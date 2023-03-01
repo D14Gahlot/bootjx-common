@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -1270,7 +1272,7 @@ public class AdminDashBoardManager {
 			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
 		}
 
-		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
+		Map<Object, Long> dateRanMap = MapUtils.getDatesRange(currentTs, lasDayTimeStmp);
 
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(currentTs);
 		List<SummaryDocDto> lstSummDto = new ArrayList<>();
@@ -1355,15 +1357,6 @@ public class AdminDashBoardManager {
 		return tStampWmS;
 	}
 
-	public Map<Object, Long> getDatesRange(long curTiStmp, long lasDayTiStmp) {
-		Map<Object, Long> mapDt = new HashMap<>();
-		for (long lasDayTiSt = lasDayTiStmp; lasDayTiSt <= curTiStmp; lasDayTiSt += DateUtil.ONEDAY) {
-			String ds = DateUtil.foramtTimeStampDateAsString(lasDayTiSt, DateUtil.YYYYMMDD_DATE_FORMAT);
-			mapDt.put(ds, new Long(0));
-		}
-		Map<Object, Long> result = new TreeMap<Object, Long>(mapDt);
-		return result;
-	}
 
 	public Map<Object, Long> getHourRange(long currentTStamp, long lastTimeStamp) {
 		Map<String, Long> mapHr = new HashMap<>();
@@ -1586,7 +1579,7 @@ public class AdminDashBoardManager {
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getMsgType,
 						Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
 		/// ** default hour
-		Map<Object, Long> dateRanMap = getDatesRange(currentTs, lasDayTimeStmp);
+		Map<Object, Long> dateRanMap = MapUtils.getDatesRange(currentTs, lasDayTimeStmp);
 
 		Map<Object, Map<Object, Long>> dateWiseSummary = addDefaultHour(dateWiseCountMap, dateRanMap);
 
@@ -2023,6 +2016,85 @@ public class AdminDashBoardManager {
 		return eventCountSummary;
 
 	}
+	
+	
+	public ContactTypeSummaryDto getNonWhatsUpSummary(String dateRange1, String dateRange2) {
+		List<String> channelLst = getListChannelCongig();
+		List<String> lst = getListOfContactType();
+		lst.remove("MESSAGE_WHATSAPP");
+		lst.remove("MESSAGE_REJECTED");
+		lst.remove("MESSAGE_QUEUED");
+		lst.remove("MESSAGE_HOLD");
+
+		String tnt = AppContextUtil.getTenant();
+		List<SummaryDocDto> lstSummDto = new ArrayList<>();
+		long currentTs = System.currentTimeMillis();
+		ZonedDateTime noOfdaysTstamp = null;
+
+		String offset = getTimeZoneFromSetup();
+		long offsetts = countryTimeZoneOffset(offset);
+		String zone = DateUtil.getTimeZone(offset);
+		long lasDayTimeStmp = 0;
+		int hr = 0;
+		int mm = 0;
+		if (ArgUtil.is(dateRange1)) {
+			lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone,
+					LocalTime.MIN);
+			lasDayTimeStmp = lasDayTimeStmp + offsetts;
+
+		}
+		if (ArgUtil.is(dateRange2)) {
+			currentTs = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs + offsetts;
+		}
+
+		for (String contactType : lst) {
+			LOGGER.info("contactType :" + contactType);
+			Query query = new Query();
+			query.addCriteria(Criteria.where("timestamp").gt(lasDayTimeStmp).lt(currentTs));
+			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
+			query.fields().include("timestamp").include("contactId");
+			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+			for (MessageDoc doc : msgDocLst) {
+				SummaryDocDto dto = new SummaryDocDto();
+				DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),DateUtil.YYYYMMDD_DATE_FORMAT);
+				dto.setDate(yyyyMMdd);
+				dto.setUniqueContactId(doc.getContactId());
+				dto.setChannel(contactType.toString());
+				dto.setDomain(tnt);
+				String id = getSummaryWithChannelId(dto);
+				dto.setId(id);
+				if (ArgUtil.is(dto.getId())) {
+					lstSummDto.add(dto);
+				}
+			}
+		}
+
+		Set<SummaryDocDto> uniqueStudentSet = lstSummDto.stream() // get stream for original list
+				.collect(Collectors.toCollection(// distinct elements stored into new SET
+						() -> new TreeSet<>(Comparator.comparing(SummaryDocDto::getUniqueContactId)))); // Id comparison
+
+		List<SummaryDocDto> uniqueList = uniqueStudentSet.stream() // get stream for unique SET
+				.sorted(Comparator.comparing(SummaryDocDto::getDate)) // rank comparing
+				.collect(Collectors.toList()); // elements stored to new list
+
+		Map<String, Map<String, Long>> datwWiseCount = uniqueList.stream().collect(Collectors.groupingBy(
+				SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getDate, Collectors.counting())));
+		
+		Map<Object, Long> dateRanMap = MapUtils.getDatesRange(currentTs, lasDayTimeStmp);
+		
+		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
+		dayWiseMap = MapUtils.defaultValue(datwWiseCount, channelLst, dateRanMap, tnt);
+
+		dayWiseMap = sortMap(dayWiseMap);
+
+		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+		dto.setDateWiseSummaryCount(dayWiseMap);
+
+		return dto;
+	}
+	
 
 	/** Agreegration Query to event msg status **/
 
