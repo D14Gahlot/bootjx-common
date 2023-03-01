@@ -86,7 +86,9 @@ public class PhoneService {
 			if (ArgUtil.is(channel.getValue().getSms())
 					&& ArgUtil.is(channel.getValue().getSms().getCountry(), countryCode)) {
 				return send(channel.getValue().getChannelId(), ob);
-			} else if (ArgUtil.not(channel.getValue().getSms().getCountry())) {
+			} else if (
+					ArgUtil.is(channel.getValue().getSms()) &&
+					ArgUtil.not(channel.getValue().getSms().getCountry())) {
 				defchannelId = channel.getValue().getChannelId();
 			}
 		}
