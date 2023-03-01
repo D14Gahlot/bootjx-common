@@ -148,7 +148,7 @@ public class PhoneController {
 			phoneService.sendPhoneOTP(loginDTO.phone, otp.getOtp());
 
 			long otpStamp = System.currentTimeMillis();
-			nextStamp = getNextStamp(userDoc.getOtpStamp(), currentCounter);
+			nextStamp = getNextStamp(otpStamp, currentCounter);
 			activeAfter = nextStamp - otpStamp;
 
 			resp.otpPrefix = otp.getPrefix();
