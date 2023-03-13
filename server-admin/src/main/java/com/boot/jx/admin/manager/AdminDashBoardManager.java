@@ -1693,6 +1693,7 @@ public class AdminDashBoardManager {
 		}
 
 		listOfChannelConfig = new ArrayList<>(new HashSet<>(listOfChannelConfig));
+		listOfChannelConfig.remove("wa360");
 
 		return listOfChannelConfig;
 	}
