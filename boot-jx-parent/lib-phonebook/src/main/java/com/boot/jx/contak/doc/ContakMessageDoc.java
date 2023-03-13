@@ -1,10 +1,7 @@
 package com.boot.jx.contak.doc;
 
-import java.io.Serializable;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.contak.dto.ContakModel;
@@ -15,27 +12,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Document(collection = "CONTAK_MESSAGES")
-public class ContakMessageDoc implements Serializable {
+public class ContakMessageDoc extends ContakMessageTrace {
 	private static final long serialVersionUID = 1281605084248923642L;
-
-	@Id
-	public String noteId;
-
-	@Indexed
-	public String phoneId;
-
-	@Indexed
-	public String domain;
-
-	public TimeStampIndex createdAt;
-
-	public TimeStampIndex relayedAt;
-
-	public TimeStampIndex expiredAt;
-
-	public TimeStampIndex readAt;
-
-	public TimeStampIndex deliveredAt;
 
 	public String title;
 
@@ -44,8 +22,7 @@ public class ContakMessageDoc implements Serializable {
 	public String otp;
 	public String type; // OTP,TRAN,PROM
 	public String pubKey;
-	public long msgGenId;
-	public String companyId;
+
 	public String companyName;
 	public long companyStamp;
 	public String logoUrl;

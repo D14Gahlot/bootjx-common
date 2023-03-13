@@ -12,12 +12,12 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.doc.ContakMessageDoc;
-import com.boot.jx.contak.dto.ContakInboundDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO;
 import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
 import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
+import com.boot.jx.contak.manager.ContakInboundManager;
 import com.boot.jx.contak.manager.ContakMessageManager;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.PhoneService;
@@ -68,6 +68,9 @@ public class PhoneController {
 
 	@Autowired
 	PhoneService phoneService;
+
+	@Autowired
+	ContakInboundManager contakInboundManager;
 
 	@RequestMapping(value = "/api/v1/login", method = { RequestMethod.POST })
 	public ApiResponse<PhoneProfileDTO, PhoneLoginResponseDTO> login(
@@ -231,15 +234,7 @@ public class PhoneController {
 		userRegistrationDoc.setUserPubKey(msg.userPubKey);
 		commonMongoTemplate.save(userRegistrationDoc);
 
-		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType("USER_REG");
-		inbound.setPhoneId(userRegistrationDoc.getUserPhoneNumber());
-		inbound.setCompanyId(userRegistrationDoc.getCompanyId());
-		inbound.setCreatedAt(userRegistrationDoc.getCreatedAt());
-		inbound.setNotifiedAt(userRegistrationDoc.getDeliveredAt());
-		inbound.setExpiredAt(userRegistrationDoc.getExpiredAt());
-		inbound.setInboundPayload(userRegistrationDoc);
-		commonMongoTemplate.save(inbound);
+		contakInboundManager.sendUserRegEvent(userRegistrationDoc);
 
 		return ApiResponse.buildResult(userRegistrationDoc);
 	}

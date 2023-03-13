@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.contak.dto.UserRegistrationDoc;
@@ -13,6 +12,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 
+@Deprecated
 @Component
 public class UserRegistrationManager {
 
@@ -20,11 +20,6 @@ public class UserRegistrationManager {
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
-
-	public List<UserRegistrationDoc> getContacts(String mobile) {
-		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(UserRegistrationDoc.class)
-				.where(Criteria.where("userPhoneNumber").is(mobile)));
-	}
 
 	public List<UserRegistrationDoc> fetchRegistrations(String companyId) {
 		TimeStampIndex deliveredAt = TimeStampIndex.from(System.currentTimeMillis());

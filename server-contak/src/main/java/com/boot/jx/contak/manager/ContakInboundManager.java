@@ -8,10 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.contak.doc.ContakMessageDoc;
+import com.boot.jx.contak.doc.ContakMessageTrace;
 import com.boot.jx.contak.dto.ContakInboundDoc;
+import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.utils.EntityDtoUtil;
 
 @Component
 public class ContakInboundManager {
@@ -36,6 +40,28 @@ public class ContakInboundManager {
 		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(ContakInboundDoc.class).where( // FIND
 				CommonMongoQueryBuilder.QueryCriteria.where("companyId").is(companyId).and("notifiedAt.stamp")
 						.is(notifiedAt.getStamp())));
+	}
+
+	public void sendUserRegEvent(UserRegistrationDoc userRegistrationDoc) {
+		ContakInboundDoc inbound = new ContakInboundDoc();
+		inbound.setInboundType("USER_REG");
+		inbound.setPhoneId(userRegistrationDoc.getUserPhoneNumber());
+		inbound.setCompanyId(userRegistrationDoc.getCompanyId());
+		inbound.setCreatedAt(userRegistrationDoc.getCreatedAt());
+		inbound.setNotifiedAt(userRegistrationDoc.getDeliveredAt());
+		inbound.setExpiredAt(userRegistrationDoc.getExpiredAt());
+		inbound.setInboundPayload(userRegistrationDoc);
+		commonMongoTemplate.save(inbound);
+	}
+
+	public void sendMsgDelvryEvent(ContakMessageDoc contakMessageDoc) {
+		ContakInboundDoc inbound = new ContakInboundDoc();
+		inbound.setInboundType("MSG_OUT_DELIVERED");
+		inbound.setPhoneId(contakMessageDoc.getPhoneId());
+		inbound.setCompanyId(contakMessageDoc.getCompanyId());
+		inbound.setCreatedAt(TimeStampIndex.now());
+		inbound.setInboundPayload(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace()));
+		commonMongoTemplate.save(inbound);
 	}
 
 }

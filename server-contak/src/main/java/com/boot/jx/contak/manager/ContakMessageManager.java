@@ -21,6 +21,9 @@ public class ContakMessageManager {
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
+	@Autowired
+	ContakInboundManager contakInboundManager;
+
 	public List<ContakMessageDoc> fetchMessages(PhoneUserDoc user) {
 		TimeStampIndex deliveredAt = TimeStampIndex.from(System.currentTimeMillis());
 		commonMongoTemplate.update(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
@@ -29,9 +32,15 @@ public class ContakMessageManager {
 				// Update
 				.set("deliveredAt", deliveredAt));
 
-		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(user.getPhoneId()).and("deliveredAt.stamp")
-						.is(deliveredAt.getStamp())));
+		List<ContakMessageDoc> messages = commonMongoTemplate
+				.find(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
+						CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(user.getPhoneId())
+								.and("deliveredAt.stamp").is(deliveredAt.getStamp())));
+
+		for (ContakMessageDoc contakMessageDoc : messages) {
+			contakInboundManager.sendMsgDelvryEvent(contakMessageDoc);
+		}
+		return messages;
 	}
 
 	public List<ContakMessageDoc> setDelivery(String noteId) {

@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,6 +25,7 @@ public class ContakInboundDoc implements Serializable {
 	public String companyId;
 
 	@Indexed
+	@ApiMockModelProperty(example = "text", value = "Inbound type", allowableValues = "USER_REG,MSG_OUT_DELIVERED,MSG_OUT_READ")
 	public String inboundType;
 
 	public TimeStampIndex createdAt;
