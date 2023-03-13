@@ -16,12 +16,12 @@ public class MapUtils {
 		 return dateRanMap3;
 	}
 	
-	
 	public  static Map<Object, Long> mapMergeV1(Map<Object, Long> dateRanMap1,Map<Object, Long> dateRanMap2) {
 		Map<Object, Long> dateRanMap3 = new HashMap<>(dateRanMap1);
 		 dateRanMap2.forEach((key, value) -> dateRanMap3.merge(key, value, (v1, v2) -> v1+v2));
 		 return dateRanMap3;
 	}
+	
 	
 	public static Map<Object, Map<Object, Long>> defaultValue(Map<String, Map<String, Long>> dayWiseCountMap, List<String> channelLst,Map<Object, Long> dateRanMap,String tnt) {
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
@@ -45,7 +45,6 @@ public class MapUtils {
 		
 	}
 	
-	
 	public static Map<Object, Map<Object, Long>> getHourdefaultValue(Map<String, Map<Object, Long>> hourWiseCountMap, List<String> channelLst,Map<Object, Long> hourRanMap,String tnt) {
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
 		for (Map.Entry<String, Map<Object, Long>> keyValue : hourWiseCountMap.entrySet()) {
@@ -68,6 +67,7 @@ public class MapUtils {
 		
 	}
 	
+
 	/** get dates between two dates **/
 			public static Map<Object, Long> getDatesRange(long curTiStmp, long lasDayTiStmp) {
 				Map<Object, Long> mapDt = new HashMap<>();
@@ -78,6 +78,4 @@ public class MapUtils {
 				Map<Object, Long> result = new TreeMap<Object, Long>(mapDt);
 				return result;
 			}
-
-	
 }
