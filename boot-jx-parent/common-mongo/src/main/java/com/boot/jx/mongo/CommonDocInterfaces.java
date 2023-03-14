@@ -15,12 +15,15 @@ import org.springframework.data.mongodb.core.query.Update;
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.model.TimeModels.ITimeStampIndex;
+import com.boot.model.UtilityModels.ProtectedJsonProperty;
+import com.boot.model.UtilityModels.PublicJsonProperty;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.KeyDeserializer;
@@ -163,12 +166,19 @@ public class CommonDocInterfaces {
 	public static class AuditActivityDoc implements AuditCreateEntity, Serializable {
 		private static final long serialVersionUID = -8573412950623297045L;
 		@Id
+		@JsonView(PublicJsonProperty.class)
 		private String id;
+		@JsonView(ProtectedJsonProperty.class)
 		private Object doc;
+		@JsonView(PublicJsonProperty.class)
 		private String createdBy;
+		@JsonView(PublicJsonProperty.class)
 		private Long createdStamp;
+		@JsonView(PublicJsonProperty.class)
 		private String collection;
+		@JsonView(PublicJsonProperty.class)
 		private String activity;
+		@JsonView(PublicJsonProperty.class)
 		private String comment;
 
 		public String getId() {
