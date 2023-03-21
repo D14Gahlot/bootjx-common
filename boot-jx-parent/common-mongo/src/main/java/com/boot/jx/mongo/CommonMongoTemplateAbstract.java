@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.model.AuditCreateEntity.AuditIdentifier;
 import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
@@ -217,6 +218,9 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		String collectionName = "ZCHANGED_" + mongoTemplate.getCollectionName(oldDocument.getClass());
 		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().doc(oldDocument);
 		auditDetailProvider.auditCreate(oldDocumentArchived);
+		if (oldDocument instanceof AuditIdentifier) {
+			oldDocumentArchived.setDocIdentifier(((AuditIdentifier) oldDocument).auditIdentifier());
+		}
 		mongoTemplate.save(oldDocumentArchived, collectionName);
 		return oldDocument;
 	}
@@ -226,6 +230,9 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(copyOfDocument)
 				.activity(activity).comment(comment);
 		auditDetailProvider.auditCreate(oldDocumentArchived);
+		if (copyOfDocument instanceof AuditIdentifier) {
+			oldDocumentArchived.setDocIdentifier(((AuditIdentifier) copyOfDocument).auditIdentifier());
+		}
 		mongoTemplate.save(oldDocumentArchived, "ZACTIVITY_LOGS");
 	}
 

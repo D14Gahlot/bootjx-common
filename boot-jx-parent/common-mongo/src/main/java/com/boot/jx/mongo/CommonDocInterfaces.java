@@ -170,6 +170,10 @@ public class CommonDocInterfaces {
 		@Id
 		@JsonView(PublicJsonProperty.class)
 		private String id;
+
+		@JsonView(PublicJsonProperty.class)
+		private String docIdentifier;
+
 		@JsonView(ProtectedJsonProperty.class)
 		private Object doc;
 		@JsonView(PublicJsonProperty.class)
@@ -257,6 +261,14 @@ public class CommonDocInterfaces {
 		public AuditActivityDoc activity(String activity) {
 			this.activity = activity;
 			return this;
+		}
+
+		public String getDocIdentifier() {
+			return docIdentifier;
+		}
+
+		public void setDocIdentifier(String docIdentifier) {
+			this.docIdentifier = docIdentifier;
 		}
 	}
 
