@@ -1125,7 +1125,7 @@ public class AccountDashBoardManager {
 	public List<String> getListChannelCongig() {
 		List<String> listOfChannelConfig = new ArrayList<String>();
 		Query query = new Query();
-		query.addCriteria(Criteria.where("isDisabled").is(false));
+		query.addCriteria(Criteria.where("isDisabled").is(false).and("isSandbox").is(false));
 		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
 		for (ChannelConfigDoc cofigDoc : cofigDocLst) {
 			listOfChannelConfig.add(cofigDoc.getChannelType());
