@@ -46,6 +46,8 @@ public class CommonDocInterfaces {
 
 		public Class<T> getDocClass();
 
+		public String getCollectionName();
+
 		public IMongoQueryBuilder<T> build();
 	}
 

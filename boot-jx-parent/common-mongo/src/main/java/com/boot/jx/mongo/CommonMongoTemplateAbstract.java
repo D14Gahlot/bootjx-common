@@ -109,17 +109,27 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return null;
 	}
 
+	public <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz, String collectionName) {
+		return find(builder.build().getQuery(), clazz, collectionName);
+	}
+
 	public <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz) {
 		return find(builder.build().getQuery(), clazz);
 	}
 
 	public <T> List<T> find(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
+		if (ArgUtil.is(builder.getCollectionName())) {
+			return find(builder.build().getQuery(), builder.getDocClass(), builder.getCollectionName());
+		}
 		return find(builder.build().getQuery(), builder.getDocClass());
 	}
 
 	public <T> T findOne(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
+		if (ArgUtil.is(builder.getCollectionName())) {
+			return findOne(builder.build().getQuery(), builder.getDocClass(), builder.getCollectionName());
+		}
 		return findOne(builder.build().getQuery(), builder.getDocClass());
 	}
 

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.UserActivityLogDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
@@ -71,7 +72,7 @@ public class AdminObjectsController {
 			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
 			@RequestParam(required = false, defaultValue = "desc") String sortDir,
 			@RequestParam(required = false) String collection, @RequestParam(required = false) String createdBy) {
-		MongoQueryBuilder<AuditActivityDoc> q = MongoQueryBuilder.collection(AuditActivityDoc.class).page(pageNo,
+		MQB<AuditActivityDoc> q = MongoQueryBuilder.select(AuditActivityDoc.class, "ZACTIVITY_LOGS").page(pageNo,
 				pageSize);
 
 		if (ArgUtil.is(collection)) {
