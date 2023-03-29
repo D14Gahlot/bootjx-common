@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.model.AuditCreateEntity.AuditIdentifier;
 import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
