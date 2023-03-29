@@ -39,6 +39,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 	Criteria currentCriteria;
 	Update update;
 	Class<T> docClass;
+	String collectionName;
 	private boolean skipUpdateStamp;
 
 	public Query query() {
@@ -295,6 +296,10 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 		this.docClass = docClass;
 	}
 
+	public void setCollectionName(String collectionName) {
+		this.collectionName = collectionName;
+	}
+
 	@Override
 	public boolean isUpdatedTimeStampSupport() {
 		if (ArgUtil.is(this.docClass)) {
@@ -353,10 +358,21 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 		return x;
 	}
 
+	public static <T> MQB<T> select(Class<T> docClass, String collectionName) {
+		MQB<T> x = new MQB<T>();
+		x.setDocClass(docClass);
+		x.setCollectionName(collectionName);
+		return x;
+	}
+
 	public static <T> MQB<T> select(Class<T> docClass) {
 		MQB<T> x = new MQB<T>();
 		x.setDocClass(docClass);
 		return x;
+	}
+
+	public String getCollectionName() {
+		return collectionName;
 	}
 
 }

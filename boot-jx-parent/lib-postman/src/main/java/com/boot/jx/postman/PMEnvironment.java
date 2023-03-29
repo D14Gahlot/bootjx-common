@@ -12,6 +12,7 @@ import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.model.AuditCreateEntity.AuditIdentifier;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -93,7 +94,8 @@ public class PMEnvironment {
 		private static final long serialVersionUID = -5531902306230415784L;
 	}
 
-	public static abstract class AChannelConfig extends AChannelDetails implements ChannelTypeSpecificProps {
+	public static abstract class AChannelConfig extends AChannelDetails
+			implements ChannelTypeSpecificProps, AuditIdentifier {
 
 		private static final long serialVersionUID = 1950315645271368433L;
 
@@ -247,6 +249,11 @@ public class PMEnvironment {
 			this.isDeleted = isDeleted;
 		}
 
+		@Override
+		public String auditIdentifier() {
+			return this.getChannelId();
+		}
+
 	}
 
 	public static class PMConfigurationObject extends MapEntry implements Serializable {
@@ -319,7 +326,7 @@ public class PMEnvironment {
 	}
 
 	@Lazy
-	@Autowired
+	@Autowired(required = false)
 	private PMEnvironmentProvider provider;
 
 	public PMConfigurationModel local() {

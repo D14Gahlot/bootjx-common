@@ -1223,7 +1223,7 @@ public class AdminDashBoardManager {
 //				hourWiseCount.put(tnt + "_" + channel, hourCntMap);
 //			}
 //		}
-		
+
 		hourWiseCount = MapUtils.getHourdefaultValue(hourWiseCountMap, channelLst, hourCntMap, tnt);
 
 		hourWiseCount = sortMap(hourWiseCount);
@@ -1356,7 +1356,6 @@ public class AdminDashBoardManager {
 
 		return tStampWmS;
 	}
-
 
 	public Map<Object, Long> getHourRange(long currentTStamp, long lastTimeStamp) {
 		Map<String, Long> mapHr = new HashMap<>();
@@ -2016,8 +2015,7 @@ public class AdminDashBoardManager {
 		return eventCountSummary;
 
 	}
-	
-	
+
 	public ContactTypeSummaryDto getNonWhatsUpSummary(String dateRange1, String dateRange2) {
 		List<String> channelLst = getListChannelCongig();
 		List<String> lst = getListOfContactType();
@@ -2058,7 +2056,8 @@ public class AdminDashBoardManager {
 			for (MessageDoc doc : msgDocLst) {
 				SummaryDocDto dto = new SummaryDocDto();
 				DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
-				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),DateUtil.YYYYMMDD_DATE_FORMAT);
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getTimestamp(),
+						DateUtil.YYYYMMDD_DATE_FORMAT);
 				dto.setDate(yyyyMMdd);
 				dto.setUniqueContactId(doc.getContactId());
 				dto.setChannel(contactType.toString());
@@ -2081,9 +2080,9 @@ public class AdminDashBoardManager {
 
 		Map<String, Map<String, Long>> datwWiseCount = uniqueList.stream().collect(Collectors.groupingBy(
 				SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getDate, Collectors.counting())));
-		
+
 		Map<Object, Long> dateRanMap = MapUtils.getDatesRange(currentTs, lasDayTimeStmp);
-		
+
 		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
 		dayWiseMap = MapUtils.defaultValue(datwWiseCount, channelLst, dateRanMap, tnt);
 
@@ -2094,7 +2093,6 @@ public class AdminDashBoardManager {
 
 		return dto;
 	}
-	
 
 	/** Agreegration Query to event msg status **/
 
