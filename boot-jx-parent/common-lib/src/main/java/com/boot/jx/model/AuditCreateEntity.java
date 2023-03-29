@@ -20,6 +20,10 @@ public interface AuditCreateEntity {
 		void setUpdatedBy(String createdBy);
 	}
 
+	public interface AuditIdentifier {
+		public String auditIdentifier();
+	}
+
 	public interface AuditableEntity extends AuditCreateEntity, AuditUpdateEntity {
 	}
 

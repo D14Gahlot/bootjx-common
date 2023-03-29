@@ -33,6 +33,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.bson.Document;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,7 @@ import com.boot.utils.JsonUtil;
 import com.boot.utils.MapUtils;
 import com.mongodb.AggregationOptions;
 import com.mongodb.AggregationOptions.OutputMode;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.Cursor;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -811,7 +813,6 @@ public class AdminDashBoardManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
 		query.addCriteria(Criteria.where("type").in("O", "I"));
-
 		List<MessageDoc> distinctIdList = mongoTemplate.getCollection(contactType.toString()).distinct("contactId",
 				query.getQueryObject());
 		return distinctIdList;
@@ -1492,7 +1493,6 @@ public class AdminDashBoardManager {
 		return dto;
 
 	}
-
 	@SuppressWarnings("unused")
 	public ContactTypeSummaryDto getDayWiseMsgStatusSummary(String dateRange1, String dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
@@ -1695,7 +1695,7 @@ public class AdminDashBoardManager {
 		List<String> listOfChannelConfig = new ArrayList<String>();
 
 		Query query = new Query();
-		query.addCriteria(Criteria.where("isDisabled").is(false));
+		query.addCriteria(Criteria.where("isDisabled").is(false).and("isSandbox").is(false));
 		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
 		for (ChannelConfigDoc cofigDoc : cofigDocLst) {
 			listOfChannelConfig.add(cofigDoc.getChannelType());

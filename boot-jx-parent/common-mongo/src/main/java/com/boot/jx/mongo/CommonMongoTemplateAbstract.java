@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.model.AuditCreateEntity.AuditIdentifier;
 import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
@@ -109,17 +110,27 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		return null;
 	}
 
+	public <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz, String collectionName) {
+		return find(builder.build().getQuery(), clazz, collectionName);
+	}
+
 	public <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz) {
 		return find(builder.build().getQuery(), clazz);
 	}
 
 	public <T> List<T> find(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
+		if (ArgUtil.is(builder.getCollectionName())) {
+			return find(builder.build().getQuery(), builder.getDocClass(), builder.getCollectionName());
+		}
 		return find(builder.build().getQuery(), builder.getDocClass());
 	}
 
 	public <T> T findOne(IMongoQueryBuilder<T> builder) {
 		// System.out.println("+++"+builder.getQuery());
+		if (ArgUtil.is(builder.getCollectionName())) {
+			return findOne(builder.build().getQuery(), builder.getDocClass(), builder.getCollectionName());
+		}
 		return findOne(builder.build().getQuery(), builder.getDocClass());
 	}
 
@@ -207,6 +218,9 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		String collectionName = "ZCHANGED_" + mongoTemplate.getCollectionName(oldDocument.getClass());
 		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().doc(oldDocument);
 		auditDetailProvider.auditCreate(oldDocumentArchived);
+		if (oldDocument instanceof AuditIdentifier) {
+			oldDocumentArchived.setDocIdentifier(((AuditIdentifier) oldDocument).auditIdentifier());
+		}
 		mongoTemplate.save(oldDocumentArchived, collectionName);
 		return oldDocument;
 	}
@@ -216,6 +230,9 @@ public class CommonMongoTemplateAbstract extends CommonMongoTemplateDefault {
 		AuditActivityDoc oldDocumentArchived = new AuditActivityDoc().collection(collectionName).doc(copyOfDocument)
 				.activity(activity).comment(comment);
 		auditDetailProvider.auditCreate(oldDocumentArchived);
+		if (copyOfDocument instanceof AuditIdentifier) {
+			oldDocumentArchived.setDocIdentifier(((AuditIdentifier) copyOfDocument).auditIdentifier());
+		}
 		mongoTemplate.save(oldDocumentArchived, "ZACTIVITY_LOGS");
 	}
 
