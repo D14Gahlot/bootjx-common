@@ -1,5 +1,7 @@
 package com.boot.jx.account;
 
+import java.io.IOException;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -8,11 +10,14 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.context.request.RequestContextListener;
+
+import com.boot.jx.app.CommonAppLauncher;
 
 /**
  * The Class WebApplication.
@@ -26,15 +31,20 @@ import org.springframework.web.context.request.RequestContextListener;
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
 @EnableMongoRepositories("com.boot.jx")
-public class AccountOWS {
+public class AccountOWS extends CommonAppLauncher {
 
 	/**
 	 * The main method.
 	 *
 	 * @param args the arguments
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
-		SpringApplication.run(AccountOWS.class, args);
+	public static void main(String[] args) throws IOException {
+//		System.out.println("user.dir " + System.getProperty("user.dir"));
+//		System.setProperty("javax.net.ssl.trustStore", "/Users/lalittanwar/Projects/mehery-jx/certs/cacerts");
+//		// System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
+//		SpringApplication.run(AccountOWS.class, args);
+		ConfigurableApplicationContext x = launch(AccountOWS.class, args);
 	}
 
 	/*
