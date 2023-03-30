@@ -1,6 +1,7 @@
 package com.boot.jx.admin;
 
-import org.springframework.boot.SpringApplication;
+import java.io.IOException;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -9,13 +10,15 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
+
+import com.boot.jx.app.CommonAppLauncher;
 
 /**
  * The Class WebApplication.
@@ -25,15 +28,17 @@ import org.springframework.web.context.request.RequestContextListener;
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
-public class AdminOWS extends SpringBootServletInitializer {
+public class AdminOWS extends CommonAppLauncher {
 
 	/**
 	 * The main method.
 	 *
 	 * @param args the arguments
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
-		SpringApplication.run(AdminOWS.class, args);
+	public static void main(String[] args) throws IOException {
+//		SpringApplication.run(AdminOWS.class, args);
+		ConfigurableApplicationContext x = launch(AdminOWS.class, args);
 	}
 
 	/*

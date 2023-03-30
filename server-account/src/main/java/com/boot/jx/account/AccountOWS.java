@@ -2,22 +2,25 @@ package com.boot.jx.account;
 
 import java.io.IOException;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
 
 import com.boot.jx.app.CommonAppLauncher;
+import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
 
 /**
  * The Class WebApplication.
@@ -26,7 +29,7 @@ import com.boot.jx.app.CommonAppLauncher;
  * @EnableCaching
  */
 @ServletComponentScan
-@SpringBootApplication
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
@@ -76,6 +79,11 @@ public class AccountOWS extends CommonAppLauncher {
 	@Bean
 	public RequestContextListener requestContextListener() {
 		return new RequestContextListener();
+	}
+
+	@Bean
+	public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
+		return new ServletListenerRegistrationBean<HttpSessionEventPublisher>(new HttpSessionEventPublisher());
 	}
 
 }

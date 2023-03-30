@@ -99,7 +99,7 @@ public class PartnerController {
 		if (ArgUtil.is(auth) && ArgUtil.is(userSessionBean.domainUser())) {
 			model.addAttribute("APP_USER", auth.getName());
 			model.addAttribute("APP_USER_NAME", userSessionBean.domainUser().contact().getName());
-			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(userSessionBean.getRole()));
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(userSessionBean.role()));
 		} else {
 			model.addAttribute("APP_USER", "");
 			model.addAttribute("APP_USER_NAME", "");

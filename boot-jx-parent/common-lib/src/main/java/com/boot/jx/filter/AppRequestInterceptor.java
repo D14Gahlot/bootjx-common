@@ -10,11 +10,23 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.exception.AmxApiError;
+import com.boot.jx.exception.ExceptionMessageKey;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
+import com.boot.jx.rest.AppRequestInterfaces.AppAuthFilter;
 import com.boot.jx.rest.RestService;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class AppRequestInterceptor extends HandlerInterceptorAdapter {
@@ -25,10 +37,43 @@ public class AppRequestInterceptor extends HandlerInterceptorAdapter {
 	@Autowired
 	RestService restService;
 
+	@Autowired
+	CommonHttpRequest commonHttpRequest;
+
+	@Autowired(required = false)
+	List<AppAuthFilter> appAuthFilters;
+
+	private boolean isValidRequest() {
+		ApiRequestDetail apiRequest = AppContextUtil.getApiRequestDetail();
+		if (ArgUtil.is(apiRequest) && ArgUtil.is(apiRequest.getRules())) {
+			if (appAuthFilters != null) {
+				for (AppAuthFilter appAuthFilter : appAuthFilters) {
+					if (!appAuthFilter.filterAppRequest(apiRequest, commonHttpRequest, AppContextUtil.getTraceId())) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 		restService.importMetaFromStatic(request);
+
+		if (!isValidRequest()) {
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+			AmxApiError apiError = new AmxApiError();
+			apiError.setHttpStatus(HttpStatus.FORBIDDEN);
+			apiError.setStatusKey(ApiStatusCodes.ACCESS_DENIED.toString());
+			apiError.setErrors(ApiResponseUtil.getErrors());
+			ExceptionMessageKey.resolveLocalMessage(apiError);
+			JsonUtil.getMapper().writeValue(response.getWriter(), apiError);
+			return false;
+		}
+
 		return super.preHandle(request, response, handler);
 	}
 

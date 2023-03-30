@@ -1,7 +1,6 @@
 package com.boot.jx.account.doc;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -12,14 +11,13 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
-import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Document(collection = "DOMAIN_USER")
 @TypeAlias("DomainUser")
-public class BusinessUserDoc implements IDocument, DocVersion, AuditCreateEntity, Serializable {
+public class BusinessUserDoc implements IDocument, AuditCreateEntity, Serializable {
 
 	private static final long serialVersionUID = -3354844112176554561L;
 
@@ -42,16 +40,6 @@ public class BusinessUserDoc implements IDocument, DocVersion, AuditCreateEntity
 
 	@DBRef
 	private Set<DomainLicenseDoc> domainLicense;
-
-	private List<DocVersion> oldVersions;
-
-	public List<DocVersion> getOldVersions() {
-		return oldVersions;
-	}
-
-	public void setOldVersions(List<DocVersion> oldVersions) {
-		this.oldVersions = oldVersions;
-	}
 
 	public Long getCreatedStamp() {
 		return createdStamp;
