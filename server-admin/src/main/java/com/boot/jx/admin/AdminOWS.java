@@ -3,25 +3,29 @@ package com.boot.jx.admin;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
 
 /**
  * The Class WebApplication.
  */
 @ServletComponentScan
-@SpringBootApplication
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
-public class AdminOWS {
+public class AdminOWS extends SpringBootServletInitializer {
 
 	/**
 	 * The main method.
@@ -62,4 +66,10 @@ public class AdminOWS {
 	public RequestContextListener requestContextListener() {
 		return new RequestContextListener();
 	}
+
+	@Bean
+	public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
+		return new ServletListenerRegistrationBean<HttpSessionEventPublisher>(new HttpSessionEventPublisher());
+	}
+
 }
