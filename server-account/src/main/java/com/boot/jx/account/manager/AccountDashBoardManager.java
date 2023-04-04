@@ -1023,8 +1023,8 @@ public class AccountDashBoardManager {
 
 	}
 
-	public ContactTypeSummaryDto getNonWhatsUpSummary(long dateRange1, long dateRange2) {
-
+	public ContactTypeSummaryDto getNonWhatsUpSummary(String dateRange1, String dateRange2) {
+		List<String> channelLst = getListChannelCongig();
 		List<String> lst = getListOfContactType();
 		lst.remove("MESSAGE_WHATSAPP");
 		lst.remove("MESSAGE_REJECTED");
@@ -1033,11 +1033,39 @@ public class AccountDashBoardManager {
 
 		String tnt = AppContextUtil.getTenant();
 		List<SummaryDocDto> lstSummDto = new ArrayList<>();
+		long currentTs = System.currentTimeMillis();
+
+		long offsetts = countryTimeZoneOffset(tnt);
+		ZonedDateTime noOfdaysTstamp = null;
+		long lasDayTimeStmp = 0;
+		String offsett = getTimeZoneFromSetup();
+		LOGGER.info("dayChannelWiseWisesummary dateRange1 :" + dateRange1 + "\t dateRange2 :" + dateRange2
+				+ "\t offsett :" + offsett);
+
+		DomainDoc dDoc = getDomainTimeZone(tnt);
+		String zone = getTimeZone(offsett == null ? dDoc.getTimeZoneOffSet() : offsett);
+		String offset = getOffSet(offsett == null ? dDoc.getTimeZoneOffSet() : offsett);
+		String[] hm = offset.split(":");
+
+		int hr = ArgUtil.parseAsInteger(hm[0]);
+		int mm = ArgUtil.parseAsInteger(hm[1]);
+
+		if (ArgUtil.is(dateRange1)) {
+			lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
+			lasDayTimeStmp = lasDayTimeStmp + offsetts;
+
+		}
+		if (ArgUtil.is(dateRange2)) {
+			currentTs = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs + offsetts;
+		}
+
+
 
 		for (String contactType : lst) {
 			LOGGER.info("contactType :" + contactType);
 			Query query = new Query();
-			query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+			query.addCriteria(Criteria.where("timestamp").gt(lasDayTimeStmp).lt(currentTs));
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
 			query.fields().include("timestamp").include("contactId");
 			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
@@ -1066,11 +1094,17 @@ public class AccountDashBoardManager {
 				.sorted(Comparator.comparing(SummaryDocDto::getDate)) // rank comparing
 				.collect(Collectors.toList()); // elements stored to new list
 
-		Map<Object, Map<Object, Long>> datwWiseCount = uniqueList.stream().collect(Collectors.groupingBy(
+		Map<String, Map<String, Long>> datwWiseCount = uniqueList.stream().collect(Collectors.groupingBy(
 				SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getDate, Collectors.counting())));
+		Map<Object, Long> dateRanMap = MapUtils.getDatesRange(currentTs, lasDayTimeStmp);
+		
+		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
+		dayWiseMap = MapUtils.defaultValue(datwWiseCount, channelLst, dateRanMap, tnt);
+
+		dayWiseMap = sortMap(dayWiseMap);
 
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
-		dto.setDateWiseSummaryCount(datwWiseCount);
+		dto.setDateWiseSummaryCount(dayWiseMap);
 
 		return dto;
 	}
@@ -1091,13 +1125,14 @@ public class AccountDashBoardManager {
 	public List<String> getListChannelCongig() {
 		List<String> listOfChannelConfig = new ArrayList<String>();
 		Query query = new Query();
-		query.addCriteria(Criteria.where("isDisabled").is(false));
+		query.addCriteria(Criteria.where("isDisabled").is(false).and("isSandbox").is(false));
 		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
 		for (ChannelConfigDoc cofigDoc : cofigDocLst) {
 			listOfChannelConfig.add(cofigDoc.getChannelType());
 		}
 
 		listOfChannelConfig = new ArrayList<>(new HashSet<>(listOfChannelConfig));
+		listOfChannelConfig.remove("wa360");
 
 		return listOfChannelConfig;
 	}

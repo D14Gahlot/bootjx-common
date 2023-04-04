@@ -53,4 +53,13 @@ public class UtilityModels {
 			return this;
 		}
 	}
+
+	public static interface PublicJsonProperty {
+	}
+
+	public static interface ProtectedJsonProperty extends PublicJsonProperty {
+	}
+
+	public static interface OneTimeVisibleJsonProperty extends ProtectedJsonProperty {
+	}
 }

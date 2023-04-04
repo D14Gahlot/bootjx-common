@@ -175,8 +175,8 @@ public class WabaPartnerController {
 	@ResponseBody
 	@RequestMapping(value = { "/pub/waba/login", "/api/waba/login" },
 			method = { RequestMethod.POST, RequestMethod.GET })
-	public ApiResponse<Map<String, Object>, Object> webhook(@RequestParam String username,
-			@RequestParam String password, @RequestParam(required = false) String partnerId)
+	public ApiResponse<Map<String, Object>, Object> webhook(@RequestParam(required = false) String username,
+			@RequestParam(required = false) String password, @RequestParam(required = false) String partnerId)
 			throws NoSuchAlgorithmException {
 
 		WabaPartnerDoc partner = getPartnerWabaDoc(partnerId);

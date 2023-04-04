@@ -27,49 +27,49 @@ import org.springframework.web.context.request.RequestContextListener;
 @EnableCaching
 public class AgentOWS extends SpringBootServletInitializer {
 
-    /**
-     * The main method.
-     *
-     * @param args the arguments
-     */
-    public static void main(String[] args) {
-	SpringApplication.run(AgentOWS.class, args);
-    }
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
+	public static void main(String[] args) {
+		SpringApplication.run(AgentOWS.class, args);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.boot.web.support.SpringBootServletInitializer#configure(
-     * org.springframework.boot.builder.SpringApplicationBuilder)
-     */
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder applicationBuilder) {
-	return applicationBuilder.sources(AgentOWS.class);
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.springframework.boot.web.support.SpringBootServletInitializer#configure(
+	 * org.springframework.boot.builder.SpringApplicationBuilder)
+	 */
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder applicationBuilder) {
+		return applicationBuilder.sources(AgentOWS.class);
+	}
 
-    /**
-     * Security filter chain registration.
-     *
-     * @param securityProperties the security properties
-     * @return the delegating filter proxy registration bean
-     */
-    @Bean
-    @ConditionalOnBean(name = "checkSession")
-    public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
-	    SecurityProperties securityProperties) {
-	DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean("checkSession");
-	registration.setOrder(securityProperties.getFilter().getOrder());
-	return registration;
-    }
+	/**
+	 * Security filter chain registration.
+	 *
+	 * @param securityProperties the security properties
+	 * @return the delegating filter proxy registration bean
+	 */
+	@Bean
+	@ConditionalOnBean(name = "checkSession")
+	public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
+			SecurityProperties securityProperties) {
+		DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean("checkSession");
+		registration.setOrder(securityProperties.getFilter().getOrder());
+		return registration;
+	}
 
-    @Bean
-    public RequestContextListener requestContextListener() {
-	return new RequestContextListener();
-    }
+	@Bean
+	public RequestContextListener requestContextListener() {
+		return new RequestContextListener();
+	}
 
-    @Bean
-    public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
-	return new ServletListenerRegistrationBean<HttpSessionEventPublisher>(new HttpSessionEventPublisher());
-    }
+	@Bean
+	public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
+		return new ServletListenerRegistrationBean<HttpSessionEventPublisher>(new HttpSessionEventPublisher());
+	}
 
 }

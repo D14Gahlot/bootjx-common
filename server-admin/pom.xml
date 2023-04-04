@@ -32,7 +32,6 @@
 		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
- 			<version>3.0.0.RELEASE</version>
 		</dependency>
 
 		<!-- /thymeleaf dependencies -->
@@ -61,15 +60,16 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>common-lib</artifactId>
 		</dependency>
-		
+
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>common-lib-session</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
@@ -91,6 +91,11 @@
 			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-common-config</artifactId>
 			<version>${jax.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-aws</artifactId>
 		</dependency>
 
 		<!-- <dependency> <groupId>net.rossillo.mvc.cache</groupId> <artifactId>spring-mvc-cache-control</artifactId> 
@@ -133,10 +138,8 @@
 	</build>
 
 	<repositories>
-<!-- 		<repository>
-			<id>spring-milestone</id>
-			<url>https://repo.spring.io/milestone</url>
-		</repository> -->
+		<!-- <repository> <id>spring-milestone</id> <url>https://repo.spring.io/milestone</url> 
+			</repository> -->
 		<repository>
 			<id>maven</id>
 			<url>https://repo1.maven.org/maven2/</url>

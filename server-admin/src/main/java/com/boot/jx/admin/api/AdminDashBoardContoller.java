@@ -121,6 +121,15 @@ public class AdminDashBoardContoller {
 		return ApiResponse.buildResults(summary);
 	}
 	
+	
+	@ResponseBody
+	@RequestMapping(value = { "/admin/non-whatsup-msg-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getNonWhatsUpSummary(String dateRange1, String dateRange2) {
+		ContactTypeSummaryDto summary = adminDbMgr.getNonWhatsUpSummary(dateRange1, dateRange2);
+		return ApiResponse.buildResult(summary);
+	}
+	
+	
 	@ResponseBody
 	@RequestMapping(value = { "/admin/event-summary" }, method = { RequestMethod.GET })
 	public ApiResponse<EventCountSummary, Object> getEventCountSummary(String dateRange1, String dateRange2,

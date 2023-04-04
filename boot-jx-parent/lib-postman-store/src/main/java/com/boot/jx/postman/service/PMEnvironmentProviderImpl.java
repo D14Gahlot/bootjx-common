@@ -216,6 +216,8 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 		String tnt = AppContextUtil.getTenant();
 		localConfigMap.invalidate(tnt);
 		if (Tenants.isDefault(tnt)) {
+			this.sharedConfiguration = null;
+			this.defaultConfiguration = null;
 			this.initConfig();
 		}
 	}

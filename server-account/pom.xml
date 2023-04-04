@@ -30,9 +30,8 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>org.thymeleaf.extras</groupId>
-		    <artifactId>thymeleaf-extras-springsecurity4</artifactId>
-		    <version>3.0.0.RELEASE</version>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
 		</dependency>
 
 		<!-- /thymeleaf dependencies -->
@@ -61,11 +60,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>common-lib</artifactId>
 		</dependency>
@@ -73,25 +67,26 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>lib-postman-chat</artifactId>
+			<artifactId>common-lib-session</artifactId>
 		</dependency>
-
-
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>lib-common-config</artifactId>
-			<version>${jax.version}</version>
+			<artifactId>lib-postman-chat</artifactId>
 		</dependency>
-		
-		
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-tmpl</artifactId>
 			<version>${jax.version}</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-common-config</artifactId>
+			<version>${jax.version}</version>
+		</dependency>
+
 		<!-- <dependency> <groupId>net.rossillo.mvc.cache</groupId> <artifactId>spring-mvc-cache-control</artifactId> 
 			<version>1.1.1-RELEASE</version> <scope>compile</scope> </dependency> -->
 
@@ -136,16 +131,12 @@
 					</execution>
 				</executions>
 			</plugin>
-
-
 		</plugins>
 	</build>
 
 	<repositories>
-<!-- 		<repository>
-			<id>spring-milestone</id>
-			<url>https://repo.spring.io/milestone</url>
-		</repository> -->
+		<!-- <repository> <id>spring-milestone</id> <url>https://repo.spring.io/milestone</url> 
+			</repository> -->
 		<repository>
 			<id>maven</id>
 			<url>https://repo1.maven.org/maven2/</url>
