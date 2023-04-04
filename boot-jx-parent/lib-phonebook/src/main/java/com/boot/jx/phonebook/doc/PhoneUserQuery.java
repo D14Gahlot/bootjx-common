@@ -62,4 +62,9 @@ public class PhoneUserQuery extends DocQueryBuilder<PhoneUserDoc> {
 		this.set("lastActiveAt", timeStampIndex);
 		return this;
 	}
+
+	public void setLastLoginAt(TimeStampIndex lastLoginAt) {
+		doc.setLastLoginAt(lastLoginAt);
+		this.set("lastLoginAt", lastLoginAt);
+	}
 }

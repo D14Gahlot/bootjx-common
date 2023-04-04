@@ -100,6 +100,10 @@ public class NodeClientController {
 			}
 		}
 
+		if (ArgUtil.is(msg.type, "HANDSHAKE") || ArgUtil.is(msg.type, "HANDSHAKE_INIT")) {
+			msg.type = "HANDSHAKE";
+		}
+
 		ContakMessageDoc newPhoneNOTPDoc = new ContakMessageDoc();
 		newPhoneNOTPDoc.setDomain(ArgUtil.anyOf(compoc.getDomain(), compoc.getDisplayName()));
 		newPhoneNOTPDoc.setPhoneId(msg.phone);

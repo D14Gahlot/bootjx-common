@@ -26,6 +26,7 @@ public class PhoneUserDoc implements Serializable {
 	public long otpStamp;
 	public long otpCounter;
 	public TimeStampIndex lastActiveAt;
+	public TimeStampIndex lastLoginAt;
 	public String loginToken;
 
 	public String getPhoneId() {
@@ -114,6 +115,14 @@ public class PhoneUserDoc implements Serializable {
 
 	public void setOtpCounter(long otpCounter) {
 		this.otpCounter = otpCounter;
+	}
+
+	public TimeStampIndex getLastLoginAt() {
+		return lastLoginAt;
+	}
+
+	public void setLastLoginAt(TimeStampIndex lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
 	}
 
 }

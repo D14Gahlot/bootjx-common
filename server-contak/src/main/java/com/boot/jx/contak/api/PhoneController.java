@@ -99,9 +99,14 @@ public class PhoneController {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID,
 						new ApiFieldError().field("authToken"));
 			}
+
 			resp.loginToken = loginToken;
 			phoneUserQuery.setLoginToken(resp.loginToken);
+			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			commonMongoTemplate.update(phoneUserQuery);
+			
+			contakInboundManager.sendUserRegisteredEvent(userDoc);
+			
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else if (ArgUtil.is(step, "VALIDATE") || (noStep && ArgUtil.is(loginDTO.otp))) { // Step 2
 			if (!new OTPDetails().yin(loginDTO.otpNounce).yang(userDoc.otpNounce)
@@ -234,7 +239,7 @@ public class PhoneController {
 		userRegistrationDoc.setUserPubKey(msg.userPubKey);
 		commonMongoTemplate.save(userRegistrationDoc);
 
-		contakInboundManager.sendUserRegEvent(userRegistrationDoc);
+		contakInboundManager.sendHandShakeAckEvent(userRegistrationDoc);
 
 		return ApiResponse.buildResult(userRegistrationDoc);
 	}

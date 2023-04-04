@@ -2,6 +2,7 @@ package com.boot.jx.contak.manager;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +11,16 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakMessageTrace;
+import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakInboundDoc;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
+import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.phonebook.doc.PhoneUserDoc;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 
 @Component
@@ -42,9 +48,9 @@ public class ContakInboundManager {
 						.is(notifiedAt.getStamp())));
 	}
 
-	public void sendUserRegEvent(UserRegistrationDoc userRegistrationDoc) {
+	public void sendHandShakeAckEvent(UserRegistrationDoc userRegistrationDoc) {
 		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType("USER_REG");
+		inbound.setInboundType("HANDSHAKE_ACK"); // Earlier it was USER_REG
 		inbound.setPhoneId(userRegistrationDoc.getUserPhoneNumber());
 		inbound.setCompanyId(userRegistrationDoc.getCompanyId());
 		inbound.setCreatedAt(userRegistrationDoc.getCreatedAt());
@@ -64,4 +70,17 @@ public class ContakInboundManager {
 		commonMongoTemplate.save(inbound);
 	}
 
+	public void sendUserRegisteredEvent(PhoneUserDoc phoneUserDoc) {
+		CompanyDoc comp = commonMongoTemplate
+				.findOne(MQB.select(CompanyDoc.class).where(QueryCriteria.where("domain").is("mehery")));
+		if (ArgUtil.is(comp)) {
+			ContakInboundDoc inbound = new ContakInboundDoc();
+			inbound.setInboundType("USER_REGISTERED");
+			inbound.setPhoneId(phoneUserDoc.getPhoneId());
+			inbound.setCompanyId(comp.getCompanyId());
+			inbound.setCreatedAt(TimeStampIndex.now());
+			inbound.setInboundPayload(new ContakMessageTrace());
+			commonMongoTemplate.save(inbound);
+		}
+	}
 }
