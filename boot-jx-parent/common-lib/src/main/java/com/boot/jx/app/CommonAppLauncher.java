@@ -4,11 +4,12 @@ import java.io.File;
 import java.io.IOException;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import com.boot.utils.ArgUtil;
 
-public class CommonAppLauncher {
+public class CommonAppLauncher extends SpringBootServletInitializer {
 
 	public static final String APP_TRUST_STORE_LOCAL = "local.ssl.trustStore";
 
