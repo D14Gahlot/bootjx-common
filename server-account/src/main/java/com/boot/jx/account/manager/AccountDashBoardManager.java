@@ -1018,7 +1018,7 @@ public class AccountDashBoardManager {
 
 	}
 
-	public ContactTypeSummaryDto getNonWhatsUpSummary(long dateRange1, long dateRange2) {
+	public ContactTypeSummaryDto getNonWhatsUpSummary(long timestamp) {
 
 		List<String> lst = getListOfContactType();
 		lst.remove("MESSAGE_WHATSAPP");
@@ -1028,11 +1028,21 @@ public class AccountDashBoardManager {
 
 		String tnt = AppContextUtil.getTenant();
 		List<SummaryDocDto> lstSummDto = new ArrayList<>();
+		
+		Date dateTi = new Date(timestamp);
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+		
 
 		for (String contactType : lst) {
 			LOGGER.info("contactType :" + contactType);
 			Query query = new Query();
-			query.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+			query.addCriteria(Criteria.where("timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
 			query.with(new Sort(new Order(Direction.DESC, "timestamp")));
 			query.fields().include("timestamp").include("contactId");
 			List<MessageDoc> msgDocLst = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
