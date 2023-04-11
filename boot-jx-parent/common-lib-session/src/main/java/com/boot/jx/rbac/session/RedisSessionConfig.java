@@ -67,7 +67,7 @@ public class RedisSessionConfig {
 //	}
 //    }
 
-	@Bean
+	//@Bean
 	ObjectMapper redisObjectMapper() {
 		ObjectMapper objectMapper = JsonUtil.createMapper("redisSession");
 		objectMapper.registerModule(new JavaTimeModule());
