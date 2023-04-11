@@ -67,7 +67,7 @@ public class RedisSessionConfig {
 //	}
 //    }
 
-	//@Bean
+	// @Bean
 	ObjectMapper redisObjectMapper() {
 		ObjectMapper objectMapper = JsonUtil.createMapper("redisSession");
 		objectMapper.registerModule(new JavaTimeModule());
@@ -91,12 +91,12 @@ public class RedisSessionConfig {
 	}
 
 	@Bean
-	protected RedisTemplate<String, Object> redisTemplate(
-			@Qualifier("redisConnectionFactory") RedisConnectionFactory redisConnectionFactory) {
+	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
 		final RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(redisConnectionFactory);
 		template.setValueSerializer(valueSerializer());
 		template.setKeySerializer(new StringRedisSerializer());
+		template.setHashKeySerializer(valueSerializer());
 		template.afterPropertiesSet();
 		return template;
 	}
