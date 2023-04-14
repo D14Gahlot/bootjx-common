@@ -37,9 +37,11 @@ public class ContakMessageManager {
 						CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(user.getPhoneId())
 								.and("deliveredAt.stamp").is(deliveredAt.getStamp())));
 
+		LOGGER.info("messages==== <" + messages.size());
 		for (ContakMessageDoc contakMessageDoc : messages) {
 			contakInboundManager.sendMsgDelvryEvent(contakMessageDoc);
 		}
+		LOGGER.info("messages==== <" + messages.size());
 		return messages;
 	}
 
