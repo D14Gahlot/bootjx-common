@@ -12,11 +12,13 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.postman.PMConstants;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AgentSessionBean extends AppCommonAuthUser implements Serializable {
+public class AgentSessionBean extends AppCommonAuthUser implements Serializable, JsonIgnoreUnknown, JsonIgnoreNull {
 
 	private static final long serialVersionUID = 5850744656958653564L;
 	private String agentCode;

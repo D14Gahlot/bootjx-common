@@ -6,16 +6,25 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.config.ConfigureRedisAction;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 import com.boot.jx.logger.LoggerService;
+import com.boot.utils.JsonUtil;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -58,16 +67,38 @@ public class RedisSessionConfig {
 //	}
 //    }
 
-	@Bean
+	// @Bean
 	ObjectMapper redisObjectMapper() {
-		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectMapper objectMapper = JsonUtil.createMapper("redisSession");
 		objectMapper.registerModule(new JavaTimeModule());
 		// objectMapper.registerModule(new Jdk8Module());
 		objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+1:00"));
 		objectMapper.setDateFormat(new ISO8601DateFormat());
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+		objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+		objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+
 		return objectMapper;
+	}
+
+	private RedisSerializer<Object> valueSerializer() {
+		Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(
+				Object.class);
+		jackson2JsonRedisSerializer.setObjectMapper(redisObjectMapper());
+		return jackson2JsonRedisSerializer;
+	}
+
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		final RedisTemplate<String, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(redisConnectionFactory);
+		template.setValueSerializer(valueSerializer());
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setHashKeySerializer(valueSerializer());
+		template.afterPropertiesSet();
+		return template;
 	}
 
 	@Bean

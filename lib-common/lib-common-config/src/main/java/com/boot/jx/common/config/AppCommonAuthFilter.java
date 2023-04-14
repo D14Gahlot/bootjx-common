@@ -107,7 +107,7 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 
 	}
 
-	@Autowired
+	@Autowired(required = false)
 	private AppCommonAuthUser appCommonAuthUser;
 
 	@Override
