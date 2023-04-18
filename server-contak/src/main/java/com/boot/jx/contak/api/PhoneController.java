@@ -100,13 +100,15 @@ public class PhoneController {
 						new ApiFieldError().field("authToken"));
 			}
 
+			boolean isUserRegistraion = ArgUtil.not(userDoc.getLastLoginAt());
+
 			resp.loginToken = loginToken;
 			phoneUserQuery.setLoginToken(resp.loginToken);
 			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			commonMongoTemplate.update(phoneUserQuery);
-			
-			contakInboundManager.sendUserRegisteredEvent(userDoc);
-			
+
+			contakInboundManager.sendUserAuthEvent(userDoc, isUserRegistraion);
+
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else if (ArgUtil.is(step, "VALIDATE") || (noStep && ArgUtil.is(loginDTO.otp))) { // Step 2
 			if (!new OTPDetails().yin(loginDTO.otpNounce).yang(userDoc.otpNounce)
