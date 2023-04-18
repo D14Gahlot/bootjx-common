@@ -42,6 +42,7 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
@@ -245,6 +246,10 @@ public class PanelV1Controller {
 		compoc.setAddress(newComp.getAddress());
 		compoc.setWebsiteUrl(newComp.getWebsiteUrl());
 		compoc.setLogoUrl(newComp.getLogoUrl());
+
+		// Sanatization
+		newComp.getPrefs().setAllowedIPAddresses(CollectionUtil.clean(newComp.getPrefs().getAllowedIPAddresses()));
+
 		compoc.setPrefs(newComp.getPrefs());
 		compoc.setProfile(newComp.getProfile());
 
