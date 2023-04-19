@@ -6,7 +6,6 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,7 +14,6 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.config.ConfigureRedisAction;
@@ -83,20 +81,27 @@ public class RedisSessionConfig {
 		return objectMapper;
 	}
 
-	private RedisSerializer<Object> valueSerializer() {
-		Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(
-				Object.class);
-		jackson2JsonRedisSerializer.setObjectMapper(redisObjectMapper());
+	@Bean
+	public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
+		FailSafeRedisObjectSerializer jackson2JsonRedisSerializer = new FailSafeRedisObjectSerializer(
+				this.getClass().getClassLoader());
 		return jackson2JsonRedisSerializer;
 	}
 
-	@Bean
-	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-		final RedisTemplate<String, Object> template = new RedisTemplate<>();
+	// @Bean
+	public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		final RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
 		template.setConnectionFactory(redisConnectionFactory);
-		template.setValueSerializer(valueSerializer());
-		template.setKeySerializer(new StringRedisSerializer());
-		template.setHashKeySerializer(valueSerializer());
+
+		RedisSerializer<Object> serialiser = springSessionDefaultRedisSerializer();
+		StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+		template.setKeySerializer(stringRedisSerializer);
+		template.setHashKeySerializer(stringRedisSerializer);
+		template.setValueSerializer(serialiser);
+		template.setHashValueSerializer(serialiser);
+		template.setDefaultSerializer(serialiser);
+
 		template.afterPropertiesSet();
 		return template;
 	}
