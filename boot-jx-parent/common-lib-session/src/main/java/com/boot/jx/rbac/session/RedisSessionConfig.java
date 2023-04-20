@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @ConditionalOnProperty(name = "spring.session.store-type", havingValue = "redis")
-@EnableRedisHttpSession
+@EnableRedisHttpSession(redisNamespace = "${spring.session.redis.namespace}")
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 public class RedisSessionConfig {
 
