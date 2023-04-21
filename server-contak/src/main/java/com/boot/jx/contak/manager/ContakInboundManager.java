@@ -72,7 +72,7 @@ public class ContakInboundManager {
 
 	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, boolean isUserRegistraion) {
 		CompanyDoc comp = commonMongoTemplate
-				.findOne(MQB.select(CompanyDoc.class).where(QueryCriteria.where("domain").is("mehery")));
+				.findOne(MQB.select(CompanyDoc.class).where(QueryCriteria.where("clientId").is("mehery")));
 		if (ArgUtil.is(comp)) {
 			ContakInboundDoc inbound = new ContakInboundDoc();
 			inbound.setInboundType(isUserRegistraion ? "USER_REGISTERED" : "USER_LOGIN");
