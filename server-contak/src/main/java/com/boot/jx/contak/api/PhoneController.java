@@ -18,6 +18,7 @@ import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
 import com.boot.jx.contak.manager.ContakInboundManager;
+import com.boot.jx.contak.manager.ContakInboundManager.USER_INBOUND_TYPE;
 import com.boot.jx.contak.manager.ContakMessageManager;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.PhoneService;
@@ -107,7 +108,7 @@ public class PhoneController {
 			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			commonMongoTemplate.update(phoneUserQuery);
 
-			// contakInboundManager.sendUserAuthEvent(userDoc, isUserRegistraion);
+			contakInboundManager.sendUserAuthEvent(userDoc, USER_INBOUND_TYPE.USER_RELOGIN);
 
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else if (ArgUtil.is(step, "VALIDATE") || (noStep && ArgUtil.is(loginDTO.otp))) { // Step 2
@@ -130,7 +131,8 @@ public class PhoneController {
 			phoneUserQuery.setOtpStamp(0L);
 			commonMongoTemplate.update(phoneUserQuery);
 
-			contakInboundManager.sendUserAuthEvent(userDoc, isUserRegistraion);
+			contakInboundManager.sendUserAuthEvent(userDoc,
+					isUserRegistraion ? USER_INBOUND_TYPE.USER_REGISTERED : USER_INBOUND_TYPE.USER_LOGIN);
 
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else { // Step 1

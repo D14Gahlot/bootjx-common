@@ -70,12 +70,18 @@ public class ContakInboundManager {
 		commonMongoTemplate.save(inbound);
 	}
 
-	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, boolean isUserRegistraion) {
+	public static class USER_INBOUND_TYPE {
+		public static final String USER_REGISTERED = "USER_REGISTERED";
+		public static final String USER_LOGIN = "USER_LOGIN"; // VALIDATE
+		public static final String USER_RELOGIN = "USER_RELOGIN"; // VERIFY
+	}
+
+	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, String isUserRegistraion) {
 		CompanyDoc comp = commonMongoTemplate
 				.findOne(MQB.select(CompanyDoc.class).where(QueryCriteria.where("clientId").is("mehery")));
 		if (ArgUtil.is(comp)) {
 			ContakInboundDoc inbound = new ContakInboundDoc();
-			inbound.setInboundType(isUserRegistraion ? "USER_REGISTERED" : "USER_LOGIN");
+			inbound.setInboundType(isUserRegistraion);
 			inbound.setPhoneId(phoneUserDoc.getPhoneId());
 			inbound.setCompanyId(comp.getCompanyId());
 			inbound.setCreatedAt(TimeStampIndex.now());
