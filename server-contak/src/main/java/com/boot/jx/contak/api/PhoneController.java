@@ -100,14 +100,14 @@ public class PhoneController {
 						new ApiFieldError().field("authToken"));
 			}
 
-			boolean isUserRegistraion = ArgUtil.not(userDoc.getLastLoginAt());
+			// boolean isUserRegistraion = ArgUtil.not(userDoc.getLastLoginAt());
 
 			resp.loginToken = loginToken;
 			phoneUserQuery.setLoginToken(resp.loginToken);
 			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			commonMongoTemplate.update(phoneUserQuery);
 
-			contakInboundManager.sendUserAuthEvent(userDoc, isUserRegistraion);
+			// contakInboundManager.sendUserAuthEvent(userDoc, isUserRegistraion);
 
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else if (ArgUtil.is(step, "VALIDATE") || (noStep && ArgUtil.is(loginDTO.otp))) { // Step 2
@@ -116,16 +116,22 @@ public class PhoneController {
 					&& !ArgUtil.is(loginDTO.otp, "888888")) {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("otp"));
 			}
+			boolean isUserRegistraion = ArgUtil.not(userDoc.getLastLoginAt());
+
 			resp.deviceToken = UniqueID.generateSessionId();
 			resp.loginToken = loginToken;
 
 			phoneUserQuery.setOtpHash(Constants.BLANK);
 			phoneUserQuery.setOtpNounce(Constants.BLANK);
 			phoneUserQuery.setLoginToken(resp.loginToken);
+			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			phoneUserQuery.setAuthToken(CryptoUtil.getEncoder().message(resp.deviceToken).sha2().toString());
 			phoneUserQuery.setOtpCounter(0L);
 			phoneUserQuery.setOtpStamp(0L);
 			commonMongoTemplate.update(phoneUserQuery);
+
+			contakInboundManager.sendUserAuthEvent(userDoc, isUserRegistraion);
+
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else { // Step 1
 
