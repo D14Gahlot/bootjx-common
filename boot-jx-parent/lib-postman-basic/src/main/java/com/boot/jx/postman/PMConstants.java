@@ -71,10 +71,12 @@ public class PMConstants {
 		public static final String EMAIL = "mailto";
 		public static final String SMS_TWILIO = "smstw";
 		public static final String SMS = "sms";
+		/** WABA cloud **/
+		public static final String WA_360DC = "wac360";
 	}
 
 	public enum CHANNEL_TYPE_ENUM {
-		tg, tw, fb, wags, wa360, web, ig, mailto,sms
+		tg, tw, fb, wags, wa360, web, ig, mailto,sms,wac360
 	}
 
 	public static enum CHAT_STATUS {
@@ -213,8 +215,10 @@ public class PMConstants {
 		} else if (ContactType.WHATSAPP.toString().equals(contactType)) {
 			if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(channel)) {
 				return CHANNEL_TYPE.WA_GUPSHUP;
+			}else if(CHANNEL_TYPE.WA_360D.equals(channel)) {
+				return CHANNEL_TYPE.WA_360D;
 			}
-			return CHANNEL_TYPE.WA_360D;
+			return CHANNEL_TYPE.WA_360DC;
 		}
 		return null;
 	}

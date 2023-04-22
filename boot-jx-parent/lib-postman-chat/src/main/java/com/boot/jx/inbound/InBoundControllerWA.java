@@ -198,6 +198,19 @@ public class InBoundControllerWA {
 		connectorHandlerFactory.onChannelUpdate(CHANNEL_TYPE.WA_360D, lane);
 		return ApiResponse.build();
 	}
+	
+	
+	@Autowired
+	private WA360CloudConnector w360CloudConnector;
+	
+	
+	@RequestMapping(value = "/ext/inbound/wac360/registerwebhook", method = RequestMethod.GET)
+	public ApiResponse<Object, Object> registerCloudWebHook(@RequestParam(required = false) String lane)
+		throws InterruptedException {
+	connectorHandlerFactory.onChannelUpdate(CHANNEL_TYPE.WA_360DC, lane);
+	return ApiResponse.build();
+		}
+		
 
 	@Autowired
 	private AuditService auditService;

@@ -8,6 +8,7 @@ import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
 import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
+import com.boot.jx.postman.plugin.WA360CloudPlugin.WA360CloudConfigDetails;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
@@ -27,6 +28,9 @@ public class ChannelConfig extends AChannelConfig {
 	private EmailConfigDetails email;
 	private TwilioConfigDetails twilio;
 	private SMSConfigDetails sms;
+	private WA360CloudConfigDetails wa360dc;
+
+	
 
 	private boolean isPushAllowed;
 	private boolean isPushOnlyApproved;
@@ -190,6 +194,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setSms(SMSConfigDetails sms) {
 		this.sms = sms;
+	}
+
+	public WA360CloudConfigDetails getWa360dc() {
+		return wa360dc;
+	}
+
+	public void setWa360dc(WA360CloudConfigDetails wa360dc) {
+		this.wa360dc = wa360dc;
 	}
 
 }

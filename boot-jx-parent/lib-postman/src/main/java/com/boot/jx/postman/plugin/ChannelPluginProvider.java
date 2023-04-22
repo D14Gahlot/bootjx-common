@@ -240,6 +240,8 @@ public class ChannelPluginProvider {
 	public static final WA360Plugin WA_360D = new WA360Plugin();
 	public static final InstagramPlugin INSTAGRAM = new InstagramPlugin();
 	public static final EmailPlugin EMAIL = new EmailPlugin();
+	/** WABA CLOUD plugin **/
+	public static final WA360CloudPlugin WA_360DC = new WA360CloudPlugin();
 
 	static {
 		register(WEB);
@@ -252,6 +254,7 @@ public class ChannelPluginProvider {
 		register(EMAIL);
 		register(new SMSPlugin());
 		register(new TwilioSMSPlugin());
+		register(WA_360DC);
 	}
 
 }
