@@ -40,7 +40,7 @@ public abstract class BatchJobExecuter {
 
 	private String getJobName() {
 		if (this.jobName == null) {
-			this.jobName = ClazzUtil.getUltimateClassName(this) + "V6";
+			this.jobName = ClazzUtil.getUltimateClassName(this) + "V7";
 		}
 		return this.jobName;
 	}
