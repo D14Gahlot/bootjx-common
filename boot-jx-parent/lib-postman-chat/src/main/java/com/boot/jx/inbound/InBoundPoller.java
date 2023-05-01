@@ -79,7 +79,7 @@ public class InBoundPoller extends ATaskLimiter {
 
 	@Override
 	public String getVersion() {
-		return "6";
+		return "7";
 	}
 
 	@Override
