@@ -28,7 +28,7 @@ public class FacebookConstants {
 
 	public static String MESSAGE_TAG(String messageType) {
 
-		if (ArgUtil.is(messageType)) {
+		if (!ArgUtil.is(messageType)) {
 			return null;
 		}
 
