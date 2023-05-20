@@ -164,7 +164,7 @@ public class CommonMongoTemplateAbstract<TStore extends CommonMongoTemplateAbstr
 
 	@Override
 	public <T> T findOne(IMongoQueryBuilder<T> builder) {
-		// System.out.println("+++"+builder.getQuery());
+		//System.out.println("+++"+builder.getQuery());
 		if (ArgUtil.is(builder.getCollectionName())) {
 			return findOne(builder.build().getQuery(), builder.getDocClass(), builder.getCollectionName());
 		}

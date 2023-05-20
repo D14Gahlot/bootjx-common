@@ -61,7 +61,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 		this.query = query;
 		return (M) this;
 	}
-
+	
 	public Criteria criteria(String key) {
 		if (currentCriteria == null) {
 			currentCriteria = Criteria.where(key);

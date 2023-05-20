@@ -61,19 +61,19 @@ public class ContakMessageManager {
 
 	public List<ContakMessageDoc> markRead(String noteId) {
 		ContakMessageDoc readMessage = commonMongoTemplate
-				.findOne(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
-						CommonMongoQueryBuilder.QueryCriteria.whereId("noteId").is(noteId)));
+				.findOne(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).whereId("noteId"));
 
-		if (!ArgUtil.is(readMessage) && !ArgUtil.is(readMessage.getDeliveredAt())) {
+		if (!ArgUtil.is(readMessage) || !ArgUtil.is(readMessage.getDeliveredAt())) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("noteId"));
 		}
 
 		TimeStampIndex readAt = TimeStampIndex.from(System.currentTimeMillis());
 		commonMongoTemplate.update(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
 				CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(readMessage.getPhoneId()) // Phone Id
-						.and("domain").is(readMessage.getDomain()).and("companyId").is(readMessage.getCompanyId()) // Company
-						.and("deliveredAt").exists(true).and("deliveredAt.stamp")
-						.lte(readMessage.getDeliveredAt().getStamp())// Delivery
+						.and("domain").is(readMessage.getDomain()) // Domain
+						.and("companyId").is(readMessage.getCompanyId()) // Company
+						.and("deliveredAt").exists(true) // delievery exists
+						.and("deliveredAt.stamp").lte(readMessage.getDeliveredAt().getStamp())// Delivery
 		)
 				// Update
 				.set("readAt", readAt));
@@ -81,8 +81,8 @@ public class ContakMessageManager {
 		List<ContakMessageDoc> messages = commonMongoTemplate
 				.find(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
 						CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(readMessage.getPhoneId())
-								.and("domain").is(readMessage.getDomain()).and("companyId")
-								.is(readMessage.getCompanyId()) // Company
+								.and("domain").is(readMessage.getDomain()) // Domain
+								.and("companyId").is(readMessage.getCompanyId()) // Company
 								.and("readAt.stamp").is(readAt.getStamp())));
 
 		for (ContakMessageDoc contakMessageDoc : messages) {
