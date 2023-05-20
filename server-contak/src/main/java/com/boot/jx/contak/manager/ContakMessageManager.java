@@ -12,9 +12,11 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
+import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -68,6 +70,7 @@ public class ContakMessageManager {
 		}
 
 		TimeStampIndex readAt = TimeStampIndex.from(System.currentTimeMillis());
+
 		commonMongoTemplate.update(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
 				CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(readMessage.getPhoneId()) // Phone Id
 						.and("domain").is(readMessage.getDomain()) // Domain
@@ -85,9 +88,8 @@ public class ContakMessageManager {
 								.and("companyId").is(readMessage.getCompanyId()) // Company
 								.and("readAt.stamp").is(readAt.getStamp())));
 
-		for (ContakMessageDoc contakMessageDoc : messages) {
-			contakInboundManager.sendMsgReadEvent(contakMessageDoc);
-		}
+		contakInboundManager.sendMsgReadEventAsync(messages);
+
 		return messages;
 	}
 

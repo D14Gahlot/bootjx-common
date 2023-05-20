@@ -79,6 +79,12 @@ public class ContakInboundManager {
 		commonMongoTemplate.save(inbound);
 	}
 
+	public void sendMsgReadEventAsync(List<ContakMessageDoc> messages) {
+		for (ContakMessageDoc contakMessageDoc : messages) {
+			this.sendMsgReadEvent(contakMessageDoc);
+		}
+	}
+
 	public static class USER_INBOUND_TYPE {
 		public static final String USER_REGISTERED = "USER_REGISTERED";
 		public static final String USER_LOGIN = "USER_LOGIN"; // VALIDATE
@@ -100,4 +106,5 @@ public class ContakInboundManager {
 			commonMongoTemplate.save(inbound);
 		}
 	}
+
 }
