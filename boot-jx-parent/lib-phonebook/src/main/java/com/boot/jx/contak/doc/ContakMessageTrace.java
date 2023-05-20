@@ -21,6 +21,8 @@ public class ContakMessageTrace implements Serializable {
 
 	@Indexed
 	public String domain;
+
+	@Indexed
 	public String companyId;
 
 	public long msgGenId;

@@ -7,11 +7,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.doc.ContakMessageDoc;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
+import com.boot.utils.ArgUtil;
 
 @Component
 public class ContakMessageManager {
@@ -32,18 +36,14 @@ public class ContakMessageManager {
 				// Update
 				.set("deliveredAt", deliveredAt));
 
-		LOGGER.info("deliveredAt.stamp====< " + deliveredAt.getStamp());
-
 		List<ContakMessageDoc> messages = commonMongoTemplate
 				.find(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
 						CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(user.getPhoneId())
 								.and("deliveredAt.stamp").is(deliveredAt.getStamp())));
 
-		LOGGER.info("messages====< " + messages.size());
 		for (ContakMessageDoc contakMessageDoc : messages) {
 			contakInboundManager.sendMsgDelvryEvent(contakMessageDoc);
 		}
-		LOGGER.info("messages====< " + messages.size());
 		return messages;
 	}
 
@@ -59,16 +59,36 @@ public class ContakMessageManager {
 						.is(deliveredAt.getStamp())));
 	}
 
-	public List<ContakMessageDoc> setRead(String noteId) {
+	public List<ContakMessageDoc> markRead(String noteId) {
+		ContakMessageDoc readMessage = commonMongoTemplate
+				.findOne(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
+						CommonMongoQueryBuilder.QueryCriteria.whereId("noteId").is(noteId)));
+
+		if (!ArgUtil.is(readMessage) && !ArgUtil.is(readMessage.getDeliveredAt())) {
+			ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("noteId"));
+		}
+
 		TimeStampIndex readAt = TimeStampIndex.from(System.currentTimeMillis());
 		commonMongoTemplate.update(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.where("noteId").is(noteId).and("readAt").exists(false))
+				CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(readMessage.getPhoneId()) // Phone Id
+						.and("domain").is(readMessage.getDomain()).and("companyId").is(readMessage.getCompanyId()) // Company
+						.and("deliveredAt").exists(true).and("deliveredAt.stamp")
+						.lte(readMessage.getDeliveredAt().getStamp())// Delivery
+		)
 				// Update
 				.set("readAt", readAt));
 
-		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.where("noteId").is(noteId).and("readAt.stamp")
-						.is(readAt.getStamp())));
+		List<ContakMessageDoc> messages = commonMongoTemplate
+				.find(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
+						CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(readMessage.getPhoneId())
+								.and("domain").is(readMessage.getDomain()).and("companyId")
+								.is(readMessage.getCompanyId()) // Company
+								.and("readAt.stamp").is(readAt.getStamp())));
+
+		for (ContakMessageDoc contakMessageDoc : messages) {
+			contakInboundManager.sendMsgReadEvent(contakMessageDoc);
+		}
+		return messages;
 	}
 
 }

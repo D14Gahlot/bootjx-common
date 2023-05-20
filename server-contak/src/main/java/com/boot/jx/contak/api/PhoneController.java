@@ -194,8 +194,7 @@ public class PhoneController {
 		return lastStamp;
 	}
 
-	@RequestMapping(value = "/api/v1/messages/fetch", method = { RequestMethod.POST })
-	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
+	private PhoneUserDoc isUserValid(PhoneLoginDTO loginDTO) {
 		if (!ArgUtil.is(loginDTO.phone)) {
 			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("phone"));
 		}
@@ -218,7 +217,19 @@ public class PhoneController {
 						new ApiFieldError().field("authToken"));
 			}
 		}
+		return userDoc;
+	}
+
+	@RequestMapping(value = "/api/v1/messages/fetch", method = { RequestMethod.POST })
+	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
+		PhoneUserDoc userDoc = isUserValid(loginDTO);
 		return ApiResponse.buildResults(contakMessageManager.fetchMessages(userDoc));
+	}
+
+	@RequestMapping(value = "/api/v1/messages/mark/read", method = { RequestMethod.POST })
+	public ApiResponse<ContakMessageDoc, Object> markRead(@RequestBody PhoneLoginDTO loginDTO) {
+		PhoneUserDoc userDoc = isUserValid(loginDTO);
+		return ApiResponse.buildResults(contakMessageManager.markRead(loginDTO.event.noteId));
 	}
 
 	@RequestMapping(value = "/api/v1/user/key/reg", method = { RequestMethod.POST })

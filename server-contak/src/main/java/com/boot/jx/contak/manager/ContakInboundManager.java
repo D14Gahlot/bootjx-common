@@ -2,7 +2,6 @@ package com.boot.jx.contak.manager;
 
 import java.util.List;
 
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +62,16 @@ public class ContakInboundManager {
 	public void sendMsgDelvryEvent(ContakMessageDoc contakMessageDoc) {
 		ContakInboundDoc inbound = new ContakInboundDoc();
 		inbound.setInboundType("MSG_OUT_DELIVERED");
+		inbound.setPhoneId(contakMessageDoc.getPhoneId());
+		inbound.setCompanyId(contakMessageDoc.getCompanyId());
+		inbound.setCreatedAt(TimeStampIndex.now());
+		inbound.setInboundPayload(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace()));
+		commonMongoTemplate.save(inbound);
+	}
+
+	public void sendMsgReadEvent(ContakMessageDoc contakMessageDoc) {
+		ContakInboundDoc inbound = new ContakInboundDoc();
+		inbound.setInboundType("MSG_OUT_READ");
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
 		inbound.setCreatedAt(TimeStampIndex.now());

@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.contak.dto.ContakModel;
 import com.boot.jx.contak.dto.ContakTemplate;
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -32,30 +31,6 @@ public class ContakMessageDoc extends ContakMessageTrace {
 	public ContakTemplate template;
 
 	private List<String> tags;
-
-	public String getNoteId() {
-		return noteId;
-	}
-
-	public void setNoteId(String noteId) {
-		this.noteId = noteId;
-	}
-
-	public String getPhoneId() {
-		return phoneId;
-	}
-
-	public void setPhoneId(String phoneId) {
-		this.phoneId = phoneId;
-	}
-
-	public String getDomain() {
-		return domain;
-	}
-
-	public void setDomain(String domain) {
-		this.domain = domain;
-	}
 
 	public String getTitle() {
 		return title;
@@ -89,38 +64,6 @@ public class ContakMessageDoc extends ContakMessageTrace {
 		this.tags = tags;
 	}
 
-	public TimeStampIndex getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(TimeStampIndex createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public TimeStampIndex getExpiredAt() {
-		return expiredAt;
-	}
-
-	public void setExpiredAt(TimeStampIndex expiredAt) {
-		this.expiredAt = expiredAt;
-	}
-
-	public TimeStampIndex getReadAt() {
-		return readAt;
-	}
-
-	public void setReadAt(TimeStampIndex readAt) {
-		this.readAt = readAt;
-	}
-
-	public TimeStampIndex getDeliveredAt() {
-		return deliveredAt;
-	}
-
-	public void setDeliveredAt(TimeStampIndex deliveredAt) {
-		this.deliveredAt = deliveredAt;
-	}
-
 	public String getType() {
 		return type;
 	}
@@ -137,22 +80,6 @@ public class ContakMessageDoc extends ContakMessageTrace {
 		this.pubKey = pubKey;
 	}
 
-	public long getMsgGenId() {
-		return msgGenId;
-	}
-
-	public void setMsgGenId(long msgGenId) {
-		this.msgGenId = msgGenId;
-	}
-
-	public String getCompanyId() {
-		return companyId;
-	}
-
-	public void setCompanyId(String companyId) {
-		this.companyId = companyId;
-	}
-
 	public String getCompanyName() {
 		return companyName;
 	}
@@ -167,14 +94,6 @@ public class ContakMessageDoc extends ContakMessageTrace {
 
 	public void setLogoUrl(String logoUrl) {
 		this.logoUrl = logoUrl;
-	}
-
-	public TimeStampIndex getRelayedAt() {
-		return relayedAt;
-	}
-
-	public void setRelayedAt(TimeStampIndex relayedAt) {
-		this.relayedAt = relayedAt;
 	}
 
 	public ContakTemplate getTemplate() {
