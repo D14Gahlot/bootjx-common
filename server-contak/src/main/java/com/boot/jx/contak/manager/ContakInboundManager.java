@@ -61,7 +61,7 @@ public class ContakInboundManager {
 
 	public void sendMsgDelvryEvent(ContakMessageDoc contakMessageDoc) {
 		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType("MSG_OUT_DELIVERED");
+		inbound.setInboundType(USER_INBOUND_TYPE.MSG_OUT_DELIVERED);
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
 		inbound.setCreatedAt(TimeStampIndex.now());
@@ -71,7 +71,7 @@ public class ContakInboundManager {
 
 	public void sendMsgReadEvent(ContakMessageDoc contakMessageDoc) {
 		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType("MSG_OUT_READ");
+		inbound.setInboundType(USER_INBOUND_TYPE.MSG_OUT_READ);
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
 		inbound.setCreatedAt(TimeStampIndex.now());
@@ -83,6 +83,8 @@ public class ContakInboundManager {
 		public static final String USER_REGISTERED = "USER_REGISTERED";
 		public static final String USER_LOGIN = "USER_LOGIN"; // VALIDATE
 		public static final String USER_RELOGIN = "USER_RELOGIN"; // VERIFY
+		public static final String MSG_OUT_DELIVERED = "MSG_OUT_DELIVERED"; // MSG_OUT_READ
+		public static final String MSG_OUT_READ = "MSG_OUT_READ"; // MSG_OUT_READ
 	}
 
 	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, String isUserRegistraion) {
