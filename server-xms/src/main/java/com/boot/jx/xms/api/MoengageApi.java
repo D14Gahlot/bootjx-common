@@ -3,7 +3,6 @@ package com.boot.jx.xms.api;
 import java.util.List;
 import java.util.Map;
 
-import org.checkerframework.common.reflection.qual.GetClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.PMEnvironment;
