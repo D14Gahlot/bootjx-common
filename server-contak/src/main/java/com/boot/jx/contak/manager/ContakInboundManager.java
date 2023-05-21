@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.contak.doc.ContakMessageDoc;
@@ -69,6 +70,13 @@ public class ContakInboundManager {
 		commonMongoTemplate.save(inbound);
 	}
 
+	@Async
+	public void sendMsgDelvryEventAsync(List<ContakMessageDoc> messages) {
+		for (ContakMessageDoc contakMessageDoc : messages) {
+			this.sendMsgDelvryEvent(contakMessageDoc);
+		}
+	}
+
 	public void sendMsgReadEvent(ContakMessageDoc contakMessageDoc) {
 		ContakInboundDoc inbound = new ContakInboundDoc();
 		inbound.setInboundType(USER_INBOUND_TYPE.MSG_OUT_READ);
@@ -79,6 +87,7 @@ public class ContakInboundManager {
 		commonMongoTemplate.save(inbound);
 	}
 
+	@Async
 	public void sendMsgReadEventAsync(List<ContakMessageDoc> messages) {
 		for (ContakMessageDoc contakMessageDoc : messages) {
 			this.sendMsgReadEvent(contakMessageDoc);

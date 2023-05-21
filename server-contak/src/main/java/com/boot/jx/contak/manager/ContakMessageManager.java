@@ -12,11 +12,9 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
-import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
-import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -44,9 +42,10 @@ public class ContakMessageManager {
 						CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(user.getPhoneId())
 								.and("deliveredAt.stamp").is(deliveredAt.getStamp())));
 
-		for (ContakMessageDoc contakMessageDoc : messages) {
-			contakInboundManager.sendMsgDelvryEvent(contakMessageDoc);
+		if (ArgUtil.is(messages) && messages.size() > 0) {
+			contakInboundManager.sendMsgDelvryEventAsync(messages);
 		}
+
 		return messages;
 	}
 
