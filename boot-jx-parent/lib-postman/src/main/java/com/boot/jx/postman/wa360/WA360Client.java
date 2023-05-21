@@ -51,7 +51,13 @@ public class WA360Client {
 		StringJoiner msgIds = new StringJoiner(",");
 
 		if (ArgUtil.is(outboxMessage.getTemplateExt())) {
-			MapModel resp = sendTemplate(channelConfig, outboxMessage);
+			MapModel resp = null;
+			/** calling raw template /directly waba api for moengage **/
+			if(outboxMessage.getRawMessageFormat()!=null && !outboxMessage.getRawMessageFormat().isEmpty()) {
+				 resp =sendTemplateRaw(channelConfig, outboxMessage);
+			}else {
+				resp = sendTemplate(channelConfig, outboxMessage);
+			}
 			msgIds.add(getMessageId(resp));
 		} else {
 			boolean isList = false;
@@ -656,5 +662,111 @@ public class WA360Client {
 		msgIds.add(getMessageId(resp));
 		outboxMessage.setMessageIdExt(msgIds.toString());
 		return outboxMessage;
+	}
+	
+	/** Call new metod to post msg directly to waba API **/
+	public MapModel sendTemplateRaw(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+
+		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
+				outboxMessage.contact().getCsid());
+
+		MapModel extTemplate = MapModel.from(outboxMessage.getTemplateExt().getTemplate());
+		MapModel model = MapModel.from(outboxMessage.getModel());
+		MapModel varMap = MapModel.from(outboxMessage.getTemplateExt().getVarMap());
+
+		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "template");
+		req.put(OutBoundWrapperPaths.TEMPLATE_NAMESPACE, extTemplate.get("namespace"));
+		req.put(OutBoundWrapperPaths.TEMPLATE_NAME, extTemplate.get("name"));
+		req.put(OutBoundWrapperPaths.TEMPLATE_LANGUAGE_CODE, extTemplate.get("language"));
+		req.put(OutBoundWrapperPaths.TEMPLATE_LANGUAGE_POLICY, "deterministic");
+
+		MapModel components = MapModel.createInstance();
+		List<Map<String, Object>> extTemplateComponents = extTemplate.keyEntry("components").asListOfMap();
+
+		for (Map<String, Object> extTemplateComponent : extTemplateComponents) {
+			String extTemplateComponentType = (String) extTemplateComponent.get("type");
+			if ("HEADER".equals(extTemplateComponentType)) {
+				TmplComponent headerComponentReq = TmplComponent.createInstance().header();
+				String extTemplateComponentFormat = (String) extTemplateComponent.get("format");
+				if ("TEXT".equals(extTemplateComponentFormat)) {
+					if (varMap.containsKey("header")) {
+						List<Map<String, Object>> headerParametersTemp = varMap.entry("header").asListOfMap();
+						for (Map<String, Object> headerParameter : headerParametersTemp) {
+							String path = (String) headerParameter.get("path");
+							String path2 = (String) headerParameter.get("path2");
+							String defaultValue = (String) headerParameter.get("defaultValue");
+							headerComponentReq.parameter("text",
+									model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+						}
+						if (headerComponentReq.parameters().size() > 0) {
+							components.add(headerComponentReq.build().map());
+						}
+					}
+				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
+					String lowerFormat = extTemplateComponentFormat.toLowerCase();
+					WA360OutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
+					headerComponentReq.parameter(lowerFormat, media);
+					if (headerComponentReq.parameters().size() > 0) {
+						components.add(headerComponentReq.build().map());
+					}
+				}
+
+			} else if ("BODY".equals(extTemplateComponentType)) {
+				if (varMap.containsKey("body")) {
+					List<Map<String, Object>> bodyParametersTemp = varMap.entry("body").asListOfMap();
+					TmplComponent bodyComponent = TmplComponent.createInstance().body();
+					for (Map<String, Object> bodyParameter : bodyParametersTemp) {
+						String path = (String) bodyParameter.get("path");
+						String path2 = (String) bodyParameter.get("path2");
+						String defaultValue = (String) bodyParameter.get("defaultValue");
+						bodyComponent.parameter("text",
+								model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+					}
+					components.add(bodyComponent.build().map());
+				}
+			} else if ("BUTTONS".equals(extTemplateComponentType)) {
+				List<Map<String, Object>> extTemplateComponentButtons = MapModel.from(extTemplateComponent)
+						.keyEntry("buttons").asListOfMap();
+				List<List<Map<String, Object>>> buttonsParametersVars = varMap.entry("buttons").asListListOfMap();
+
+				for (int i = 0; i < extTemplateComponentButtons.size(); i++) {
+					Map<String, Object> extTemplateComponentButton = extTemplateComponentButtons.get(i);
+					List<Map<String, Object>> buttonParameterVar = CollectionUtil.getArray(buttonsParametersVars, i);
+					if (ArgUtil.is(buttonParameterVar)) {
+						String buttonType = (String) extTemplateComponentButton.get("type");
+						if ("URL".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+									String path = (String) buttonParameter.get("path");
+									String path2 = (String) buttonParameter.get("path2");
+									String defaultValue = (String) buttonParameter.get("defaultValue");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
+									buttonComponent.parameter("text",
+											model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+									components.add(buttonComponent.build().map());
+								}
+							}
+						} else if ("QUICK_REPLY".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+									String path = (String) buttonParameter.get("path");
+									String path2 = (String) buttonParameter.get("path2");
+									String defaultValue = (String) buttonParameter.get("defaultValue");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
+											i);
+									buttonComponent.parameter("payLoad",
+											model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+									components.add(buttonComponent.build().map());
+								}
+							}
+						}
+					}
+				}
+			}
+
+		}
+
+		req.put(OutBoundWrapperPaths.TEMPLATE_COMPONENTS, components.list());
+		return send(req, channelConfig);
 	}
 }

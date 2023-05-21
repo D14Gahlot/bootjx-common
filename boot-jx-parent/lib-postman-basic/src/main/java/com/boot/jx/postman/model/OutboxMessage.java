@@ -3,6 +3,7 @@ package com.boot.jx.postman.model;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
@@ -27,6 +28,10 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private List<Object> trace;
 	/** csv refernce key**/
 	private String referenceKey;
+	
+	/** **/
+	private Map<String,Object> rawMessageFormat;
+
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -149,6 +154,14 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public void setReferenceKey(String referenceKey) {
 		this.referenceKey = referenceKey;
+	}
+
+	public Map<String, Object> getRawMessageFormat() {
+		return rawMessageFormat;
+	}
+
+	public void setRawMessageFormat(Map<String, Object> rawMessageFormat) {
+		this.rawMessageFormat = rawMessageFormat;
 	}
 
 }
