@@ -18,6 +18,7 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 
 @Component
 public class ContakMessageManager {
@@ -63,10 +64,14 @@ public class ContakMessageManager {
 
 	public List<ContakMessageDoc> markRead(String noteId) {
 		ContakMessageDoc readMessage = commonMongoTemplate
-				.findOne(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).whereId("noteId"));
+				.findOne(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).whereId(noteId));
 
 		if (!ArgUtil.is(readMessage) || !ArgUtil.is(readMessage.getDeliveredAt())) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("noteId"));
+		}
+
+		if (ArgUtil.is(readMessage.getReadAt())) {
+			return CollectionUtil.asList(readMessage);
 		}
 
 		TimeStampIndex readAt = TimeStampIndex.from(System.currentTimeMillis());
