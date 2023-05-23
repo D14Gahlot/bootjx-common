@@ -210,7 +210,7 @@ public class ChatSessionManager {
 							Criteria.where("lastOutGoingStamp").gt(graceStamp)));
 		}
 
-		if (query.contains(CHAT_STATE.CLOSED) || query.contains(CHAT_STATUS.CLOSED)) {
+		if (query.hasClosed()) {
 			criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
 		} else if (query.contains(CHAT_STATUS.RESOLVED)) {
 			criterias.add(Criteria.where("resolved").is(true));
@@ -218,7 +218,7 @@ public class ChatSessionManager {
 			query.add(CHAT_MODE.AGENT);
 			criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
 					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
-		} else if (query.contains(CHAT_STATE.EXPIRED) || query.contains(CHAT_STATUS.EXPIRED)) {
+		} else if (query.hasExpired()) {
 			Calendar expiryWatermark = Calendar.getInstance();
 			expiryWatermark.setTimeInMillis(
 					expiryWatermark.getTimeInMillis() - TimeUtils.toMillis(pmClientConfig.getChatSessionTimeout()));
@@ -301,7 +301,9 @@ public class ChatSessionManager {
 		}
 
 		if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
-			query.add(CHAT_MODE.AGENT);
+			if (!query.hasClosed() && !query.hasExpired()) {
+				query.add(CHAT_MODE.AGENT);
+			}
 			primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
 			criterias.add(new Criteria().orOperator(
 					// Assigned to Me
@@ -311,7 +313,9 @@ public class ChatSessionManager {
 			//
 			));
 		} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
-			query.add(CHAT_MODE.AGENT);
+			if (!query.hasClosed() && !query.hasExpired()) {
+				query.add(CHAT_MODE.AGENT);
+			}
 			criterias.add(new Criteria().orOperator(
 					// Not Assigned to Me
 					Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
