@@ -85,6 +85,8 @@ public class ProxyService {
 
 		headers.set("TRACE", traceId);
 		headers.remove(HttpHeaders.ACCEPT_ENCODING);
+		headers.remove(HttpHeaders.ORIGIN);
+		headers.remove(HttpHeaders.REFERER);
 
 		HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
 		ClientHttpRequestFactory factory = new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory());
