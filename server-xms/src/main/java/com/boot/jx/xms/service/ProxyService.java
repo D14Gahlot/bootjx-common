@@ -58,16 +58,16 @@ public class ProxyService {
 		String replacerValue = null;
 		String replacerString = httpRequest.get("x-api-replacer");
 		if (ArgUtil.is(replacerString)) {
-			String[] replacer = replacerString.split(":");
+			String[] replacer = replacerString.toLowerCase().split(":");
 			replacerPrefix = replacer[0];
 			replacerValue = replacer[1];
 		}
-
+		
 		while (headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();
 			String headerValue = request.getHeader(headerName);
 			headers.set(headerName, headerValue);
-			if (ArgUtil.is(replacerPrefix) && headerName.indexOf(replacerPrefix) == 0) {
+			if (ArgUtil.is(replacerPrefix) && headerName.toLowerCase().indexOf(replacerPrefix) == 0) {
 				headers.set(headerName.replaceFirst(replacerPrefix, replacerValue), headerValue);
 				LOGGER.info("Header - " + headerName + " : " + headerValue);
 			}
