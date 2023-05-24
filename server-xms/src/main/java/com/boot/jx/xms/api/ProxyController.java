@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +31,21 @@ public class ProxyController {
 	@Autowired
 	ProxyService service;
 
-	//@CrossOrigin(origins = "*")
+	@CrossOrigin(origins = "*")
+	@ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Try API's", hidden = true)
+	@RequestMapping(value = { "/proxc/{domainHash}", "/proxc/{domainHash}/*", "/proxc/{domainHash}/**" })
+	public MapModel proxc(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
+			HttpServletResponse response, @PathVariable String domainHash)
+			throws URISyntaxException, MalformedURLException {
+		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64().toString();
+		URL url = new URL(domain);
+		String requestUrl = request.getRequestURI();
+		String path = requestUrl.replaceFirst("/xms/proxc/" + domainHash + "/", "/");
+		return MapModel
+				.from(service.processProxyRequest(url.getHost(), path, body, method, request, response).getBody());
+	}
+
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Try API's", hidden = true)
 	@RequestMapping(value = { "/proxy/{domainHash}", "/proxy/{domainHash}/*", "/proxy/{domainHash}/**" })
