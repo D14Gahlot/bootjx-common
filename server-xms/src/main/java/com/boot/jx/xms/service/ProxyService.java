@@ -68,13 +68,16 @@ public class ProxyService {
 			String headerName = headerNames.nextElement();
 			String headerValue = request.getHeader(headerName);
 			headers.set(headerName, headerValue);
-			if (ArgUtil.is(headerprint) && ArgUtil.is(replacerPrefix)
-					&& headerName.toLowerCase().indexOf(replacerPrefix) == 0) {
+			if (ArgUtil.is(replacerPrefix) && headerName.toLowerCase().indexOf(replacerPrefix) == 0) {
 				headers.set(headerName.replaceFirst(replacerPrefix, replacerValue), headerValue);
-				LOGGER.info("Header - " + headerName + " : " + headerValue);
+				if (ArgUtil.is(headerprint)) {
+					LOGGER.info("Header - " + headerName + " : " + headerValue);
+				}
 			}
-			httpRequest.addHeader("Y-found", headerName);
-			httpRequest.addHeader("YY-" + headerName, headerValue);
+			if (ArgUtil.is(headerprint)) {
+				httpRequest.addHeader("Y-found", headerName);
+				httpRequest.addHeader("YY-" + headerName, headerValue);
+			}
 		}
 
 		headers.set("TRACE", traceId);
