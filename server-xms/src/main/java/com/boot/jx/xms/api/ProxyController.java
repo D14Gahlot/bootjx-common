@@ -3,7 +3,6 @@ package com.boot.jx.xms.api;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.http.ApiRequest;
@@ -36,8 +34,7 @@ public class ProxyController {
 	@CrossOrigin(origins = "*")
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Try API's", hidden = true)
-	@RequestMapping(value = { "/proxy/{domainHash}", "/proxy/{domainHash}/*", "/proxy/{domainHash}/**" },
-			method = { RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(value = { "/proxy/{domainHash}", "/proxy/{domainHash}/*", "/proxy/{domainHash}/**" })
 	public MapModel proxy(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
 			HttpServletResponse response, @PathVariable String domainHash)
 			throws URISyntaxException, MalformedURLException {
