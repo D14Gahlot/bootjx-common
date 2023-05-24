@@ -69,6 +69,7 @@ public class ProxyService {
 			headers.set(headerName, headerValue);
 			if (ArgUtil.is(replacerPrefix) && headerName.indexOf(replacerPrefix) == 0) {
 				headers.set(headerName.replaceFirst(replacerPrefix, replacerValue), headerValue);
+				LOGGER.info("Header - " + headerName + " : " + headerValue);
 			}
 			httpRequest.setHeader("Y-" + headerName, headerValue);
 		}
