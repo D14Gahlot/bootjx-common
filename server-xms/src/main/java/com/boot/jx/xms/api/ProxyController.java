@@ -31,7 +31,7 @@ public class ProxyController {
 	@Autowired
 	ProxyService service;
 
-	@CrossOrigin(origins = "*")
+	@CrossOrigin(origins = "*", allowedHeaders = "*")
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Try API's", hidden = true)
 	@RequestMapping(value = { "/proxy/{domainHash}", "/proxy/{domainHash}/*", "/proxy/{domainHash}/**" })
