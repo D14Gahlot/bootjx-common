@@ -38,7 +38,7 @@ public class ProxyController {
 	public MapModel proxc(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
 			HttpServletResponse response, @PathVariable String domainHash)
 			throws URISyntaxException, MalformedURLException {
-		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64().toString();
+		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
 		URL url = new URL(domain);
 		String requestUrl = request.getRequestURI();
 		String path = requestUrl.replaceFirst("/xms/proxc/" + domainHash + "/", "/");
@@ -52,7 +52,7 @@ public class ProxyController {
 	public MapModel proxy(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
 			HttpServletResponse response, @PathVariable String domainHash)
 			throws URISyntaxException, MalformedURLException {
-		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64().toString();
+		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
 		URL url = new URL(domain);
 		String requestUrl = request.getRequestURI();
 		String path = requestUrl.replaceFirst("/xms/proxy/" + domainHash + "/", "/");
@@ -67,9 +67,9 @@ public class ProxyController {
 	public MapModel proxch(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
 			HttpServletResponse response, @PathVariable String domainHash, @PathVariable String pathHash)
 			throws URISyntaxException, MalformedURLException {
-		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64().toString();
+		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
 		URL url = new URL(domain);
-		String path = CryptoUtil.getEncoder().message(pathHash).decodeBase64().toString();
+		String path = CryptoUtil.getEncoder().message(pathHash).decodeBase64Hack().toString();
 		return MapModel
 				.from(service.processProxyRequest(url.getHost(), path, body, method, request, response).getBody());
 	}
@@ -80,9 +80,9 @@ public class ProxyController {
 	public MapModel proxyh(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
 			HttpServletResponse response, @PathVariable String domainHash, @PathVariable String pathHash)
 			throws URISyntaxException, MalformedURLException {
-		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64().toString();
+		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
 		URL url = new URL(domain);
-		String path = CryptoUtil.getEncoder().message(pathHash).decodeBase64().toString();
+		String path = CryptoUtil.getEncoder().message(pathHash).decodeBase64Hack().toString();
 		return MapModel
 				.from(service.processProxyRequest(url.getHost(), path, body, method, request, response).getBody());
 	}
