@@ -47,6 +47,9 @@ public class ProxyService {
 		ThreadContext.put("traceId", traceId);
 		// log if required in this line
 		URI uri = new URI("https", null, domain, -1, null, null, null);
+		
+		
+		//LOGGER.info("URL " + domain + " " + path);
 
 		// replacing context path form urI to match actual gateway URI
 		uri = UriComponentsBuilder.fromUri(uri).path(path).query(request.getQueryString()).build(true).toUri();
