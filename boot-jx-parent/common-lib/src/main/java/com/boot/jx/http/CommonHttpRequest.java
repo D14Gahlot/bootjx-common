@@ -283,7 +283,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 		}
 	}
 
-	public void setHeader(String key, String value) {
+	public void addHeader(String key, String value) {
 		if (response != null) {
 			response.addHeader(key, value);
 		}

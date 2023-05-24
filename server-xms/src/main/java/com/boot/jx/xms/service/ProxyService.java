@@ -62,7 +62,7 @@ public class ProxyService {
 			replacerPrefix = replacer[0];
 			replacerValue = replacer[1];
 		}
-		
+
 		while (headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();
 			String headerValue = request.getHeader(headerName);
@@ -71,7 +71,8 @@ public class ProxyService {
 				headers.set(headerName.replaceFirst(replacerPrefix, replacerValue), headerValue);
 				LOGGER.info("Header - " + headerName + " : " + headerValue);
 			}
-			httpRequest.setHeader("Y-" + headerName, headerValue);
+			httpRequest.addHeader("Y-found", headerName);
+			httpRequest.addHeader(headerName, headerValue);
 		}
 
 		headers.set("TRACE", traceId);
