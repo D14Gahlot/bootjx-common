@@ -31,7 +31,7 @@ public class ProxyController {
 	@Autowired
 	ProxyService service;
 
-	@CrossOrigin(origins = "*", allowedHeaders = "*")
+	@CrossOrigin(origins = "*")
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Try API's", hidden = true)
 	@RequestMapping(value = { "/proxy/{domainHash}", "/proxy/{domainHash}/*", "/proxy/{domainHash}/**" })
@@ -42,7 +42,6 @@ public class ProxyController {
 		URL url = new URL(domain);
 		String requestUrl = request.getRequestURI();
 		String path = requestUrl.replaceFirst("/xms/proxy/" + domainHash + "/", "/");
-
 		return MapModel
 				.from(service.processProxyRequest(url.getHost(), path, body, method, request, response).getBody());
 	}

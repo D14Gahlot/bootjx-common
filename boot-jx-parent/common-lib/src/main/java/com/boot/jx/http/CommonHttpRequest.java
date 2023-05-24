@@ -283,6 +283,12 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 		}
 	}
 
+	public void setHeader(String key, String value) {
+		if (response != null) {
+			response.addHeader(key, value);
+		}
+	}
+
 	/**
 	 * 
 	 * @param name

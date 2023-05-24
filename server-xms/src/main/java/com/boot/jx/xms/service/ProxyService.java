@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,10 +27,15 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
+import com.boot.utils.ArgUtil;
 
 @Service
 public class ProxyService {
+
+	@Autowired
+	CommonHttpRequest httpRequest;
 
 	public static Logger LOGGER = LoggerService.getLogger(ProxyService.class);
 
@@ -48,9 +54,23 @@ public class ProxyService {
 		HttpHeaders headers = new HttpHeaders();
 		Enumeration<String> headerNames = request.getHeaderNames();
 
+		String replacerPrefix = null;
+		String replacerValue = null;
+		String replacerString = httpRequest.get("x-api-replacer");
+		if (ArgUtil.is(replacerString)) {
+			String[] replacer = replacerString.split(":");
+			replacerPrefix = replacer[0];
+			replacerValue = replacer[1];
+		}
+
 		while (headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();
-			headers.set(headerName, request.getHeader(headerName));
+			String headerValue = request.getHeader(headerName);
+			headers.set(headerName, headerValue);
+			if (ArgUtil.is(replacerPrefix) && headerName.indexOf(replacerPrefix) == 0) {
+				headers.set(headerName.replaceFirst(replacerPrefix, replacerValue), headerValue);
+			}
+			httpRequest.setHeader("Y-" + headerName, headerValue);
 		}
 
 		headers.set("TRACE", traceId);
