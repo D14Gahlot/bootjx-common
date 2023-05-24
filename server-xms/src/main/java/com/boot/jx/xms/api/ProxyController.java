@@ -60,4 +60,30 @@ public class ProxyController {
 				.from(service.processProxyRequest(url.getHost(), path, body, method, request, response).getBody());
 	}
 
+	@CrossOrigin(origins = "*")
+	@ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Try API's", hidden = true)
+	@RequestMapping(value = { "/proxch/{domainHash}/{pathHash}" })
+	public MapModel proxch(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
+			HttpServletResponse response, @PathVariable String domainHash, @PathVariable String pathHash)
+			throws URISyntaxException, MalformedURLException {
+		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64().toString();
+		URL url = new URL(domain);
+		String path = CryptoUtil.getEncoder().message(pathHash).decodeBase64().toString();
+		return MapModel
+				.from(service.processProxyRequest(url.getHost(), path, body, method, request, response).getBody());
+	}
+
+	@ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Try API's", hidden = true)
+	@RequestMapping(value = { "/proxyh/{domainHash}/{pathHash}" })
+	public MapModel proxyh(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
+			HttpServletResponse response, @PathVariable String domainHash, @PathVariable String pathHash)
+			throws URISyntaxException, MalformedURLException {
+		String domain = CryptoUtil.getEncoder().message(domainHash).decodeBase64().toString();
+		URL url = new URL(domain);
+		String path = CryptoUtil.getEncoder().message(pathHash).decodeBase64().toString();
+		return MapModel
+				.from(service.processProxyRequest(url.getHost(), path, body, method, request, response).getBody());
+	}
 }
