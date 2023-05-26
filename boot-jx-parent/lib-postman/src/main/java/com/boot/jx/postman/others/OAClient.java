@@ -17,21 +17,21 @@ public class OAClient {
 	public static final String TEXTLOCAL_URL = "https://api.otp.in/send";
 	public static final JsonPath TEXTLOCAL_URL_RESPONSE_MSG_ID = new JsonPath("messages/[0]/id");
 
-	public static final String TWILIO = "TWILIO";
-	public static final String TWILIO_URL = "https://api.twilio.com/2010-04-01/";
-	public static final JsonPath TWILIO_URL_RESPONSE_MSG_ID = new JsonPath("sid");
+	public static final String OA_URL = ".otpalerts.com/entoc/api/v1/e2ee/send";
+	public static final JsonPath TEMPLATE_CODE = new JsonPath("template.code");
+	public static final JsonPath TEMPLATE_MODEL = new JsonPath("template.model");
 
 	@Autowired
 	private RestService restService;
 
 	public OutboxMessage sendMessage(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		OAConfigDetails oa = channelConfig.getOa();
-		MapModel resp = restService.ajax(oa.getClientId() + ".otpalerts.com/entoc/api/v1/e2ee/send")
-				.header("x-api-key", oa.getApiKey()).postJson(MapModel.createInstance()
+		MapModel resp = restService.ajax("https://" + oa.getClientId() + OA_URL).header("x-api-key", oa.getApiKey())
+				.postJson(MapModel.createInstance()
 						//
 						.put("phone", outboxMessage.contact().getPhone())
-						.put("template.code", outboxMessage.getTemplateExt())
-						.put("template.model", outboxMessage.getModel())
+						.put(TEMPLATE_CODE, outboxMessage.getTemplateExt().getCode())
+						.put(TEMPLATE_MODEL, outboxMessage.getModel())
 						//
 						.toMap())
 				.asMapModel();;

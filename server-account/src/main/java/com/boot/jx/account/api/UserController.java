@@ -86,10 +86,13 @@ public class UserController {
 		} else {
 			OTPDetails otpDetails = OTPUtils.genrateBasicOTP(username, app);
 
-			ChannelConfig channel = pmEnvironment.config().channel("mehery");
+			ChannelConfig channel = pmEnvironment.config().channel("oa:mehery");
 			OutboxMessage ob = new OutboxMessage();
 			ob.contact().setPhone(loginToken.getDomainUserPhone());
 			ob.setTemplateExt(new HSMTemplate3rdParty().code("login_otp"));
+			ob.model().put("prefix", otpDetails.getPrefix());
+			ob.model().put("value", otpDetails.getOtp());
+			
 			oaClient.sendMessage(channel, ob);
 
 			// Details to SHOW/MASK to UI

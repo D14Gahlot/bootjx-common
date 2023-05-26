@@ -505,7 +505,7 @@ public class MapModel implements JsonSerializerType<Object> {
 		jsonPath.save(this.map(), value);
 		return this;
 	}
-
+	
 	public MapModel remove(String key) {
 		this.map().remove(key);
 		return this;
