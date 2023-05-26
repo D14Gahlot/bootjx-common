@@ -20,6 +20,7 @@ public class OAClient {
 	public static final String OA_URL = ".otpalerts.com/entoc/api/v1/e2ee/send";
 	public static final JsonPath TEMPLATE_CODE = new JsonPath("template.code");
 	public static final JsonPath TEMPLATE_MODEL = new JsonPath("template.model");
+	public static final JsonPath TEMPLATE_DATA = new JsonPath("template.model.data");
 
 	@Autowired
 	private RestService restService;

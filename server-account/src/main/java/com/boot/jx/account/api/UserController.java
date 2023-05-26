@@ -26,7 +26,9 @@ import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.others.OAClient;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.OTPUtils;
 import com.boot.utils.OTPUtils.OTPDetails;
@@ -92,7 +94,9 @@ public class UserController {
 			ob.setTemplateExt(new HSMTemplate3rdParty().code("login_otp"));
 			ob.model().put("prefix", otpDetails.getPrefix());
 			ob.model().put("value", otpDetails.getOtp());
-			
+			ob.model().put("data",
+					MapModel.createInstance().put("panel", ArgUtil.nonEmpty(app, Constants.BLANK)).toMap());
+
 			oaClient.sendMessage(channel, ob);
 
 			// Details to SHOW/MASK to UI
