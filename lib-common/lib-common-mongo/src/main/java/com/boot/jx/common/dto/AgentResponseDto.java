@@ -16,6 +16,9 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 	@JsonProperty("email")
 	private String agent_email;
 
+	@JsonProperty("phone")
+	private String agent_number;
+
 	@JsonProperty("name")
 	private String agent_name;
 
@@ -159,6 +162,14 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	public void setQuickskills(List<ResourceDocument> quickskills) {
 		this.quickskills = quickskills;
+	}
+
+	public String getAgent_number() {
+		return agent_number;
+	}
+
+	public void setAgent_number(String agent_number) {
+		this.agent_number = agent_number;
 	}
 
 }

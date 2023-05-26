@@ -30,9 +30,19 @@ public class ITemplates {
 	}
 
 	public interface BasicExternalTemplate {
+
+		public String getCode();
+
+		public void setCode(String code);
+
 		public Map<String, Object> getTemplate();
 
 		public Map<String, Object> getVarMap();
+
+		default public BasicExternalTemplate code(String code) {
+			this.setCode(code);
+			return this;
+		}
 	}
 
 	public interface ITemplate extends BasicTemplate {

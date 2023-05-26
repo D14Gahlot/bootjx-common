@@ -237,6 +237,7 @@ public class EmpAuthService {
 			userLoginToken.setDomainToken(builder.toHMAC().output());
 			userLoginToken.setDomainUser(username);
 			userLoginToken.setDomainUserEmail(email);
+			userLoginToken.setDomainUserPhone(agent.getPhone());
 			userLoginToken.setApp(app);
 		} else {
 			ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")

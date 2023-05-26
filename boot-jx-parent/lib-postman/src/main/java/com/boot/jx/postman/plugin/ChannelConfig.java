@@ -4,6 +4,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
+import com.boot.jx.postman.plugin.OAPlugin.OAConfigDetails;
 import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
@@ -29,8 +30,7 @@ public class ChannelConfig extends AChannelConfig {
 	private TwilioConfigDetails twilio;
 	private SMSConfigDetails sms;
 	private WA360CloudConfigDetails wa360dc;
-
-	
+	private OAConfigDetails oa;
 
 	private boolean isPushAllowed;
 	private boolean isPushOnlyApproved;
@@ -202,6 +202,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setWa360dc(WA360CloudConfigDetails wa360dc) {
 		this.wa360dc = wa360dc;
+	}
+
+	public OAConfigDetails getOa() {
+		return oa;
+	}
+
+	public void setOa(OAConfigDetails oa) {
+		this.oa = oa;
 	}
 
 }
