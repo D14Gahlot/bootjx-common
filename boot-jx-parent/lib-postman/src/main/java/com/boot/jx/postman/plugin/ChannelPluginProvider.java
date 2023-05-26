@@ -26,7 +26,6 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.UtilityModels.Stringable;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.StringUtils;
 
 public class ChannelPluginProvider {
 
@@ -240,6 +239,7 @@ public class ChannelPluginProvider {
 	public static final WA360Plugin WA_360D = new WA360Plugin();
 	public static final InstagramPlugin INSTAGRAM = new InstagramPlugin();
 	public static final EmailPlugin EMAIL = new EmailPlugin();
+	public static final OAPlugin OA = new OAPlugin();
 	/** WABA CLOUD plugin **/
 	public static final WA360CloudPlugin WA_360DC = new WA360CloudPlugin();
 
@@ -254,6 +254,7 @@ public class ChannelPluginProvider {
 		register(EMAIL);
 		register(new SMSPlugin());
 		register(new TwilioSMSPlugin());
+		register(OA);
 		register(WA_360DC);
 	}
 
