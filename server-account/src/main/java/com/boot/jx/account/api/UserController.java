@@ -83,7 +83,8 @@ public class UserController {
 			UserLoginTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserLoginTokenDoc.class);
 			if (!new OTPDetails().yin(otpNounce).yang(loginDoc.getOtpNounce()).genrate(username, app).validate(otp,
 					loginDoc.getOtpHash())) {
-				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("otp"));
+				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("otp")
+						.codeKey("ValidCredentials").description("Invalid OTP"));
 			}
 		} else {
 			OTPDetails otpDetails = OTPUtils.genrateBasicOTP(username, app);
