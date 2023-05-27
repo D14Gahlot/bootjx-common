@@ -6,7 +6,7 @@ import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserLoginToken implements Serializable {
+public class UserAuthToken implements Serializable {
 
 	private static final long serialVersionUID = -4274591422350406712L;
 
@@ -19,6 +19,7 @@ public class UserLoginToken implements Serializable {
 	private String domainUserEmail;
 	private String domainUserPhone;
 	private String app;
+	private String event;
 
 	// OTP
 	@ApiMockModelProperty(example = "xxxxxxxx", required = false)
@@ -115,5 +116,13 @@ public class UserLoginToken implements Serializable {
 
 	public void setDomainUserPhone(String domainUserPhone) {
 		this.domainUserPhone = domainUserPhone;
+	}
+
+	public String getEvent() {
+		return event;
+	}
+
+	public void setEvent(String event) {
+		this.event = event;
 	}
 }

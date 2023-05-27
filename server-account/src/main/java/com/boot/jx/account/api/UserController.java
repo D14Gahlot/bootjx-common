@@ -1,6 +1,7 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -16,10 +17,9 @@ import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.doc.UserLoginTokenDoc;
-import com.boot.jx.common.dto.UserLoginToken;
+import com.boot.jx.common.doc.UserAuthTokenDoc;
+import com.boot.jx.common.dto.UserAuthToken;
 import com.boot.jx.common.service.EmpAuthService;
-import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
@@ -49,9 +49,6 @@ public class UserController {
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
-	@Autowired
-	private OAClient oaClient;
-
 	@RequestMapping(value = { "/auth/**", "/app/**" }, method = { RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
 		model.addAllAttributes(appCommonConfig.appAttributes());
@@ -72,49 +69,51 @@ public class UserController {
 
 	@ResponseBody
 	@RequestMapping(value = "/pub/login", method = { RequestMethod.POST })
-	public ApiResponse<UserLoginToken, Object> agentLogin(@RequestParam String username, @RequestParam String password,
+	public ApiResponse<UserAuthToken, Object> agentLogin(@RequestParam String username, @RequestParam String password,
 			@RequestParam(required = false) String app, @RequestParam String tnt, @RequestParam String domainId,
 			@RequestParam(required = false) String otp, @RequestParam(required = false) String otpNounce,
 			@RequestParam(required = false) String tokenId) throws NoSuchAlgorithmException {
 
-		UserLoginToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
-				app);
+		UserAuthToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
+				app, "LOGIN");
 		if (ArgUtil.is(tokenId)) {
-			UserLoginTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserLoginTokenDoc.class);
+			UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
 			if (!new OTPDetails().yin(otpNounce).yang(loginDoc.getOtpNounce()).genrate(username, app).validate(otp,
 					loginDoc.getOtpHash())) {
 				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("otp")
 						.codeKey("ValidCredentials").description("Invalid OTP"));
 			}
-		} else {
-			OTPDetails otpDetails = OTPUtils.genrateBasicOTP(username, app);
-
-			ChannelConfig channel = pmEnvironment.config().channel("oa:mehery");
-			OutboxMessage ob = new OutboxMessage();
-			ob.contact().setPhone(loginToken.getDomainUserPhone());
-			ob.setTemplateExt(new HSMTemplate3rdParty().code("login_otp"));
-			ob.model().put("prefix", otpDetails.getPrefix());
-			ob.model().put("value", otpDetails.getOtp());
-			ob.model().put("data",
-					MapModel.createInstance().put("panel", ArgUtil.nonEmpty(app, Constants.BLANK)).toMap());
-
-			oaClient.sendMessage(channel, ob);
-
-			// Details to SHOW/MASK to UI
-			loginToken.setOtpPrefix(otpDetails.getPrefix());
-			loginToken.setOtpNounce(otpDetails.getYin());
-			loginToken.setDomainToken(null);
-
-			// Details to SAVE in DB
-			UserLoginTokenDoc loginDoc = EntityDtoUtil.dtoToEntity(loginToken, new UserLoginTokenDoc());
-			loginDoc.setOtpNounce(otpDetails.getYang());
-			loginDoc.setOtpHash(otpDetails.getHash());
-			mongoTemplate.save(loginDoc);
-
-			// Details to SHOW/MASK to UI
-			loginToken.setTokenId(loginDoc.getTokenId());
+		} else if (ArgUtil.is(loginToken.getDomainUserPhone())) {
+			empAuthService.sendOTP(loginToken);
 		}
 		return ApiResponse.buildData(loginToken);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/pub/resetpass", method = { RequestMethod.POST })
+	public ApiResponse<?, ?> resetPass(@RequestParam String username, @RequestParam(required = false) String password,
+			@RequestParam(required = false) String newpassword, @RequestParam(required = false) String app,
+			@RequestParam String tnt, @RequestParam String domainId, @RequestParam(required = false) String otp,
+			@RequestParam(required = false) String otpNounce, @RequestParam(required = false) String tokenId)
+			throws NoSuchAlgorithmException {
+		if (ArgUtil.is(password)) {
+			UserAuthToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
+					app, "RESETPASS");
+			if (ArgUtil.is(tokenId)) {
+				UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
+				if (!new OTPDetails().yin(otpNounce).yang(loginDoc.getOtpNounce()).genrate(username, app).validate(otp,
+						loginDoc.getOtpHash())) {
+					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("otp")
+							.codeKey("ValidCredentials").description("Invalid OTP"));
+				}
+				empAuthService.agentSetPass(username, password, newpassword, ArgUtil.is(app, "admin"));
+			} else {
+				empAuthService.sendOTP(loginToken);
+			}
+			return ApiResponse.buildData(loginToken);
+		} else {
+			return empAuthService.agentResetPass(username, ArgUtil.is(app, "admin"));
+		}
 	}
 
 }

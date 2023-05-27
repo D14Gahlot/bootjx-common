@@ -42,7 +42,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.common.dto.UserLoginToken;
+import com.boot.jx.common.dto.UserAuthToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
@@ -130,7 +130,7 @@ public class PartnerController {
 				panel));
 
 		if (userSessionBean.hasAdminAccesTo(domain)) {
-			UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin",
+			UserAuthToken userLoginToken = empAuthService.createSuperLoginToken("superadmin",
 					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), "admin");
 			model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
 			model.addAttribute("DOMAIN_USER_EMAIL", userLoginToken.getDomainUserEmail());
