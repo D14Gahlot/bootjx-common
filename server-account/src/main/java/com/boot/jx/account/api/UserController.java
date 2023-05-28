@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -90,13 +91,13 @@ public class UserController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/pub/resetpass", method = { RequestMethod.POST })
-	public ApiResponse<?, ?> resetPass(@RequestParam String username, @RequestParam(required = false) String password,
-			@RequestParam(required = false) String newpassword, @RequestParam(required = false) String app,
-			@RequestParam String tnt, @RequestParam String domainId, @RequestParam(required = false) String otp,
-			@RequestParam(required = false) String otpNounce, @RequestParam(required = false) String tokenId)
-			throws NoSuchAlgorithmException {
-		if (ArgUtil.is(password)) {
+	@RequestMapping(value = "/pub/resetpass/{flow}", method = { RequestMethod.POST })
+	public ApiResponse<?, ?> resetPass(@PathVariable String flow, @RequestParam String username,
+			@RequestParam(required = false) String password, @RequestParam(required = false) String newpassword,
+			@RequestParam(required = false) String app, @RequestParam String tnt, @RequestParam String domainId,
+			@RequestParam(required = false) String otp, @RequestParam(required = false) String otpNounce,
+			@RequestParam(required = false) String tokenId) throws NoSuchAlgorithmException {
+		if (ArgUtil.is(password) && "FORGOTPASS".equalsIgnoreCase(flow)) {
 			UserAuthToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
 					app, "RESETPASS");
 			if (ArgUtil.is(tokenId)) {
