@@ -97,24 +97,25 @@ public class UserController {
 			@RequestParam(required = false) String app, @RequestParam String tnt, @RequestParam String domainId,
 			@RequestParam(required = false) String otp, @RequestParam(required = false) String otpNounce,
 			@RequestParam(required = false) String tokenId) throws NoSuchAlgorithmException {
-		if (ArgUtil.is(password) && "FORGOTPASS".equalsIgnoreCase(flow)) {
-			UserAuthToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
-					app, "RESETPASS");
-			if (ArgUtil.is(tokenId)) {
-				UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
-				if (!new OTPDetails().yin(otpNounce).yang(loginDoc.getOtpNounce()).genrate(username, app).validate(otp,
-						loginDoc.getOtpHash())) {
-					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("otp")
-							.codeKey("ValidCredentials").description("Invalid OTP"));
-				}
-				empAuthService.agentSetPass(username, password, newpassword, ArgUtil.is(app, "admin"));
-			} else {
-				empAuthService.sendOTP(loginToken);
-			}
-			return ApiResponse.buildData(loginToken);
-		} else {
+
+		if ("FORGOTPASS".equalsIgnoreCase(flow)) {
 			return empAuthService.agentResetPass(username, ArgUtil.is(app, "admin"));
 		}
+
+		UserAuthToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
+				app, "RESETPASS");
+		if (ArgUtil.is(tokenId)) {
+			UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
+			if (!new OTPDetails().yin(otpNounce).yang(loginDoc.getOtpNounce()).genrate(username, app).validate(otp,
+					loginDoc.getOtpHash())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("otp")
+						.codeKey("ValidCredentials").description("Invalid OTP"));
+			}
+			empAuthService.agentSetPass(username, password, newpassword, ArgUtil.is(app, "admin"));
+		} else {
+			empAuthService.sendOTP(loginToken);
+		}
+		return ApiResponse.buildData(loginToken);
 	}
 
 }
