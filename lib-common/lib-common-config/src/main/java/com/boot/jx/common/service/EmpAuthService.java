@@ -206,7 +206,7 @@ public class EmpAuthService {
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
 		if (resetPassword(username, admin)) {
 			x.setStatusKey("SUCCESS");
-			x.addWarning("Password reset email sent");
+			x.setMessage("Password reset email sent");
 		} else {
 			x.data().put("success", false);
 			x.setMeta("error");
