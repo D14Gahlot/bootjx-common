@@ -150,10 +150,10 @@ public class EmpAuthService {
 				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
 				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
 				.put("serviceDomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
-				.put("link",
-						String.format("https://%s.%s/front/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0",
-								domain, pmEnvironment.keyEntry("mry.prop.service.domain").asString(),
-								agent.getAgent_code(), agent.getAgent_otp()))
+				.put("link", String.format(
+						"https://%s.%s/front/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0&domain=%s",
+						domain, pmEnvironment.keyEntry("mry.prop.service.domain").asString(), agent.getAgent_code(),
+						agent.getAgent_otp(), domain))
 				.put("tnt", domain).put("panel", app).put("contactName", agent.getAgent_name())));
 
 		return true;
