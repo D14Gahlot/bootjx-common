@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3" class="loadable loading">
 
 <head>
 	<meta charset=utf-8>
@@ -11,6 +11,7 @@
 
 	<title>[[${CONFIG.PROP_SERVICE_NAME}]] - Account</title>
 
+	<style th:replace="frags/loader.html :: style"> </style>
 
 	<script>
 		window.CONST = {
@@ -30,16 +31,19 @@
 		<strong>We're sorry but ArchitectUI doesn't work properly
 			without JavaScript enabled. Please enable it to continue.</strong>
 	</noscript>
-	<div id=app>
-		<form th:action="${FORM_URL}" method="POST" name="login">
-			<input type="hidden" name="domainName" th:value="${DOMAIN_NAME}" />
-			<input type="hidden" name="domainUser" th:value="${DOMAIN_USER}" />
-			<input type="hidden" name="domainUserEmail" th:value="${DOMAIN_USER_EMAIL}" />
-			<input type="hidden" name="domainId" th:value="${DOMAIN_ID}" />
-			<input type="hidden" name="domainToken" th:value="${DOMAIN_TOKEN}" />
-			<input type="hidden" name="domainTokenValid" th:value="${DOMAIN_TOKEN_VALID}" />
-			<button type="submit">Redirecting...</button>
-		</form>
+	<style th:replace="frags/loader.html :: loader"> </style>
+	<div id=app >
+		<center>
+			<form th:action="${FORM_URL}" method="POST" name="login">
+				<input type="hidden" name="domainName" th:value="${DOMAIN_NAME}" />
+				<input type="hidden" name="domainUser" th:value="${DOMAIN_USER}" />
+				<input type="hidden" name="domainUserEmail" th:value="${DOMAIN_USER_EMAIL}" />
+				<input type="hidden" name="domainId" th:value="${DOMAIN_ID}" />
+				<input type="hidden" name="domainToken" th:value="${DOMAIN_TOKEN}" />
+				<input type="hidden" name="domainTokenValid" th:value="${DOMAIN_TOKEN_VALID}" />
+				<button type="submit" style="background: transparent; border:none;font-size: 10px;">Redirecting...</button>
+			</form>
+		</center>
 	</div>
 
 	<script type="text/javascript">
