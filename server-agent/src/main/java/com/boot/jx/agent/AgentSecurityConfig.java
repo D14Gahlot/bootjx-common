@@ -30,6 +30,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.boot.utils.URLBuilder;
 import com.boot.utils.Urly;
 
 @Configuration
@@ -102,13 +103,16 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	public LogoutSuccessHandler logoutSuccessHandler() {
 		return new LogoutSuccessHandler() {
+
 			@Override
 			public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
 				String referrer = request.getHeader("referer");
 				try {
 					referrer = Urly.parse(referrer).getRelativeURL();
-					redirectResponse(request, response, "/auth/login?logout?_=" + System.currentTimeMillis());
+					URLBuilder url = Urly.parse("/front/auth/login").queryParam("logout", "")
+							.queryParam("_", System.currentTimeMillis()).queryParam("referer", referrer);
+					redirectResponse(request, response, url.getRelativeURL());
 				} catch (MalformedURLException | URISyntaxException e) {
 					e.printStackTrace();
 				}
