@@ -131,7 +131,7 @@ public class AgentAuthController {
 	}
 
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
-	@RequestMapping(value = { "/app/home", "/", "", "/app/**", "/auth/**" },
+	@RequestMapping(value = { "/app/home", "/", "", "/app/**", "/auth/**", "/auth/login/direct" },
 			method = { RequestMethod.POST, RequestMethod.GET })
 	public String home(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam(required = false) String domainName, @RequestParam(required = false) String domainId,
@@ -385,7 +385,7 @@ public class AgentAuthController {
 
 	@Autowired
 	private WA360Client wa360Client;
-	
+
 	@Autowired
 	protected ChatLogger logManager;
 
@@ -417,11 +417,11 @@ public class AgentAuthController {
 					logManager.error(outboxMessage, e);
 				}
 				outboxMessage.logs().add(e.getMessage());
-				//LOGGER.error("SEND ERROR", e);
+				// LOGGER.error("SEND ERROR", e);
 				System.out.println("3.LOGGER.error(\"SEND ERROR\", e)");
 				e.printStackTrace();
 			} catch (Exception ex) {
-				//LOGGER.error("SEND ERROR LOG EXCEPTION", ex);
+				// LOGGER.error("SEND ERROR LOG EXCEPTION", ex);
 				System.out.println("4.LOGGER.error(\"SEND ERROR LOG EXCEPTION\", ex)");
 				ex.printStackTrace();
 			}

@@ -247,11 +247,12 @@ public class EmpAuthService {
 		UserAuthToken userLoginToken = new UserAuthToken();
 		AgentDoc agent = validateAgent(username, email, password, "admin".equals(app));
 		if (ArgUtil.is(agent)) {
-			HashBuilder builder = getHashBuilder(username, email, domainName, domainId, agent.getAuthKey());
+			HashBuilder builder = getHashBuilder(agent.getAgent_code(), agent.getAgent_email(), domainName, domainId,
+					agent.getAuthKey());
 			userLoginToken.setDomainName(domainName);
 			userLoginToken.setDomainId(domainId);
 			userLoginToken.setDomainToken(builder.toHMAC().output());
-			userLoginToken.setDomainUser(username);
+			userLoginToken.setDomainUser(agent.getAgent_code());
 			userLoginToken.setDomainUserEmail(agent.getAgent_email());
 			userLoginToken.setDomainUserPhone(agent.getPhone());
 			userLoginToken.setApp(app);
