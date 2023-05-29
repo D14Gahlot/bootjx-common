@@ -30,6 +30,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.utils.URLBuilder;
 import com.boot.utils.Urly;
 
@@ -111,7 +112,8 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				try {
 					referrer = Urly.parse(referrer).getRelativeURL();
 					URLBuilder url = Urly.parse("/front/auth/login").queryParam("logout", "")
-							.queryParam("_", System.currentTimeMillis()).queryParam("referer", referrer);
+							.queryParam("_", System.currentTimeMillis()).queryParam("referer", referrer)
+							.queryParam("domain", AppContextUtil.getTenant()).queryParam("app", "agent");
 					redirectResponse(request, response, url.getRelativeURL());
 				} catch (MalformedURLException | URISyntaxException e) {
 					e.printStackTrace();
