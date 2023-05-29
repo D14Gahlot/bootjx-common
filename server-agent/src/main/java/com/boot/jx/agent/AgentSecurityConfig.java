@@ -75,7 +75,9 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				// .loginProcessingUrl("/auth/login/submit").permitAll()
 				// Logout Pages
 				.and().logout().permitAll().addLogoutHandler(logoutHandler).logoutUrl("/auth/logout")
+				// Logout Success
 				.logoutSuccessHandler(logoutSuccessHandler()).logoutSuccessUrl("/auth/login?logout")
+				/// After Logout
 				.deleteCookies("JSESSIONID", "JXSESSIONID", "AGENTSESSIONID").invalidateHttpSession(true).permitAll()
 				.and().exceptionHandling().accessDeniedPage("/403")
 				// Gen stuff
