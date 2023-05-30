@@ -61,6 +61,12 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		return this;
 	}
 
+	public ChatSessionQuery setStamp(String key, long object) {
+		this.doc.stamps().put(key, object);
+		this.set("stamps." + key, object);
+		return this;
+	}
+
 	public ChatSessionQuery setFirstInComingStamp(long firstInComingStamp) {
 		this.doc.setFirstInComingStamp(firstInComingStamp);
 		this.set("firstInComingStamp", firstInComingStamp);
