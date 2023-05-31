@@ -31,6 +31,7 @@ public class ContakMessageDoc extends ContakMessageTrace {
 	public ContakTemplate template;
 
 	private List<String> tags;
+	public List<Object> events;
 
 	public String getTitle() {
 		return title;
@@ -132,5 +133,13 @@ public class ContakMessageDoc extends ContakMessageTrace {
 
 	public void setCompanyStamp(long companyStamp) {
 		this.companyStamp = companyStamp;
+	}
+
+	public List<Object> getEvents() {
+		return events;
+	}
+
+	public void setEvents(List<Object> events) {
+		this.events = events;
 	}
 }

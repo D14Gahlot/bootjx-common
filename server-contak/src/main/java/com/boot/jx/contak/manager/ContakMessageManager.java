@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.doc.ContakMessageDoc;
+import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
@@ -97,9 +98,9 @@ public class ContakMessageManager {
 		return messages;
 	}
 
-	public List<ContakMessageDoc> markFailed(String noteId) {
+	public List<ContakMessageDoc> addEventLog(MessageEvent event) {
 		ContakMessageDoc failedMessage = commonMongoTemplate
-				.findOne(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).whereId(noteId));
+				.findOne(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).whereId(event.noteId));
 
 		if (!ArgUtil.is(failedMessage) || !ArgUtil.is(failedMessage.getDeliveredAt())) {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("noteId"));
@@ -109,20 +110,17 @@ public class ContakMessageManager {
 			return CollectionUtil.asList(failedMessage);
 		}
 
-		TimeStampIndex failedAt = TimeStampIndex.from(System.currentTimeMillis());
-
+		event.eventStamp = System.currentTimeMillis();
 		commonMongoTemplate.update(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.whereId(noteId) // NoteId
+				CommonMongoQueryBuilder.QueryCriteria.whereId(event.noteId) // NoteId
 						.and("phoneId").is(failedMessage.getPhoneId()) // Phone Id
 						.and("domain").is(failedMessage.getDomain()) // Domain
 						.and("companyId").is(failedMessage.getCompanyId()) // Company
-						.and("deliveredAt").exists(true) // delievery exists
-						.and("deliveredAt.stamp").lte(failedMessage.getDeliveredAt().getStamp())// Delivery
 		)
 				// Update
-				.set("failedAt", failedAt));
+				.push("events", event));
 
-		contakInboundManager.sendMsgFailedEventAsync(failedMessage);
+		contakInboundManager.sendMsgLogEventAsync(failedMessage, event);
 
 		return CollectionUtil.asList(failedMessage);
 	}

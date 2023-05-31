@@ -61,7 +61,7 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 		this.query = query;
 		return (M) this;
 	}
-	
+
 	public Criteria criteria(String key) {
 		if (currentCriteria == null) {
 			currentCriteria = Criteria.where(key);
@@ -220,6 +220,12 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQu
 	@SuppressWarnings("unchecked")
 	public M set(String key, Object o) {
 		update().set(key, o);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M push(String key, Object o) {
+		update().push(key, o);
 		return (M) this;
 	}
 

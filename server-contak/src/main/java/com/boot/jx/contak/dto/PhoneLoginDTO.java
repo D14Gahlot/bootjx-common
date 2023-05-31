@@ -33,6 +33,9 @@ public class PhoneLoginDTO implements Serializable {
 		@ApiMockModelProperty(example = "xxxxxxxx", required = false, value = "Message Event Name",
 				allowableValues = "READ")
 		public String eventName;
+		public String eventSubCode;
+		public String eventDesc;
+		public long eventStamp;
 	}
 
 	public static class PhoneLoginResponseDTO implements Serializable {

@@ -13,6 +13,7 @@ import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakMessageTrace;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakInboundDoc;
+import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
@@ -100,7 +101,7 @@ public class ContakInboundManager {
 		public static final String USER_RELOGIN = "USER_RELOGIN"; // VERIFY
 		public static final String MSG_OUT_DELIVERED = "MSG_OUT_DELIVERED"; // MSG_OUT_READ
 		public static final String MSG_OUT_READ = "MSG_OUT_READ"; // MSG_OUT_READ
-		public static final String MSG_OUT_FAILED = "MSG_OUT_FAILED"; // MSG_OUT_READ
+		public static final String MSG_OUT_LOG = "MSG_OUT_LOG"; // MSG_OUT_READ
 	}
 
 	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, String isUserRegistraion) {
@@ -118,13 +119,14 @@ public class ContakInboundManager {
 	}
 
 	@Async
-	public void sendMsgFailedEventAsync(ContakMessageDoc contakMessageDoc) {
+	public void sendMsgLogEventAsync(ContakMessageDoc contakMessageDoc, MessageEvent event) {
 		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType(USER_INBOUND_TYPE.MSG_OUT_FAILED);
+		inbound.setInboundType(USER_INBOUND_TYPE.MSG_OUT_LOG);
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
 		inbound.setCreatedAt(TimeStampIndex.now());
 		inbound.setInboundPayload(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace()));
+		inbound.setEvent(event);
 		commonMongoTemplate.save(inbound);
 	}
 

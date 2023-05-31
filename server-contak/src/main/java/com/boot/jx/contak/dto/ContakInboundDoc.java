@@ -1,11 +1,13 @@
 package com.boot.jx.contak.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,7 +27,8 @@ public class ContakInboundDoc implements Serializable {
 	public String companyId;
 
 	@Indexed
-	@ApiMockModelProperty(example = "text", value = "Inbound type", allowableValues = "USER_REG,MSG_OUT_DELIVERED,MSG_OUT_READ")
+	@ApiMockModelProperty(example = "text", value = "Inbound type",
+			allowableValues = "USER_REG,MSG_OUT_DELIVERED,MSG_OUT_READ")
 	public String inboundType;
 
 	public TimeStampIndex createdAt;
@@ -35,6 +38,8 @@ public class ContakInboundDoc implements Serializable {
 	public TimeStampIndex expiredAt;
 
 	public Object inboundPayload;
+
+	public MessageEvent event;
 
 	public String getInboundId() {
 		return inboundId;
@@ -98,6 +103,14 @@ public class ContakInboundDoc implements Serializable {
 
 	public void setExpiredAt(TimeStampIndex expiredAt) {
 		this.expiredAt = expiredAt;
+	}
+
+	public MessageEvent getEvent() {
+		return event;
+	}
+
+	public void setEvent(MessageEvent event) {
+		this.event = event;
 	}
 
 }
