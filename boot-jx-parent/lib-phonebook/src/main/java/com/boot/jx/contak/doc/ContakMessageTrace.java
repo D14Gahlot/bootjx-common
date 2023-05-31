@@ -25,7 +25,7 @@ public class ContakMessageTrace implements Serializable {
 	@Indexed
 	public String companyId;
 
-	public long msgGenId;
+	public String msgGenId;
 
 	public TimeStampIndex createdAt;
 
@@ -113,11 +113,11 @@ public class ContakMessageTrace implements Serializable {
 		this.companyId = companyId;
 	}
 
-	public long getMsgGenId() {
+	public String getMsgGenId() {
 		return msgGenId;
 	}
 
-	public void setMsgGenId(long msgGenId) {
+	public void setMsgGenId(String msgGenId) {
 		this.msgGenId = msgGenId;
 	}
 

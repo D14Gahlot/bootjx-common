@@ -51,7 +51,7 @@ public final class PhoneNotpRequestModels {
 		public String pubKey;
 
 		@ApiMockModelProperty(example = "1", required = true, value = "Message Gen Id")
-		public long msgGenId;
+		public String msgGenId;
 
 		@ApiMockModelProperty(example = "1", required = true, value = "Company Id")
 		public String companyId;
