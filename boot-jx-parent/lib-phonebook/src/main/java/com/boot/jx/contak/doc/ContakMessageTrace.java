@@ -37,6 +37,8 @@ public class ContakMessageTrace implements Serializable {
 
 	public TimeStampIndex deliveredAt;
 
+	public TimeStampIndex failedAt;
+
 	public String getNoteId() {
 		return noteId;
 	}
@@ -119,6 +121,14 @@ public class ContakMessageTrace implements Serializable {
 
 	public void setMsgGenId(String msgGenId) {
 		this.msgGenId = msgGenId;
+	}
+
+	public TimeStampIndex getFailedAt() {
+		return failedAt;
+	}
+
+	public void setFailedAt(TimeStampIndex failedAt) {
+		this.failedAt = failedAt;
 	}
 
 }

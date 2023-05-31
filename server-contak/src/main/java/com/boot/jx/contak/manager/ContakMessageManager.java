@@ -97,4 +97,34 @@ public class ContakMessageManager {
 		return messages;
 	}
 
+	public List<ContakMessageDoc> markFailed(String noteId) {
+		ContakMessageDoc failedMessage = commonMongoTemplate
+				.findOne(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).whereId(noteId));
+
+		if (!ArgUtil.is(failedMessage) || !ArgUtil.is(failedMessage.getDeliveredAt())) {
+			ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("noteId"));
+		}
+
+		if (ArgUtil.is(failedMessage.getReadAt())) {
+			return CollectionUtil.asList(failedMessage);
+		}
+
+		TimeStampIndex failedAt = TimeStampIndex.from(System.currentTimeMillis());
+
+		commonMongoTemplate.update(CommonMongoQueryBuilder.collection(ContakMessageDoc.class).where( // FIND
+				CommonMongoQueryBuilder.QueryCriteria.whereId(noteId) // NoteId
+						.and("phoneId").is(failedMessage.getPhoneId()) // Phone Id
+						.and("domain").is(failedMessage.getDomain()) // Domain
+						.and("companyId").is(failedMessage.getCompanyId()) // Company
+						.and("deliveredAt").exists(true) // delievery exists
+						.and("deliveredAt.stamp").lte(failedMessage.getDeliveredAt().getStamp())// Delivery
+		)
+				// Update
+				.set("failedAt", failedAt));
+
+		contakInboundManager.sendMsgFailedEventAsync(failedMessage);
+
+		return CollectionUtil.asList(failedMessage);
+	}
+
 }

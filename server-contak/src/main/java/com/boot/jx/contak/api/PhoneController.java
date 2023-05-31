@@ -231,6 +231,12 @@ public class PhoneController {
 		PhoneUserDoc userDoc = isUserValid(loginDTO);
 		return ApiResponse.buildResults(contakMessageManager.markRead(loginDTO.event.noteId));
 	}
+	
+	@RequestMapping(value = "/api/v1/messages/mark/failed", method = { RequestMethod.POST })
+	public ApiResponse<ContakMessageDoc, Object> markFailed(@RequestBody PhoneLoginDTO loginDTO) {
+		PhoneUserDoc userDoc = isUserValid(loginDTO);
+		return ApiResponse.buildResults(contakMessageManager.markFailed(loginDTO.event.noteId));
+	}
 
 	@RequestMapping(value = "/api/v1/user/key/reg", method = { RequestMethod.POST })
 	public ApiResponse<UserRegistrationDoc, Object> save(@RequestBody UserRegistrationDTO msg) {

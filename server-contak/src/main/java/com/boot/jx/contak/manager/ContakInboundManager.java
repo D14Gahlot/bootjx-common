@@ -100,6 +100,7 @@ public class ContakInboundManager {
 		public static final String USER_RELOGIN = "USER_RELOGIN"; // VERIFY
 		public static final String MSG_OUT_DELIVERED = "MSG_OUT_DELIVERED"; // MSG_OUT_READ
 		public static final String MSG_OUT_READ = "MSG_OUT_READ"; // MSG_OUT_READ
+		public static final String MSG_OUT_FAILED = "MSG_OUT_FAILED"; // MSG_OUT_READ
 	}
 
 	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, String isUserRegistraion) {
@@ -114,6 +115,17 @@ public class ContakInboundManager {
 			inbound.setInboundPayload(new ContakMessageTrace());
 			commonMongoTemplate.save(inbound);
 		}
+	}
+
+	@Async
+	public void sendMsgFailedEventAsync(ContakMessageDoc contakMessageDoc) {
+		ContakInboundDoc inbound = new ContakInboundDoc();
+		inbound.setInboundType(USER_INBOUND_TYPE.MSG_OUT_FAILED);
+		inbound.setPhoneId(contakMessageDoc.getPhoneId());
+		inbound.setCompanyId(contakMessageDoc.getCompanyId());
+		inbound.setCreatedAt(TimeStampIndex.now());
+		inbound.setInboundPayload(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace()));
+		commonMongoTemplate.save(inbound);
 	}
 
 }
