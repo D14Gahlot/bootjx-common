@@ -750,8 +750,9 @@ public class AgentAnalyticsManager {
 		double totSatisScore = 0;
 		Query query = new Query();
 		query.addCriteria(Criteria.where("mode").is("BOT"));
-		query.addCriteria(Criteria.where("assignedToQueue").is("feedback"));
+		//query.addCriteria(Criteria.where("assignedToQueue").is("feedback"));
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
+		query.addCriteria(Criteria.where("feedback").exists(true));
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessFieldForSatisScore(query);
 		List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
