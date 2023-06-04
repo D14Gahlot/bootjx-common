@@ -50,6 +50,7 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+import com.boot.utils.StringUtils;
 
 @Component
 public class AgentAnalyticsManager {
@@ -62,6 +63,7 @@ public class AgentAnalyticsManager {
 	public static final int OPEN_CONV_HR = 1;
 
 	public static final String MY_BOT = "BOT";
+
 
 	@Autowired
 	CommonMongoTemplate mongoTemplate;
@@ -99,11 +101,18 @@ public class AgentAnalyticsManager {
 				dto = getAgentAnalytics(agent, date1, date2,req.getContactType());
 				lstDto.add(dto);
 			}
-		} else {
+		} else  {
 			//dto = getAgentAnalytics(req.getAgent(), date1, date2);
 			dto = getAgentAnalytics(req.getAgent(), date1, date2,req.getContactType());
 			lstDto.add(dto);
 		}
+	
+		
+		/** "mode" : "BOT", "assignedToAgent" : null, **/
+		dto = getAgentAnalytics(null, date1, date2,req.getContactType());
+		dto.setAgentName(MY_BOT);
+		lstDto.add(dto);
+		
 		return lstDto;
 	}
 
@@ -349,9 +358,9 @@ public class AgentAnalyticsManager {
 		// "contactId", String.class);
 
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		List<String> distinceAgentList = getDistinct(chatSessDocLst);
+		List<String> distinceContactList = getDistinct(chatSessDocLst);
 
-		return distinceAgentList;
+		return distinceContactList;
 	}
 
 	public List<String> getUniqueAgentWiseContactList(String agent, long dateRange1, long dateRange2) {
@@ -364,13 +373,14 @@ public class AgentAnalyticsManager {
 		List<String> distinctIdList = new ArrayList<>();
 		// List<String> distinctIdList = mongoTemplate.distinctValues("CHAT_SESSION",
 		// "contactId", String.class);
+		
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-
+		
 		distinctIdList = getDistinct(chatSessDocLst);
 
-		if (distinctIdList == null || distinctIdList.isEmpty()) {
-			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
-		}
+//		if (distinctIdList == null || distinctIdList.isEmpty()) {
+//			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
+//		}
 
 		return distinctIdList;
 	}
@@ -720,6 +730,7 @@ public class AgentAnalyticsManager {
 		//List<String> lst = adminDbMgr.getListOfContactType();
 		List<String> lst  =getContactType(contact);
 		for (String contactType : lst) {
+			//System.out.println("contactType :"+contactType);
 			Query query = new Query();
 			query.addCriteria(Criteria.where("contactId").is(contactId));
 			query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
