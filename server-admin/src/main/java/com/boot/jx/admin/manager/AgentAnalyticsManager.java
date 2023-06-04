@@ -102,16 +102,18 @@ public class AgentAnalyticsManager {
 				lstDto.add(dto);
 			}
 		} else  {
-			//dto = getAgentAnalytics(req.getAgent(), date1, date2);
+			
 			dto = getAgentAnalytics(req.getAgent(), date1, date2,req.getContactType());
 			lstDto.add(dto);
 		}
 	
 		
 		/** "mode" : "BOT", "assignedToAgent" : null, **/
+		if ((!ArgUtil.isEmptyString(req.getAgent()) &&  req.getAgent().equalsIgnoreCase(DEFAULT_AGENT))) {
 		dto = getAgentAnalytics(null, date1, date2,req.getContactType());
 		dto.setAgentName(MY_BOT);
 		lstDto.add(dto);
+		}
 		
 		return lstDto;
 	}
