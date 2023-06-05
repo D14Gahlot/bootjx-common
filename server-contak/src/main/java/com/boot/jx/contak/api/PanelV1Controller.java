@@ -47,6 +47,7 @@ import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.Random;
+import com.boot.utils.StringUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -283,6 +284,8 @@ public class PanelV1Controller {
 			ApiResponseUtil.throwInputException(new ApiFieldError().field("clientId").codeKey("NotAllowed")
 					.description("Not Allowed to change ClientId"));
 		}
+
+		clientId = StringUtils.removeSpecialCharacter(clientId).toLowerCase();
 
 		String newKeyString = UUID.randomUUID().toString();
 		ContakApiKey newKey = new ContakApiKey();
