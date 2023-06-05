@@ -290,6 +290,7 @@ public class PMConstants {
 		public static final String POSTMAN_CHAT_FEEDBACK_QUEUE = "postman.chat.feedback.queue";
 		public static final String POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED = "postman.agent.chat.autoreply.resolved";
 		public static final String POSTMAN_AGENT_TAB_NONAGENT = "postman.agent.tab.nonagent";
+		public static final String POSTMAN_AGENT_OTP_CHANNEL = "postman.agent.otp.channel";
 		public static final String POSTMAN_CHAT_WEB_CHANNEL = "postman.chat.web.channel";
 		public static final String POSTMAN_CHAT_WEB_QUEUE = "postman.chat.web.queue.enabled";
 	}
