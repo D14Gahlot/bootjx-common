@@ -81,6 +81,14 @@ public class AgentDoc implements IDocument, DocVersion {
 		this.agent_number = agent_number;
 	}
 
+	public String getPhone() {
+		return agent_number;
+	}
+
+	public void setPhone(String phone) {
+		this.agent_number = phone;
+	}
+
 	public Date getCreated_date() {
 		return created_date;
 	}

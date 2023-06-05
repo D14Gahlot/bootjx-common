@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -49,6 +50,7 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+import com.boot.utils.StringUtils;
 
 @Component
 public class AgentAnalyticsManager {
@@ -61,6 +63,7 @@ public class AgentAnalyticsManager {
 	public static final int OPEN_CONV_HR = 1;
 
 	public static final String MY_BOT = "BOT";
+
 
 	@Autowired
 	CommonMongoTemplate mongoTemplate;
@@ -94,13 +97,24 @@ public class AgentAnalyticsManager {
 			for (Object chatSess : allAgent) {
 				dto = new DashBoardResponseDto();
 				String agent = (String) chatSess;
-				dto = getAgentAnalytics(agent, date1, date2);
+				//dto = getAgentAnalytics(agent, date1, date2);
+				dto = getAgentAnalytics(agent, date1, date2,req.getContactType());
 				lstDto.add(dto);
 			}
-		} else {
-			dto = getAgentAnalytics(req.getAgent(), date1, date2);
+		} else  {
+			
+			dto = getAgentAnalytics(req.getAgent(), date1, date2,req.getContactType());
 			lstDto.add(dto);
 		}
+	
+		
+		/** "mode" : "BOT", "assignedToAgent" : null, **/
+		if ((!ArgUtil.isEmptyString(req.getAgent()) &&  req.getAgent().equalsIgnoreCase(DEFAULT_AGENT))) {
+		dto = getAgentAnalytics(null, date1, date2,req.getContactType());
+		dto.setAgentName(MY_BOT);
+		lstDto.add(dto);
+		}
+		
 		return lstDto;
 	}
 
@@ -183,7 +197,7 @@ public class AgentAnalyticsManager {
 		return dto;
 	}
 
-	public DashBoardResponseDto getAgentAnalytics(String agent, long dateRange1, long dateRange2) {
+	public DashBoardResponseDto getAgentAnalytics(String agent, long dateRange1, long dateRange2,Object contact) {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 		LOGGER.info(dtf.format(LocalDateTime.now()) + " Get Analytics for  :" + agent);
 		DashBoardResponseDto dto = new DashBoardResponseDto();
@@ -205,7 +219,7 @@ public class AgentAnalyticsManager {
 		/** Total Agent-contact wise msg **/
 
 		List<MessageDoc> totalAgConMsgExchanged = getTotalMessageAgentAndContactWise(distinctContactLst, dateRange1,
-				dateRange2);
+				dateRange2,contact);
 		if (ArgUtil.is(totalAgConMsgExchanged)) {
 			dto.setTotalMsgExchanged(totalAgConMsgExchanged.size());
 
@@ -253,7 +267,7 @@ public class AgentAnalyticsManager {
 
 		/** lead Messanger **/
 
-		LeadMessanger leadMsg = getLeadMessenger(agent, dateRange1, dateRange2);
+		LeadMessanger leadMsg = getLeadMessenger(agent, dateRange1, dateRange2,contact);
 		dto.setLeadMessanger(leadMsg);
 
 		/** Converation duration **/
@@ -346,9 +360,9 @@ public class AgentAnalyticsManager {
 		// "contactId", String.class);
 
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		List<String> distinceAgentList = getDistinct(chatSessDocLst);
+		List<String> distinceContactList = getDistinct(chatSessDocLst);
 
-		return distinceAgentList;
+		return distinceContactList;
 	}
 
 	public List<String> getUniqueAgentWiseContactList(String agent, long dateRange1, long dateRange2) {
@@ -361,13 +375,14 @@ public class AgentAnalyticsManager {
 		List<String> distinctIdList = new ArrayList<>();
 		// List<String> distinctIdList = mongoTemplate.distinctValues("CHAT_SESSION",
 		// "contactId", String.class);
+		
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-
+		
 		distinctIdList = getDistinct(chatSessDocLst);
 
-		if (distinctIdList == null || distinctIdList.isEmpty()) {
-			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
-		}
+//		if (distinctIdList == null || distinctIdList.isEmpty()) {
+//			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
+//		}
 
 		return distinctIdList;
 	}
@@ -542,10 +557,13 @@ public class AgentAnalyticsManager {
 	}
 
 	/** fetch lead mesenger **/
-	public LeadMessanger getLeadMessenger(Object contactype, long startTime, long endTime) {
+	public LeadMessanger getLeadMessenger(Object contactype, long startTime, long endTime,Object contact) {
 		LeadMessanger leadMessanger = new LeadMessanger();
 		double percentageWithDecimal = 0.0;
-		List<String> lst = adminDbMgr.getListOfContactType();
+		//List<String> lst = adminDbMgr.getListOfContactType();
+		
+		List<String> lst =getContactType(contact);
+		
 		Map<String, Integer> leasMsgLst = new HashMap<String, Integer>();
 		for (String contactType : lst) {
 			List<MessageDoc> msgDocLst = adminDbMgr.getTotalMsgCount(contactType, startTime, endTime);
@@ -695,10 +713,10 @@ public class AgentAnalyticsManager {
 	// Get Total Msg from
 
 	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<String> contactIds, long dateRange1,
-			long dateRange2) {
+			long dateRange2,Object contact) {
 		List<MessageDoc> totalMsgDocLst = new ArrayList<MessageDoc>();
 		for (String contactId : contactIds) {
-			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2);
+			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2,contact);
 			totalMsgDocLst.addAll(msgDocLst);
 		}
 		// LOGGER.debug("getTotalMessageAgentAndContactWise
@@ -707,12 +725,14 @@ public class AgentAnalyticsManager {
 	}
 
 	// To fetch all the records from a collection
-	public List<MessageDoc> getMsgCountAgentContactWise(String contactId, long dateRange1, long dateRange2) {
+	public List<MessageDoc> getMsgCountAgentContactWise(String contactId, long dateRange1, long dateRange2,Object contact) {
 
 		List<MessageDoc> totalMsgDoc = new ArrayList<MessageDoc>();
 
-		List<String> lst = adminDbMgr.getListOfContactType();
+		//List<String> lst = adminDbMgr.getListOfContactType();
+		List<String> lst  =getContactType(contact);
 		for (String contactType : lst) {
+			//System.out.println("contactType :"+contactType);
 			Query query = new Query();
 			query.addCriteria(Criteria.where("contactId").is(contactId));
 			query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
@@ -775,9 +795,9 @@ public class AgentAnalyticsManager {
 		double totSatisScore = 0;
 		Query query = new Query();
 		query.addCriteria(Criteria.where("mode").is("BOT"));
-		query.addCriteria(Criteria.where("assignedToQueue").is("feedback"));
+		//query.addCriteria(Criteria.where("assignedToQueue").is("feedback"));
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
-		query.addCriteria(Criteria.where("feedback").is(true));
+		query.addCriteria(Criteria.where("feedback").exists(true));
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessFieldForSatisScore(query);
 		List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
@@ -808,5 +828,17 @@ public class AgentAnalyticsManager {
 	private void removeChatSessFieldForSatisScore(Query query2) {
 		query2.fields().exclude("updated").exclude("lastInBoundMsg").exclude("lastMsg").exclude("lastBotReply")
 				.exclude("msg").exclude("stamps").exclude("contact");
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public List<String> getContactType(Object contact){
+			List<String> lst =null;
+			if(ArgUtil.is(contact)) {
+				lst =new ArrayList<String>();
+				lst = (ArrayList)contact;
+			}else{
+			  lst = adminDbMgr.getListOfContactType();
+			}
+			return lst;
 	}
 }

@@ -30,6 +30,8 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.boot.jx.AppContextUtil;
+import com.boot.utils.URLBuilder;
 import com.boot.utils.Urly;
 
 @Configuration
@@ -73,7 +75,9 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 				// .loginProcessingUrl("/auth/login/submit").permitAll()
 				// Logout Pages
 				.and().logout().permitAll().addLogoutHandler(logoutHandler).logoutUrl("/auth/logout")
+				// Logout Success
 				.logoutSuccessHandler(logoutSuccessHandler()).logoutSuccessUrl("/auth/login?logout")
+				/// After Logout
 				.deleteCookies("JSESSIONID", "JXSESSIONID", "AGENTSESSIONID").invalidateHttpSession(true).permitAll()
 				.and().exceptionHandling().accessDeniedPage("/403")
 				// Gen stuff
@@ -102,13 +106,17 @@ public class AgentSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	public LogoutSuccessHandler logoutSuccessHandler() {
 		return new LogoutSuccessHandler() {
+
 			@Override
 			public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
 				String referrer = request.getHeader("referer");
 				try {
 					referrer = Urly.parse(referrer).getRelativeURL();
-					redirectResponse(request, response, "/auth/login?logout?_=" + System.currentTimeMillis());
+					URLBuilder url = Urly.parse("/front/auth/login").queryParam("logout", "")
+							.queryParam("_", System.currentTimeMillis()).queryParam("referer", referrer)
+							.queryParam("domain", AppContextUtil.getTenant()).queryParam("app", "agent");
+					redirectResponse(request, response, url.getRelativeURL());
 				} catch (MalformedURLException | URISyntaxException e) {
 					e.printStackTrace();
 				}

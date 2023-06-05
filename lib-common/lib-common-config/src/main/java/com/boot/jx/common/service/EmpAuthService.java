@@ -19,20 +19,30 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.common.doc.UserAuthTokenDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.dto.DepartmentResponseAuthDto;
-import com.boot.jx.common.dto.UserLoginToken;
+import com.boot.jx.common.dto.UserAuthToken;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.PostManClient;
+import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
+import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.others.OAClient;
+import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.CryptoUtil.HashBuilder;
+import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.MapBuilder;
+import com.boot.utils.OTPUtils;
+import com.boot.utils.OTPUtils.OTPDetails;
 import com.boot.utils.Random;
 
 @Component
@@ -63,6 +73,9 @@ public class EmpAuthService {
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
+
+	@Autowired
+	private OAClient oaClient;
 
 	private AgentDoc validateAgent(String username, String email, String passsword, boolean admin)
 			throws NoSuchAlgorithmException {
@@ -130,17 +143,19 @@ public class EmpAuthService {
 
 		String app = admin ? "admin" : "agent";
 		String domain = AppContextUtil.getTenant();
+
 		postManClient.send(new MessageBox().push(new Email().to(agent.getAgent_email()).template("agent-reset-pass")
 				.put("otp", agent.getAgent_otp()).put("username", agent.getAgent_code())
 				.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
 				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
 				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
 				.put("serviceDomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
-				.put("link",
-						String.format("https://%s.%s/%s/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0",
-								domain, pmEnvironment.keyEntry("mry.prop.service.domain").asString(), app,
-								agent.getAgent_code(), agent.getAgent_otp()))
+				.put("link", String.format(
+						"https://%s.%s/front/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0&domain=%s",
+						domain, pmEnvironment.keyEntry("mry.prop.service.domain").asString(), agent.getAgent_code(),
+						agent.getAgent_otp(), domain))
 				.put("tnt", domain).put("panel", app).put("contactName", agent.getAgent_name())));
+
 		return true;
 	}
 
@@ -191,6 +206,7 @@ public class EmpAuthService {
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
 		if (resetPassword(username, admin)) {
 			x.setStatusKey("SUCCESS");
+			x.setMessage("Password reset email sent");
 		} else {
 			x.data().put("success", false);
 			x.setMeta("error");
@@ -226,18 +242,21 @@ public class EmpAuthService {
 		}
 	}
 
-	public UserLoginToken createAgentLoginToken(String username, String email, String password, String domainName,
-			String domainId, String app) throws NoSuchAlgorithmException {
-		UserLoginToken userLoginToken = new UserLoginToken();
+	public UserAuthToken createAgentLoginToken(String username, String email, String password, String domainName,
+			String domainId, String app, String event) throws NoSuchAlgorithmException {
+		UserAuthToken userLoginToken = new UserAuthToken();
 		AgentDoc agent = validateAgent(username, email, password, "admin".equals(app));
 		if (ArgUtil.is(agent)) {
-			HashBuilder builder = getHashBuilder(username, email, domainName, domainId, agent.getAuthKey());
+			HashBuilder builder = getHashBuilder(agent.getAgent_code(), agent.getAgent_email(), domainName, domainId,
+					agent.getAuthKey());
 			userLoginToken.setDomainName(domainName);
 			userLoginToken.setDomainId(domainId);
 			userLoginToken.setDomainToken(builder.toHMAC().output());
-			userLoginToken.setDomainUser(username);
-			userLoginToken.setDomainUserEmail(email);
+			userLoginToken.setDomainUser(agent.getAgent_code());
+			userLoginToken.setDomainUserEmail(agent.getAgent_email());
+			userLoginToken.setDomainUserPhone(agent.getPhone());
 			userLoginToken.setApp(app);
+			userLoginToken.setEvent(event);
 		} else {
 			ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
 					.codeKey("ValidCredentials").description("Invalid Email or Password"));
@@ -245,9 +264,9 @@ public class EmpAuthService {
 		return userLoginToken;
 	}
 
-	public UserLoginToken createSuperLoginToken(String username, String email, String domainName, String domainId,
+	public UserAuthToken createSuperLoginToken(String username, String email, String domainName, String domainId,
 			String app) throws NoSuchAlgorithmException {
-		UserLoginToken userLoginToken = new UserLoginToken();
+		UserAuthToken userLoginToken = new UserAuthToken();
 		String authKey = appConfig.prop("mry.app.login.key");
 		HashBuilder builder = getHashBuilder(username, email, domainName, domainId, authKey);
 		userLoginToken.setDomainName(domainName);
@@ -257,6 +276,35 @@ public class EmpAuthService {
 		userLoginToken.setDomainUserEmail(email);
 		userLoginToken.setApp(app);
 		return userLoginToken;
+	}
+
+	public void sendOTP(UserAuthToken loginToken) {
+		OTPDetails otpDetails = OTPUtils.genrateBasicOTP(loginToken.getDomainUser(), loginToken.getApp());
+
+		ChannelConfig channel = pmEnvironment.config().channel("oa:mehery");
+		OutboxMessage ob = new OutboxMessage();
+		ob.contact().setPhone(loginToken.getDomainUserPhone());
+		ob.setTemplateExt(new HSMTemplate3rdParty().code("login_otp"));
+		ob.model().put("prefix", otpDetails.getPrefix());
+		ob.model().put("value", otpDetails.getOtp());
+		ob.model().put("data",
+				MapModel.createInstance().put("panel", ArgUtil.nonEmpty(loginToken.getApp(), Constants.BLANK)).toMap());
+
+		oaClient.sendMessage(channel, ob);
+
+		// Details to SHOW/MASK to UI
+		loginToken.setOtpPrefix(otpDetails.getPrefix());
+		loginToken.setOtpNounce(otpDetails.getYin());
+		loginToken.setDomainToken(null);
+
+		// Details to SAVE in DB
+		UserAuthTokenDoc loginDoc = EntityDtoUtil.dtoToEntity(loginToken, new UserAuthTokenDoc());
+		loginDoc.setOtpNounce(otpDetails.getYang());
+		loginDoc.setOtpHash(otpDetails.getHash());
+		mongoTemplate.save(loginDoc);
+
+		// Details to SHOW/MASK to UI
+		loginToken.setTokenId(loginDoc.getTokenId());
 	}
 
 	private HashBuilder getHashBuilder(String username, String email, String domainName, String domainId,

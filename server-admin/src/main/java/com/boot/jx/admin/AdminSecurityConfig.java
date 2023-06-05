@@ -29,6 +29,8 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.boot.jx.AppContextUtil;
+import com.boot.utils.URLBuilder;
 import com.boot.utils.Urly;
 
 @Configuration
@@ -60,9 +62,11 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 				// .loginProcessingUrl("/auth/login/submit").permitAll()
 				// Logout Pages
 				.and().logout().permitAll().addLogoutHandler(agentLogoutHandler).logoutUrl("/auth/logout")
-				.logoutSuccessUrl("/auth/login?logout").deleteCookies("JSESSIONID", "JXSESSIONID", "ADMINSESSIONID")
-				.invalidateHttpSession(true).permitAll().and().exceptionHandling().accessDeniedPage("/403").and().csrf()
-				.disable().headers().disable();
+				// Logout Success
+				.logoutSuccessHandler(logoutSuccessHandler()).logoutSuccessUrl("/auth/login?logout")
+				/// After Logout
+				.deleteCookies("JSESSIONID", "JXSESSIONID", "ADMINSESSIONID").invalidateHttpSession(true).permitAll()
+				.and().exceptionHandling().accessDeniedPage("/403").and().csrf().disable().headers().disable();
 	}
 
 	@Bean
@@ -89,10 +93,13 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 			@Override
 			public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
-				String referrer = request.getHeader("referer");
+				String referer = request.getHeader("referer");
 				try {
-					referrer = Urly.parse(referrer).getRelativeURL();
-					redirectResponse(request, response, "/auth/login?logout?_=" + System.currentTimeMillis());
+					referer = Urly.parse(referer).getRelativeURL();
+					URLBuilder url = Urly.parse("/front/auth/login").queryParam("logout", "")
+							.queryParam("_", System.currentTimeMillis()).queryParam("referer", referer)
+							.queryParam("domain", AppContextUtil.getTenant()).queryParam("app", "admin");
+					redirectResponse(request, response, url.getRelativeURL());
 				} catch (MalformedURLException | URISyntaxException e) {
 					e.printStackTrace();
 				}

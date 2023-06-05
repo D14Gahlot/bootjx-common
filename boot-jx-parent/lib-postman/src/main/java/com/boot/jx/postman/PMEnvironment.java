@@ -114,6 +114,7 @@ public class PMEnvironment {
 		private boolean isShared;
 		private boolean isDisabled;
 		private boolean isDeleted;
+		private boolean isHidden;
 
 		@JsonView(PMEnvironment.PublicProperty.class)
 		private String server;
@@ -252,6 +253,14 @@ public class PMEnvironment {
 		@Override
 		public String auditIdentifier() {
 			return this.getChannelId();
+		}
+
+		public boolean isHidden() {
+			return isHidden;
+		}
+
+		public void setHidden(boolean isHidden) {
+			this.isHidden = isHidden;
 		}
 
 	}
