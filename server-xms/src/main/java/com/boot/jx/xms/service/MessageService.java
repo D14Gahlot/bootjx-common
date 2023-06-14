@@ -15,6 +15,8 @@ import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.MessageDefinitions.ContactID;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.pbook.PBDate;
 import com.boot.jx.postman.pbook.PBLocation;
@@ -32,6 +34,7 @@ import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactEmail;
 import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactPhone;
 import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactSocial;
 import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactUrl;
+import com.boot.jx.xms.dto.OutBoundContact;
 import com.boot.jx.xms.dto.OutBoundMsgBasic.OutBoundMsg;
 import com.boot.jx.xms.dto.OutBoundReciept;
 import com.boot.utils.ArgUtil;
@@ -242,13 +245,25 @@ public class MessageService {
 			}
 		}
 
+		return send(channel, message.getToContact(), outboxMessage);
+	}
+	
+	public OutBoundReciept send(String channelId,  OutboxMessage outboxMessage) {
+		ChannelConfig channel = pmEnvironment.config().channel(channelId);
+	
+		return send(channel,outboxMessage.getContact(),outboxMessage);
+	}
+	
+	 
+
+	private OutBoundReciept send(ChannelConfig channel, ContactID contact, OutboxMessage outboxMessage) {
 		ClientApp clientApp = XmsVendorConfigurer.getClientApp();
 
 		outboxMessage.contact().type(channel.getContactType());
 		outboxMessage.contact().setChannelType(channel.getChannelType());
 		outboxMessage.contact().setLane(channel.getLane());
 
-		outboxMessage.contact().copyFrom(message.getToContact());
+		outboxMessage.contact().copyFrom(contact);
 
 		outboxMessage.route().setQueueCode(clientApp.getQueue());
 		outboxMessage.route().setSendMode(clientApp.getAppMode());
@@ -257,6 +272,8 @@ public class MessageService {
 				.setSenderType(ArgUtil.parseAsString(clientApp.props().get("sender_type"), MESSAGE_SENDER_TYPE.API));
 
 		ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
+		
+		
 
 		if (ArgUtil.is(chatSessionDoc)) {
 			chatSessionService.initSession(outboxMessage, chatSessionDoc);
@@ -267,7 +284,11 @@ public class MessageService {
 							.description("Session Cannot be initialized for given contact"));
 		}
 		String messageId = outboxMessage.getMessageId();
+		
+		
+		
 		return new OutBoundReciept().id(messageId);
 	}
+	
 
 }
