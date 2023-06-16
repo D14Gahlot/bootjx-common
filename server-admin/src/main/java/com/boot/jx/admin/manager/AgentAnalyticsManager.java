@@ -102,6 +102,13 @@ public class AgentAnalyticsManager {
 			dto = getAgentAnalytics(req.getAgent(), date1, date2,req.getContactType());
 			lstDto.add(dto);
 		}
+		
+
+		/** "mode" : "BOT", "assignedToAgent" : null, **/
+		dto = getAgentAnalytics(null, date1, date2,req.getContactType());
+		dto.setAgentName(MY_BOT);
+		lstDto.add(dto);
+		
 		return lstDto;
 	}
 
@@ -357,9 +364,9 @@ public class AgentAnalyticsManager {
 		removeChatSessField(query);
 		List<ChatSessionDoc> distinctIdList = mongoTemplate.getCollection(CHAT_SESSION).distinct("contactId",
 				query.getQueryObject());
-		if (distinctIdList == null || distinctIdList.isEmpty()) {
-			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
-		}
+//		if (distinctIdList == null || distinctIdList.isEmpty()) {
+//			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
+//		}
 
 		return distinctIdList;
 	}
