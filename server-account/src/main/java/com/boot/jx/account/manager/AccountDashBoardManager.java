@@ -1038,6 +1038,30 @@ public class AccountDashBoardManager {
 		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
 		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
 		
+		long currentTs = System.currentTimeMillis();
+		
+		long offsetts = countryTimeZoneOffset(tnt);
+		ZonedDateTime noOfdaysTstamp = null;
+		long lasDayTimeStmp = 0;
+		String offsett = getTimeZoneFromSetup();
+		LOGGER.info("dayChannelWiseWisesummary dateRange1 :" + monthMinTimeStamp + "\t dateRange2 :" + monthMaxTimeStamp
+				+ "\t offsett :" + offsett);
+
+		DomainDoc dDoc = getDomainTimeZone(tnt);
+		String zone = getTimeZone(offsett == null ? dDoc.getTimeZoneOffSet() : offsett);
+		String offset = getOffSet(offsett == null ? dDoc.getTimeZoneOffSet() : offsett);
+		String[] hm = offset.split(":");
+
+		
+
+		if (ArgUtil.is(monthMinTimeStamp)) {
+			lasDayTimeStmp = monthMinTimeStamp + offsetts;
+
+		}
+		if (ArgUtil.is(monthMaxTimeStamp)) {
+			currentTs = monthMaxTimeStamp + offsetts;
+		}
+
 
 		for (String contactType : lst) {
 			LOGGER.info("contactType :" + contactType);
@@ -1062,7 +1086,6 @@ public class AccountDashBoardManager {
 				}
 			}
 		}
-
 		Set<SummaryDocDto> uniqueStudentSet = lstSummDto.stream() // get stream for original list
 				.collect(Collectors.toCollection(// distinct elements stored into new SET
 						() -> new TreeSet<>(Comparator.comparing(SummaryDocDto::getUniqueContactId)))); // Id comparison
@@ -1071,11 +1094,18 @@ public class AccountDashBoardManager {
 				.sorted(Comparator.comparing(SummaryDocDto::getDate)) // rank comparing
 				.collect(Collectors.toList()); // elements stored to new list
 
-		Map<Object, Map<Object, Long>> datwWiseCount = uniqueList.stream().collect(Collectors.groupingBy(
+		Map<String, Map<String, Long>> datwWiseCount = uniqueList.stream().collect(Collectors.groupingBy(
 				SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getDate, Collectors.counting())));
+		Map<Object, Long> dateRanMap = MapUtils.getDatesRange(currentTs, lasDayTimeStmp);
+		
+		Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
+		dayWiseMap = MapUtils.defaultValue(datwWiseCount, lst, dateRanMap, tnt);
+
+		dayWiseMap = sortMap(dayWiseMap);
 
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
-		dto.setDateWiseSummaryCount(datwWiseCount);
+		dto.setDateWiseSummaryCount(dayWiseMap);
+
 
 		return dto;
 	}
