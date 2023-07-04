@@ -523,42 +523,9 @@ public class AccountDashBoardManager {
 
 		Map<Object, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
-//		for (Map.Entry<String, Map<Object, Long>> keyValue : hourWiseCountMap.entrySet()) {
-//			Map<Object, Long> hoCntMapAll = new HashMap<>();
-//			String key = keyValue.getKey();
-//			if (ArgUtil.is(key)) {
-//				for (String channel : channelLst) {
-//					if (!key.contains(channel)) {
-//						hourWiseCount.put(tnt + "_" + channel, hourCntMap);
-//					}
-//				}
-//				Map<Object, Long> hoCntMap = hourWiseCountMap.get(key);
-//
-//				for (Map.Entry<Object, Long> keyValueCount : hourCntMap.entrySet()) {
-//					Object keydt = keyValueCount.getKey();
-//					if (ArgUtil.is(keydt)) {
-//						Long count = keyValueCount.getValue();
-//						if (hoCntMap.containsKey(keydt)) {
-//							hoCntMapAll.put(keydt, hoCntMap.get(keydt));
-//						} else {
-//							hoCntMapAll.put(keydt, count);
-//						}
-//					}
-//				}
-//
-//				hourWiseCount.put(key, hoCntMapAll);
-//			}
-//		}
-		
-		
-		
+	
 		
 		hourWiseCount = MapUtils.getHourdefaultValue(hourWiseCountMap, channelLst, hourCntMap, tnt);
-//		if (hourWiseCount == null || hourWiseCount.isEmpty()) {
-//			for (String channel : channelLst) {
-//				hourWiseCount.put(tnt + "_" + channel, hourCntMap);
-//			}
-//		}
 
 		hourWiseCount = sortMap(hourWiseCount);
 
@@ -1030,13 +997,12 @@ public class AccountDashBoardManager {
 		lst.remove("MESSAGE_REJECTED");
 		lst.remove("MESSAGE_QUEUED");
 		lst.remove("MESSAGE_HOLD");
+		channelLst = getChannelShortCode(lst);
 
 		String tnt = AppContextUtil.getTenant();
 		List<SummaryDocDto> lstSummDto = new ArrayList<>();
 		long currentTs = System.currentTimeMillis();
-		
-		
-		
+				
 		Date dateTi = new Date(timestamp);
 		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
 		Calendar cal = Calendar.getInstance();
@@ -1383,5 +1349,27 @@ public class AccountDashBoardManager {
 		query.fields().include("form.reply_title").include("contactId").include("contact.contactType")
 				.include("timestamp");
 	}
-
+	
+	public List<String> getChannelShortCode(List<String> lstofChann){
+		List<String> lstofChanelShotCode = new ArrayList<>();
+		
+		for(String str:lstofChann) {
+			if (str.contains(ContactType.WHATSAPP.name())) {
+				lstofChanelShotCode.add("wa") ;
+			} else if (str.contains(ContactType.FACEBOOK.name())) {
+				lstofChanelShotCode.add("fb");
+			} else if (str.contains(ContactType.TWITTER.name())) {
+				lstofChanelShotCode.add("tw");
+			} else if (str.contains(ContactType.TELEGRAM.name())) {
+				lstofChanelShotCode.add("tg");
+			} else if (str.contains(ContactType.INSTAGRAM.name())) {
+				lstofChanelShotCode.add("ig");
+			} else if (str.contains(ContactType.WEBSITE.name())) {
+				lstofChanelShotCode.add("web");
+			}
+		}
+		
+		return lstofChanelShotCode;
+	}
+	
 }
