@@ -102,7 +102,6 @@ public class AgentAnalyticsManager {
 				lstDto.add(dto);
 			}
 		} else  {
-			
 			dto = getAgentAnalytics(req.getAgent(), date1, date2,req.getContactType());
 			lstDto.add(dto);
 		}
@@ -354,6 +353,7 @@ public class AgentAnalyticsManager {
 	public List<String> getDefaultDistinctContact(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("assignedToAgent").exists(false));
 		// removeChatSessField(query);
 		query.fields().include("assignedAgentStamp").include("contactId");
 		// List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION",
@@ -383,6 +383,10 @@ public class AgentAnalyticsManager {
 //		if (distinctIdList == null || distinctIdList.isEmpty()) {
 //			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
 //		}
+		
+		if(agent==null) {
+			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
+		}
 
 		return distinctIdList;
 	}
