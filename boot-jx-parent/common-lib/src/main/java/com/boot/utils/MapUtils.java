@@ -67,15 +67,14 @@ public class MapUtils {
 		
 	}
 	
-
 	/** get dates between two dates **/
-			public static Map<Object, Long> getDatesRange(long curTiStmp, long lasDayTiStmp) {
-				Map<Object, Long> mapDt = new HashMap<>();
-				for (long lasDayTiSt = lasDayTiStmp; lasDayTiSt <= curTiStmp; lasDayTiSt += DateUtil.ONEDAY) {
-					String ds = DateUtil.foramtTimeStampDateAsString(lasDayTiSt, DateUtil.YYYYMMDD_DATE_FORMAT);
-					mapDt.put(ds, new Long(0));
-				}
-				Map<Object, Long> result = new TreeMap<Object, Long>(mapDt);
-				return result;
-			}
+	public static Map<Object, Long> getDatesRange(long curTiStmp, long lasDayTiStmp) {
+		Map<Object, Long> mapDt = new HashMap<>();
+		for (long lasDayTiSt = lasDayTiStmp; lasDayTiSt <= curTiStmp; lasDayTiSt += DateUtil.ONEDAY) {
+			String ds = DateUtil.foramtTimeStampDateAsString(lasDayTiSt, DateUtil.YYYYMMDD_DATE_FORMAT);
+			mapDt.put(ds, new Long(0));
+		}
+		Map<Object, Long> result = new TreeMap<Object, Long>(mapDt);
+		return result;
+	}
 }

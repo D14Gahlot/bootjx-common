@@ -28,10 +28,9 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private List<Object> trace;
 	/** csv refernce key**/
 	private String referenceKey;
-	
+
 	/** **/
 	private Map<String,Object> rawMessageFormat;
-
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -155,7 +154,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 	public void setReferenceKey(String referenceKey) {
 		this.referenceKey = referenceKey;
 	}
-
+	
 	public Map<String, Object> getRawMessageFormat() {
 		return rawMessageFormat;
 	}

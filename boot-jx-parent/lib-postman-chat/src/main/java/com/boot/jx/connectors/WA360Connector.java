@@ -333,7 +333,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		MessageReport report = this.createMessageReport(channelConfig);
 		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
 
-		if (ArgUtil.is(csid)) {
+		if (!ArgUtil.is(csid)) {
 			csid = requestMap.getString("recipient_id");
 		}
 

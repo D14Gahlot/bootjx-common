@@ -47,7 +47,7 @@ public class AWSFileStore {
 		String fileNameNow = String.format("%s", fileName);
 
 		return new CommonFile()
-				.url(String.format("http://%s.s3.amazonaws.com/%s/%s", bucketName, pathFolder, fileNameNow))
+				.url(String.format("https://%s.s3.amazonaws.com/%s/%s", bucketName, pathFolder, fileNameNow))
 				.path(pathFolder).name(fileNameNow).format(srcFile.getFileFormat());
 	}
 
