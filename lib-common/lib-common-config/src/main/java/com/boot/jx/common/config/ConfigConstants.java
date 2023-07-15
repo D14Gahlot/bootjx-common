@@ -95,6 +95,12 @@ public class ConfigConstants {
 		POSTMAN_CHAT_WEB_CHANNEL(new ConfigMeta("Default Web Channel", PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL)
 				.desc("This channel will be connected your Page").optionsSource("getx:/api/options/channels")
 				.optionsKey("id").optionsLabel("name").filter("contactType", ContactType.WEBSITE)),
+
+		POSTMAN_AGENT_OTP_CHANNEL(new ConfigMeta("OTP Channel", PROPERTIES.POSTMAN_AGENT_OTP_CHANNEL)
+				.desc("This channel will be used for 2FA for Agent/Admin Login using login_otp template")
+				.optionsSource("getx:/api/options/channels").optionsKey("id").optionsLabel("name")
+				.filter("contactType", ContactType.OA)),
+
 		// Agent Properties
 		CHAT_TAG_ENABLED(
 				new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
@@ -180,8 +186,9 @@ public class ConfigConstants {
 						.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
 						.optionsOnOff().group(GROUP_AGENT)),
 
-		POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL(new ConfigMeta("Inbound Idle Timeout Interval",
-				"postman.agent.chat.in.idle.timeout.interval").superKey("postman.agent.chat.in.idle.timeout")
+		POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL(
+				new ConfigMeta("Inbound Idle Timeout Interval", "postman.agent.chat.in.idle.timeout.interval")
+						.superKey("postman.agent.chat.in.idle.timeout")
 						.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
 						.inputType(INPUT_TYPE.NUMBER).min(5).group(GROUP_AGENT)),
 

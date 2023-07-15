@@ -25,7 +25,9 @@ import com.boot.jx.common.dto.DepartmentResponseAuthDto;
 import com.boot.jx.common.dto.UserAuthToken;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.model.Email;
@@ -281,7 +283,11 @@ public class EmpAuthService {
 	public void sendOTP(UserAuthToken loginToken) {
 		OTPDetails otpDetails = OTPUtils.genrateBasicOTP(loginToken.getDomainUser(), loginToken.getApp());
 
-		ChannelConfig channel = pmEnvironment.config().channel("oa:mehery");
+		String otpChannel = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_OTP_CHANNEL)
+				.asString("oa:mehery");
+
+		ChannelConfig channel = pmEnvironment.config().channel(otpChannel);
+
 		OutboxMessage ob = new OutboxMessage();
 		ob.contact().setPhone(loginToken.getDomainUserPhone());
 		ob.setTemplateExt(new HSMTemplate3rdParty().code("login_otp"));

@@ -102,7 +102,6 @@ public class AgentAnalyticsManager {
 				lstDto.add(dto);
 			}
 		} else  {
-			
 			dto = getAgentAnalytics(req.getAgent(), date1, date2,req.getContactType());
 			lstDto.add(dto);
 		}
@@ -219,7 +218,7 @@ public class AgentAnalyticsManager {
 		/** Total Agent-contact wise msg **/
 
 		List<MessageDoc> totalAgConMsgExchanged = getTotalMessageAgentAndContactWise(distinctContactLst, dateRange1,
-				dateRange2,contact);
+				dateRange2,contact,agent);
 		if (ArgUtil.is(totalAgConMsgExchanged)) {
 			dto.setTotalMsgExchanged(totalAgConMsgExchanged.size());
 
@@ -354,6 +353,7 @@ public class AgentAnalyticsManager {
 	public List<String> getDefaultDistinctContact(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("assignedToAgent").exists(false));
 		// removeChatSessField(query);
 		query.fields().include("assignedAgentStamp").include("contactId");
 		// List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION",
@@ -383,6 +383,10 @@ public class AgentAnalyticsManager {
 //		if (distinctIdList == null || distinctIdList.isEmpty()) {
 //			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
 //		}
+		
+		if(agent==null) {
+			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
+		}
 
 		return distinctIdList;
 	}
@@ -713,10 +717,10 @@ public class AgentAnalyticsManager {
 	// Get Total Msg from
 
 	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<String> contactIds, long dateRange1,
-			long dateRange2,Object contact) {
+			long dateRange2,Object contact,String agent) {
 		List<MessageDoc> totalMsgDocLst = new ArrayList<MessageDoc>();
 		for (String contactId : contactIds) {
-			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2,contact);
+			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2,contact,agent);
 			totalMsgDocLst.addAll(msgDocLst);
 		}
 		// LOGGER.debug("getTotalMessageAgentAndContactWise
@@ -725,20 +729,24 @@ public class AgentAnalyticsManager {
 	}
 
 	// To fetch all the records from a collection
-	public List<MessageDoc> getMsgCountAgentContactWise(String contactId, long dateRange1, long dateRange2,Object contact) {
+	public List<MessageDoc> getMsgCountAgentContactWise(String contactId, long dateRange1, long dateRange2,Object contact,String agent) {
 
 		List<MessageDoc> totalMsgDoc = new ArrayList<MessageDoc>();
 
 		//List<String> lst = adminDbMgr.getListOfContactType();
 		List<String> lst  =getContactType(contact);
 		for (String contactType : lst) {
-			//System.out.println("contactType :"+contactType);
+		
 			Query query = new Query();
 			query.addCriteria(Criteria.where("contactId").is(contactId));
 			query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
+			if(ArgUtil.is(agent)) {
+				query.addCriteria(Criteria.where("agent").is(agent));
+			}
 			query.with(new Sort(new Order(Direction.ASC, "timestamp")));
 			removeMsgFields(query);
 			List<MessageDoc> totalMsg = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
+			System.out.println("contactType :"+contactType+"\t size :"+totalMsg.size());
 			totalMsgDoc.addAll(totalMsg);
 		}
 		return totalMsgDoc;
