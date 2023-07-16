@@ -1,4 +1,3 @@
-package com.boot.jx.xms.api;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.FileType;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.OutboxMessage;

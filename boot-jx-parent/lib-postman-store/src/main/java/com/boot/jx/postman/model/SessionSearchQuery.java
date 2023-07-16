@@ -212,4 +212,14 @@ public class SessionSearchQuery {
 		return this;
 	}
 
+	// SHORTCUTS
+
+	public boolean hasClosed() {
+		return this.contains(CHAT_STATE.CLOSED) || this.contains(CHAT_STATUS.CLOSED);
+	}
+
+	public boolean hasExpired() {
+		return this.contains(CHAT_STATE.EXPIRED) || this.contains(CHAT_STATUS.EXPIRED);
+	}
+
 }

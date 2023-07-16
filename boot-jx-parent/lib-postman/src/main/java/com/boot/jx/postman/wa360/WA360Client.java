@@ -59,7 +59,7 @@ public class WA360Client {
 				resp = sendTemplate(channelConfig, outboxMessage);
 			}
 			msgIds.add(getMessageId(resp));
-		} else {
+			} else {
 			boolean isList = false;
 			boolean isButton = false;
 			int buttonsCount = 0;
@@ -663,6 +663,7 @@ public class WA360Client {
 		outboxMessage.setMessageIdExt(msgIds.toString());
 		return outboxMessage;
 	}
+	
 	
 	/** Call new metod to post msg directly to waba API **/
 	public MapModel sendTemplateRaw(ChannelConfig channelConfig, OutboxMessage outboxMessage) {

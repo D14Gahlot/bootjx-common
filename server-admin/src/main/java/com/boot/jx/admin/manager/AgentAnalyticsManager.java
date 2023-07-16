@@ -746,7 +746,7 @@ public class AgentAnalyticsManager {
 			query.with(new Sort(new Order(Direction.ASC, "timestamp")));
 			removeMsgFields(query);
 			List<MessageDoc> totalMsg = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
-			System.out.println("contactType :"+contactType+"\t size :"+totalMsg.size());
+			
 			totalMsgDoc.addAll(totalMsg);
 		}
 		return totalMsgDoc;
