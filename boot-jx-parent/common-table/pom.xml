@@ -28,12 +28,12 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-utils</artifactId>
+			<artifactId>bootjx-common-utils</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib</artifactId>
+			<artifactId>bootjx-common-lib</artifactId>
 		</dependency>
 
 		<dependency>

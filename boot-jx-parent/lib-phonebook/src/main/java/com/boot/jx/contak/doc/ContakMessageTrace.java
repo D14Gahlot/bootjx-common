@@ -1,33 +1,35 @@
-package com.boot.jx.contak.dto;
+package com.boot.jx.contak.doc;
 
 import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Document(collection = "USER_REG")
-public class UserRegistrationDoc implements Serializable {
-	private static final long serialVersionUID = 1281605084248923642L;
+public class ContakMessageTrace implements Serializable {
+
+	private static final long serialVersionUID = 7243640883747555047L;
 
 	@Id
-	public String userRegistrationId;
+	public String noteId;
 
 	@Indexed
-	public String companyName;
+	public String phoneId;
 
 	@Indexed
-	public String userPhoneNumber;
+	public String domain;
 
 	@Indexed
 	public String companyId;
 
+	public String msgGenId;
+
 	public TimeStampIndex createdAt;
+
+	public TimeStampIndex relayedAt;
 
 	public TimeStampIndex expiredAt;
 
@@ -35,31 +37,28 @@ public class UserRegistrationDoc implements Serializable {
 
 	public TimeStampIndex deliveredAt;
 
-	public String userPubKey;
-	public String loginToken;
-
-	public String getUserRegistrationId() {
-		return userRegistrationId;
+	public String getNoteId() {
+		return noteId;
 	}
 
-	public void setUserRegistrationId(String userRegistrationId) {
-		this.userRegistrationId = userRegistrationId;
+	public void setNoteId(String noteId) {
+		this.noteId = noteId;
 	}
 
-	public String getCompanyName() {
-		return companyName;
+	public String getPhoneId() {
+		return phoneId;
 	}
 
-	public void setCompanyName(String companyName) {
-		this.companyName = companyName;
+	public void setPhoneId(String phoneId) {
+		this.phoneId = phoneId;
 	}
 
-	public String getUserPhoneNumber() {
-		return userPhoneNumber;
+	public String getDomain() {
+		return domain;
 	}
 
-	public void setUserPhoneNumber(String userPhoneNumber) {
-		this.userPhoneNumber = userPhoneNumber;
+	public void setDomain(String domain) {
+		this.domain = domain;
 	}
 
 	public TimeStampIndex getCreatedAt() {
@@ -68,6 +67,14 @@ public class UserRegistrationDoc implements Serializable {
 
 	public void setCreatedAt(TimeStampIndex createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public TimeStampIndex getRelayedAt() {
+		return relayedAt;
+	}
+
+	public void setRelayedAt(TimeStampIndex relayedAt) {
+		this.relayedAt = relayedAt;
 	}
 
 	public TimeStampIndex getExpiredAt() {
@@ -94,12 +101,8 @@ public class UserRegistrationDoc implements Serializable {
 		this.deliveredAt = deliveredAt;
 	}
 
-	public String getUserPubKey() {
-		return userPubKey;
-	}
-
-	public void setUserPubKey(String userPubKey) {
-		this.userPubKey = userPubKey;
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 
 	public String getCompanyId() {
@@ -110,12 +113,12 @@ public class UserRegistrationDoc implements Serializable {
 		this.companyId = companyId;
 	}
 
-	public String getLoginToken() {
-		return loginToken;
+	public String getMsgGenId() {
+		return msgGenId;
 	}
 
-	public void setLoginToken(String loginToken) {
-		this.loginToken = loginToken;
+	public void setMsgGenId(String msgGenId) {
+		this.msgGenId = msgGenId;
 	}
 
 }

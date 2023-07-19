@@ -61,7 +61,7 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib</artifactId>
+			<artifactId>bootjx-common-lib</artifactId>
 		</dependency>
 		<!-- <dependency> <groupId>com.boot.jx</groupId> <artifactId>common-lib-rbac</artifactId> 
 			</dependency> -->

@@ -12,12 +12,13 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.doc.ContakMessageDoc;
-import com.boot.jx.contak.dto.ContakInboundDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO;
 import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
 import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
+import com.boot.jx.contak.manager.ContakInboundManager;
+import com.boot.jx.contak.manager.ContakInboundManager.USER_INBOUND_TYPE;
 import com.boot.jx.contak.manager.ContakMessageManager;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.PhoneService;
@@ -69,6 +70,9 @@ public class PhoneController {
 	@Autowired
 	PhoneService phoneService;
 
+	@Autowired
+	ContakInboundManager contakInboundManager;
+
 	@RequestMapping(value = "/api/v1/login", method = { RequestMethod.POST })
 	public ApiResponse<PhoneProfileDTO, PhoneLoginResponseDTO> login(
 			@ApiParam(allowableValues = "SEND,VALIDATE,VERIFY", required = false)
@@ -96,9 +100,16 @@ public class PhoneController {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID,
 						new ApiFieldError().field("authToken"));
 			}
+
+			// boolean isUserRegistraion = ArgUtil.not(userDoc.getLastLoginAt());
+
 			resp.loginToken = loginToken;
 			phoneUserQuery.setLoginToken(resp.loginToken);
+			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			commonMongoTemplate.update(phoneUserQuery);
+
+			contakInboundManager.sendUserAuthEvent(userDoc, USER_INBOUND_TYPE.USER_RELOGIN);
+
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else if (ArgUtil.is(step, "VALIDATE") || (noStep && ArgUtil.is(loginDTO.otp))) { // Step 2
 			if (!new OTPDetails().yin(loginDTO.otpNounce).yang(userDoc.otpNounce)
@@ -106,16 +117,23 @@ public class PhoneController {
 					&& !ArgUtil.is(loginDTO.otp, "888888")) {
 				ApiResponseUtil.throwInputException(ApiStatusCodes.PARAM_INVALID, new ApiFieldError().field("otp"));
 			}
+			boolean isUserRegistraion = ArgUtil.not(userDoc.getLastLoginAt());
+
 			resp.deviceToken = UniqueID.generateSessionId();
 			resp.loginToken = loginToken;
 
 			phoneUserQuery.setOtpHash(Constants.BLANK);
 			phoneUserQuery.setOtpNounce(Constants.BLANK);
 			phoneUserQuery.setLoginToken(resp.loginToken);
+			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			phoneUserQuery.setAuthToken(CryptoUtil.getEncoder().message(resp.deviceToken).sha2().toString());
 			phoneUserQuery.setOtpCounter(0L);
 			phoneUserQuery.setOtpStamp(0L);
 			commonMongoTemplate.update(phoneUserQuery);
+
+			contakInboundManager.sendUserAuthEvent(userDoc,
+					isUserRegistraion ? USER_INBOUND_TYPE.USER_REGISTERED : USER_INBOUND_TYPE.USER_LOGIN);
+
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else { // Step 1
 
@@ -148,7 +166,7 @@ public class PhoneController {
 			phoneService.sendPhoneOTP(loginDTO.phone, otp.getOtp());
 
 			long otpStamp = System.currentTimeMillis();
-			nextStamp = getNextStamp(userDoc.getOtpStamp(), currentCounter);
+			nextStamp = getNextStamp(otpStamp, currentCounter);
 			activeAfter = nextStamp - otpStamp;
 
 			resp.otpPrefix = otp.getPrefix();
@@ -176,8 +194,7 @@ public class PhoneController {
 		return lastStamp;
 	}
 
-	@RequestMapping(value = "/api/v1/messages/fetch", method = { RequestMethod.POST })
-	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
+	private PhoneUserDoc isUserValid(PhoneLoginDTO loginDTO) {
 		if (!ArgUtil.is(loginDTO.phone)) {
 			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("phone"));
 		}
@@ -200,7 +217,25 @@ public class PhoneController {
 						new ApiFieldError().field("authToken"));
 			}
 		}
+		return userDoc;
+	}
+
+	@RequestMapping(value = "/api/v1/messages/fetch", method = { RequestMethod.POST })
+	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
+		PhoneUserDoc userDoc = isUserValid(loginDTO);
 		return ApiResponse.buildResults(contakMessageManager.fetchMessages(userDoc));
+	}
+
+	@RequestMapping(value = "/api/v1/messages/mark/read", method = { RequestMethod.POST })
+	public ApiResponse<ContakMessageDoc, Object> markRead(@RequestBody PhoneLoginDTO loginDTO) {
+		PhoneUserDoc userDoc = isUserValid(loginDTO);
+		return ApiResponse.buildResults(contakMessageManager.markRead(loginDTO.event.noteId));
+	}
+
+	@RequestMapping(value = "/api/v1/messages/log/event", method = { RequestMethod.POST })
+	public ApiResponse<ContakMessageDoc, Object> markFailed(@RequestBody PhoneLoginDTO loginDTO) {
+		PhoneUserDoc userDoc = isUserValid(loginDTO);
+		return ApiResponse.buildResults(contakMessageManager.addEventLog(loginDTO.event));
 	}
 
 	@RequestMapping(value = "/api/v1/user/key/reg", method = { RequestMethod.POST })
@@ -231,15 +266,7 @@ public class PhoneController {
 		userRegistrationDoc.setUserPubKey(msg.userPubKey);
 		commonMongoTemplate.save(userRegistrationDoc);
 
-		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType("USER_REG");
-		inbound.setPhoneId(userRegistrationDoc.getUserPhoneNumber());
-		inbound.setCompanyId(userRegistrationDoc.getCompanyId());
-		inbound.setCreatedAt(userRegistrationDoc.getCreatedAt());
-		inbound.setNotifiedAt(userRegistrationDoc.getDeliveredAt());
-		inbound.setExpiredAt(userRegistrationDoc.getExpiredAt());
-		inbound.setInboundPayload(userRegistrationDoc);
-		commonMongoTemplate.save(inbound);
+		contakInboundManager.sendHandShakeAckEvent(userRegistrationDoc);
 
 		return ApiResponse.buildResult(userRegistrationDoc);
 	}

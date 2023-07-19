@@ -43,7 +43,7 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib</artifactId>
+			<artifactId>bootjx-common-lib</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>junit</groupId>
@@ -63,7 +63,7 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-mongo</artifactId>
+			<artifactId>bootjx-common-mongo</artifactId>
 		</dependency>
 
 		<dependency>

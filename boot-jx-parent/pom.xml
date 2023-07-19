@@ -3,7 +3,6 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.boot.jx</groupId>
 	<artifactId>boot-jx-parent</artifactId>
 	<name>boot-jx-parent</name>
 	<packaging>pom</packaging>
@@ -17,21 +16,23 @@
 	</organization>
 
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.5.RELEASE</version>
+		<groupId>com.boot.jx</groupId>
+		<artifactId>bootjx-common</artifactId>
+		<version>2.0.3-SNAPSHOT</version>
 		<relativePath />
 	</parent>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
-		<boot.jx.version>0.0.1-SNAPSHOT</boot.jx.version>
-		<vzn>0.0.1-SNAPSHOT</vzn>
+		<boot.jx.version>2.0.3-SNAPSHOT</boot.jx.version>
+		<myproject.version>0.0.1-SNAPSHOT</myproject.version>
+		<vzn>2.0.3-SNAPSHOT</vzn>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- 
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>common-utils</artifactId>
@@ -42,6 +43,7 @@
 				<artifactId>common-lib</artifactId>
 				<version>${boot.jx.version}</version>
 			</dependency>
+			
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>common-mongo</artifactId>
@@ -53,76 +55,94 @@
 				<artifactId>common-db</artifactId>
 				<version>${boot.jx.version}</version>
 			</dependency>
+			
+			-->
 
 			<dependency>
 				<groupId>com.boot.jx</groupId>
-				<artifactId>common-table</artifactId>
+				<artifactId>bootjx-common-utils</artifactId>
 				<version>${boot.jx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.boot.jx</groupId>
+				<artifactId>bootjx-common-lib</artifactId>
+				<version>${boot.jx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.boot.jx</groupId>
+				<artifactId>bootjx-common-mongo</artifactId>
+				<version>${boot.jx.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.boot.jx</groupId>
+				<artifactId>common-table</artifactId>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>common-tmpl</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-mcq</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-postman-basic</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-postman</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-phonebook</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-postman-store</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-monitor</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-postman-chat</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-postman-nlp</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>lib-aws</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>common-lib-rbac</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>	
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>common-lib-session</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 			</dependency>	
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>boot-ext-jar</artifactId>
-				<version>${boot.jx.version}</version>
+				<version>${myproject.version}</version>
 				<type>pom</type>
 			</dependency>
 		</dependencies>
@@ -183,11 +203,13 @@
 
 	<modules>
 		<!-- Common Libs -->
+<!-- 
 		<module>common-utils</module>
 		<module>common-lib</module>
-		<module>common-table</module>
 		<module>common-db</module>
 		<module>common-mongo</module>
+		<module>common-table</module>
+-->
 		<module>common-tmpl</module>
 		<module>common-lib-rbac</module>
 		<module>common-lib-session</module>
@@ -202,6 +224,5 @@
 		<module>lib-postman-nlp</module>
 		<module>lib-monitor</module>
 		<!-- Common Servers -->
-
 	</modules>
 </project>

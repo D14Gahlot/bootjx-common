@@ -61,7 +61,7 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib</artifactId>
+			<artifactId>bootjx-common-lib</artifactId>
 		</dependency>
 
 
@@ -100,11 +100,6 @@
 
 		<!-- <dependency> <groupId>net.rossillo.mvc.cache</groupId> <artifactId>spring-mvc-cache-control</artifactId> 
 			<version>1.1.1-RELEASE</version> <scope>compile</scope> </dependency> -->
-
-		<dependency>
-			<groupId>com.boot.jx</groupId>
-			<artifactId>common-utils</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>

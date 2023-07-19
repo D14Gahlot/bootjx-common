@@ -42,10 +42,12 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.Random;
+import com.boot.utils.StringUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -245,6 +247,10 @@ public class PanelV1Controller {
 		compoc.setAddress(newComp.getAddress());
 		compoc.setWebsiteUrl(newComp.getWebsiteUrl());
 		compoc.setLogoUrl(newComp.getLogoUrl());
+
+		// Sanatization
+		newComp.getPrefs().setAllowedIPAddresses(CollectionUtil.clean(newComp.getPrefs().getAllowedIPAddresses()));
+
 		compoc.setPrefs(newComp.getPrefs());
 		compoc.setProfile(newComp.getProfile());
 
@@ -278,6 +284,8 @@ public class PanelV1Controller {
 			ApiResponseUtil.throwInputException(new ApiFieldError().field("clientId").codeKey("NotAllowed")
 					.description("Not Allowed to change ClientId"));
 		}
+
+		clientId = StringUtils.removeSpecialCharacter(clientId).toLowerCase();
 
 		String newKeyString = UUID.randomUUID().toString();
 		ContakApiKey newKey = new ContakApiKey();
