@@ -104,6 +104,19 @@
 			<version>${jax.version}</version>
 		</dependency>
 
+		<!-- DynmoDB  start -->
+	  	<dependency>
+	        <groupId>com.amazonaws</groupId>
+	        <artifactId>aws-java-sdk-dynamodb</artifactId>
+	        <version>1.11.64</version>
+	    </dependency>
+	    <dependency>
+	        <groupId>com.github.derjust</groupId>
+	        <artifactId>spring-data-dynamodb</artifactId>
+	        <version>5.0.4</version>
+	    </dependency>
+		<!-- DynmoDb end -->
+
 	</dependencies>
 
 	<build>
