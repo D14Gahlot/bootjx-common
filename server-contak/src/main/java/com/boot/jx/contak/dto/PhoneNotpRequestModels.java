@@ -17,7 +17,7 @@ public final class PhoneNotpRequestModels {
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class PhoneNotpDto implements Serializable {
+	public static class OtpAlert implements Serializable {
 		private static final long serialVersionUID = 4064758284063588819L;
 
 		@Deprecated

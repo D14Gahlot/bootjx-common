@@ -21,7 +21,7 @@ import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakInboundDoc;
 import com.boot.jx.contak.dto.ContakTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.ContakMessgaeTemplate;
-import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
+import com.boot.jx.contak.dto.PhoneNotpRequestModels.OtpAlert;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
 import com.boot.jx.contak.manager.ContakInboundManager;
@@ -74,7 +74,7 @@ public class NodeClientController {
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
-	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody PhoneNotpDto msg) {
+	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody OtpAlert msg) {
 
 		CompanyDoc compoc = apiContext.getCompany();
 
