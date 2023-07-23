@@ -28,6 +28,7 @@ import com.boot.jx.phonebook.doc.PhoneUserQuery;
 import com.boot.jx.phonebook.dto.PhoneProfileDTO;
 import com.boot.jx.phonebook.manager.PhoneBookManager;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.OTPUtils;
@@ -183,19 +184,19 @@ public class PhoneV1Controller {
 	@RequestMapping(value = "/messages/fetch", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
 		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
-		return ApiResponse.buildResults(contakMessageManager.fetchMessages(userDoc));
+		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
 	@RequestMapping(value = "/messages/mark/read", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> markRead(@RequestBody PhoneLoginDTO loginDTO) {
 		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
-		return ApiResponse.buildResults(contakMessageManager.markRead(loginDTO.event.noteId));
+		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
 	@RequestMapping(value = "/messages/log/event", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> markFailed(@RequestBody PhoneLoginDTO loginDTO) {
 		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
-		return ApiResponse.buildResults(contakMessageManager.addEventLog(loginDTO.event));
+		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
 	@RequestMapping(value = "/user/key/reg", method = { RequestMethod.POST })
