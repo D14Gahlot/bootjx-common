@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.contak.cache.OtpAlertEventManager;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -28,7 +29,10 @@ public class ContakMessageManager {
 	private CommonMongoTemplate commonMongoTemplate;
 
 	@Autowired
-	ContakInboundManager contakInboundManager;
+	private ContakInboundManager contakInboundManager;
+
+	@Autowired
+	private OtpAlertEventManager otpAlertEventManager;
 
 	public List<ContakMessageDoc> fetchMessages(PhoneUserDoc user) {
 		TimeStampIndex deliveredAt = TimeStampIndex.from(System.currentTimeMillis());
@@ -44,7 +48,7 @@ public class ContakMessageManager {
 								.and("deliveredAt.stamp").is(deliveredAt.getStamp())));
 
 		if (ArgUtil.is(messages) && messages.size() > 0) {
-			contakInboundManager.sendMsgDelvryEventAsync(messages);
+			otpAlertEventManager.sendMsgDelvryEventAsync(messages);
 		}
 
 		return messages;
@@ -93,7 +97,7 @@ public class ContakMessageManager {
 								.and("companyId").is(readMessage.getCompanyId()) // Company
 								.and("readAt.stamp").is(readAt.getStamp())));
 
-		contakInboundManager.sendMsgReadEventAsync(messages);
+		otpAlertEventManager.sendMsgReadEventAsync(messages);
 
 		return messages;
 	}
@@ -120,7 +124,7 @@ public class ContakMessageManager {
 				// Update
 				.push("events", event));
 
-		contakInboundManager.sendMsgLogEventAsync(failedMessage, event);
+		otpAlertEventManager.sendMsgLogEventAsync(failedMessage, event);
 
 		return CollectionUtil.asList(failedMessage);
 	}

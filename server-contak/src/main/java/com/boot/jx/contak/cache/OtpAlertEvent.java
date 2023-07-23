@@ -1,9 +1,11 @@
 package com.boot.jx.contak.cache;
 
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexRangeKey;
@@ -12,8 +14,9 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.model.TimeModels.ITimeStampIndexAbstract;
 
-@DynamoDBTable(tableName = "OtpAlertEvent")
+@DynamoDBTable(tableName = OtpAlertEventId.OTP_ALERT_EVENT_TABLE)
 public class OtpAlertEvent {
 
 	@Id
@@ -23,21 +26,29 @@ public class OtpAlertEvent {
 
 	private String phoneId;
 
-	@Indexed
+	public static enum CompanyQueueStatus {
+		CRTD, NTFD, FLD, XPRD
+	}
+
+	@ApiMockModelProperty(example = "text", value = "Current Status", allowableValues = "CRTD,NTFD,FLD,XPRD")
+	private String status;
+
+	private String companyQueue;
+
 	@ApiMockModelProperty(example = "text", value = "Inbound type",
 			allowableValues = "USER_REG,MSG_OUT_DELIVERED,MSG_OUT_READ")
 	public String inboundType;
 
-	public Object inboundPayload;
+	public Map<String, Object> inboundPayload;
 
-	public MessageEvent event;
+	public MessageEventDynmo event;
 
 	// Stamps
-	public TimeStampIndex createdAt;
+	public TimeStampIndexDynmo createdAt;
 
-	public TimeStampIndex notifiedAt;
+	public TimeStampIndexDynmo notifiedAt;
 
-	public TimeStampIndex expiredAt;
+	public TimeStampIndexDynmo expiredAt;
 
 	public OtpAlertEvent() {
 	}
@@ -65,7 +76,7 @@ public class OtpAlertEvent {
 	}
 
 	@DynamoDBRangeKey(attributeName = "CreatedHour")
-	@DynamoDBIndexRangeKey(globalSecondaryIndexName = "CompanyIndex")
+	@DynamoDBIndexRangeKey(globalSecondaryIndexName = OtpAlertEventId.OTP_ALERT_EVENT_COMPANY_INDEX)
 	public Long getCreatedHour() {
 		return otpAlertEventId != null ? otpAlertEventId.getCreatedHour() : null;
 	}
@@ -77,14 +88,31 @@ public class OtpAlertEvent {
 		otpAlertEventId.setCreatedHour(createdHour);
 	}
 
+	@DynamoDBIndexHashKey(globalSecondaryIndexName = OtpAlertEventId.OTP_ALERT_EVENT_COMPANY_INDEX)
+	public String getCompanyQueue() {
+		return companyQueue;
+	}
+
+	public void setCompanyQueue(String companyQueue) {
+		this.companyQueue = companyQueue;
+	}
+
 	@DynamoDBAttribute(attributeName = "CompanyId")
-	@DynamoDBIndexHashKey(globalSecondaryIndexName = "CompanyIndex")
 	public String getCompanyId() {
 		return companyId;
 	}
 
 	public void setCompanyId(String comapnyId) {
 		this.companyId = comapnyId;
+	}
+
+	@DynamoDBAttribute
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	@DynamoDBAttribute
@@ -106,47 +134,75 @@ public class OtpAlertEvent {
 	}
 
 	@DynamoDBAttribute
-	public Object getInboundPayload() {
+	public Map<String, Object> getInboundPayload() {
 		return inboundPayload;
 	}
 
-	public void setInboundPayload(Object inboundPayload) {
+	public void setInboundPayload(Map<String, Object> inboundPayload) {
 		this.inboundPayload = inboundPayload;
 	}
 
 	@DynamoDBAttribute
-	public MessageEvent getEvent() {
+	public MessageEventDynmo getEvent() {
 		return event;
 	}
 
-	public void setEvent(MessageEvent event) {
+	public void setEvent(MessageEventDynmo event) {
 		this.event = event;
 	}
 
 	@DynamoDBAttribute
-	public TimeStampIndex getCreatedAt() {
+	public TimeStampIndexDynmo getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(TimeStampIndex createdAt) {
+	public void setCreatedAt(TimeStampIndexDynmo createdAt) {
 		this.createdAt = createdAt;
 	}
 
 	@DynamoDBAttribute
-	public TimeStampIndex getNotifiedAt() {
+	public TimeStampIndexDynmo getNotifiedAt() {
 		return notifiedAt;
 	}
 
-	public void setNotifiedAt(TimeStampIndex notifiedAt) {
+	public void setNotifiedAt(TimeStampIndexDynmo notifiedAt) {
 		this.notifiedAt = notifiedAt;
 	}
 
 	@DynamoDBAttribute
-	public TimeStampIndex getExpiredAt() {
+	public TimeStampIndexDynmo getExpiredAt() {
 		return expiredAt;
 	}
 
-	public void setExpiredAt(TimeStampIndex expiredAt) {
+	public void setExpiredAt(TimeStampIndexDynmo expiredAt) {
 		this.expiredAt = expiredAt;
+	}
+
+	@DynamoDBDocument
+	public static class TimeStampIndexDynmo extends ITimeStampIndexAbstract<TimeStampIndexDynmo> {
+		private static final long serialVersionUID = 680494594671730973L;
+
+		public static TimeStampIndexDynmo from(long stamp) {
+			return new TimeStampIndexDynmo().fromStamp(stamp);
+		}
+
+		public static TimeStampIndexDynmo now() {
+			return new TimeStampIndexDynmo().fromNow();
+		}
+
+		public static TimeStampIndexDynmo from(TimeStampIndex createdAt) {
+			return new TimeStampIndexDynmo().fromStamp(createdAt.getStamp());
+		}
+	}
+
+	@DynamoDBDocument
+	public static class MessageEventDynmo extends MessageEvent {
+		private static final long serialVersionUID = 1L;
+	}
+
+	public OtpAlertEvent update(CompanyQueueStatus status) {
+		this.setStatus(status.name());
+		this.companyQueue = this.companyId + "#" + status.name();
+		return this;
 	}
 }

@@ -17,7 +17,6 @@ import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakInboundManager;
 import com.boot.jx.contak.manager.ContakInboundManager.USER_INBOUND_TYPE;
-import com.boot.jx.contak.manager.ContakMessageManager;
 import com.boot.jx.contak.manager.PhoneService;
 import com.boot.jx.contak.service.PhoneAuthService;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -47,9 +46,6 @@ public class PhoneV1Controller {
 
 	@Autowired
 	private PhoneBookManager phoneBookManager;
-
-	@Autowired
-	private ContakMessageManager contakMessageManager;
 
 	@Autowired
 	private PhoneService phoneService;

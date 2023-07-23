@@ -14,17 +14,18 @@ public interface OtpAlertEventRepository extends CrudRepository<OtpAlertEvent, O
 
 	List<OtpAlertEvent> findByCompanyId(String companyId);
 
-	List<OtpAlertEvent> findByCompanyIdAndCreatedHourGreaterThan(final String companyId, final Long startCreatedHour);
+	List<OtpAlertEvent> findByCompanyQueueAndCreatedHourGreaterThan(final String companyQueue,
+			final Long startCreatedHour);
 
-	List<OtpAlertEvent> findByCompanyIdAndCreatedHourGreaterThan(final String companyId, final Long startCreatedHour,
-			final Pageable pageRequest);
+	List<OtpAlertEvent> findByCompanyQueueAndCreatedHourGreaterThan(final String companyQueue,
+			final Long startCreatedHour, final Pageable pageRequest);
 
-	List<OtpAlertEvent> findByCompanyIdAndCreatedHourLessThan(final String companyId, final Long endCreatedHour);
+	List<OtpAlertEvent> findByCompanyQueueAndCreatedHourLessThan(final String companyQueue, final Long endCreatedHour);
 
-	List<OtpAlertEvent> findByCompanyIdAndCreatedHourBetween(final String companyId, final Long startCreatedHour,
+	List<OtpAlertEvent> findByCompanyQueueAndCreatedHourBetween(final String companyQueue, final Long startCreatedHour,
 			final Long endCreatedHour);
 
-	List<OtpAlertEvent> findByCompanyIdAndCreatedHourBetween(final String companyId, final Long startCreatedHour,
+	List<OtpAlertEvent> findByCompanyQueueAndCreatedHourBetween(final String companyQueue, final Long startCreatedHour,
 			final Long endCreatedHour, final Pageable pageRequest);
 
 }
