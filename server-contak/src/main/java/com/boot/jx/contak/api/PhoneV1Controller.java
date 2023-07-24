@@ -10,20 +10,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO;
 import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
 import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
-import com.boot.jx.contak.manager.ContakApiContext;
 import com.boot.jx.contak.manager.ContakInboundManager;
 import com.boot.jx.contak.manager.ContakInboundManager.USER_INBOUND_TYPE;
-import com.boot.jx.contak.manager.ContakMessageManager;
-import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.PhoneService;
+import com.boot.jx.contak.service.PhoneAuthService;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
-import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
@@ -31,6 +27,7 @@ import com.boot.jx.phonebook.doc.PhoneUserQuery;
 import com.boot.jx.phonebook.dto.PhoneProfileDTO;
 import com.boot.jx.phonebook.manager.PhoneBookManager;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.OTPUtils;
@@ -41,39 +38,25 @@ import com.boot.utils.UniqueID;
 import io.swagger.annotations.ApiParam;
 
 @RestController
-@RequestMapping("/phone")
-public class PhoneController {
-
-	private static final int TIME_24_HOURS = 24 * 3600 * 1000;
+@RequestMapping("/phone/api/v1")
+public class PhoneV1Controller {
 
 	@Autowired
-	CommonHttpRequest commonHttpRequest;
+	private CommonMongoTemplate commonMongoTemplate;
 
 	@Autowired
-	CommonMongoTemplate commonMongoTemplate;
+	private PhoneBookManager phoneBookManager;
 
 	@Autowired
-	PhoneBookManager phoneBookManager;
+	private PhoneService phoneService;
 
 	@Autowired
-	ContakMessageManager contakMessageManager;
+	private PhoneAuthService phoneAuthService;
 
 	@Autowired
-	FirebaseManager firebaseManager;
+	private ContakInboundManager contakInboundManager;
 
-	@Autowired
-	AWSFileStore fileStore;
-
-	@Autowired
-	ContakApiContext apiContext;
-
-	@Autowired
-	PhoneService phoneService;
-
-	@Autowired
-	ContakInboundManager contakInboundManager;
-
-	@RequestMapping(value = "/api/v1/login", method = { RequestMethod.POST })
+	@RequestMapping(value = "/login", method = { RequestMethod.POST })
 	public ApiResponse<PhoneProfileDTO, PhoneLoginResponseDTO> login(
 			@ApiParam(allowableValues = "SEND,VALIDATE,VERIFY", required = false)
 			@RequestParam(required = false) String step, @RequestBody PhoneLoginDTO loginDTO) {
@@ -194,51 +177,25 @@ public class PhoneController {
 		return lastStamp;
 	}
 
-	private PhoneUserDoc isUserValid(PhoneLoginDTO loginDTO) {
-		if (!ArgUtil.is(loginDTO.phone)) {
-			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("phone"));
-		}
-		PhoneUserDoc userDoc = commonMongoTemplate.findById(loginDTO.phone, PhoneUserDoc.class);
-		if (ArgUtil.is(loginDTO.deviceId)) { // Step 3
-			if (!loginDTO.deviceId.equalsIgnoreCase(userDoc.deviceId)) {
-				ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("deviceId"));
-			}
-		}
-		if (!ArgUtil.is(userDoc)) {
-			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("phone"));
-		}
-		PhoneUserQuery phoneUserQuery = new PhoneUserQuery(userDoc);
-		phoneUserQuery.setLastTimeActiveAt(TimeStampIndex.now());
-		commonMongoTemplate.update(phoneUserQuery);
-
-		if (ArgUtil.is(loginDTO.deviceToken)) { // Step 3
-			if (!CryptoUtil.getEncoder().message(loginDTO.deviceToken).sha2().is(userDoc.authToken)) {
-				ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED,
-						new ApiFieldError().field("authToken"));
-			}
-		}
-		return userDoc;
-	}
-
-	@RequestMapping(value = "/api/v1/messages/fetch", method = { RequestMethod.POST })
+	@RequestMapping(value = "/messages/fetch", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
-		PhoneUserDoc userDoc = isUserValid(loginDTO);
-		return ApiResponse.buildResults(contakMessageManager.fetchMessages(userDoc));
+		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
+		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
-	@RequestMapping(value = "/api/v1/messages/mark/read", method = { RequestMethod.POST })
+	@RequestMapping(value = "/messages/mark/read", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> markRead(@RequestBody PhoneLoginDTO loginDTO) {
-		PhoneUserDoc userDoc = isUserValid(loginDTO);
-		return ApiResponse.buildResults(contakMessageManager.markRead(loginDTO.event.noteId));
+		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
+		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
-	@RequestMapping(value = "/api/v1/messages/log/event", method = { RequestMethod.POST })
+	@RequestMapping(value = "/messages/log/event", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> markFailed(@RequestBody PhoneLoginDTO loginDTO) {
-		PhoneUserDoc userDoc = isUserValid(loginDTO);
-		return ApiResponse.buildResults(contakMessageManager.addEventLog(loginDTO.event));
+		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
+		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
-	@RequestMapping(value = "/api/v1/user/key/reg", method = { RequestMethod.POST })
+	@RequestMapping(value = "/user/key/reg", method = { RequestMethod.POST })
 	public ApiResponse<UserRegistrationDoc, Object> save(@RequestBody UserRegistrationDTO msg) {
 
 		PhoneUserDoc userDoc = commonMongoTemplate.findById(msg.userPhoneNumber, PhoneUserDoc.class);

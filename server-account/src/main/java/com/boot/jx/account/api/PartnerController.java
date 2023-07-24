@@ -112,8 +112,8 @@ public class PartnerController {
 	}
 
 	@RequestMapping(value = { "/app/goto/{domain}/{panel}" }, method = { RequestMethod.GET })
-	public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel)
-			throws NoSuchAlgorithmException {
+	public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel,
+			@RequestParam(required = false) String server) throws NoSuchAlgorithmException {
 		String tnt = AppContextUtil.getTenant();
 
 		if (!Tenants.isDefault(tnt)) {
@@ -125,7 +125,7 @@ public class PartnerController {
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
 				// "local.com"
-				ArgUtil.anyOf(domainDoc.getServer(),
+				ArgUtil.anyOf(server, domainDoc.getServer(),
 						env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString()),
 				panel));
 

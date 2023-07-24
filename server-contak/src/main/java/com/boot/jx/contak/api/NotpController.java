@@ -19,7 +19,7 @@ import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakTemplate;
 import com.boot.jx.contak.dto.PhoneLoginDTO;
 import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
-import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
+import com.boot.jx.contak.dto.PhoneNotpRequestModels.OtpAlert;
 import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakMessageManager;
@@ -150,7 +150,7 @@ public class NotpController {
 	}
 
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
-	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody PhoneNotpDto msg) {
+	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody OtpAlert msg) {
 
 		CompanyDoc compoc = commonMongoTemplate.findOne(
 				CommonMongoQueryBuilder.collection(CompanyDoc.class).where(Criteria.where("apiKey").is(msg.apiKey)));

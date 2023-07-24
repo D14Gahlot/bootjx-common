@@ -1,7 +1,7 @@
 [submodule "bootjx-common"]
 	path = bootjx-common
-	url = git@github.com:bootloader/bootjx-common.git
+	url = https://github.com/bootloader/bootjx-common.git
 	branch = v2_dev
 [submodule "bootjx-extjar"]
 	path = bootjx-extjar
-	url = git@github.com:bootloader/bootjx-extjar
+	url = https://github.com/bootloader/bootjx-extjar

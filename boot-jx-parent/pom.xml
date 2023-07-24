@@ -19,7 +19,7 @@
 		<groupId>com.boot.jx</groupId>
 		<artifactId>bootjx-common</artifactId>
 		<version>2.0.3-SNAPSHOT</version>
-		<relativePath />
+		<relativePath>../bootjx-common/pom.xml</relativePath>
 	</parent>
 
 	<properties>
@@ -57,7 +57,13 @@
 			</dependency>
 			
 			-->
-
+			<dependency>
+				<groupId>com.boot.jx</groupId>
+				<artifactId>bootjx-extjar</artifactId>
+				<version>${boot.jx.version}</version>
+				<type>pom</type>
+			</dependency>
+			
 			<dependency>
 				<groupId>com.boot.jx</groupId>
 				<artifactId>bootjx-common-utils</artifactId>

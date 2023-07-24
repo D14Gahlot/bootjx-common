@@ -81,6 +81,7 @@
 
 	<modules>
 		<module>bootjx-common</module>
+		<module>bootjx-extjar</module>
 		<module>boot-jx-parent</module>
 		<module>lib-tmpl</module>
 		<module>lib-common/lib-common-mongo</module>

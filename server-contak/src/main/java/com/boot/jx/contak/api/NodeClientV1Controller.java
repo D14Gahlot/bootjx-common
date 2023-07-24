@@ -4,24 +4,23 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.contak.cache.OtpAlertEventManager;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakInboundDoc;
 import com.boot.jx.contak.dto.ContakTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.ContakMessgaeTemplate;
-import com.boot.jx.contak.dto.PhoneNotpRequestModels.PhoneNotpDto;
+import com.boot.jx.contak.dto.PhoneNotpRequestModels.OtpAlert;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
 import com.boot.jx.contak.manager.ContakInboundManager;
@@ -42,7 +41,7 @@ import com.boot.utils.ArgUtil;
 
 @RestController
 @RequestMapping("/client")
-public class NodeClientController {
+public class NodeClientV1Controller {
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
@@ -74,7 +73,7 @@ public class NodeClientController {
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/api/v1/messages/send", method = { RequestMethod.POST })
-	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody PhoneNotpDto msg) {
+	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody OtpAlert msg) {
 
 		CompanyDoc compoc = apiContext.getCompany();
 
@@ -177,6 +176,7 @@ public class NodeClientController {
 		return ApiResponse.buildResults(userRegistrationManager.fetchRegistrations(compoc.companyId));
 	}
 
+	@Deprecated
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
 	@RequestMapping(value = "/api/v1/inbound/fetch", method = { RequestMethod.POST })
