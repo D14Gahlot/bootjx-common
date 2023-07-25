@@ -38,6 +38,7 @@ import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
 import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 
 @RestController
 @RequestMapping("/client")
@@ -191,9 +192,10 @@ public class NodeClientV1Controller {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
 		}
 
-		List<ContakInboundDoc> inbounds = inboundManager.fetchInbounds(compoc.companyId);
+		// List<ContakInboundDoc> inbounds =
+		// inboundManager.fetchInbounds(compoc.companyId);
 
-		return ApiResponse.buildResults(inbounds);
+		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
 	@ApiRequest(authenticateTenant = true)

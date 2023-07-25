@@ -14,6 +14,7 @@ import org.springframework.data.annotation.Id;
 
 import com.boot.jx.mongo.CommonMongoSourceProvider;
 import com.boot.jx.mongo.MongoTemplateCommonImpl;
+import com.boot.utils.ArgUtil;
 
 public class MongoLoadTester {
 	private static final Random PRNG = new Random();
@@ -21,10 +22,11 @@ public class MongoLoadTester {
 	private static AtomicInteger TOTAL = new AtomicInteger(0);
 
 	private static MongoTemplateCommonImpl initMongo(String tnt) {
+		String mongoConnectionString = ArgUtil.parseAsString(System.getenv("mongo.connection.string"),
+				"mongodb://mhmongoadmin:xxxxxxxx@mongo.mehery.io:27017");
 		AppContextUtil.setTenant(tnt);
-		String connectionString = "mongodb://mhmongoadmin:" + "xxxxxxxx@mongo.mehery.com:27017/"
-				+ "meheryqa?authSource=admin&authMechanism=SCRAM-SHA-1"
-				+ "&connectTimeoutMS=300000&minPoolSize=0&maxPoolSize=2&maxIdleTimeMS=900000";
+		String connectionString = mongoConnectionString + "/" + "meheryqa?authSource=admin&authMechanism=SCRAM-SHA-1"
+				+ "&connectTimeoutMS=300000&minPoolSize=0&maxPoolSize=2&maxIdleTimeMS=900000&waitQueueMultiple=100";
 
 		CommonMongoSourceProvider commonMongoSource = new CommonMongoSourceProvider();
 		commonMongoSource.setDataSourceUrl(connectionString);

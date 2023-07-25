@@ -179,19 +179,19 @@ public class PhoneV1Controller {
 
 	@RequestMapping(value = "/messages/fetch", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
-		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
+		//PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
 		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
 	@RequestMapping(value = "/messages/mark/read", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> markRead(@RequestBody PhoneLoginDTO loginDTO) {
-		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
+		//PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
 		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
 	@RequestMapping(value = "/messages/log/event", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> markFailed(@RequestBody PhoneLoginDTO loginDTO) {
-		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
+		//PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
 		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
