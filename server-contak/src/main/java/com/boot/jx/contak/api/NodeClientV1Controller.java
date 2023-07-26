@@ -15,6 +15,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.cache.OtpAlertEventManager;
 import com.boot.jx.contak.doc.ContakMessageDoc;
+import com.boot.jx.contak.doc.ContakMessageTrace.MessageStatus;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakInboundDoc;
@@ -112,6 +113,7 @@ public class NodeClientV1Controller {
 		newPhoneNOTPDoc.setTags(msg.tags);
 		newPhoneNOTPDoc.setCreatedAt(TimeStampIndex.from(msg.createdAt));
 		newPhoneNOTPDoc.setRelayedAt(TimeStampIndex.now());
+		newPhoneNOTPDoc.setStatus(MessageStatus.RELAYED);
 		newPhoneNOTPDoc.setExpiredAt(TimeStampIndex.from(System.currentTimeMillis() + msg.validity * 1000));
 		newPhoneNOTPDoc.setType(msg.type);
 		newPhoneNOTPDoc.setPubKey(msg.pubKey);

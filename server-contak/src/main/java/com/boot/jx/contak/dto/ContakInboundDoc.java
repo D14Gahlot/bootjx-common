@@ -1,12 +1,12 @@
 package com.boot.jx.contak.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.contak.cache.OtpAlertEvent.CompanyQueueStatus;
 import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -25,6 +25,10 @@ public class ContakInboundDoc implements Serializable {
 
 	@Indexed
 	public String companyId;
+
+	@ApiMockModelProperty(example = "text", value = "Current Status", allowableValues = "CRTD,NTFD,FLD,XPRD")
+	@Indexed
+	private CompanyQueueStatus status;
 
 	@Indexed
 	@ApiMockModelProperty(example = "text", value = "Inbound type",
@@ -111,6 +115,14 @@ public class ContakInboundDoc implements Serializable {
 
 	public void setEvent(MessageEvent event) {
 		this.event = event;
+	}
+
+	public CompanyQueueStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(CompanyQueueStatus status) {
+		this.status = status;
 	}
 
 }

@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,15 +28,21 @@ public class ContakMessageTrace implements Serializable {
 
 	public String msgGenId;
 
+	public static enum MessageStatus {
+		CREATED, RELAYED, POLLED, READ, DELIVERED, EXPIRED
+	}
+
+	@ApiMockModelProperty(example = "text", value = "Current Status",
+			allowableValues = "CREATED, RELAYED, POLLED, READ, DELIVERED, EXPIRED")
+	@Indexed
+	private MessageStatus status;
+
 	public TimeStampIndex createdAt;
-
 	public TimeStampIndex relayedAt;
-
-	public TimeStampIndex expiredAt;
-
-	public TimeStampIndex readAt;
-
+	public TimeStampIndex polledAt;
 	public TimeStampIndex deliveredAt;
+	public TimeStampIndex readAt;
+	public TimeStampIndex expiredAt;
 
 	public String getNoteId() {
 		return noteId;
@@ -119,6 +126,14 @@ public class ContakMessageTrace implements Serializable {
 
 	public void setMsgGenId(String msgGenId) {
 		this.msgGenId = msgGenId;
+	}
+
+	public MessageStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(MessageStatus status) {
+		this.status = status;
 	}
 
 }

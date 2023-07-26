@@ -10,7 +10,7 @@ import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Document(collection = "CONTAK_MESSAGES")
+@Document(collection = "OA_MESSAGE")
 public class ContakMessageDoc extends ContakMessageTrace {
 	private static final long serialVersionUID = 1281605084248923642L;
 

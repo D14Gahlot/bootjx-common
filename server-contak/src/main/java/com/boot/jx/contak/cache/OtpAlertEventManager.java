@@ -46,7 +46,7 @@ public class OtpAlertEventManager {
 		TimeStampIndex created = TimeStampIndex.from(System.currentTimeMillis());
 		OtpAlertEventId otpAlertEventId = new OtpAlertEventId(eventId, created.getHour());
 		return otpAlertEventRepository
-				.save(new OtpAlertEvent(otpAlertEventId, companyId, phoneId).update(CompanyQueueStatus.CRTD));
+				.save(new OtpAlertEvent(otpAlertEventId, companyId, phoneId).update(CompanyQueueStatus.CREATED));
 	}
 
 	public OtpAlertEvent getOtpAlertEvent(final String eventId) {
@@ -60,13 +60,13 @@ public class OtpAlertEventManager {
 	public List<OtpAlertEvent> pollOtpAlertEvents(String companyId) {
 		TimeStampIndex created = TimeStampIndex.from(System.currentTimeMillis());
 
-		OtpAlertEvent otpAlertEventQuery = new OtpAlertEvent(null, companyId, null).update(CompanyQueueStatus.CRTD);
+		OtpAlertEvent otpAlertEventQuery = new OtpAlertEvent(null, companyId, null).update(CompanyQueueStatus.CREATED);
 
 		Iterable<OtpAlertEvent> otpAlertEvents = otpAlertEventRepository.findByCompanyQueueAndCreatedHourGreaterThan(
 				otpAlertEventQuery.getCompanyQueue(), created.getHour() - 1, PageRequest.of(0, 5));
 
 		for (OtpAlertEvent otpAlertEvent : otpAlertEvents) {
-			otpAlertEvent.update(CompanyQueueStatus.NTFD);
+			otpAlertEvent.update(CompanyQueueStatus.NOTIFIED);
 		}
 
 		otpAlertEventRepository.saveAll(otpAlertEvents);
