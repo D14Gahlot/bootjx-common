@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.contak.cache.OtpAlertEventManager;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -29,10 +28,7 @@ public class ContakMessageManager {
 	private CommonMongoTemplate commonMongoTemplate;
 
 	@Autowired
-	private ContakInboundManager contakInboundManager;
-
-	@Autowired
-	private OtpAlertEventManager otpAlertEventManager;
+	private ContakInboundRouter otpAlertEventManager;
 
 	public List<ContakMessageDoc> fetchMessages(PhoneUserDoc user) {
 		TimeStampIndex deliveredAt = TimeStampIndex.from(System.currentTimeMillis());

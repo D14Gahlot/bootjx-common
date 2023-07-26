@@ -13,7 +13,7 @@ import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Document(collection = "CONTAK_INBOUND")
+@Document(collection = "OA_EVENT")
 public class ContakInboundDoc implements Serializable {
 	private static final long serialVersionUID = 1281605084248923642L;
 

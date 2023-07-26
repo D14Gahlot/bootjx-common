@@ -64,6 +64,11 @@ public class OtpAlertEvent {
 		this.otpAlertEventId = improvedMusicId;
 	}
 
+	public OtpAlertEvent otpAlertEventId(OtpAlertEventId improvedMusicId) {
+		otpAlertEventId = improvedMusicId;
+		return this;
+	}
+
 	@DynamoDBHashKey(attributeName = "EventId")
 	public String getEventId() {
 		return otpAlertEventId != null ? otpAlertEventId.getEventId() : null;

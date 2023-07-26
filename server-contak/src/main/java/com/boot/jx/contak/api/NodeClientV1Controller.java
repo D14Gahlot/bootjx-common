@@ -1,7 +1,6 @@
 package com.boot.jx.contak.api;
 
 import java.util.HashMap;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.contak.cache.OtpAlertEventManager;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakMessageTrace.MessageStatus;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
@@ -24,7 +22,7 @@ import com.boot.jx.contak.dto.PhoneNotpRequestModels.ContakMessgaeTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.OtpAlert;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
-import com.boot.jx.contak.manager.ContakInboundManager;
+import com.boot.jx.contak.manager.ContakInboundRouter;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.UserRegistrationManager;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -58,7 +56,7 @@ public class NodeClientV1Controller {
 	private UserRegistrationManager userRegistrationManager;
 
 	@Autowired
-	private ContakInboundManager inboundManager;
+	private ContakInboundRouter inboundManager;
 
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
