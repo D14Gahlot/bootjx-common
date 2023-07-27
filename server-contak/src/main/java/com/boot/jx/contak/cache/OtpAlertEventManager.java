@@ -14,10 +14,10 @@ import com.boot.jx.contak.cache.OtpAlertEvent.TimeStampIndexDynmo;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakMessageTrace;
 import com.boot.jx.contak.dto.CompanyDoc;
-import com.boot.jx.contak.dto.ContakInboundDoc;
-import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
-import com.boot.jx.contak.manager.ContakInboundManager.USER_INBOUND_TYPE;
+import com.boot.jx.contak.dto.UserRegistrationDoc;
+import com.boot.jx.contak.manager.ContakInboundRouter;
+import com.boot.jx.contak.manager.ContakInboundRouter.USER_INBOUND_TYPE;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
@@ -26,6 +26,7 @@ import com.boot.jx.phonebook.doc.PhoneUserDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
+import com.boot.utils.UniqueID;
 import com.google.common.collect.Lists;
 
 @Component
@@ -46,7 +47,13 @@ public class OtpAlertEventManager {
 		TimeStampIndex created = TimeStampIndex.from(System.currentTimeMillis());
 		OtpAlertEventId otpAlertEventId = new OtpAlertEventId(eventId, created.getHour());
 		return otpAlertEventRepository
-				.save(new OtpAlertEvent(otpAlertEventId, companyId, phoneId).update(CompanyQueueStatus.CRTD));
+				.save(new OtpAlertEvent(otpAlertEventId, companyId, phoneId).update(CompanyQueueStatus.CREATED));
+	}
+
+	public OtpAlertEvent createOtpAlertEvent(final OtpAlertEvent event) {
+		TimeStampIndex created = TimeStampIndex.from(System.currentTimeMillis());
+		OtpAlertEventId otpAlertEventId = new OtpAlertEventId(UniqueID.generateString(), created.getHour());
+		return otpAlertEventRepository.save(event.otpAlertEventId(otpAlertEventId).update(CompanyQueueStatus.CREATED));
 	}
 
 	public OtpAlertEvent getOtpAlertEvent(final String eventId) {
@@ -60,13 +67,13 @@ public class OtpAlertEventManager {
 	public List<OtpAlertEvent> pollOtpAlertEvents(String companyId) {
 		TimeStampIndex created = TimeStampIndex.from(System.currentTimeMillis());
 
-		OtpAlertEvent otpAlertEventQuery = new OtpAlertEvent(null, companyId, null).update(CompanyQueueStatus.CRTD);
+		OtpAlertEvent otpAlertEventQuery = new OtpAlertEvent(null, companyId, null).update(CompanyQueueStatus.CREATED);
 
 		Iterable<OtpAlertEvent> otpAlertEvents = otpAlertEventRepository.findByCompanyQueueAndCreatedHourGreaterThan(
 				otpAlertEventQuery.getCompanyQueue(), created.getHour() - 1, PageRequest.of(0, 5));
 
 		for (OtpAlertEvent otpAlertEvent : otpAlertEvents) {
-			otpAlertEvent.update(CompanyQueueStatus.NTFD);
+			otpAlertEvent.update(CompanyQueueStatus.NOTIFIED);
 		}
 
 		otpAlertEventRepository.saveAll(otpAlertEvents);
@@ -83,18 +90,18 @@ public class OtpAlertEventManager {
 		inbound.setNotifiedAt(TimeStampIndexDynmo.from(userRegistrationDoc.getDeliveredAt()));
 		inbound.setExpiredAt(TimeStampIndexDynmo.from(userRegistrationDoc.getExpiredAt()));
 		inbound.setInboundPayload(JsonUtil.toJsonMap(userRegistrationDoc));
-		otpAlertEventRepository.save(inbound);
+		createOtpAlertEvent(inbound);
 	}
 
 	public void sendMsgDelvryEvent(ContakMessageDoc contakMessageDoc) {
 		OtpAlertEvent inbound = new OtpAlertEvent();
-		inbound.setInboundType(USER_INBOUND_TYPE.MSG_OUT_DELIVERED);
+		inbound.setInboundType(ContakInboundRouter.USER_INBOUND_TYPE.MSG_OUT_DELIVERED);
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
 		inbound.setCreatedAt(TimeStampIndexDynmo.now());
 		inbound.setInboundPayload(
 				JsonUtil.toJsonMap(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace())));
-		otpAlertEventRepository.save(inbound);
+		createOtpAlertEvent(inbound);
 	}
 
 	@Async
@@ -106,13 +113,14 @@ public class OtpAlertEventManager {
 
 	public void sendMsgReadEvent(ContakMessageDoc contakMessageDoc) {
 		OtpAlertEvent inbound = new OtpAlertEvent();
-		inbound.setInboundType(USER_INBOUND_TYPE.MSG_OUT_READ);
+		inbound.setInboundType(ContakInboundRouter.USER_INBOUND_TYPE.MSG_OUT_READ);
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
 		inbound.setCreatedAt(TimeStampIndexDynmo.now());
+		inbound.setStatus("CREATED");
 		inbound.setInboundPayload(
 				JsonUtil.toJsonMap(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace())));
-		otpAlertEventRepository.save(inbound);
+		createOtpAlertEvent(inbound);
 	}
 
 	@Async
@@ -132,20 +140,20 @@ public class OtpAlertEventManager {
 			inbound.setCompanyId(comp.getCompanyId());
 			inbound.setCreatedAt(TimeStampIndexDynmo.now());
 			inbound.setInboundPayload(JsonUtil.toJsonMap(new ContakMessageTrace()));
-			otpAlertEventRepository.save(inbound);
+			createOtpAlertEvent(inbound);
 		}
 	}
 
 	@Async
 	public void sendMsgLogEventAsync(ContakMessageDoc contakMessageDoc, MessageEvent event) {
 		OtpAlertEvent inbound = new OtpAlertEvent();
-		inbound.setInboundType(USER_INBOUND_TYPE.MSG_OUT_LOG);
+		inbound.setInboundType(ContakInboundRouter.USER_INBOUND_TYPE.MSG_OUT_LOG);
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
 		inbound.setCreatedAt(TimeStampIndexDynmo.now());
 		inbound.setInboundPayload(
 				JsonUtil.toJsonMap(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace())));
 		inbound.setEvent(EntityDtoUtil.entityToDto(event, new MessageEventDynmo()));
-		otpAlertEventRepository.save(inbound);
+		createOtpAlertEvent(inbound);
 	}
 }

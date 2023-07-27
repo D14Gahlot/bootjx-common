@@ -16,7 +16,8 @@ import com.boot.jx.contak.dto.PhoneLoginDTO.PhoneLoginResponseDTO;
 import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakInboundManager;
-import com.boot.jx.contak.manager.ContakInboundManager.USER_INBOUND_TYPE;
+import com.boot.jx.contak.manager.ContakInboundRouter;
+import com.boot.jx.contak.manager.ContakInboundRouter.USER_INBOUND_TYPE;
 import com.boot.jx.contak.manager.PhoneService;
 import com.boot.jx.contak.service.PhoneAuthService;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -54,7 +55,7 @@ public class PhoneV1Controller {
 	private PhoneAuthService phoneAuthService;
 
 	@Autowired
-	private ContakInboundManager contakInboundManager;
+	private ContakInboundRouter contakInboundManager;
 
 	@RequestMapping(value = "/login", method = { RequestMethod.POST })
 	public ApiResponse<PhoneProfileDTO, PhoneLoginResponseDTO> login(
@@ -91,7 +92,7 @@ public class PhoneV1Controller {
 			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			commonMongoTemplate.update(phoneUserQuery);
 
-			contakInboundManager.sendUserAuthEvent(userDoc, USER_INBOUND_TYPE.USER_RELOGIN);
+			contakInboundManager.sendUserAuthEvent(userDoc, ContakInboundRouter.USER_INBOUND_TYPE.USER_RELOGIN);
 
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else if (ArgUtil.is(step, "VALIDATE") || (noStep && ArgUtil.is(loginDTO.otp))) { // Step 2
@@ -115,7 +116,8 @@ public class PhoneV1Controller {
 			commonMongoTemplate.update(phoneUserQuery);
 
 			contakInboundManager.sendUserAuthEvent(userDoc,
-					isUserRegistraion ? USER_INBOUND_TYPE.USER_REGISTERED : USER_INBOUND_TYPE.USER_LOGIN);
+					isUserRegistraion ? ContakInboundRouter.USER_INBOUND_TYPE.USER_REGISTERED
+							: ContakInboundRouter.USER_INBOUND_TYPE.USER_LOGIN);
 
 			return ApiResponse.buildResults(phoneBookManager.getProfile(userDoc), resp);
 		} else { // Step 1
@@ -179,19 +181,19 @@ public class PhoneV1Controller {
 
 	@RequestMapping(value = "/messages/fetch", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {
-		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
+		// PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
 		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
 	@RequestMapping(value = "/messages/mark/read", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> markRead(@RequestBody PhoneLoginDTO loginDTO) {
-		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
+		// PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
 		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
 	@RequestMapping(value = "/messages/log/event", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> markFailed(@RequestBody PhoneLoginDTO loginDTO) {
-		PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
+		// PhoneUserDoc userDoc = phoneAuthService.isUserValid(loginDTO);
 		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 

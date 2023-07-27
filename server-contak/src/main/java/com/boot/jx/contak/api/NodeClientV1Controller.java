@@ -1,7 +1,6 @@
 package com.boot.jx.contak.api;
 
 import java.util.HashMap;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -13,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.contak.cache.OtpAlertEventManager;
 import com.boot.jx.contak.doc.ContakMessageDoc;
+import com.boot.jx.contak.doc.ContakMessageTrace.MessageStatus;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakInboundDoc;
@@ -23,7 +22,7 @@ import com.boot.jx.contak.dto.PhoneNotpRequestModels.ContakMessgaeTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.OtpAlert;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
-import com.boot.jx.contak.manager.ContakInboundManager;
+import com.boot.jx.contak.manager.ContakInboundRouter;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.UserRegistrationManager;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -38,6 +37,7 @@ import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
 import com.boot.jx.swagger.MockParamBuilder.MockParamType;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 
 @RestController
 @RequestMapping("/client")
@@ -56,7 +56,7 @@ public class NodeClientV1Controller {
 	private UserRegistrationManager userRegistrationManager;
 
 	@Autowired
-	private ContakInboundManager inboundManager;
+	private ContakInboundRouter inboundManager;
 
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
@@ -111,6 +111,7 @@ public class NodeClientV1Controller {
 		newPhoneNOTPDoc.setTags(msg.tags);
 		newPhoneNOTPDoc.setCreatedAt(TimeStampIndex.from(msg.createdAt));
 		newPhoneNOTPDoc.setRelayedAt(TimeStampIndex.now());
+		newPhoneNOTPDoc.setStatus(MessageStatus.RELAYED);
 		newPhoneNOTPDoc.setExpiredAt(TimeStampIndex.from(System.currentTimeMillis() + msg.validity * 1000));
 		newPhoneNOTPDoc.setType(msg.type);
 		newPhoneNOTPDoc.setPubKey(msg.pubKey);
@@ -191,9 +192,10 @@ public class NodeClientV1Controller {
 			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
 		}
 
-		List<ContakInboundDoc> inbounds = inboundManager.fetchInbounds(compoc.companyId);
+		// List<ContakInboundDoc> inbounds =
+		// inboundManager.fetchInbounds(compoc.companyId);
 
-		return ApiResponse.buildResults(inbounds);
+		return ApiResponse.buildResults(CollectionUtil.asList());
 	}
 
 	@ApiRequest(authenticateTenant = true)

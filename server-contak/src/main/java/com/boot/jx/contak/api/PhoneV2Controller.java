@@ -11,11 +11,11 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.cache.OtpAlertEvent;
-import com.boot.jx.contak.cache.OtpAlertEventManager;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO;
 import com.boot.jx.contak.dto.UserRegistrationDTO;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
+import com.boot.jx.contak.manager.ContakInboundRouter;
 import com.boot.jx.contak.manager.ContakMessageManager;
 import com.boot.jx.contak.service.PhoneAuthService;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -40,7 +40,7 @@ public class PhoneV2Controller {
 	private PhoneAuthService phoneAuthService;
 
 	@Autowired
-	private OtpAlertEventManager otpAlertEventManager;
+	private ContakInboundRouter otpAlertEventManager;
 
 	@RequestMapping(value = "/messages/fetch", method = { RequestMethod.POST })
 	public ApiResponse<ContakMessageDoc, Object> read(@RequestBody PhoneLoginDTO loginDTO) {

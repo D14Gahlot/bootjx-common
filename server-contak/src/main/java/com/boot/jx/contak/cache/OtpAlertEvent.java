@@ -27,10 +27,11 @@ public class OtpAlertEvent {
 	private String phoneId;
 
 	public static enum CompanyQueueStatus {
-		CRTD, NTFD, FLD, XPRD
+		CREATED, NOTIFIED, FAILED, EXPIRED
 	}
 
-	@ApiMockModelProperty(example = "text", value = "Current Status", allowableValues = "CRTD,NTFD,FLD,XPRD")
+	@ApiMockModelProperty(example = "text", value = "Current Status",
+			allowableValues = "CREATED, NOTIFIED, FAILED, EXPIRED")
 	private String status;
 
 	private String companyQueue;
@@ -61,6 +62,11 @@ public class OtpAlertEvent {
 
 	public OtpAlertEvent(OtpAlertEventId improvedMusicId) {
 		this.otpAlertEventId = improvedMusicId;
+	}
+
+	public OtpAlertEvent otpAlertEventId(OtpAlertEventId improvedMusicId) {
+		otpAlertEventId = improvedMusicId;
+		return this;
 	}
 
 	@DynamoDBHashKey(attributeName = "EventId")

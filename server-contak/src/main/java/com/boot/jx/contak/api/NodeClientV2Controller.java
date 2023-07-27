@@ -13,9 +13,9 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.cache.OtpAlertEvent;
-import com.boot.jx.contak.cache.OtpAlertEventManager;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
+import com.boot.jx.contak.manager.ContakInboundRouter;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.filter.AppRequestUtil;
 import com.boot.jx.http.ApiRequest;
@@ -33,7 +33,7 @@ public class NodeClientV2Controller {
 	private ContakApiContext apiContext;
 
 	@Autowired
-	private OtpAlertEventManager otpAlertEventManager;
+	private ContakInboundRouter otpAlertEventManager;
 
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
