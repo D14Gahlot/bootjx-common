@@ -26,6 +26,19 @@ public class OWATest { // Noncompliant
 	 */
 
 	public static void main(String[] args) throws MalformedURLException, URISyntaxException {
-		System.out.println(CryptoUtil.getEncoder().message("pass4").sha2().toString());
+		String[] keys = "32care:64c15721d8be2e37457633f9-6b383d0c-26cc-4741-b308-463e14d3b33f".split("\\-",2);
+		
+		String[] apiIndex = keys[0].split("\\:", 2);
+
+		String clientId = apiIndex[0];
+		String apiId = apiIndex[1];
+		String apiSecret = keys[1];
+		
+		System.out.println("clientId : " + clientId);
+		System.out.println("apiId : " + apiId);
+		System.out.println("apiSecret : " + apiSecret);
+		
+		
+		//System.out.println(CryptoUtil.getEncoder().message("pass4").sha2().toString());
 	}
 }
