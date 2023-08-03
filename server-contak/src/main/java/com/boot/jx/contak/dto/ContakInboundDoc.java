@@ -125,4 +125,11 @@ public class ContakInboundDoc implements Serializable {
 		this.status = status;
 	}
 
+	public static ContakInboundDoc create(String inboundType) {
+		ContakInboundDoc inbound = new ContakInboundDoc();
+		inbound.setInboundType(inboundType);
+		inbound.setCreatedAt(TimeStampIndex.now());
+		inbound.setStatus(CompanyQueueStatus.CREATED);
+		return inbound;
+	}
 }

@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.contak.cache.OtpAlertEvent.CompanyQueueStatus;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakMessageTrace;
 import com.boot.jx.contak.dto.CompanyDoc;
@@ -51,12 +50,10 @@ public class ContakInboundManager {
 	}
 
 	public void sendHandShakeAckEvent(UserRegistrationDoc userRegistrationDoc) {
-		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType("HANDSHAKE_ACK"); // Earlier it was USER_REG
+		ContakInboundDoc inbound = ContakInboundDoc.create(ContakInboundRouter.USER_INBOUND_TYPE.HANDSHAKE_ACK);
 		inbound.setPhoneId(userRegistrationDoc.getUserPhoneNumber());
 		inbound.setCompanyId(userRegistrationDoc.getCompanyId());
 		inbound.setCreatedAt(userRegistrationDoc.getCreatedAt());
-		inbound.setStatus(CompanyQueueStatus.CREATED);
 		inbound.setNotifiedAt(userRegistrationDoc.getDeliveredAt());
 		inbound.setExpiredAt(userRegistrationDoc.getExpiredAt());
 		inbound.setInboundPayload(userRegistrationDoc);
@@ -64,12 +61,9 @@ public class ContakInboundManager {
 	}
 
 	public void sendMsgDelvryEvent(ContakMessageDoc contakMessageDoc) {
-		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType(ContakInboundRouter.USER_INBOUND_TYPE.MSG_OUT_DELIVERED);
+		ContakInboundDoc inbound = ContakInboundDoc.create(ContakInboundRouter.USER_INBOUND_TYPE.MSG_OUT_DELIVERED);
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
-		inbound.setCreatedAt(TimeStampIndex.now());
-		inbound.setStatus(CompanyQueueStatus.CREATED);
 		inbound.setInboundPayload(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace()));
 		commonMongoTemplate.save(inbound);
 	}
@@ -82,12 +76,9 @@ public class ContakInboundManager {
 	}
 
 	public void sendMsgReadEvent(ContakMessageDoc contakMessageDoc) {
-		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType(ContakInboundRouter.USER_INBOUND_TYPE.MSG_OUT_READ);
+		ContakInboundDoc inbound = ContakInboundDoc.create(ContakInboundRouter.USER_INBOUND_TYPE.MSG_OUT_READ);
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
-		inbound.setCreatedAt(TimeStampIndex.now());
-		inbound.setStatus(CompanyQueueStatus.CREATED);
 		inbound.setInboundPayload(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace()));
 		commonMongoTemplate.save(inbound);
 	}
@@ -99,16 +90,13 @@ public class ContakInboundManager {
 		}
 	}
 
-	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, String isUserRegistraion) {
+	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, String inBoundType) {
 		CompanyDoc comp = commonMongoTemplate
 				.findOne(MQB.select(CompanyDoc.class).where(QueryCriteria.where("clientId").is("mehery")));
 		if (ArgUtil.is(comp)) {
-			ContakInboundDoc inbound = new ContakInboundDoc();
-			inbound.setInboundType(isUserRegistraion);
+			ContakInboundDoc inbound = ContakInboundDoc.create(inBoundType);
 			inbound.setPhoneId(phoneUserDoc.getPhoneId());
 			inbound.setCompanyId(comp.getCompanyId());
-			inbound.setCreatedAt(TimeStampIndex.now());
-			inbound.setStatus(CompanyQueueStatus.CREATED);
 			inbound.setInboundPayload(new ContakMessageTrace());
 			commonMongoTemplate.save(inbound);
 		}
@@ -116,12 +104,9 @@ public class ContakInboundManager {
 
 	@Async
 	public void sendMsgLogEventAsync(ContakMessageDoc contakMessageDoc, MessageEvent event) {
-		ContakInboundDoc inbound = new ContakInboundDoc();
-		inbound.setInboundType(ContakInboundRouter.USER_INBOUND_TYPE.MSG_OUT_LOG);
+		ContakInboundDoc inbound = ContakInboundDoc.create(ContakInboundRouter.USER_INBOUND_TYPE.MSG_OUT_LOG);
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
-		inbound.setCreatedAt(TimeStampIndex.now());
-		inbound.setStatus(CompanyQueueStatus.CREATED);
 		inbound.setInboundPayload(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace()));
 		inbound.setEvent(event);
 		commonMongoTemplate.save(inbound);

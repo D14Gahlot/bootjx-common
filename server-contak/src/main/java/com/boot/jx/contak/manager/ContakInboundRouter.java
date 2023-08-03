@@ -28,6 +28,7 @@ public class ContakInboundRouter {
 		public static final String MSG_OUT_DELIVERED = "MSG_OUT_DELIVERED"; // MSG_OUT_READ
 		public static final String MSG_OUT_READ = "MSG_OUT_READ"; // MSG_OUT_READ
 		public static final String MSG_OUT_LOG = "MSG_OUT_LOG"; // MSG_OUT_READ
+		public static final String HANDSHAKE_ACK = "HANDSHAKE_ACK";
 	}
 
 	@Autowired
@@ -60,8 +61,8 @@ public class ContakInboundRouter {
 		contakInboundManager.sendMsgReadEventAsync(messages);
 	}
 
-	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, String isUserRegistraion) {
-		contakInboundManager.sendUserAuthEvent(phoneUserDoc, isUserRegistraion);
+	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, String inBoundType) {
+		contakInboundManager.sendUserAuthEvent(phoneUserDoc, inBoundType);
 	}
 
 	@Async
