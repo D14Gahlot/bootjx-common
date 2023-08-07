@@ -137,5 +137,12 @@ public class AdminDashBoardContoller {
 		EventCountSummary summary = adminDbMgr.getEventCountSummary(dateRange1, dateRange2, days);
 		return ApiResponse.buildResult(summary);
 	}
+	
+	@ResponseBody
+	@RequestMapping(value = { "/admin/customer-session-count-summary" }, method = { RequestMethod.GET })
+	public ApiResponse<ContactTypeSummaryDto, Object> getCustomerSessionCountSummary(String dateRange1, String dateRange2,int days){
+		ContactTypeSummaryDto summary = adminDbMgr.getCustomerSessionCountSummary(dateRange1,dateRange2,days);
+		return ApiResponse.buildResult(summary);
+	}
 
 }
