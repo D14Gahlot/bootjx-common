@@ -2065,4 +2065,103 @@ public void includeMsgFieldsEvent(Query query) {
 	query.fields().include("form.reply_title").include("contactId").include("contact.contactType").include("timestamp");
 }
 
+/** customer session count with  channel summary **/
+public ContactTypeSummaryDto getCustomerSessionCountSummary(String dateRange1, String dateRange2, int days) {
+	String tnt = AppContextUtil.getTenant();
+	List<String> lst = getListOfContactType();
+	List<String> channelLst = getListChannelCongig();
+	long currentTs = System.currentTimeMillis();
+
+	ZonedDateTime noOfdaysTstamp = null;
+
+	String offset = getTimeZoneFromSetup();
+
+	LOGGER.info("ADMIN getCustomerSessionCountSummary {}" + offset + "\t dateRange1:" + dateRange1 + "\t dateRange2 :"
+			+ dateRange2);
+
+	long offsetts = countryTimeZoneOffset(offset);
+	String zone = DateUtil.getTimeZone(offset);
+	long lasDayTimeStmp = 0;
+	int hr = 0;
+	int mm = 0;
+
+	if (ArgUtil.is(dateRange1)) {
+		lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange1), hr, mm, zone,
+				LocalTime.MIN);
+		lasDayTimeStmp = lasDayTimeStmp + offsetts;
+
+	}
+	if (ArgUtil.is(dateRange2)) {
+		currentTs = DateUtil.getDateMinAndMaxTime(DateUtil.getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+		currentTs = currentTs + offsetts;
+	}
+
+	if (lasDayTimeStmp == 0 && days > 0) {
+		noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
+		lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+	}
+
+	Map<Object, Long> dateRanMap = MapUtils.getDatesRange(currentTs, lasDayTimeStmp);
+
+	String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(lasDayTimeStmp);
+	List<SummaryDocDto> lstSummDto = new ArrayList<>();
+	List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
+
+	
+		Query query = new Query();
+		query.addCriteria(Criteria.where("startSessionStamp").gt(lasDayTimeStmp).lt(currentTs));
+		query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
+		query.fields().include("startSessionStamp").include("contactType").include("channel").include("contact");
+		List<ChatSessionDoc> msgDocLst = mongoTemplate.find(query, ChatSessionDoc.class);
+		for (ChatSessionDoc doc : msgDocLst) {
+			SummaryDocDto dto = new SummaryDocDto();
+			DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
+			String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getStartSessionStamp(),
+					DateUtil.YYYYMMDD_DATE_FORMAT);
+			dto.setDate(yyyyMMdd);
+			dto.setType(doc.contact().getContactType());
+			dto.setChannel(doc.contact().getContactType());
+			////--dto.setMeta(doc.getMeta());
+			dto.setDomain(tnt);
+			dto.setLane(getLane(doc.contact().getContactId()));
+			String id = getSummaryId(dto);
+			dto.setId(id);
+			if (ArgUtil.is(dto.getId())) {
+				lstSummDto.add(dto);
+			}
+			String channelid = getSummaryWithChannelId(dto);
+			if (ArgUtil.is(channelid)) {
+				daySummDto.setDate(yyyyMMdd);
+				daySummDto.setChannel(channelid);
+				if (daySummDto != null) {
+					hourCntLst.add(daySummDto);
+				}
+			}
+
+		}
+
+	
+	Map<Object, Long> summaryMap = new HashMap<>();
+
+	/** day wise count **/
+	Map<String, Map<String, Long>> dayWiseCountMap = hourCntLst.stream()
+			.collect(Collectors.groupingBy(DateWiseHourCountDto::getChannel,
+					Collectors.groupingBy(DateWiseHourCountDto::getDate, Collectors.counting())));
+
+	Map<Object, Map<Object, Long>> dayWiseMap = new HashMap<>();
+	dayWiseMap = MapUtils.defaultValue(dayWiseCountMap, channelLst, dateRanMap, tnt);
+
+	dayWiseMap = sortMap(dayWiseMap);
+
+	summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
+
+	ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
+	dto.setTenant(tnt);
+	dto.setMonth(monthYear);
+	dto.setSummaryCount(summaryMap);
+	dto.setDateWiseSummaryCount(dayWiseMap);
+	return dto;
+}
+
+
 }
