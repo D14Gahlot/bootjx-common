@@ -332,13 +332,9 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
 		MessageReport report = this.createMessageReport(channelConfig);
 		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
-
-		LOGGER.info("1.toMessageReport csid:"+csid);
 		if (!ArgUtil.is(csid)) {
 			csid = requestMap.getString("recipient_id");
 		}
-		LOGGER.info("2.toMessageReport csid:"+csid);
-
 		report.contact().setCsid(csid);
 		report.setChangeStamp(requestMap.getLong("timestamp", 0L) * 1000);
 		report.setMessageIdExt(requestMap.getString("id"));
