@@ -27,6 +27,7 @@ import com.boot.jx.phonebook.doc.PhoneUserDoc;
 import com.boot.jx.phonebook.doc.PhoneUserQuery;
 import com.boot.jx.phonebook.dto.PhoneProfileDTO;
 import com.boot.jx.phonebook.manager.PhoneBookManager;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
@@ -177,6 +178,11 @@ public class PhoneV1Controller {
 			return lastStamp + TimeUtils.Constants.MILLIS_IN_DAY;
 		}
 		return lastStamp;
+	}
+
+	@RequestMapping(value = "/otp", method = { RequestMethod.POST })
+	public ApiResponse<OutboxMessage, Object> read(@RequestParam String phone, @RequestParam String otp) {
+		return ApiResponse.buildResults(CollectionUtil.asList(phoneService.sendPhoneOTP(phone, otp)));
 	}
 
 	@RequestMapping(value = "/messages/fetch", method = { RequestMethod.POST })
