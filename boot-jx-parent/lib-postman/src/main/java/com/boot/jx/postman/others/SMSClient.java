@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -43,8 +44,8 @@ public class SMSClient {
 
 		MapModel pub = MapModel.from(sms.getPub());
 		MapModel secret = MapModel.from(sms.getSecret());
-		MapModel model = MapModel.createInstance().putAll(pub).putAll(secret).put("message",
-				outboxMessage.getMessage());
+		MapModel model = MapModel.createInstance().putAll(pub).putAll(secret).put("message", outboxMessage.getMessage())
+				.put("message_id", outboxMessage.getMessageId());
 
 		if (TEXTLOCAL.equalsIgnoreCase(sms.getProvider())) {
 			MapModel resp = restService.ajax(TEXTLOCAL_URL).field("apikey", secret.entry("apikey").asString())
