@@ -68,11 +68,18 @@ public class SMSClient {
 			if (sms.getRequest().getHeaders() != null) {
 				for (String header : sms.getRequest().getHeaders()) {
 					String[] hd = header.split(":");
-					ajax.header(hd[0], hd[1]);
+					ajax.header(hd[0], fullfull(hd[1], model));
+				}
+			}
+			if (sms.getRequest().getAuths() != null) {
+				for (String auth : sms.getRequest().getAuths()) {
+					ajax.header("Authorization", "Basic " + CryptoUtil.getEncoder()
+							.message(ArgUtil.parseAsString(fullfull(auth, model))).encodeBase64().toString());
 				}
 			}
 
 			if ("POST".equalsIgnoreCase(sms.getRequest().getMethod())) {
+				// ajax.header("Accept", "text/html");
 				if (sms.getRequest().getFields() != null) {
 					for (Entry<String, String> field : sms.getRequest().getFields().entrySet()) {
 						ajax.field(field.getKey(), fullfull(field.getValue(), model));
@@ -101,7 +108,7 @@ public class SMSClient {
 	private Object fullfull(Object template, MapModel model) {
 		String tempString = ArgUtil.parseAsString(template, Constants.BLANK);
 		if (tempString.contains("{{")) {
-			return tmplClient.process(tempString, model);
+			return tmplClient.process(tempString, model.toMap());
 		}
 		return template;
 	}

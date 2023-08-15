@@ -22,7 +22,7 @@ public class JsonPathTests {
 	public void curl() {
 		URL url = FileUtil.getResource("sample/curl_test.txt", JsonPathTests.class);
 		String text = FileUtil.read(url);
-		System.out.println(JsonUtil.toJson(CurlCommand.parse(text)));
+		System.out.println(JsonUtil.toJsonPrettyPrint(CurlCommand.parse(text)));
 	}
 
 	// @Test
