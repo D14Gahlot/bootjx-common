@@ -1,5 +1,6 @@
 package com.boot.jx.postman.others;
 
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,15 @@ import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.rest.RestService.Ajax;
 import com.boot.model.MapModel;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonPath;
 
 @Component
 public class SMSClient {
 
+	private static final String MESSAGE_VAR = "{{message}}";
 	public static final String TEXTLOCAL = "TEXTLOCAL";
 	public static final String TEXTLOCAL_URL = "https://api.textlocal.in/send";
 	public static final JsonPath TEXTLOCAL_URL_RESPONSE_MSG_ID = new JsonPath("messages/[0]/id");
@@ -65,16 +69,20 @@ public class SMSClient {
 			if ("POST".equalsIgnoreCase(sms.getRequest().getMethod())) {
 				if (sms.getRequest().getFields() != null) {
 					for (Entry<String, String> field : sms.getRequest().getFields().entrySet()) {
-						ajax.field(field.getKey(), field.getValue());
+						ajax.field(field.getKey(), fullfull(field.getValue(), outboxMessage));
 					}
 					ajax.submit().asNone();
 				} else if (sms.getRequest().getData() != null) {
-					ajax.postJson(sms.getRequest().getData()).asNone();
+					Map<String, Object> data = MapModel.newMap();
+					for (Entry<String, Object> field : sms.getRequest().getData().entrySet()) {
+						data.put(field.getKey(), fullfull(field.getValue(), outboxMessage));
+					}
+					ajax.postJson(data).asNone();
 				}
 			} else if ("GET".equalsIgnoreCase(sms.getRequest().getMethod())) {
 				if (sms.getRequest().getFields() != null) {
 					for (Entry<String, String> field : sms.getRequest().getFields().entrySet()) {
-						ajax.queryParam(field.getKey(), field.getValue());
+						ajax.queryParam(field.getKey(), fullfull(field.getValue(), outboxMessage));
 					}
 				}
 				ajax.get().asNone();
@@ -84,4 +92,11 @@ public class SMSClient {
 		return outboxMessage;
 	}
 
+	private Object fullfull(Object template, OutboxMessage outboxMessage) {
+		String tempString = ArgUtil.parseAsString(template, Constants.BLANK);
+		if (tempString.contains(MESSAGE_VAR)) {
+			return tempString.replace(MESSAGE_VAR, outboxMessage.getMessage());
+		}
+		return template;
+	}
 }
