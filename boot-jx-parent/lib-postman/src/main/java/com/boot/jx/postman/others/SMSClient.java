@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
@@ -20,7 +21,6 @@ import com.boot.utils.JsonPath;
 @Component
 public class SMSClient {
 
-	private static final String MESSAGE_VAR = "{{message}}";
 	public static final String TEXTLOCAL = "TEXTLOCAL";
 	public static final String TEXTLOCAL_URL = "https://api.textlocal.in/send";
 	public static final JsonPath TEXTLOCAL_URL_RESPONSE_MSG_ID = new JsonPath("messages/[0]/id");
@@ -35,11 +35,16 @@ public class SMSClient {
 	@Autowired
 	TwilioClient twilioClient;
 
+	@Autowired
+	TmplClient tmplClient;
+
 	public OutboxMessage sendSMS(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		SMSConfigDetails sms = channelConfig.getSms();
 
 		MapModel pub = MapModel.from(sms.getPub());
 		MapModel secret = MapModel.from(sms.getSecret());
+		MapModel model = MapModel.createInstance().putAll(pub).putAll(secret).put("message",
+				outboxMessage.getMessage());
 
 		if (TEXTLOCAL.equalsIgnoreCase(sms.getProvider())) {
 			MapModel resp = restService.ajax(TEXTLOCAL_URL).field("apikey", secret.entry("apikey").asString())
@@ -69,20 +74,20 @@ public class SMSClient {
 			if ("POST".equalsIgnoreCase(sms.getRequest().getMethod())) {
 				if (sms.getRequest().getFields() != null) {
 					for (Entry<String, String> field : sms.getRequest().getFields().entrySet()) {
-						ajax.field(field.getKey(), fullfull(field.getValue(), outboxMessage));
+						ajax.field(field.getKey(), fullfull(field.getValue(), model));
 					}
 					ajax.submit().asNone();
 				} else if (sms.getRequest().getData() != null) {
 					Map<String, Object> data = MapModel.newMap();
 					for (Entry<String, Object> field : sms.getRequest().getData().entrySet()) {
-						data.put(field.getKey(), fullfull(field.getValue(), outboxMessage));
+						data.put(field.getKey(), fullfull(field.getValue(), model));
 					}
 					ajax.postJson(data).asNone();
 				}
 			} else if ("GET".equalsIgnoreCase(sms.getRequest().getMethod())) {
 				if (sms.getRequest().getFields() != null) {
 					for (Entry<String, String> field : sms.getRequest().getFields().entrySet()) {
-						ajax.queryParam(field.getKey(), fullfull(field.getValue(), outboxMessage));
+						ajax.queryParam(field.getKey(), fullfull(field.getValue(), model));
 					}
 				}
 				ajax.get().asNone();
@@ -92,10 +97,10 @@ public class SMSClient {
 		return outboxMessage;
 	}
 
-	private Object fullfull(Object template, OutboxMessage outboxMessage) {
+	private Object fullfull(Object template, MapModel model) {
 		String tempString = ArgUtil.parseAsString(template, Constants.BLANK);
-		if (tempString.contains(MESSAGE_VAR)) {
-			return tempString.replace(MESSAGE_VAR, outboxMessage.getMessage());
+		if (tempString.contains("{{")) {
+			return tmplClient.process(tempString, model);
 		}
 		return template;
 	}
