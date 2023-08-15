@@ -45,7 +45,7 @@ public class SMSClient {
 		MapModel pub = MapModel.from(sms.getPub());
 		MapModel secret = MapModel.from(sms.getSecret());
 		MapModel model = MapModel.createInstance().putAll(pub).putAll(secret).put("message", outboxMessage.getMessage())
-				.put("message_id", outboxMessage.getMessageId());
+				.put("message_id", outboxMessage.getMessageId()).put("csid", outboxMessage.contact().getCsid());
 
 		if (TEXTLOCAL.equalsIgnoreCase(sms.getProvider())) {
 			MapModel resp = restService.ajax(TEXTLOCAL_URL).field("apikey", secret.entry("apikey").asString())
