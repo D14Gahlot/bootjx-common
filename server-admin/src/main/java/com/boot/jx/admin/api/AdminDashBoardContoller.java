@@ -51,7 +51,6 @@ public class AdminDashBoardContoller {
 		return agentAnaMgr.getAgentList();
 	}
 
-	
 	@RequestMapping(value = "/admin/agent-dashboard-analytics", method = { RequestMethod.POST })
 	public ApiResponse<DashBoardResponseDto, Object> getAgentWiseAnalytics(@RequestBody DashBoardRequestDto req) {
 		ApiResponse<DashBoardResponseDto, Object> resp = new ApiResponse<DashBoardResponseDto, Object>();
@@ -144,5 +143,6 @@ public class AdminDashBoardContoller {
 		ContactTypeSummaryDto summary = adminDbMgr.getCustomerSessionCountSummary(dateRange1,dateRange2,days);
 		return ApiResponse.buildResult(summary);
 	}
+
 
 }
