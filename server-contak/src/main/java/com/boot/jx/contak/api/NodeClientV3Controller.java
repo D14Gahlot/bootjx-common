@@ -21,6 +21,7 @@ import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
+import com.boot.jx.contak.manager.ContakApiContext.AUTH_RULES;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -39,7 +40,7 @@ public class NodeClientV3Controller {
 	@Autowired
 	private AWSFileStore fileStore;
 
-	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
+	@ApiRequest(authenticateTenant = true, rules = { AUTH_RULES.VALID_SESSION })
 	@RequestMapping(value = { "/org/{companyId}/hsm/tmpl" }, method = { RequestMethod.GET })
 	public ApiResponse<ContakTemplateDoc, Object> hsmTemplate(Model model) throws NoSuchAlgorithmException {
 		CompanyDoc compoc = apiContext.validateCompany();
@@ -47,7 +48,7 @@ public class NodeClientV3Controller {
 				.where("companyId", compoc.companyId).find().asList());
 	}
 
-	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
+	@ApiRequest(authenticateTenant = true, rules = { AUTH_RULES.VALID_SESSION })
 	@RequestMapping(value = { "/org/{companyId}/hsm/tmpl" }, method = { RequestMethod.POST })
 	public ApiResponse<ContakTemplateDoc, Object> hsmTemplate(Model model, @RequestBody ContakTemplateDoc template)
 			throws NoSuchAlgorithmException {
@@ -68,7 +69,7 @@ public class NodeClientV3Controller {
 		return ApiResponse.buildResult(template);
 	}
 
-	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
+	@ApiRequest(authenticateTenant = true, rules = { AUTH_RULES.VALID_SESSION })
 	@RequestMapping(value = { "/org/{companyId}/hsm/tmpl/{templateId}" }, method = { RequestMethod.DELETE })
 	public ApiResponse<Object, Object> hsmTemplate(Model model, @PathVariable String companyId,
 			@PathVariable String templateId) throws NoSuchAlgorithmException {
@@ -80,7 +81,7 @@ public class NodeClientV3Controller {
 		return ApiResponse.build().message("Template has been " + (template.isDeleted() ? "deleted" : "restored"));
 	}
 
-	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
+	@ApiRequest(authenticateTenant = true, rules = { AUTH_RULES.VALID_SESSION })
 	@RequestMapping(value = "/org/{companyId}/hsm/tmpl/{templateId}/media", method = { RequestMethod.POST })
 	public ApiResponse<CommonFile, Object> uploadFile(@RequestParam(name = "file", required = false) MultipartFile file,
 			@RequestParam(name = "thumbnail", required = false) MultipartFile thumbnail, @PathVariable String companyId,

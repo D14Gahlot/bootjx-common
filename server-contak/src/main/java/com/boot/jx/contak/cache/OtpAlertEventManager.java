@@ -17,7 +17,6 @@ import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakInboundRouter;
-import com.boot.jx.contak.manager.ContakInboundRouter.USER_INBOUND_TYPE;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;

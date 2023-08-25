@@ -24,6 +24,10 @@ import com.google.common.cache.CacheBuilder;
 @ThreadScoped
 public class ContakApiContext {
 
+	public static final class AUTH_RULES {
+		public static final String VALID_SESSION = "VALID_SESSION";
+	}
+
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 

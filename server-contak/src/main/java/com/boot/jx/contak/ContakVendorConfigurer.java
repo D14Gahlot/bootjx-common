@@ -9,6 +9,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
+import com.boot.jx.contak.manager.ContakApiContext.AUTH_RULES;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.postman.ClientApp;
@@ -41,7 +42,7 @@ public class ContakVendorConfigurer implements TenantAuthFilter {
 			return false;
 		}
 
-		CompanyDoc company = apiContext.loadKey(apiKey, apiRequest.hasRule("VALID_SESSION"));
+		CompanyDoc company = apiContext.loadKey(apiKey, apiRequest.hasRule(AUTH_RULES.VALID_SESSION));
 
 		if (ArgUtil.not(company)) {
 			String message = "Invalid " + ParamKeys.X_API_KEY;

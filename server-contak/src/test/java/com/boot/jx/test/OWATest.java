@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.ExpressionException;
 
-import com.boot.utils.CryptoUtil;
-
 public class OWATest { // Noncompliant
 
 	public static final Pattern pattern = Pattern.compile("^\\$\\{(.*)\\}$");
