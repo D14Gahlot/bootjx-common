@@ -7,7 +7,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.dto.CompanyDoc;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -20,6 +23,10 @@ import com.google.common.cache.CacheBuilder;
 @Component
 @ThreadScoped
 public class ContakApiContext {
+
+	public static final class AUTH_RULES {
+		public static final String VALID_SESSION = "VALID_SESSION";
+	}
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
@@ -73,6 +80,14 @@ public class ContakApiContext {
 
 	public CompanyDoc getCompany() {
 		return currentCompany;
+	}
+
+	public CompanyDoc validateCompany() {
+		CompanyDoc compoc = getCompany();
+		if (!ArgUtil.is(compoc)) {
+			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
+		}
+		return compoc;
 	}
 
 }

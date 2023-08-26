@@ -15,6 +15,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.contak.cache.OtpAlertEvent;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
+import com.boot.jx.contak.manager.ContakApiContext.AUTH_RULES;
 import com.boot.jx.contak.manager.ContakInboundRouter;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.filter.AppRequestUtil;
@@ -36,7 +37,7 @@ public class NodeClientV2Controller {
 	private ContakInboundRouter otpAlertEventManager;
 
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
-	@ApiRequest(authenticateTenant = true, rules = { "VALID_SESSION" })
+	@ApiRequest(authenticateTenant = true, rules = { AUTH_RULES.VALID_SESSION })
 	@RequestMapping(value = "/inbound/fetch", method = { RequestMethod.POST })
 	public ApiResponse<OtpAlertEvent, Object> messageInboundFetch(@RequestBody HashMap<String, String> msg) {
 		AppRequestUtil.log("MESSAGE APIKEY", msg);

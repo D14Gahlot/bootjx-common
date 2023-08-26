@@ -12,7 +12,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.boot.jx.contak.cache.OtpAlertEvent;
-import com.boot.jx.contak.manager.ContakInboundManager;
 
 @Configuration
 public class DynamoDBSetup {

@@ -22,7 +22,6 @@ import com.boot.jx.contak.dto.PhoneNotpRequestModels.ContakMessgaeTemplate;
 import com.boot.jx.contak.dto.PhoneNotpRequestModels.OtpAlert;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.contak.manager.ContakApiContext;
-import com.boot.jx.contak.manager.ContakInboundRouter;
 import com.boot.jx.contak.manager.FirebaseManager;
 import com.boot.jx.contak.manager.UserRegistrationManager;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
@@ -55,9 +54,6 @@ public class NodeClientV1Controller {
 	@Autowired
 	private UserRegistrationManager userRegistrationManager;
 
-	@Autowired
-	private ContakInboundRouter inboundManager;
-
 	@ApiRequest(authenticateTenant = true)
 	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/api/v1/auth", method = { RequestMethod.GET })
@@ -76,10 +72,6 @@ public class NodeClientV1Controller {
 	public ApiResponse<ContakMessageDoc, Object> send(@RequestBody OtpAlert msg) {
 
 		CompanyDoc compoc = apiContext.getCompany();
-
-		if (!ArgUtil.is(compoc)) {
-			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
-		}
 
 		if (!ArgUtil.is(msg.phone)) {
 			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("phone"));
@@ -187,10 +179,7 @@ public class NodeClientV1Controller {
 		if (!ArgUtil.is(name)) {
 			ApiResponseUtil.throwMissinInputException(new ApiFieldError().field("name"));
 		}
-		CompanyDoc compoc = apiContext.getCompany();
-		if (!ArgUtil.is(compoc)) {
-			ApiResponseUtil.throwInputException(ApiStatusCodes.UNAUTHORIZED, new ApiFieldError().field("apiKey"));
-		}
+		CompanyDoc compoc = apiContext.validateCompany();
 
 		// List<ContakInboundDoc> inbounds =
 		// inboundManager.fetchInbounds(compoc.companyId);
@@ -211,4 +200,5 @@ public class NodeClientV1Controller {
 		}
 		return ApiResponse.buildResults(tmpl);
 	}
+
 }
