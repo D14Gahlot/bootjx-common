@@ -196,7 +196,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		}
 
 		map.put("CDN_VERSION", "V3");
-		map.put("CDN_VERSION", getVersion());
+		map.put("CDN_VERSION", appConfig.getAppAppBuildStamp() + "." + getVersion());
 
 		map.put("APP_CONTEXT", appConfig.getAppPrefix());
 		map.put("POSTMAN_CONTEXT", appConfig.getAppPrefix());
