@@ -275,4 +275,10 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(serviceServer);
 	}
 
+	@Override
+	public String getServiceServerByRequest() {
+		return commonHttpRequest.getBaseDomain();
+		// return getServiceServer();
+	}
+
 }
