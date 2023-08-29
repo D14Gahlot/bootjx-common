@@ -144,39 +144,44 @@ public class ContakSecurityConfig {
 	@Autowired
 	AppConfig appConfig;
 
+	private ApiInfo apiInfo(String title, String description) {
+		return new ApiInfoBuilder().title(title).description(description)
+				.version(String.format("1.0 - %s", appConfig.getAppAppBuildStamp())).build();
+	}
+
 	@Bean
 	public Docket api2() {
 		List<SecurityScheme> securitySchemes = new ArrayList<SecurityScheme>();
 		securitySchemes.add(new ApiKey("X_API_KEY", "x-api-key",
 				StringUtils.toLowerCase(ArgUtil.parseAsString(MockParamBuilder.MockParamType.HEADER))));
-		return new Docket(DocumentationType.SWAGGER_2).groupName("clientdocs").apiInfo(apiInfo()).select()
+		return new Docket(DocumentationType.SWAGGER_2).groupName("clientdocs")
+				.apiInfo(apiInfo("API Documentation", "APIs to send messages to custoemr")).select()
 				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.nodedocs"))
 				// .paths(PathSelectors.ant("/api/products/**"))
 				.build().securitySchemes(securitySchemes);
 	}
 
-	private ApiInfo apiInfo() {
-		return new ApiInfoBuilder().version(String.format("1.0 - %s", appConfig.getAppAppBuildStamp())).build();
-	}
-
 	@Bean
 	public Docket apisForClientNode() {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("client").apiInfo(apiInfo()).select()
-				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
+		return new Docket(DocumentationType.SWAGGER_2).groupName("client")
+				.apiInfo(apiInfo("Node Client", "API's for communication between NodeClient and Contak Service"))
+				.select().apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
 				.paths(Predicates.or(PathSelectors.ant("/client/**"), PathSelectors.ant("/pub/meta/**"))).build();
 	}
 
 	@Bean
 	public Docket apisForCustomer() {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("phone").apiInfo(apiInfo()).select()
-				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
+		return new Docket(DocumentationType.SWAGGER_2).groupName("phone")
+				.apiInfo(apiInfo("Phone Client", "API's for communication between PhoneClient and Contak Service"))
+				.select().apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
 				.paths(PathSelectors.ant("/phone/**")).build();
 	}
 
 	@Bean
 	public Docket apisForPanel() {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("panel").apiInfo(apiInfo()).select()
-				.apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
+		return new Docket(DocumentationType.SWAGGER_2).groupName("panel")
+				.apiInfo(apiInfo("Contak Panel", "API's for communication between ContakDashboard and Contak Service"))
+				.select().apis(RequestHandlerSelectors.basePackage("com.boot.jx.contak.api"))
 				.paths(Predicates.or(PathSelectors.ant("/panel/**"), PathSelectors.ant("/pub/meta/**"))).build();
 	}
 
