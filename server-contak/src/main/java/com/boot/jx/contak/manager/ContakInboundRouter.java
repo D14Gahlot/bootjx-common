@@ -12,6 +12,9 @@ import com.boot.jx.contak.cache.OtpAlertEvent;
 import com.boot.jx.contak.cache.OtpAlertEventManager;
 import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.dto.ContakInboundDoc;
+import com.boot.jx.contak.dto.ContakModels.ContakActor;
+import com.boot.jx.contak.dto.ContakModels.ContakEvent;
+import com.boot.jx.contak.dto.ContakModels.ContakInboundTrigger;
 import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
@@ -29,6 +32,8 @@ public class ContakInboundRouter {
 		public static final String MSG_OUT_READ = "MSG_OUT_READ"; // MSG_OUT_READ
 		public static final String MSG_OUT_LOG = "MSG_OUT_LOG"; // MSG_OUT_READ
 		public static final String HANDSHAKE_ACK = "HANDSHAKE_ACK";
+		public static final String SYSTEM = "SYSTEM";
+		public static final String TEMPLATE_UPDATE = "TEMPLATE_UPDATE";
 	}
 
 	@Autowired
@@ -63,6 +68,18 @@ public class ContakInboundRouter {
 
 	public void sendUserAuthEvent(PhoneUserDoc phoneUserDoc, String inBoundType) {
 		contakInboundManager.sendUserAuthEvent(phoneUserDoc, inBoundType);
+	}
+
+	public void sendSystemEvent(ContakActor actor, String inBoundType, ContakEvent event) {
+		contakInboundManager.sendSystemEventAsync(actor, inBoundType, event);
+	}
+
+	public void sendSystemEvent(ContakActor actor, String inBoundType) {
+		contakInboundManager.sendSystemEventAsync(actor, inBoundType, null);
+	}
+
+	public void sendSystemEvent(ContakInboundTrigger trigger) {
+		contakInboundManager.sendSystemEventAsync(trigger.getActor(), trigger.getInboundType(), trigger.getEvent());
 	}
 
 	@Async

@@ -2,6 +2,7 @@ package com.boot.jx.contak.dto;
 
 import java.io.Serializable;
 
+import com.boot.jx.contak.dto.ContakModels.ContakEvent;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -26,7 +27,7 @@ public class PhoneLoginDTO implements Serializable {
 
 	public MessageEvent event;
 
-	public static class MessageEvent implements Serializable {
+	public static class MessageEvent implements Serializable, ContakEvent {
 		private static final long serialVersionUID = 7471706517329183180L;
 		@ApiMockModelProperty(example = "xxxxxxxx", required = false, value = "Messages Delivered Id")
 		public String noteId;

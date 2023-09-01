@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.contak.cache.OtpAlertEvent.CompanyQueueStatus;
-import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
+import com.boot.jx.contak.dto.ContakModels.ContakEvent;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -43,7 +43,7 @@ public class ContakInboundDoc implements Serializable {
 
 	public Object inboundPayload;
 
-	public MessageEvent event;
+	public ContakEvent event;
 
 	public String getInboundId() {
 		return inboundId;
@@ -109,11 +109,11 @@ public class ContakInboundDoc implements Serializable {
 		this.expiredAt = expiredAt;
 	}
 
-	public MessageEvent getEvent() {
+	public ContakEvent getEvent() {
 		return event;
 	}
 
-	public void setEvent(MessageEvent event) {
+	public void setEvent(ContakEvent event) {
 		this.event = event;
 	}
 

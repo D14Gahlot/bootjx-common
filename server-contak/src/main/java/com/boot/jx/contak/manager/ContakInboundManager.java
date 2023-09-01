@@ -13,6 +13,8 @@ import com.boot.jx.contak.doc.ContakMessageDoc;
 import com.boot.jx.contak.doc.ContakMessageTrace;
 import com.boot.jx.contak.dto.CompanyDoc;
 import com.boot.jx.contak.dto.ContakInboundDoc;
+import com.boot.jx.contak.dto.ContakModels.ContakActor;
+import com.boot.jx.contak.dto.ContakModels.ContakEvent;
 import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
 import com.boot.jx.contak.dto.UserRegistrationDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
@@ -108,6 +110,15 @@ public class ContakInboundManager {
 		inbound.setPhoneId(contakMessageDoc.getPhoneId());
 		inbound.setCompanyId(contakMessageDoc.getCompanyId());
 		inbound.setInboundPayload(EntityDtoUtil.entityToDto(contakMessageDoc, new ContakMessageTrace()));
+		inbound.setEvent(event);
+		commonMongoTemplate.save(inbound);
+	}
+
+	@Async
+	public void sendSystemEventAsync(ContakActor actor, String inBoundType, ContakEvent event) {
+		ContakInboundDoc inbound = ContakInboundDoc.create(inBoundType);
+		inbound.setCompanyId(actor.getCompanyId());
+		inbound.setPhoneId(actor.getPhoneId());
 		inbound.setEvent(event);
 		commonMongoTemplate.save(inbound);
 	}
