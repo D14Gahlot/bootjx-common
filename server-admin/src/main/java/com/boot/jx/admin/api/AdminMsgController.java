@@ -24,6 +24,7 @@ import com.boot.jx.admin.manager.CSVHelper;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
 import com.boot.jx.admin.service.CSVService;
+import com.boot.jx.admin.service.TestMessageService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
@@ -169,7 +170,26 @@ public class AdminMsgController {
 	}
 
 	@Autowired
+	private TestMessageService testMessageService;
+
+	@Autowired
 	private BulkMessageService bulkMessageService;
+
+	@RequestMapping(value = "/api/message/test/push/send", method = { RequestMethod.POST })
+	public ApiResponse<BulkSessionDoc, Object> sendTestMessage(@RequestBody OutboxMessage bulkMessage)
+			throws NumberParseException {
+		if (ArgUtil.is(bulkMessage.getReferenceKey())) {
+			List<OutboxMessage> lstOutBoxMsg = getCsvData(bulkMessage);
+			BulkSessionDoc bulkDoc = bulkMessageService.sendMultiple(lstOutBoxMsg);
+			if (ArgUtil.is(bulkDoc)) {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
+			} else {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+			}
+		} else {
+			return ApiResponse.buildResult(testMessageService.send(bulkMessage)).message("Bulk Message Job Created");
+		}
+	}
 
 	@RequestMapping(value = "/api/message/bulk/push/send", method = { RequestMethod.POST })
 	public ApiResponse<BulkSessionDoc, Object> sendBulkMessage(@RequestBody OutboxMessage bulkMessage)
