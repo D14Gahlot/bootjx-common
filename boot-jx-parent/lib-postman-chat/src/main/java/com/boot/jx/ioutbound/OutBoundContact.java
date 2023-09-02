@@ -1,4 +1,4 @@
-package com.boot.jx.xms.dto;
+package com.boot.jx.ioutbound;
 
 import com.boot.jx.postman.model.MessageDefinitions.ContactID;
 import com.boot.jx.swagger.ApiMockModelProperty;

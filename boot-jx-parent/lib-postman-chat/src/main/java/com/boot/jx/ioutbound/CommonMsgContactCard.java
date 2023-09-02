@@ -1,4 +1,4 @@
-package com.boot.jx.xms.dto;
+package com.boot.jx.ioutbound;
 
 import java.util.List;
 

@@ -17,6 +17,7 @@ import com.boot.jx.common.config.ConfigManager;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
@@ -25,7 +26,6 @@ import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.model.ext.MsgChannel;
 import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
-import com.boot.jx.xms.XmsVendorConfigurer;
 import com.boot.jx.xms.dto.WebhookUrlRequest;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -60,7 +60,7 @@ public class ConfigApiV1 {
 	@RequestMapping(value = "/api/v1/config/webhook", method = { RequestMethod.POST })
 	public ApiResponse<ClientApp, Object> setWebhookUrl(@RequestBody WebhookUrlRequest req) {
 
-		ClientApp x = XmsVendorConfigurer.getClientApp();
+		ClientApp x = PMContextUtil.clientApp();
 		if (ArgUtil.is(x)) {
 			ClientAppConfigDoc xo = configMaster.findById(x.getId(), ClientAppConfigDoc.class);
 			if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
