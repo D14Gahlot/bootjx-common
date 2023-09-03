@@ -119,7 +119,7 @@ html.loadable.loading .fullloader {
 			href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
 		
 		<!-- // preload  css and js -->
-		<link th:href="${CDN_URL} + '/app-test.js?_='+${CDN_VERSION}" rel=preload
+		<link th:href="${CDN_URL} + '/app-dev.js?_='+${CDN_VERSION}" rel=preload
 			as=script>
 		<link th:href="${CDN_URL} + '/css/chunk-common.css?_='+${CDN_VERSION}"
 			rel=preload as=style>
@@ -192,13 +192,13 @@ html.loadable.loading .fullloader {
 <div th:switch="${CDN_DEBUG}" th:remove="tag"> 
   <p th:case="'true'" th:remove="tag">
   		<!-- // load  js if debug -->
-		<script th:src="${CDN_URL}+'/app-test.js?_='+${CDN_VERSION}"></script>
+		<script th:src="${CDN_URL}+'/app-dev.js?_='+${CDN_VERSION}"></script>
   </p>
   <p th:case="*" th:remove="tag">
   		<!-- // load  js if prod -->
   	  	<script th:src="${CDN_URL}+'/js/chunk-vendors.js?_='+${CDN_VERSION}"></script>
   	  	<script th:src="${CDN_URL}+'/js/chunk-common.js?_='+${CDN_VERSION}"></script>
-		<script th:src="${CDN_URL}+'/app-test.js?_='+${CDN_VERSION}"></script>
+		<script th:src="${CDN_URL}+'/app-dev.js?_='+${CDN_VERSION}"></script>
   </p> 
 </div>
 
