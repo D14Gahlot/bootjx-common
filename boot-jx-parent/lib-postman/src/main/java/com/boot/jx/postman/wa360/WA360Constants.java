@@ -101,7 +101,7 @@ public class WA360Constants {
 
 	public static final String D360_API_KEY = "D360-API-KEY";
 	public static final String D360_CLOUD_API_KEY = "D360-API-KEY";
-	public static final String BASE_URL = "https://waba.360dialog.io";
+	public static final String BASE_URL ="https://waba.360dialog.io";
 	public static final String BASE_CLOUD_URL = "https://waba-v2.360dialog.io";
 
 
