@@ -45,6 +45,7 @@ import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
@@ -109,13 +110,16 @@ public class ConfigOptionMetaController {
 	// Option APIS
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
+	@ResponseBody
 	public ApiResponse<AChannelConfig, Object> listActiveLanes(
 			@RequestParam(required = false) ContactType contactType) {
 		if (ArgUtil.is(contactType)) {
 			return ApiResponse.buildResults(pmEnvironment.config().listChannels().stream()
 					.filter(channel -> channel.equals(contactType)).collect(Collectors.toList()));
 		}
-		return ApiResponse.buildResults(pmEnvironment.config().listChannels());
+		List<AChannelConfig> x = pmEnvironment.config().listChannels();
+		//System.out.println(JsonUtil.toJson(x));
+		return ApiResponse.buildResults(x);
 	}
 
 	@RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })
