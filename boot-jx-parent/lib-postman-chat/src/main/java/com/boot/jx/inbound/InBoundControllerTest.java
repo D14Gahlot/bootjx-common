@@ -73,7 +73,7 @@ public class InBoundControllerTest {
 		}
 
 		if (ArgUtil.is(bootJxConfigService)) {
-			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnAEntry("demo").map());
+			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnAEntry("dev").map());
 		}
 
 		return "app-test";
