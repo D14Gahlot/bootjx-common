@@ -216,10 +216,10 @@ public class PMConstants {
 		} else if (ContactType.WHATSAPP.toString().equals(contactType)) {
 			if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(channel)) {
 				return CHANNEL_TYPE.WA_GUPSHUP;
-			} else if (CHANNEL_TYPE.WA_360D.equals(channel)) {
-				return CHANNEL_TYPE.WA_360D;
+			} else if (CHANNEL_TYPE.WA_360DC.equals(channel)) {
+				return CHANNEL_TYPE.WA_360DC;
 			}
-			return CHANNEL_TYPE.WA_360DC;
+			return CHANNEL_TYPE.WA_360D;
 		}
 		return null;
 	}

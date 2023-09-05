@@ -111,7 +111,8 @@ public class ChatService {
 		outboxMessage.updateStatus(Status.RECEIVD);
 		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
-		outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
+		outboxMessage.contact().setChannelType(
+				ArgUtil.nonEmpty(outboxMessage.contact().getChannelType(), chatContactDoc.getChannelType()));
 		outboxMessage.contact().setLane(chatContactDoc.getLane());
 		outboxMessage.contact().setCsid(chatContactDoc.getCsid());
 		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
@@ -130,7 +131,8 @@ public class ChatService {
 
 		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.contact().setContactType(inboxMessage.contact().getContactType());
-		outboxMessage.contact().setChannelType(inboxMessage.contact().getChannelType());
+		outboxMessage.contact().setChannelType(
+				ArgUtil.nonEmpty(outboxMessage.contact().getChannelType(), chatContactDoc.getChannelType()));
 		outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 		outboxMessage.contact().setCsid(inboxMessage.contact().getCsid());
 		outboxMessage.contact().setContactId(inboxMessage.contact().getContactId());
@@ -156,7 +158,8 @@ public class ChatService {
 
 		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
-		outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
+		outboxMessage.contact().setChannelType(
+				ArgUtil.nonEmpty(outboxMessage.contact().getChannelType(), chatContactDoc.getChannelType()));
 		outboxMessage.contact().setLane(chatContactDoc.getLane());
 		outboxMessage.contact().setCsid(chatContactDoc.getCsid());
 		outboxMessage.contact().setContactId(chatContactDoc.getContactId());

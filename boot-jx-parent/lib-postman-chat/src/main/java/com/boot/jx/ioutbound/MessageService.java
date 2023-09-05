@@ -1,7 +1,6 @@
-package com.boot.jx.xms.service;
+package com.boot.jx.ioutbound;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
@@ -10,13 +9,19 @@ import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.dict.FileType;
+import com.boot.jx.ioutbound.CommonMsgContactCard.OutBoundMsgContactAddress;
+import com.boot.jx.ioutbound.CommonMsgContactCard.OutBoundMsgContactEmail;
+import com.boot.jx.ioutbound.CommonMsgContactCard.OutBoundMsgContactPhone;
+import com.boot.jx.ioutbound.CommonMsgContactCard.OutBoundMsgContactSocial;
+import com.boot.jx.ioutbound.CommonMsgContactCard.OutBoundMsgContactUrl;
+import com.boot.jx.ioutbound.OutBoundMsgBasic.OutBoundMsg;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
+import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageDefinitions.ContactID;
-import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.pbook.PBDate;
 import com.boot.jx.postman.pbook.PBLocation;
@@ -26,33 +31,16 @@ import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.store.SessionStore;
-import com.boot.jx.xms.XmsVendorConfigurer;
-import com.boot.jx.xms.dto.CommonMsgContactCard;
-import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactAddress;
-import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactEmail;
-import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactPhone;
-import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactSocial;
-import com.boot.jx.xms.dto.CommonMsgContactCard.OutBoundMsgContactUrl;
-import com.boot.jx.xms.dto.OutBoundContact;
-import com.boot.jx.xms.dto.OutBoundMsgBasic.OutBoundMsg;
-import com.boot.jx.xms.dto.OutBoundReciept;
 import com.boot.utils.ArgUtil;
 
 @Component
 public class MessageService {
 
 	@Autowired
-	private MongoTemplate mongoTemplate;
-
-	@Autowired
 	private ChatService chatService;
 
 	@Autowired
 	private ChatSessionService chatSessionService;
-
-	@Autowired
-	private SessionStore sessionStore;
 
 	@Autowired
 	private ChatSessionFactory chatSessionFactory;
@@ -247,17 +235,15 @@ public class MessageService {
 
 		return send(channel, message.getToContact(), outboxMessage);
 	}
-	
-	public OutBoundReciept send(String channelId,  OutboxMessage outboxMessage) {
+
+	public OutBoundReciept send(String channelId, OutboxMessage outboxMessage) {
 		ChannelConfig channel = pmEnvironment.config().channel(channelId);
-	
-		return send(channel,outboxMessage.getContact(),outboxMessage);
+
+		return send(channel, outboxMessage.getContact(), outboxMessage);
 	}
-	
-	 
 
 	private OutBoundReciept send(ChannelConfig channel, ContactID contact, OutboxMessage outboxMessage) {
-		ClientApp clientApp = XmsVendorConfigurer.getClientApp();
+		ClientApp clientApp = PMContextUtil.clientApp();
 
 		outboxMessage.contact().type(channel.getContactType());
 		outboxMessage.contact().setChannelType(channel.getChannelType());
@@ -272,8 +258,6 @@ public class MessageService {
 				.setSenderType(ArgUtil.parseAsString(clientApp.props().get("sender_type"), MESSAGE_SENDER_TYPE.API));
 
 		ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
-		
-		
 
 		if (ArgUtil.is(chatSessionDoc)) {
 			chatSessionService.initSession(outboxMessage, chatSessionDoc);
@@ -284,11 +268,8 @@ public class MessageService {
 							.description("Session Cannot be initialized for given contact"));
 		}
 		String messageId = outboxMessage.getMessageId();
-		
-		
-		
+
 		return new OutBoundReciept().id(messageId);
 	}
-	
 
 }
