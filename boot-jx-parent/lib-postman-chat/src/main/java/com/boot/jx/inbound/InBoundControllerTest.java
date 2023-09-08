@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.cdn.BootJxConfigService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.connectors.WebConnector;
 import com.boot.jx.http.ApiRequest;
@@ -43,38 +44,18 @@ import com.boot.utils.ArgUtil;
 public class InBoundControllerTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundControllerTest.class);
-	@Autowired
-	private InBoundService inBoundService;
-
-	@Autowired(required = false)
-	private WebConnector dummyConnector;
 
 	@Autowired
 	private CommonHttpRequest commonHttpRequest;
-
-	@Autowired
-	private SessionStore sessionStore;
-
-	@Autowired
-	private ChatSessionFactory chatSessionFactory;
-
-	@Autowired
-	private MessageStore messageStore;
-
-	@Autowired
-	VisitorActivityStore visitorActivityStore;
-
-	@Autowired
-	private MessageContext messageContext;
-
-	@Autowired
-	private WebConnector connector;
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
 	@Autowired(required = false)
 	private PMCommonConfig pmCommonConfig;
+
+	@Autowired(required = false)
+	private BootJxConfigService bootJxConfigService;
 
 	@Autowired
 	private AppConfig appConfig;
@@ -83,13 +64,18 @@ public class InBoundControllerTest {
 	private MessageService messageService;
 
 	@ApiRequest(session = true)
-	@RequestMapping(value = "/chatbox/**", method = RequestMethod.GET)
+	@RequestMapping(value = "/**", method = RequestMethod.GET)
 	public String pluginCustomer(Model model, HttpServletRequest request) throws InterruptedException {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 		if (pmCommonConfig != null) {
 			model.addAllAttributes(pmCommonConfig.appAttributes());
 		}
+
+		if (ArgUtil.is(bootJxConfigService)) {
+			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnAEntry("dev").map());
+		}
+
 		return "app-test";
 	}
 
