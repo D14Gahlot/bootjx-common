@@ -8,17 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.cdn.BootJxConfigService;
-import com.boot.jx.chat.ChatSessionFactory;
-import com.boot.jx.connectors.WebConnector;
+import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.ioutbound.MessageService;
@@ -29,14 +28,15 @@ import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConstants.ParamKeys;
 import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
-import com.boot.jx.postman.store.MessageContext;
-import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.postman.store.SessionStore;
-import com.boot.jx.postman.store.VisitorActivityStore;
+import com.boot.jx.postman.doc.config.ChannelConfigDoc;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
 import com.boot.jx.swagger.MockParamBuilder.MockParamType;
+import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
 @Controller
@@ -63,6 +63,30 @@ public class InBoundControllerTest {
 	@Autowired
 	private MessageService messageService;
 
+	@Autowired
+	private PMClientConfig pmClientConfig;
+
+	@Autowired
+	private ConnectorHandlerFactory connectorHandlerFactory;
+
+	private PMConfigurationModel validateApiKey() {
+		String apiKey = commonHttpRequest.get(ParamKeys.X_API_KEY);
+		if (!ArgUtil.is(apiKey)) {
+			ApiResponseUtil.throwException("Missing " + ParamKeys.X_API_KEY);
+		}
+		PMConfigurationModel config = pmEnvironment.local();
+		ClientApp apiKeyConfig = config.clientApiKey(apiKey);
+
+		if (!ArgUtil.is(apiKeyConfig)) {
+			ApiResponseUtil.throwException("Invalid " + ParamKeys.X_API_KEY);
+		}
+
+		if (ArgUtil.areEqual(apiKey, apiKeyConfig.getKey())) {
+			PMContextUtil.clientApp(apiKeyConfig);
+		}
+		return config;
+	}
+
 	@ApiRequest(session = true)
 	@RequestMapping(value = "/**", method = RequestMethod.GET)
 	public String pluginCustomer(Model model, HttpServletRequest request) throws InterruptedException {
@@ -84,22 +108,32 @@ public class InBoundControllerTest {
 	@RequestMapping(value = "/message/send", method = { RequestMethod.POST })
 	@ResponseBody
 	public ApiResponse<OutBoundReciept, Object> sendMessage(@RequestBody OutBoundMsg message) {
-		String apiKey = commonHttpRequest.get(ParamKeys.X_API_KEY);
-		if (!ArgUtil.is(apiKey)) {
-			ApiResponseUtil.throwException("Missing " + ParamKeys.X_API_KEY);
-		}
-
-		PMConfigurationModel config = pmEnvironment.local();
-		ClientApp apiKeyConfig = config.clientApiKey(apiKey);
-
-		if (!ArgUtil.is(apiKeyConfig)) {
-			ApiResponseUtil.throwException("Invalid " + ParamKeys.X_API_KEY);
-		}
-
-		if (ArgUtil.areEqual(apiKey, apiKeyConfig.getKey())) {
-			PMContextUtil.clientApp(apiKeyConfig);
-		}
-
+		PMConfigurationModel config = validateApiKey();
 		return ApiResponse.buildResult(messageService.send(message));
 	}
+
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
+			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@RequestMapping(value = "/setup/channel/webhook", method = { RequestMethod.GET })
+	@ResponseBody
+	public ApiResponse<MapModel, Object> getWebhook(@RequestParam String channelId) {
+		PMConfigurationModel config = validateApiKey();
+		ChannelConfig channelDto = config.channel(channelId);
+		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
+		String webhook_path = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelDto);
+		return ApiResponse.buildResult(MapModel.createInstance().put("webhook_url", webhook_url)
+				.put("webhook_path", webhook_path).put("webhook_context", appConfig.getAppPrefix()));
+	}
+
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
+			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@RequestMapping(value = "/setup/channel/webhook", method = { RequestMethod.POST })
+	@ResponseBody
+	public ApiResponse<MapModel, Object> resetWebhook(@RequestBody ChannelConfigDoc channel) {
+		PMConfigurationModel config = validateApiKey();
+		ChannelConfig channelDto = config.channel(channel.getId());
+		connectorHandlerFactory.onChannelUpdate(channelDto);
+		return ApiResponse.buildResult(MapModel.createInstance().put("channelId", channel.getId()));
+	}
+
 }
