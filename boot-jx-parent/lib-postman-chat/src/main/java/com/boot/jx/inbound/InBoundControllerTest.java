@@ -140,7 +140,7 @@ public class InBoundControllerTest {
 		ChannelConfig channelDto = config.channel(channelId);
 		context = ArgUtil.nonEmpty(context, appConfig.getAppPrefix());
 		if (ArgUtil.is(endpoint)) {
-			PMContextUtil.publicUrl(String.format("%s%s", context));
+			PMContextUtil.publicUrl(String.format("%s%s", endpoint, context));
 		}
 		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
 		String webhook_path = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelDto);
