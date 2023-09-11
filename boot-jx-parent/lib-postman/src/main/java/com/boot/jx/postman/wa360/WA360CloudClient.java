@@ -31,6 +31,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.JsonUtil.JsonUtilConfigurable;
 import com.boot.utils.StringUtils;
 
 @Component
@@ -280,7 +281,8 @@ public class WA360CloudClient {
 	}
 
 	private MapModel sendMedia(ChannelConfig channelConfig, OutboxMessage outboxMessage, Attachment attachment) {
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to",
 				outboxMessage.contact().getCsid());
 
 		WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
@@ -310,7 +312,8 @@ public class WA360CloudClient {
 	}
 
 	private MapModel sendList(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons) {
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to",
 				outboxMessage.contact().getCsid());
 
 		MapModel options = outboxMessage.optionsAsModel();
@@ -361,7 +364,8 @@ public class WA360CloudClient {
 	}
 
 	private MapModel sendButton(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons) {
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to",
 				outboxMessage.contact().getCsid());
 
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
@@ -418,6 +422,7 @@ public class WA360CloudClient {
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
 		try {
 			System.out.println("Req :"+req.toMap());
+			System.out.println("Rew "+req.toJsonPretty());
 			
 			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("messages")
 					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
@@ -476,13 +481,16 @@ public class WA360CloudClient {
 
 	public MapModel fetchTemplates(ChannelConfig channelConfig) {
 		MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates")
-				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360dc().getApiKey()).get().asMapModel();
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).get().asMapModel();
 		return resp;
 	}
+	
+	
+
 
 	public MapModel deleteTemplates(ChannelConfig channelConfig, String templateName) {
 		MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates/{templateName}")
-				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360dc().getApiKey())
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 				.pathParam("templateName", templateName).delete().asMapModel();
 		return resp;
 	}
@@ -491,7 +499,7 @@ public class WA360CloudClient {
 		try {
 			String templateName = req.getString("name");
 			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates/{templateName}")
-					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 					.pathParam("templateName", templateName).post(req.toMap()).asMapModel();
 
 			return resp;

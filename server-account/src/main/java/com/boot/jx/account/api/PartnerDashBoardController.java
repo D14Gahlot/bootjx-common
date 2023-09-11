@@ -122,8 +122,8 @@ public class PartnerDashBoardController {
 
 	@ResponseBody
 	@RequestMapping(value = { "/pub/non-whatsup-msg-summary" }, method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getNonWhatsUpSummary(long timestamp) {
-		ContactTypeSummaryDto summary = dashBMgr.getNonWhatsUpSummary(timestamp);
+	public ApiResponse<ContactTypeSummaryDto, Object> getNonWhatsUpSummary(String dateRange1, String dateRange2,int days) {
+		ContactTypeSummaryDto summary = dashBMgr.getNonWhatsUpSummary(dateRange1,dateRange2,days);
 		return ApiResponse.buildResult(summary);
 	}
 	
