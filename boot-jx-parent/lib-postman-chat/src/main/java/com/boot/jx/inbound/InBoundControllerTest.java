@@ -129,11 +129,11 @@ public class InBoundControllerTest {
 	@RequestMapping(value = "/setup/channel/webhook", method = { RequestMethod.POST })
 	@ResponseBody
 	public ApiResponse<MapModel, Object> resetWebhook(@RequestParam String channelId,
-			@RequestParam(required = false) String endPoint, @RequestParam(required = false) String context) {
+			@RequestParam(required = false) String endpoint, @RequestParam(required = false) String context) {
 		PMConfigurationModel config = validateApiKey();
 		ChannelConfig channelDto = config.channel(channelId);
 		context = ArgUtil.nonEmpty(context, appConfig.getAppPrefix());
-		if (ArgUtil.is(endPoint)) {
+		if (ArgUtil.is(endpoint)) {
 			PMContextUtil.publicUrl(String.format("%s%s", context));
 		}
 		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
