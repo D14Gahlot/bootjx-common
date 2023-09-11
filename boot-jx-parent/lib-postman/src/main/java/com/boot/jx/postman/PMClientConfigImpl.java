@@ -69,7 +69,8 @@ public class PMClientConfigImpl implements PMClientConfig {
 
 	@Override
 	public String getChatSessionTimeout() {
-		return environment.local().keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
+		return environment.local().keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT)
+				.asString(chatSessionTimeout);
 	}
 
 	@Override
@@ -81,7 +82,10 @@ public class PMClientConfigImpl implements PMClientConfig {
 	public String getWebhookBase(ChannelConfig channelConfig) {
 		String webhookUrl = channelConfig.getWebhookUrl();
 		if (!ArgUtil.is(webhookUrl)) {
-			if (isLocalDummyBotEnabled()) {
+			String publicUrl = PMContextUtil.publicUrl();
+			if (ArgUtil.is(publicUrl)) {
+				webhookUrl = publicUrl;
+			} else if (isLocalDummyBotEnabled()) {
 				webhookUrl = String.format("%s%s", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
 						environment.keyEntry("mry.prop.service.server").asString());
 			} else {

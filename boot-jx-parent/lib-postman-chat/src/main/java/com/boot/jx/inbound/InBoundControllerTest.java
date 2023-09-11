@@ -30,7 +30,6 @@ import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
-import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
@@ -129,11 +128,19 @@ public class InBoundControllerTest {
 			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/setup/channel/webhook", method = { RequestMethod.POST })
 	@ResponseBody
-	public ApiResponse<MapModel, Object> resetWebhook(@RequestBody ChannelConfigDoc channel) {
+	public ApiResponse<MapModel, Object> resetWebhook(@RequestParam String channelId,
+			@RequestParam(required = false) String endPoint, @RequestParam(required = false) String context) {
 		PMConfigurationModel config = validateApiKey();
-		ChannelConfig channelDto = config.channel(channel.getId());
+		ChannelConfig channelDto = config.channel(channelId);
+		context = ArgUtil.nonEmpty(context, appConfig.getAppPrefix());
+		if (ArgUtil.is(endPoint)) {
+			PMContextUtil.publicUrl(String.format("%s%s", context));
+		}
+		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
+		String webhook_path = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelDto);
 		connectorHandlerFactory.onChannelUpdate(channelDto);
-		return ApiResponse.buildResult(MapModel.createInstance().put("channelId", channel.getId()));
+		return ApiResponse.buildResult(MapModel.createInstance().put("channelId", channelId)
+				.put("webhook_url", webhook_url).put("webhook_path", webhook_path).put("webhook_context", context));
 	}
 
 }
