@@ -116,6 +116,9 @@ public class InBoundControllerTest {
 	@RequestMapping(value = "/setup/channel/webhook", method = { RequestMethod.GET })
 	@ResponseBody
 	public ApiResponse<MapModel, Object> getWebhook(@RequestParam String channelId) {
+		if (ArgUtil.not(channelId)) {
+			ApiResponseUtil.throwException("Select Channel");
+		}
 		PMConfigurationModel config = validateApiKey();
 		ChannelConfig channelDto = config.channel(channelId);
 		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
@@ -130,6 +133,9 @@ public class InBoundControllerTest {
 	@ResponseBody
 	public ApiResponse<MapModel, Object> resetWebhook(@RequestParam String channelId,
 			@RequestParam(required = false) String endpoint, @RequestParam(required = false) String context) {
+		if (ArgUtil.not(channelId)) {
+			ApiResponseUtil.throwException("Select Channel");
+		}
 		PMConfigurationModel config = validateApiKey();
 		ChannelConfig channelDto = config.channel(channelId);
 		context = ArgUtil.nonEmpty(context, appConfig.getAppPrefix());
