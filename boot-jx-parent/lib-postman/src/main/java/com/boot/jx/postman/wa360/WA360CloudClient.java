@@ -31,6 +31,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.JsonUtil.JsonUtilConfigurable;
 import com.boot.utils.StringUtils;
 
@@ -514,8 +515,9 @@ public class WA360CloudClient {
 
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
+			System.out.println("createTemplates WAC"+JsonUtil.toJsonPrettyPrint(req));
 			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates")
-					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
+					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).post(req.toMap())
 					.asMapModel();
 
 			return resp;

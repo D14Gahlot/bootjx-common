@@ -87,9 +87,18 @@ public class ThirdPartyTemplateManager {
 		MapModel resp = null;
 		if ("approved".equalsIgnoreCase(status) || "rejected".equalsIgnoreCase(status)
 				|| "paused".equalsIgnoreCase(status)) {
+			if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
+				resp = wa360CloudClient.updateTemplates(channelConfig, MapModel.from(templateStructure));
+			}else {
 			resp = wa360Client.updateTemplates(channelConfig, MapModel.from(templateStructure));
+			}
 		} else {
+			
+			if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
+				resp = wa360CloudClient.createTemplates(channelConfig, MapModel.from(templateStructure));
+			}else {
 			resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
+			}
 		}
 		return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
 	}
