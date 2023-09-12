@@ -117,6 +117,9 @@ public class InBoundControllerTest {
 	@RequestMapping(value = "/setup/channel/webhook", method = { RequestMethod.GET })
 	@ResponseBody
 	public ApiResponse<MapModel, Object> getWebhook(@RequestParam String channelId) {
+		if (ArgUtil.not(channelId)) {
+			ApiResponseUtil.throwException("Select Channel");
+		}
 		PMConfigurationModel config = validateApiKey();
 		ChannelConfig channelDto = config.channel(channelId);
 		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
@@ -129,11 +132,22 @@ public class InBoundControllerTest {
 			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/setup/channel/webhook", method = { RequestMethod.POST })
 	@ResponseBody
-	public ApiResponse<MapModel, Object> resetWebhook(@RequestBody ChannelConfigDoc channel) {
+	public ApiResponse<MapModel, Object> resetWebhook(@RequestParam String channelId,
+			@RequestParam(required = false) String endpoint, @RequestParam(required = false) String context) {
+		if (ArgUtil.not(channelId)) {
+			ApiResponseUtil.throwException("Select Channel");
+		}
 		PMConfigurationModel config = validateApiKey();
-		ChannelConfig channelDto = config.channel(channel.getId());
+		ChannelConfig channelDto = config.channel(channelId);
+		context = ArgUtil.nonEmpty(context, appConfig.getAppPrefix());
+		if (ArgUtil.is(endpoint)) {
+			PMContextUtil.publicUrl(String.format("%s%s", endpoint, context));
+		}
+		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
+		String webhook_path = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelDto);
 		connectorHandlerFactory.onChannelUpdate(channelDto);
-		return ApiResponse.buildResult(MapModel.createInstance().put("channelId", channel.getId()));
+		return ApiResponse.buildResult(MapModel.createInstance().put("channelId", channelId)
+				.put("webhook_url", webhook_url).put("webhook_path", webhook_path).put("webhook_context", context));
 	}
 
 }

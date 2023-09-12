@@ -1,5 +1,8 @@
 package com.boot.jx.postman;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +18,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils.TimePeriod;
+import com.boot.utils.URLBuilder;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @Configuration
@@ -69,7 +73,8 @@ public class PMClientConfigImpl implements PMClientConfig {
 
 	@Override
 	public String getChatSessionTimeout() {
-		return environment.local().keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT).asString(chatSessionTimeout);
+		return environment.local().keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT)
+				.asString(chatSessionTimeout);
 	}
 
 	@Override
@@ -81,7 +86,10 @@ public class PMClientConfigImpl implements PMClientConfig {
 	public String getWebhookBase(ChannelConfig channelConfig) {
 		String webhookUrl = channelConfig.getWebhookUrl();
 		if (!ArgUtil.is(webhookUrl)) {
-			if (isLocalDummyBotEnabled()) {
+			String publicUrl = PMContextUtil.publicUrl();
+			if (ArgUtil.is(publicUrl)) {
+				webhookUrl = publicUrl;
+			} else if (isLocalDummyBotEnabled()) {
 				webhookUrl = String.format("%s%s", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
 						environment.keyEntry("mry.prop.service.server").asString());
 			} else {
@@ -95,9 +103,16 @@ public class PMClientConfigImpl implements PMClientConfig {
 	@Override
 	public String getWebhookUrl(ChannelConfig channelConfig) {
 		PMConfigurationModel config = environment.local();
-		String webhookUrl = getWebhookBase(channelConfig);
-		return String.format("%s/%s", webhookUrl,
-				PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
+		String webhookEndPoint = getWebhookBase(channelConfig);
+		String webhookPath = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig);
+		try {
+			URLBuilder url = URLBuilder.parse(webhookEndPoint).path(webhookPath);
+			url.queryParam(webhookPath, AppContextUtil.getTenant());
+			return url.getURL();
+		} catch (MalformedURLException | URISyntaxException e) {
+			return String.format("%s/%s", webhookEndPoint, webhookPath);
+		}
+
 	}
 
 }
