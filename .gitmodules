@@ -5,3 +5,4 @@
 [submodule "bootjx-extjar"]
 	path = bootjx-extjar
 	url = https://github.com/bootloader/bootjx-extjar
+	branch = v2_dev
