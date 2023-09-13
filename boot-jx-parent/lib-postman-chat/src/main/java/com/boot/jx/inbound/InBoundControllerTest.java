@@ -30,6 +30,7 @@ import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;

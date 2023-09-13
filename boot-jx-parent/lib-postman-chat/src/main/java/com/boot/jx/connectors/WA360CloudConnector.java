@@ -432,11 +432,11 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				phone = String.format("+%s", phone);
 			}
 
-			MapModel resp = wa360CloudClient.fetchContact(phone, channelConfig);
-			String waId = resp.getString("wa_id");
+			//MapModel resp = wa360CloudClient.fetchContact(phone, channelConfig);
+			//String waId = resp.getString("wa_id");
 
-			String input = resp.getString("input");
-			String status = resp.getString("status");
+			String input =null;// resp.getString("input");
+			String status ="valid";// resp.getString("status");
 
 			if ("valid".equals(status)) {
 				ChatContactQuery chatContactQuery = new ChatContactQuery(chatContactDoc);
