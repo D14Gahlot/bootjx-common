@@ -90,8 +90,9 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
 		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+		LOGGER.info("WA360CloudConnector onChannelUpdate :"+webhookUrl);
 		restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/webhook")
-				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360d().getApiKey())
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 				.post(MapModel.createInstance().put("url", webhookUrl).toMap()).asMap();
 	}
 
