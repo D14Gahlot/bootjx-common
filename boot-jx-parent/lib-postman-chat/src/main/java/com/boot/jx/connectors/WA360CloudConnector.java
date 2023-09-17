@@ -1,5 +1,7 @@
 package com.boot.jx.connectors;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -293,9 +295,9 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			FileType fileType) {
 		try {
 			WA360InboundMedia media = map.entry(path).as(WA360InboundMedia.class);
-			CommonFileStream srcFile = new CommonFileStream().url(WA360Constants.MEDIA_URL(media.getId()))
+			CommonFileStream srcFile = new CommonFileStream().url(WA360Constants.MEDIA_CLOUD_URL(media.getId()))
 					.fileType(fileType).format(FileFormat.from(media.getMimeType()))
-					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+					.header(WA360Constants.BASE_CLOUD_URL, channelConfig.getWa360dc().getApiKey())
 					.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
 			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
@@ -433,8 +435,11 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				phone = String.format("+%s", phone);
 			}
 
-			//MapModel resp = wa360CloudClient.fetchContact(phone, channelConfig);
-			//String waId = resp.getString("wa_id");
+			MapModel resp = wa360CloudClient.fetchContact(phone, channelConfig);
+			String waId =null;
+			if(ArgUtil.is(resp)) {
+			 waId = resp.getString("wa_id");
+			}
 
 			String input =null;// resp.getString("input");
 			String status ="valid";// resp.getString("status");
