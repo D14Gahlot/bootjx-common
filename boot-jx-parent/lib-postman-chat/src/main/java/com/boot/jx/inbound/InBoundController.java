@@ -138,7 +138,7 @@ public class InBoundController {
 	public ApiResponse<Object, Object> inboundMessageBoxEvent(@PathVariable(required = false) String channelType,
 			@PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
 			@PathVariable(required = false) String channelKey, @RequestBody Map<String, Object> data) {
-		inBoundRouter.inboundMessageEvent(channelId, data);
+		inBoundRouter.inboundMessageEvent(PostManUtil.CHANNEL_ID_DECODED(channelId), data);
 		return ApiResponse.build();
 	}
 
