@@ -90,7 +90,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
 		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-		LOGGER.info("onChannelUpdate webhookUrl"+webhookUrl);
+		LOGGER.info("WA360CloudConnector onChannelUpdate :"+webhookUrl);
 		restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/webhook")
 				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 				.post(MapModel.createInstance().put("url", webhookUrl).toMap()).asMap();
@@ -295,7 +295,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			WA360InboundMedia media = map.entry(path).as(WA360InboundMedia.class);
 			CommonFileStream srcFile = new CommonFileStream().url(WA360Constants.MEDIA_CLOUD_URL(media.getId()))
 					.fileType(fileType).format(FileFormat.from(media.getMimeType()))
-					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
+					.header(WA360Constants.BASE_CLOUD_URL, channelConfig.getWa360dc().getApiKey())
 					.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
 			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
@@ -434,7 +434,10 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			}
 
 			MapModel resp = wa360CloudClient.fetchContact(phone, channelConfig);
-			String waId = resp.getString("wa_id");
+			String waId =null;
+			if(ArgUtil.is(resp)) {
+			 waId = resp.getString("wa_id");
+			}
 
 			String input =null;// resp.getString("input");
 			String status ="valid";// resp.getString("status");
