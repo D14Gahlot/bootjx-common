@@ -1,6 +1,7 @@
 package com.boot.jx.contak.dto;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import com.boot.jx.contak.dto.ContakModels.ContakEvent;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -37,6 +38,7 @@ public class PhoneLoginDTO implements Serializable {
 		public String eventSubCode;
 		public String eventDesc;
 		public long eventStamp;
+		public Map<String, Object> eventData;
 	}
 
 	public static class PhoneLoginResponseDTO implements Serializable {
