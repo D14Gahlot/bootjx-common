@@ -27,9 +27,9 @@ import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
+import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -289,7 +289,10 @@ public class EmpAuthService {
 		ChannelConfig channel = pmEnvironment.config().channel(otpChannel);
 
 		if (!ArgUtil.is(channel)) {
-			return;
+			channel = mongoTemplate.findById(otpChannel, ChannelConfigDoc.class, "CONFIG_CHANNEL_X");
+			if (!ArgUtil.is(channel)) {
+				return;
+			}
 		}
 
 		OutboxMessage ob = new OutboxMessage();
