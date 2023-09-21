@@ -288,6 +288,10 @@ public class EmpAuthService {
 
 		ChannelConfig channel = pmEnvironment.config().channel(otpChannel);
 
+		if (!ArgUtil.is(channel)) {
+			return;
+		}
+
 		OutboxMessage ob = new OutboxMessage();
 		ob.contact().setPhone(loginToken.getDomainUserPhone());
 		ob.setTemplateExt(new HSMTemplate3rdParty().code("login_otp"));
