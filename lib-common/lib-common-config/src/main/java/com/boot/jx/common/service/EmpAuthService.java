@@ -294,7 +294,7 @@ public class EmpAuthService {
 		ChannelConfig channel = pmEnvironment.config().channel(otpChannel.asString());
 
 		if (!ArgUtil.is(channel)) {
-			channel = mongoTemplate.findById(otpChannel, ChannelConfigDoc.class, "CONFIG_CHANNEL_X");
+			channel = mongoTemplate.findById(otpChannel.asString(), ChannelConfigDoc.class, "CONFIG_CHANNEL_X");
 			if (!ArgUtil.is(channel)) {
 				return;
 			}
