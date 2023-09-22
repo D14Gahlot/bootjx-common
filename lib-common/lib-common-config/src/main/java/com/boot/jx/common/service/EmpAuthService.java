@@ -27,6 +27,7 @@ import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
@@ -283,10 +284,14 @@ public class EmpAuthService {
 	public void sendOTP(UserAuthToken loginToken) {
 		OTPDetails otpDetails = OTPUtils.genrateBasicOTP(loginToken.getDomainUser(), loginToken.getApp());
 
-		String otpChannel = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_OTP_CHANNEL)
-				.asString("oa:mehery");
+		PMConfigurationObject otpChannel = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_OTP_CHANNEL);
+		// .asString("oa:mehery");
 
-		ChannelConfig channel = pmEnvironment.config().channel(otpChannel);
+		if (otpChannel.exists()) {
+			return;
+		}
+
+		ChannelConfig channel = pmEnvironment.config().channel(otpChannel.asString());
 
 		if (!ArgUtil.is(channel)) {
 			channel = mongoTemplate.findById(otpChannel, ChannelConfigDoc.class, "CONFIG_CHANNEL_X");
