@@ -295,9 +295,10 @@ public class EmpAuthService {
 
 		if (!ArgUtil.is(channel)) {
 			channel = mongoTemplate.findById(otpChannel.asString(), ChannelConfigDoc.class, "CONFIG_CHANNEL_X");
-			if (!ArgUtil.is(channel)) {
-				return;
-			}
+		}
+		
+		if (!ArgUtil.is(channel) || !ArgUtil.is(channel.getOa())) {
+			return;
 		}
 
 		OutboxMessage ob = new OutboxMessage();
