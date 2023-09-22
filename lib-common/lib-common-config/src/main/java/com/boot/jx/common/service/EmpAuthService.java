@@ -287,7 +287,7 @@ public class EmpAuthService {
 		PMConfigurationObject otpChannel = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_OTP_CHANNEL);
 		// .asString("oa:mehery");
 
-		if (otpChannel.exists()) {
+		if (!otpChannel.exists()) {
 			return;
 		}
 
