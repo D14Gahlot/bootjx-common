@@ -20,7 +20,6 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 
 /**
  * 
@@ -52,16 +51,10 @@ public class InBoundRouter {
 
 	public void inboundMessageEvent(String channelId, Map<String, Object> data) {
 	
-		MapModel map =null;
+		MapModel map =MapModel.from(data);
 		
 		PMConfiguration config = pmEnvironment.config();
 		ChannelConfig channelConfig = config.channel(channelId);
-		
-		if(channelConfig.getChannelType().equalsIgnoreCase(PMConstants.CHANNEL_TYPE.WA_360DC)) {
-			 map = MapModel.from(data);
-			}else {
-				 map = MapModel.from(data);
-			}
 		
 		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 
