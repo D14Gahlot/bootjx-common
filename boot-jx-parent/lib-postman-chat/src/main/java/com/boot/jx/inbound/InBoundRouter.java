@@ -14,11 +14,13 @@ import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.AuditService;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 /**
  * 
@@ -49,9 +51,18 @@ public class InBoundRouter {
 	private ChatStatusService inBoundStatusService;
 
 	public void inboundMessageEvent(String channelId, Map<String, Object> data) {
-		MapModel map = MapModel.from(data);
+	
+		MapModel map =null;
+		
 		PMConfiguration config = pmEnvironment.config();
 		ChannelConfig channelConfig = config.channel(channelId);
+		
+		if(channelConfig.getChannelType().equalsIgnoreCase(PMConstants.CHANNEL_TYPE.WA_360DC)) {
+			 map = MapModel.from(data);
+			}else {
+				 map = MapModel.from(data);
+			}
+		
 		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 
 		if (!ArgUtil.is(connector)) {

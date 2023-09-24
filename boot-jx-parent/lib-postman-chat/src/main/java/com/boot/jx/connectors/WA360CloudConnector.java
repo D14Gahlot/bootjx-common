@@ -1,7 +1,5 @@
 package com.boot.jx.connectors;
 
-import static org.hamcrest.CoreMatchers.nullValue;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -385,10 +383,9 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
-
 		
 		LOGGER.info("KEy from MAP "+JsonUtil.toJsonPrettyPrint(messageBoxEvent)+"\n requestMap"+requestMap);
-		
+	
 		List<Object> entryLst = (List<Object>)requestMap.map().get("entry");
 		List<Object> changesLst = new ArrayList<>();
 		LinkedHashMap<String, Object> lMap =null;
@@ -414,10 +411,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		if (cloudRequestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
 		}
-		
-		
 
-		if (requestMap.containsKey("statuses")) {
+		if (cloudRequestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = requestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
