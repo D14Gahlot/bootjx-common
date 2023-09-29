@@ -13,7 +13,7 @@ import com.boot.jx.api.AmxResponseSchemes.ApiResultsMetaCompactResponse;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
@@ -42,7 +42,7 @@ import io.swagger.annotations.Authorization;
 public class ConfigApiV1 {
 
 	@Autowired
-	private ConfigManager configManager;
+	private ConfigManagerImpl configManager;
 
 	@Autowired
 	private ConfigMaster configMaster;

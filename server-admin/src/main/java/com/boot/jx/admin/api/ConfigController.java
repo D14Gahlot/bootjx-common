@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
@@ -31,7 +31,7 @@ public class ConfigController {
 	private CommonMongoTemplate mongoTemplate;
 
 	@Autowired
-	private ConfigManager configManager;
+	private ConfigManagerImpl configManager;
 
 	@Autowired
 	public PMEnvironment pmEnvironment;

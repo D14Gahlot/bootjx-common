@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.cdn.BootJxConfigService;
@@ -30,8 +31,10 @@ import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
-import com.boot.jx.postman.doc.config.ChannelConfigDoc;
+import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
+import com.boot.jx.postman.manager.ConfigManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.swagger.ApiMockParam;
 import com.boot.jx.swagger.ApiMockParams;
 import com.boot.jx.swagger.MockParamBuilder.MockParamType;
@@ -68,6 +71,12 @@ public class InBoundControllerTest {
 
 	@Autowired
 	private ConnectorHandlerFactory connectorHandlerFactory;
+
+	@Autowired
+	private ConfigMaster configMaster;
+
+	@Autowired(required = false)
+	private ConfigManager configManager;
 
 	private PMConfigurationModel validateApiKey() {
 		String apiKey = commonHttpRequest.get(ParamKeys.X_API_KEY);
@@ -116,7 +125,7 @@ public class InBoundControllerTest {
 			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/setup/channel/webhook", method = { RequestMethod.GET })
 	@ResponseBody
-	public ApiResponse<MapModel, Object> getWebhook(@RequestParam String channelId) {
+	public ApiResponse<MapModel, Object> getChannelWebhook(@RequestParam String channelId) {
 		if (ArgUtil.not(channelId)) {
 			ApiResponseUtil.throwException("Select Channel");
 		}
@@ -132,7 +141,7 @@ public class InBoundControllerTest {
 			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
 	@RequestMapping(value = "/setup/channel/webhook", method = { RequestMethod.POST })
 	@ResponseBody
-	public ApiResponse<MapModel, Object> resetWebhook(@RequestParam String channelId,
+	public ApiResponse<MapModel, Object> resetChannelWebhook(@RequestParam String channelId,
 			@RequestParam(required = false) String endpoint, @RequestParam(required = false) String context) {
 		if (ArgUtil.not(channelId)) {
 			ApiResponseUtil.throwException("Select Channel");
@@ -148,6 +157,36 @@ public class InBoundControllerTest {
 		connectorHandlerFactory.onChannelUpdate(channelDto);
 		return ApiResponse.buildResult(MapModel.createInstance().put("channelId", channelId)
 				.put("webhook_url", webhook_url).put("webhook_path", webhook_path).put("webhook_context", context));
+	}
+
+	@ApiMockParams({ @ApiMockParam(name = ParamKeys.X_API_KEY, value = "API Key", paramType = MockParamType.HEADER),
+			@ApiMockParam(name = ParamKeys.X_API_ID, value = "API Id", paramType = MockParamType.HEADER) })
+	@RequestMapping(value = "/setup/clientapp/webhook", method = { RequestMethod.POST })
+	@ResponseBody
+	public ApiResponse<MapModel, Object> setClientAppWebhook(@RequestParam String url,
+			@RequestParam(required = false) String forward) {
+		PMConfigurationModel config = validateApiKey();
+		ClientApp x = PMContextUtil.clientApp();
+		if (ArgUtil.is(x)) {
+			ClientAppConfigDoc xo = configMaster.findById(x.getId(), ClientAppConfigDoc.class);
+			if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
+				xo.setWebhook(url);
+				if (ArgUtil.is(forward)) {
+					xo.setForward(forward);
+				}
+				if (ArgUtil.is(configManager)) {
+					configManager.save(xo);
+					configManager.refresh();
+				}
+			} else {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("appType").obzect("WebhookUrlRequest")
+						.codeKey("INCORRECT_APP_TYPE").description("ClientApp is not configured for Webhook type"));
+			}
+		} else {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("appType").obzect("WebhookUrlRequest")
+					.codeKey("INCORRECT_APP_TYPE").description("ClientApp is not configured"));
+		}
+		return ApiResponse.buildResult(MapModel.createInstance().put("appId", x.getId()).put("webhook_url", url));
 	}
 
 }
