@@ -96,7 +96,11 @@ public class ConfigConstants {
 				.desc("This channel will be connected your Page").optionsSource("getx:/api/options/channels")
 				.optionsKey("id").optionsLabel("name").filter("contactType", ContactType.WEBSITE)),
 
-		POSTMAN_AGENT_OTP_CHANNEL(new ConfigMeta("OTP Channel", PROPERTIES.POSTMAN_AGENT_OTP_CHANNEL)
+		POSTMAN_AGENT_2FA_ENABLED(new ConfigMeta("Enable 2FA Login", PROPERTIES.POSTMAN_AGENT_2FA_ENABLED)
+				.superKey(PROPERTIES.POSTMAN_AGENT_2FA_ENABLED).desc("You will need OA app").optionsOnOff()),
+
+		POSTMAN_AGENT_2FA_CHANNEL(new ConfigMeta("OTP Channel", PROPERTIES.POSTMAN_AGENT_2FA_CHANNEL)
+				.superKey(PROPERTIES.POSTMAN_AGENT_2FA_ENABLED)
 				.desc("This channel will be used for 2FA for Agent/Admin Login using login_otp template")
 				.optionsSource("getx:/api/options/channels").optionsKey("id").optionsLabel("name")
 				.filter("contactType", ContactType.OA)),
