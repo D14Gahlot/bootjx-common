@@ -282,9 +282,16 @@ public class EmpAuthService {
 	}
 
 	public void sendOTP(UserAuthToken loginToken) {
+
+		PMConfigurationObject mfaEnabled = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_ENABLED);
+
+		if (!mfaEnabled.exists() || !mfaEnabled.asBoolean()) {
+			return;
+		}
+
 		OTPDetails otpDetails = OTPUtils.genrateBasicOTP(loginToken.getDomainUser(), loginToken.getApp());
 
-		PMConfigurationObject otpChannel = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_OTP_CHANNEL);
+		PMConfigurationObject otpChannel = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_CHANNEL);
 		// .asString("oa:mehery");
 
 		if (!otpChannel.exists()) {
@@ -296,7 +303,7 @@ public class EmpAuthService {
 		if (!ArgUtil.is(channel)) {
 			channel = mongoTemplate.findById(otpChannel.asString(), ChannelConfigDoc.class, "CONFIG_CHANNEL_X");
 		}
-		
+
 		if (!ArgUtil.is(channel) || !ArgUtil.is(channel.getOa())) {
 			return;
 		}
