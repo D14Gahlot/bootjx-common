@@ -1,6 +1,8 @@
 package com.boot.jx.connectors;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +63,7 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.JsonUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -376,15 +379,40 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		return report;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
+		
+		LOGGER.info("KEy from MAP "+JsonUtil.toJsonPrettyPrint(messageBoxEvent)+"\n requestMap"+requestMap);
+	
+		List<Object> entryLst = (List<Object>)requestMap.map().get("entry");
+		List<Object> changesLst = new ArrayList<>();
+		LinkedHashMap<String, Object> lMap =null;
+		for(Object object :entryLst) {
+			 lMap =(LinkedHashMap<String, Object>)object;
+			changesLst =(List<Object>)lMap.get("changes");
+		}
+		for(Object object :changesLst) {
+			 lMap =(LinkedHashMap<String, Object>)object;
+			lMap =(LinkedHashMap<String, Object>)lMap.get("value");
+		}
+		
+		
+		List<String> keys = new ArrayList<String>();
 
-		if (requestMap.containsKey("messages")) {
-			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
+	    for(Map.Entry<String, Object> t : lMap.entrySet()) {
+	        keys.add(t.getKey());
+	    }
+	    MapModel cloudRequestMap = MapModel.from(lMap);
+	    LOGGER.info("Keys "+JsonUtil.toJson(keys)+"\t Map Model :"+cloudRequestMap);
+		
+		
+		if (cloudRequestMap.containsKey("messages")) {
+			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
 		}
 
-		if (requestMap.containsKey("statuses")) {
+		if (cloudRequestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = requestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);

@@ -1,4 +1,3 @@
-package com.boot.jx.postman.wa360;
 
 import java.io.Serializable;
 
@@ -28,6 +27,7 @@ public class WA360CloudOutBoundMedia implements Serializable {
 		    + "\n Do not use with audio or sticker media.")
     public String caption;
 
+ 
 
     public String getId() {
 	return id;
@@ -53,5 +53,5 @@ public class WA360CloudOutBoundMedia implements Serializable {
 	this.caption = caption;
     }
 
-    
+   
 }

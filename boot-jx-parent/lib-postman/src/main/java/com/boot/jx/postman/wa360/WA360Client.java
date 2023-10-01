@@ -312,6 +312,9 @@ public class WA360Client {
 				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360OutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
+					if ("video".equals(lowerFormat)||("document".equals(lowerFormat))) {
+						media.setCaption(null);
+					}
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());

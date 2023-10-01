@@ -30,6 +30,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.client.PostManClient;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
+import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.model.Email;
 import com.boot.jx.postman.model.MessageBox;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -281,12 +282,31 @@ public class EmpAuthService {
 	}
 
 	public void sendOTP(UserAuthToken loginToken) {
+
+		PMConfigurationObject mfaEnabled = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_ENABLED);
+
+		if (!mfaEnabled.exists() || !mfaEnabled.asBoolean()) {
+			return;
+		}
+
 		OTPDetails otpDetails = OTPUtils.genrateBasicOTP(loginToken.getDomainUser(), loginToken.getApp());
 
-		String otpChannel = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_OTP_CHANNEL)
-				.asString("oa:mehery");
+		PMConfigurationObject otpChannel = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_CHANNEL);
+		// .asString("oa:mehery");
 
-		ChannelConfig channel = pmEnvironment.config().channel(otpChannel);
+		if (!otpChannel.exists()) {
+			return;
+		}
+
+		ChannelConfig channel = pmEnvironment.config().channel(otpChannel.asString());
+
+		if (!ArgUtil.is(channel)) {
+			channel = mongoTemplate.findById(otpChannel.asString(), ChannelConfigDoc.class, "CONFIG_CHANNEL_X");
+		}
+
+		if (!ArgUtil.is(channel) || !ArgUtil.is(channel.getOa())) {
+			return;
+		}
 
 		OutboxMessage ob = new OutboxMessage();
 		ob.contact().setPhone(loginToken.getDomainUserPhone());

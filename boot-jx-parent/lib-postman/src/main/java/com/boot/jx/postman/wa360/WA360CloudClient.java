@@ -289,7 +289,7 @@ public class WA360CloudClient {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
 		wa360OutBoundMedia.setCaption(ArgUtil.nonEmpty(attachment.getMediaCaption(), outboxMessage.getSubject()));
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		//wa360OutBoundMedia.setFilename(attachment.getMediaName());
+		
 
 		if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "image");

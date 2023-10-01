@@ -14,11 +14,9 @@ public class ChannelConfigDoc extends ChannelConfig {
 
 	private static final long serialVersionUID = -6368905475787041196L;
 
-	@Id
-	private String id;
-
 	private String domain;
 
+	@Id
 	public String getId() {
 		return id;
 	}
