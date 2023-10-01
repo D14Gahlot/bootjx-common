@@ -1,3 +1,4 @@
+package com.boot.jx.postman.wa360;
 
 import java.io.Serializable;
 
