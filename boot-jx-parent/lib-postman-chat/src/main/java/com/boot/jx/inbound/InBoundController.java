@@ -1,5 +1,7 @@
 package com.boot.jx.inbound;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -131,6 +133,13 @@ public class InBoundController {
 		msg.setContact(contact);
 		inBoundService.invokeMethodsRelease(msg);
 		return ApiResponse.buildResult(contact).meta(contactId);
+	}
+
+	@RequestMapping(value = "/ext/messagse/media/reload", method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> messageMediaReload(@RequestParam String sessionId,
+			@RequestParam String messageId) throws FileNotFoundException, IOException {
+		inBoundRouter.reloadMedia(sessionId, messageId);
+		return ApiResponse.build();
 	}
 
 	@RequestMapping(value = "/ext/inbound/v2/{channelType}/callback/{accountKey}/{channelId}/{channelKey}",
