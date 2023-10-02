@@ -47,11 +47,8 @@ import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.WA360CloudPlugin;
 import com.boot.jx.postman.plugin.WA360CloudPlugin.WA360CloudConfigDetails;
-import com.boot.jx.postman.plugin.WA360Plugin;
-import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.WABAConversationQuery;
-import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360CloudClient;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
@@ -339,8 +336,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
 		MessageReport report = this.createMessageReport(channelConfig);
 		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
-
-		if (ArgUtil.is(csid)) {
+		
+		if (!ArgUtil.is(csid)) {
 			csid = requestMap.getString("recipient_id");
 		}
 
@@ -387,6 +384,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		LOGGER.info("KEy from MAP "+JsonUtil.toJsonPrettyPrint(messageBoxEvent)+"\n requestMap"+requestMap);
 	
 		List<Object> entryLst = (List<Object>)requestMap.map().get("entry");
+		System.out.println();
 		List<Object> changesLst = new ArrayList<>();
 		LinkedHashMap<String, Object> lMap =null;
 		for(Object object :entryLst) {
@@ -413,7 +411,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		}
 
 		if (cloudRequestMap.containsKey("statuses")) {
-			List<Map<String, Object>> statusMaps = requestMap.keyEntry("statuses").asListOfMap();
+			List<Map<String, Object>> statusMaps = cloudRequestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
 				MessageReport reprt = toMessageReport(channelConfig, statusModel);
@@ -479,5 +477,5 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		}
 		return !ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp());
 	}
-
+	
 }
