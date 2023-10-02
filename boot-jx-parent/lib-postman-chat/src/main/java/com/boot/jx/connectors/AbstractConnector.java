@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,21 +12,28 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.manager.ChatLogger;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
@@ -35,10 +45,12 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.postman.store.MessageContext;
+import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+import com.boot.utils.Urly;
 
 public abstract class AbstractConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
 		implements ConnectorHandler {
@@ -69,6 +81,9 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 	@Autowired
 	protected ContactStore contactStore;
+
+	@Autowired
+	private PMFileStoreClient pmFileStoreClient;
 
 	@Override
 	public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
@@ -263,6 +278,25 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 				}
 			}
 		}
+	}
+
+	@Override
+	public void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException {
+		List<Attachment> attach = msg.getAttachments();
+		for (Attachment attachment : attach) {
+			CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+					// .fileType(attachment.getMediaType())
+					.format(FileFormat.from(attachment.getMediaMimeType()))
+					// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+					.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+
+			File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+
+			CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+					.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
+			pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+		}
+		// System.out.println("msg " + msg.getMessageId());
 	}
 
 }

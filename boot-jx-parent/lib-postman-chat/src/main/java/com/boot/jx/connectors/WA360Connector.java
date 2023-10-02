@@ -1,5 +1,7 @@
 package com.boot.jx.connectors;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -58,6 +61,7 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.Urly;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -305,6 +309,25 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	}
 
 	@Override
+	public void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException {
+		List<Attachment> attach = msg.getAttachments();
+		for (Attachment attachment : attach) {
+			CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+					// .fileType(attachment.getMediaType())
+					.format(FileFormat.from(attachment.getMediaMimeType()))
+					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+					.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+
+			File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+
+			CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+					.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
+			pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+		}
+		// System.out.println("msg " + msg.getMessageId());
+	}
+
+	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
 			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
@@ -332,11 +355,11 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
 		MessageReport report = this.createMessageReport(channelConfig);
 		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
-		LOGGER.info("1.toMessageReport csid :"+csid);
+		LOGGER.info("1.toMessageReport csid :" + csid);
 		if (!ArgUtil.is(csid)) {
 			csid = requestMap.getString("recipient_id");
 		}
-		LOGGER.info("2.toMessageReport csid :"+csid);
+		LOGGER.info("2.toMessageReport csid :" + csid);
 		report.contact().setCsid(csid);
 		report.setChangeStamp(requestMap.getLong("timestamp", 0L) * 1000);
 		report.setMessageIdExt(requestMap.getString("id"));
