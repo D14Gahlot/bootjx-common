@@ -1,5 +1,7 @@
 package com.boot.jx.chat;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -225,6 +227,10 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		void prompt(InboxMessage inboxMessage);
 
 		void linkProfile(ChatSessionDoc session, InboxMessage inboxMessage);
+
+		default void reloadMedia(ChannelConfig channelConfig, MessageDoc msg)
+				throws FileNotFoundException, IOException {
+		}
 
 	}
 
