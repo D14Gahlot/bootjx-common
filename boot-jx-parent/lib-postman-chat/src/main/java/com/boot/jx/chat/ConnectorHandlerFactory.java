@@ -19,6 +19,7 @@ import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants;
@@ -228,9 +229,10 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		void linkProfile(ChatSessionDoc session, InboxMessage inboxMessage);
 
-		default void reloadMedia(ChannelConfig channelConfig, MessageDoc msg)
-				throws FileNotFoundException, IOException {
-		}
+		CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Integer index)
+				throws FileNotFoundException, IOException;
+
+		void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException;
 
 	}
 

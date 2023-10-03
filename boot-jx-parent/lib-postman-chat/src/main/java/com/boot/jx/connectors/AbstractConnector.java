@@ -3,6 +3,7 @@ package com.boot.jx.connectors;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -45,7 +46,6 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.postman.store.MessageContext;
-import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -284,19 +284,36 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	public void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException {
 		List<Attachment> attach = msg.getAttachments();
 		for (Attachment attachment : attach) {
-			CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
-					// .fileType(attachment.getMediaType())
-					.format(FileFormat.from(attachment.getMediaMimeType()))
-					// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-					.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
-
-			File fileb = Urly.parse(attachment.getMediaURL()).toFile();
-
-			CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
-					.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
-			pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+			if (ArgUtil.is(attach) && attach.size() > 0) {
+				reloadMedia(channelConfig, msg, attachment);
+			}
 		}
-		// System.out.println("msg " + msg.getMessageId());
+	}
+
+	@Override
+	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Integer index)
+			throws FileNotFoundException, IOException {
+		List<Attachment> attach = msg.getAttachments();
+		if (ArgUtil.is(attach) && attach.size() > 0) {
+			Attachment attachment = attach.get(index);
+			return reloadMedia(channelConfig, msg, attachment);
+		}
+		return null;
+	}
+
+	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
+			throws MalformedURLException, FileNotFoundException, IOException {
+		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+				// .fileType(attachment.getMediaType())
+				.format(FileFormat.from(attachment.getMediaMimeType()))
+				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+
+		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+
+		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
+		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
 	}
 
 }
