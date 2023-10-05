@@ -384,8 +384,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
 		
-		LOGGER.info("KEy from MAP "+JsonUtil.toJsonPrettyPrint(messageBoxEvent)+"\n requestMap"+requestMap);
-	
 		List<Object> entryLst = (List<Object>)requestMap.map().get("entry");
 		List<Object> changesLst = new ArrayList<>();
 		LinkedHashMap<String, Object> lMap =null;
@@ -413,7 +411,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		}
 
 		if (cloudRequestMap.containsKey("statuses")) {
-			List<Map<String, Object>> statusMaps = requestMap.keyEntry("statuses").asListOfMap();
+			List<Map<String, Object>> statusMaps = cloudRequestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
 				MessageReport reprt = toMessageReport(channelConfig, statusModel);
