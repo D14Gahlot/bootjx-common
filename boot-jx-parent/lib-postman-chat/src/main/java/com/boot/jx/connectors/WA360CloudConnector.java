@@ -385,7 +385,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		report.setMessageIdExt(requestMap.getString("id"));
 
 		String status = requestMap.getString("status");
-		LOGGER.info("toMessageReport status:"+status);
+		LOGGER.info("toMessageReport csid-Receiepent mob no - status:"+csid+"--"+status);
 
 		if ("sent".equals(status)) {
 			report.setStatus(Status.SENTX);

@@ -227,6 +227,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
 								.is(channelConfig.getChannelId())));
+				LOGGER.info(JsonUtil.toJson(temps));
 			}
 
 			if (ArgUtil.is(temps)) {
@@ -309,7 +310,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
 				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
 
-		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+		File fileb =Urly.parse(attachment.getMediaURL()).toFile();
 
 		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
 				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
