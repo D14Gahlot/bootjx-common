@@ -333,7 +333,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
 				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
 
-		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+			File fileb = Urly.parse(attachment.getMediaURL()).toFile();
 
 		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
 				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));

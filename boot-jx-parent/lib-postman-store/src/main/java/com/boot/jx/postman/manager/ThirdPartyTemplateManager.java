@@ -44,8 +44,6 @@ public class ThirdPartyTemplateManager {
 		}
 
 		List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);
-		
-		
 
 		MongoQueryBuilder<HSMTemplate3rdParty> cmqb = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 				.where(Criteria.where("channelId").is(channelConfig.getChannelId())).set("template.status", "deleted");

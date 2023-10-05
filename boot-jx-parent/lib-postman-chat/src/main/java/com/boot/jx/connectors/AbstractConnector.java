@@ -46,6 +46,7 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.postman.store.MessageContext;
+import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -217,7 +218,6 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 		if (ArgUtil.is(outboxMessage.templateId())) {
 			List<HSMTemplate3rdParty> temps = null;
-
 			if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
 				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")

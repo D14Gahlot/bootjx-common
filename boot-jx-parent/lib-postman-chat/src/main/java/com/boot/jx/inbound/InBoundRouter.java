@@ -63,9 +63,7 @@ public class InBoundRouter {
 	private MessageStore messageStore;
 
 	public void inboundMessageEvent(String channelId, Map<String, Object> data) {
-
 		MapModel map = MapModel.from(data);
-
 		PMConfiguration config = pmEnvironment.config();
 		ChannelConfig channelConfig = config.channel(channelId);
 
