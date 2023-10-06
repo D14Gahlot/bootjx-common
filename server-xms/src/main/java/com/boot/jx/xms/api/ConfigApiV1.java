@@ -100,14 +100,17 @@ public class ConfigApiV1 {
 			authorizations = @Authorization("X_API_KEY"))
 	@XMSClientAuth
 	@RequestMapping(value = "/api/v1/config/tmpl/hsm", method = { RequestMethod.GET })
-	public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId) {
+	public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId,
+			@RequestParam(required=false)String channelStatus) {
 
 		MongoQueryBuilder<HSMTemplateDoc> cmq = MongoQueryBuilder.collection(HSMTemplateDoc.class);
 
 		if (ArgUtil.is(channelId)) {
 			cmq.where("approved.channelId", channelId);
 		}
-
+		if (ArgUtil.is(channelStatus)) {
+			cmq.where("approved.status", channelStatus);
+		}
 		return ApiResponse.buildResults(commonMongoTemplate.find(cmq));
 	}
 
