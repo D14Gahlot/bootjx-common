@@ -198,7 +198,7 @@ public class AgentAnalyticsManager {
 
 	public DashBoardResponseDto getAgentAnalytics(String agent, long dateRange1, long dateRange2,Object contact) {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-		LOGGER.info(dtf.format(LocalDateTime.now()) + " Get Analytics for  :" + agent);
+		LOGGER.debug(dtf.format(LocalDateTime.now()) + " Get Analytics for  :" + agent);
 		DashBoardResponseDto dto = new DashBoardResponseDto();
 		dto.setAgentName(agent == null ? MY_BOT : agent);
 		/** Unique agent list **/
