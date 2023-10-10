@@ -236,6 +236,9 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		if (ArgUtil.isEmpty(iMessage.contact().getName())) {
 			iMessage.contact().setName(chatSessionDoc.contact().getName());
 		}
+		//needs to be verified
+		iMessage.contact().copyFrom(chatSessionDoc.contact());
+		
 		iMessage.contact().setContactId(chatSessionDoc.getContactId());
 		iMessage.setSessionId(chatSessionDoc.getSessionId());
 		iMessage.session().setQueue(chatSessionDoc.getAssignedToQueue());
