@@ -203,7 +203,7 @@ public class WA360CloudClient {
 					}
 				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
-					WA360OutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
+					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());
@@ -260,14 +260,14 @@ public class WA360CloudClient {
 		return send(req, channelConfig);
 	}
 
-	private WA360OutBoundMedia createMedia(String mediaType, Attachment attachment) {
-		WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
+	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
+		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
 		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		wa360OutBoundMedia.setFilename(attachment.getMediaName());
-		if (mediaType.equalsIgnoreCase("image")) {
-			wa360OutBoundMedia.setFilename(null);
-		}
+		//wa360OutBoundMedia.setFilename(attachment.getMediaName());
+		//if (mediaType.equalsIgnoreCase("image")) {
+		//	wa360OutBoundMedia.setFilename(null);
+		//}
 		return wa360OutBoundMedia;
 	}
 
