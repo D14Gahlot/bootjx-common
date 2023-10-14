@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.admin.dto.CsvDto;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.FILE_TYPE;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 
 @Component
@@ -31,13 +33,24 @@ public class CSVHelper {
 	private CommonMongoTemplate mongoTemplate;
 
 	public static String TYPE = "text/csv";
+	
+	public static String tYPE_EXCEL="application/vnd.ms-excel";
 
 	public static boolean hasCSVFormat(MultipartFile file) {
-		if (!TYPE.equals(file.getContentType())) {
+		if (!FILE_TYPE.CSV.equals(file.getContentType())) {
 			return false;
 		}
 		return true;
 	}
+	
+	
+	public static boolean hasExcelFormat(MultipartFile file) {
+		if (!FILE_TYPE.EXCEL.equals(file.getContentType())) {
+			return false;
+		}
+		return true;
+	}
+
 
 	public CsvDto csvToTutorials(String templateId, InputStream is) {
 		CsvDto dto = new CsvDto();
@@ -45,7 +58,7 @@ public class CSVHelper {
 		List<String> lsterrors = new ArrayList<>();
 		Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
 		List<String> templVarLst = new ArrayList<>();
-		templVarLst.add("contacts");
+		templVarLst.add(PMConstants.CONTACTS);
 		dto.setTemplateId(templateId);	
 		HSMTemplateDoc templateDoc = mongoTemplate.findById(templateId, HSMTemplateDoc.class);
 		if (templateDoc != null) {
@@ -85,8 +98,11 @@ public class CSVHelper {
 				for (int i = 0; i < columns.length; i++) {
 					if (!StringUtils.isBlank(record.get(i))) {
 						String columnName = StringUtils.substring(columns[i].trim(), (columns[i].trim().indexOf(".") + 1));
-						//map.put(columns[i].trim(), record.get(i).trim());
-						map.put(columnName, record.get(i).trim());
+						String colmValue=record.get(i).trim();
+						if(PMConstants.CONTACTS.equalsIgnoreCase(columnName)) {
+							colmValue = getContactValue(colmValue);
+						}
+						map.put(columnName,colmValue);
 						
 					} else {
 						String str = "Row:" + row + " Column :" + (i + 1) + " " + columns[i] + " value  is missing";
@@ -109,4 +125,13 @@ public class CSVHelper {
 			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
 		}
 	}
+	
+	private String getContactValue(String colmValue) {
+		int compare = Character.compare(colmValue.charAt(0), '+');
+		if(compare!=0) {
+			colmValue =PMConstants.PLUS_SYM.concat(colmValue);
+		}
+		return colmValue;
+	}
+	
 }
