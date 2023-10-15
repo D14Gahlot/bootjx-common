@@ -282,7 +282,7 @@ public class AdminMsgController {
 			}
 		}else if(CSVHelper.hasExcelFormat(file)) {
 			try {
-				lst = fileService.save(templateId, file);
+				lst = fileService.readExcel(templateId, file);
 				message = "Uploaded the file successfully: " + file.getOriginalFilename();
 				OutboxMessage outboxMessage = new OutboxMessage();
 				outboxMessage.setReferenceKey(lst.getReferenceKey());
@@ -330,7 +330,7 @@ public class AdminMsgController {
 					outboxMsg.setHsm(hsmTemp);
 
 					listOfOutboxMsg.add(outboxMsg);
-				} // end of listOfOutboxMsg
+				} // end of listOfOutboxMsgs
 
 			}
 
