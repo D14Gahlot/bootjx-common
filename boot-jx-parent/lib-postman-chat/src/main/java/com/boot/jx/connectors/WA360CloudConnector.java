@@ -98,7 +98,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
 		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-		LOGGER.info("WA360CloudConnector onChannelUpdate :"+webhookUrl);
+		LOGGER.info("WA360CloudConnector onChannelUpdate :" + webhookUrl);
 		restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/webhook")
 				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 				.post(MapModel.createInstance().put("url", webhookUrl).toMap()).asMap();
@@ -300,9 +300,14 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	private void formatMedia(InboxMessage inboxMessage, MapModel map, ChannelConfig channelConfig, JsonPath path,
 			FileType fileType) {
 		try {
+
 			WA360InboundMedia media = map.entry(path).as(WA360InboundMedia.class);
-			CommonFileStream srcFile = new CommonFileStream().url(WA360Constants.MEDIA_CLOUD_URL(media.getId()))
-					.fileType(fileType).format(FileFormat.from(media.getMimeType()))
+
+			String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig,
+					WA360Constants.MEDIA_CLOUD_URL(media.getId()));
+
+			CommonFileStream srcFile = new CommonFileStream().url(mediaUrl).fileType(fileType)
+					.format(FileFormat.from(media.getMimeType()))
 					.header(WA360Constants.BASE_CLOUD_URL, channelConfig.getWa360dc().getApiKey())
 					.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
@@ -315,7 +320,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			logManager.error(inboxMessage, e);
 		}
 	}
-	
+
 	public CommonFile reloadMedia(Attachment attachment)
 			throws MalformedURLException, FileNotFoundException, IOException {
 		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
@@ -334,13 +339,16 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	@Override
 	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
 			throws FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+
+		String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig,attachment.getMediaSrc());
+
+		CommonFileStream srcFile = new CommonFileStream().url(mediaUrl)
 				// .fileType(attachment.getMediaType())
 				.format(FileFormat.from(attachment.getMediaMimeType()))
-				.header(WA360Constants.BASE_CLOUD_URL, channelConfig.getWa360dc().getApiKey())
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
 
-			File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
 
 		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
 				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
@@ -385,7 +393,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		report.setMessageIdExt(requestMap.getString("id"));
 
 		String status = requestMap.getString("status");
-		LOGGER.info("toMessageReport csid-Receiepent mob no - status:"+csid+"--"+status);
+		LOGGER.info("toMessageReport csid-Receiepent mob no - status:" + csid + "--" + status);
 
 		if ("sent".equals(status)) {
 			report.setStatus(Status.SENTX);
@@ -420,29 +428,27 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
-		
-		List<Object> entryLst = (List<Object>)requestMap.map().get("entry");
+
+		List<Object> entryLst = (List<Object>) requestMap.map().get("entry");
 		List<Object> changesLst = new ArrayList<>();
-		LinkedHashMap<String, Object> lMap =null;
-		for(Object object :entryLst) {
-			 lMap =(LinkedHashMap<String, Object>)object;
-			changesLst =(List<Object>)lMap.get("changes");
+		LinkedHashMap<String, Object> lMap = null;
+		for (Object object : entryLst) {
+			lMap = (LinkedHashMap<String, Object>) object;
+			changesLst = (List<Object>) lMap.get("changes");
 		}
-		for(Object object :changesLst) {
-			 lMap =(LinkedHashMap<String, Object>)object;
-			lMap =(LinkedHashMap<String, Object>)lMap.get("value");
+		for (Object object : changesLst) {
+			lMap = (LinkedHashMap<String, Object>) object;
+			lMap = (LinkedHashMap<String, Object>) lMap.get("value");
 		}
-		
-		
+
 		List<String> keys = new ArrayList<String>();
 
-	    for(Map.Entry<String, Object> t : lMap.entrySet()) {
-	        keys.add(t.getKey());
-	    }
-	    MapModel cloudRequestMap = MapModel.from(lMap);
-	    LOGGER.info("Keys "+JsonUtil.toJson(keys)+"\t Map Model :"+cloudRequestMap);
-		
-		
+		for (Map.Entry<String, Object> t : lMap.entrySet()) {
+			keys.add(t.getKey());
+		}
+		MapModel cloudRequestMap = MapModel.from(lMap);
+		LOGGER.info("Keys " + JsonUtil.toJson(keys) + "\t Map Model :" + cloudRequestMap);
+
 		if (cloudRequestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
 		}
@@ -497,13 +503,13 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			}
 
 			MapModel resp = wa360CloudClient.fetchContact(phone, channelConfig);
-			String waId =null;
-			if(ArgUtil.is(resp)) {
-			 waId = resp.getString("wa_id");
+			String waId = null;
+			if (ArgUtil.is(resp)) {
+				waId = resp.getString("wa_id");
 			}
 
-			String input =null;// resp.getString("input");
-			String status ="valid";// resp.getString("status");
+			String input = null;// resp.getString("input");
+			String status = "valid";// resp.getString("status");
 
 			if ("valid".equals(status)) {
 				ChatContactQuery chatContactQuery = new ChatContactQuery(chatContactDoc);
