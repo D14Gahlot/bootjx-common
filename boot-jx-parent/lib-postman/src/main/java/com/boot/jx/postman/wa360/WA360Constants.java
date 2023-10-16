@@ -111,10 +111,8 @@ public class WA360Constants {
 	
 	/** WABA cloud **/ 
 	public static String MEDIA_CLOUD_URL(String mediaId) {
-		return BASE_CLOUD_URL + "/v1/media/" + mediaId;
+		return BASE_CLOUD_URL + "/" + mediaId;
 	}
-
-	
 
 	public static class TmplComponent extends MapModel {
 		MapModel parameters;

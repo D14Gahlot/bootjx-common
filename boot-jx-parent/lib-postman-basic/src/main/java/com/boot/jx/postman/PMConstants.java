@@ -304,5 +304,15 @@ public class PMConstants {
 
 	public static final String COLLECTION_NAME = "MESSAGE_";
 	public static final String CHAT_SESSION = "CHAT_SESSION";
+	
+	public static final String CONTACTS = "contacts";
+	public static final String PLUS_SYM = "+";
+	
+	
+	public static class FILE_TYPE {
+		public static String CSV = "text/csv";
+		public static String EXCEL="application/vnd.ms-excel";
+		public static String XLS="application/xls";
+	}
 
 }

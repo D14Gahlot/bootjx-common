@@ -422,9 +422,6 @@ public class WA360CloudClient {
 
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
 		try {
-			System.out.println("Req :"+req.toMap());
-			System.out.println("Rew "+req.toJsonPretty());
-			
 			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("messages")
 					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 					.post(req.toMap())
@@ -485,9 +482,6 @@ public class WA360CloudClient {
 				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).get().asMapModel();
 		return resp;
 	}
-	
-	
-
 
 	public MapModel deleteTemplates(ChannelConfig channelConfig, String templateName) {
 		MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates/{templateName}")
@@ -515,7 +509,6 @@ public class WA360CloudClient {
 
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
-			System.out.println("createTemplates WAC"+JsonUtil.toJsonPrettyPrint(req));
 			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates")
 					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).post(req.toMap())
 					.asMapModel();
@@ -528,6 +521,12 @@ public class WA360CloudClient {
 				ApiResponseUtil.addError(((ApiHttpException) e));
 			throw e;
 		}
+	}
+
+	public String getMediaUrl(ChannelConfig channelConfig, String url) {
+		MapModel resp = restService.ajax(url.replace("/v1/media/", "/"))
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).get().asMapModel();
+		return resp.getString("url").replace("https://lookaside.fbsbx.com", WA360Constants.BASE_CLOUD_URL);
 	}
 
 }
