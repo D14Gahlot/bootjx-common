@@ -116,7 +116,7 @@ public class ConfigConstants {
 						// "2d", "5d", "3d", "7d")
 						.group(GROUP_CUSTOMER_CHAT)),
 		
-		postman_agent_customer_contact_info_mask(new ConfigMeta("Display Phone Number","postman.agent.customer.contact.info.mask").optionsOnOff().group(GROUP_AGENT)),
+		postman_agent_customer_contact_info_mask(new ConfigMeta("Mask Number","postman.agent.customer.contact.info.mask").optionsOnOff().group(GROUP_AGENT)),
 		
 		POSTMAN_CHAT_IDLE_TIMEOUT(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout")
 				.optionValues("5min", "10min", "15min", "20min", "25min", "30min").group(GROUP_AGENT)),
