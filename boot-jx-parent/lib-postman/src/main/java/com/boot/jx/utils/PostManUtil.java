@@ -4,7 +4,6 @@ import java.security.NoSuchAlgorithmException;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
@@ -213,11 +212,23 @@ public class PostManUtil {
 		if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(channelType)) {
 			channelType = CHANNEL_TYPE.WA_GUPSHUP;
 		}
+		
 		return String.format("%s:%s", channelType, lane).toLowerCase();
 	}
 
 	public static String CHANNEL_ID(String channelType, String lane) {
 		return CHANNEL_ID(null, channelType, lane);
+	}
+
+	public static String CHANNEL_ID_ENCODED(String channelType, String lane) {
+		if (CHANNEL_TYPE.WA_360DC.equalsIgnoreCase(channelType)) {
+			return CHANNEL_ID(channelType, lane).replace(":", "=");
+		}
+		return CHANNEL_ID(channelType, lane);
+	}
+
+	public static String CHANNEL_ID_DECODED(String channelId) {
+		return channelId.replace("=", ":");
 	}
 
 	public static String CHANNEL_ID(Contactable contactable) {
@@ -230,7 +241,8 @@ public class PostManUtil {
 
 	public static String CHANNEL_CALLBACK_PATH(String accountKey, AChannelConfig channelConfig) {
 		return String.format("ext/inbound/v2/%s/callback/%s/%s/%s", channelConfig.getChannelType(), accountKey,
-				CHANNEL_ID(channelConfig.getChannelType(), channelConfig.getLane()), channelConfig.getChannelKey());
+				CHANNEL_ID_ENCODED(channelConfig.getChannelType(), channelConfig.getLane()),
+				channelConfig.getChannelKey());
 	}
 
 	public static String ON_DEPT_ASSIGN_TOPIC(String dept) {

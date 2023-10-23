@@ -9,10 +9,13 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Client;
+import com.boot.jx.postman.wa360.WA360CloudClient;
 import com.boot.jx.postman.wa360.WA360Template;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -24,12 +27,21 @@ public class ThirdPartyTemplateManager {
 
 	@Autowired
 	private WA360Client wa360Client;
+	
+	@Autowired
+	private WA360CloudClient wa360CloudClient;
 
 	@Autowired
 	CommonMongoTemplate commonMongoTemplate;
 
 	public void refreshWA360Templates(ChannelConfig channelConfig) {
-		MapModel resp = wa360Client.fetchTemplates(channelConfig);
+		MapModel resp =null;
+		
+		if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
+			resp = wa360CloudClient.fetchTemplates(channelConfig);
+		}else {
+			resp = wa360Client.fetchTemplates(channelConfig);
+		}
 
 		List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);
 
@@ -73,9 +85,18 @@ public class ThirdPartyTemplateManager {
 		MapModel resp = null;
 		if ("approved".equalsIgnoreCase(status) || "rejected".equalsIgnoreCase(status)
 				|| "paused".equalsIgnoreCase(status)) {
+			if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
+				resp = wa360CloudClient.updateTemplates(channelConfig, MapModel.from(templateStructure));
+			}else {
 			resp = wa360Client.updateTemplates(channelConfig, MapModel.from(templateStructure));
+			}
 		} else {
+			
+			if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
+				resp = wa360CloudClient.createTemplates(channelConfig, MapModel.from(templateStructure));
+			}else {
 			resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
+			}
 		}
 		return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
 	}

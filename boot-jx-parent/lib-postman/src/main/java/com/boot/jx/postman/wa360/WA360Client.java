@@ -312,6 +312,9 @@ public class WA360Client {
 				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360OutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
+					if ("video".equals(lowerFormat)||("document".equals(lowerFormat))) {
+						media.setCaption(null);
+					}
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());
@@ -594,7 +597,7 @@ public class WA360Client {
 				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).get().asMapModel();
 		return resp;
 	}
-
+	
 	public MapModel deleteTemplates(ChannelConfig channelConfig, String templateName) {
 		MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates/{templateName}")
 				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())

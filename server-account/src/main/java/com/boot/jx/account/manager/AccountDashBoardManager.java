@@ -990,7 +990,7 @@ public class AccountDashBoardManager {
 
 	}
 
-	public ContactTypeSummaryDto getNonWhatsUpSummary(long timestamp) {
+	public ContactTypeSummaryDto getNonWhatsUpSummary(String dateRange1, String dateRange2,int days) {
 		List<String> channelLst = getListChannelCongig();
 		List<String> lst = getListOfContactType();
 		lst.remove("MESSAGE_WHATSAPP");
@@ -1002,24 +1002,12 @@ public class AccountDashBoardManager {
 		String tnt = AppContextUtil.getTenant();
 		List<SummaryDocDto> lstSummDto = new ArrayList<>();
 		long currentTs = System.currentTimeMillis();
-				
-		Date dateTi = new Date(timestamp);
-		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(timestamp);
-		int month = cal.get(Calendar.MONTH);
-		int year = cal.get(Calendar.YEAR);
-		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
-		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
-
-
+		
 		long offsetts = countryTimeZoneOffset(tnt);
 		ZonedDateTime noOfdaysTstamp = null;
 		long lasDayTimeStmp = 0;
 		String offsett = getTimeZoneFromSetup();
-		LOGGER.info("dayChannelWiseWisesummary dateRange1 :" + monthMinTimeStamp + "\t dateRange2 :" + monthMaxTimeStamp
-				+ "\t offsett :" + offsett);
-
+		
 		DomainDoc dDoc = getDomainTimeZone(tnt);
 		String zone = getTimeZone(offsett == null ? dDoc.getTimeZoneOffSet() : offsett);
 		String offset = getOffSet(offsett == null ? dDoc.getTimeZoneOffSet() : offsett);
@@ -1028,17 +1016,27 @@ public class AccountDashBoardManager {
 		int hr = ArgUtil.parseAsInteger(hm[0]);
 		int mm = ArgUtil.parseAsInteger(hm[1]);
 
-		if (ArgUtil.is(monthMinTimeStamp)) {
-			//lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
-			lasDayTimeStmp = monthMinTimeStamp + offsetts;
-
+		
+		
+		if (ArgUtil.is(dateRange1)) {
+			lasDayTimeStmp = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange1), hr, mm, zone, LocalTime.MIN);
+			lasDayTimeStmp = lasDayTimeStmp + offsetts;
 		}
-		if (ArgUtil.is(monthMaxTimeStamp)) {
-			//currentTs = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
-			currentTs = monthMaxTimeStamp + offsetts;
+		if (ArgUtil.is(dateRange2)) {
+			currentTs = DateUtil.getDateMinAndMaxTime(getCovertDate(dateRange2), hr, mm, zone, LocalTime.MAX);
+			currentTs = currentTs + offsetts;
 		}
-
-
+		if (lasDayTimeStmp == 0 && days > 0) {
+			noOfdaysTstamp = ZonedDateTime.now().minusDays(days).with(LocalTime.MIN);
+			lasDayTimeStmp = noOfdaysTstamp.toInstant().toEpochMilli();
+		}
+				
+		Date dateTi = new Date(lasDayTimeStmp);
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(currentTs);
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
 
 		for (String contactType : lst) {
 			LOGGER.info("contactType :" + contactType);
@@ -1083,8 +1081,11 @@ public class AccountDashBoardManager {
 
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 		dto.setDateWiseSummaryCount(dayWiseMap);
+		dto.setTenant(tnt);
+		dto.setMonth(monthYear);
 
 		return dto;
+
 	}
 
 	/** Agreegration Query to fetch msg status **/

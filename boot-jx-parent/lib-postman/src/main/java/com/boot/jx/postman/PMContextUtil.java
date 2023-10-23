@@ -13,4 +13,13 @@ public class PMContextUtil {
 		return clientApp;
 	}
 
+	public static String publicUrl(String public_url) {
+		AppContextUtil.set("----public_url---", public_url);
+		return public_url;
+	}
+
+	public static String publicUrl() {
+		return AppContextUtil.get("----public_url---");
+	}
+
 }

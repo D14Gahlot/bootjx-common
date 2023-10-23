@@ -1,5 +1,7 @@
 package com.boot.jx.inbound;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -12,11 +14,17 @@ import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.AuditService;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
@@ -48,10 +56,17 @@ public class InBoundRouter {
 	@Autowired
 	private ChatStatusService inBoundStatusService;
 
+	@Autowired
+	private SessionStore sessionStore;
+
+	@Autowired
+	private MessageStore messageStore;
+
 	public void inboundMessageEvent(String channelId, Map<String, Object> data) {
 		MapModel map = MapModel.from(data);
 		PMConfiguration config = pmEnvironment.config();
 		ChannelConfig channelConfig = config.channel(channelId);
+
 		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 
 		if (!ArgUtil.is(connector)) {
@@ -79,6 +94,33 @@ public class InBoundRouter {
 	@Async
 	public void inboundMessageEventAsync(String channelId, Map<String, Object> data) {
 		this.inboundMessageEvent(channelId, data);
+	}
+
+	public CommonFile reloadMedia(String sessionId, String messageId, Integer index)
+			throws FileNotFoundException, IOException {
+		ChatSessionDoc session = sessionStore.getSession(sessionId);
+		PMConfiguration config = pmEnvironment.config();
+		String channelId = PostManUtil.CHANNEL_ID(session.contact());
+		ChannelConfig channelConfig = config.channel(channelId);
+		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
+		if (!ArgUtil.is(connector)) {
+			LOGGER.error("Channel Not Found for " + channelId);
+		}
+		MessageDoc msg = messageStore.findByMessageId(messageId, session.contact().getContactType());
+		return connector.reloadMedia(channelConfig, msg, index);
+	}
+
+	public void reloadMedia(String sessionId, String messageId) throws FileNotFoundException, IOException {
+		ChatSessionDoc session = sessionStore.getSession(sessionId);
+		PMConfiguration config = pmEnvironment.config();
+		String channelId = PostManUtil.CHANNEL_ID(session.contact());
+		ChannelConfig channelConfig = config.channel(channelId);
+		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
+		if (!ArgUtil.is(connector)) {
+			LOGGER.error("Channel Not Found for " + channelId);
+		}
+		MessageDoc msg = messageStore.findByMessageId(messageId, session.contact().getContactType());
+		connector.reloadMedia(channelConfig, msg);
 	}
 
 }

@@ -35,6 +35,7 @@ public class ConfigConstants {
 	public static final String GROUP_NLP = "NLP";
 	public static final String GROUP_DEV = "DEVELOPMENT";
 
+
 	public static enum APP_KEY implements EntryMeta {
 
 		PROP_SERVICE_DOMAIN(new ConfigMeta("server", "mry.prop.service.domain")),
@@ -96,7 +97,11 @@ public class ConfigConstants {
 				.desc("This channel will be connected your Page").optionsSource("getx:/api/options/channels")
 				.optionsKey("id").optionsLabel("name").filter("contactType", ContactType.WEBSITE)),
 
-		POSTMAN_AGENT_OTP_CHANNEL(new ConfigMeta("OTP Channel", PROPERTIES.POSTMAN_AGENT_OTP_CHANNEL)
+		POSTMAN_AGENT_2FA_ENABLED(new ConfigMeta("Enable 2FA Login", PROPERTIES.POSTMAN_AGENT_2FA_ENABLED)
+				.superKey(PROPERTIES.POSTMAN_AGENT_2FA_ENABLED).desc("You will need OA app").optionsOnOff()),
+
+		POSTMAN_AGENT_2FA_CHANNEL(new ConfigMeta("OTP Channel", PROPERTIES.POSTMAN_AGENT_2FA_CHANNEL)
+				.superKey(PROPERTIES.POSTMAN_AGENT_2FA_ENABLED)
 				.desc("This channel will be used for 2FA for Agent/Admin Login using login_otp template")
 				.optionsSource("getx:/api/options/channels").optionsKey("id").optionsLabel("name")
 				.filter("contactType", ContactType.OA)),
@@ -104,14 +109,15 @@ public class ConfigConstants {
 		// Agent Properties
 		CHAT_TAG_ENABLED(
 				new ConfigMeta("Chat Session Tags Enabled", "chat.tag.enabled").optionsOnOff().group(GROUP_AGENT)),
-
 		POSTMAN_CHAT_SESSION_TIMEOUT(
 				new ConfigMeta("Default Chat Session Idle Duration", "postman.chat.session.timeout")
 						.desc("Use 2hr,3hr,4hr etc for hours and 2d,3d,4d etc for days.")
 						// .optionValues("1hr", "2hr", "4hr", "8hr", "12hr", "16hr", "20hr", "24hr",
 						// "2d", "5d", "3d", "7d")
 						.group(GROUP_CUSTOMER_CHAT)),
-
+		
+		postman_agent_customer_contact_info_mask(new ConfigMeta("Mask Number","postman.agent.customer.contact.info.mask").optionsOnOff().group(GROUP_AGENT)),
+		
 		POSTMAN_CHAT_IDLE_TIMEOUT(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout")
 				.optionValues("5min", "10min", "15min", "20min", "25min", "30min").group(GROUP_AGENT)),
 
@@ -156,7 +162,7 @@ public class ConfigConstants {
 						PMConstants.CHAT_SESSION_STICKY.STRICT)
 				.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
 
-		POSTMAN_AGENT_HEADER(new ConfigMeta("Header of Messsage Sent by agent", "postman.agent.chat.header")
+		POSTMAN_AGENT_HEADER(new ConfigMeta("Header of Message Sent by agent", "postman.agent.chat.header")
 				.desc("Use {{agent}} for agent name").group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
@@ -242,7 +248,7 @@ public class ConfigConstants {
 						.optionsLabel("desc").group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
-				new ConfigMeta("Message to customer when no agent avaialble", "postman.agent.chat.autoreply.noagent")
+				new ConfigMeta("Message to customer when no agent available", "postman.agent.chat.autoreply.noagent")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 						.group(GROUP_AGENT)),
 

@@ -106,6 +106,7 @@ public class PMEnvironment {
 		protected String channelKey;
 		protected String channelCode;
 
+		protected String id;
 		protected String name;
 		protected String inboundQueue;
 
@@ -144,6 +145,9 @@ public class PMEnvironment {
 		}
 
 		public String getChannelId() {
+			if (ArgUtil.is(this.id)) {
+				return this.id;
+			}
 			return String.format("%s:%s", this.getChannelType(), this.getLane()).toLowerCase();
 		}
 

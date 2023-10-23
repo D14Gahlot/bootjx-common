@@ -290,7 +290,8 @@ public class PMConstants {
 		public static final String POSTMAN_CHAT_FEEDBACK_QUEUE = "postman.chat.feedback.queue";
 		public static final String POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED = "postman.agent.chat.autoreply.resolved";
 		public static final String POSTMAN_AGENT_TAB_NONAGENT = "postman.agent.tab.nonagent";
-		public static final String POSTMAN_AGENT_OTP_CHANNEL = "postman.agent.otp.channel";
+		public static final String POSTMAN_AGENT_2FA_ENABLED = "postman.agent.2fa";
+		public static final String POSTMAN_AGENT_2FA_CHANNEL = "postman.agent.2fa.channel";
 		public static final String POSTMAN_CHAT_WEB_CHANNEL = "postman.chat.web.channel";
 		public static final String POSTMAN_CHAT_WEB_QUEUE = "postman.chat.web.queue.enabled";
 	}
@@ -303,5 +304,15 @@ public class PMConstants {
 
 	public static final String COLLECTION_NAME = "MESSAGE_";
 	public static final String CHAT_SESSION = "CHAT_SESSION";
+	
+	public static final String CONTACTS = "contacts";
+	public static final String PLUS_SYM = "+";
+	
+	
+	public static class FILE_TYPE {
+		public static String CSV = "text/csv";
+		public static String EXCEL="application/vnd.ms-excel";
+		public static String XLS="application/xls";
+	}
 
 }
