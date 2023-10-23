@@ -1,6 +1,7 @@
 package com.boot.jx.connectors;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBDate;
 import com.boot.jx.postman.pbook.PBEmail;
@@ -202,7 +204,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
 		return inboxMessage;
 	}
-
+    
 	private void extractContacts(MapModel map, InboxMessage inboxMessage) {
 		List<Map<String, Object>> cards = map.entry(InBoundWrapperPaths.VCARDS).asListOfMap();
 		for (Map<String, Object> card : cards) {
@@ -402,6 +404,60 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		}
 
 		return messageBoxEvent;
+	}
+    
+	public OutboxMessage initSession1(ChatSessionDoc session, InboxMessage inboxMessage) {
+
+		ChatContactQuery contactQuery = messageContext.contact();
+		ChatContactDoc chatContactDoc = messageContext.contact().getDoc();
+
+		if (ArgUtil.is(inboxMessage.getForm())) {
+			if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
+				String name = ArgUtil.parseAsString(inboxMessage.getForm().get("name"));
+				contactQuery.setName(name);
+			}
+			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
+				String email = ArgUtil.parseAsString(inboxMessage.getForm().get("email"));
+				contactQuery.setEmail(email);
+				contactQuery.setEmailVerified(false);
+			}
+			if (ArgUtil.is(inboxMessage.getForm().get("phone"))) {
+				contactQuery.setPhone(ArgUtil.parseAsString(inboxMessage.getForm().get("phone")));
+				contactQuery.setPhoneVerified(false);
+			}
+		}
+
+		List<TmplElement> inputs = new ArrayList<TmplElement>();
+		if (ArgUtil.isEmpty(chatContactDoc.getName())) {
+			inputs.add(new TmplElement().code("name").label("Name").type("TEXT"));
+//			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+//					inputs);
+		}
+
+		ChannelConfig channel = getChannelConfig(inboxMessage);
+
+		if (channel.getWa360d().isPromptEmail()) {
+			if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
+				inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
+//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//						.option("inputs", inputs);
+			}
+		}
+
+		if (channel.getWeb().isPromptPhone()) {
+			if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
+				inputs.add(new TmplElement().code("phone").label("Phone").type("PHONE"));
+//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//						.option("inputs", inputs);
+			}
+		}
+
+		if (ArgUtil.is(inputs) && inputs.size() > 0) {
+			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+					inputs);
+		}
+
+		return null;
 	}
 
 	public String getCountryCode(String phone) {
