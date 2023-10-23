@@ -108,7 +108,7 @@ public class NodeClientV1Controller {
 		newPhoneNOTPDoc.setType(msg.type);
 		newPhoneNOTPDoc.setPubKey(msg.pubKey);
 		newPhoneNOTPDoc.setMsgGenId(msg.msgGenId);
-		newPhoneNOTPDoc.setCompanyId(msg.companyId);
+		newPhoneNOTPDoc.setCompanyId(ArgUtil.anyOf(compoc.getCompanyId(), msg.companyId));
 		newPhoneNOTPDoc.setCompanyName(ArgUtil.anyOf(compoc.getDisplayName(), msg.companyName));
 		newPhoneNOTPDoc.setCompanyStamp(compoc.meta().getUpdateStamp());
 		newPhoneNOTPDoc.setLogoUrl(msg.logoUrl);
