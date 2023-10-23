@@ -31,6 +31,7 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
+import com.boot.jx.postman.manager.ConfigManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
@@ -44,7 +45,7 @@ import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 
 @Service
-public class ConfigManager {
+public class ConfigManagerImpl implements ConfigManager {
 
 	@Autowired
 	public ConfigMaster configStore;
@@ -88,8 +89,7 @@ public class ConfigManager {
 
 				break;
 			default:
-				list.add(MapBuilder.map().put("meta", meta)
-						.put("domain", pmEnvironment.local().keyEntry(meta.getKey())) // Domain
+				list.add(MapBuilder.map().put("meta", meta).put("domain", pmEnvironment.local().keyEntry(meta.getKey())) // Domain
 						.put("shared", pmEnvironment.shared().keyEntry(meta.getKey())) // Shared
 						.put("config", pmEnvironment.keyEntry(meta.getKey())) // Resolved
 						.toMap());
@@ -190,6 +190,7 @@ public class ConfigManager {
 		this.refresh();
 	}
 
+	@Override
 	public ClientAppConfigDoc save(ClientAppConfigDoc clientApiKey) {
 		ClientApp app = pmEnvironment.config().clientApiKey(clientApiKey.getQueue());
 		if (ArgUtil.is(app) && app.isReadOnly()) {
@@ -343,6 +344,7 @@ public class ConfigManager {
 		this.refresh();
 	}
 
+	@Override
 	public void refresh() {
 		sharedConfigManager.clear();
 	}

@@ -54,6 +54,12 @@ public class PMFileStoreClient {
 			throws FileNotFoundException, IOException {
 		return awsFileStore.commitFile2(srcFile, dstFile);
 	}
+	
+
+	public CommonFile commitSessionFileSync(CommonFileAbstract<?> srcFile, CommonFile dstFile)
+			throws FileNotFoundException, IOException {
+		return awsFileStore.commitFile2Sync(srcFile, dstFile);
+	}
 
 	public CommonFile uploadSessionFile(MultipartFile srcFile, String sessionId, String fileId) {
 		sessionId = StringUtils.removeSpecialCharacter(ArgUtil.nonEmpty(sessionId,UniqueID.generateString()));

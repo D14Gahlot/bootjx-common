@@ -4,7 +4,6 @@ import java.security.NoSuchAlgorithmException;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants;
@@ -213,6 +212,7 @@ public class PostManUtil {
 		if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(channelType)) {
 			channelType = CHANNEL_TYPE.WA_GUPSHUP;
 		}
+		
 		return String.format("%s:%s", channelType, lane).toLowerCase();
 	}
 

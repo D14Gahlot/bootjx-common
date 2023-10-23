@@ -1,5 +1,7 @@
 package com.boot.jx.inbound;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,11 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.AppContextUtil;
@@ -24,6 +29,7 @@ import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatProxyManager;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
@@ -131,6 +137,22 @@ public class InBoundController {
 		msg.setContact(contact);
 		inBoundService.invokeMethodsRelease(msg);
 		return ApiResponse.buildResult(contact).meta(contactId);
+	}
+
+	@RequestMapping(value = "/ext/messagse/media/reload", method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> messageMediaReload(@RequestParam String sessionId,
+			@RequestParam String messageId) throws FileNotFoundException, IOException {
+		inBoundRouter.reloadMedia(sessionId, messageId);
+		return ApiResponse.build();
+	}
+
+	@RequestMapping(value = "/ext/messagse/media/reload", method = { RequestMethod.GET })
+	@ResponseBody
+	public ResponseEntity<byte[]> messageMediaReloadGet(@RequestParam String sessionId, @RequestParam String messageId,
+			@RequestParam(required = false, defaultValue = "0") Integer index)
+			throws FileNotFoundException, IOException {
+		CommonFile file = inBoundRouter.reloadMedia(sessionId, messageId, index);
+		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(file.getBody());
 	}
 
 	@RequestMapping(value = "/ext/inbound/v2/{channelType}/callback/{accountKey}/{channelId}/{channelKey}",

@@ -13,7 +13,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.manager.AdminManager;
-import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.service.EmpAuthService;
@@ -37,7 +37,7 @@ public class AdminService {
 	MongoTemplate mongoTemplate;
 
 	@Autowired
-	ConfigManager configManager;
+	ConfigManagerImpl configManager;
 
 	@Autowired
 	private EmpAuthService empAuthService;
