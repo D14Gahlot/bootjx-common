@@ -88,7 +88,7 @@ public class PhoneV1Controller {
 
 			resp.loginToken = loginToken;
 			phoneUserQuery.setLoginToken(resp.loginToken);
-			phoneUserQuery.setDeviceId(loginToken);
+			phoneUserQuery.setDeviceId(loginDTO.deviceId);
 			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			commonMongoTemplate.update(phoneUserQuery);
 
