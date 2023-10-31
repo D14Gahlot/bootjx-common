@@ -145,45 +145,7 @@ public class AdminMsgController {
 		return ApiResponse.buildResults(chatSessionDtos);
 	}
 	
-	@RequestMapping(value = "/api/message/v1/session", method = { RequestMethod.POST })
-	public ApiResponse<ChatSessionDoc, Object> fetchSessionV1(@RequestParam String startStamp,
-			@RequestParam String endStamp, @RequestParam(required = false) String agentCode,
-			@RequestParam(required = false) String contactType) {
-		Query query2 = new Query();
-
-		Criteria criteria = new Criteria();
-		Long startStampLong = ArgUtil.parseAsLong(startStamp);
-		Long endStampLong = ArgUtil.parseAsLong(endStamp);
-		Criteria dateCriteria = new Criteria().orOperator(
-				new Criteria().andOperator(Criteria.where("startSessionStamp").gt(startStampLong),
-						Criteria.where("startSessionStamp").lt(endStampLong)),
-				new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(startStampLong),
-						Criteria.where("closeSessionStamp").lt(endStampLong)),
-
-				new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(startStampLong),
-						Criteria.where("assignedDeptStamp").lt(endStampLong)),
-				new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(startStampLong),
-						Criteria.where("assignedAgentStamp").lt(endStampLong)),
-
-				new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(startStampLong),
-						Criteria.where("fistResponseStamp").lt(endStampLong)),
-				new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(startStampLong),
-						Criteria.where("lastResponseStamp").lt(endStampLong)),
-
-				new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(startStampLong),
-						Criteria.where("lastInComingStamp").lt(endStampLong)));
-
-		criteria.andOperator(dateCriteria);
-
-		if (ArgUtil.is(agentCode)) {
-			criteria.and("assignedToAgent").is(agentCode);
-		}
-		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
-		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
-		return ApiResponse.buildResults(messages);
-	}
-
-
+	
 	@RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
 		chatSessionDto = chatArchive.getChatSession(chatSessionDto);
