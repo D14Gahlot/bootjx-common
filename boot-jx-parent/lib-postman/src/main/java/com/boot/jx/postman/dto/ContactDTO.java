@@ -48,7 +48,16 @@ public class ContactDTO implements java.io.Serializable, Contactable {
 	private long lastPushStamp;
 	private long lastReplyStamp;
 	private long lastOptInStamp;
+/*	private String expiration_timestamp;
 
+	public String getExpiration_timestamp() {
+		return expiration_timestamp;
+	}
+
+	public void setExpiration_timestamp(String expiration_timestamp) {
+		this.expiration_timestamp = expiration_timestamp;
+	}
+*/
 	private Long createdStamp;
 	private String createdBy;
 

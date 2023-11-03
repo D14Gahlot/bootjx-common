@@ -52,6 +52,16 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 
 	private long lastOptInStamp;
 	private long lastSentXStamp;
+	
+	private long expiration_timestamp;
+
+	public long getExpiration_timestamp() {
+		return expiration_timestamp;
+	}
+
+	public void setExpiration_timestamp(long expiration_timestamp) {
+		this.expiration_timestamp = expiration_timestamp;
+	}
 
 	private String sessionId;
 
