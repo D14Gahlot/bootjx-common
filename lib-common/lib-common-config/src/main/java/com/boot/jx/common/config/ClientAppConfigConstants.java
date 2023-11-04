@@ -232,7 +232,7 @@ public class ClientAppConfigConstants {
 				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("MoEngage Connector")
 						.desc("Use this app to Send Messages originated by MoEngage").group("About App"),
 				new ConfigMeta().path("api_url").title("API URL")
-						.defaultValue("https://${domain}.${server}/xms/api/moengage/v1/message/send").readonly()
+						.defaultValue("https://{{domain}}.{{server}}/xms/api/moengage/v1/message/send").readonly()
 
 		});
 	}
