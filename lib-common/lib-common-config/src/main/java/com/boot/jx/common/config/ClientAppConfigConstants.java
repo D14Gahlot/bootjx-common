@@ -226,6 +226,15 @@ public class ClientAppConfigConstants {
 						new ConfigMeta().group("AVAAMO").title("Avaamo endpoint")
 								.desc("Inbound messages will be forwarded to this url").path("props.end_point").example(
 										"https://c6.avaamo.com/bot_connector_webhooks/02de0dde-c7ec-49a7-83f8-6106ee72/message.json") });
+
+		APP_CONFIGS.put(APP_TYPE.MOENGAGE, new ConfigMeta[] {
+				// Fields
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("MoEngage Connector")
+						.desc("Use this app to Send Messages originated by MoEngage").group("About App"),
+				new ConfigMeta().path("api_url").title("API URL")
+						.defaultValue("https://${tnt}.${service.server}/xms/api/moengage/v1/message/send").readonly()
+
+		});
 	}
 
 }
