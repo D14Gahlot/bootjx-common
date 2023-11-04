@@ -31,6 +31,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
+import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.fb.FacebookHookRequest;
@@ -40,6 +41,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
@@ -190,7 +192,7 @@ public class InBoundController {
 							.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted")
 									.is(false).and("channelType").is(channelType)));
 					if (ArgUtil.is(channels)) {
-						channelList.put(accountKey, channels);
+						channelList.put(pageId, channels);
 					}
 				}
 				if (ArgUtil.is(channels)) {
@@ -205,6 +207,9 @@ public class InBoundController {
 							e.printStackTrace();
 						}
 					}
+				} else {
+					String channelId = PostManUtil.CHANNEL_ID(channelType, pageId);
+					inBoundRouter.inboundMessageEventAsync(channelId, newData.map());
 				}
 
 			});

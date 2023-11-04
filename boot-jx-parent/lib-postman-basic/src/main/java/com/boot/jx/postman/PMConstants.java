@@ -125,7 +125,7 @@ public class PMConstants {
 		// Agent Mdoes
 		MITEL(CHAT_MODE.AGENT),
 
-		FAQ(CHAT_MODE.BOT), APP_SCRIPT(CHAT_MODE.WEBHOOK),
+		FAQ(CHAT_MODE.BOT), APP_SCRIPT(CHAT_MODE.WEBHOOK), MOENGAGE(CHAT_MODE.PUSH),
 
 		DEFAULT(CHAT_MODE.PUSH);
 
@@ -304,15 +304,14 @@ public class PMConstants {
 
 	public static final String COLLECTION_NAME = "MESSAGE_";
 	public static final String CHAT_SESSION = "CHAT_SESSION";
-	
+
 	public static final String CONTACTS = "contacts";
 	public static final String PLUS_SYM = "+";
-	
-	
+
 	public static class FILE_TYPE {
 		public static String CSV = "text/csv";
-		public static String EXCEL="application/vnd.ms-excel";
-		public static String XLS="application/xls";
+		public static String EXCEL = "application/vnd.ms-excel";
+		public static String XLS = "application/xls";
 	}
 
 }

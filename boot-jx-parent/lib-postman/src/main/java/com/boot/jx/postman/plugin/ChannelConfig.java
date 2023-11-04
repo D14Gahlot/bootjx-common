@@ -41,6 +41,7 @@ public class ChannelConfig extends AChannelConfig {
 	private Object error;
 
 	private String callbackPath;
+	private String unhandledInboundForward;
 
 	public String getLane() {
 		return lane;
@@ -210,6 +211,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setOa(OAConfigDetails oa) {
 		this.oa = oa;
+	}
+
+	public String getUnhandledInboundForward() {
+		return unhandledInboundForward;
+	}
+
+	public void setUnhandledInboundForward(String unhandledInboundForward) {
+		this.unhandledInboundForward = unhandledInboundForward;
 	}
 
 }
