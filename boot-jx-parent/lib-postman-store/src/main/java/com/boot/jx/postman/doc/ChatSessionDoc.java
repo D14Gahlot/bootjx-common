@@ -143,6 +143,9 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	// @DBRef
 	private MessageDoc lastMsg;
+	
+	/** session expiry stamp**/
+	private long sessionExpiryStamp;
 
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
@@ -657,5 +660,13 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 			this.summary = new HashMap<String, Object>();
 		}
 		return summary;
+	}
+
+	public long getSessionExpiryStamp() {
+		return sessionExpiryStamp;
+	}
+
+	public void setSessionExpiryStamp(long sessionExpiryStamp) {
+		this.sessionExpiryStamp = sessionExpiryStamp;
 	}
 }
