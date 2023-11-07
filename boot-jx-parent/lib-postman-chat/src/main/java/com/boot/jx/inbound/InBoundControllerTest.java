@@ -132,6 +132,11 @@ public class InBoundControllerTest {
 		}
 		PMConfigurationModel config = validateApiKey();
 		ChannelConfig channelDto = config.channel(channelId);
+
+		if (!ArgUtil.is(channelDto)) {
+			channelDto = pmEnvironment.config().channel(channelId);
+		}
+
 		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
 		String webhook_path = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelDto);
 		return ApiResponse.buildResult(MapModel.createInstance().put("webhook_url", webhook_url)
@@ -149,6 +154,11 @@ public class InBoundControllerTest {
 		}
 		PMConfigurationModel config = validateApiKey();
 		ChannelConfig channelDto = config.channel(channelId);
+
+		if (!ArgUtil.is(channelDto)) {
+			ApiResponseUtil.throwException("Cannot Update Webhook for Shared/Sandbox Channels");
+		}
+
 		context = ArgUtil.nonEmpty(context, appConfig.getAppPrefix());
 		if (ArgUtil.is(endpoint)) {
 			PMContextUtil.publicUrl(String.format("%s%s", endpoint, context));
