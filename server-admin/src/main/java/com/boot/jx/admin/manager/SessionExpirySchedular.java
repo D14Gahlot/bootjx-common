@@ -53,7 +53,7 @@ public class SessionExpirySchedular  extends CommonMongoTemplateAbstract<Session
 		LOGGER.info("Current time is :: " + LocalDate.now());
 		
 		SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
-		boolean isSchedular = true;//globalVars.keyEntry("session_expiry_schedular").asBoolean();
+		boolean isSchedular = false;//globalVars.keyEntry("session_expiry_schedular").asBoolean();
 		LOGGER.info("isSchedular ON/OFF :"+isSchedular);
 		if(isSchedular) {
 		

@@ -124,11 +124,48 @@ public class AdminMsgController {
 		return ApiResponse.buildResults(messages);
 	}
 	
+	
 	@RequestMapping(value = "/api/message/v1/session", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> fetchSessionV1(@RequestBody SessionSearchRequest query) {
 		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
 		List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
 				query.toStamp);
+		
+		/** for comatability **/
+		
+		if(sessions==null || sessions.isEmpty()) {
+			Criteria criteria = new Criteria();
+			Query query2 = new Query();
+			Criteria dateCriteria = new Criteria().orOperator(
+					new Criteria().andOperator(Criteria.where("startSessionStamp").gt(query.fromStamp),
+							Criteria.where("startSessionStamp").lt(query.toStamp)),
+					new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(query.fromStamp),
+							Criteria.where("closeSessionStamp").lt(query.toStamp)),
+
+					new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(query.fromStamp),
+							Criteria.where("assignedDeptStamp").lt(query.toStamp)),
+					new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(query.fromStamp),
+							Criteria.where("assignedAgentStamp").lt(query.toStamp)),
+
+					new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(query.fromStamp),
+							Criteria.where("fistResponseStamp").lt(query.toStamp)),
+					new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(query.fromStamp),
+							Criteria.where("lastResponseStamp").lt(query.toStamp)),
+
+					new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(query.fromStamp),
+							Criteria.where("lastInComingStamp").lt(query.toStamp)));
+
+			criteria.andOperator(dateCriteria);
+
+			if (ArgUtil.is(query.agantCode)) {
+				criteria.and("assignedToAgent").is(query.agantCode);
+			}
+			 query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
+			 sessions = mongoTemplate.find(query2, ChatSessionDoc.class);
+		}
+		/** for comatability end **/
+		
+		
 		for (ChatSessionDoc chatSessionDoc : sessions) {
 			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 			chatSessionDtos.add(chatSessionDto);
@@ -142,6 +179,10 @@ public class AdminMsgController {
 			chatSessionDtos = chatSessionDtos.stream().filter(e -> chatSessionSet.add(e.getPhone()))
 					.collect(Collectors.toList());
 		}
+		
+		
+		
+		
 		return ApiResponse.buildResults(chatSessionDtos);
 	}
 	

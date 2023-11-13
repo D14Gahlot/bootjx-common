@@ -13,5 +13,6 @@ public class SessionSearchRequest {
 	public long fromStamp;
 	public long toStamp;
 	public long limit;
+	public String agantCode;
 	
 }
