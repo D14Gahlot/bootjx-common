@@ -3,6 +3,10 @@ package com.boot.jx.postman.plugin;
 import java.util.List;
 
 import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.common.impl.ConfigMeta.CONVERT_TYPE;
+import com.boot.jx.common.impl.ConfigMeta.ConfigMetaProperty;
+import com.boot.jx.common.impl.ConfigMeta.DATA_TYPE;
+import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
@@ -38,7 +42,29 @@ public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
 		private String verifyToken;
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String appSecret;
+        
+		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptEmail;
 
+		@ConfigMetaProperty(path = "web.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
+		private boolean promptPhone;
+		public boolean isPromptEmail() {
+			return promptEmail;
+		}
+
+		public void setPromptEmail(boolean promptEmail) {
+			this.promptEmail = promptEmail;
+		}
+
+		public boolean isPromptPhone() {
+			return promptPhone;
+		}
+
+		public void setPromptPhone(boolean promptPhone) {
+			this.promptPhone = promptPhone;
+		}
 		public String getPageId() {
 			return pageId;
 		}

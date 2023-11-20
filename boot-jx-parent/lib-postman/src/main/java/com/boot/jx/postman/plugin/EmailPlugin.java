@@ -53,6 +53,12 @@ public class EmailPlugin implements DefaultChannelPlugin<EmailConfigDetails> {
 		@ConfigMetaProperty(path = "email.smtpStartTls", title = "SMTP TLS", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN)
 		private boolean smtpStartTls;
+		@ConfigMetaProperty(path = "email.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
+		private boolean promptPhone;
+		@ConfigMetaProperty(path = "email.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptEmail;
 
 		@ConfigMetaProperty(path = "email.smtpHost", title = "SMTP Host")
 		private String smtpHost;
@@ -167,6 +173,21 @@ public class EmailPlugin implements DefaultChannelPlugin<EmailConfigDetails> {
 		public void setPop3Port(String pop3Port) {
 			this.pop3Port = pop3Port;
 		}
+		public boolean isPromptPhone() {
+			return promptPhone;
+		}
+
+		public void setPromptPhone(boolean promptPhone) {
+			this.promptPhone = promptPhone;
+		}
+		public boolean isPromptEmail() {
+			return promptEmail;
+		}
+
+		public void setPromptEmail(boolean promptEmail) {
+			this.promptEmail = promptEmail;
+		}
+
 
 	}
 

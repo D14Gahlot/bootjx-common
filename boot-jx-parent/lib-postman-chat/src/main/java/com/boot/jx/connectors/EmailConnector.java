@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -46,6 +47,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.EmailPlugin;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
@@ -128,6 +130,52 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 		}
 		if (chatContactDoc.getEmailVerified() == null) {
 			contactQuery.setEmailVerified(true);
+		}
+		if (ArgUtil.is(inboxMessage.getForm())) {
+			if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
+				String name = ArgUtil.parseAsString(inboxMessage.getForm().get("name"));
+				contactQuery.setName(name);
+			}
+			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
+				String email = ArgUtil.parseAsString(inboxMessage.getForm().get("email"));
+				contactQuery.setEmail(email);
+				contactQuery.setEmailVerified(false);
+			}
+			if (ArgUtil.is(inboxMessage.getForm().get("phone"))) {
+				contactQuery.setPhone(ArgUtil.parseAsString(inboxMessage.getForm().get("phone")));
+				contactQuery.setPhoneVerified(false);
+			}
+		}
+
+		List<TmplElement> inputs = new ArrayList<TmplElement>();
+		if (ArgUtil.isEmpty(chatContactDoc.getInfo().getName())) {
+			inputs.add(new TmplElement().code("name").label("Name").type("TEXT"));
+//			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+//					inputs);
+		}
+
+		ChannelConfig channel = getChannelConfig(inboxMessage);
+
+		if (channel.getEmail().isPromptEmail()) {
+			if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
+				inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
+//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//						.option("inputs", inputs);
+			}
+		}
+
+		if (channel.getEmail().isPromptPhone()) {
+			if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
+				inputs.add(new TmplElement().code("phone").label("Phone").type("PHONE"));
+//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//						.option("inputs", inputs);
+			}
+		}
+			if (ArgUtil.is(inputs) && inputs.size() > 0) {
+				return (OutboxMessage) inboxMessage.replyMessage("Could you please help us with your").option("inputs",
+						inputs);
+			
+
 		}
 		return null;
 	}

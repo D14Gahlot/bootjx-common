@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,7 @@ import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.InstagramPlugin;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
@@ -66,14 +70,63 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		// System.out.println("initSession=====" + JsonUtil.toJson(inboxMessage));
 		try {
 			ChannelConfig config = getChannelConfig(inboxMessage);
+			ChatContactDoc chatContactDoc = messageContext.contact().getDoc();
+
 			InstagramUserProfile profile = instaClient.getUserProfile(config, inboxMessage.contact());
 			ChatContactQuery contactQuery = messageContext.contact();
 			contactQuery.setProfilePic(profile.getProfilePic());
 			contactQuery.setName(profile.getName());
 			contactQuery.setEmail(profile.getEmail());
+			if (ArgUtil.is(inboxMessage.getForm())) {
+				if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
+					String name = ArgUtil.parseAsString(inboxMessage.getForm().get("name"));
+					contactQuery.setName("Rahul");
+				}
+				if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
+					String email = ArgUtil.parseAsString(inboxMessage.getForm().get("email"));
+					contactQuery.setEmail(email);
+					//contactQuery.setEmailVerified(false);
+				}
+				if (ArgUtil.is(inboxMessage.getForm().get("phone"))) {
+					contactQuery.setPhone(ArgUtil.parseAsString(inboxMessage.getForm().get("phone")));
+					//contactQuery.setPhoneVerified(false);
+				}
+			}
+
+			List<TmplElement> inputs = new ArrayList<TmplElement>();
+			if (ArgUtil.isEmpty(chatContactDoc.getName())) {
+				inputs.add(new TmplElement().code("name").label("Name").type("TEXT"));
+//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+//						inputs);
+			}
+
+			ChannelConfig channel = getChannelConfig(inboxMessage);
+
+			if (channel.getInstagram().isPromptEmail()) {
+				if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
+					inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
+//					return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//							.option("inputs", inputs);
+				}
+			}
+
+			if (channel.getInstagram().isPromptPhone()) {
+				if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
+					inputs.add(new TmplElement().code("phone").label("Phone").type("PHONE"));
+//					return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//							.option("inputs", inputs);
+				}
+			}
+
+			if (ArgUtil.is(inputs) && inputs.size() > 0) {
+				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+						inputs);
+			}
+			
 		} catch (ApiHttpException e) {
 			logManager.error(inboxMessage, e);
 		}
+		
 		return null;
 	}
 
