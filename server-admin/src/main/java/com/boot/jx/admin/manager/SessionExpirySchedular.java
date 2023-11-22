@@ -108,14 +108,14 @@ public class SessionExpirySchedular  extends CommonMongoTemplateAbstract<Session
 
 	@SuppressWarnings("deprecation")
 	//@Scheduled(cron = "0 */2 * * * *")
-	@Scheduled(fixedRate=60*60*1000)
+	//@Scheduled(fixedRate=60*60*1000)
 	public void sessionExpirySummarySchedular() {
 		try {
-		String tnt = AppContextUtil.getTenant();
+		String tnt ="demo";// AppContextUtil.getTenant();
 		SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
 		
 		LOGGER.info("sessionExpirySummarySchedular Current time is :: " + LocalDate.now()+"\t tnt :"+tnt+"\t expiry schedular :"+globalVars.keyEntry("session_expiry_schedular").asBoolean());
-		boolean isSchedular = true;//globalVars.keyEntry("session_expiry_schedular").asBoolean();
+		boolean isSchedular = false;//globalVars.keyEntry("session_expiry_schedular").asBoolean();
 		LOGGER.info("isSchedular ON/OFF :"+isSchedular);
 		long todayStartTime = DateUtil.todayStartTime();
 		long todayEndTime = DateUtil.todayEndTime();
