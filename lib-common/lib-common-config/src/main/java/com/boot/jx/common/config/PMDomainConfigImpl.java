@@ -77,7 +77,7 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	
 	@Override
 	public PMConfigurationObject getAgentChatDisable() {
-		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_DISABLE);
+		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CUSTOMER_CHAT_DISABLE);
 	}
 	
 	
