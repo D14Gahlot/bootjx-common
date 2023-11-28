@@ -72,6 +72,9 @@ public class ChatSessionDTO implements Serializable {
 
 	private Map<String, Object> feedback;
 	private Map<String, Object> meta;
+	
+	/** session expiry stamp**/
+	private long sessionExpiryStamp;
 
 	public String getSessionId() {
 		return sessionId;
@@ -435,5 +438,13 @@ public class ChatSessionDTO implements Serializable {
 
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
+	}
+
+	public long getSessionExpiryStamp() {
+		return sessionExpiryStamp;
+	}
+
+	public void setSessionExpiryStamp(long sessionExpiryStamp) {
+		this.sessionExpiryStamp = sessionExpiryStamp;
 	}
 }

@@ -3,8 +3,11 @@ package com.boot.jx.admin.api;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.admin.dto.CsvDto;
+import com.boot.jx.admin.dto.SessionSearchRequest;
 import com.boot.jx.admin.manager.CSVHelper;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
@@ -37,6 +41,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.manager.StarterDocKit;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
@@ -76,6 +81,10 @@ public class AdminMsgController {
 
 	@Autowired
 	public CSVService fileService;
+	
+	@Autowired
+	public ChatSessionManager chatSessionManager;
+
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -110,12 +119,74 @@ public class AdminMsgController {
 		if (ArgUtil.is(agentCode)) {
 			criteria.and("assignedToAgent").is(agentCode);
 		}
-		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
-		// System.out.println(query2.toString());
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
 		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
 		return ApiResponse.buildResults(messages);
 	}
+	
+	
+	@RequestMapping(value = "/api/message/v1/session", method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, Object> fetchSessionV1(@RequestBody SessionSearchRequest query) {
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+		List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
+				query.toStamp);
+		
+		/** for comatability **/
+		
+		if(sessions==null || sessions.isEmpty()) {
+			Criteria criteria = new Criteria();
+			Query query2 = new Query();
+			Criteria dateCriteria = new Criteria().orOperator(
+					new Criteria().andOperator(Criteria.where("startSessionStamp").gt(query.fromStamp),
+							Criteria.where("startSessionStamp").lt(query.toStamp)),
+					new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(query.fromStamp),
+							Criteria.where("closeSessionStamp").lt(query.toStamp)),
 
+					new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(query.fromStamp),
+							Criteria.where("assignedDeptStamp").lt(query.toStamp)),
+					new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(query.fromStamp),
+							Criteria.where("assignedAgentStamp").lt(query.toStamp)),
+
+					new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(query.fromStamp),
+							Criteria.where("fistResponseStamp").lt(query.toStamp)),
+					new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(query.fromStamp),
+							Criteria.where("lastResponseStamp").lt(query.toStamp)),
+
+					new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(query.fromStamp),
+							Criteria.where("lastInComingStamp").lt(query.toStamp)));
+
+			criteria.andOperator(dateCriteria);
+
+			if (ArgUtil.is(query.agantCode)) {
+				criteria.and("assignedToAgent").is(query.agantCode);
+			}
+			 query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
+			 sessions = mongoTemplate.find(query2, ChatSessionDoc.class);
+		}
+		/** for comatability end **/
+		
+		
+		for (ChatSessionDoc chatSessionDoc : sessions) {
+			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+			chatSessionDtos.add(chatSessionDto);
+		}
+		/**
+		 * remove duplicate /multiple Session for each contact we can filter based on
+		 * name , phone number on any field
+		 **/
+		if (chatSessionDtos != null && !chatSessionDtos.isEmpty()) {
+			Set<String> chatSessionSet = new HashSet<>();
+			chatSessionDtos = chatSessionDtos.stream().filter(e -> chatSessionSet.add(e.getPhone()))
+					.collect(Collectors.toList());
+		}
+		
+		
+		
+		
+		return ApiResponse.buildResults(chatSessionDtos);
+	}
+	
+	
 	@RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
 		chatSessionDto = chatArchive.getChatSession(chatSessionDto);

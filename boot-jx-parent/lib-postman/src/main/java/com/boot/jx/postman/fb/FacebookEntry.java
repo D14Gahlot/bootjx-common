@@ -9,6 +9,7 @@ public class FacebookEntry implements Serializable {
 	private String id;
 	private Long time;
 	private List<FacebookMessaging> messaging = new ArrayList<>();
+	private List<Object> changes = new ArrayList<>();
 
 	public String getId() {
 		return id;
@@ -32,5 +33,13 @@ public class FacebookEntry implements Serializable {
 
 	public void setMessaging(List<FacebookMessaging> messaging) {
 		this.messaging = messaging;
+	}
+
+	public List<Object> getChanges() {
+		return changes;
+	}
+
+	public void setChanges(List<Object> changes) {
+		this.changes = changes;
 	}
 }

@@ -309,6 +309,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		}
 	}
 
+	@Deprecated
 	public CommonFile reloadMedia(Attachment attachment)
 			throws MalformedURLException, FileNotFoundException, IOException {
 		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
