@@ -35,10 +35,10 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String FIRST_INBOUND_STAMP = "stamps.firstInBound";
-	public static final String LAST_INBOUND_STAMP = "stamps.lastInBound";
-	public static final String FIRST_OUTBOUND_STAMP = "stamps.firstOutBound";
-	public static final String LAST_OUTBOUND_STAMP = "stamps.lastOutBound";
+	public static final String FIRST_INBOUND_STAMP = "firstInBound";
+	public static final String LAST_INBOUND_STAMP = "lastInBound";
+	public static final String FIRST_OUTBOUND_STAMP = "firstOutBound";
+	public static final String LAST_OUTBOUND_STAMP = "lastOutBound";
 
 	@Id
 	private String sessionId;
@@ -127,6 +127,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	private Map<String, Object> store;
 	private Map<String, Object> meta;
+	private Map<String, Object> summary;
 
 	private Map<String, ChatMessageDTO> msg;
 	private Map<String, Long> stamps;
@@ -142,6 +143,9 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	// @DBRef
 	private MessageDoc lastMsg;
+	
+	/** session expiry stamp**/
+	private long sessionExpiryStamp;
 
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
@@ -597,6 +601,18 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 		this.routingId = routingId;
 	}
 
+	public ChatMessageDTO lastMsg() {
+		return this.msg().get("lastMsg");
+	}
+
+	public ChatMessageDTO lastOutBoundMsg() {
+		return this.msg().get("lastOutBoundMsg");
+	}
+
+	public ChatMessageDTO lastInBoundMsg() {
+		return this.msg().get("lastInBoundMsg");
+	}
+
 	public void refreshStamps() {
 		if (!ArgUtil.is(this.lastOutGoingStamp)) {
 			if (this.lastOutBoundMsg != null && PostManUtil.isOutBound(lastOutBoundMsg.getType())) {
@@ -629,5 +645,28 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 				}
 			}
 		}
+	}
+
+	public Map<String, Object> getSummary() {
+		return summary;
+	}
+
+	public void setSummary(Map<String, Object> summary) {
+		this.summary = summary;
+	}
+
+	public Map<String, Object> summary() {
+		if (this.summary == null) {
+			this.summary = new HashMap<String, Object>();
+		}
+		return summary;
+	}
+
+	public long getSessionExpiryStamp() {
+		return sessionExpiryStamp;
+	}
+
+	public void setSessionExpiryStamp(long sessionExpiryStamp) {
+		this.sessionExpiryStamp = sessionExpiryStamp;
 	}
 }

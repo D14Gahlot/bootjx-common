@@ -1,5 +1,6 @@
 package com.boot.jx.mongo;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +15,24 @@ import org.springframework.data.mongodb.core.query.Update;
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.model.AuditCreateEntity.AuditUpdateEntity;
 import com.boot.model.TimeModels.ITimeStampIndex;
+import com.boot.model.TimeModels.TimeStampIndexKeyDeserializer;
+import com.boot.model.UtilityModels.ProtectedJsonProperty;
+import com.boot.model.UtilityModels.PublicJsonProperty;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class CommonDocInterfaces {
 
-	public static interface MongoQueryBuilder<T> {
+	public static interface IMongoQueryBuilder<T> {
 		public boolean isUpdatedTimeStampSupport();
 
 		public boolean isCreatedTimeStampSupport();
@@ -37,6 +46,10 @@ public class CommonDocInterfaces {
 		public Query getQuery();
 
 		public Class<T> getDocClass();
+
+		public String getCollectionName();
+
+		public IMongoQueryBuilder<T> build();
 	}
 
 	public static interface Patchable<T extends Patchable<T>> {
@@ -107,6 +120,27 @@ public class CommonDocInterfaces {
 	public static interface IDocument {
 	}
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static interface SimpleDocument extends IDocument {
+		public String getId();
+
+		public void setId(String id);
+	}
+
+	@JsonDeserialize(as = ResourceDocumentImpl.class, keyUsing = ResourceDocumentKeyDeserializer.class)
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static interface ResourceDocument extends SimpleDocument {
+
+		public void setCode(String code);
+
+		public String getCode();
+
+		public void setTitle(String title);
+
+		public String getTitle();
+
+	}
+
 	public interface ADocumentDTO<T extends ADocumentDTO<T>> extends IDocument, Serializable {
 
 		@SuppressWarnings("unchecked")
@@ -135,12 +169,23 @@ public class CommonDocInterfaces {
 	public static class AuditActivityDoc implements AuditCreateEntity, Serializable {
 		private static final long serialVersionUID = -8573412950623297045L;
 		@Id
+		@JsonView(PublicJsonProperty.class)
 		private String id;
+
+		@JsonView(PublicJsonProperty.class)
+		private String docIdentifier;
+
+		@JsonView(ProtectedJsonProperty.class)
 		private Object doc;
+		@JsonView(PublicJsonProperty.class)
 		private String createdBy;
+		@JsonView(PublicJsonProperty.class)
 		private Long createdStamp;
+		@JsonView(PublicJsonProperty.class)
 		private String collection;
+		@JsonView(PublicJsonProperty.class)
 		private String activity;
+		@JsonView(PublicJsonProperty.class)
 		private String comment;
 
 		public String getId() {
@@ -218,6 +263,14 @@ public class CommonDocInterfaces {
 			this.activity = activity;
 			return this;
 		}
+
+		public String getDocIdentifier() {
+			return docIdentifier;
+		}
+
+		public void setDocIdentifier(String docIdentifier) {
+			this.docIdentifier = docIdentifier;
+		}
 	}
 
 	public static class BasicDocument<T extends BasicDocument<T>>
@@ -265,6 +318,7 @@ public class CommonDocInterfaces {
 	public interface AuditableByIdEntity extends AuditIdEntity, AuditCreateEntity, AuditUpdateEntity {
 	}
 
+	@JsonDeserialize(as = TimeStampIndex.class, keyUsing = TimeStampIndexKeyDeserializer.class)
 	public static class TimeStampIndex implements Serializable, ITimeStampIndex {
 
 		private static final long serialVersionUID = 9114924334759684396L;
@@ -355,4 +409,48 @@ public class CommonDocInterfaces {
 		}
 	}
 
+	public static class ResourceDocumentImpl implements ResourceDocument, ADocumentDTO<ResourceDocumentImpl> {
+		private static final long serialVersionUID = -2330556618187197003L;
+		private String id;
+		private String code;
+		private String title;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String getCode() {
+			return code;
+		}
+
+		public void setCode(String code) {
+			this.code = code;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public void setTitle(String title) {
+			this.title = title;
+		}
+
+		@Override
+		public ADocumentDTO<ResourceDocumentImpl> newInstance() {
+			return new ResourceDocumentImpl();
+		}
+
+	}
+
+	public class ResourceDocumentKeyDeserializer extends KeyDeserializer {
+		@Override
+		public Object deserializeKey(String key, DeserializationContext deserializationContext)
+				throws IOException, JsonProcessingException {
+			return JsonUtil.getMapper().readValue(key, ResourceDocumentImpl.class);
+		}
+	}
 }

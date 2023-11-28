@@ -1,10 +1,11 @@
 package com.boot.jx.postman.service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -19,26 +21,35 @@ import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
+import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.store.ConfigStore;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 @Component
 public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppSharedConfig {
+	private static final Logger LOGGER = LoggerService.getLogger(PMEnvironmentProviderImpl.class);
 
-	private Map<String, PMConfigurationDoc> localConfigMap = new HashMap<String, PMConfigurationDoc>();
+	private Cache<String, PMConfigurationDoc> localConfigMap = CacheBuilder.newBuilder().maximumSize(1000)
+			.expireAfterWrite(1, TimeUnit.HOURS).build();
+
+	// private Map<String, PMConfigurationDoc> localConfigMap = new HashMap<String,
+	// PMConfigurationDoc>();
 
 	PMConfigurationDoc sharedConfiguration = null;
+	PMConfigurationDoc defaultConfiguration = null;
 
 	@Autowired(required = false)
-	private ConfigStore configStore;
+	private ConfigMaster configStore;
 
 	@Value("${mry.prop.service.server}")
 	private String serviceServer;
@@ -54,17 +65,29 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 		String mappedTo = hasRule(CommonMongoSource.USE_NO_DB) ? "nodb" : tnt;
 
-		if (localConfigMap.containsKey(mappedTo)) {
-			return localConfigMap.get(mappedTo);
+		if (Tenants.isDefault(tnt)) {
+			if (defaultConfiguration != null && sharedConfiguration != null) {
+				return defaultConfiguration;
+			}
+		} else {
+			PMConfigurationModel presentConfig = localConfigMap.getIfPresent(mappedTo);
+			if (presentConfig != null) {
+				return presentConfig;
+			}
 		}
 
 		if (ArgUtil.is(configStore)) {
-			PMConfigurationDoc prefs = getPMConfigurationDoc();
-			prefs.setPrefs(null);
+			PMConfigurationDoc localConfiguration = getPMConfigurationDoc();
+			localConfiguration.setPrefs(null);
 
 			List<PrefsConfigDoc> prefsConfigs = configStore.findAll(PrefsConfigDoc.class);
 			for (PrefsConfigDoc prefsConfig : prefsConfigs) {
-				prefs.setPref(prefsConfig, serviceServer);
+				localConfiguration.setPref(prefsConfig, serviceServer);
+			}
+
+			List<PermsConfigDoc> permsConfigs = configStore.findAll(PermsConfigDoc.class);
+			for (PermsConfigDoc permsConfig : permsConfigs) {
+				localConfiguration.setPerm(permsConfig, serviceServer);
 			}
 
 			List<ChannelConfigDoc> channels = configStore.findAll(ChannelConfigDoc.class);
@@ -72,31 +95,38 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 			// channels.size());
 			for (ChannelConfigDoc channel : channels) {
 				channel.setDomain(tnt);
-				prefs.channels(channel);
+				localConfiguration.channels(channel);
 			}
 
 			List<ClientAppConfigDoc> clientKeys = configStore.findAll(ClientAppConfigDoc.class);
 			for (ClientAppConfigDoc clientKey : clientKeys) {
-				prefs.clientApiKey(clientKey);
+				localConfiguration.clientApiKey(clientKey);
 			}
 
 			List<CompanyVarsConfigDoc> companyVars = configStore.findAll(CompanyVarsConfigDoc.class);
 
-			SafeKeyHashMap<Object> company = prefs.globalVars();
+			SafeKeyHashMap<Object> company = localConfiguration.globalVars();
 
 			for (CompanyVarsConfigDoc companyVar : companyVars) {
 				company.put(companyVar.getKey(), companyVar.getValue());
 			}
 
-			if (ArgUtil.is(prefs)) {
-				prefs.setUpdateStamp(System.currentTimeMillis());
-				localConfigMap.put(mappedTo, prefs);
+			if (ArgUtil.is(localConfiguration)) {
+				localConfiguration.setUpdateStamp(System.currentTimeMillis());
+				if (!Tenants.isDefault(tnt)) {
+					localConfigMap.put(mappedTo, localConfiguration);
+				} else {
+					defaultConfiguration = localConfiguration;
+				}
 			}
 
 			if (Tenants.isDefault(tnt)) {
 				PMConfigurationDoc newSharedConfiguration = new PMConfigurationDoc();
-				for (Entry<String, PMConfigurationObject> entry : prefs.prefs().entrySet()) {
+				for (Entry<String, PMConfigurationObject> entry : localConfiguration.prefs().entrySet()) {
 					newSharedConfiguration.setPref(entry.getValue(), serviceServer);
+				}
+				for (Entry<String, PMConfigurationObject> entry : localConfiguration.perms().entrySet()) {
+					newSharedConfiguration.setPerm(entry.getValue(), serviceServer);
 				}
 				List<ChannelConfigDoc> sandboxChannels = configStore.findAll(ChannelConfigDoc.class);
 				for (ChannelConfigDoc channel : sandboxChannels) {
@@ -116,7 +146,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 				sharedConfiguration = newSharedConfiguration;
 			}
 
-			return prefs;
+			return localConfiguration;
 		}
 		return null;
 	}
@@ -172,6 +202,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 
 	@Override
 	public void initConfig() {
+		LOGGER.info("=======================initConfig");
 		String sessionId = UniqueID.generateString();
 		AppContextUtil.setSessionId(sessionId);
 		AppContextUtil.getTraceId(true, true);
@@ -183,8 +214,10 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	@Override
 	public void clear(Map<String, String> map) {
 		String tnt = AppContextUtil.getTenant();
-		localConfigMap.remove(tnt);
+		localConfigMap.invalidate(tnt);
 		if (Tenants.isDefault(tnt)) {
+			this.sharedConfiguration = null;
+			this.defaultConfiguration = null;
 			this.initConfig();
 		}
 	}

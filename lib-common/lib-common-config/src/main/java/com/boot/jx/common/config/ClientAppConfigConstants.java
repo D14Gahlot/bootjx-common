@@ -3,6 +3,7 @@ package com.boot.jx.common.config;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
@@ -16,6 +17,10 @@ public class ClientAppConfigConstants {
 			// PRefixe
 			"mry.props.logo.", "mry.props.service.", "mry.props.social.", };
 	public static final Map<APP_TYPE, ConfigMeta[]> APP_CONFIGS = new ConcurrentHashMap<APP_TYPE, ConfigMeta[]>();
+	public static final ConfigMeta[] APP_CONFIGS_COMMON = new ConfigMeta[] {
+			SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT.getConfigMeta(),
+			SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL.getConfigMeta(),
+			SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE.getConfigMeta() };
 
 	static {
 
@@ -75,15 +80,29 @@ public class ClientAppConfigConstants {
 
 						new ConfigMeta().title("Default Agent Queue").path("props.agent_queue")
 								.desc("Default Agent App").optionsSource("getx:/api/options/agent_queue")
-								.optionsKey("code").optionsLabel("code") });
+								.optionsKey("code").optionsLabel("code")
+
+				});
 
 		APP_CONFIGS.put(APP_TYPE.TEAM_ROUTER, new ConfigMeta[] { new ConfigMeta()
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Team Router")
 				.desc("Use this app to route session to Team based on customer's input. Selected template should have team code in button code")
 				.group("About App"),
 
+				new ConfigMeta().title("Options Type").path("props.options_type").options(
+						new ConfigOption("QUICK_SKILL").label("QUICK_SKILL"),
+						new ConfigOption("AGENT_TEAM").label("AGENT_TEAM")),
+
 				new ConfigMeta().title("Team Options Template").path("props.template").group("TEMPLATES")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc") });
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc"),
+
+				new ConfigMeta().title("Default Agent Team").path("props.deptCode")
+						.optionsSource("getx:/api/admins/dept").optionsKey("code").optionsLabel("Name").group("Team"),
+
+				new ConfigMeta().title("Default Agent Queue").path("props.agent_queue").desc("Default Agent App")
+						.optionsSource("getx:/api/options/agent_queue").optionsKey("code").optionsLabel("code"),
+
+		});
 
 		APP_CONFIGS.put(APP_TYPE.APP_SWITCH, new ConfigMeta[] { new ConfigMeta()
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Switch Menu")
@@ -159,8 +178,12 @@ public class ClientAppConfigConstants {
 
 				new ConfigMeta().title("No/Wrong Options Template")
 						.desc("Use coding convetions in template for this to work").path("props.noption_template")
-						.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
-						.optionsLabel("code") });
+						.group("TEMPLATES").optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+
+				new ConfigMeta().title("No/Wrong Options Actions").desc("Default action for No/Wrong option")
+						.path("props.noption_action").group("TEMPLATES")
+
+		});
 
 		APP_CONFIGS.put(APP_TYPE.FEEDBACK,
 				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Feedback")
@@ -193,6 +216,25 @@ public class ClientAppConfigConstants {
 								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
 
 				});
+
+		APP_CONFIGS.put(APP_TYPE.AVAMO,
+				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Avaamo")
+						.desc("Use this app to integrate with Avaamo"//
+						).group("About App"), //
+						new ConfigMeta().group("AVAAMO").title("Channel UUID").path("props.channel_uuid")
+								.example("6106ee72-81a1-49a7-9e10-df591d5194f3"),
+						new ConfigMeta().group("AVAAMO").title("Avaamo endpoint")
+								.desc("Inbound messages will be forwarded to this url").path("props.end_point").example(
+										"https://c6.avaamo.com/bot_connector_webhooks/02de0dde-c7ec-49a7-83f8-6106ee72/message.json") });
+
+		APP_CONFIGS.put(APP_TYPE.MOENGAGE, new ConfigMeta[] {
+				// Fields
+				new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("MoEngage Connector")
+						.desc("Use this app to Send Messages originated by MoEngage").group("About App"),
+				new ConfigMeta().path("api_url").title("API URL")
+						.defaultValue("https://{{domain}}.{{server}}/xms/api/moengage/v1/message/send").readonly()
+
+		});
 	}
 
 }

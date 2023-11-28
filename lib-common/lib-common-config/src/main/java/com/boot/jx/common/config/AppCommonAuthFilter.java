@@ -1,7 +1,12 @@
 package com.boot.jx.common.config;
 
+import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +18,6 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthFilter;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.scope.tnt.Tenants;
-import com.boot.jx.scope.tnt.Tenants.Tenant;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -33,8 +37,9 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 		public static final String ONLY_DOMAIN_ADMIN = "ONLY_DOMAIN_ADMIN";
 	}
 
-	public static abstract class AppCommonAuthUser implements AppAuthUser {
+	public static abstract class AppCommonAuthUser implements AppAuthUser, Serializable {
 
+		private static final long serialVersionUID = 5305577408399630086L;
 		private Set<String> role;
 		private Set<String> domain;
 
@@ -63,6 +68,26 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 			}
 		}
 
+		public boolean hasRoleAny(String... roles) {
+			this.role = this.role();
+			for (String newRole : roles) {
+				if (this.role.contains(newRole)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public boolean hasRoleAll(String... roles) {
+			this.role = this.role();
+			for (String newRole : roles) {
+				if (!this.role.contains(newRole)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public Set<String> getDomain() {
 			return domain;
 		}
@@ -87,16 +112,20 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 
 	@Override
 	public boolean filterAppRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
+		AppCommonAuthUser appCommonAuthUserLocal = appCommonAuthUser;
 		if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DUPERUSER)) {
-			if (!ArgUtil.is(appCommonAuthUser)) {
+			if (!ArgUtil.is(appCommonAuthUserLocal)) {
 				return false;
 			}
-			return appCommonAuthUser.role().contains(PMConstants.USER_ROLE.DUPER_USER);
+			return (appCommonAuthUserLocal != null)
+					&& appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.DUPER_USER);
 		} else if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN)
 				&& Tenants.isDefault(AppContextUtil.getTenant())) {
-			return appCommonAuthUser.role().contains(PMConstants.USER_ROLE.DUPER_USER);
+			return (appCommonAuthUserLocal != null)
+					&& appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.DUPER_USER);
 		} else if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DOMAIN_ADMIN)) {
-			return appCommonAuthUser.role().contains(PMConstants.USER_ROLE.ADMIN);
+			return (appCommonAuthUserLocal != null)
+					&& appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.ADMIN);
 		} else
 			return true;
 	}

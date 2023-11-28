@@ -148,7 +148,8 @@ public class TwitterClient implements MessageClient {
 								.put("url", button.getUrl()).toMap());
 					} else {
 						options.add(MapModel.createInstance().put("label", button.getLabel())
-								.put("description", button.getDesc()).put("metadata", button.getCode()).toMap());
+								.put("description", ArgUtil.nonEmpty(button.getDesc(), button.getLabel()))
+								.put("metadata", button.getCode()).toMap());
 					}
 				}
 

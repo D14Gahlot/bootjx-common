@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.bson.Document;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.BulkOperations.BulkMode;
@@ -12,13 +13,13 @@ import org.springframework.data.mongodb.core.CollectionOptions;
 import org.springframework.data.mongodb.core.DbCallback;
 import org.springframework.data.mongodb.core.DocumentCallbackHandler;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
-import org.springframework.data.mongodb.core.IndexOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ScriptOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
+import org.springframework.data.mongodb.core.index.IndexOperations;
 import org.springframework.data.mongodb.core.mapreduce.GroupBy;
 import org.springframework.data.mongodb.core.mapreduce.GroupByResults;
 import org.springframework.data.mongodb.core.mapreduce.MapReduceOptions;
@@ -29,14 +30,12 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.util.CloseableIterator;
 
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
-import com.mongodb.CommandResult;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
 import com.mongodb.ReadPreference;
-import com.mongodb.WriteResult;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
 public abstract class CommonMongoTemplateDefault {
 
@@ -48,20 +47,15 @@ public abstract class CommonMongoTemplateDefault {
 		return getCommonMongoTemplate().getCollectionName(entityClass);
 	}
 
-	public CommandResult executeCommand(String jsonCommand) {
+	public Document executeCommand(String jsonCommand) {
 		return getCommonMongoTemplate().executeCommand(jsonCommand);
 	}
 
-	public CommandResult executeCommand(DBObject command) {
+	public Document executeCommand(Document command) {
 		return getCommonMongoTemplate().executeCommand(command);
 	}
 
-	@SuppressWarnings("deprecation")
-	public CommandResult executeCommand(DBObject command, int options) {
-		return getCommonMongoTemplate().executeCommand(command, options);
-	}
-
-	public CommandResult executeCommand(DBObject command, ReadPreference readPreference) {
+	public Document executeCommand(Document command, ReadPreference readPreference) {
 		return getCommonMongoTemplate().executeCommand(command, readPreference);
 	}
 
@@ -82,28 +76,23 @@ public abstract class CommonMongoTemplateDefault {
 		return getCommonMongoTemplate().execute(collectionName, action);
 	}
 
-	@SuppressWarnings("deprecation")
-	public <T> T executeInSession(DbCallback<T> action) {
-		return getCommonMongoTemplate().executeInSession(action);
-	}
-
 	public <T> CloseableIterator<T> stream(Query query, Class<T> entityType) {
 		return getCommonMongoTemplate().stream(query, entityType);
 	}
 
-	public <T> DBCollection createCollection(Class<T> entityClass) {
+	public <T> MongoCollection<Document> createCollection(Class<T> entityClass) {
 		return getCommonMongoTemplate().createCollection(entityClass);
 	}
 
-	public <T> DBCollection createCollection(Class<T> entityClass, CollectionOptions collectionOptions) {
+	public <T> MongoCollection<Document> createCollection(Class<T> entityClass, CollectionOptions collectionOptions) {
 		return getCommonMongoTemplate().createCollection(entityClass, collectionOptions);
 	}
 
-	public DBCollection createCollection(String collectionName) {
+	public MongoCollection<Document> createCollection(String collectionName) {
 		return getCommonMongoTemplate().createCollection(collectionName);
 	}
 
-	public DBCollection createCollection(String collectionName, CollectionOptions collectionOptions) {
+	public MongoCollection<Document> createCollection(String collectionName, CollectionOptions collectionOptions) {
 		return getCommonMongoTemplate().createCollection(collectionName, collectionOptions);
 	}
 
@@ -111,7 +100,7 @@ public abstract class CommonMongoTemplateDefault {
 		return getCommonMongoTemplate().getCollectionNames();
 	}
 
-	public DBCollection getCollection(String collectionName) {
+	public MongoCollection<Document> getCollection(String collectionName) {
 		return getCommonMongoTemplate().getCollection(collectionName);
 	}
 
@@ -322,59 +311,59 @@ public abstract class CommonMongoTemplateDefault {
 		getCommonMongoTemplate().save(objectToSave, collectionName);
 	}
 
-	public WriteResult upsert(Query query, Update update, Class<?> entityClass) {
+	public UpdateResult upsert(Query query, Update update, Class<?> entityClass) {
 		return getCommonMongoTemplate().upsert(query, update, entityClass);
 	}
 
-	public WriteResult upsert(Query query, Update update, String collectionName) {
+	public UpdateResult upsert(Query query, Update update, String collectionName) {
 		return getCommonMongoTemplate().upsert(query, update, collectionName);
 	}
 
-	public WriteResult upsert(Query query, Update update, Class<?> entityClass, String collectionName) {
+	public UpdateResult upsert(Query query, Update update, Class<?> entityClass, String collectionName) {
 		return getCommonMongoTemplate().upsert(query, update, entityClass, collectionName);
 	}
 
-	public WriteResult updateFirst(Query query, Update update, Class<?> entityClass) {
+	public UpdateResult updateFirst(Query query, Update update, Class<?> entityClass) {
 		return getCommonMongoTemplate().updateFirst(query, update, entityClass);
 	}
 
-	public WriteResult updateFirst(Query query, Update update, String collectionName) {
+	public UpdateResult updateFirst(Query query, Update update, String collectionName) {
 		return getCommonMongoTemplate().updateFirst(query, update, collectionName);
 	}
 
-	public WriteResult updateFirst(Query query, Update update, Class<?> entityClass, String collectionName) {
+	public UpdateResult updateFirst(Query query, Update update, Class<?> entityClass, String collectionName) {
 		return getCommonMongoTemplate().updateFirst(query, update, entityClass, collectionName);
 	}
 
-	public WriteResult updateMulti(Query query, Update update, Class<?> entityClass) {
+	public UpdateResult updateMulti(Query query, Update update, Class<?> entityClass) {
 		return getCommonMongoTemplate().updateMulti(query, update, entityClass);
 	}
 
-	public WriteResult updateMulti(Query query, Update update, String collectionName) {
+	public UpdateResult updateMulti(Query query, Update update, String collectionName) {
 		return getCommonMongoTemplate().updateMulti(query, update, collectionName);
 	}
 
-	public WriteResult updateMulti(Query query, Update update, Class<?> entityClass, String collectionName) {
+	public UpdateResult updateMulti(Query query, Update update, Class<?> entityClass, String collectionName) {
 		return getCommonMongoTemplate().updateMulti(query, update, entityClass, collectionName);
 	}
 
-	public WriteResult remove(Object object) {
+	public DeleteResult remove(Object object) {
 		return getCommonMongoTemplate().remove(object);
 	}
 
-	public WriteResult remove(Object object, String collection) {
+	public DeleteResult remove(Object object, String collection) {
 		return getCommonMongoTemplate().remove(object, collection);
 	}
 
-	public WriteResult remove(Query query, Class<?> entityClass) {
+	public DeleteResult remove(Query query, Class<?> entityClass) {
 		return getCommonMongoTemplate().remove(query, entityClass);
 	}
 
-	public WriteResult remove(Query query, Class<?> entityClass, String collectionName) {
+	public DeleteResult remove(Query query, Class<?> entityClass, String collectionName) {
 		return getCommonMongoTemplate().remove(query, entityClass, collectionName);
 	}
 
-	public WriteResult remove(Query query, String collectionName) {
+	public DeleteResult remove(Query query, String collectionName) {
 		return getCommonMongoTemplate().remove(query, collectionName);
 	}
 
@@ -394,7 +383,26 @@ public abstract class CommonMongoTemplateDefault {
 		return getCommonMongoTemplate().getConverter();
 	}
 
-	public DB getDb() {
+	public MongoDatabase getDb() {
 		return getCommonMongoTemplate().getDb();
 	}
+
+	public abstract <T> T findOne(IMongoQueryBuilder<T> builder);
+
+	public abstract <T> List<T> find(IMongoQueryBuilder<T> builder);
+
+	public abstract <T> List<T> find(IMongoQueryBuilder<T> builder, Class<T> clazz);
+
+	/**
+	 * @param builder
+	 * @return
+	 * 
+	 * @see MongoTemplate#upsert(Query,
+	 *      org.springframework.data.mongodb.core.query.Update, Class, String)
+	 */
+	public abstract <T> UpdateResult upsert(IMongoQueryBuilder<T> builder);
+
+	public abstract <T> UpdateResult update(IMongoQueryBuilder<T> builder);
+
+	public abstract <T> UpdateResult updateFirst(IMongoQueryBuilder<T> builder);
 }

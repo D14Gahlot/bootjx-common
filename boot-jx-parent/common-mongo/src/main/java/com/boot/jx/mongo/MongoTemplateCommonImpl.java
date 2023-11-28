@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.mongodb.MongoDbFactory;
@@ -14,13 +15,13 @@ import org.springframework.data.mongodb.core.CollectionOptions;
 import org.springframework.data.mongodb.core.DbCallback;
 import org.springframework.data.mongodb.core.DocumentCallbackHandler;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
-import org.springframework.data.mongodb.core.IndexOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ScriptOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
+import org.springframework.data.mongodb.core.index.IndexOperations;
 import org.springframework.data.mongodb.core.mapreduce.GroupBy;
 import org.springframework.data.mongodb.core.mapreduce.GroupByResults;
 import org.springframework.data.mongodb.core.mapreduce.MapReduceOptions;
@@ -31,28 +32,27 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.util.CloseableIterator;
 
-import com.mongodb.CommandResult;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
-import com.mongodb.WriteResult;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
 public class MongoTemplateCommonImpl extends MongoTemplate {
 
 	@Autowired
-	public CommonMongoSource mongoDBCredentials;
+	public CommonMongoSourceProvider commonMongoSourceProvider;
 
 	public MongoTemplateCommonImpl(MongoDbFactory mongoDbFactory) {
 		super(mongoDbFactory);
 	}
 
 	protected MongoTemplate getCommonMongoTemplate() {
-		return mongoDBCredentials.getMongoTemplate();
+		return commonMongoSourceProvider.getSource().getMongoTemplate();
 	}
 
-	public void setMongoDBCredentials(CommonMongoSource mongoDBCredentials) {
-		this.mongoDBCredentials = mongoDBCredentials;
+	public void setMongoSourceProvider(CommonMongoSourceProvider commonMongoSourceProvider) {
+		this.commonMongoSourceProvider = commonMongoSourceProvider;
 	}
 
 	@Override
@@ -61,23 +61,17 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 	}
 
 	@Override
-	public CommandResult executeCommand(String jsonCommand) {
+	public Document executeCommand(String jsonCommand) {
 		return getCommonMongoTemplate().executeCommand(jsonCommand);
 	}
 
 	@Override
-	public CommandResult executeCommand(DBObject command) {
+	public Document executeCommand(Document command) {
 		return getCommonMongoTemplate().executeCommand(command);
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public CommandResult executeCommand(DBObject command, int options) {
-		return getCommonMongoTemplate().executeCommand(command, options);
-	}
-
-	@Override
-	public CommandResult executeCommand(DBObject command, ReadPreference readPreference) {
+	public Document executeCommand(Document command, ReadPreference readPreference) {
 		return getCommonMongoTemplate().executeCommand(command, readPreference);
 	}
 
@@ -102,34 +96,28 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 		return getCommonMongoTemplate().execute(collectionName, action);
 	}
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public <T> T executeInSession(DbCallback<T> action) {
-		return getCommonMongoTemplate().executeInSession(action);
-	}
-
 	@Override
 	public <T> CloseableIterator<T> stream(Query query, Class<T> entityType) {
 		return getCommonMongoTemplate().stream(query, entityType);
 	}
 
 	@Override
-	public <T> DBCollection createCollection(Class<T> entityClass) {
+	public <T> MongoCollection<Document> createCollection(Class<T> entityClass) {
 		return getCommonMongoTemplate().createCollection(entityClass);
 	}
 
 	@Override
-	public <T> DBCollection createCollection(Class<T> entityClass, CollectionOptions collectionOptions) {
+	public <T> MongoCollection<Document> createCollection(Class<T> entityClass, CollectionOptions collectionOptions) {
 		return getCommonMongoTemplate().createCollection(entityClass, collectionOptions);
 	}
 
 	@Override
-	public DBCollection createCollection(String collectionName) {
+	public MongoCollection<Document> createCollection(String collectionName) {
 		return getCommonMongoTemplate().createCollection(collectionName);
 	}
 
 	@Override
-	public DBCollection createCollection(String collectionName, CollectionOptions collectionOptions) {
+	public MongoCollection<Document> createCollection(String collectionName, CollectionOptions collectionOptions) {
 		return getCommonMongoTemplate().createCollection(collectionName, collectionOptions);
 	}
 
@@ -139,7 +127,7 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 	}
 
 	@Override
-	public DBCollection getCollection(String collectionName) {
+	public MongoCollection<Document> getCollection(String collectionName) {
 		return getCommonMongoTemplate().getCollection(collectionName);
 	}
 
@@ -398,72 +386,72 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 	}
 
 	@Override
-	public WriteResult upsert(Query query, Update update, Class<?> entityClass) {
+	public UpdateResult upsert(Query query, Update update, Class<?> entityClass) {
 		return getCommonMongoTemplate().upsert(query, update, entityClass);
 	}
 
 	@Override
-	public WriteResult upsert(Query query, Update update, String collectionName) {
+	public UpdateResult upsert(Query query, Update update, String collectionName) {
 		return getCommonMongoTemplate().upsert(query, update, collectionName);
 	}
 
 	@Override
-	public WriteResult upsert(Query query, Update update, Class<?> entityClass, String collectionName) {
+	public UpdateResult upsert(Query query, Update update, Class<?> entityClass, String collectionName) {
 		return getCommonMongoTemplate().upsert(query, update, entityClass, collectionName);
 	}
 
 	@Override
-	public WriteResult updateFirst(Query query, Update update, Class<?> entityClass) {
+	public UpdateResult updateFirst(Query query, Update update, Class<?> entityClass) {
 		return getCommonMongoTemplate().updateFirst(query, update, entityClass);
 	}
 
 	@Override
-	public WriteResult updateFirst(Query query, Update update, String collectionName) {
+	public UpdateResult updateFirst(Query query, Update update, String collectionName) {
 		return getCommonMongoTemplate().updateFirst(query, update, collectionName);
 	}
 
 	@Override
-	public WriteResult updateFirst(Query query, Update update, Class<?> entityClass, String collectionName) {
+	public UpdateResult updateFirst(Query query, Update update, Class<?> entityClass, String collectionName) {
 		return getCommonMongoTemplate().updateFirst(query, update, entityClass, collectionName);
 	}
 
 	@Override
-	public WriteResult updateMulti(Query query, Update update, Class<?> entityClass) {
+	public UpdateResult updateMulti(Query query, Update update, Class<?> entityClass) {
 		return getCommonMongoTemplate().updateMulti(query, update, entityClass);
 	}
 
 	@Override
-	public WriteResult updateMulti(Query query, Update update, String collectionName) {
+	public UpdateResult updateMulti(Query query, Update update, String collectionName) {
 		return getCommonMongoTemplate().updateMulti(query, update, collectionName);
 	}
 
 	@Override
-	public WriteResult updateMulti(Query query, Update update, Class<?> entityClass, String collectionName) {
+	public UpdateResult updateMulti(Query query, Update update, Class<?> entityClass, String collectionName) {
 		return getCommonMongoTemplate().updateMulti(query, update, entityClass, collectionName);
 	}
 
 	@Override
-	public WriteResult remove(Object object) {
+	public DeleteResult remove(Object object) {
 		return getCommonMongoTemplate().remove(object);
 	}
 
 	@Override
-	public WriteResult remove(Object object, String collection) {
+	public DeleteResult remove(Object object, String collection) {
 		return getCommonMongoTemplate().remove(object, collection);
 	}
 
 	@Override
-	public WriteResult remove(Query query, Class<?> entityClass) {
+	public DeleteResult remove(Query query, Class<?> entityClass) {
 		return getCommonMongoTemplate().remove(query, entityClass);
 	}
 
 	@Override
-	public WriteResult remove(Query query, Class<?> entityClass, String collectionName) {
+	public DeleteResult remove(Query query, Class<?> entityClass, String collectionName) {
 		return getCommonMongoTemplate().remove(query, entityClass, collectionName);
 	}
 
 	@Override
-	public WriteResult remove(Query query, String collectionName) {
+	public DeleteResult remove(Query query, String collectionName) {
 		return getCommonMongoTemplate().remove(query, collectionName);
 	}
 
@@ -488,8 +476,12 @@ public class MongoTemplateCommonImpl extends MongoTemplate {
 	}
 
 	@Override
-	public DB getDb() {
+	public MongoDatabase getDb() {
 		return getCommonMongoTemplate().getDb();
 	}
 
+	public MongoTemplateCommonImpl using(CommonMongoSourceProvider commonMongoSourceProvider) {
+		this.setMongoSourceProvider(commonMongoSourceProvider);
+		return this;
+	}
 }

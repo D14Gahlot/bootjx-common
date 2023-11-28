@@ -1,6 +1,7 @@
 package com.boot.jx.xms.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,6 +25,10 @@ public final class SessionRequestObjects {
 		@ApiMockModelProperty(example = "external_bot", required = false,
 				value = "Agent Code, applicable only if queue type is Agent")
 		public String agent;
+
+		@ApiMockModelProperty(example = "[\"dental\",\"ortho\"]", required = false,
+				value = "Agent Skills, applicable only if queue type is Agent")
+		public List<String> skills;
 
 		public Object params;
 	}

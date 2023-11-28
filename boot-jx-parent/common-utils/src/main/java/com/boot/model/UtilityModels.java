@@ -16,6 +16,14 @@ public class UtilityModels {
 		public String id();
 	}
 
+	public interface UniqueIndex<T> {
+		public String uuid();
+
+		public String uuid(String uuid);
+
+		public T update(T fromObject);
+	}
+
 	/**
 	 * While De-Serialization
 	 * 
@@ -44,5 +52,14 @@ public class UtilityModels {
 		default Object jsonObject() {
 			return this;
 		}
+	}
+
+	public static interface PublicJsonProperty {
+	}
+
+	public static interface ProtectedJsonProperty extends PublicJsonProperty {
+	}
+
+	public static interface OneTimeVisibleJsonProperty extends ProtectedJsonProperty {
 	}
 }

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,15 +17,17 @@ public class PhoneUserDoc implements Serializable {
 
 	@Id
 	public String phoneId;
-
 	public PBName name;
-
 	public PBPhone phone;
 	public String deviceId;
-
 	public String authToken;
 	public String otpHash;
 	public String otpNounce;
+	public long otpStamp;
+	public long otpCounter;
+	public TimeStampIndex lastActiveAt;
+	public TimeStampIndex lastLoginAt;
+	public String loginToken;
 
 	public String getPhoneId() {
 		return phoneId;
@@ -81,4 +84,45 @@ public class PhoneUserDoc implements Serializable {
 	public void setOtpNounce(String otpNounce) {
 		this.otpNounce = otpNounce;
 	}
+
+	public TimeStampIndex getLastActiveAt() {
+		return lastActiveAt;
+	}
+
+	public void setLastActiveAt(TimeStampIndex lastActiveAt) {
+		this.lastActiveAt = lastActiveAt;
+	}
+
+	public String getLoginToken() {
+		return loginToken;
+	}
+
+	public void setLoginToken(String loginToken) {
+		this.loginToken = loginToken;
+	}
+
+	public long getOtpStamp() {
+		return otpStamp;
+	}
+
+	public void setOtpStamp(long otpStamp) {
+		this.otpStamp = otpStamp;
+	}
+
+	public long getOtpCounter() {
+		return otpCounter;
+	}
+
+	public void setOtpCounter(long otpCounter) {
+		this.otpCounter = otpCounter;
+	}
+
+	public TimeStampIndex getLastLoginAt() {
+		return lastLoginAt;
+	}
+
+	public void setLastLoginAt(TimeStampIndex lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
+	}
+
 }

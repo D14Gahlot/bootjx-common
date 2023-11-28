@@ -26,16 +26,19 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.common.store.UserActivityStore;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelSessionManager;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -49,6 +52,9 @@ public class AgentSessionService
 
 	@Autowired
 	private PMClientConfig chatClientConfig;
+
+	@Autowired
+	public MessageContext messageContext;
 
 	/*
 	 * Below APIs are
@@ -68,14 +74,19 @@ public class AgentSessionService
 	@Autowired
 	private StompTunnelSessionManager stompTunnelSessionManager;
 
+	@Autowired
+	UserActivityStore userActivityStore;
+
 	public List<AgentSessionDoc> getAgentSessions() {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().where("isEnabled", true);
+		MongoQueryBuilder<AgentSessionDoc> builder = MongoQueryBuilder.collection(AgentSessionDoc.class)
+				.where("isEnabled", true);
 		return mongoTemplate.find(builder.getQuery(), AgentSessionDoc.class);
 	}
 
 	public void updateSession(boolean publish, AgentSessionBean agentSession) {
 
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(agentSession.getAgentCode());
+		MongoQueryBuilder<AgentSessionDoc> builder = MongoQueryBuilder.collection(AgentSessionDoc.class)
+				.whereId(agentSession.getAgentCode());
 		builder.set("agentCode", agentSession.getAgentCode());
 		builder.set("agentDept", agentSession.getAgentDept());
 		builder.set("isLoggedIn", agentSession.isLoggedIn());
@@ -83,6 +94,7 @@ public class AgentSessionService
 		builder.set("isAway", agentSession.isAway());
 		builder.set("lastOnlineStamp", agentSession.getLastOnlineStamp());
 		builder.set("domain", AppContextUtil.getTenant());
+		builder.set("profile", agentSession.getProfile());
 
 		if (ArgUtil.is(agentSession.getProfile())) {
 			builder.set("isEnabled", agentSession.getProfile().isEnabled());
@@ -107,7 +119,22 @@ public class AgentSessionService
 	}
 
 	public void setAway(boolean isAway) {
+		boolean oldIsAway = agentSessionBean.isAway();
 		agentSessionBean.setAway(isAway);
+		if (oldIsAway != isAway) {
+			MapModel data = MapModel.createInstance();
+			if (isAway) {
+				agentSessionBean.stamps().put("USERSESSION_AWAY_START", System.currentTimeMillis());
+			} else {
+				long awayStamp = MapModel.from(agentSessionBean.stamps()).keyEntry("USERSESSION_AWAY_START").asLong(0L);
+				if (awayStamp > 0L) {
+					long awayGap = System.currentTimeMillis() - awayStamp;
+					data.put("awayGap", awayGap);
+				}
+			}
+			userActivityStore.log(agentSessionBean.getAgentCode(),
+					isAway ? "USERSESSION_AWAY_START" : "USERSESSION_AWAY_END", data.toMap());
+		}
 	}
 
 	public void setOnline(boolean isOnline) {
@@ -116,6 +143,19 @@ public class AgentSessionService
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 		if (oldOnline != isOnline) {
 			this.updateSession(true, agentSessionBean);
+			String status = isOnline ? "USERSESSION_ONLINE" : "USERSESSION_OFFLINE";
+			MapModel data = MapModel.createInstance();
+			if (!isOnline) {
+				agentSessionBean.stamps().put("USERSESSION_OFFLINE", System.currentTimeMillis());
+			} else {
+				long offlineStamp = MapModel.from(agentSessionBean.stamps()).keyEntry("USERSESSION_OFFLINE").asLong(0L);
+				if (offlineStamp > 0L) {
+					long offlineGap = System.currentTimeMillis() - offlineStamp;
+					data.put("offlineGap", offlineGap);
+				}
+			}
+			userActivityStore.log(agentSessionBean.getAgentCode(), status, data.toMap());
+
 		} else {
 			this.updateSession(false, agentSessionBean);
 		}
@@ -148,6 +188,7 @@ public class AgentSessionService
 		agentSession.setAgentCode(agentPrincipal.getAgentCode());
 		// agentSessionBean.setAgentDept("ONLINE");
 		this.updateSession(true, agentSession);
+		userActivityStore.log(agentPrincipal.getAgentCode(), "USERSESSION_LOGOUT");
 	}
 
 	public void login(HttpServletRequest request, AgentResponseAuthDto agent, String passhash) {
@@ -162,6 +203,7 @@ public class AgentSessionService
 		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(), DEFAULT.NO_DEPT,
 				StompQuery.PING_TAG);
 		updateLogin(agent);
+		userActivityStore.log(agent.getAgent_code(), "USERSESSION_LOGIN");
 	}
 
 	@Autowired
@@ -233,7 +275,11 @@ public class AgentSessionService
 				return getAuthUser().getAuthUser();
 			}
 		}
-		return PMConstants.DEFAULT.NO_USER;
+		String user = messageContext.getActiveQueueCode();
+		if (ArgUtil.is(user)) {
+			return user;
+		}
+		return ArgUtil.anyOf(chatClientConfig.getDefaultSender(), PMConstants.DEFAULT.NO_USER);
 	}
 
 	@Override

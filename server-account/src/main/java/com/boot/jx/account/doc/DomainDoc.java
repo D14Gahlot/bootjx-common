@@ -40,6 +40,7 @@ public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Co
 	private Long modifiedStamp;
 	private String modifiedBy;
 	private Boolean isActive;
+	private String timeZoneOffSet;
 
 	public Long getCreatedStamp() {
 		return createdStamp;
@@ -145,5 +146,13 @@ public class DomainDoc implements IDocument, AuditCreateEntity, Serializable, Co
 
 	public void setDomainAlias(String domainAlias) {
 		this.domainAlias = domainAlias;
+	}
+
+	public String getTimeZoneOffSet() {
+		return timeZoneOffSet;
+	}
+
+	public void setTimeZoneOffSet(String timeZoneOffSet) {
+		this.timeZoneOffSet = timeZoneOffSet;
 	}
 }

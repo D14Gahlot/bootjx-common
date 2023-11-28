@@ -176,6 +176,10 @@ public final class StringUtils {
 		return inputString.replaceAll("[^a-zA-Z0-9]+", "");
 	}
 
+	public static String removeSpaces(String inputString) {
+		return inputString.replaceAll("[\\ ]+", "");
+	}
+
 	// public static Map<String, String> getMapFromString(String splitter_char,
 	// String key_value_separator_char,
 //			String data) {
@@ -274,6 +278,16 @@ public final class StringUtils {
 
 	public static String normalizeSpace(String src) {
 		return (src == null) ? src : src.trim().replaceAll(" +", " ");
+	}
+
+	public static String join(String delimter, String... strs) {
+		StringJoiner sj = new StringJoiner(delimter);
+		for (String string : strs) {
+			if (ArgUtil.is(string)) {
+				sj.add(string);
+			}
+		}
+		return sj.toString();
 	}
 
 	/**
@@ -512,6 +526,9 @@ public final class StringUtils {
 		if (str == null) {
 			return new String[0];
 		}
+		if (str.startsWith("[") && str.endsWith("]")) {
+			str = str.trim().substring(1, str.length() - 1);
+		}
 		return str.split(",");
 	}
 
@@ -546,6 +563,10 @@ public final class StringUtils {
 	public static String maskIpAddress(String ipAddress) {
 		String[] slots = ipAddress.split(":|\\.");
 		return String.join("-", Arrays.copyOfRange(slots, 0, slots.length / 4 * 3));
+	}
+
+	public static String repeat(String repeat, int times) {
+		return new String(new char[times]).replace("\0", repeat);
 	}
 
 }

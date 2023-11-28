@@ -27,12 +27,12 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib</artifactId>
+			<artifactId>bootjx-common-lib</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-mongo</artifactId>
+			<artifactId>bootjx-common-mongo</artifactId>
 		</dependency>
 
 		<dependency>
@@ -55,8 +55,8 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
-			<version>2.9.6</version>
 		</dependency>
+
 
 	</dependencies>
 

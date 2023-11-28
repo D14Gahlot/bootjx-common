@@ -9,7 +9,6 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
-import com.boot.model.UtilityModels.JsonIgnoreNull;
 
 public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
@@ -48,6 +47,12 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 				inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code",
 				optionsLabel = "desc")
 		private String welcomeBack;
+
+		@ConfigMetaProperty(path = "web.title", title = "ChatBox Title")
+		private String title;
+
+		@ConfigMetaProperty(path = "web.stylesheet", title = "Stylesheet Url", optional = true)
+		private String stylesheet;
 
 		@Override
 		public String getLane() {
@@ -92,6 +97,22 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
 		public void setWelcomeBack(String welcomeBack) {
 			this.welcomeBack = welcomeBack;
+		}
+
+		public String getStylesheet() {
+			return stylesheet;
+		}
+
+		public void setStylesheet(String stylesheet) {
+			this.stylesheet = stylesheet;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public void setTitle(String title) {
+			this.title = title;
 		}
 
 	}

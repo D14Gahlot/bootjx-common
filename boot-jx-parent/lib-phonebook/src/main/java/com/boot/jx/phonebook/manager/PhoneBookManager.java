@@ -8,11 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.phonebook.doc.PhoneContactDoc;
-import com.boot.jx.phonebook.doc.PhoneNOTPDoc;
 import com.boot.jx.phonebook.doc.PhoneUserDoc;
 import com.boot.jx.phonebook.dto.PhoneProfileDTO;
 
@@ -35,19 +33,6 @@ public class PhoneBookManager {
 
 	public PhoneProfileDTO getProfile(PhoneUserDoc user) {
 		return new PhoneProfileDTO();
-	}
-
-	public List<PhoneNOTPDoc> fetchMessages(PhoneUserDoc user) {
-		TimeStampIndex deliveredAt = TimeStampIndex.from(System.currentTimeMillis());
-		commonMongoTemplate.update(CommonMongoQueryBuilder.collection(PhoneNOTPDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(user.getPhoneId()).and("deliveredAt").exists(false)
-						.and("expiredAt.hour").gte(deliveredAt.getHour() - 1))
-				// Update
-				.set("deliveredAt", deliveredAt));
-
-		return commonMongoTemplate.find(CommonMongoQueryBuilder.collection(PhoneNOTPDoc.class).where( // FIND
-				CommonMongoQueryBuilder.QueryCriteria.where("phoneId").is(user.getPhoneId()).and("deliveredAt.stamp")
-						.is(deliveredAt.getStamp())));
 	}
 
 }

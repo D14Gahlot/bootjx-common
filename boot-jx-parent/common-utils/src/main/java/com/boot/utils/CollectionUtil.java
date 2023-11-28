@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -219,6 +220,15 @@ public final class CollectionUtil {
 		return getList(elements);
 	}
 
+	public static <T> List<T> asList(Iterable<T> listable) {
+		Iterator<T> cursor = listable.iterator();
+		List<T> list = new ArrayList<T>();
+		while (cursor.hasNext()) {
+			list.add(cursor.next());
+		}
+		return list;
+	}
+
 	@SafeVarargs
 	public static <T> T[] asArray(T... elements) {
 		return elements;
@@ -299,6 +309,16 @@ public final class CollectionUtil {
 		return null;
 	}
 
+	public static <T> T get(List<T> list, int index) {
+		if (ArgUtil.isEmpty(list)) {
+			return null;
+		}
+		if (index < list.size()) {
+			return list.get(index);
+		}
+		return null;
+	}
+
 	public static <T> T first(T[] list) {
 		return get(list, 0);
 	}
@@ -324,5 +344,12 @@ public final class CollectionUtil {
 
 	public static <T> List<T> distinct(List<T> numbersList) {
 		return numbersList.stream().distinct().collect(Collectors.toList());
+	}
+
+	public static <T> List<T> clean(List<T> numbersList) {
+		if (ArgUtil.not(numbersList)) {
+			return numbersList;
+		}
+		return numbersList.stream().filter(x -> ArgUtil.is(numbersList)).distinct().collect(Collectors.toList());
 	}
 }

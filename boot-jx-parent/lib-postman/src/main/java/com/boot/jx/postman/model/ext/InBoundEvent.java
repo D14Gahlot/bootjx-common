@@ -1,15 +1,19 @@
 package com.boot.jx.postman.model.ext;
 
+import java.util.List;
+
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
 import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
+import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
+import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.MessageSession;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
-public class InBoundEvent implements LoggableEntity, SessionInfo {
+public class InBoundEvent implements LoggableEntity, SessionInfo, TraceMessage {
 
 	private static final long serialVersionUID = -8470839812429749401L;
 
@@ -20,8 +24,10 @@ public class InBoundEvent implements LoggableEntity, SessionInfo {
 	public static final String SESSION_STATUS = "SESSION_STATUS";
 
 	public static final String SESSION_ASSIGNED = "SESSION_ASSIGNED";
-	
+
 	public static final String CONTACT_UPDATE = "CONTACT_UPDATE";
+
+	public String eventId;
 
 	@ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service")
 	public String eventCode;
@@ -61,6 +67,8 @@ public class InBoundEvent implements LoggableEntity, SessionInfo {
 
 	public Contactable contact;
 	private MessageSession session;
+	private MessageRouter route;
+	private List<Object> trace;
 
 	public Contactable contact() {
 		if (this.contact == null) {
@@ -116,4 +124,45 @@ public class InBoundEvent implements LoggableEntity, SessionInfo {
 		this.session = session;
 	}
 
+	public String getEventId() {
+		return eventId;
+	}
+
+	public void setEventId(String eventId) {
+		this.eventId = eventId;
+	}
+
+	public List<Object> getTrace() {
+		return trace;
+	}
+
+	public void setTrace(List<Object> trace) {
+		this.trace = trace;
+	}
+
+	@Override
+	public String id() {
+		return this.getEventId();
+	}
+
+	@Override
+	public void id(String id) {
+		this.setEventId(id);
+	}
+
+	public MessageRouter getRoute() {
+		return route;
+	}
+
+	public void setRoute(MessageRouter route) {
+		this.route = route;
+	}
+
+	@Override
+	public MessageRouter route() {
+		if (route == null) {
+			this.route = new MessageRouter();
+		}
+		return this.route;
+	}
 }

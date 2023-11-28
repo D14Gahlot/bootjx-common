@@ -1,7 +1,5 @@
 package com.boot.jx.account;
 
-import java.util.Collections;
-
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,7 +14,7 @@ public class AccountAuthProvider implements AuthenticationProvider {
 		if (auth.getCredentials() != null) {
 			password = auth.getCredentials().toString();
 		}
-		return new UsernamePasswordAuthenticationToken(username, password, Collections.emptyList());
+		return new UsernamePasswordAuthenticationToken(username, password, auth.getAuthorities());
 	}
 
 	@Override

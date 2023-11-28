@@ -22,11 +22,14 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
+import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.http.ApiRequest;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -43,10 +46,11 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
-import com.boot.model.MapModel.MapEntry;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 
 @RestController
@@ -97,6 +101,12 @@ public class AgChatSessionController {
 	@Autowired
 	private AgentStore agentStore;
 
+	@Autowired
+	private SessionEventTimer sessionEventTimer;
+
+	@Autowired
+	private MessageContext messageContext;
+
 	@ResponseBody
 	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
 	public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
@@ -110,7 +120,7 @@ public class AgChatSessionController {
 
 		// Session Stuff Logging <
 		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())
-				|| (environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_REASSIGNMENT_AUTO).asBoolean()
+				|| (environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean()
 						&& !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()))) {
 			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
 			agentChatHandlerImpl.onAssign(agent, sessionDoc);
@@ -156,6 +166,10 @@ public class AgChatSessionController {
 		CommonFile f = pmFileStoreClient.uploadSessionFile(file, outboxMessage.getSessionId(),
 				outboxMessage.getMessageIdRef());
 
+		if (ArgUtil.is(caption)) {
+			caption = new CryptoUtil.Encoder().message(caption).decodeURL().toString();
+		}
+
 		outboxMessage
 				.attachment(new Attachment().mediaURL(f.getUrl()).mediaType(f.getFileType()).mediaCaption(caption));
 
@@ -196,9 +210,20 @@ public class AgChatSessionController {
 		return ApiResponse.buildData(ChatDTOUtil.getChatSessionDTO(sessionDoc));
 	}
 
+	@RequestMapping(value = { "/api/session/watch" }, method = { RequestMethod.GET })
+	public ApiResponse<ChatSessionDTO, ?> sessionWatch(@RequestParam String sessionId) {
+		ApiResponse<ChatSessionDTO, ?> resp = ApiResponse.build();
+		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
+		sessionEventTimer.setChatViewIdleTimeout(sessionDoc, false);
+		ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
+		chatSessionDto = chatArchive.withContact(chatSessionDto);
+		return resp.result(chatSessionDto);
+	}
+
 	@RequestMapping(value = { "/api/session/messages" }, method = { RequestMethod.GET })
 	public ApiResponse<ChatMessageDTO, ChatSessionDTO> messageApi(@RequestParam String sessionId,
-			@RequestParam(required = false) String messageId, @RequestParam(required = false) String messageIdExt) {
+			@RequestParam(required = false) String messageId, @RequestParam(required = false) String messageIdExt,
+			@RequestParam(required = false, defaultValue = "false") boolean previous) {
 		ApiResponse<ChatMessageDTO, ChatSessionDTO> resp = ApiResponse.build();
 		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
 		if (ArgUtil.is(messageId)) {
@@ -209,9 +234,19 @@ public class AgChatSessionController {
 			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			MessageDoc m = messageStore.findOneByMessageIdExt(messageIdExt, sessionDoc.contact().getContactType());
 			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
+		} else if (previous) {
+			ChatSessionDoc prevSession = sessionStore.getPreviousSession(sessionDoc.contact(),
+					sessionDoc.getStartSessionStamp());
+			if (ArgUtil.is(prevSession)) {
+				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(prevSession);
+				chatSessionDto = chatArchive.withContact(chatSessionDto);
+				return resp.results(chatArchive.getMessages(chatSessionDto)).meta(chatSessionDto);
+			}
+			return resp.meta(null);
 		} else {
+			sessionEventTimer.setChatViewIdleTimeout(sessionDoc, true);
 			if (agentSession.isLoggedIn() && ArgUtil.is(agentSession.getAgentCode())) {
-				sessionStore.save(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
+				sessionStore.update(new ChatSessionQuery(sessionDoc).read(agentSession.getAgentCode()));
 			}
 			ChatSessionDTO chatSessionDto = chatArchive.getChatSession(sessionDoc);
 			chatSessionDto = chatArchive.withContact(chatSessionDto);
@@ -224,6 +259,7 @@ public class AgChatSessionController {
 			@RequestParam(required = false) String agentId, @RequestParam(required = false) String agentCode,
 			@RequestParam(required = false) String deptCode, @RequestParam(required = false) String deptId) {
 		ChatSessionDoc chatSessionDoc = sessionStore.getSession(sessionId);
+
 		if (ArgUtil.is(agentId)) {
 			AgentDoc agent = agentStore.findById(agentId);
 			agentChatHandlerImpl.onAssign(agent, chatSessionDoc);
@@ -233,7 +269,7 @@ public class AgChatSessionController {
 		} else if (ArgUtil.is(deptCode)) {
 			agentChatHandlerImpl.onAssign(chatSessionDoc, deptCode, agentCode);
 		}
-		
+
 		ChatSessionDTO chatSessionDto = chatArchiveBuilder.sessionDTO().from(chatSessionDoc).withContact()
 				.isAssigned(agentSession.getAgentCode()).withMessages().get();
 		return ApiResponse.buildResult(chatSessionDto);

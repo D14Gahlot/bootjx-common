@@ -5,7 +5,6 @@ public class DashBoardRequestDto {
 	long dateRange1;
 	long dateReange2;
 	String agent;
-	
 	public String getAgent() {
 		return agent;
 	}

@@ -20,8 +20,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<thymeleaf.version>3.0.2.RELEASE</thymeleaf.version>
-		<thymeleaf-layout-dialect.version>2.1.1</thymeleaf-layout-dialect.version>
 	</properties>
 
 	<dependencies>
@@ -32,8 +30,8 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>org.thymeleaf.extras</groupId>
-		    <artifactId>thymeleaf-extras-springsecurity4</artifactId>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
 		</dependency>
 
 		<!-- /thymeleaf dependencies -->
@@ -62,25 +60,17 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.session</groupId>
-			<artifactId>spring-session</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib</artifactId>
+			<artifactId>bootjx-common-lib</artifactId>
 		</dependency>
+		<!-- <dependency> <groupId>com.boot.jx</groupId> <artifactId>common-lib-rbac</artifactId> 
+			</dependency> -->
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>common-lib-session</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-postman-chat</artifactId>
@@ -97,7 +87,7 @@
 			<artifactId>lib-common-config</artifactId>
 			<version>${jax.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-aws</artifactId>
@@ -133,10 +123,8 @@
 	</build>
 
 	<repositories>
-<!-- 		<repository>
-			<id>spring-milestone</id>
-			<url>https://repo.spring.io/milestone</url>
-		</repository> -->
+		<!-- <repository> <id>spring-milestone</id> <url>https://repo.spring.io/milestone</url> 
+			</repository> -->
 		<repository>
 			<id>maven</id>
 			<url>https://repo1.maven.org/maven2/</url>

@@ -2,11 +2,9 @@ package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -44,7 +42,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.common.dto.UserLoginToken;
+import com.boot.jx.common.dto.UserAuthToken;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
@@ -101,7 +99,7 @@ public class PartnerController {
 		if (ArgUtil.is(auth) && ArgUtil.is(userSessionBean.domainUser())) {
 			model.addAttribute("APP_USER", auth.getName());
 			model.addAttribute("APP_USER_NAME", userSessionBean.domainUser().contact().getName());
-			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(userSessionBean.getRole()));
+			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(userSessionBean.role()));
 		} else {
 			model.addAttribute("APP_USER", "");
 			model.addAttribute("APP_USER_NAME", "");
@@ -114,23 +112,25 @@ public class PartnerController {
 	}
 
 	@RequestMapping(value = { "/app/goto/{domain}/{panel}" }, method = { RequestMethod.GET })
-	public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel)
-			throws NoSuchAlgorithmException {
+	public String gotopanel(Model model, @PathVariable String domain, @PathVariable String panel,
+			@RequestParam(required = false) String server) throws NoSuchAlgorithmException {
 		String tnt = AppContextUtil.getTenant();
 
 		if (!Tenants.isDefault(tnt)) {
 			return pmCommonConfig.mainDomainRedirect(commonHttpRequest.getRequestURI() + "/auth/direct");
 		}
 
+		DomainDoc domainDoc = accountStore.findDomainByName(domain);
+
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
-				//"local.com"
-				env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString()
-				, panel));
+				// "local.com"
+				ArgUtil.anyOf(server, domainDoc.getServer(),
+						env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString()),
+				panel));
 
 		if (userSessionBean.hasAdminAccesTo(domain)) {
-			DomainDoc domainDoc = accountStore.findDomainByName(domain);
-			UserLoginToken userLoginToken = empAuthService.createSuperLoginToken("superadmin",
+			UserAuthToken userLoginToken = empAuthService.createSuperLoginToken("superadmin",
 					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), "admin");
 			model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
 			model.addAttribute("DOMAIN_USER_EMAIL", userLoginToken.getDomainUserEmail());
@@ -223,15 +223,15 @@ public class PartnerController {
 
 		if (!ArgUtil.is(accountDoc)
 				|| !ArgUtil.areEqual(CryptoUtil.getSHA2Hash(newpass), accountDoc.getMeta().getPassword())) {
-			// ApiResponseUtil.throwInputException(new
-			// ApiFieldError().obzect("login").field("password")
-			// .codeKey("ValidCredentials").description("Invalid Email or Password"));
+			ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
+					.codeKey("ValidCredentials").description("Invalid Email or Password"));
 		}
 
 		sessionService.login(accountDoc, request);
 		return ApiResponse.build().message("Login Success");
 	}
 
+	@ResponseBody
 	@RequestMapping(value = { "/api/domain/exists", "/pub/domain/exists" }, method = { RequestMethod.GET })
 	public ApiResponse<Object, Object> sisExists(@RequestParam @Valid String domain) throws NoSuchAlgorithmException {
 		AppContextUtil.setTenant(Tenants.getDefault());
@@ -374,7 +374,7 @@ public class PartnerController {
 		domainDoc.setCompany(domain.getCompany());
 		domainDoc.setSocial(domain.getSocial());
 		domainDoc.setServer(env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString());
-
+		domainDoc.setTimeZoneOffSet(domain.getTimeZoneOffSet());
 		accountStore.save(domainDoc);
 
 		domainUser.domains().add(domainDoc);

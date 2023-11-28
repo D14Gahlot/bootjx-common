@@ -7,9 +7,9 @@ import java.util.Map;
 
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
-import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
+import com.boot.jx.postman.pbook.PBVCard;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,7 +34,7 @@ public class ChatMessageDTO implements Serializable {
 	private TagDocument tags;
 	private List<Attachment> attachments;
 	private List<PBVCard> vccards;
-	public List<String> logs;
+	public List<Object> logs;
 	private String sender;
 	private String status;
 	private Map<String, Long> stamps;
@@ -118,11 +118,11 @@ public class ChatMessageDTO implements Serializable {
 		this.sender = sender;
 	}
 
-	public List<String> getLogs() {
+	public List<Object> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<Object> logs) {
 		this.logs = logs;
 	}
 

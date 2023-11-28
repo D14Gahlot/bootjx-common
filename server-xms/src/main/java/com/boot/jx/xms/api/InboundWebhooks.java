@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.model.ext.InBoundAction;
@@ -16,7 +17,6 @@ import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.xms.XmsConstants;
 import com.boot.jx.xms.XmsConstants.ApiCallbacktParams;
-import com.boot.jx.xms.XmsVendorConfigurer;
 import com.boot.jx.xms.dto.ContactInfoUpdate;
 import com.boot.utils.ArgUtil;
 
@@ -34,7 +34,7 @@ public class InboundWebhooks {
 	private PMEnvironment pmEnvironment;
 
 	private void forwardDummy(Object req) {
-		ClientApp x = XmsVendorConfigurer.getClientApp();
+		ClientApp x = PMContextUtil.clientApp();
 		if (ArgUtil.is(x) && ArgUtil.is(x.getWebhook())) {
 			restService.ajax(x.getWebhook()).post(req).asMapModel();
 		}

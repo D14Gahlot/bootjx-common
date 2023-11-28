@@ -1,15 +1,23 @@
 package com.boot.jx.admin.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
@@ -17,8 +25,10 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.mongo.QA;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
@@ -40,17 +50,13 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import com.mongodb.AggregationOptions;
-import com.mongodb.AggregationOptions.OutputMode;
-import com.mongodb.Cursor;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCursor;
 
 @Component
 public class BulkMessageService extends BatchJobExecuter {
 
 	@Autowired
-	private MongoTemplate mongoTemplate;
+	private CommonMongoTemplate mongoTemplate;
 
 	@Autowired
 	private MessageStore messageStore;
@@ -99,6 +105,68 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setTemplateId(bulkMessage.templateId());
 			doc.setTemplate(bulkMessage.templateCode());
 			doc.setAttachments(bulkMessage.getAttachments());
+
+			doc.route().setQueueCode(adminApp.getQueue());
+			doc.route().setSendMode(adminApp.getAppMode());
+			doc.route().setSenderApp(adminApp.getAppType());
+			doc.route().setSenderType(MESSAGE_SENDER_TYPE.ADMIN);
+			doc.route().setSenderCode(auditDetailProvider.getAuditUser());
+
+			docs.add(doc);
+		}
+
+		session.setStatus("CREATED");
+		mongoTemplate.save(session);
+		messageStore.insert(docs, bulkMessage.contact().type());
+		registerJob(JobTaskModel.newBatchJob()
+				// Set Unique Job Id
+				.jobId(session.getBulkSessionId())
+				// Contact Type for each message
+				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channelType", channelConfig.getChannelType())
+				// Lane for each message
+				.data("lane", session.getLane()));
+
+		return session;
+	}
+
+	public BulkSessionDoc sendMultiple(List<OutboxMessage> bulkMessages) throws NumberParseException {
+
+		OutboxMessage bulkMessage = bulkMessages.get(0);
+		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
+		ChannelConfig channelConfig = enviroment.config().channel(channelId);
+		BulkSessionDoc session = new BulkSessionDoc();
+		session.setMessage(bulkMessage.getMessage());
+		session.setTemplateId(bulkMessage.templateId());
+		session.setTemplate(bulkMessage.templateCode());
+		session.setMessageCount(bulkMessage.getTo().size());
+		session.setContactType(bulkMessage.contact().getContactType());
+		session.setLane(bulkMessage.contact().getLane());
+		session.setChannelId(channelId);
+		session.setBulkSessionId(UniqueID.generateString62());
+
+		auditDetailProvider.auditCreate(session);
+
+		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
+		String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+
+		PhoneNumber phoneNumber = new PhoneNumber();
+		List<MessageDoc> docs = new ArrayList<MessageDoc>();
+		for (OutboxMessage bulkMsg : bulkMessages) {
+			MessageDoc doc = messageStore.createMessageDoc(bulkMsg);
+			String to = bulkMsg.getTo().get(0);
+			doc.setContactId(null);
+			doc.updateStatus(Status.SCHLD);
+			doc.setBulkSessionId(session.getBulkSessionId());
+			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
+			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			doc.getContact().setPhone(to);
+			doc.setMessage(bulkMsg.getMessage());
+			doc.setHsm(bulkMsg.getHsm());
+			doc.setTemplateId(bulkMsg.templateId());
+			doc.setTemplate(bulkMsg.templateCode());
+			doc.setAttachments(bulkMsg.getAttachments());
 
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
@@ -246,29 +314,34 @@ public class BulkMessageService extends BatchJobExecuter {
 //		AggregationResults<Map> results = mongoTemplate.aggregate(agg, MessageStore.getCollectionName(contactType),
 //				Map.class);
 
-		List<DBObject> list = new ArrayList<DBObject>();
-		list.add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))) // Match
-				.toDBObject(Aggregation.DEFAULT_CONTEXT));
-		list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+		QA list = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
+				QA.project("statuss", QA.objectToArray("stamps")), Aggregation.unwind("statuss"),
+				Aggregation.group("statuss.k").count().as("count"));;
 
-		DBCollection col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
-		Cursor cursor = col.aggregate(list,
-				AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
+		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
+//				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
+//				MongoCursor<Document> cursor = col.aggregate(list).iterator();
+//				System.out.println(JsonUtil.toJson(list.piplines()));
+
+		MongoCursor<Document> cursor = mongoTemplate.collection(MessageStore.getCollectionName(contactType))
+				.aggregate(list).iterator();
 
 		long totalCount = 0;
 		long doneCount = 0;
 		// for (Map map : results) {
 		while (cursor.hasNext()) {
-			DBObject object = cursor.next();
+			Document object = cursor.next();
 			if (ArgUtil.is(object)) {
 				Status status = ArgUtil.parseAsEnumT(object.get("_id"), Status.class);
 				if (ArgUtil.is(status)) {
 					long count = ArgUtil.parseAsLong(object.get("count"), 0L);
 					doc.stats().put(ArgUtil.parseAsString(status), count);
-					totalCount = (totalCount + count);
+					if (ArgUtil.isEqual(status, Status.SCHLD)) {
+						totalCount = Math.max(totalCount, count);
+					}
 					// Done Count
-					if (status.ordinal() > Status.INIT.ordinal()) {
-						doneCount = (doneCount + count);
+					if (ArgUtil.isEqual(status, Status.CRTD, Status.INIT, Status.SENT)) {
+						doneCount = Math.max(doneCount, count);
 					}
 				}
 			}
@@ -277,19 +350,60 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		// System.out.println("TALLY : " + (totalCount == doneCount) + " -- "
 		// +currentBatchJob.getDonePercent());
-		boolean completed = (totalCount == doneCount) && (currentBatchJob.getDonePercent() == 100);
+		boolean completed = (totalCount == doneCount);
 
 		if (completed) {
 			doc.setCompletedStamp(System.currentTimeMillis());
 		}
-		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())) {
-			doc.setStatus(currentBatchJob.getStatus().toString());
+		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())
+				|| !ArgUtil.is(doc.getStatus(), JOB_STATUS.COMPLETED.toString())
+		){
+			doc.setStatus(ArgUtil.parseAsString(currentBatchJob.getStatus(),doc.getStatus()));
 			if (completed) {
 				doc.setStatus(JOB_STATUS.COMPLETED.toString());
 			}
 		}
+		doc.setJob(currentBatchJob);
 		mongoTemplate.save(doc);
 		return completed;
 	}
 
+	/** Parsing csv file **/
+	public BulkSessionDoc uploadFile(MultipartFile file) throws NumberParseException {
+		try {
+			readFile(file.getInputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static String TYPE = "text/csv";
+
+	public static boolean hasCSVFormat(MultipartFile file) {
+		if (!TYPE.equals(file.getContentType())) {
+			return false;
+		}
+		return true;
+	}
+
+	public void readFile(InputStream is) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
+				CSVParser csvParser = new CSVParser(fileReader,
+						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+			// List<Tutorial> tutorials = new ArrayList<Tutorial>();
+			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+			for (CSVRecord csvRecord : csvRecords) {
+				System.out.println("id :" + csvRecord.get("contacts"));
+				// System.out.println("Title :"+ csvRecord.get("Title"));
+				// System.out.println("Description :"+ csvRecord.get("Description"));
+				// System.out.println("id :"+ csvRecord.get("Published"));
+
+			}
+
+		} catch (Exception e) {
+			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+		}
+	}
 }

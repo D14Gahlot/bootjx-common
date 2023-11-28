@@ -4,9 +4,12 @@ import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
+import com.boot.jx.postman.plugin.OAPlugin.OAConfigDetails;
+import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
 import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
+import com.boot.jx.postman.plugin.WA360CloudPlugin.WA360CloudConfigDetails;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
@@ -25,6 +28,9 @@ public class ChannelConfig extends AChannelConfig {
 	private WebConfigDetails web;
 	private EmailConfigDetails email;
 	private TwilioConfigDetails twilio;
+	private SMSConfigDetails sms;
+	private WA360CloudConfigDetails wa360dc;
+	private OAConfigDetails oa;
 
 	private boolean isPushAllowed;
 	private boolean isPushOnlyApproved;
@@ -32,7 +38,10 @@ public class ChannelConfig extends AChannelConfig {
 	private boolean isPushToNewContactAllowed;
 	private boolean isWebhookManual;
 
+	private Object error;
+
 	private String callbackPath;
+	private String unhandledInboundForward;
 
 	public String getLane() {
 		return lane;
@@ -170,6 +179,46 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setTwilio(TwilioConfigDetails twilio) {
 		this.twilio = twilio;
+	}
+
+	public Object getError() {
+		return error;
+	}
+
+	public void setError(Object error) {
+		this.error = error;
+	}
+
+	public SMSConfigDetails getSms() {
+		return sms;
+	}
+
+	public void setSms(SMSConfigDetails sms) {
+		this.sms = sms;
+	}
+
+	public WA360CloudConfigDetails getWa360dc() {
+		return wa360dc;
+	}
+
+	public void setWa360dc(WA360CloudConfigDetails wa360dc) {
+		this.wa360dc = wa360dc;
+	}
+
+	public OAConfigDetails getOa() {
+		return oa;
+	}
+
+	public void setOa(OAConfigDetails oa) {
+		this.oa = oa;
+	}
+
+	public String getUnhandledInboundForward() {
+		return unhandledInboundForward;
+	}
+
+	public void setUnhandledInboundForward(String unhandledInboundForward) {
+		this.unhandledInboundForward = unhandledInboundForward;
 	}
 
 }

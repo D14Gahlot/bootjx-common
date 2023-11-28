@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocument;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 
@@ -42,6 +43,15 @@ public class AgentDoc implements IDocument, DocVersion {
 	private boolean isDefaultValue;
 	private Boolean isEnabled;
 
+	@Indexed
+	private List<ResourceDocument> quicktags;
+
+	@Indexed
+	private List<ResourceDocument> quicklabels;
+
+	@Indexed
+	private List<ResourceDocument> quickskills;
+
 	private List<String> channels;
 	private String dept_id;
 
@@ -69,6 +79,14 @@ public class AgentDoc implements IDocument, DocVersion {
 
 	public void setAgent_number(String agent_number) {
 		this.agent_number = agent_number;
+	}
+
+	public String getPhone() {
+		return agent_number;
+	}
+
+	public void setPhone(String phone) {
+		this.agent_number = phone;
 	}
 
 	public Date getCreated_date() {
@@ -244,6 +262,30 @@ public class AgentDoc implements IDocument, DocVersion {
 
 	public void setDuperAdmin(boolean isDuperAdmin) {
 		this.isDuperAdmin = isDuperAdmin;
+	}
+
+	public List<ResourceDocument> getQuicktags() {
+		return quicktags;
+	}
+
+	public void setQuicktags(List<ResourceDocument> quicktags) {
+		this.quicktags = quicktags;
+	}
+
+	public List<ResourceDocument> getQuicklabels() {
+		return quicklabels;
+	}
+
+	public void setQuicklabels(List<ResourceDocument> quicklabels) {
+		this.quicklabels = quicklabels;
+	}
+
+	public List<ResourceDocument> getQuickskills() {
+		return quickskills;
+	}
+
+	public void setQuickskills(List<ResourceDocument> quickskills) {
+		this.quickskills = quickskills;
 	}
 
 }

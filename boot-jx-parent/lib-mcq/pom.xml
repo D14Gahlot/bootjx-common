@@ -29,7 +29,12 @@
 			<version>3.12.0</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>28.0-jre</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
@@ -37,7 +42,7 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib</artifactId>
+			<artifactId>bootjx-common-lib</artifactId>
 		</dependency>
 
 		<dependency>

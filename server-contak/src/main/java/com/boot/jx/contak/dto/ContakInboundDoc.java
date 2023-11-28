@@ -1,0 +1,135 @@
+package com.boot.jx.contak.dto;
+
+import java.io.Serializable;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.boot.jx.contak.cache.OtpAlertEvent.CompanyQueueStatus;
+import com.boot.jx.contak.dto.PhoneLoginDTO.MessageEvent;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.swagger.ApiMockModelProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Document(collection = "OA_EVENT")
+public class ContakInboundDoc implements Serializable {
+	private static final long serialVersionUID = 1281605084248923642L;
+
+	@Id
+	public String inboundId;
+
+	@Indexed
+	public String phoneId;;
+
+	@Indexed
+	public String companyId;
+
+	@ApiMockModelProperty(example = "text", value = "Current Status", allowableValues = "CRTD,NTFD,FLD,XPRD")
+	@Indexed
+	private CompanyQueueStatus status;
+
+	@Indexed
+	@ApiMockModelProperty(example = "text", value = "Inbound type",
+			allowableValues = "USER_REG,MSG_OUT_DELIVERED,MSG_OUT_READ")
+	public String inboundType;
+
+	public TimeStampIndex createdAt;
+
+	public TimeStampIndex notifiedAt;
+
+	public TimeStampIndex expiredAt;
+
+	public Object inboundPayload;
+
+	public MessageEvent event;
+
+	public String getInboundId() {
+		return inboundId;
+	}
+
+	public void setInboundId(String inboundId) {
+		this.inboundId = inboundId;
+	}
+
+	public String getPhoneId() {
+		return phoneId;
+	}
+
+	public void setPhoneId(String phoneId) {
+		this.phoneId = phoneId;
+	}
+
+	public String getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(String companyId) {
+		this.companyId = companyId;
+	}
+
+	public TimeStampIndex getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(TimeStampIndex createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public String getInboundType() {
+		return inboundType;
+	}
+
+	public void setInboundType(String inboundType) {
+		this.inboundType = inboundType;
+	}
+
+	public Object getInboundPayload() {
+		return inboundPayload;
+	}
+
+	public void setInboundPayload(Object inboundPayload) {
+		this.inboundPayload = inboundPayload;
+	}
+
+	public TimeStampIndex getNotifiedAt() {
+		return notifiedAt;
+	}
+
+	public void setNotifiedAt(TimeStampIndex notifiedAt) {
+		this.notifiedAt = notifiedAt;
+	}
+
+	public TimeStampIndex getExpiredAt() {
+		return expiredAt;
+	}
+
+	public void setExpiredAt(TimeStampIndex expiredAt) {
+		this.expiredAt = expiredAt;
+	}
+
+	public MessageEvent getEvent() {
+		return event;
+	}
+
+	public void setEvent(MessageEvent event) {
+		this.event = event;
+	}
+
+	public CompanyQueueStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(CompanyQueueStatus status) {
+		this.status = status;
+	}
+
+	public static ContakInboundDoc create(String inboundType) {
+		ContakInboundDoc inbound = new ContakInboundDoc();
+		inbound.setInboundType(inboundType);
+		inbound.setCreatedAt(TimeStampIndex.now());
+		inbound.setStatus(CompanyQueueStatus.CREATED);
+		return inbound;
+	}
+}

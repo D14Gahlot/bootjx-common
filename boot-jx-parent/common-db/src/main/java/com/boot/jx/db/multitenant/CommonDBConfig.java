@@ -22,29 +22,29 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 @EnableJpaRepositories("com.boot.jx")
 public class CommonDBConfig {
 
-	@Autowired
-	private JpaProperties jpaProperties;
+    @Autowired
+    private JpaProperties jpaProperties;
 
-	@Bean
-	public JpaVendorAdapter jpaVendorAdapter() {
-		return new HibernateJpaVendorAdapter();
-	}
+    @Bean
+    public JpaVendorAdapter jpaVendorAdapter() {
+	return new HibernateJpaVendorAdapter();
+    }
 
-	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource,
-			MultiTenantConnectionProvider multiTenantConnectionProviderImpl,
-			CurrentTenantIdentifierResolver currentTenantIdentifierResolverImpl) {
-		Map<String, Object> properties = new HashMap<>();
-		properties.putAll(jpaProperties.getHibernateProperties(dataSource));
-		properties.put(Environment.MULTI_TENANT, MultiTenancyStrategy.SCHEMA);
-		properties.put(Environment.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProviderImpl);
-		properties.put(Environment.MULTI_TENANT_IDENTIFIER_RESOLVER, currentTenantIdentifierResolverImpl);
-		properties.put("hibernate.show_sql", jpaProperties.isShowSql());
-		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-		em.setDataSource(dataSource);
-		em.setPackagesToScan("com.boot.jx");
-		em.setJpaVendorAdapter(jpaVendorAdapter());
-		em.setJpaPropertyMap(properties);
-		return em;
-	}
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource,
+	    MultiTenantConnectionProvider multiTenantConnectionProviderImpl,
+	    CurrentTenantIdentifierResolver currentTenantIdentifierResolverImpl) {
+	Map<String, Object> properties = new HashMap<String, Object>();
+	//properties.putAll(jpaProperties.getHibernateProperties(dataSource));
+	properties.put(Environment.MULTI_TENANT, MultiTenancyStrategy.SCHEMA);
+	properties.put(Environment.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProviderImpl);
+	properties.put(Environment.MULTI_TENANT_IDENTIFIER_RESOLVER, currentTenantIdentifierResolverImpl);
+	properties.put("hibernate.show_sql", jpaProperties.isShowSql());
+	LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+	em.setDataSource(dataSource);
+	em.setPackagesToScan("com.boot.jx");
+	em.setJpaVendorAdapter(jpaVendorAdapter());
+	em.setJpaPropertyMap(properties);
+	return em;
+    }
 }

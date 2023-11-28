@@ -1,18 +1,20 @@
 package com.boot.jx.contak;
 
-import org.springframework.boot.SpringApplication;
+import java.io.IOException;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.context.request.RequestContextListener;
+
+import com.boot.jx.app.CommonAppLauncher;
 
 /**
  * The Class WebApplication.
@@ -22,15 +24,16 @@ import org.springframework.web.context.request.RequestContextListener;
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
-public class ContakApplication extends SpringBootServletInitializer {
+public class ContakApplication extends CommonAppLauncher {
 
 	/**
 	 * The main method.
 	 *
 	 * @param args the arguments
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ContakApplication.class, args);
+	public static void main(String[] args) throws IOException {
+		launch(ContakApplication.class, args);
 	}
 
 	/*
@@ -55,7 +58,7 @@ public class ContakApplication extends SpringBootServletInitializer {
 	public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
 			SecurityProperties securityProperties) {
 		DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean("checkSession");
-		registration.setOrder(securityProperties.getFilterOrder());
+		registration.setOrder(securityProperties.getFilter().getOrder());
 		return registration;
 	}
 
@@ -63,4 +66,5 @@ public class ContakApplication extends SpringBootServletInitializer {
 	public RequestContextListener requestContextListener() {
 		return new RequestContextListener();
 	}
+
 }

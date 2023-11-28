@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
@@ -16,15 +17,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConstants;
 import com.boot.jx.http.ApiRequest;
-import com.boot.jx.stomp.StompSessionCache.StompSession;
+import com.boot.jx.scope.tnt.TenantContextHolder;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
+import com.boot.jx.stomp.StompConfig.StompSession;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
+import com.boot.utils.StringUtils;
 
 @Controller
 @ConditionalOnProperty("app.stomp")
 public class StompController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StompTunnelSessionManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(StompController.class);
 
 	@Autowired
 	StompTunnelSessionManager stompTunnelSessionManager;
@@ -32,20 +37,35 @@ public class StompController {
 	@Autowired
 	StompTunnelService stompTunnelService;
 
+	@Autowired(required = false)
+	TenantResolver tenantResolver;
+
 	@ApiRequest(session = true)
-	@SubscribeMapping("/stomp/tunnel/meta")
-	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor) {
+	@SubscribeMapping("/stomp/tunnel/meta/{tnt}/{xSessionId}/{jSessionId}")
+	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor, @DestinationVariable String tnt,
+			@DestinationVariable String xSessionId, @DestinationVariable String jSessionId) {
+
+		if (ArgUtil.is(tenantResolver)) {
+			tnt = tenantResolver.resolve(tnt);
+		}
+
+		if (!StringUtils.isEmpty(tnt)) {
+			TenantContextHolder.setCurrent(tnt, null);
+		}
+
 		Map<String, Object> map = new HashMap<String, Object>();
-
-		String xSessionId = ArgUtil
-				.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
-
-		String jSessionId = ArgUtil
-				.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_JID_XKEY));
 
 		if (!ArgUtil.is(xSessionId) && !ArgUtil.is(jSessionId)) {
 			LOGGER.warn("xSessionId/jSessionId is Empty");
 			return map;
+		}
+
+		if (ArgUtil.is(xSessionId)) {
+			map.put(AppConstants.SESSION_ID_XKEY, xSessionId);
+		}
+
+		if (ArgUtil.is(jSessionId)) {
+			map.put(AppConstants.SESSION_JID_XKEY, jSessionId);
 		}
 
 		StompSession stompSession = stompTunnelSessionManager.getStompSessionByHttpSessionId(xSessionId, jSessionId);
@@ -66,6 +86,31 @@ public class StompController {
 				ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_UID_XKEY))));
 
 		return map;
+	}
+
+	@ApiRequest(session = true)
+	@SubscribeMapping("/stomp/tunnel/meta/{xSessionId}/{jSessionId}")
+	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor, @DestinationVariable String xSessionId,
+			@DestinationVariable String jSessionId) {
+
+		String tnt = ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_TNT_XKEY));
+
+		return meta(headerAccessor, tnt, xSessionId, jSessionId);
+	}
+
+	@ApiRequest(session = true)
+	@SubscribeMapping("/stomp/tunnel/meta")
+	public Map<String, Object> meta(SimpMessageHeaderAccessor headerAccessor) {
+
+		String tnt = ArgUtil.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_TNT_XKEY));
+
+		String xSessionId = ArgUtil.parseAsString(
+				headerAccessor.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY), Constants.BLANK);
+
+		String jSessionId = ArgUtil
+				.parseAsString(headerAccessor.getSessionAttributes().get(AppConstants.SESSION_JID_XKEY));
+
+		return meta(headerAccessor, tnt, xSessionId, jSessionId);
 	}
 
 	@MessageMapping("/ping")

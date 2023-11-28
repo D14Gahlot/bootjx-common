@@ -21,6 +21,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<swagger.version>2.8.0</swagger.version>
+		<jasypt.spring.version>2.0.0</jasypt.spring.version>
 	</properties>
 
 	<dependencies>
@@ -37,12 +38,13 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-utils</artifactId>
+			<artifactId>bootjx-common-utils</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.mobile</groupId>
 			<artifactId>spring-mobile-device</artifactId>
+			<version>2.0.0.M3</version>
 		</dependency>
 
 		<dependency>
@@ -70,6 +72,18 @@
 			<!-- <scope>compile</scope> -->
 		</dependency>
 
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>boot-ext-jar</artifactId>
+			<type>pom</type>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.github.ulisesbocchio</groupId>
+			<artifactId>jasypt-spring-boot</artifactId>
+			<version>${jasypt.spring.version}</version>
+		</dependency> 
+		
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-spi</artifactId>
@@ -112,6 +126,12 @@
 		</dependency>
 		<!-- file upload libs ends -->
 
+		<dependency>
+			<groupId>com.googlecode.libphonenumber</groupId>
+			<artifactId>libphonenumber</artifactId>
+			<version>8.10.5</version>
+		</dependency>
+
 	</dependencies>
 
 	<repositories>
@@ -124,6 +144,15 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/libs-milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
+
 
 </project>

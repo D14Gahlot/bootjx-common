@@ -10,12 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 
 public class ConfigMeta implements Serializable {
 
 	public static enum INPUT_TYPE {
-		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE, MESSAGE;
+		TEXT, OPTIONS, RANGE, NUMBER, COLOR, COLOR_PALLETE, NONE, MESSAGE, TEXTAREA, JSON;
 	}
 
 	public static enum DATA_TYPE {
@@ -97,9 +98,12 @@ public class ConfigMeta implements Serializable {
 
 	private String title;
 	private String key;
+	private String ukey;
+	private String superKey;
 	private String desc;
 	private String group;
 	private String path;
+	private String pathRaw;
 	private Object defaultValue;
 	private Object example;
 	private boolean optional;
@@ -108,6 +112,9 @@ public class ConfigMeta implements Serializable {
 	private boolean writeonly;
 	private boolean hidden;
 	private boolean deprecated;
+	private boolean searchable;
+	private boolean clearable;
+	private boolean filterable;
 	private Integer order;
 	private Integer max;
 	private Integer min;
@@ -132,15 +139,25 @@ public class ConfigMeta implements Serializable {
 
 		String path() default "";
 
+		String pathRaw() default "";
+
 		boolean hidden() default false;
+
+		boolean readonly() default false;
 
 		boolean createonly() default false;
 
 		boolean writeonly() default false;
 
-		boolean optional() default false;
+		boolean deprecated() default false;
 
-		boolean readonly() default false;
+		boolean searchable() default false;
+
+		boolean clearable() default false;
+
+		boolean filterable() default false;
+
+		boolean optional() default false;
 
 		INPUT_TYPE inputType() default INPUT_TYPE.NONE;
 
@@ -159,11 +176,15 @@ public class ConfigMeta implements Serializable {
 
 	public ConfigMeta() {
 		this.messageType = MESSAGE_TYPE.PRIMARY;
+		this.searchable = true;
+		this.clearable = true;
+		this.filterable = true;
 	}
 
 	public ConfigMeta(String title, String key) {
 		super();
 		this.key = key;
+		this.ukey = SafeKeyHashMap.sanitizeKey(key);
 		this.title = title;
 	}
 
@@ -288,6 +309,7 @@ public class ConfigMeta implements Serializable {
 
 	public ConfigMeta key(String key) {
 		this.key = key;
+		this.ukey = SafeKeyHashMap.sanitizeKey(key);
 		return this;
 	}
 
@@ -554,4 +576,76 @@ public class ConfigMeta implements Serializable {
 		return this;
 	}
 
+	public String getSuperKey() {
+		return superKey;
+	}
+
+	public void setSuperKey(String superKey) {
+		this.superKey = superKey;
+	}
+
+	public ConfigMeta superKey(String superKey) {
+		this.superKey = superKey;
+		return this;
+	}
+
+	public boolean isSearchable() {
+		return searchable;
+	}
+
+	public void setSearchable(boolean searchable) {
+		this.searchable = searchable;
+	}
+
+	public boolean isClearable() {
+		return clearable;
+	}
+
+	public void setClearable(boolean clearable) {
+		this.clearable = clearable;
+	}
+
+	public boolean isFilterable() {
+		return filterable;
+	}
+
+	public void setFilterable(boolean filterable) {
+		this.filterable = filterable;
+	}
+
+	public ConfigMeta searchable(boolean searchable) {
+		this.searchable = searchable;
+		return this;
+	}
+
+	public ConfigMeta filterable(boolean filterable) {
+		this.filterable = filterable;
+		return this;
+	}
+
+	public ConfigMeta clearable(boolean clearable) {
+		this.clearable = true;
+		return this;
+	}
+
+	public String getPathRaw() {
+		return pathRaw;
+	}
+
+	public void setPathRaw(String pathRaw) {
+		this.pathRaw = pathRaw;
+	}
+
+	public ConfigMeta pathRaw(String pathRaw) {
+		this.pathRaw = pathRaw;
+		return this;
+	}
+
+	public String getUkey() {
+		return ukey;
+	}
+
+	public void setUkey(String ukey) {
+		this.ukey = ukey;
+	}
 }

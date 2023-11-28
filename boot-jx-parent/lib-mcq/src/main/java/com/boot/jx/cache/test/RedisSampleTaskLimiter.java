@@ -9,7 +9,7 @@ import com.boot.jx.tunnel.task.ATaskLimiter;
 public class RedisSampleTaskLimiter extends ATaskLimiter {
 
 	@Override
-	public void doTask(TunnelTask task) {
+	public void doTaskSafely(TunnelTask task) {
 		System.out.println(String.format("%s - %s %s", new Date().toString(), task.getId(), task.getName()));
 	}
 

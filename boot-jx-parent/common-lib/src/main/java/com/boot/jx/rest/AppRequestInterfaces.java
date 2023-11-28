@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
-import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.utils.JsonUtil;
 
 public final class AppRequestInterfaces {

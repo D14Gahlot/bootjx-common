@@ -24,6 +24,20 @@ public class PhoneLoginDTO implements Serializable {
 	@ApiMockModelProperty(example = "xxxxxxxx", required = false, value = "Send if OTP")
 	public String otpNounce;
 
+	public MessageEvent event;
+
+	public static class MessageEvent implements Serializable {
+		private static final long serialVersionUID = 7471706517329183180L;
+		@ApiMockModelProperty(example = "xxxxxxxx", required = false, value = "Messages Delivered Id")
+		public String noteId;
+		@ApiMockModelProperty(example = "xxxxxxxx", required = false, value = "Message Event Name",
+				allowableValues = "READ")
+		public String eventName;
+		public String eventSubCode;
+		public String eventDesc;
+		public long eventStamp;
+	}
+
 	public static class PhoneLoginResponseDTO implements Serializable {
 		private static final long serialVersionUID = 1281605084248923642L;
 
@@ -39,6 +53,15 @@ public class PhoneLoginDTO implements Serializable {
 		@ApiMockModelProperty(example = "xxxxxxxx", required = false)
 		public String otpNounce;
 
+		@ApiMockModelProperty(example = "xxxxxxxx", required = false)
+		public String loginToken;
+
+		@ApiMockModelProperty(example = "1", required = false)
+		public long otpCounter;
+
+		@ApiMockModelProperty(example = "1", required = false,
+				value = "milliseconds to wait before next otp send request can be sent")
+		public long otpWait;
 	}
 
 }

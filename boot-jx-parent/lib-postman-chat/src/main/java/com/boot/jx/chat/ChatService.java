@@ -2,9 +2,11 @@ package com.boot.jx.chat;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
@@ -18,8 +20,9 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
+import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
@@ -51,7 +54,14 @@ public class ChatService {
 	private SessionStore sessionStore;
 
 	@Autowired
+	private ChatLogger chatLogger;
+
+	@Autowired
 	private ChatSessionFactory chatSessionFactory;
+
+	@Lazy
+	@Autowired(required = false)
+	private MessageEvents messageEvents;
 
 	public InboxMessage getInboxMessage() {
 		return messageContext.getInboxMessage();
@@ -81,6 +91,11 @@ public class ChatService {
 		connectorHandlerFactory.message(new MessageContext().from(context()), messageType, chatContactDoc,
 				outboxMessage, inboxMessage);
 		chatSessionFactory.push(messageDoc, outboxMessage);
+
+		if (messageEvents != null) {
+			messageEvents.onMessageOutbound(outboxMessage);
+		}
+
 		return messageDoc;
 	}
 
@@ -93,9 +108,11 @@ public class ChatService {
 			throw new PostManException("Destination Not Specified : chatContactDoc Empty");
 		}
 
+		outboxMessage.updateStatus(Status.RECEIVD);
 		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
-		outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
+		outboxMessage.contact().setChannelType(
+				ArgUtil.nonEmpty(outboxMessage.contact().getChannelType(), chatContactDoc.getChannelType()));
 		outboxMessage.contact().setLane(chatContactDoc.getLane());
 		outboxMessage.contact().setCsid(chatContactDoc.getCsid());
 		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
@@ -114,7 +131,8 @@ public class ChatService {
 
 		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.contact().setContactType(inboxMessage.contact().getContactType());
-		outboxMessage.contact().setChannelType(inboxMessage.contact().getChannelType());
+		outboxMessage.contact().setChannelType(
+				ArgUtil.nonEmpty(outboxMessage.contact().getChannelType(), chatContactDoc.getChannelType()));
 		outboxMessage.contact().setLane(inboxMessage.contact().getLane());
 		outboxMessage.contact().setCsid(inboxMessage.contact().getCsid());
 		outboxMessage.contact().setContactId(inboxMessage.contact().getContactId());
@@ -140,7 +158,8 @@ public class ChatService {
 
 		outboxMessage.updateStatus(Message.Status.INIT);
 		outboxMessage.contact().setContactType(chatContactDoc.getContactType());
-		outboxMessage.contact().setChannelType(chatContactDoc.getChannelType());
+		outboxMessage.contact().setChannelType(
+				ArgUtil.nonEmpty(outboxMessage.contact().getChannelType(), chatContactDoc.getChannelType()));
 		outboxMessage.contact().setLane(chatContactDoc.getLane());
 		outboxMessage.contact().setCsid(chatContactDoc.getCsid());
 		outboxMessage.contact().setContactId(chatContactDoc.getContactId());
@@ -242,7 +261,7 @@ public class ChatService {
 		return true;
 	}
 
-	private MessageContext loadChatContextInternal(String contactId, SessionInfo inboxMessage) {
+	private MessageContext loadChatContextInternal(String contactId, TraceMessage inboxMessage) {
 		LOGGER.debug("Loading chat conewxt");
 		if (!ArgUtil.is(inboxMessage.session().getMode())) {
 			ChatSessionDoc sessionDoc = messageContext.session().getDoc();
@@ -268,10 +287,14 @@ public class ChatService {
 		if (!ArgUtil.is(doc.getMeta())
 				|| !ArgUtil.is(doc.getMeta().getRoutingId(), inboxMessage.session().getRoutingId())) {
 			LOGGER.debug("Loading chat conewxt:newSession");
-			doc.setMeta(new ChatMeta());
+			chatLogger.addTrace(inboxMessage, "NewSession", doc.getMeta(), inboxMessage.session());
+			messageContext.chat().setMeta(new ChatMeta());
+			messageContext.commitChatContextQuery();
 			messageContext.chat().setQueueCode(inboxMessage.session().getQueue());
 			messageContext.chat().setSessionId(inboxMessage.getSessionId());
 			messageContext.chat().setRoutingId(inboxMessage.session().getRoutingId());
+		} else {
+			chatLogger.addTrace(inboxMessage, "ContinueOldSession", doc.getMeta());
 		}
 
 		// messageStore.create(inboxMessage);

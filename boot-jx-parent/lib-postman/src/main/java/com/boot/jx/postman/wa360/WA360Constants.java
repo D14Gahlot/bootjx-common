@@ -48,6 +48,8 @@ public class WA360Constants {
 
 		public static final JsonPath CONTEXT_ID = new JsonPath("messages/[0]/context/id");
 
+		public static final JsonPath STATUS_RECIPIENT = new JsonPath("message/recipient_id");
+
 	}
 
 	public static class OutBoundWrapperPaths {
@@ -78,7 +80,13 @@ public class WA360Constants {
 		public static final JsonPath TEMPLATE_COMPONENTS = new JsonPath("template/components");
 
 		public static final JsonPath FETCH_CONTACTS_DETAILS = new JsonPath("contacts/[0]");
+		public static final JsonPath NAME_FIRST_NAME = new JsonPath("name/first_name");
+		public static final JsonPath NAME_LAST_NAME = new JsonPath("name/last_name");
+		public static final JsonPath NAME_FORMATTED_NAME = new JsonPath("name/formatted_name");
 
+		public static final JsonPath ORG_COMPANY = new JsonPath("org/company");
+		public static final JsonPath ORG_DEPARTMENT = new JsonPath("org/department");
+		public static final JsonPath ORG_TITLE = new JsonPath("org/title");
 	}
 
 	public static final String[] componentTypes = { "header", "body", "button" };
@@ -92,10 +100,17 @@ public class WA360Constants {
 	};
 
 	public static final String D360_API_KEY = "D360-API-KEY";
+	public static final String D360_CLOUD_API_KEY = "D360-API-KEY";
 	public static final String BASE_URL = "https://waba.360dialog.io";
+	public static final String BASE_CLOUD_URL = "https://waba-v2.360dialog.io";
 
 	public static String MEDIA_URL(String mediaId) {
 		return BASE_URL + "/v1/media/" + mediaId;
+	}
+
+	/** WABA cloud **/
+	public static String MEDIA_CLOUD_URL(String mediaId) {
+		return BASE_CLOUD_URL + "/" + mediaId;
 	}
 
 	public static class TmplComponent extends MapModel {
@@ -117,6 +132,8 @@ public class WA360Constants {
 
 		public TmplComponent button(String subType, int index) {
 			this.put("type", "button");
+			this.put("sub_type", subType);
+			this.put("index", index);
 			this.parameters = MapModel.createInstance();
 			return this;
 		}

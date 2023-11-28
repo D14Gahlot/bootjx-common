@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +13,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.cache.CacheBox;
-import com.boot.jx.def.ICacheBox;
 import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.store.MessageStore;
@@ -44,18 +41,10 @@ public class ChatStatusService {
 	private StompTunnelService stompTunnelService;
 
 	@Autowired(required = false)
-	private RedissonClient redisson;
-	private CacheBox<String> proxyManager;
-
-	@Autowired(required = false)
 	private InBoundHandler inBoundHandler;
 
-	public ICacheBox<String> proxy() {
-		if (proxyManager == null) {
-			this.proxyManager = CacheBox.getInstance("InBoundService-Proxy", redisson);
-		}
-		return this.proxyManager;
-	}
+	@Autowired
+	private ChatProxyManager proxyManager;
 
 	public void offer(MessageReport e) {
 		queue.offer(e);
@@ -97,7 +86,7 @@ public class ChatStatusService {
 			// Check for Proxy Account
 			String contactId = PostManUtil.createContactId(messageReport.contact());
 			if (ArgUtil.is(contactId)) {
-				String proxy = proxy().get(contactId);
+				String proxy = proxyManager.get(contactId);
 				if (ArgUtil.is(proxy)) {
 					AppContextUtil.clear();
 					AppContextUtil.setTenant(proxy);

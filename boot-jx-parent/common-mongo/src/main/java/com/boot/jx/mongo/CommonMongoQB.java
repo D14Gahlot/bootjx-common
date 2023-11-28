@@ -12,13 +12,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
-import com.boot.jx.mongo.CommonDocInterfaces.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonDocInterfaces.IMongoQueryBuilder;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.CreatedTimeStampIndexSupport;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.PatternUtil;
 
-public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQueryBuilder<T> {
+public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements IMongoQueryBuilder<T> {
 
 	public static class QueryCriteria extends Criteria {
 		public static Criteria whereId(Object id) {
@@ -35,8 +36,10 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	Query query;
+	Criteria currentCriteria;
 	Update update;
 	Class<T> docClass;
+	String collectionName;
 	private boolean skipUpdateStamp;
 
 	public Query query() {
@@ -59,6 +62,25 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 		return (M) this;
 	}
 
+	public Criteria criteria(String key) {
+		if (currentCriteria == null) {
+			currentCriteria = Criteria.where(key);
+		} else {
+			currentCriteria = currentCriteria.and(key);
+		}
+		return currentCriteria;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public M build() {
+		if (currentCriteria != null) {
+			query().addCriteria(currentCriteria);
+			this.currentCriteria = null;
+		}
+		return (M) this;
+	}
+
 	@SuppressWarnings("unchecked")
 	public M where(Criteria criteria) {
 		query().addCriteria(criteria);
@@ -72,10 +94,39 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	@SuppressWarnings("unchecked")
+	public M search(String key, String o) {
+		if (ArgUtil.is(o)) {
+			query().addCriteria(Criteria.where(key).regex(PatternUtil.contains(o)));
+		}
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public M having(String key) {
 		query().addCriteria(Criteria.where(key).exists(true));
 		return (M) this;
 	}
+
+	// <--- Where Queries----
+	@SuppressWarnings("unchecked")
+	public M where(String key) {
+		criteria(key);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M and(String key) {
+		criteria(key);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M is(Object value) {
+		this.currentCriteria.is(value);
+		return (M) this;
+	}
+
+	// --- Where Queries---->
 
 	@SuppressWarnings("unchecked")
 	public M sortBy(String byField) {
@@ -90,8 +141,20 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	@SuppressWarnings("unchecked")
+	public M sortBy(Sort sort) {
+		this.query().with(sort);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public M limit(int limit) {
 		this.query().limit(limit);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M limit(long modifiedCount) {
+		this.query().limit(ArgUtil.parseAsInteger(modifiedCount));
 		return (M) this;
 	}
 
@@ -146,8 +209,23 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 	}
 
 	@SuppressWarnings("unchecked")
+	public M setunset(String key, Object o) {
+		if (o == null) {
+			update().unset(key);
+		} else
+			update().set(key, o);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public M set(String key, Object o) {
 		update().set(key, o);
+		return (M) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public M push(String key, Object o) {
+		update().push(key, o);
 		return (M) this;
 	}
 
@@ -224,6 +302,10 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 		this.docClass = docClass;
 	}
 
+	public void setCollectionName(String collectionName) {
+		this.collectionName = collectionName;
+	}
+
 	@Override
 	public boolean isUpdatedTimeStampSupport() {
 		if (ArgUtil.is(this.docClass)) {
@@ -260,14 +342,43 @@ public class CommonMongoQB<M extends CommonMongoQB<M, T>, T> implements MongoQue
 		this.set("updatedStamp", updatedStamp);
 	}
 
+	public static class MongoQueryBuilder<R> extends CommonMongoQB<MongoQueryBuilder<R>, R> {
+
+	}
+
+	public static class MQB<R> extends CommonMongoQB<MQB<R>, R> {
+
+	}
+
+	public static class MongoQBimpl<R> extends MongoQueryBuilder<R> {
+
+	}
+
 	public static class CommonMongoQBimpl<R> extends CommonMongoQB<CommonMongoQBimpl<R>, R> {
 
 	}
 
-	public static <T> CommonMongoQB<CommonMongoQBimpl<T>, T> collection(Class<T> docClass) {
-		CommonMongoQBimpl<T> x = new CommonMongoQBimpl<T>();
+	public static <T> MongoQueryBuilder<T> collection(Class<T> docClass) {
+		MongoQueryBuilder<T> x = new MongoQueryBuilder<T>();
 		x.setDocClass(docClass);
 		return x;
+	}
+
+	public static <T> MQB<T> select(Class<T> docClass, String collectionName) {
+		MQB<T> x = new MQB<T>();
+		x.setDocClass(docClass);
+		x.setCollectionName(collectionName);
+		return x;
+	}
+
+	public static <T> MQB<T> select(Class<T> docClass) {
+		MQB<T> x = new MQB<T>();
+		x.setDocClass(docClass);
+		return x;
+	}
+
+	public String getCollectionName() {
+		return collectionName;
 	}
 
 }

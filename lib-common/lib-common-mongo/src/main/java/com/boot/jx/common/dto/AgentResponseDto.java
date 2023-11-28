@@ -1,6 +1,9 @@
 package com.boot.jx.common.dto;
 
+import java.util.List;
+
 import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
+import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocument;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumentDTO<T> {
@@ -12,6 +15,9 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 	private String agent_code;
 	@JsonProperty("email")
 	private String agent_email;
+
+	@JsonProperty("phone")
+	private String agent_number;
 
 	@JsonProperty("name")
 	private String agent_name;
@@ -34,6 +40,12 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	@JsonProperty("dept_id")
 	private String dept_id;
+
+	private List<ResourceDocument> quicktags;
+
+	private List<ResourceDocument> quicklabels;
+
+	private List<ResourceDocument> quickskills;
 
 	public String getId() {
 		return id;
@@ -126,6 +138,38 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	public void setDuperAdmin(boolean isDuperAdmin) {
 		this.isDuperAdmin = isDuperAdmin;
+	}
+
+	public List<ResourceDocument> getQuicktags() {
+		return quicktags;
+	}
+
+	public void setQuicktags(List<ResourceDocument> quicktags) {
+		this.quicktags = quicktags;
+	}
+
+	public List<ResourceDocument> getQuicklabels() {
+		return quicklabels;
+	}
+
+	public void setQuicklabels(List<ResourceDocument> quicklabels) {
+		this.quicklabels = quicklabels;
+	}
+
+	public List<ResourceDocument> getQuickskills() {
+		return quickskills;
+	}
+
+	public void setQuickskills(List<ResourceDocument> quickskills) {
+		this.quickskills = quickskills;
+	}
+
+	public String getAgent_number() {
+		return agent_number;
+	}
+
+	public void setAgent_number(String agent_number) {
+		this.agent_number = agent_number;
 	}
 
 }

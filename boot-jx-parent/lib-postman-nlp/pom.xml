@@ -19,20 +19,18 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<thymeleaf.version>3.0.2.RELEASE</thymeleaf.version>
-		<thymeleaf-layout-dialect.version>2.1.1</thymeleaf-layout-dialect.version>
 	</properties>
 
 	<dependencies>
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib</artifactId>
+			<artifactId>bootjx-common-lib</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-mongo</artifactId>
+			<artifactId>bootjx-common-mongo</artifactId>
 		</dependency>
 
 		<dependency>

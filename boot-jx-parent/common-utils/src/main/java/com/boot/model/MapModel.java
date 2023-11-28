@@ -1,5 +1,6 @@
 package com.boot.model;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.boot.json.JsonSerializerType;
+import com.boot.json.JsonSerializerTypeSerializer;
 import com.boot.json.MapModelDeserializer;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -19,17 +21,21 @@ import com.boot.utils.TimeUtils.TimePeriod;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(using = JsonSerializerTypeSerializer.class)
 @JsonDeserialize(using = MapModelDeserializer.class)
 public class MapModel implements JsonSerializerType<Object> {
 
 	public static interface EntryMeta {
 		public String getKey();
+
+		public String getUkey();
 	}
 
 	public static class NodeEntry<T> {
-		private T value;
+		protected T value;
 
 		public NodeEntry() {
 			this.value = null;
@@ -152,6 +158,11 @@ public class MapModel implements JsonSerializerType<Object> {
 			return ArgUtil.parseAsListOfT(value, new Object(), Constants.EMPTY_LIST, false);
 		}
 
+		public List<List<Map<String, Object>>> asListListOfMap() {
+			return ArgUtil.parseAsListListOfT(value, new HashMap<String, Object>(),
+					new ArrayList<Map<String, Object>>(), new ArrayList<List<Map<String, Object>>>(), false);
+		}
+
 		public List<Map<String, Object>> asListOfMap() {
 			return ArgUtil.parseAsListOfT(value, new HashMap<String, Object>(), new ArrayList<Map<String, Object>>(),
 					false);
@@ -175,6 +186,10 @@ public class MapModel implements JsonSerializerType<Object> {
 
 		public boolean is(Object compare) {
 			return ArgUtil.areEqual(this.value, compare);
+		}
+
+		public boolean not(Object compare) {
+			return !ArgUtil.areEqual(this.value, compare);
 		}
 
 		public boolean in(Object... compare) {
@@ -251,6 +266,25 @@ public class MapModel implements JsonSerializerType<Object> {
 			return this;
 		}
 
+		public MapPathEntry keyEntry(String key) {
+			return new MapPathEntry().map(this.asMap()).key(key).load(null);
+		}
+
+		public MapPathEntry pathEntry(JsonPath path) {
+			return new MapPathEntry().map(this.asMap()).path(path).load(null);
+		}
+
+		public MapPathEntry pathEntry(String path) {
+			return this.pathEntry(new JsonPath(path));
+		}
+
+		public MapPathEntry pathEntrySafe(String path) {
+			if (!this.exists() && ArgUtil.is(path)) {
+				return this.pathEntry(new JsonPath(path));
+			}
+			return this;
+		}
+
 	}
 
 	protected Map<String, Object> map;
@@ -267,7 +301,15 @@ public class MapModel implements JsonSerializerType<Object> {
 
 	@SuppressWarnings("unchecked")
 	public MapModel(String json) {
-		this.map = JsonUtil.fromJson(json, Map.class);
+		if (json.indexOf("[") == 0) {
+			try {
+				this.list = JsonUtil.getObjectListFromJsonString(json);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			this.map = JsonUtil.fromJson(json, Map.class);
+		}
 	}
 
 	public MapModel(List<Object> list) {
@@ -284,6 +326,10 @@ public class MapModel implements JsonSerializerType<Object> {
 
 	public MapPathEntry keyEntry(String key) {
 		return this.entry(key);
+	}
+
+	public MapPathEntry keyEntry(EntryMeta metaKey) {
+		return this.entry(metaKey.getKey());
 	}
 
 	public MapPathEntry pathEntry(String path) {
@@ -459,7 +505,7 @@ public class MapModel implements JsonSerializerType<Object> {
 		jsonPath.save(this.map(), value);
 		return this;
 	}
-
+	
 	public MapModel remove(String key) {
 		this.map().remove(key);
 		return this;
@@ -481,4 +527,22 @@ public class MapModel implements JsonSerializerType<Object> {
 		return 0;
 	}
 
+	public MapModel map2list() {
+		this.list().add(this.map());
+		this.map = null;
+		return this;
+	}
+
+	public MapModel list2map(String key) {
+		this.map().put(key, this.list());
+		this.list = null;
+		return this;
+	}
+
+	public MapModel map2map(String key) {
+		Map<String, Object> child = this.map();
+		this.map = null;
+		this.map().put(key, child);
+		return this;
+	}
 }

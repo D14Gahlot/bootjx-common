@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.stomp.StompSessionCache.StompSession;
+import com.boot.jx.stomp.StompConfig.StompSession;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;

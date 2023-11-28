@@ -2,15 +2,20 @@ package com.boot.jx.postman;
 
 import java.io.Serializable;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.logger.LoggerService;
+import com.boot.jx.model.AuditCreateEntity.AuditIdentifier;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
@@ -23,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @Component
 public class PMEnvironment {
+
+	private static final Logger LOGGER = LoggerService.getLogger(PMEnvironment.class);
 
 	public static interface PublicProperty {
 	}
@@ -87,7 +94,8 @@ public class PMEnvironment {
 		private static final long serialVersionUID = -5531902306230415784L;
 	}
 
-	public static abstract class AChannelConfig extends AChannelDetails implements ChannelTypeSpecificProps {
+	public static abstract class AChannelConfig extends AChannelDetails
+			implements ChannelTypeSpecificProps, AuditIdentifier {
 
 		private static final long serialVersionUID = 1950315645271368433L;
 
@@ -98,6 +106,7 @@ public class PMEnvironment {
 		protected String channelKey;
 		protected String channelCode;
 
+		protected String id;
 		protected String name;
 		protected String inboundQueue;
 
@@ -105,6 +114,8 @@ public class PMEnvironment {
 		private boolean isSandbox;
 		private boolean isShared;
 		private boolean isDisabled;
+		private boolean isDeleted;
+		private boolean isHidden;
 
 		@JsonView(PMEnvironment.PublicProperty.class)
 		private String server;
@@ -134,6 +145,9 @@ public class PMEnvironment {
 		}
 
 		public String getChannelId() {
+			if (ArgUtil.is(this.id)) {
+				return this.id;
+			}
 			return String.format("%s:%s", this.getChannelType(), this.getLane()).toLowerCase();
 		}
 
@@ -232,6 +246,27 @@ public class PMEnvironment {
 			return this.contactType == type;
 		}
 
+		public boolean isDeleted() {
+			return isDeleted;
+		}
+
+		public void setDeleted(boolean isDeleted) {
+			this.isDeleted = isDeleted;
+		}
+
+		@Override
+		public String auditIdentifier() {
+			return this.getChannelId();
+		}
+
+		public boolean isHidden() {
+			return isHidden;
+		}
+
+		public void setHidden(boolean isHidden) {
+			this.isHidden = isHidden;
+		}
+
 	}
 
 	public static class PMConfigurationObject extends MapEntry implements Serializable {
@@ -303,6 +338,7 @@ public class PMEnvironment {
 
 	}
 
+	@Lazy
 	@Autowired(required = false)
 	private PMEnvironmentProvider provider;
 
@@ -338,6 +374,7 @@ public class PMEnvironment {
 
 	public void initConfig() {
 		if (ArgUtil.is(provider)) {
+			LOGGER.info("=======================initConfig");
 			provider.initConfig();
 		}
 	}
@@ -369,6 +406,27 @@ public class PMEnvironment {
 		return keyEntry(entryMeta.getKey());
 	}
 
+	public PMConfigurationObject permEntry(String key) {
+		PMConfigurationObject configObject = this.local().perms().get(key);
+		String tnt = AppContextUtil.getTenant();
+		if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
+			PMConfigurationObject sharedConfigObject = this.shared().perms().get(key);
+			if (ArgUtil.is(sharedConfigObject)) {
+				return sharedConfigObject;
+			}
+		}
+		if (ArgUtil.isEmpty(configObject)) {
+			String value = appConfig.prop(key);
+			configObject = new PMConfigurationObject(key, value);
+			// this.config().map().put(key, configObject);
+		}
+		return configObject;
+	}
+
+	public PMConfigurationObject permEntry(EntryMeta entryMeta) {
+		return permEntry(entryMeta.getKey());
+	}
+
 	public void addChannel(ChannelConfig config) {
 		if (ArgUtil.is(provider)) {
 			provider.addChannel(config);
@@ -382,6 +440,8 @@ public class PMEnvironment {
 	}
 
 	public interface PMCommonConfig extends AppCommonConfig {
+		public String getCdnServerDebug();
+
 		public String getCdnServer();
 
 		public String getBotUrl();
@@ -401,12 +461,13 @@ public class PMEnvironment {
 		public String mainDomainRedirect();
 
 		public String mainDomainRedirect(String path);
+
 	}
 
 	public interface PMDomainConfig {
 		public String getDefaultInboundQueue();
 
-		public String getDefaultInboundQueue(String channelId);
+		public String getDefaultInboundQueue(String channelId, CHAT_MODE mode);
 
 		public String getDefaultInboundQueue(Contactable contact);
 
@@ -417,6 +478,10 @@ public class PMEnvironment {
 		PMConfigurationObject getChatIdleTimeout();
 
 		PMConfigurationObject getAgentHistoryCount();
+
+		String getDefaultInboundQueue(Contactable contact, CHAT_MODE mode);
+		
+		PMConfigurationObject getAgentChatDisable();
 
 	}
 

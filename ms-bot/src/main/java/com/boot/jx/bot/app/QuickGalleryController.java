@@ -13,6 +13,7 @@ import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.doc.QuickAction;
+import com.boot.jx.postman.doc.QuickLocation;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.model.Attachment;
@@ -20,6 +21,8 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.pbook.PBLocation;
+import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.store.QuickStore;
 import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
 import com.boot.model.MapModel.MapEntry;
@@ -43,6 +46,8 @@ public class QuickGalleryController extends CommonBotController {
 			return (Class<T>) QuickAction.class;
 		} else if ("QUICK_REPLY".equalsIgnoreCase(itemType)) {
 			return (Class<T>) QuickReply.class;
+		} else if ("QUICK_LOCATION".equalsIgnoreCase(itemType)) {
+			return (Class<T>) QuickLocation.class;
 		}
 		return (Class<T>) QuickReply.class;
 	}
@@ -191,6 +196,8 @@ public class QuickGalleryController extends CommonBotController {
 						sendQuickAction((QuickAction) item);
 					} else if (item instanceof QuickReply) {
 						sendQuickReply((QuickReply) item);
+					} else if (item instanceof QuickLocation) {
+						sendQuickLocation((QuickLocation) item);
 					}
 					next("on_item_select");
 					return;
@@ -216,6 +223,18 @@ public class QuickGalleryController extends CommonBotController {
 	private void sendQuickAction(QuickAction item) {
 		OutboxMessage msg = new OutboxMessage();
 		msg.setAction(item.getAction());
+		reply(msg);
+	}
+
+	private void sendQuickLocation(QuickLocation item) {
+		OutboxMessage msg = new OutboxMessage();
+		PBLocation pbLocation = new PBLocation();
+		pbLocation.setName(item.getTitle());
+		pbLocation.setAddress(item.getAddress());
+		pbLocation.setLatitude(item.getLatitude());
+		pbLocation.setLongitude(item.getLongitude());
+		pbLocation.setUrl(item.getUrl());
+		msg.vccards().add(new PBVCard().locations(pbLocation));
 		reply(msg);
 	}
 

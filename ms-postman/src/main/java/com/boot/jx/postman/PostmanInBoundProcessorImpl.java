@@ -6,8 +6,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.inbound.InBound.InBoundProcessor;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.TagDocument;
-import com.boot.jx.postman.nlp.CoreNLPService;
-import com.boot.jx.postman.nlp.OpenNLPService;
+import com.boot.jx.postman.service.CommonNLPService;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -16,10 +15,7 @@ import com.boot.utils.CollectionUtil;
 public class PostmanInBoundProcessorImpl implements InBoundProcessor {
 
 	@Autowired(required = false)
-	private OpenNLPService openNLPService;
-
-	@Autowired(required = false)
-	private CoreNLPService coreNLPService;
+	private CommonNLPService commonNLPService;
 
 	@Autowired
 	PMEnvironment pmEnvironment;
@@ -36,12 +32,8 @@ public class PostmanInBoundProcessorImpl implements InBoundProcessor {
 					inboxMessage.setTags(new TagDocument());
 				}
 
-				if (ArgUtil.is(openNLPService)) {
-					openNLPService.addTags(inboxMessage.getMessage(), inboxMessage.getTags());
-				}
-
-				if (ArgUtil.is(coreNLPService)) {
-					coreNLPService.addTags(inboxMessage.getMessage(), inboxMessage.getTags());
+				if (ArgUtil.is(commonNLPService)) {
+					commonNLPService.addTags(inboxMessage, inboxMessage.getTags());
 				}
 
 				if (ArgUtil.is(inboxMessage.getTags().getCategories())) {

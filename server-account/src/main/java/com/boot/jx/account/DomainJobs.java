@@ -4,22 +4,23 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.account.doc.AccountStore;
-import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.inbound.InBoundPoller;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.config.ChannelConfigDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -37,7 +38,7 @@ public class DomainJobs {
 	InBoundPoller inBoundPoller;
 
 	@Autowired
-	AccountStore accountStore;
+	ConfigMaster configMaster;
 
 	@Autowired
 	PMEnvironment pmEnvironment;
@@ -49,35 +50,33 @@ public class DomainJobs {
 		AppContextUtil.setTenant("app");
 		AppContextUtil.init();
 		LOGGER.debug("Searching Domains");
-		if(true) {
-			//return;
-		}
+		ApiRequestDetail detail = new ApiRequestDetail();
+		detail.setRules(new String[] { CommonMongoSource.READ_ONLY_DB });
+		AppContextUtil.setApiRequestDetail(detail);
 
 		String serviceDomain = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 
-		List<DomainDoc> domainDocs = accountStore.findAllDomainByServer(serviceDomain);
-		CommonMongoQBimpl<ChannelConfigDoc> emailChannelsQuery = CommonMongoQueryBuilder
-				.collection(ChannelConfigDoc.class).where("contactType", ContactType.EMAIL.name());
+		MongoQueryBuilder<ChannelConfigDupsDoc> emailChannelsQuery = MongoQueryBuilder
+				.collection(ChannelConfigDupsDoc.class)
+				.where(Criteria.where("contactType").is(ContactType.EMAIL.name()).and("server").is(serviceDomain));
+		List<ChannelConfigDupsDoc> emailChannels = configMaster.find(emailChannelsQuery);
 
-		for (DomainDoc domainDoc : domainDocs) {
-			AppContextUtil.clear();
-			AppContextUtil.setTenant(domainDoc.getDomain());
-			AppContextUtil.init();
-			LOGGER.debug("Searching Config {}", domainDoc.getDomain());
-			List<ChannelConfigDoc> emailChannels = accountStore.find(emailChannelsQuery);
-
-			for (ChannelConfigDoc emailChannel : emailChannels) {
-				if (!emailChannel.isDisabled()) {
-					if (ArgUtil.is(emailChannels) && emailChannels.size() > 0) {
-						LOGGER.info("Found Config {} ---> {}", domainDoc.getDomain(), emailChannel.getChannelId());
-						inBoundPoller.doTask(new TunnelTask().name(InBoundPoller.TASK_EMAIL_POLLER)
-								.id(domainDoc.getDomain() + "_" + emailChannel.getChannelId()).intervalSeconds(15)
-								.data(MapModel.createInstance().put("channelId", emailChannel.getChannelId())));
-					}
+		for (ChannelConfigDupsDoc emailChannel : emailChannels) {
+			LOGGER.debug("Searching Config {}", emailChannel.getId());
+			if (!emailChannel.isDisabled() && !emailChannel.isDeleted()) {
+				AppContextUtil.clear();
+				AppContextUtil.setTenant(emailChannel.getDomain());
+				AppContextUtil.init();
+				if (ArgUtil.is(emailChannels) && emailChannels.size() > 0) {
+					LOGGER.debug("Found Config {} ---> {}", emailChannel.getDomain(), emailChannel.getChannelId());
+					inBoundPoller.throttle(new TunnelTask().name(InBoundPoller.TASK_EMAIL_POLLER)
+							.id(emailChannel.getDomain() + "_" + emailChannel.getChannelId()).intervalSeconds(15)
+							.data(MapModel.createInstance().put("channelId", emailChannel.getChannelId())));
 				}
+				AppContextUtil.clear();
 			}
-			AppContextUtil.clear();
 		}
+
 	}
 
 }

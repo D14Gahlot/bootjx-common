@@ -131,15 +131,16 @@ public class MessageContext {
 
 	public ChatSessionQuery session() {
 		if (chatSessionQuery == null && ArgUtil.is(getSessionId())) {
-			ChatSessionDoc chatSessionDoc;
-			chatSessionDoc = sessionStore.getSession(getSessionId());
+			ChatSessionDoc chatSessionDoc = sessionStore.getSession(getSessionId());
 			chatSessionQuery = new ChatSessionQuery(chatSessionDoc);
 		}
 		return chatSessionQuery;
 	}
 
 	public void session(ChatSessionDoc sessionDoc) {
-		chatSessionQuery = new ChatSessionQuery(sessionDoc);
+		if (ArgUtil.is(sessionDoc)) {
+			chatSessionQuery = new ChatSessionQuery(sessionDoc);
+		}
 	}
 
 	private Contactable getContactable() {
@@ -185,16 +186,28 @@ public class MessageContext {
 		if (getMessage() != null) {
 			return getMessage().session().getQueue();
 		} else if (this.event != null && ArgUtil.is(this.event.session().getQueue())) {
-			return getMessage().session().getQueue();
+			return event.session().getQueue();
 		} else if (ArgUtil.notNull(this.session()) && ArgUtil.notNull(this.session().getDoc())) {
 			return this.session().getDoc().getAssignedToQueue();
 		}
 		return null;
 	}
 
+	public void commitChatSessionQuery() {
+		if (this.chatSessionQuery != null) {
+			commonMongoTemplate.updateFirst(this.chatSessionQuery);
+		}
+	}
+
 	public void commitChatContactQuery() {
 		if (this.chatContactQuery != null) {
 			commonMongoTemplate.updateFirst(this.chatContactQuery);
+		}
+	}
+
+	public void commitChatContextQuery() {
+		if (this.chatContextQuery != null) {
+			commonMongoTemplate.updateFirst(this.chatContextQuery);
 		}
 	}
 

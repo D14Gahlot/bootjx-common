@@ -1,9 +1,7 @@
 package com.boot.jx.admin.api;
 
 import java.util.List;
-import java.util.Map;
 
-import org.jboss.logging.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -14,9 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.AppFaqDoc;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.utils.ArgUtil;
 
 @RestController
@@ -24,13 +23,39 @@ public class AppFaqController {
 
 	@Autowired
 	private CommonMongoTemplate mongoTemplate;
+	@Autowired
+	AuditDetailProvider auditDetailProvider;
 
 	
 	@RequestMapping(value = "/pub/app/faq", method = { RequestMethod.POST })
 	public ApiResponse<AppFaqDoc, Object> createAppFaq(@RequestBody AppFaqDoc appFaqDoc) {
+		
+		if (ArgUtil.isEmpty(appFaqDoc)) {
+			ApiResponseUtil.throwException("Input Required");
+		}
+		appFaqDoc.setCreatedBy(auditDetailProvider.getAuditUser());
+		appFaqDoc.setCreatedStamp(System.currentTimeMillis());
 		mongoTemplate.save(appFaqDoc);
 		return ApiResponse.buildResults(mongoTemplate.findAll(AppFaqDoc.class)).message("AppFaq  created");
 	}
+	
+	@RequestMapping(value = "/pub/app/update/faq", method = { RequestMethod.POST })
+	public ApiResponse<AppFaqDoc, Object> createOrUpdateAppFaq(@RequestBody AppFaqDoc appFaqDoc) {
+		AppFaqDoc appFaq =mongoTemplate.findById(appFaqDoc.getId(), AppFaqDoc.class);
+		if (ArgUtil.is(appFaq)) {
+			appFaqDoc.setCreatedBy(appFaq.getCreatedBy());
+			appFaqDoc.setCreatedStamp(appFaq.getCreatedStamp());
+			appFaqDoc.setModifiedBy(auditDetailProvider.getAuditUser());
+			appFaqDoc.setModifiedStamp(System.currentTimeMillis());
+			mongoTemplate.save(appFaqDoc);
+		}else {
+			appFaqDoc.setCreatedBy(auditDetailProvider.getAuditUser());
+			appFaqDoc.setCreatedStamp(System.currentTimeMillis());
+			mongoTemplate.save(appFaqDoc);
+		}
+		return ApiResponse.buildResults(mongoTemplate.findAll(AppFaqDoc.class)).message("AppFaq  created");
+	}
+	
   
 	@RequestMapping(value = "/pub/app/faq/parent", method = { RequestMethod.GET })
 	public ApiResponse<AppFaqDoc, Object> getFaqParent(@RequestParam(required = false) String lang) {
@@ -45,6 +70,11 @@ public class AppFaqController {
 			@RequestParam(required = false) String code
 			) {
 		return ApiResponse.buildResults(getFaqByCode(lang,parent,code));
+	}
+	
+	@RequestMapping(value = "/pub/app/faq/all", method = { RequestMethod.GET })
+	public ApiResponse<AppFaqDoc, Object> getAllFaq(@RequestParam(required = false) String lang) {
+		return ApiResponse.buildResults(fetchAllFaq(lang));
 	}
 	
 	public List<AppFaqDoc> getParents(String lang){
@@ -70,5 +100,11 @@ public class AppFaqController {
 		}
 		List<AppFaqDoc> faqParentLst = mongoTemplate.find(query, AppFaqDoc.class);
 	   return faqParentLst;
+	}
+	
+	public List<AppFaqDoc> fetchAllFaq(String lang){
+		Query query = new Query();
+		List<AppFaqDoc> faqLst = mongoTemplate.find(query, AppFaqDoc.class);
+	    return faqLst;
 	}
 }

@@ -1,8 +1,13 @@
 package com.boot.jx.admin.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -17,13 +22,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.admin.dto.CsvDto;
+import com.boot.jx.admin.dto.SessionSearchRequest;
+import com.boot.jx.admin.manager.CSVHelper;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
 import com.boot.jx.admin.service.BulkMessageService;
+import com.boot.jx.admin.service.CSVService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
@@ -31,6 +41,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
+import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.manager.StarterDocKit;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
@@ -38,6 +49,7 @@ import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -66,6 +78,13 @@ public class AdminMsgController {
 
 	@Autowired
 	public StarterDocKit starterDocKit;
+
+	@Autowired
+	public CSVService fileService;
+	
+	@Autowired
+	public ChatSessionManager chatSessionManager;
+
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -100,12 +119,74 @@ public class AdminMsgController {
 		if (ArgUtil.is(agentCode)) {
 			criteria.and("assignedToAgent").is(agentCode);
 		}
-		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
-		// System.out.println(query2.toString());
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
 		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
 		return ApiResponse.buildResults(messages);
 	}
+	
+	
+	@RequestMapping(value = "/api/message/v1/session", method = { RequestMethod.POST })
+	public ApiResponse<ChatSessionDTO, Object> fetchSessionV1(@RequestBody SessionSearchRequest query) {
+		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
+		List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
+				query.toStamp);
+		
+		/** for comatability **/
+		
+		if(sessions==null || sessions.isEmpty()) {
+			Criteria criteria = new Criteria();
+			Query query2 = new Query();
+			Criteria dateCriteria = new Criteria().orOperator(
+					new Criteria().andOperator(Criteria.where("startSessionStamp").gt(query.fromStamp),
+							Criteria.where("startSessionStamp").lt(query.toStamp)),
+					new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(query.fromStamp),
+							Criteria.where("closeSessionStamp").lt(query.toStamp)),
 
+					new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(query.fromStamp),
+							Criteria.where("assignedDeptStamp").lt(query.toStamp)),
+					new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(query.fromStamp),
+							Criteria.where("assignedAgentStamp").lt(query.toStamp)),
+
+					new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(query.fromStamp),
+							Criteria.where("fistResponseStamp").lt(query.toStamp)),
+					new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(query.fromStamp),
+							Criteria.where("lastResponseStamp").lt(query.toStamp)),
+
+					new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(query.fromStamp),
+							Criteria.where("lastInComingStamp").lt(query.toStamp)));
+
+			criteria.andOperator(dateCriteria);
+
+			if (ArgUtil.is(query.agantCode)) {
+				criteria.and("assignedToAgent").is(query.agantCode);
+			}
+			 query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
+			 sessions = mongoTemplate.find(query2, ChatSessionDoc.class);
+		}
+		/** for comatability end **/
+		
+		
+		for (ChatSessionDoc chatSessionDoc : sessions) {
+			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
+			chatSessionDtos.add(chatSessionDto);
+		}
+		/**
+		 * remove duplicate /multiple Session for each contact we can filter based on
+		 * name , phone number on any field
+		 **/
+		if (chatSessionDtos != null && !chatSessionDtos.isEmpty()) {
+			Set<String> chatSessionSet = new HashSet<>();
+			chatSessionDtos = chatSessionDtos.stream().filter(e -> chatSessionSet.add(e.getPhone()))
+					.collect(Collectors.toList());
+		}
+		
+		
+		
+		
+		return ApiResponse.buildResults(chatSessionDtos);
+	}
+	
+	
 	@RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
 		chatSessionDto = chatArchive.getChatSession(chatSessionDto);
@@ -164,7 +245,17 @@ public class AdminMsgController {
 	@RequestMapping(value = "/api/message/bulk/push/send", method = { RequestMethod.POST })
 	public ApiResponse<BulkSessionDoc, Object> sendBulkMessage(@RequestBody OutboxMessage bulkMessage)
 			throws NumberParseException {
-		return ApiResponse.buildResult(bulkMessageService.send(bulkMessage)).message("Bulk Message Job Created");
+		if (ArgUtil.is(bulkMessage.getReferenceKey())) {
+			List<OutboxMessage> lstOutBoxMsg = getCsvData(bulkMessage);
+			BulkSessionDoc bulkDoc = bulkMessageService.sendMultiple(lstOutBoxMsg);
+			if (ArgUtil.is(bulkDoc)) {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
+			} else {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+			}
+		} else {
+			return ApiResponse.buildResult(bulkMessageService.send(bulkMessage)).message("Bulk Message Job Created");
+		}
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/retry", method = { RequestMethod.POST })
@@ -177,6 +268,21 @@ public class AdminMsgController {
 			bulkMessageService.resetJob(jobId);
 		} else if (ArgUtil.is(action, "stop")) {
 			bulkMessageService.stopJob(jobId);
+		} else if (ArgUtil.is(action, "tally")) {
+			BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
+			BatchJob job = session.getJob();
+			if (ArgUtil.not(job)) {
+				job = JobTaskModel.newBatchJob()
+						// Set Unique Job Id
+						.jobId(session.getBulkSessionId())
+						// Contact Type for each message
+						.data("contactType", session.getContactType())
+						// Channel for each message
+						.data("channelType", session.getChannelId())
+						// Lane for each message
+						.data("lane", session.getLane());
+			}
+			bulkMessageService.tally(job);
 		}
 		return ApiResponse.build().message("Bulk Message Job [" + action + "]");
 	}
@@ -225,6 +331,82 @@ public class AdminMsgController {
 			chatSessionDtos.add(chatSessionDto);
 		}
 		return ApiResponse.buildResults(chatSessionDtos);
+	}
+
+	/** upload csv file **/
+	@RequestMapping(value = "/pub/message/bulk/push/csv/read", method = { RequestMethod.POST })
+	public ApiResponse<CsvDto, Object> sendBulkCsvMessage(@RequestParam(required = true) String templateId,
+			@RequestParam("file") MultipartFile file) throws NumberParseException {
+		String message = "";
+		CsvDto lst = null;
+		if (CSVHelper.hasCSVFormat(file)) {
+			try {
+				lst = fileService.save(templateId, file);
+				message = "Uploaded the file successfully: " + file.getOriginalFilename();
+				OutboxMessage outboxMessage = new OutboxMessage();
+				outboxMessage.setReferenceKey(lst.getReferenceKey());
+				// getCsvData(outboxMessage);
+				return ApiResponse.buildResult(lst).message(message);
+			} catch (Exception e) {
+				message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+				return ApiResponse.buildResult(lst).message(message);
+			}
+		}else if(CSVHelper.hasExcelFormat(file)) {
+			try {
+				lst = fileService.readExcel(templateId, file);
+				message = "Uploaded the file successfully: " + file.getOriginalFilename();
+				OutboxMessage outboxMessage = new OutboxMessage();
+				outboxMessage.setReferenceKey(lst.getReferenceKey());
+				return ApiResponse.buildResult(lst).message(message);
+			} catch (Exception e) {
+				message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+				return ApiResponse.buildResult(lst).message(message);
+			}
+			
+		}else {
+			message = "Please upload a csv or excel file!";
+			return ApiResponse.buildResult(lst).message(message);
+		}
+	}
+
+	public List<OutboxMessage> getCsvData(OutboxMessage outboxMessage) {
+		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
+		if (outboxMessage != null) {
+			String csvRefKeyId = outboxMessage.getReferenceKey();
+			OutboxMessage otBoxMsg = outboxMessage;
+			String hsmId = otBoxMsg.getHsm().getId();
+			CsvDto csvDoc = mongoTemplate.findById(csvRefKeyId, CsvDto.class);
+			if (ArgUtil.is(csvDoc)) {
+				List<Map<Object, Object>> lstMap = csvDoc.getLstMap();
+				for (Map<Object, Object> map : lstMap) {
+					OutboxMessage outboxMsg = new OutboxMessage();
+					CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
+					hsmTemp.setId(hsmId);
+					outboxMsg.setMessage(otBoxMsg.getMessage());
+					outboxMsg.setAttachments(otBoxMsg.getAttachments());
+					outboxMsg.setContact(otBoxMsg.getContact());
+					Map<String, Object> data = new HashMap<>();
+					for (Map.Entry<Object, Object> entry : map.entrySet()) {
+						String k = ArgUtil.parseAsString(entry.getKey());
+						String v = ArgUtil.parseAsString(entry.getValue());
+						if (ArgUtil.parseAsString(k).equalsIgnoreCase("contacts")) {
+							outboxMsg.setTo(Arrays.asList(v.toString()));
+						} else if (ArgUtil.is(k)) {
+							data.put(ArgUtil.parseAsString(k), v);
+						}
+					}
+					if (data != null && !data.isEmpty()) {
+						hsmTemp.setData(data);
+					}
+					outboxMsg.setHsm(hsmTemp);
+
+					listOfOutboxMsg.add(outboxMsg);
+				} // end of listOfOutboxMsgs
+
+			}
+
+		}
+		return listOfOutboxMsg;
 	}
 
 }

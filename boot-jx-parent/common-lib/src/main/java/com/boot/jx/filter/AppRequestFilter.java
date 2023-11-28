@@ -60,7 +60,6 @@ import com.boot.utils.HttpUtils;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
-import com.boot.utils.Urly;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -124,6 +123,16 @@ public class AppRequestFilter implements Filter {
 		}
 	}
 
+	/**
+	 * {@link AppRequestInterceptor}
+	 * 
+	 * @param localCommonHttpRequest
+	 * @param apiRequest
+	 * @param req
+	 * @param resp
+	 * @param traceId
+	 * @return
+	 */
 	private boolean isRequestValid(CommonHttpRequest localCommonHttpRequest, ApiRequestDetail apiRequest,
 			HttpServletRequest req, HttpServletResponse resp, String traceId) {
 		String authVendor = localCommonHttpRequest.get(AppConstants.AUTH_ID_XKEY);
@@ -146,15 +155,18 @@ public class AppRequestFilter implements Filter {
 			}
 		}
 
-		if (ArgUtil.is(apiRequest.getRules())) {
-			if (appAuthFilters != null) {
-				for (AppAuthFilter appAuthFilter : appAuthFilters) {
-					if (!appAuthFilter.filterAppRequest(apiRequest, localCommonHttpRequest, traceId)) {
-						return false;
-					}
-				}
-			}
-		}
+		/**
+		 * This code has been moved to {@link AppRequestInterceptor}
+		 */
+//		if (ArgUtil.is(apiRequest.getRules())) {
+//			if (appAuthFilters != null) {
+//				for (AppAuthFilter appAuthFilter : appAuthFilters) {
+//					if (!appAuthFilter.filterAppRequest(apiRequest, localCommonHttpRequest, traceId)) {
+//						return false;
+//					}
+//				}
+//			}
+//		}
 
 		if (apiRequest.isUseAuthKey() && appConfig.isAppAuthEnabled()
 				&& !doesTokenMatch(localCommonHttpRequest, req, resp, traceId, true)) {
@@ -334,6 +346,7 @@ public class AppRequestFilter implements Filter {
 					req.getSession().setAttribute(AppConstants.FLOW_ID_XKEY, flowFix);
 					req.getSession().setAttribute(AppConstants.SESSION_ID_XKEY, sessionId);
 					req.getSession().setAttribute(TenantContextHolder.TENANT, tnt);
+					// localCommonHttpRequest.setCookie(AppConstants.SESSION_ID_XKEY, sessionId);
 				}
 			} else {
 				AppContextUtil.loadTraceId(traceId);

@@ -47,10 +47,15 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 	private String appMode;
 	private String appType;
 	private String webhook;
+
 	private String forward;
+
+	private String appHook;
+	private String appHookFrwrd;
 
 	private Map<String, Object> secret;
 	private Map<String, Object> props;
+	private Map<String, Object> config;
 
 	private String domain;
 	private boolean isShared;
@@ -232,4 +237,37 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 	public void setAppMode(String appMode) {
 		this.appMode = appMode;
 	}
+
+	public String getAppHook() {
+		return appHook;
+	}
+
+	public void setAppHook(String appHook) {
+		this.appHook = appHook;
+	}
+
+	public String getAppHookFrwrd() {
+		return appHookFrwrd;
+	}
+
+	public void setAppHookFrwrd(String appHookFrwrd) {
+		this.appHookFrwrd = appHookFrwrd;
+	}
+
+	public Map<String, Object> getConfig() {
+		return config;
+	}
+
+	public void setConfig(Map<String, Object> config) {
+		this.config = config;
+	}
+
+	@Override
+	public Map<String, Object> config() {
+		if (this.config == null) {
+			this.config = new HashMap<String, Object>();
+		}
+		return config;
+	}
+
 }

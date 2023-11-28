@@ -1,19 +1,21 @@
 package com.boot.jx.common.config;
 
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
-import com.boot.jx.common.service.SessionRouter;
+import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -44,9 +46,9 @@ import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.postman.store.MessageStore.EVENTS;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.stomp.StompTunnelService;
-import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
@@ -89,7 +91,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private MitelClient mitelClient;
 
 	@Autowired
-	private SessionRouter sessionRouter;
+	private SessionEventTimer sessionEventTimer;
 
 	@Autowired(required = false)
 	private ChatService chatService;
@@ -98,12 +100,21 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	@Autowired(required = false)
 	private ChatSessionService chatSessionService;
 
+	@Lazy
+	@Autowired(required = false)
+	private MessageEvents messageEvents;
+
 	@Autowired(required = false)
 	private MessageContext messageContext;
 
 	@Override
 	public MessageContext context() {
 		return messageContext;
+	}
+
+	@Override
+	public CHAT_MODE mode() {
+		return CHAT_MODE.NONE;
 	}
 
 	@Override
@@ -123,14 +134,17 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						// production
 						inboxMessage.setOriginalMessage(null);
 						chatClient.forward(defaultClient.getForward() + PATH.INBOUND_FRWRD, inboxMessage);
-					} else if (APP_TYPE.APP_SCRIPT.equals(appType)) {
-						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-								defaultClient.getId());
 					} else if (ArgUtil.is(defaultClient.getWebhook())) {
 						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
 					} else {
-						ApiResponseUtil.throwException("Forward URL missing");
+						// if (APP_TYPE.APP_SCRIPT.equals(appType)) {
+						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
+								defaultClient.getId());
+						// } else {
+						// ApiResponseUtil.throwException("Forward URL missing");
+						// }
 					}
+
 					updateStatus(inboxMessage, Status.FORWARDED);
 					return;
 				}
@@ -139,16 +153,15 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				if (CHAT_MODE.AGENT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 					LOGGER.debug("Forwarding InboxMessage to internal Agent ");
 					chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
-					if (ArgUtil.is(session) && APP_TYPE.MITEL.equals(appType)) {
-						mitelRouting(session, defaultClient, 5);
-					}
 					return;
 				}
 
 				// INTERNAL BOT HANDLING
 				if (CHAT_MODE.BOT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getBotUrl())) {
 					LOGGER.debug("Forwarding InboxMessage to internal Bot ");
-					chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+					chatClient.forward(pmCommonConfig.getBotUrl()
+							// "http://127.0.0.1:8084/bot"
+							+ PATH.INBOUND_FRWRD, inboxMessage);
 					return;
 				}
 
@@ -166,21 +179,11 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		}
 	}
 
-	private void mitelRouting(ChatSessionDoc session, ClientApp defaultClient, int delay) {
-		MapModel meta = new MapModel(session.getMeta());
-		MapPathEntry omidEntry = meta.pathEntry("mitel.omid");
-		String omid = omidEntry.asString();
-		TunnelTask task = new TunnelTask().name("MITEL_ROUTER").id(session.getSessionId()).intervalSeconds(delay);
-		task.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue", defaultClient.getQueue());
-		sessionRouter.debounce(task);
-		// sessionRouter.doTask(task);
-
-		TunnelTask closeTask = new TunnelTask().name("MITEL_CLOSE_CHECK").id(session.getSessionId())
-				.intervalSeconds(60 * 10);
-		closeTask.data().put("sessionId", session.getSessionId()).put("omid", omid).put("queue",
-				defaultClient.getQueue());
-		sessionRouter.debounce(closeTask);
-		// sessionRouter.doTask(closeTask);
+	@Override
+	public void afterMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
+		if (messageEvents != null) {
+			messageEvents.postMessageInBound(inboxMessage);
+		}
 	}
 
 	private void updateStatus(InboxMessage inboxMessage, Status status, Exception e) {
@@ -212,7 +215,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		InBoundMsg msg = new InBoundMsg();
 		msg.messageId = inboxMessage.getMessageId();
 		msg.messageIdExt = inboxMessage.getMessageIdExt();
-		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(), inboxMessage.contact().getEmail());
+		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(), inboxMessage.contact().getEmail(),inboxMessage.contact().getCsid());
 		msg.contactId = contact.contactId;
 		msg.session = new MsgSession();
 		msg.session.sessionId = inboxMessage.getSessionId();
@@ -226,17 +229,28 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			Attachment atth = inboxMessage.attachments().get(0);
 			InBoundMsgMedia media = InBoundMsgMedia.from(atth);
 			if (MESSAGE_FORMAT_TYPE.IMAGE.equals(inboxMessage.getFormatType())) {
+				msg.type = MESSAGE_FORMAT_TYPE.IMAGE;
 				msg.image = media;
 			} else if (MESSAGE_FORMAT_TYPE.STICKER.equals(inboxMessage.getFormatType())) {
+				msg.type = MESSAGE_FORMAT_TYPE.STICKER;
 				msg.sticker = media;
 			} else if (MESSAGE_FORMAT_TYPE.VIDEO.equals(inboxMessage.getFormatType())) {
 				msg.video = media;
+				msg.type = MESSAGE_FORMAT_TYPE.VIDEO;
 			} else if (MESSAGE_FORMAT_TYPE.AUDIO.equals(inboxMessage.getFormatType())) {
 				msg.audio = media;
+				msg.type = MESSAGE_FORMAT_TYPE.AUDIO;
 			} else if (MESSAGE_FORMAT_TYPE.VOICE.equals(inboxMessage.getFormatType())) {
 				msg.voice = media;
+				msg.type = MESSAGE_FORMAT_TYPE.VOICE;
 			} else {
+				msg.type = MESSAGE_FORMAT_TYPE.DOCUMENT;
 				msg.document = media;
+			}
+			msg.attachments = new ArrayList<InBoundMsgMedia>();
+			for (Attachment thisAttach : inboxMessage.attachments()) {
+				InBoundMsgMedia thisMedia = InBoundMsgMedia.from(thisAttach);
+				msg.attachments.add(thisMedia);
 			}
 		} else {
 			msg.type = MESSAGE_FORMAT_TYPE.TEXT;
@@ -295,9 +309,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session) {
-		return new NodeEntry<InBoundEvent>().value(chatClient.assignToAgentV2(new PMArgs()
-				.sessionId(session.getSessionId()).contact(session.contact())
-				.assignToDeptCode(params.getAssignToDeptCode()).assignToAgentCode(params.getAssignToAgentCode())));
+		return new NodeEntry<InBoundEvent>().value(
+				chatClient.assignToAgentV2(new PMArgs().sessionId(session.getSessionId()).contact(session.contact())
+						.assignToDeptCode(params.getAssignToDeptCode()).assignToAgentCode(params.getAssignToAgentCode())
+						.assignToSkillCodes(params.getAssignToSkillCodes())));
 	}
 
 	@Override
@@ -305,36 +320,40 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		context().setInBoundEvent(event);
 		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 			ChatSessionDoc sessionDoc = context().session().getDoc();
-			this.onSessionRoute(event, sessionDoc, pmArgs);
+			this.onSessionRouteSync(event, sessionDoc, pmArgs);
 		}
 		return event;
 	}
 
 	@Override
-	public void onSessionRoute(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+	public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		logManager.addTrace(inBoundEvent, EVENTS.ON_SESSION_ROUTE, "NO_ACTION");
+	}
+
+	@Override
+	public void afterSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		if (sessionEventTimer != null) {
+			ClientApp defaultClient = context().clientApp(inBoundEvent.sessionRouted.targetQueue);
+			sessionEventTimer.setChatOutIdleTimeout(inBoundEvent.getSessionId(), defaultClient);
+		}
+	}
+
+	@Override
+	public void onSessionRouteWrapper(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
 		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
 			ClientApp targetAppQueue = context().clientApp(event.sessionRouted.targetQueue, null);
 			if (ArgUtil.is(targetAppQueue)) {
 				APP_TYPE appType = APP_TYPE.from(targetAppQueue.getAppType());
-				if (appType.is(CHAT_MODE.WEBHOOK)) {
+				if (appType.is(mode())) {
+					context().setInBoundEvent(event);
+					context().session(sessionDoc);
+					this.onSessionRoute(event, sessionDoc, pmArgs);
+					sessionEventTimer.setChatOnRoute(sessionDoc.getSessionId(), targetAppQueue);
+				} else if (appType.is(CHAT_MODE.WEBHOOK)) {
 					sendEventWebhook(event, targetAppQueue);
 					return;
 				} else if (appType.is(CHAT_MODE.AGENT)) {
-					MapModel props = new MapModel(targetAppQueue.props());
-					AppContextUtil.setActorId(targetAppQueue.getQueue());
-					assignSessionToAgent(new PMArgs()
-							.assignToDeptCode(
-									ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
-							.assignToAgentCode(
-									ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode"))),
-							sessionDoc);
-					if (APP_TYPE.MITEL.equals(appType)) {
-						try {
-							mitelRouting(sessionDoc, targetAppQueue, 1);
-						} catch (Exception e) {
-							logManager.error(event, e);
-						}
-					}
+					chatClient.sessionEvent(pmCommonConfig.getAgentUrl(), event, pmArgs);
 				} else if (appType.is(CHAT_MODE.BOT)) {
 					chatClient.sessionEvent(pmCommonConfig.getBotUrl(), event, pmArgs);
 				}
@@ -374,7 +393,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			} else if (APP_TYPE.MITEL.equals(appType)) {
 				try {
 					MapModel meta = new MapModel(sessionDoc.getMeta());
-					mitelClient.openMediaAction(defaultClient, meta.pathEntry("mitel.omid").asString(), "Complete");
+					MapPathEntry omid = meta.pathEntry("mitel.omid");
+					if (omid.exists()) {
+						mitelClient.openMediaAction(defaultClient, omid.asString(), "Complete");
+					}
 				} catch (Exception e) {
 					logManager.error(event, e);
 				}

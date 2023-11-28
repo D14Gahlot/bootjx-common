@@ -13,21 +13,19 @@ import com.boot.jx.api.AmxResponseSchemes.ApiResultsMetaCompactResponse;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.config.ConfigManager;
-import com.boot.jx.mongo.CommonMongoQB;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.common.config.ConfigManagerImpl;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.model.ext.MsgChannel;
-import com.boot.jx.postman.store.ConfigStore;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
-import com.boot.jx.xms.XmsVendorConfigurer;
 import com.boot.jx.xms.dto.WebhookUrlRequest;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -44,10 +42,10 @@ import io.swagger.annotations.Authorization;
 public class ConfigApiV1 {
 
 	@Autowired
-	private ConfigManager configManager;
+	private ConfigManagerImpl configManager;
 
 	@Autowired
-	private ConfigStore configStore;
+	private ConfigMaster configMaster;
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
@@ -62,9 +60,9 @@ public class ConfigApiV1 {
 	@RequestMapping(value = "/api/v1/config/webhook", method = { RequestMethod.POST })
 	public ApiResponse<ClientApp, Object> setWebhookUrl(@RequestBody WebhookUrlRequest req) {
 
-		ClientApp x = XmsVendorConfigurer.getClientApp();
+		ClientApp x = PMContextUtil.clientApp();
 		if (ArgUtil.is(x)) {
-			ClientAppConfigDoc xo = configStore.findById(x.getId(), ClientAppConfigDoc.class);
+			ClientAppConfigDoc xo = configMaster.findById(x.getId(), ClientAppConfigDoc.class);
 			if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
 				xo.setWebhook(req.url);
 				xo.setForward(req.forward);
@@ -102,15 +100,17 @@ public class ConfigApiV1 {
 			authorizations = @Authorization("X_API_KEY"))
 	@XMSClientAuth
 	@RequestMapping(value = "/api/v1/config/tmpl/hsm", method = { RequestMethod.GET })
-	public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId) {
+	public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId,
+			@RequestParam(required=false)String channelStatus) {
 
-		CommonMongoQB<CommonMongoQBimpl<HSMTemplateDoc>, HSMTemplateDoc> cmq = CommonMongoQueryBuilder
-				.collection(HSMTemplateDoc.class);
+		MongoQueryBuilder<HSMTemplateDoc> cmq = MongoQueryBuilder.collection(HSMTemplateDoc.class);
 
 		if (ArgUtil.is(channelId)) {
 			cmq.where("approved.channelId", channelId);
 		}
-
+		if (ArgUtil.is(channelStatus)) {
+			cmq.where("approved.status", channelStatus);
+		}
 		return ApiResponse.buildResults(commonMongoTemplate.find(cmq));
 	}
 
@@ -120,8 +120,7 @@ public class ConfigApiV1 {
 	@RequestMapping(value = "/api/v1/config/global/vars", method = { RequestMethod.GET })
 	public ApiResponse<CompanyVarsConfigDoc, Object> getGlobalVars(@RequestParam(required = false) String channelId) {
 
-		CommonMongoQB<CommonMongoQBimpl<CompanyVarsConfigDoc>, CompanyVarsConfigDoc> cmq = CommonMongoQueryBuilder
-				.collection(CompanyVarsConfigDoc.class);
+		MongoQueryBuilder<CompanyVarsConfigDoc> cmq = MongoQueryBuilder.collection(CompanyVarsConfigDoc.class);
 
 		if (ArgUtil.is(channelId)) {
 			cmq.where("approved.channelId", channelId);

@@ -1,7 +1,6 @@
 package com.boot.utils;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,8 +12,6 @@ import java.util.Set;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
-import com.boot.json.JsonSerializerType;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
@@ -302,64 +299,20 @@ public class MapBuilder {
 		public String toString() {
 			return this.map.toString();
 		}
-	}
 
-	@Deprecated
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class MapModel implements JsonSerializerType<Object> {
-		protected Map<String, Object> map;
-
-		@SuppressWarnings("unchecked")
-		public MapModel(String json) {
-			this.map = JsonUtil.fromJson(json, Map.class);
-		}
-
-		@Deprecated
-		public Object put(String key, Object value) {
-			return this.map.put(key, value);
-		}
-
-		@Deprecated
-		public Object get(String key) {
-			return this.map.get(key);
-		}
-
-		@Deprecated
-		public String getString(String key) {
-			return ArgUtil.parseAsString(this.get(key));
-		}
-
-		@Deprecated
-		public Long getLong(String key) {
-			return ArgUtil.parseAsLong(this.get(key));
-		}
-
-		@Deprecated
-		public BigDecimal getBigDecimal(String key) {
-			return ArgUtil.parseAsBigDecimal(this.get(key));
-		}
-
-		@SuppressWarnings("unchecked")
-		public MapModel getMap(String key) {
-			return new MapModel((Map<String, Object>) this.get(key));
-		}
-
-		@Deprecated
-		public MapModel(Map<String, Object> map) {
-			this.map = map;
-		}
-
-		@Deprecated
 		@Override
-		public Object toObject() {
-			return this.map;
+		public void addAll(K key, List<? extends V> values) {
+			for (V v : values) {
+				this.add(key, v);
+			}
 		}
 
-		@Deprecated
-		public <T> T as(Class<T> clazz) {
-			return JsonUtil.getMapper().convertValue(this.map, clazz);
+		@Override
+		public void addAll(MultiValueMap<K, V> values) {
+			for (Entry<K, List<V>> entry : values.entrySet()) {
+				addAll(entry.getKey(), entry.getValue());
+			}
 		}
-
 	}
 
 }

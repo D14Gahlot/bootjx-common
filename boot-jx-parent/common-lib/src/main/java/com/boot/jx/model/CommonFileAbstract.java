@@ -40,6 +40,8 @@ public class CommonFileAbstract<C extends CommonFileAbstract<C>> implements Seri
 	private String extension;
 	private String password;
 	protected String url;
+	protected String thumb;
+	protected long contentLength;
 	private CommonTemplateMeta template = null;
 	private Map<String, Object> model = new HashMap<String, Object>();
 	private Map<String, Object> options = new HashMap<String, Object>();
@@ -411,6 +413,22 @@ public class CommonFileAbstract<C extends CommonFileAbstract<C>> implements Seri
 					/* ignore */ }
 			}
 		}
+	}
+
+	public String getThumb() {
+		return thumb;
+	}
+
+	public void setThumb(String thumb) {
+		this.thumb = thumb;
+	}
+
+	public long getContentLength() {
+		return contentLength;
+	}
+
+	public void setContentLength(long contentLength) {
+		this.contentLength = contentLength;
 	}
 
 }

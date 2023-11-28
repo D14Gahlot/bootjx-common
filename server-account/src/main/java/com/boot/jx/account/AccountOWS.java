@@ -1,19 +1,26 @@
 package com.boot.jx.account;
 
-import org.springframework.boot.SpringApplication;
+import java.io.IOException;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
+
+import com.boot.jx.app.CommonAppLauncher;
+import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
 
 /**
  * The Class WebApplication.
@@ -22,20 +29,25 @@ import org.springframework.web.context.request.RequestContextListener;
  * @EnableCaching
  */
 @ServletComponentScan
-@SpringBootApplication
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @ComponentScan("com.boot.jx")
 @EnableAsync(proxyTargetClass = true)
 @EnableCaching
 @EnableMongoRepositories("com.boot.jx")
-public class AccountOWS extends SpringBootServletInitializer {
+public class AccountOWS extends CommonAppLauncher {
 
 	/**
 	 * The main method.
 	 *
 	 * @param args the arguments
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
-		SpringApplication.run(AccountOWS.class, args);
+	public static void main(String[] args) throws IOException {
+//		System.out.println("user.dir " + System.getProperty("user.dir"));
+//		System.setProperty("javax.net.ssl.trustStore", "/Users/lalittanwar/Projects/mehery-jx/certs/cacerts");
+//		// System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
+//		SpringApplication.run(AccountOWS.class, args);
+		ConfigurableApplicationContext x = launch(AccountOWS.class, args);
 	}
 
 	/*
@@ -60,13 +72,18 @@ public class AccountOWS extends SpringBootServletInitializer {
 	public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
 			SecurityProperties securityProperties) {
 		DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean("checkSession");
-		registration.setOrder(securityProperties.getFilterOrder());
+		registration.setOrder(securityProperties.getFilter().getOrder());
 		return registration;
 	}
 
 	@Bean
 	public RequestContextListener requestContextListener() {
 		return new RequestContextListener();
+	}
+
+	@Bean
+	public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
+		return new ServletListenerRegistrationBean<HttpSessionEventPublisher>(new HttpSessionEventPublisher());
 	}
 
 }

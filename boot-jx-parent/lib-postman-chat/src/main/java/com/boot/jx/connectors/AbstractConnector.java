@@ -1,5 +1,9 @@
 package com.boot.jx.connectors;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,19 +13,28 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.manager.ChatLogger;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
@@ -29,11 +42,16 @@ import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.postman.store.MessageContext;
+import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
+import com.boot.utils.Urly;
 
 public abstract class AbstractConnector<CD extends AChannelDetails, P extends ChannelPlugin<CD>>
 		implements ConnectorHandler {
@@ -61,6 +79,12 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 	@Autowired
 	protected ChatLogger logManager;
+
+	@Autowired
+	protected ContactStore contactStore;
+
+	@Autowired
+	private PMFileStoreClient pmFileStoreClient;
 
 	@Override
 	public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
@@ -124,6 +148,26 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		return messageContext.contact().getDoc();
 	}
 
+	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return null;
+	}
+
+	@Override
+	public void linkProfile(ChatSessionDoc session, InboxMessage inboxMessage) {
+		try {
+			ChatContactQuery contactQuery = context().contact();
+			ChatContactDoc chatContactDoc = contactQuery.getDoc();
+			if (!ArgUtil.is(chatContactDoc.profile().getId())) {
+				CustomerProfileDoc profile = findProfile(chatContactDoc);
+				if (profile != null) {
+					contactStore.linkProfile(contactQuery, profile);
+				}
+			}
+		} catch (Exception e) {
+			logManager.error(e);
+		}
+	}
+
 	@Override
 	public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
@@ -164,37 +208,44 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		data.putAll(model.keyEntry(Message.DATA_KEY).asMap());
 		data.putAll(outboxMessage.hsm().data());
 		model.put(Message.DATA_KEY, data.toMap());
-		outboxMessage.setModel(model.toMap());
+		outboxMessage.setModel(JsonUtil.deepCopy(model.toMap()));
 
 		if (ArgUtil.isEmpty(outboxMessage.hsm().getLang())) {
 			outboxMessage.hsm().lang(chatContactDoc.prefs().getLang());
 		}
 
 		tmplClient.process(outboxMessage);
-		if (ArgUtil.is(outboxMessage.templateId())) {
 
-			if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
+		if (ArgUtil.is(outboxMessage.templateId())) {
+			List<HSMTemplate3rdParty> temps = null;
+			if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
+				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+								.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
+			} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
 					&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
-				List<HSMTemplate3rdParty> temps = commonMongoTemplate.find(CommonMongoQueryBuilder
-						.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
-								.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
-				if (ArgUtil.is(temps)) {
-					HSMTemplate3rdParty resolvedTemplate = null;
-					if (temps.size() > 1) {
-						for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-							if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
-								resolvedTemplate = hsmTemplate3rdParty;
-								break;
-							} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
-								resolvedTemplate = hsmTemplate3rdParty;
-							}
+				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+								.is(channelConfig.getChannelId())));
+				LOGGER.info(JsonUtil.toJson(temps));
+			}
+
+			if (ArgUtil.is(temps)) {
+				HSMTemplate3rdParty resolvedTemplate = null;
+				if (temps.size() > 1) {
+					for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
+						if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
+							resolvedTemplate = hsmTemplate3rdParty;
+							break;
+						} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
+							resolvedTemplate = hsmTemplate3rdParty;
 						}
-					} else {
-						resolvedTemplate = temps.get(0);
 					}
-					outboxMessage.setTemplateExt(resolvedTemplate);
-					return outboxMessage;
+				} else {
+					resolvedTemplate = temps.get(0);
 				}
+				outboxMessage.setTemplateExt(resolvedTemplate);
+				return outboxMessage;
 			}
 		}
 		return outboxMessage;
@@ -228,6 +279,42 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 				}
 			}
 		}
+	}
+
+	@Override
+	public void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException {
+		List<Attachment> attach = msg.getAttachments();
+		for (Attachment attachment : attach) {
+			if (ArgUtil.is(attach) && attach.size() > 0) {
+				reloadMedia(channelConfig, msg, attachment);
+			}
+		}
+	}
+
+	@Override
+	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Integer index)
+			throws FileNotFoundException, IOException {
+		List<Attachment> attach = msg.getAttachments();
+		if (ArgUtil.is(attach) && attach.size() > 0) {
+			Attachment attachment = attach.get(index);
+			return reloadMedia(channelConfig, msg, attachment);
+		}
+		return null;
+	}
+
+	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
+			throws MalformedURLException, FileNotFoundException, IOException {
+		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+				// .fileType(attachment.getMediaType())
+				.format(FileFormat.from(attachment.getMediaMimeType()))
+				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+
+		File fileb =Urly.parse(attachment.getMediaURL()).toFile();
+
+		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
+		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
 	}
 
 }

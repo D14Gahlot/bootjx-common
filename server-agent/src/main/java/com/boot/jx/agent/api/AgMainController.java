@@ -18,7 +18,6 @@ import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.agent.api.ControllerRequestDTOs.SessionSearchRequest;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;

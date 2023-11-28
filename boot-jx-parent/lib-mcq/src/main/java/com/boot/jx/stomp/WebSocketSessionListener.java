@@ -12,46 +12,72 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import com.boot.jx.AppConstants;
+import com.boot.jx.scope.tnt.TenantContextHolder;
+import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.StringUtils;
 
 @Component
 @ConditionalOnProperty("app.stomp")
 public class WebSocketSessionListener {
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketSessionListener.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(WebSocketSessionListener.class.getName());
 
-    public static JsonPath TOKEN_PATH = new JsonPath("/nativeHeaders/token/[0]");
-    public static JsonPath SESSION_ID_PATH = new JsonPath("/simpSessionAttributes/x-session-id");
-    public static JsonPath JSESSION_ID_PATH = new JsonPath("/simpSessionAttributes/x-jsession-id");
+	public static JsonPath TOKEN_PATH = new JsonPath("/nativeHeaders/token/[0]");
+	public static JsonPath SESSION_ID_PATH = new JsonPath("/simpSessionAttributes/x-session-id");
+	public static JsonPath JSESSION_ID_PATH = new JsonPath("/simpSessionAttributes/x-jsession-id");
 
-    @Autowired
-    StompTunnelSessionManager stompTunnelSessionManager;
+	public static JsonPath SESSION_ID_PATH_FALLBACK = new JsonPath("/nativeHeaders/xSessionId/[0]");
+	public static JsonPath JSESSION_ID_PATH_FALLBACK = new JsonPath("/nativeHeaders/jSessionId/[0]");
 
-    @EventListener
-    public void connectionEstablished(SessionConnectedEvent sce) {
-	StompHeaderAccessor sha = StompHeaderAccessor.wrap(sce.getMessage());
+	@Autowired
+	StompTunnelSessionManager stompTunnelSessionManager;
 
-	GenericMessage<?> simpConnectMessage = (GenericMessage<?>) sha.getHeader("simpConnectMessage");
-	if (!ArgUtil.isEmpty(simpConnectMessage)) {
-	    String token = TOKEN_PATH.load(simpConnectMessage.getHeaders(), Constants.BLANK);
-	    String xSessionId = SESSION_ID_PATH.load(simpConnectMessage.getHeaders(), Constants.BLANK);
-	    String jSessionId = JSESSION_ID_PATH.load(simpConnectMessage.getHeaders(), Constants.BLANK);
-	    logger.info("WS_CREATED xS:{}, jS:{}, wS:{}, token:{}", xSessionId, jSessionId, sha.getSessionId(), token);
+	@Autowired(required = false)
+	TenantResolver tenantResolver;
+
+	@EventListener
+	public void connectionEstablished(SessionConnectedEvent sce) {
+		StompHeaderAccessor sha = StompHeaderAccessor.wrap(sce.getMessage());
+
+		GenericMessage<?> simpConnectMessage = (GenericMessage<?>) sha.getHeader("simpConnectMessage");
+		if (!ArgUtil.isEmpty(simpConnectMessage)) {
+			String token = TOKEN_PATH.load(simpConnectMessage.getHeaders(), Constants.BLANK);
+			String xSessionId = ArgUtil.anyOf(SESSION_ID_PATH.load(simpConnectMessage.getHeaders(), Constants.BLANK),
+					SESSION_ID_PATH_FALLBACK.load(simpConnectMessage.getHeaders(), Constants.BLANK));
+			String jSessionId = ArgUtil.anyOf(JSESSION_ID_PATH.load(simpConnectMessage.getHeaders(), Constants.BLANK),
+					JSESSION_ID_PATH_FALLBACK.load(simpConnectMessage.getHeaders(), Constants.BLANK));
+			logger.info("WS_CREATED xS:{}, jS:{}, wS:{}, token:{}", xSessionId, jSessionId, sha.getSessionId(), token);
+		}
 	}
-    }
 
-    @EventListener
-    public void webSockectDisconnect(SessionDisconnectEvent sde) {
-	StompHeaderAccessor sha = StompHeaderAccessor.wrap(sde.getMessage());
-	if (!ArgUtil.isEmpty(sha.getSessionAttributes())) {
-	    String xSessionId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
-	    String jSessionId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_JID_XKEY));
-	    logger.info("WS_DESTROYED http:{}, ws:{}", sha.getSessionId(), xSessionId);
-	    if (ArgUtil.is(xSessionId)) {
-		stompTunnelSessionManager.delinkWs2Http(xSessionId, jSessionId, sha.getSessionId());
-	    }
+	@EventListener
+	public void webSockectDisconnect(SessionDisconnectEvent sde) {
+		StompHeaderAccessor sha = StompHeaderAccessor.wrap(sde.getMessage());
+		if (!ArgUtil.isEmpty(sha.getSessionAttributes())) {
+			String xSessionId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_ID_XKEY));
+			String jSessionId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_JID_XKEY));
+			String tenantId = ArgUtil.parseAsString(sha.getSessionAttributes().get(AppConstants.SESSION_TNT_XKEY));
+
+			if (ArgUtil.is(tenantResolver)) {
+				tenantId = tenantResolver.resolve(tenantId);
+			}
+
+			if (!StringUtils.isEmpty(tenantId)) {
+				TenantContextHolder.setCurrent(tenantId, null);
+			}
+
+			logger.info("WS_DESTROYED  xS:{}, jS:{}, wS:{}", xSessionId, jSessionId, sha.getSessionId());
+			if (ArgUtil.is(xSessionId)) {
+				try {
+					stompTunnelSessionManager.delinkWs2Http(xSessionId, jSessionId, sha.getSessionId());
+				} catch (Exception e) {
+					logger.error("WS_DESTROY_EXCEPTION xS:{}, jS:{}, wS:{}", xSessionId, jSessionId,
+							sha.getSessionId());
+				}
+			}
+		}
 	}
-    }
 
 }

@@ -5,10 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.exception.AmxApiError;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
@@ -16,7 +20,8 @@ import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
+import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
+import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
@@ -48,6 +53,9 @@ public class ChatLogger {
 	@Autowired
 	private MessageContext messageContext;
 
+	@Autowired
+	private AppConfig appConfig;
+
 	public MessageDoc note(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		outboxMessage.contact().setContactType(sessionDoc.getContactType());
 		outboxMessage.contact().setChannelType(sessionDoc.getChannel());
@@ -60,13 +68,13 @@ public class ChatLogger {
 		return messageStore.note(outboxMessage, getCurrenUser());
 	}
 
-	public MessageDoc event(SessionMessage inboxMessage, String actorAgent, EVENTS eventName, String... logMessage) {
+	public MessageDoc event(SessionInfo inboxMessage, String actorAgent, EVENTS eventName, Object... logMessage) {
 		MessageDoc doc = new MessageDoc();
 		doc.setContactId(PostManUtil.createContactId(inboxMessage.contact()));
 		doc.setType("L");
 		doc.setTimestamp(System.currentTimeMillis());
 		if (ArgUtil.is(logMessage)) {
-			for (String string : logMessage) {
+			for (Object string : logMessage) {
 				doc.logs().add(string);
 			}
 		}
@@ -77,16 +85,16 @@ public class ChatLogger {
 		return doc;
 	}
 
-	public MessageDoc event(SessionMessage inboxMessage, EVENTS event, String... logs) {
+	public MessageDoc event(SessionInfo inboxMessage, EVENTS event, Object... logs) {
 		return event(inboxMessage, inboxMessage.session().getAgent(), event, logs);
 	}
 
-	public MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, String... logs) {
+	public MessageDoc event(ChatSessionDoc sessionDoc, String auditAgent, EVENTS event, Object... logs) {
 		IMessageExtended inboxMessage = sessionStore.toSessionMessage(sessionDoc);
 		return event(inboxMessage, auditAgent, event, logs);
 	}
 
-	public MessageDoc event(ChatSessionDoc sessionDoc, EVENTS event, String... logs) {
+	public MessageDoc event(ChatSessionDoc sessionDoc, EVENTS event, Object... logs) {
 		return event(sessionDoc, getCurrenUser(), event, logs);
 	}
 
@@ -117,6 +125,7 @@ public class ChatLogger {
 		doc.setTimestamp(System.currentTimeMillis());
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setMessage(e.getMessage());
+		doc.setQueue(inBoundEvent.session().getQueue());
 
 		toLogs(e, doc);
 		messageStore.save(doc);
@@ -132,7 +141,9 @@ public class ChatLogger {
 		}
 
 		if (e instanceof ApiHttpServerException || e instanceof ApiHttpException) {
-			doc.setHttpResp(MapModel.from(((ApiHttpException) e).getResponse().getBody()).toMap());
+			AmxApiError r = ((ApiHttpException) e).getResponse();
+			doc.setHttpResp(MapModel.from(r.getBody()).toMap());
+			doc.setHttpStatusCode(r.getRawStatusCode());
 		}
 
 	}
@@ -152,7 +163,7 @@ public class ChatLogger {
 		}
 	}
 
-	private void log(String type, MessageDocAbstract doc, String message, Object[] debugMessage) {
+	private void log(MessageDocAbstract doc, String message, Object[] debugMessage) {
 		doc.setTimestamp(System.currentTimeMillis());
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setMessage(message);
@@ -164,7 +175,7 @@ public class ChatLogger {
 		messageStore.save(doc);
 	}
 
-	private MessageDocAbstract messageDoc(LoggableEntity inBoundEvent) {
+	private MessageDocAbstract messageDoc(String type, LoggableEntity inBoundEvent) {
 		MessageDocLogs doc = new MessageDocLogs();
 		if (ArgUtil.is(inBoundEvent)) {
 			doc.setSessionId(inBoundEvent.getSessionId());
@@ -173,8 +184,9 @@ public class ChatLogger {
 		return doc;
 	}
 
-	private MessageDocAbstract messageDoc(LogMessage message) {
+	private MessageDocAbstract messageDoc(String type, LogMessage message) {
 		MessageDocAbstract doc = new MessageDocLogs();
+		doc.setType(type);
 		if (ArgUtil.is(message)) {
 			doc.setSessionId(message.getSessionId());
 			doc.setMessageId(message.getMessageId());
@@ -189,29 +201,49 @@ public class ChatLogger {
 		if (!LOGGER.isDebugEnabled())
 			return;
 		if (ArgUtil.is(messageContext.getMessage())) {
-			this.log("D", messageDoc(messageContext.getMessage()), message, debugMessage);
+			this.log(messageDoc("D", messageContext.getMessage()), message, debugMessage);
 		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
-			this.log("D", messageDoc(messageContext.getInBoundEvent()), message, debugMessage);
+			this.log(messageDoc("D", messageContext.getInBoundEvent()), message, debugMessage);
 		} else {
-			this.log("D", messageDoc(new InBoundEvent()), message, debugMessage);
+			this.log(messageDoc("D", new InBoundEvent()), message, debugMessage);
 		}
 	}
 
 	public void debug(InBoundEvent assignEvent, String message, Object... debugMessage) {
 		if (!LOGGER.isDebugEnabled())
 			return;
-		this.log("D", messageDoc(assignEvent), message, debugMessage);
+		this.log(messageDoc("D", assignEvent), message, debugMessage);
 	}
 
 	public void warn(String message, Object... debugMessage) {
 		if (!LOGGER.isWarnEnabled())
 			return;
 		if (ArgUtil.is(messageContext.getMessage())) {
-			this.log("W", messageDoc(messageContext.getMessage()), message, debugMessage);
+			this.log(messageDoc("W", messageContext.getMessage()), message, debugMessage);
 		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
-			this.log("W", messageDoc(messageContext.getInBoundEvent()), message, debugMessage);
+			this.log(messageDoc("W", messageContext.getInBoundEvent()), message, debugMessage);
 		} else {
-			this.log("W", messageDoc(new InBoundEvent()), message, debugMessage);
+			this.log(messageDoc("W", new InBoundEvent()), message, debugMessage);
+		}
+	}
+
+	public void addTrace(TraceMessage inboxMessage, Object... msg) {
+		if (msg == null || msg.length == 0 || inboxMessage == null) {
+			return;
+		}
+		Object[] result = new Object[msg.length + 1];
+		result[0] = appConfig.getAppInstanceType();
+		System.arraycopy(msg, 0, result, 1, msg.length);
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+
+		if (ArgUtil.is(inboxMessage.id())) {
+			builder.whereIdSafe(inboxMessage.id());
+			inboxMessage.trace().add(result);
+			builder.update().push("trace", result);
+			messageStore.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+					MessageStore.getCollectionName(inboxMessage.contact().type()));
+		} else {
+			inboxMessage.trace().add(result);
 		}
 	}
 

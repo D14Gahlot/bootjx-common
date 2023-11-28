@@ -11,17 +11,15 @@ import com.boot.jx.inbound.InBound.InBoundHandler;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
-import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
-import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.manager.ChatLogger;
+import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
@@ -97,7 +95,18 @@ public class ChatSessionService {
 				} catch (Exception e) {
 					logManager.error(inboxMessage, e);
 				}
+				if (initd) {
+					inboxMessage.session().setInitMessage(true);
+					connector.linkProfile(session, inboxMessage);
+				}
 				messageContext.commitChatContactQuery();
+				try {
+					messageContext.commitChatSessionQuery();
+					messageContext.session().update(messageContext.contact().getDoc());
+					messageContext.commitChatSessionQuery();
+				} catch (Exception e) {
+					logManager.error(inboxMessage, e);
+				}
 			}
 
 			if (initd) { // Inbound Init Method
@@ -110,7 +119,7 @@ public class ChatSessionService {
 
 		if (initd) {
 			if (chatUtility.isPushOnly(session)) {
-				this.routeSession(session);
+				InBoundEvent routEvent = this.routeSession(session);
 				inboxMessage.session().setQueue(session.getAssignedToQueue());
 				inboxMessage.session().setDept(session.getAssignedToDept());
 				inboxMessage.session().setAgent(session.getAssignedToAgent());

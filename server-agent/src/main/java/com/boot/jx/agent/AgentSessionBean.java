@@ -1,19 +1,24 @@
 package com.boot.jx.agent;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.postman.PMConstants;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AgentSessionBean extends AppCommonAuthUser implements Serializable {
+public class AgentSessionBean extends AppCommonAuthUser implements Serializable, JsonIgnoreUnknown, JsonIgnoreNull {
 
 	private static final long serialVersionUID = 5850744656958653564L;
 	private String agentCode;
@@ -29,6 +34,8 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable 
 	private long lastSyncStamp;
 
 	private boolean isDirty;
+
+	private Map<String, Object> stamps;
 
 	private AgentResponseAuthDto profile;
 
@@ -118,7 +125,22 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable 
 		} else if (ArgUtil.is(this.profile)) {
 			return this.profile.getAgent_code();
 		}
-		return PMConstants.DEFAULT.NO_USER;
+		return ArgUtil.anyOf(AppContextUtil.getActorId(), PMConstants.DEFAULT.NO_USER);
+	}
+
+	public Map<String, Object> getStamps() {
+		return stamps;
+	}
+
+	public void setStamps(Map<String, Object> stamps) {
+		this.stamps = stamps;
+	}
+
+	public Map<String, Object> stamps() {
+		if (this.stamps == null) {
+			this.stamps = new HashMap<String, Object>();
+		}
+		return this.stamps;
 	}
 
 }

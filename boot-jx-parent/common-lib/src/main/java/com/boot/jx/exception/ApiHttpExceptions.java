@@ -1,6 +1,9 @@
 package com.boot.jx.exception;
 
+import java.io.IOException;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
 
 import com.boot.utils.ArgUtil;
 
@@ -17,7 +20,7 @@ public class ApiHttpExceptions {
 
 		UNAUTHORIZED(401), ACCESS_DENIED(403), HTTP_NOT_FOUND(404),
 
-		OTP_REQUIRED(461), MOTP_REQUIRED(461), EOTP_REQUIRED(463), DOTP_REQUIRED(464), USER_NOT_FOUND(465),
+		OTP_REQUIRED(461), MOTP_REQUIRED(461), EOTP_REQUIRED(463), DOTP_REQUIRED(464), USER_NOT_FOUND(465),HANDSHAKE_REQUIRED(466),
 
 		UNKNOWN(520);
 
@@ -39,6 +42,17 @@ public class ApiHttpExceptions {
 		@Override
 		public int getStatusCode() {
 			return this.statusCode;
+		}
+
+		public static HttpStatus getHttpStatus(ClientHttpResponse response) throws IOException {
+			int code = response.getRawStatusCode();
+			for (HttpStatus status : HttpStatus.values()) {
+				if (status.value() == code) {
+					return status;
+				}
+			}
+			code = (code / 100) * 100;
+			return HttpStatus.valueOf(code);
 		}
 
 	}

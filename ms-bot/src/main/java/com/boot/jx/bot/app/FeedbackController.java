@@ -6,6 +6,7 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -19,6 +20,7 @@ public class FeedbackController extends CommonBotController {
 	private void showFeedbackMenu() {
 		ClientApp app = context().clientApp();
 		String template = ArgUtil.parseAsString(app.props().get("template"));
+
 		if (ArgUtil.is(template)) { // item_menu_template
 			reply(new OutboxMessage().template(template));
 		} else {
@@ -32,6 +34,10 @@ public class FeedbackController extends CommonBotController {
 	@Override
 	public void onSessionRoute(InBoundEvent assignEvent) {
 		super.onSessionRoute(assignEvent);
+		ChatSessionDoc session = context().session().getDoc();
+		if (ArgUtil.is(session) && !session.isResolved()) {
+			resolveSession();
+		}
 		showFeedbackMenu();
 	}
 
@@ -53,6 +59,7 @@ public class FeedbackController extends CommonBotController {
 		if (ArgUtil.is(template)) { // item_menu_template
 			reply(new OutboxMessage().template(template));
 		}
+		logManager.addTrace(inboxMessage, "FeedbackController.feedback", "closeSession");
 		closeSession();
 	}
 

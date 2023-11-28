@@ -20,8 +20,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<thymeleaf.version>3.0.2.RELEASE</thymeleaf.version>
-		<thymeleaf-layout-dialect.version>2.1.1</thymeleaf-layout-dialect.version>
 	</properties>
 
 	<dependencies>
@@ -34,7 +32,6 @@
 		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
-			<version>3.0.0.RELEASE</version>
 		</dependency>
 
 		<!-- /thymeleaf dependencies -->
@@ -63,18 +60,13 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.session</groupId>
-			<artifactId>spring-session</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-lib</artifactId>
+			<artifactId>bootjx-common-lib</artifactId>
 		</dependency>
 
 		<dependency>
@@ -103,7 +95,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>common-mongo</artifactId>
+			<artifactId>bootjx-common-mongo</artifactId>
 		</dependency>
 
 		<dependency>
@@ -111,6 +103,19 @@
 			<artifactId>lib-tmpl</artifactId>
 			<version>${jax.version}</version>
 		</dependency>
+
+		<!-- DynmoDB  start -->
+		<dependency>
+	        <groupId>com.amazonaws</groupId>
+	        <artifactId>aws-java-sdk-dynamodb</artifactId>
+	        <version>1.11.64</version>
+	    </dependency>
+	    <dependency>
+	        <groupId>com.github.derjust</groupId>
+	        <artifactId>spring-data-dynamodb</artifactId>
+	        <version>5.0.4</version>
+	    </dependency>
+		<!-- DynmoDb end -->
 
 	</dependencies>
 

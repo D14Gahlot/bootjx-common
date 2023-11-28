@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -52,8 +53,12 @@ public class ChatSessionFactory {
 
 		} else {
 			ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
-			String sessionId = chatContactDoc.getSessionId();
-			chatSessionDoc = sessionStore.getSession(sessionId);
+			if (ArgUtil.is(chatContactDoc)) {
+				String sessionId = chatContactDoc.getSessionId();
+				if(ArgUtil.is(sessionId)){
+					chatSessionDoc = sessionStore.getSession(sessionId);					
+				}
+			}
 		}
 
 		if (sessionStore.isSessionValid(chatSessionDoc)) {
@@ -210,7 +215,8 @@ public class ChatSessionFactory {
 					chatSessionDocQuery.setQueue(defaultQueue);
 					chatSessionDocQuery.setMode(inboxMessage.route().getSendMode());
 				} else {
-					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact());
+					defaultQueue = pmDomainConfig.getDefaultInboundQueue(inboxMessage.contact(),
+							CHAT_MODE.from(inboxMessage.route().getSendMode()));
 					chatSessionDocQuery.setQueue(defaultQueue);
 				}
 			}
@@ -241,30 +247,30 @@ public class ChatSessionFactory {
 
 					ChatSessionDoc session = chatSessionDocQuery.getDoc();
 					if (!session.stamps().containsKey(ChatSessionDoc.FIRST_INBOUND_STAMP)) {
-						chatSessionDocQuery.set(ChatSessionDoc.FIRST_INBOUND_STAMP, now);
+						chatSessionDocQuery.setStamp(ChatSessionDoc.FIRST_INBOUND_STAMP, now);
 					}
 
 					String FIRST_INBOUND_STAMP_MODE = ChatSessionDoc.FIRST_INBOUND_STAMP + "_" + session.getMode();
 					if (!session.stamps().containsKey(FIRST_INBOUND_STAMP_MODE)) {
-						chatSessionDocQuery.set(FIRST_INBOUND_STAMP_MODE, now);
+						chatSessionDocQuery.setStamp(FIRST_INBOUND_STAMP_MODE, now);
 					}
-					chatSessionDocQuery.set(ChatSessionDoc.LAST_INBOUND_STAMP, now);
-					chatSessionDocQuery.set(ChatSessionDoc.LAST_INBOUND_STAMP + "_" + session.getMode(), now);
+					chatSessionDocQuery.setStamp(ChatSessionDoc.LAST_INBOUND_STAMP, now);
+					chatSessionDocQuery.setStamp(ChatSessionDoc.LAST_INBOUND_STAMP + "_" + session.getMode(), now);
 
 					chatSessionDocQuery.setLastInBoundMsg(msgDoc, iMessage.contact().getContactType());
 
 				} else if (PostManUtil.isOutBound(msgDoc.getType())) {
 					ChatSessionDoc session = chatSessionDocQuery.getDoc();
 					if (!session.stamps().containsKey(ChatSessionDoc.FIRST_OUTBOUND_STAMP)) {
-						chatSessionDocQuery.set(ChatSessionDoc.FIRST_OUTBOUND_STAMP, now);
+						chatSessionDocQuery.setStamp(ChatSessionDoc.FIRST_OUTBOUND_STAMP, now);
 					}
 
-					String FIRST_INBOUND_STAMP_MODE = ChatSessionDoc.FIRST_OUTBOUND_STAMP + "_" + session.getMode();
-					if (!session.stamps().containsKey(FIRST_INBOUND_STAMP_MODE)) {
-						chatSessionDocQuery.set(FIRST_INBOUND_STAMP_MODE, now);
+					String FIRST_OUTBOUND_STAMP_MODE = ChatSessionDoc.FIRST_OUTBOUND_STAMP + "_" + session.getMode();
+					if (!session.stamps().containsKey(FIRST_OUTBOUND_STAMP_MODE)) {
+						chatSessionDocQuery.setStamp(FIRST_OUTBOUND_STAMP_MODE, now);
 					}
-					chatSessionDocQuery.set(ChatSessionDoc.LAST_OUTBOUND_STAMP, now);
-					chatSessionDocQuery.set(ChatSessionDoc.LAST_OUTBOUND_STAMP + "_" + session.getMode(), now);
+					chatSessionDocQuery.setStamp(ChatSessionDoc.LAST_OUTBOUND_STAMP, now);
+					chatSessionDocQuery.setStamp(ChatSessionDoc.LAST_OUTBOUND_STAMP + "_" + session.getMode(), now);
 
 					chatSessionDocQuery.setLastOutBoundMsg(msgDoc, iMessage.contact().getContactType());
 				}

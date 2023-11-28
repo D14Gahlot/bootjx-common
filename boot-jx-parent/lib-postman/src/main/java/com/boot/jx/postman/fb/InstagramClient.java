@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import com.boot.jx.dict.FileType;
-import com.boot.jx.exception.AmxException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostmanPackages.MessageClient;
 import com.boot.jx.postman.client.ExtUtilService;
@@ -104,8 +104,9 @@ public class InstagramClient implements MessageClient {
 				}
 				MapModel quickreplies = MapModel.createInstance();
 				for (TmplElement button : buttons) {
-					quickreplies.add(MapModel.createInstance().put("title", button.getLabel())
-							.put("content_type", "text").put("payload", button.getCode()).toMap());
+					quickreplies
+							.add(MapModel.createInstance().put("title", button.getLabel()).put("content_type", "text")
+									.put("payload", ArgUtil.nonEmpty(button.getCode(), button.getLabel())).toMap());
 				}
 				messageModel.put("quick_replies", quickreplies.list());
 				reqMessage.put("message", messageModel.toMap());
@@ -190,17 +191,22 @@ public class InstagramClient implements MessageClient {
 				}
 			}
 
-		} catch (HttpStatusCodeException | AmxException e) {
+		} catch (HttpStatusCodeException | ApiHttpException e) {
 			if (e instanceof HttpStatusCodeException)
 				resp = JsonUtil.parse(((HttpStatusCodeException) e).getResponseBodyAsString(),
 						FacebookMessageResp.class);
 			else
-				resp = JsonUtil.parse(e.getMessage(), FacebookMessageResp.class);
+				resp = JsonUtil.parse(((ApiHttpException) e).getResponse().getBody(), FacebookMessageResp.class);
 
-			outboxMessage.logs().add(resp.getError().getMessage());
-			outboxMessage.logs()
-					.add(String.format("%s-%s", resp.getError().getCode(), resp.getError().getErrorSubcode()));
-			outboxMessage.logs().add(ArgUtil.parseAsString(resp.getError().getFbtraceId()));
+			if (ArgUtil.is(resp) && ArgUtil.is(resp.getError())) {
+				outboxMessage.logs().add(resp.getError().getMessage());
+				outboxMessage.logs()
+						.add(String.format("%s-%s", resp.getError().getCode(), resp.getError().getErrorSubcode()));
+				outboxMessage.logs().add(ArgUtil.parseAsString(resp.getError().getFbtraceId()));
+			} else {
+				outboxMessage.logs().add(ArgUtil.parseAsString(resp));
+			}
+
 		}
 
 		outboxMessage.setMessageIdExt(msgIds.toString());

@@ -6,7 +6,7 @@ public enum RequestType {
 
 	DEFAULT(true, true), POLL(false, false), PING(true, false), PUBG(true, false),
 
-	NO_TRACK_PING(false, false);
+	NO_TRACK_PING(false, false), STOMP(false, false);
 
 	boolean track = false;
 	boolean auth = true;

@@ -10,8 +10,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjuster;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.SimpleTimeZone;
@@ -45,7 +47,7 @@ public final class DateUtil {
 	private static final String DEFAULT_DATE_FORMAT_EVENT = "dd-MMM-yyyy";
 
 	/** The Constant DEFAULT_DATE_TIME_FORMAT. */
-	private static final String DEFAULT_DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm";
+	public static final String DEFAULT_DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm";
 
 	/** The Constant DATE_FORMAT. */
 	private static final String DATE_FORMAT = "dd MMM yyyy";
@@ -84,6 +86,9 @@ public final class DateUtil {
 	/** yyyyMMdd format **/
 	public static final String YYYYMMDD_DATE_FORMAT = "yyyyMMdd";
 
+	/** YYYY-MM-DD format **/
+	public static final String YYYY_MM_DD_DATE_FORMAT = "YYYY-MM-dd";
+	public static final String EEEE_MM_DD_YYYY = "EEE MM/dd/yyyy";
 
 	/**
 	 * Instantiates a new date util.
@@ -91,6 +96,12 @@ public final class DateUtil {
 	public static final long DAYS_IN_YEAR = 365;
 
 	public static final long DAYS_IN_WEEK = 7;
+	
+	public static final long MIN_30 = 30 * 60 * 1000L;
+	
+	public static final long ONE_HR =60 * 60 * 1000L;
+	
+	public static final long MIN = 60 * 1000L;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DateUtil.class);
 
@@ -223,6 +234,11 @@ public final class DateUtil {
 	
 	public static String formatDateDDMMMYYYY(Date date) {
 		SimpleDateFormat format = new SimpleDateFormat(DD_MM_YYYY_DATE_FORMAT);
+		return format.format(date);
+	}
+	
+	public static String formatDateYYYYMMDD(Date date) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_DATE_FORMAT);
 		return format.format(date);
 	}
 
@@ -1149,5 +1165,56 @@ public final class DateUtil {
 		}
 		return Integer.parseInt(monthNumber);
 	}
+	
+	
+	public static long getDateMinAndMaxTime(String dateStr,int hr,int min,String strZone,TemporalAdjuster lt) {
+	    dateStr=dateStr+"T00:00:00.00";
+	    LocalDateTime ldt= LocalDateTime.parse(dateStr);
+       // create ZoneOffset
+        ZoneOffset zoneOffset= ZoneOffset.ofHoursMinutes(3, 0);
+        
+        // create a ZonID
+        ZoneId zone= ZoneId.of(strZone);
+        
+        ZonedDateTime todayStartTime = ZonedDateTime.ofInstant(ldt, zoneOffset, zone);
+        
+		// use the same datetime to create the end of the day using the maximum time for
+		ZonedDateTime endToday = todayStartTime.with(lt);
+		long timeStamp = endToday.toInstant().toEpochMilli();
+		
+		return timeStamp;
+}
+	
+	public static String getCovertDate(String date) {
+		String dt = null;
+		if(ArgUtil.is(date)){
+			String[] dtStr = date.split("/");
+			dt =dtStr[2]+"-"+dtStr[1]+"-"+dtStr[0]; 
+		}
+		return dt;
+	}
+	
+	public static String getTimeZone(String toffset) {
+		String timeZone = java.util.TimeZone.getDefault().getID();
+		if(ArgUtil.is(toffset)) {
+			String[] hrStr =toffset.split("::");
+			if(ArgUtil.is(hrStr)) {
+				timeZone =hrStr[0]; 
+			}
+		}
+		return timeZone;
+	}
+	
+	public static  String getOffSetd(String toffset) {
+		String offset = "00:00";
+		if(ArgUtil.is(toffset)) {
+			String[] hrStr =toffset.split("::");
+			if(ArgUtil.is(hrStr)) {
+				offset =hrStr[1].substring(hrStr[1].indexOf('+')+1);
+			}
+		}
+		return offset;
+	}
+
 	
 }

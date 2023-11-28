@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
@@ -28,24 +30,34 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	}
 
 	@Override
-	public String getDefaultInboundQueue(String channelId) {
-		ChannelConfig channel = environment.config().channel(channelId);
-		if (ArgUtil.is(channel) && ArgUtil.is(channel.getInboundQueue())) {
-			return channel.getInboundQueue();
+	public String getDefaultInboundQueue(String channelId, CHAT_MODE mode) {
+		if (CHAT_MODE.AGENT.equals(mode)) {
+			return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
+					.asString(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 		} else {
-			return getDefaultInboundQueue();
+			ChannelConfig channel = environment.config().channel(channelId);
+			if (ArgUtil.is(channel) && ArgUtil.is(channel.getInboundQueue())) {
+				return channel.getInboundQueue();
+			} else {
+				return getDefaultInboundQueue();
+			}
 		}
 	}
 
 	@Override
 	public String getDefaultInboundQueue(Contactable contact) {
-		return getDefaultInboundQueue(PostManUtil.CHANNEL_ID(contact));
+		return getDefaultInboundQueue(PostManUtil.CHANNEL_ID(contact), null);
+	}
+
+	@Override
+	public String getDefaultInboundQueue(Contactable contact, CHAT_MODE mode) {
+		return getDefaultInboundQueue(PostManUtil.CHANNEL_ID(contact), mode);
 	}
 
 	@Override
 	public String getDomainUrl() {
 		return String.format("https://%s.%s", AppContextUtil.getTenant(),
-				environment.keyEntry("mry.prop.service.domain").asString());
+				environment.keyEntry("mry.prop.service.server").asString());
 	}
 
 	@Override
@@ -62,4 +74,11 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	public PMConfigurationObject getChatIdleTimeout() {
 		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_IDLE_TIMEOUT);
 	}
+	
+	@Override
+	public PMConfigurationObject getAgentChatDisable() {
+		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CUSTOMER_CHAT_DISABLE);
+	}
+	
+	
 }

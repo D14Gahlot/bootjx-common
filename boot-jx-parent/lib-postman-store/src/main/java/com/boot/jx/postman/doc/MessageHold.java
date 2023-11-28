@@ -1,6 +1,9 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -18,8 +21,9 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 
 	private static final long serialVersionUID = -1916969779141145310L;
 
-	public static final String COLLECTION_ORIGINAL = "MESSAGE_ORIGINAL";
 	public static final String COLLECTION_NAME = "MESSAGE_HOLD";
+
+	public static final String COLLECTION_ORIGINAL = "MESSAGE_ORIGINAL";
 	public static final String COLLECTION_REJECTED = "MESSAGE_REJECTED";
 	public static final String COLLECTION_QUEUED = "MESSAGE_QUEUED";
 
@@ -35,6 +39,12 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 	@Indexed
 	private String appType;
 
+	@Indexed
+	private String appVenv;
+
+	@Indexed
+	private String batch;
+
 	private long timestamp;
 
 	private InboxMessage inboxMessage;
@@ -42,6 +52,12 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 	private InBoundEvent event;
 
 	private PMArgs pmArgs;
+
+	private Map<String, Object> map;
+	private List<Object> logs;
+
+	private Object httpReq;
+	private Object httpResp;
 
 	public String getTempId() {
 		return tempId;
@@ -120,5 +136,70 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 	public MessageHold inboxMessage(InboxMessage inboxMessage) {
 		this.inboxMessage = inboxMessage;
 		return this;
+	}
+
+	public String getBatch() {
+		return batch;
+	}
+
+	public void setBatch(String batch) {
+		this.batch = batch;
+	}
+
+	@Document(collection = COLLECTION_ORIGINAL)
+	@TypeAlias("MessageHoldOriginal")
+	public static class MessageHoldOriginal extends MessageHold {
+		private static final long serialVersionUID = -4164969609975765804L;
+	}
+
+	@Document(collection = COLLECTION_REJECTED)
+	@TypeAlias("MessageHoldRejected")
+	public static class MessageHoldRejected extends MessageHold {
+		private static final long serialVersionUID = 5700536999322313441L;
+	}
+
+	@Document(collection = COLLECTION_QUEUED)
+	@TypeAlias("MessageHoldQueue")
+	public static class MessageHoldQueue extends MessageHold {
+		private static final long serialVersionUID = 1137079051032041202L;
+	}
+
+	public String getAppVenv() {
+		return appVenv;
+	}
+
+	public void setAppVenv(String appVenv) {
+		this.appVenv = appVenv;
+	}
+
+	public List<Object> getLogs() {
+		return logs;
+	}
+
+	public void setLogs(List<Object> logs) {
+		this.logs = logs;
+	}
+
+	public List<Object> logs() {
+		if (this.getLogs() == null) {
+			this.setLogs(new ArrayList<Object>());
+		}
+		return this.getLogs();
+	}
+
+	public Object getHttpReq() {
+		return httpReq;
+	}
+
+	public void setHttpReq(Object httpReq) {
+		this.httpReq = httpReq;
+	}
+
+	public Object getHttpResp() {
+		return httpResp;
+	}
+
+	public void setHttpResp(Object httpResp) {
+		this.httpResp = httpResp;
 	}
 }

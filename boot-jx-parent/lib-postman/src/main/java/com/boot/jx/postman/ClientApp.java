@@ -3,11 +3,14 @@ package com.boot.jx.postman;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.boot.jx.model.AuditCreateEntity.AuditIdentifier;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
+import com.boot.model.MapModel.EntryMeta;
+import com.boot.model.MapModel.MapPathEntry;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public interface ClientApp extends Serializable {
+public interface ClientApp extends Serializable, AuditIdentifier {
 
 	public static final String APP_TYPE_WEBHOOK = "WEBHOOK";
 	public static final String APP_TYPE_AGENT = "AGENT";
@@ -17,6 +20,11 @@ public interface ClientApp extends Serializable {
 
 	@JsonView(PMEnvironment.OneTimeVisibleProperty.class)
 	public String getKey();
+
+	@JsonView(PMEnvironment.OneTimeVisibleProperty.class)
+	public String getAppHook();
+
+	public String getAppHookFrwrd();
 
 	public String getKeyName();
 
@@ -51,4 +59,16 @@ public interface ClientApp extends Serializable {
 
 	boolean equals(APP_TYPE appType);
 
+	public Map<String, Object> getConfig();
+
+	public Map<String, Object> config();
+
+	public default MapPathEntry keyEntry(EntryMeta metaKey) {
+		return new MapPathEntry().map(this.config()).key(metaKey.getUkey()).load(null);
+	}
+
+	@Override
+	public default String auditIdentifier() {
+		return this.getQueue();
+	}
 }

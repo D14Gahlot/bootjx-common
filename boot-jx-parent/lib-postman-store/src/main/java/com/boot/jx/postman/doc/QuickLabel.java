@@ -8,10 +8,15 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity.AuditableEntity;
+import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
+import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocumentKeyDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Document(collection = "DICT_QUICK_LABEL")
 @TypeAlias("QuickLabel")
-public class QuickLabel implements Serializable, AuditableEntity {
+@JsonDeserialize(as = QuickLabel.class, keyUsing = ResourceDocumentKeyDeserializer.class)
+public class QuickLabel implements Serializable, AuditableEntity, ResourceDocument, ADocumentDTO<QuickLabel> {
 
 	private static final long serialVersionUID = 2845094878124818820L;
 	@Id
@@ -90,5 +95,10 @@ public class QuickLabel implements Serializable, AuditableEntity {
 
 	public void setUpdatedStamp(Long updatedStamp) {
 		this.updatedStamp = updatedStamp;
+	}
+
+	@Override
+	public ADocumentDTO<QuickLabel> newInstance() {
+		return new QuickLabel();
 	}
 }

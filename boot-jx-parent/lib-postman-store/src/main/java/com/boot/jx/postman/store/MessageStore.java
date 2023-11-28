@@ -17,11 +17,15 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -29,11 +33,12 @@ import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
 import com.google.common.collect.Lists;
-import com.mongodb.WriteResult;
+import com.mongodb.client.result.UpdateResult;
 
 @Component
 public class MessageStore extends CommonMongoTemplateAbstract {
@@ -46,6 +51,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 		// OTHER ERROS
 		INBOUND_FORWARD_ERROR,
+
+		// Events
+		ON_SESSION_START, ON_SESSION_ROUTE, ON_SESSION_IDLE,
 
 		// ENDS
 		DEFAULT;
@@ -89,6 +97,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setAttachments(inboxMessage.getAttachments());
 		doc.setVccards(inboxMessage.getVccards());
 
+		doc.setTrace(inboxMessage.getTrace());
+		doc.setLogs(inboxMessage.getLogs());
 		doc.form().putAll(inboxMessage.form());
 		doc.stamps().put("session", ArgUtil.parseAsLong(inboxMessage.session().getSessionStamp(), 0L));
 
@@ -102,6 +112,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setContactId(PostManUtil.createContactId(inboxMessage));
 		doc.setType("I");
 		doc.setTimestamp(System.currentTimeMillis());
+		doc.setTime(TimeStampIndex.now());
 
 		doc.setFormatType(inboxMessage.getFormatType());
 		doc.setFormatSubType(inboxMessage.getFormatSubType());
@@ -193,10 +204,19 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	public void setHandler(InboxMessage inboxMessage, String handler) {
-		MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
-		doc.setHandler(handler);
-		mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
-		inboxMessage.setMessageId(doc.getMessageId());
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+		if (ArgUtil.is(inboxMessage.getMessageId())) {
+			builder.whereIdSafe(inboxMessage.getMessageId());
+			builder.update().set("handler", handler);
+			builder.update().set("meta.handler", handler);
+			mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
+					MessageStore.getCollectionName(inboxMessage.contact().type()));
+		} else {
+			MessageDoc doc = findOrCreateMessageDoc(inboxMessage);
+			doc.setHandler(handler);
+			mongoTemplate.save(doc, getCollectionName(inboxMessage.contact().type()));
+			inboxMessage.setMessageId(doc.getMessageId());
+		}
 	}
 
 	// Out Going Messages
@@ -220,6 +240,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setSessionId(outMessage.getSessionId());
 		doc.setMessageIdRef(outMessage.getMessageIdRef());
 
+		doc.setTrace(outMessage.getTrace());
 		doc.setLogs(outMessage.getLogs());
 		doc.setMessageIdExt(outMessage.getMessageIdExt());
 		doc.setStatus(ArgUtil.parseAsString(outMessage.getStatus()));
@@ -244,6 +265,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "O"));
 		}
 		doc.setTimestamp(System.currentTimeMillis());
+		doc.setTime(TimeStampIndex.now());
 
 		String to = CollectionUtil.getOne(outMessage.getTo());
 		doc.setContactId(PostManUtil.createContactId(outMessage));
@@ -377,7 +399,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 			String collectionName = getCollectionName(messageReport.contact().getContactType());
 
-			WriteResult result;
+			UpdateResult result;
 
 			if (multi) {
 				result = mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageDoc.class,
@@ -387,8 +409,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 						collectionName);
 			}
 
-			if (result.getN() > 1) {
-				builder.limit(result.getN());
+			if (result.isModifiedCountAvailable() && result.getModifiedCount() > 1) {
+				builder.limit(result.getModifiedCount());
 				List<MessageDoc> messsages = mongoTemplate.find(builder.getQuery(), MessageDoc.class, collectionName);
 				if (ArgUtil.is(messsages) && ArgUtil.is(messsages.get(0))) {
 					updateMessageReport(messageReport, messsages.get(0));
@@ -434,17 +456,52 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	public MessageDoc save(MessageDoc msg, ContactType contactType) {
+		if (!ArgUtil.is(msg.getAppType())) {
+			msg.setAppType(appConfig.getAppType());
+		}
+		if (!ArgUtil.is(msg.getAppVenv())) {
+			msg.setAppVenv(appConfig.getAppVenv());
+		}
 		mongoTemplate.save(msg, MessageStore.getCollectionName(contactType));
 		return msg;
 	}
 
-	public void reject(InboxMessage inboxMessageOriginal) {
+	public MessageDocAbstract save(MessageDocAbstract msg) {
+		if (!ArgUtil.is(msg.getAppType())) {
+			msg.setAppType(appConfig.getAppType());
+		}
+		if (!ArgUtil.is(msg.getAppVenv())) {
+			msg.setAppVenv(appConfig.getAppVenv());
+		}
+
+		if (msg.getTime() == null) {
+			msg.setTime(TimeStampIndex.now());
+		}
+
+		mongoTemplate.save(msg);
+		return msg;
+	}
+
+	public void reject(InboxMessage inboxMessageOriginal, Throwable e) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		MessageHold hold = new MessageHold();
 		hold.setInboxMessage(inboxMessageOriginal);
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
+		hold.setAppVenv(appConfig.getAppVenv());
+
+		StackTraceElement[] traces = e.getStackTrace();
+		if (traces.length > 0 && traces[0].toString().length() > 0) {
+			for (StackTraceElement trace : traces) {
+				hold.logs().add(trace.toString());
+			}
+		}
+
+		if (e instanceof ApiHttpServerException || e instanceof ApiHttpException) {
+			hold.setHttpResp(MapModel.from(((ApiHttpException) e).getResponse().getBody()).toMap());
+		}
+
 		mongoTemplate.save(hold, MessageHold.COLLECTION_REJECTED);
 	}
 
@@ -455,6 +512,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
+		hold.setAppVenv(appConfig.getAppVenv());
 		commonMongoTemplate.save(hold, MessageHold.COLLECTION_ORIGINAL);
 	}
 
@@ -465,19 +523,22 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
 		hold.setAppType(appConfig.getAppType());
+		hold.setAppVenv(appConfig.getAppVenv());
 		mongoTemplate.save(hold);
 	}
 
 	public List<InboxMessage> releaseBySession(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-		builder.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()));
+		builder.where(Criteria.where("contactId").is(contactId).and("appType").is(appConfig.getAppType()).and("appVenv")
+				.is(appConfig.getAppVenv()));
 		builder.set("sessionId", inboxMessageOriginal.getSessionId());
 		mongoTemplate.updateMulti(builder.getQuery(), builder.getUpdate(), MessageHold.class);
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
-		builder2.where(Criteria.where("contactId").is(contactId).and("sessionId").is(inboxMessageOriginal.getSessionId())
-				.and("appType").is(appConfig.getAppType())).sortBy("timestamp");;
+		builder2.where(Criteria.where("contactId").is(contactId).and("sessionId")
+				.is(inboxMessageOriginal.getSessionId()).and("appType").is(appConfig.getAppType()))
+				.sortBy("timestamp");;
 		List<MessageHold> docs = mongoTemplate.findAllAndRemove(builder2.getQuery(), MessageHold.class);
 		List<InboxMessage> x = docs.stream().map(d -> d.getInboxMessage()).collect(Collectors.toList());
 		return x;

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.collections.list.TreeList;
-
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.agent.AgentConfig;
@@ -16,6 +14,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
@@ -41,6 +40,7 @@ public interface PMConfiguration extends Serializable {
 		private Map<String, ClientApp> clientApiKeys;
 
 		private Map<String, PMConfigurationObject> prefs;
+		private Map<String, PMConfigurationObject> perms;
 		private Map<String, Object> globalVars;
 
 		private AgentConfig agent;
@@ -150,8 +150,27 @@ public interface PMConfiguration extends Serializable {
 			return new SafeKeyHashMap<PMConfigurationObject>(prefs);
 		}
 
+		public SafeKeyHashMap<PMConfigurationObject> perms() {
+			if (ArgUtil.isEmpty(perms)) {
+				perms = new HashMap<String, PMConfigurationObject>();
+			}
+			return new SafeKeyHashMap<PMConfigurationObject>(perms);
+		}
+
 		public PMConfigurationObject keyEntry(String key) {
 			return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
+		}
+
+		public PMConfigurationObject keyEntry(EntryMeta entry) {
+			return this.keyEntry(entry.getKey());
+		}
+
+		public PMConfigurationObject permEntry(String key) {
+			return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
+		}
+
+		public PMConfigurationObject permEntry(EntryMeta entry) {
+			return this.permEntry(entry.getKey());
 		}
 
 		public PMConfigurationObject getPref(String key, Object value) {
@@ -173,6 +192,30 @@ public interface PMConfiguration extends Serializable {
 				PMConfigurationObject existing = this.prefs().get(map.getKey());
 				if (!ArgUtil.is(existing) || !ArgUtil.is(existing.getServer())) {
 					return this.setPref(map);
+				}
+			}
+			return this;
+		}
+
+		public PMConfigurationObject getPerm(String key, Object value) {
+			return perms().getOrDefault(key, new PMConfigurationObject(key, value));
+		}
+
+		public PMConfiguration setPerm(PMConfigurationObject map) {
+			this.perms().put(map.getKey(), map);
+			return this;
+		}
+
+		public PMConfiguration setPerm(PMConfigurationObject map, String server) {
+			if (ArgUtil.is(map.getServer())) {
+				if (ArgUtil.is(map.getServer(), server)) {
+					return this.setPerm(map);
+				}
+				return this;
+			} else {
+				PMConfigurationObject existing = this.perms().get(map.getKey());
+				if (!ArgUtil.is(existing) || !ArgUtil.is(existing.getServer())) {
+					return this.setPerm(map);
 				}
 			}
 			return this;

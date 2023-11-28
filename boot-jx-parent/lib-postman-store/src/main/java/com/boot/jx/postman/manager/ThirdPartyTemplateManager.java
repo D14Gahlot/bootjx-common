@@ -7,14 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.mongo.CommonMongoQB;
-import com.boot.jx.mongo.CommonMongoQB.CommonMongoQBimpl;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Client;
+import com.boot.jx.postman.wa360.WA360CloudClient;
 import com.boot.jx.postman.wa360.WA360Template;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -26,16 +27,25 @@ public class ThirdPartyTemplateManager {
 
 	@Autowired
 	private WA360Client wa360Client;
+	
+	@Autowired
+	private WA360CloudClient wa360CloudClient;
 
 	@Autowired
 	CommonMongoTemplate commonMongoTemplate;
 
 	public void refreshWA360Templates(ChannelConfig channelConfig) {
-		MapModel resp = wa360Client.fetchTemplates(channelConfig);
+		MapModel resp =null;
+		
+		if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
+			resp = wa360CloudClient.fetchTemplates(channelConfig);
+		}else {
+			resp = wa360Client.fetchTemplates(channelConfig);
+		}
 
 		List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);
 
-		CommonMongoQBimpl<HSMTemplate3rdParty> cmqb = CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+		MongoQueryBuilder<HSMTemplate3rdParty> cmqb = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 				.where(Criteria.where("channelId").is(channelConfig.getChannelId())).set("template.status", "deleted");
 
 		commonMongoTemplate.update(cmqb);
@@ -61,7 +71,7 @@ public class ThirdPartyTemplateManager {
 		thirdPartyTemplate.setCode(wa360Template.getName());
 		thirdPartyTemplate.setLang(wa360Template.getLanguage());
 
-		thirdPartyTemplate.setCategory(wa360Template.getCategory());
+		//thirdPartyTemplate.setCategory(wa360Template.getCategory());
 		thirdPartyTemplate.setContactType(ArgUtil.parseAsString(channelConfig.getContactType()));
 		thirdPartyTemplate.setChannelType(channelConfig.getChannelType());
 
@@ -71,7 +81,23 @@ public class ThirdPartyTemplateManager {
 
 	public HSMTemplate3rdParty createhWA360Templates(ChannelConfig channelConfig,
 			Map<String, Object> templateStructure) {
-		MapModel resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
+		String status = ArgUtil.parseAsString(templateStructure.get("status"), Constants.BLANK);
+		MapModel resp = null;
+		if ("approved".equalsIgnoreCase(status) || "rejected".equalsIgnoreCase(status)
+				|| "paused".equalsIgnoreCase(status)) {
+			if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
+				resp = wa360CloudClient.updateTemplates(channelConfig, MapModel.from(templateStructure));
+			}else {
+			resp = wa360Client.updateTemplates(channelConfig, MapModel.from(templateStructure));
+			}
+		} else {
+			
+			if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
+				resp = wa360CloudClient.createTemplates(channelConfig, MapModel.from(templateStructure));
+			}else {
+			resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
+			}
+		}
 		return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
 	}
 
@@ -87,7 +113,7 @@ public class ThirdPartyTemplateManager {
 	}
 
 	public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig, String code) {
-		CommonMongoQBimpl<HSMTemplate3rdParty> q = CommonMongoQB.collection(HSMTemplate3rdParty.class)
+		MongoQueryBuilder<HSMTemplate3rdParty> q = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 				.where(Criteria.where("channelId").is(channelConfig.getChannelId()));
 
 		if (ArgUtil.is(code)) {

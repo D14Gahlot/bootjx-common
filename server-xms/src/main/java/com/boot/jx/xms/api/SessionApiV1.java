@@ -21,6 +21,7 @@ import com.boot.jx.xms.XmsConstants.XMSClientAuth;
 import com.boot.jx.xms.dto.SessionRequestObjects.SessionQueueAssignment;
 import com.boot.jx.xms.dto.SessionRequestObjects.SessionStatusClose;
 import com.boot.model.MapModel.NodeEntry;
+import com.boot.utils.CollectionUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,8 +63,9 @@ public class SessionApiV1 {
 	@XMSClientAuth
 	@RequestMapping(value = "/api/v1/session/routing", method = { RequestMethod.POST })
 	public ApiResultsMetaCompactResponse<InBoundEvent, Object> sessionRouting(@RequestBody SessionQueueAssignment req) {
-		InBoundEvent event = chatSessionService.routeSession(req.sessionId, new PMArgs().assignToQueueCode(req.queue)
-				.assignToAgentCode(req.agent).assignToDeptCode(req.team).params(req.params));
+		InBoundEvent event = chatSessionService.routeSession(req.sessionId,
+				new PMArgs().assignToQueueCode(req.queue).assignToAgentCode(req.agent).assignToDeptCode(req.team)
+						.assignToSkillCode(CollectionUtil.asArray(req.skills)).params(req.params));
 		return ApiResponse.buildResults(event);
 	}
 

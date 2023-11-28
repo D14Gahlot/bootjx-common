@@ -58,14 +58,14 @@ public class FacebooClient implements MessageClient {
 
 	public FacebookMessageResp sendReply(ChannelConfig channelConfig, FacebookMessageRequest resp) {
 		return restService
-				.ajax("https://graph.facebook.com/v2.6/me/messages?access_token="
+				.ajax("https://graph.facebook.com/v16.0/me/messages?access_token="
 						+ channelConfig.getFacebook().getAccessToken())
 				.post(resp).as(new ParameterizedTypeReference<FacebookMessageResp>() {
 				});
 	}
 
 	public MapModel sendAdvanced(ChannelConfig config, MapModel map) {
-		String url = "https://graph.facebook.com/v2.6/me/messages?access_token="
+		String url = "https://graph.facebook.com/v16.0/me/messages?access_token="
 				+ config.getFacebook().getAccessToken();
 
 		return restService.ajax(url).post(map.toMap()).asMapModel();
@@ -89,20 +89,20 @@ public class FacebooClient implements MessageClient {
 
 		MapModel reqMessage = MapModel.createInstance().put(new JsonPath("recipient/id"), csid);
 
+		String messageTag = FacebookConstants.MESSAGE_TAG(outboxMessage.categoryType());
+		String messageType = "RESPONSE";
+
+		if (ArgUtil.is(messageTag)) {
+			messageType = "MESSAGE_TAG";
+			reqMessage.put("tag", messageTag);
+		}
+		reqMessage.put("messaging_type", messageType);
+
 		List<TmplElement> buttons = outboxMessage.optionActionButtons();
 
 		if (buttons.size() > 0) {
 			if (buttons.size() > 3) {
 				isTemplate = true;
-
-				String messageTag = FacebookConstants.MESSAGE_TAG(outboxMessage.categoryType());
-
-				if (ArgUtil.is(messageTag)) {
-					reqMessage.put("messaging_type", "MESSAGE_TAG");
-					reqMessage.put("tag", messageTag);
-				} else {
-					reqMessage.put("messaging_type", "RESPONSE");
-				}
 
 				MapModel messageModel = MapModel.createInstance();
 				if (ArgUtil.is(outboxMessage.getMessage())) {
@@ -163,6 +163,7 @@ public class FacebooClient implements MessageClient {
 				for (Attachment attachment : outboxMessage.getAttachments()) {
 
 					FacebookMessageRequest req = new FacebookMessageRequest();
+					req.setMessageType(messageType);
 					req.recipientId(to);
 					if (ArgUtil.is(attachment.getMediaURL())) {
 						if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {

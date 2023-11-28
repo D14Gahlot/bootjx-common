@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,10 +21,15 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
+import com.boot.jx.postman.doc.QuickLocation;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
+import com.boot.jx.postman.doc.QuickSkill;
 import com.boot.jx.postman.doc.QuickTag;
+import com.boot.jx.postman.store.QuickStore;
+import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.EntityDtoUtil;
 
 @RestController
 public class TmplQuickController {
@@ -33,6 +39,9 @@ public class TmplQuickController {
 
 	@Autowired
 	private AuditDetailProvider auditDetailProvider;
+
+	@Autowired
+	private QuickStore quickStore;
 
 	// QuickReply
 	@RequestMapping(value = "/category/map/smart_reply", method = { RequestMethod.POST })
@@ -63,20 +72,18 @@ public class TmplQuickController {
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickreps", method = { RequestMethod.POST })
-	public ApiResponse<QuickReply, Object> createQuickReply(@RequestParam(required = false) String id,
-			@RequestParam String category, @RequestParam String title,
-			@RequestParam(required = false) String template) {
+	public ApiResponse<QuickReply, Object> createQuickReply(@RequestBody QuickReply req) {
 
-		QuickReply newVersion = mongoTemplate.findByIdOrDefault(id, new QuickReply());
+		QuickReply newVersion = mongoTemplate.findByIdOrDefault(req.getId(), new QuickReply());
 
-		newVersion.setCategory(category);
-		newVersion.setTitle(title);
-		newVersion.setTemplate(template);
+		newVersion.setCategory(req.getCategory());
+		newVersion.setTitle(req.getTitle());
+		newVersion.setTemplate(req.getTemplate());
 
 		auditDetailProvider.auditCreate(newVersion);
 		mongoTemplate.save(newVersion);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickReply.class)).data(newVersion)
-				.message("QuickReply created");
+				.message("QuickReply Saved");
 	}
 
 	// QuickAction
@@ -93,45 +100,15 @@ public class TmplQuickController {
 	}
 
 	@RequestMapping(value = "/api/tmpl/quickaxn", method = { RequestMethod.POST })
-	public ApiResponse<QuickAction, Object> createQuickAction(@RequestParam(required = false) String id,
-			@RequestParam String category, @RequestParam String title, String code) {
-
-		QuickAction newVersion = mongoTemplate.findByIdOrDefault(id, new QuickAction());
-
-		newVersion.setCategory(category);
-		newVersion.setTitle(title);
-		newVersion.setAction(code);
+	public ApiResponse<QuickAction, Object> createQuickAction(@RequestBody QuickAction req) {
+		QuickAction newVersion = mongoTemplate.findByIdOrDefault(req.getId(), new QuickAction());
+		newVersion.setCategory(req.getCategory());
+		newVersion.setTitle(req.getTitle());
+		newVersion.setAction(req.getCode());
 		auditDetailProvider.auditCreate(newVersion);
 		mongoTemplate.save(newVersion);
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickAction.class)).data(newVersion)
-				.message("QuickAction created");
-	}
-
-	// QuickLabel
-	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.GET })
-	public ApiResponse<QuickLabel, Object> listQuickTag() {
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class));
-	}
-
-	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.DELETE })
-	public ApiResponse<QuickLabel, Object> deleteQuickTag(@RequestParam String id) {
-		QuickLabel qr = mongoTemplate.removeAndAudit(id, QuickLabel.class);
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(qr).message("QuickLabel deleted");
-	}
-
-	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.POST })
-	public ApiResponse<QuickLabel, Object> createQuickTag(@RequestParam(required = false) String id,
-			@RequestParam String category, @RequestParam String title, String code) {
-
-		QuickLabel newVersion = mongoTemplate.findByIdOrDefault(id, new QuickLabel());
-
-		newVersion.setCategory(category);
-		newVersion.setTitle(title);
-		newVersion.setCode(code);
-		auditDetailProvider.auditCreate(newVersion);
-		mongoTemplate.save(newVersion);
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(newVersion)
-				.message("QuickLabel created");
+				.message("QuickAction Saved");
 	}
 
 	// QuickMedia
@@ -182,7 +159,31 @@ public class TmplQuickController {
 		mongoTemplate.save(newVersion);
 
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickMedia.class)).data(newVersion)
-				.message("Quick Media created");
+				.message("Quick Media Saved");
+	}
+
+	// QuickLabel
+	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.GET })
+	public ApiResponse<QuickLabel, Object> listQuickLabels() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class));
+	}
+
+	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.DELETE })
+	public ApiResponse<QuickLabel, Object> deleteQuickLabels(@RequestParam String id) {
+		QuickLabel qr = mongoTemplate.removeAndAudit(id, QuickLabel.class);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(qr).message("QuickLabel deleted");
+	}
+
+	@RequestMapping(value = "/api/tmpl/quicklabels", method = { RequestMethod.POST })
+	public ApiResponse<QuickLabel, Object> createQuickLabels(@RequestBody QuickLabel req) {
+		QuickLabel newVersion = mongoTemplate.findByIdOrDefault(req.getId(), new QuickLabel());
+		newVersion.setCategory(req.getCategory());
+		newVersion.setTitle(req.getTitle());
+		newVersion.setCode(req.getCode());
+		auditDetailProvider.auditCreate(newVersion);
+		mongoTemplate.save(newVersion);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLabel.class)).data(newVersion)
+				.message("QuickLabel Saved");
 	}
 
 	/** for adding quick Tag category e.g flight,train ,etc */
@@ -200,14 +201,55 @@ public class TmplQuickController {
 	}
 
 	@RequestMapping(value = "/api/tmpl/quicktags", method = { RequestMethod.POST })
-	public ApiResponse<QuickTag, Object> createQuickTagCategory(@RequestParam(required = false) String id,
-			@RequestParam String category, @RequestParam String title, String code) {
-		QuickTag quickTag = mongoTemplate.findByIdOrDefault(id, new QuickTag());
-		quickTag.setCategory(category);
-		quickTag.setTitle(title);
-		quickTag.setCode(code);
+	public ApiResponse<QuickTag, Object> createQuickTagCategory(@RequestBody QuickTag req) {
+		QuickTag quickTag = mongoTemplate.findByIdOrDefault(req.getId(), new QuickTag());
+		quickTag.setCategory(req.getCategory());
+		quickTag.setTitle(req.getTitle());
+		quickTag.setCode(req.getCode());
 		mongoTemplate.saveAndAudit(quickTag, ArgUtil.is(quickTag.getId()));
-		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(quickTag)
-				.message("QuickTag created");
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickTag.class)).data(quickTag).message("QuickTag Saved");
+	}
+
+	// QuickLabel
+	@RequestMapping(value = "/api/tmpl/quickskills", method = { RequestMethod.GET })
+	public ApiResponse<QuickSkill, Object> listQuickSkills() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickSkill.class));
+	}
+
+	@RequestMapping(value = "/api/tmpl/quickskills", method = { RequestMethod.DELETE })
+	public ApiResponse<QuickSkill, Object> deleteQuickSkills(@RequestParam String id) {
+		QuickSkill qr = mongoTemplate.removeAndAudit(id, QuickSkill.class);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickSkill.class)).data(qr).message("QuickSkill deleted");
+	}
+
+	@RequestMapping(value = "/api/tmpl/quickskills", method = { RequestMethod.POST })
+	public ApiResponse<QuickSkill, Object> createQuickSkills(@RequestBody QuickSkill req) {
+		QuickSkill quickTag = mongoTemplate.findByIdOrDefault(req.getId(), new QuickSkill());
+		quickTag.setCategory(req.getCategory());
+		quickTag.setTitle(req.getTitle());
+		quickTag.setCode(req.getCode());
+		mongoTemplate.saveAndAudit(quickTag, ArgUtil.is(quickTag.getId()));
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickSkill.class)).data(quickTag)
+				.message("QuickSkill Saved");
+	}
+
+	// QuickLocations
+	@RequestMapping(value = "/api/tmpl/quick/location", method = { RequestMethod.GET })
+	public ApiResponse<QuickLocation, Object> listQuickLocations() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLocation.class));
+	}
+
+	@RequestMapping(value = "/api/tmpl/quick/location", method = { RequestMethod.DELETE })
+	public ApiResponse<QuickLocation, Object> deleteQuickLocations(@RequestParam String id) {
+		QuickLocation qr = mongoTemplate.removeAndAudit(id, QuickLocation.class);
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLocation.class)).data(qr)
+				.message("QuickLocation deleted");
+	}
+
+	@RequestMapping(value = "/api/tmpl/quick/location", method = { RequestMethod.POST })
+	public ApiResponse<QuickLocation, Object> createQuickLocation(@RequestBody QuickLocation req) {
+		QuickLocation quickTag = quickStore.createGalleryItem(req, new QuickLocation());
+		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLocation.class)).data(quickTag)
+				.message("QuickLocations Saved");
 	}
 }

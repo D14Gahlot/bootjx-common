@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
@@ -31,7 +31,7 @@ public class ConfigController {
 	private CommonMongoTemplate mongoTemplate;
 
 	@Autowired
-	private ConfigManager configManager;
+	private ConfigManagerImpl configManager;
 
 	@Autowired
 	public PMEnvironment pmEnvironment;
@@ -82,8 +82,11 @@ public class ConfigController {
 
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@ResponseBody
-	@RequestMapping(value = { "/api/config/clientapikey/{id}" }, method = { RequestMethod.DELETE })
-	public ApiResponse<ClientAppConfigDoc, Object> deleteClientApiKey(@PathVariable String id) {
+	@RequestMapping(value = { "/api/config/clientapikey/{appId}", "/api/config/clientapikey" },
+			method = { RequestMethod.DELETE })
+	public ApiResponse<ClientAppConfigDoc, Object> deleteClientApiKey(@PathVariable(required = false) String appId,
+			@RequestParam(required = false) String id) {
+		id = ArgUtil.nonEmpty(id, appId);
 		ClientAppConfigDoc clientApiKey = new ClientAppConfigDoc();
 		clientApiKey.setId(id);
 		return ApiResponse.buildResults(configManager.remove(clientApiKey));

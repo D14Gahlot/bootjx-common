@@ -93,7 +93,7 @@ public class AppConfig {
 
 	@Value(APP_VENV)
 	@AppParamKey(AppParam.APP_VENV)
-	private String appBranch;
+	private String appVenv;
 
 	@Value(APP_GROUP)
 	@AppParamKey(AppParam.APP_GROUP)
@@ -216,17 +216,19 @@ public class AppConfig {
 	@Value("${app.session}")
 	private boolean appSessionEnabled;
 
+	private String originApp;
+
 	public boolean isAppSessionEnabled() {
 		return appSessionEnabled;
 	}
 
-	@Value("${server.session.cookie.http-only}")
+	@Value("${server.servlet.session.cookie.http-only}")
 	private boolean cookieHttpOnly;
 
-	@Value("${server.session.cookie.name:JSESSIONID}")
+	@Value("${server.servlet.session.cookie.name:JSESSIONID}")
 	private String sessionCookieName;
 
-	@Value("${server.session.cookie.secure}")
+	@Value("${server.servlet.session.cookie.secure}")
 	private boolean cookieSecure;
 
 	@Value("${spring.profiles.active}")
@@ -320,6 +322,7 @@ public class AppConfig {
 			AppParam.APP_INSTANCE_ID.setValue(appInstanceId);
 			AppParam.APP_INSTANCE_HASH.setValue(CryptoUtil.getMD5Hash(appInstanceId));
 			AppParam.APP_INSTANCE_UID.setValue(appInstanceId + "#" + UniqueID.PREF);
+			AppParam.APP_INSTANCE_TYPE.setValue(AppParam.APP_VENV.getValue() + "/" + AppParam.APP_TYPE.getValue());
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
@@ -409,6 +412,7 @@ public class AppConfig {
 		if (defaultTenant != null) {
 			Tenants.setDefault(defaultTenant);
 		}
+		this.loadAppParams();
 	}
 
 	public String getDefaultTenant() {
@@ -473,6 +477,14 @@ public class AppConfig {
 
 	public String getSessionCookieName() {
 		return sessionCookieName;
+	}
+
+	public String getAppVenv() {
+		return appVenv;
+	}
+
+	public String getAppInstanceType() {
+		return AppParam.APP_INSTANCE_TYPE.getValue();
 	}
 
 }

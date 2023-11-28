@@ -1,7 +1,9 @@
 package com.boot.jx.admin.service;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -11,7 +13,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.manager.AdminManager;
-import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.service.EmpAuthService;
@@ -35,7 +37,7 @@ public class AdminService {
 	MongoTemplate mongoTemplate;
 
 	@Autowired
-	ConfigManager configManager;
+	ConfigManagerImpl configManager;
 
 	@Autowired
 	private EmpAuthService empAuthService;
@@ -43,8 +45,8 @@ public class AdminService {
 	@Autowired
 	private DocumentUpdateListner documentUpdateListner;
 
-	public List<AgentResponseAdminDto> fetchAgents(String agentId) {
-		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId);
+	public List<AgentResponseAdminDto> fetchAgents(String agentId, boolean includeInActive) {
+		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId, includeInActive);
 		return buildAgentDto(lstOfAgent);
 	}
 
@@ -52,7 +54,7 @@ public class AdminService {
 		AgentDoc reqEntity = EntityDtoUtil.dtoToEntity(reqDto, new AgentDoc());
 		List<AgentDoc> lstOfAgent = adminManager.createOrUpdateAgent(reqEntity);
 		try {
-			if (!ArgUtil.is(reqEntity.getId())) {
+			if (!ArgUtil.is(reqDto.getId()) && ArgUtil.is(reqEntity.getId())) {
 				empAuthService.resetPassword(reqEntity.getAgent_code(), false);
 			}
 		} catch (NoSuchAlgorithmException e) {
@@ -66,8 +68,8 @@ public class AdminService {
 		return new DepartmentResponseAdminDto().importFrom(adminManager.createOrUpdateDepartment(reqEntity));
 	}
 
-	public List<DepartmentResponseAdminDto> fetchDepts(String deptId) {
-		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId);
+	public List<DepartmentResponseAdminDto> fetchDepts(String deptId, boolean includeInActive) {
+		List<DepartmentDoc> lstDept = adminManager.fetchDept(deptId, includeInActive);
 		return new DepartmentResponseAdminDto().importFrom(lstDept);
 	}
 
@@ -124,11 +126,16 @@ public class AdminService {
 
 	private List<AgentResponseAdminDto> buildAgentDto(List<AgentDoc> lstOfAgent) {
 		List<AgentResponseAdminDto> agentList = new AgentResponseAdminDto().importFrom(lstOfAgent);
+		List<DepartmentDoc> depts = adminManager.fetchDept(null, true);
+		Map<String, DepartmentDoc> deptMap = new HashMap<String, DepartmentDoc>();
+		for (DepartmentDoc departmentDoc : depts) {
+			deptMap.put(departmentDoc.getDept_id(), departmentDoc);
+		}
 		for (AgentResponseAdminDto agentResponseDto : agentList) {
 			agentResponseDto.setAgent_password(null);
 			if (ArgUtil.is(agentResponseDto.getId())) {
-				agentResponseDto.setDept(new DepartmentResponseAdminDto().importFrom(CollectionUtil
-						.getOne(adminManager.fetchDept(ArgUtil.parseAsString(agentResponseDto.getDept_id())))));
+				agentResponseDto.setDept(
+						new DepartmentResponseAdminDto().importFrom(deptMap.get(agentResponseDto.getDept_id())));
 			}
 		}
 		return agentList;

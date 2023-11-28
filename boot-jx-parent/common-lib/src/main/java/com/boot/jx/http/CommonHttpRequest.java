@@ -283,6 +283,12 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 		}
 	}
 
+	public void addHeader(String key, String value) {
+		if (response != null) {
+			response.addHeader(key, value);
+		}
+	}
+
 	/**
 	 * 
 	 * @param name
@@ -718,7 +724,7 @@ public class CommonHttpRequest extends ACommonHttpRequest {
 		}
 
 		if (apiRequestConfig != null) {
-			return apiRequestConfig.from(req, reqType);
+			return ArgUtil.nonEmpty(apiRequestConfig.from(req, reqType), reqType);
 		}
 
 		return reqType;

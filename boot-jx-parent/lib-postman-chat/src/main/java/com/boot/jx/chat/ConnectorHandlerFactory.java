@@ -1,5 +1,7 @@
 package com.boot.jx.chat;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -15,7 +17,9 @@ import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMConstants;
@@ -223,6 +227,13 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		void prompt(InboxMessage inboxMessage);
 
+		void linkProfile(ChatSessionDoc session, InboxMessage inboxMessage);
+
+		CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Integer index)
+				throws FileNotFoundException, IOException;
+
+		void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException;
+
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -290,6 +301,10 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 	@Autowired
 	protected MessageContext messageContext;
+
+	@Lazy
+	@Autowired(required = false)
+	private MessageEvents messageEvents;
 
 	/**
 	 * 
@@ -393,6 +408,10 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 				&& ArgUtil.is(outboxMessage.session().getDept())) {
 			ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 			stompTunnelService.sendToTag(outboxMessage.session().getDept(), "/message/sent/new", messageDto);
+		}
+
+		if (messageEvents != null) {
+			messageEvents.postMessageOutBound(outboxMessage);
 		}
 	}
 

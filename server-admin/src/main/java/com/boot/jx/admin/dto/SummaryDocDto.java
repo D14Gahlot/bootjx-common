@@ -8,6 +8,8 @@ public class SummaryDocDto {
 	String date;
 	String channel;
 	String type;
+	String lane;
+	String uniqueContactId;
     Map<String, Object> meta;
 	public String getId() {
 		return id;
@@ -44,6 +46,18 @@ public class SummaryDocDto {
 	}
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
+	}
+	public String getLane() {
+		return lane;
+	}
+	public void setLane(String lane) {
+		this.lane = lane;
+	}
+	public String getUniqueContactId() {
+		return uniqueContactId;
+	}
+	public void setUniqueContactId(String uniqueContactId) {
+		this.uniqueContactId = uniqueContactId;
 	}
 	
 

@@ -19,12 +19,10 @@ import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.BusinessUserDoc;
-import com.boot.jx.account.doc.SignupContact;
-import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
-import com.boot.jx.common.config.ConfigManager;
+import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
@@ -46,7 +44,7 @@ public class CPanelController {
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
-	private ConfigManager configManager;
+	private ConfigManagerImpl configManager;
 
 	@Autowired
 	private AppCommonConfig appCommonConfig;

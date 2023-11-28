@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
@@ -38,7 +39,12 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private String bulkSessionId;
 
 	private String collapseId;
+
+	@Indexed
 	private long timestamp;
+
+	public TimeStampIndex time;
+
 	private String type;
 	private String template;
 	private String templateId;
@@ -75,8 +81,11 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private String mediaReplyId;
 
 	private Map<String, Long> stamps;
-	public List<String> logs;
+	public List<Object> logs;
+	public List<Object> trace;
 	private Map<String, Object> replyTo;
+	private String appType;
+	private String appVenv;
 
 	@Indexed
 	private String contactId;
@@ -146,6 +155,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	}
 
 	public void setHandler(String handler) {
+		this.meta().put("handler", handler);
 		this.handler = handler;
 	}
 
@@ -220,17 +230,17 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 		return patch;
 	}
 
-	public List<String> getLogs() {
+	public List<Object> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<Object> logs) {
 		this.logs = logs;
 	}
 
-	public List<String> logs() {
+	public List<Object> logs() {
 		if (this.logs == null) {
-			this.logs = new ArrayList<String>();
+			this.logs = new ArrayList<Object>();
 		}
 		return this.logs;
 	}
@@ -447,6 +457,45 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 			this.options = new HashMap<String, Object>();
 		}
 		return this.options;
+	}
+
+	public List<Object> getTrace() {
+		return trace;
+	}
+
+	public void setTrace(List<Object> trace) {
+		this.trace = trace;
+	}
+
+	public List<Object> trace() {
+		if (this.trace == null) {
+			this.trace = new ArrayList<Object>();
+		}
+		return this.trace;
+	}
+
+	public String getAppType() {
+		return appType;
+	}
+
+	public void setAppType(String appType) {
+		this.appType = appType;
+	}
+
+	public String getAppVenv() {
+		return appVenv;
+	}
+
+	public void setAppVenv(String appVenv) {
+		this.appVenv = appVenv;
+	}
+
+	public TimeStampIndex getTime() {
+		return time;
+	}
+
+	public void setTime(TimeStampIndex time) {
+		this.time = time;
 	}
 
 }

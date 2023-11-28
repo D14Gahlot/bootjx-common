@@ -1,9 +1,12 @@
 package com.boot.jx.postman.mitel;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.client.RestServiceWithoutSSL;
@@ -41,8 +44,8 @@ public class MitelClient {
 		Ajax ajax = restService.ajax(endPoint).path("/AuthorizationServer/Token").field("grant_type", grantType);
 
 		if (ArgUtil.areEqual(grantType, "password")) {
-			String username = ArgUtil.parseAsString(defaultClient.props().get("username"));
-			String password = ArgUtil.parseAsString(defaultClient.secret().get("password"));
+			String username = ArgUtil.parseAsString(defaultClient.props().get("client_id"));
+			String password = ArgUtil.parseAsString(defaultClient.secret().get("client_secret"));
 			ajax.field("username", username).field("password", password);
 		} else {
 			String clientId = ArgUtil.parseAsString(defaultClient.props().get("client_id"));
@@ -72,6 +75,12 @@ public class MitelClient {
 				}
 			} catch (ResourceAccessException e) {
 				return null;
+			} catch (HttpClientErrorException e) {
+				if (HttpStatus.NOT_FOUND == e.getStatusCode()) {
+					return null;
+				} else {
+					throw e;
+				}
 			}
 		}
 		return null;
@@ -98,16 +107,21 @@ public class MitelClient {
 				.header("Authorization", "Bearer " + accessToken)
 				.postJson(MapModel.createInstance().put("targetUri", url).put("targetUriEmbedded", true)
 						.put("previewUrl", url).put("historyUrl", url).put("queue", queue).put("from", from)
-						.put("to", to).put("subject", contactable.getName()).toMap())
+						.put("to", to).put("subject", contactable.getName() + " " + contactable.getCsid()).toMap())
 				.asMapModel();
 	}
 
 	public MapModel openMediaAction(ClientApp defaultClient, String openmediaId, String action) {
-		String accessToken = getToken(defaultClient);
-		String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
-		return restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia/{id}").pathParam("id", openmediaId)
-				.header("Authorization", "Bearer " + accessToken)
-				.putJson(MapModel.createInstance().put("action", action).toMap()).asMapModel();
+		try {
+			String accessToken = getToken(defaultClient);
+			String endPoint = ArgUtil.parseAsString(defaultClient.props().get("end_point"));
+			return restService.ajax(endPoint).path("/MiccSdk/api/v1/openmedia/{id}").pathParam("id", openmediaId)
+					.header("Authorization", "Bearer " + accessToken)
+					.putJson(MapModel.createInstance().put("action", action).toMap()).asMapModel();
+		} catch (ApiHttpException e) {
+			return MapModel.from(e.getResponse().getBody());
+		}
+
 	}
 
 }

@@ -77,6 +77,10 @@ public class BotEngine {
 		return chatBotDefined;
 	}
 
+	public ChatController getBotByCode(String botCode) {
+		return filtersMap.get("botCode#" + botCode);
+	}
+
 	@PostConstruct
 	public void mapping() {
 		if (ArgUtil.isEmpty(chatControllers)) {
@@ -210,6 +214,7 @@ public class BotEngine {
 	}
 
 	public void invokeMethods(InboxMessage inboxMessageOriginal) {
+
 		String contactId = PostManUtil.createContactId(inboxMessageOriginal);
 		InboxMessage inboxMessage = EntityDtoUtil.entityToDto(inboxMessageOriginal, new InboxMessage());
 
@@ -288,6 +293,7 @@ public class BotEngine {
 				Method method = matchedMethod.getMethod();
 				ChatController controller = filtersMap.get("controllerName#" + matchedMethod.getController());
 				// LOGGER.info("Target Handler : " + method.getName());
+				logManager.addTrace(inboxMessage, "invokeMethods", matchedMethod.getController());
 				List<Class<?>> prmTyps = Arrays.asList(method.getParameterTypes());
 				if (prmTyps.contains(InboxMessage.class) && prmTyps.contains(StringMatcher.class)) {
 					method.invoke(controller, inboxMessage, inboxMessage.getMatcher());
@@ -327,7 +333,7 @@ public class BotEngine {
 						}
 					}
 				}
-				ChatController controller = filtersMap.get("botCode#" + botCode);
+				ChatController controller = getBotByCode(botCode);
 				if (ArgUtil.is(controller)) {
 
 					if (assignEvent.sessionRouted.sessionStart) {

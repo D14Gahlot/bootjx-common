@@ -34,8 +34,10 @@ public class AdminUserController {
 	// Agent
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.GET })
 	public ApiResponse<AgentResponseAdminDto, Object> fetchAgents(
-			@RequestParam(value = "agent_id", required = false) String agent_id) {
-		return ApiResponse.buildResults(adminService.fetchAgents(agent_id));
+			@RequestParam(value = "agent_id", required = false) String agent_id,
+			@RequestParam(required = false, defaultValue = "false") boolean includeInActive) {
+		return ApiResponse.buildResults(adminService.fetchAgents(agent_id, includeInActive));
+		
 	}
 
 	@RequestMapping(value = "/api/admins/agent", method = { RequestMethod.POST })
@@ -72,8 +74,9 @@ public class AdminUserController {
 	// DepartMent
 	@RequestMapping(value = { "/api/admins/dept" }, method = { RequestMethod.GET })
 	public ApiResponse<DepartmentResponseAdminDto, Object> fetchDepts(
-			@RequestParam(value = "dept_id", required = false) String deptId) {
-		return ApiResponse.buildResults(adminService.fetchDepts(deptId));
+			@RequestParam(value = "dept_id", required = false) String deptId,
+			@RequestParam(required = false, defaultValue = "false") boolean includeInActive) {
+		return ApiResponse.buildResults(adminService.fetchDepts(deptId, includeInActive));
 	}
 
 	@RequestMapping(value = { "/api/admins/dept" }, method = { RequestMethod.POST })
@@ -113,6 +116,5 @@ public class AdminUserController {
 		} else {
 			return new ApiResponse<ContactDTO, Object>();
 		}
-
 	}
 }

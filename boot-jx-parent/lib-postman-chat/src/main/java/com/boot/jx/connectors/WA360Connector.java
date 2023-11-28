@@ -1,6 +1,9 @@
 package com.boot.jx.connectors;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +27,8 @@ import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -57,6 +62,7 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.Urly;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -93,7 +99,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChatContactQuery contactQuery = messageContext.contact();
-		ChatContactDoc chatContactDoc = messageContext.contact().getDoc();
+		ChatContactDoc chatContactDoc = contactQuery.getDoc();
 		if (chatContactDoc.getPhone() == null) {
 			contactQuery.setPhone(inboxMessage.contact().getPhone());
 		}
@@ -101,6 +107,11 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 			contactQuery.setPhoneVerified(true);
 		}
 		return null;
+	}
+
+	@Override
+	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
+		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
 	}
 
 	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {
@@ -298,6 +309,38 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		}
 	}
 
+	@Deprecated
+	public CommonFile reloadMedia(Attachment attachment)
+			throws MalformedURLException, FileNotFoundException, IOException {
+		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+				// .fileType(attachment.getMediaType())
+				.format(FileFormat.from(attachment.getMediaMimeType()))
+				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+
+		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+
+		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
+		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+	}
+
+	@Override
+	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
+			throws FileNotFoundException, IOException {
+		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+				// .fileType(attachment.getMediaType())
+				.format(FileFormat.from(attachment.getMediaMimeType()))
+				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+
+			File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+
+		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
+		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
+	}
+
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
@@ -313,17 +356,24 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 				outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 			} else {
 				outboxMessage.logs().add(String.format("Invalid Contact for %s", chatContactDoc));
+				outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			}
 
 		} catch (AmxApiException e) {
 			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
+			outboxMessage.logs().add(e.getMessage());
 		}
 	}
 
 	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
 		MessageReport report = this.createMessageReport(channelConfig);
-		String csid = requestMap.getString("recipient_id");
+		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
+		LOGGER.info("1.toMessageReport csid :" + csid);
+		if (!ArgUtil.is(csid)) {
+			csid = requestMap.getString("recipient_id");
+		}
+		LOGGER.info("2.toMessageReport csid :" + csid);
 		report.contact().setCsid(csid);
 		report.setChangeStamp(requestMap.getLong("timestamp", 0L) * 1000);
 		report.setMessageIdExt(requestMap.getString("id"));
@@ -362,7 +412,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
-
+		LOGGER.info("IN message {DR}"+requestMap);
 		if (requestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
 		}

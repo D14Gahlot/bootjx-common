@@ -1,0 +1,281 @@
+package com.boot.jx.contak.dto;
+
+import java.io.Serializable;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.boot.jx.contak.doc.ContakApiKey;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Document(collection = "CONTAK_COMPANY")
+public class CompanyDoc implements Serializable {
+	private static final long serialVersionUID = 1281605084248923642L;
+
+	@Id
+	public String companyId;
+
+	@Indexed
+	public String legalBusinessName;
+
+	public String displayName;
+
+	@Indexed(unique = true, sparse = true)
+	public String clientId;
+
+	@Indexed(unique = true, sparse = true)
+	public String domain;
+
+	public String countryOfOperation;
+
+	public String address;
+
+	public String websiteUrl;
+
+	public String coiFileUrl;
+
+	public String gstFileUrl;
+
+	public String panFileUrl;
+
+	public String contactPersonName;
+
+	public String contactPhoneNumber;
+
+	public String contactPersonEmailId;
+
+	public String password;
+
+	public String companyTimeZone;
+
+	public TimeStampIndex createdAt;
+
+	public boolean isActive;
+
+	@Indexed
+	public String number;
+
+	@Indexed
+	public String apiKey;
+
+	@DBRef
+	private ContakApiKey api;
+
+	public String logoUrl;
+
+	public CompanyPref prefs;
+	public CompanyMeta meta;
+	public CompanyProfile profile;
+
+	public String getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(String companyId) {
+		this.companyId = companyId;
+	}
+
+	public String getLegalBusinessName() {
+		return legalBusinessName;
+	}
+
+	public void setLegalBusinessName(String legalBusinessName) {
+		this.legalBusinessName = legalBusinessName;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getCountryOfOperation() {
+		return countryOfOperation;
+	}
+
+	public void setCountryOfOperation(String countryOfOperation) {
+		this.countryOfOperation = countryOfOperation;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getWebsiteUrl() {
+		return websiteUrl;
+	}
+
+	public void setWebsiteUrl(String websiteUrl) {
+		this.websiteUrl = websiteUrl;
+	}
+
+	public String getCoiFileUrl() {
+		return coiFileUrl;
+	}
+
+	public void setCoiFileUrl(String coiFileUrl) {
+		this.coiFileUrl = coiFileUrl;
+	}
+
+	public String getGstFileUrl() {
+		return gstFileUrl;
+	}
+
+	public void setGstFileUrl(String gstFileUrl) {
+		this.gstFileUrl = gstFileUrl;
+	}
+
+	public String getPanFileUrl() {
+		return panFileUrl;
+	}
+
+	public void setPanFileUrl(String panFileUrl) {
+		this.panFileUrl = panFileUrl;
+	}
+
+	public String getContactPersonName() {
+		return contactPersonName;
+	}
+
+	public void setContactPersonName(String contactPersonName) {
+		this.contactPersonName = contactPersonName;
+	}
+
+	public String getContactPhoneNumber() {
+		return contactPhoneNumber;
+	}
+
+	public void setContactPhoneNumber(String contactPhoneNumber) {
+		this.contactPhoneNumber = contactPhoneNumber;
+	}
+
+	public String getContactPersonEmailId() {
+		return contactPersonEmailId;
+	}
+
+	public void setContactPersonEmailId(String contactPersonEmailId) {
+		this.contactPersonEmailId = contactPersonEmailId;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getCompanyTimeZone() {
+		return companyTimeZone;
+	}
+
+	public void setCompanyTimeZone(String companyTimeZone) {
+		this.companyTimeZone = companyTimeZone;
+	}
+
+	public TimeStampIndex getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(TimeStampIndex createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public String getNumber() {
+		return number;
+	}
+
+	public void setNumber(String number) {
+		this.number = number;
+	}
+
+	public String getApiKey() {
+		return apiKey;
+	}
+
+	public void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
+	}
+
+	public String getLogoUrl() {
+		return logoUrl;
+	}
+
+	public void setLogoUrl(String logoUrl) {
+		this.logoUrl = logoUrl;
+	}
+
+	public ContakApiKey getApi() {
+		return api;
+	}
+
+	public void setApi(ContakApiKey api) {
+		this.api = api;
+	}
+
+	public String getDomain() {
+		return domain;
+	}
+
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
+
+	public CompanyPref getPrefs() {
+		return prefs;
+	}
+
+	public void setPrefs(CompanyPref prefs) {
+		this.prefs = prefs;
+	}
+
+	public CompanyMeta getMeta() {
+		return meta;
+	}
+
+	public CompanyMeta meta() {
+		if (this.meta == null) {
+			this.meta = new CompanyMeta();
+		}
+		return meta;
+	}
+
+	public void setMeta(CompanyMeta meta) {
+		this.meta = meta;
+	}
+
+	public CompanyProfile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(CompanyProfile profile) {
+		this.profile = profile;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+}

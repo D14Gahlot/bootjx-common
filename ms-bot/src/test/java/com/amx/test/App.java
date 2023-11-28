@@ -5,7 +5,10 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.DateFormatUtil;
+import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public class App { // Noncompliant
@@ -27,11 +30,20 @@ public class App { // Noncompliant
 		return String.join("-", Arrays.copyOfRange(slots, 0, slots.length / 4 * 3));
 	}
 
-	public static void main(String[] args) throws ParseException {
+	public static void main2(String[] args) throws ParseException {
 		DateFormat f = DateFormatUtil.determineDateFormat("16 July, 2020 06:09:52 PM AST");
 
 		System.out.println(f.parse("16 July, 2020 06:09:52 PM AST"));
-
 	}
+	public static void main(String[] args) throws ParseException {
+		String[] texts = StringUtils.split("@app", " ");
+		String commond = ArgUtil.parseAsString(StringUtils.trim(texts[0]), Constants.BLANK);
+		String sign = commond.substring(0, 1);
+		String code = commond.length() > 0 ? commond.substring(1) : null;
+		
+		System.out.println(sign + "--" + code);
+	}
+	
+	
 
 }

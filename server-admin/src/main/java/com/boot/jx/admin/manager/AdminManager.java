@@ -22,7 +22,6 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
@@ -84,26 +83,27 @@ public class AdminManager {
 			if (!ArgUtil.is(agent.getAgent_password())) {
 				agent.setAgent_password(oldAgent.getAgent_password());
 			}
-
-			agent.oldVersion(oldAgent);
+			agent.setOldVersions(null);
 		}
 		agent.setAgent_code(StringUtils.toLowerCase(agent.getAgent_code()));
 		agentStore.save(agent);
-		return
 
-		fetchAgentList(null);
+		return fetchAgentList(null);
 	}
 
-	public List<AgentDoc> fetchAgentList(String agentId) {
+	public List<AgentDoc> fetchAgentList(String agentId, boolean includeInActive) {
 		List<AgentDoc> agentList = new ArrayList<AgentDoc>();
 		if (ArgUtil.is(agentId)) {
 			AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
 			agentList.add(agent);
 		} else {
-			agentList = commonMongoTemplate
-					.find(CommonMongoQueryBuilder.collection(AgentDoc.class).sortBy("agent_code"));
+			agentList = agentStore.findAllAgents(includeInActive);
 		}
 		return agentList;
+	}
+
+	private List<AgentDoc> fetchAgentList(String agentId) {
+		return fetchAgentList(agentId, true);
 	}
 
 	public List<AgentDoc> updateAgentActive(String agentId, String status) {
@@ -171,16 +171,20 @@ public class AdminManager {
 		return fetchDept(null);
 	}
 
-	public List<DepartmentDoc> fetchDept(String deptId) {
+	public List<DepartmentDoc> fetchDept(String deptId, boolean includeInActive) {
 		List<DepartmentDoc> lstDept = new ArrayList<DepartmentDoc>();
 		if (ArgUtil.is(deptId)) {
 			DepartmentDoc dept = mongoTemplate.findOne(new Query(Criteria.where("_id").is(deptId)),
 					DepartmentDoc.class);
 			lstDept.add(dept);
 		} else {
-			lstDept = mongoTemplate.findAll(DepartmentDoc.class);
+			lstDept = agentStore.findDepartmentAll(includeInActive);
 		}
 		return lstDept;
+	}
+
+	public List<DepartmentDoc> fetchDept(String id) {
+		return fetchDept(id, true);
 	}
 
 	public List<DepartmentDoc> updateDeptStatus(Integer deptId, String status) {

@@ -17,7 +17,8 @@
 	</parent>
 	
 	<properties>
-		<jasypt.version>2.0.0</jasypt.version>
+		<spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
+		<jasypt.version>1.9.3</jasypt.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -54,20 +55,29 @@
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
 		</dependency>
 
-
+		<!--
 		<dependency>
 			<groupId>com.github.ulisesbocchio</groupId>
 			<artifactId>jasypt-spring-boot</artifactId>
 			<version>${jasypt.version}</version>
-		</dependency>
+		</dependency> 
+		-->
+
+        <dependency>
+            <groupId>org.jasypt</groupId>
+            <artifactId>jasypt</artifactId>
+            <version>${jasypt.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>

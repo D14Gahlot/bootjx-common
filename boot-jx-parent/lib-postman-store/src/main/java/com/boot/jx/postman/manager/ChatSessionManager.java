@@ -19,6 +19,7 @@ import org.springframework.util.MultiValueMap;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
@@ -35,6 +36,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.SessionSearchQuery;
@@ -48,7 +50,6 @@ import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.TimeUtils;
-import com.boot.utils.UniqueID;
 
 @Component
 public class ChatSessionManager {
@@ -209,7 +210,7 @@ public class ChatSessionManager {
 							Criteria.where("lastOutGoingStamp").gt(graceStamp)));
 		}
 
-		if (query.contains(CHAT_STATE.CLOSED) || query.contains(CHAT_STATUS.CLOSED)) {
+		if (query.hasClosed()) {
 			criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
 		} else if (query.contains(CHAT_STATUS.RESOLVED)) {
 			criterias.add(Criteria.where("resolved").is(true));
@@ -217,7 +218,7 @@ public class ChatSessionManager {
 			query.add(CHAT_MODE.AGENT);
 			criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
 					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
-		} else if (query.contains(CHAT_STATE.EXPIRED) || query.contains(CHAT_STATUS.EXPIRED)) {
+		} else if (query.hasExpired()) {
 			Calendar expiryWatermark = Calendar.getInstance();
 			expiryWatermark.setTimeInMillis(
 					expiryWatermark.getTimeInMillis() - TimeUtils.toMillis(pmClientConfig.getChatSessionTimeout()));
@@ -300,7 +301,9 @@ public class ChatSessionManager {
 		}
 
 		if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
-			query.add(CHAT_MODE.AGENT);
+			if (!query.hasClosed() && !query.hasExpired()) {
+				query.add(CHAT_MODE.AGENT);
+			}
 			primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
 			criterias.add(new Criteria().orOperator(
 					// Assigned to Me
@@ -310,7 +313,9 @@ public class ChatSessionManager {
 			//
 			));
 		} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
-			query.add(CHAT_MODE.AGENT);
+			if (!query.hasClosed() && !query.hasExpired()) {
+				query.add(CHAT_MODE.AGENT);
+			}
 			criterias.add(new Criteria().orOperator(
 					// Not Assigned to Me
 					Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
@@ -411,6 +416,7 @@ public class ChatSessionManager {
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
 
 		String sourceQueue = chatSessionDoc.getAssignedToQueue();
+		String chatStatus = chatSessionDoc.getStatus();
 
 		if (ArgUtil.is(chatSessionDoc.getContactId())) {
 			inBoundEvent.contact().setContactId(inBoundEvent.contactId);
@@ -434,6 +440,7 @@ public class ChatSessionManager {
 						apiKeyConfig.getQueue());
 
 				chatSessionDoc.setRoutingId(inBoundEvent.sessionRouted.routingId);
+				chatSessionDoc.setStatus(CHAT_STATUS.OPEN.toString());
 			} else {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("queue").codeKey("INVALID_QUEUE")
 						.description("Invalid Queue Code " + queueCode));
@@ -443,22 +450,35 @@ public class ChatSessionManager {
 			chatSessionDoc.setAssignedToQueue(null);
 			chatSessionDoc.setMode(null);
 		}
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder().whereId(chatSessionDoc.getSessionId());
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
+				.whereId(chatSessionDoc.getSessionId());
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("mode", chatSessionDoc.getMode());
 		builder.set("routingId", chatSessionDoc.getRoutingId());
+		builder.set("status", chatSessionDoc.getStatus());
 		sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
 
-		if (!ArgUtil.is(sourceQueue, chatSessionDoc.getAssignedToQueue())) {
-			inBoundEvent.sessionRouted.sourceQueue = sourceQueue;
-		} else {
+		if (ArgUtil.not(sourceQueue) || !ArgUtil.is(chatStatus)) {
 			inBoundEvent.sessionRouted.sessionStart = true;
+		} else {
+			inBoundEvent.sessionRouted.sourceQueue = sourceQueue;
 		}
+
 		inBoundEvent.sessionRouted.targetQueue = chatSessionDoc.getAssignedToQueue();
 
 		sessionStore.updateMessageFromSession(chatSessionDoc, inBoundEvent);
+
+		if (inBoundEvent.sessionRouted.sessionStart) {
+			MessageDoc doc = logManager.event(inBoundEvent, queueCode, EVENTS.ON_SESSION_START,
+					inBoundEvent.sessionRouted);
+			inBoundEvent.setEventId(doc.getMessageId());
+		} else {
+			MessageDoc doc = logManager.event(inBoundEvent, queueCode, EVENTS.ON_SESSION_ROUTE,
+					inBoundEvent.sessionRouted);
+			inBoundEvent.setEventId(doc.getMessageId());
+		}
 
 		return inBoundEvent;
 

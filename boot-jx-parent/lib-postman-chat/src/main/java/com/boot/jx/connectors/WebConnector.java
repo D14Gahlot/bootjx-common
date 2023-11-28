@@ -20,9 +20,12 @@ import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -33,6 +36,7 @@ import com.boot.jx.postman.plugin.WebPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -51,6 +55,15 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
+
+	@Autowired(required = false)
+	RedissonClient redisson;
+
+	@Autowired
+	private StompTunnelService stompTunnelService;
+
+	@Autowired
+	private MessageStore messageStore;
 
 	public static class MessageQueue<T> {
 
@@ -85,6 +98,57 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
 	private MessageQueue<OutboxMessage> messageQueue = new MessageQueue<OutboxMessage>(100);
 
+	public OutboxMessage pollUnreadMessage(String contactId) throws InterruptedException {
+		if (redisson == null) {
+			try {
+				return messageQueue.dequeue();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
+		String x = messageQueue.poll(5, TimeUnit.SECONDS);
+
+		if (ArgUtil.is(x)) {
+			return JsonUtil.parse(x, OutboxMessage.class);
+		}
+		return null;
+	}
+
+	public List<Object> pollAllUnreadMessage(String contactId, String sessionid) {
+		List<Object> msgs = new ArrayList<Object>();
+		try {
+			if (redisson == null) {
+				try {
+					OutboxMessage msg = messageQueue.dequeue();
+					if (ArgUtil.is(msg)) {
+						msgs.add(msg);
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			} else if (environment.keyEntry(PROPERTIES.POSTMAN_CHAT_WEB_QUEUE).asBoolean()) {
+				RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
+				String x = messageQueue.poll(5, TimeUnit.SECONDS);
+				while (ArgUtil.is(x)) {
+					msgs.add(JsonUtil.parse(x, OutboxMessage.class));
+					x = messageQueue.poll();
+				}
+			} else if (ArgUtil.is(sessionid)) {
+				List<MessageDoc> messages = messageStore.findBySessionId(sessionid, ContactType.WEBSITE.toString());
+				for (MessageDoc messageDoc : messages) {
+					ChatMessageDTO outboxMessage = ChatDTOUtil.getChatMessageDTO(messageDoc);
+					if (ArgUtil.isEqual(messageDoc.getType(), "I", "O")) {
+						msgs.add(outboxMessage);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return msgs;
+	}
+
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		String contactId = outboxMessage.contact().getContactId();
@@ -100,7 +164,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 				e.printStackTrace();
 			}
 		} else {
-			if (!stompEnabled) {
+			if (!stompEnabled && environment.keyEntry(PROPERTIES.POSTMAN_CHAT_WEB_QUEUE).asBoolean()) {
 				LOGGER.debug("sendReply to " + contactIdWeb);
 				RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactIdWeb);
 				messageQueue.add(JsonUtil.toJson(outboxMessage));
@@ -136,29 +200,6 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		return inboxMessage;
 	}
 
-	@Autowired(required = false)
-	RedissonClient redisson;
-
-	@Autowired
-	private StompTunnelService stompTunnelService;
-
-	public OutboxMessage pollUnreadMessage(String contactId) throws InterruptedException {
-		if (redisson == null) {
-			try {
-				return messageQueue.dequeue();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
-		String x = messageQueue.poll(5, TimeUnit.SECONDS);
-
-		if (ArgUtil.is(x)) {
-			return JsonUtil.parse(x, OutboxMessage.class);
-		}
-		return null;
-	}
-
 	@Override
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 
@@ -167,10 +208,12 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 
 		if (ArgUtil.is(inboxMessage.getForm())) {
 			if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
-				contactQuery.setName(ArgUtil.parseAsString(inboxMessage.getForm().get("name")));
+				String name = ArgUtil.parseAsString(inboxMessage.getForm().get("name"));
+				contactQuery.setName(name);
 			}
 			if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
-				contactQuery.setEmail(ArgUtil.parseAsString(inboxMessage.getForm().get("email")));
+				String email = ArgUtil.parseAsString(inboxMessage.getForm().get("email"));
+				contactQuery.setEmail(email);
 				contactQuery.setEmailVerified(false);
 			}
 			if (ArgUtil.is(inboxMessage.getForm().get("phone"))) {
@@ -182,8 +225,8 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		List<TmplElement> inputs = new ArrayList<TmplElement>();
 		if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 			inputs.add(new TmplElement().code("name").label("Name").type("TEXT"));
-			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
-					inputs);
+//			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+//					inputs);
 		}
 
 		ChannelConfig channel = getChannelConfig(inboxMessage);
@@ -191,17 +234,22 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		if (channel.getWeb().isPromptEmail()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 				inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
-				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-						.option("inputs", inputs);
+//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//						.option("inputs", inputs);
 			}
 		}
 
 		if (channel.getWeb().isPromptPhone()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
 				inputs.add(new TmplElement().code("phone").label("Phone").type("PHONE"));
-				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-						.option("inputs", inputs);
+//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
+//						.option("inputs", inputs);
 			}
+		}
+
+		if (ArgUtil.is(inputs) && inputs.size() > 0) {
+			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+					inputs);
 		}
 
 		return null;

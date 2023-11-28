@@ -31,6 +31,7 @@ public class ChatClient {
 		public static final String INBOUND_FRWRD = "/int/inbound/callback";
 		public static final String SESSION_EVENT = "/int/session/event";
 		public static final String APP_SCRIPT_FRWRD = "/bot/sendMessage";
+		public static final String APP_SCRIPT_FRWRD_OUTBOUND = "/bot/outbound/message";
 	}
 
 	@Autowired
@@ -47,7 +48,8 @@ public class ChatClient {
 		try {
 			if (ArgUtil.is(inboundForwardUrl)) {
 				inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-				return restService.ajax(inboundForwardUrl).post(inboxMessage)
+				return restService.ajax(inboundForwardUrl).post(inboxMessage).cookie("JSESSIONID", "JSESSIONID")
+						.cookie("JXSESSIONID", "JXSESSIONID").cookie("AGENTSESSIONID", "AGENTSESSIONID")
 						.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
 						});
 			}
@@ -62,7 +64,9 @@ public class ChatClient {
 		LOGGER.debug("Assign InboxMessage Session to other Agent ");
 		if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 			inboxMessage.setChecksum(PostManUtil.generateCheckSum(inboxMessage));
-			return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT).post(inboxMessage)
+			return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT)
+					.cookie("JSESSIONID", "JSESSIONID").cookie("JXSESSIONID", "JXSESSIONID")
+					.cookie("AGENTSESSIONID", "AGENTSESSIONID").post(inboxMessage)
 					.as(new ParameterizedTypeReference<ApiResponse<InboxMessage, Object>>() {
 					});
 		} else {
@@ -74,7 +78,9 @@ public class ChatClient {
 		LOGGER.debug("Assign InboxMessage Session to other Agent ");
 		if (ArgUtil.is(pmCommonConfig.getAgentUrl())) {
 			params.setChecksum(PostManUtil.generateCheckSum(params));
-			return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT_V2).post(params)
+			return restService.ajax(pmCommonConfig.getAgentUrl()).path(PATH.ASSIGN_TO_AGENT_V2)
+					.cookie("JSESSIONID", "JSESSIONID").cookie("JXSESSIONID", "JXSESSIONID")
+					.cookie("AGENTSESSIONID", "AGENTSESSIONID").post(params)
 					.as(new ParameterizedTypeReference<InBoundEvent>() {
 					});
 		} else {
@@ -86,7 +92,8 @@ public class ChatClient {
 		LOGGER.debug("Assign InboxMessage Session to other BotCode ");
 		event.setChecksum(PostManUtil.generateCheckSum(event));
 		pmArgs.setChecksum(PostManUtil.generateCheckSum(pmArgs));
-		restService.ajax(inboundForwardUrl).path(PATH.SESSION_EVENT)
+		restService.ajax(inboundForwardUrl).path(PATH.SESSION_EVENT).cookie("JSESSIONID", "JSESSIONID")
+				.cookie("JXSESSIONID", "JXSESSIONID").cookie("AGENTSESSIONID", "AGENTSESSIONID")
 				.post(MapModel.createInstance().put("event", event).put("pmArgs", pmArgs).toMap()).asNone();
 	}
 

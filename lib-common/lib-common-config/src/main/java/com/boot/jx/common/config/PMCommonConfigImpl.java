@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
@@ -28,6 +29,7 @@ import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.boot.utils.UniqueID;
@@ -102,6 +104,14 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		return cdnBuilder.latest(pmEnvironment.keyEntry("mry.cdn.url").asString(cdnUrl));
 	}
 
+	public String getCdnServerDebug() {
+		String debugCdnUrl = commonHttpRequest.get("CDN_URL");
+		if (ArgUtil.is(debugCdnUrl) && !(debugCdnUrl.startsWith("http://") || debugCdnUrl.startsWith("https://"))) {
+			debugCdnUrl = CryptoUtil.getEncoder().message(debugCdnUrl).decodeBase64().toString();
+		}
+		return ArgUtil.parseAsString(debugCdnUrl, getCdnServer());
+	}
+
 	private long getVersion() {
 		return System.currentTimeMillis() / 300000;
 	}
@@ -112,6 +122,15 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 			map.put(entry.getValue(), pmEnvironment.keyEntry(entry.getKey()).asString());
 		}
 		return map;
+	}
+
+	private SafeKeyHashMap<Object> permsConfigAttributes() {
+		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
+		for (PERMS_KEY config : ConfigConstants.PERMS_KEY.values()) {
+			setup.put(config.name(),
+					ArgUtil.nonEmpty(pmEnvironment.permEntry(config.getKey()).getValue(), config.getDefaultValue()));
+		}
+		return setup;
 	}
 
 	private SafeKeyHashMap<Object> setupConfigAttributes() {
@@ -128,6 +147,14 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		if (ArgUtil.is(channelConfig)) {
 			setup.put("POSTMAN_CHAT_WEB_CHANNEL", channelConfig.getChannelId());
 			setup.put("POSTMAN_CHAT_WEB_CHANNEL_KEY", channelConfig.getChannelKey());
+			if (ArgUtil.is(channelConfig.getWeb())) {
+				if (ArgUtil.is(channelConfig.getWeb().getTitle())) {
+					setup.put("POSTMAN_CHAT_WEB_CHANNEL_TITLE", channelConfig.getWeb().getTitle());
+				}
+				if (ArgUtil.is(channelConfig.getWeb().getStylesheet())) {
+					setup.put("POSTMAN_CHAT_WEB_CHANNEL_STYLESHEET", channelConfig.getWeb().getStylesheet());
+				}
+			}
 		}
 		return setup;
 	}
@@ -146,6 +173,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		Map<String, Object> map = commonAttributes();
 		map.putAll(appConfigAttributes());
 		map.put("SETUP", setupConfigAttributes());
+		map.put("PERMS", permsConfigAttributes());
 		map.put("timestamp", System.currentTimeMillis());
 		return map;
 	}
@@ -157,8 +185,9 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		map.put("CONFIG", config);
 		map.put("CONFIG_JSON", JsonUtil.toJson(config));
 		map.put("APP", app);
-		String debugCdnUrl = commonHttpRequest.get("CDN_URL");
-		map.put("CDN_URL", ArgUtil.parseAsString(debugCdnUrl, getCdnServer()));
+		String debugCdnUrl = getCdnServerDebug();
+
+		map.put("CDN_URL", debugCdnUrl);
 
 		if (ArgUtil.is(debugCdnUrl) && (debugCdnUrl.contains("127.0.0.1") || debugCdnUrl.contains("localhost"))) {
 			map.put("CDN_DEBUG", ArgUtil.parseAsString(commonHttpRequest.get("CDN_DEBUG"), "true"));
@@ -187,6 +216,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	@EventListener(ApplicationReadyEvent.class)
 	public void onApplicationReady() {
 		try {
+			LOGGER.info("=======================ApplicationReadyEvent");
 			pmEnvironment.initConfig();
 		} catch (Exception e) {
 			LOGGER.error("pmEnvironment.reload", e);
@@ -198,12 +228,12 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	}
 
 	public String getBotUrl() {
-		return botUrl;
+		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_BOT_URL).asString(this.botUrl);
 	}
 
 	@Override
 	public String getAgentUrl() {
-		return agentUrl;
+		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_AGENT_URL).asString(this.agentUrl);
 	}
 
 	@Override
@@ -232,7 +262,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	@Override
 	public String getScriptusUrl() {
 		// return "http://localhost:8085/";
-		return this.scriptusUrl;
+		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SCRIPTUS_URL).asString(this.scriptusUrl);
 	}
 
 	@Override

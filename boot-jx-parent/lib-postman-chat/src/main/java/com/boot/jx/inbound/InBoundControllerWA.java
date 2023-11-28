@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
+import com.boot.jx.connectors.WA360CloudConnector;
 import com.boot.jx.connectors.WA360Connector;
 import com.boot.jx.connectors.WAGupShupAgentConnector;
 import com.boot.jx.connectors.WAGupShupConnector;
@@ -150,7 +151,7 @@ public class InBoundControllerWA {
 				event = waGupShupAgentConnector.toInboxMessage(JsonUtil.toObject(inboundMap, GupShupInboundV2.class));
 			}
 			event.setOriginalMessage(inboundMap);
-			inBoundService.invokeMethods(event);
+			inBoundService.invokeMethodsAsync(event);
 			return event;
 		} catch (Exception e) {
 			LOGGER.error("INBOUND", e);
@@ -198,12 +199,25 @@ public class InBoundControllerWA {
 		connectorHandlerFactory.onChannelUpdate(CHANNEL_TYPE.WA_360D, lane);
 		return ApiResponse.build();
 	}
+	
+	
+	@Autowired
+	private WA360CloudConnector w360CloudConnector;
+	
+	
+	@RequestMapping(value = "/ext/inbound/wac360/registerwebhook", method = RequestMethod.GET)
+	public ApiResponse<Object, Object> registerCloudWebHook(@RequestParam(required = false) String lane)
+		throws InterruptedException {
+	connectorHandlerFactory.onChannelUpdate(CHANNEL_TYPE.WA_360DC, lane);
+	return ApiResponse.build();
+		}
+		
 
 	@Autowired
 	private AuditService auditService;
 
-	@RequestMapping(value = "/ext/inbound/wa360/callback/{accountKey}/{channelId}/{channelKey}",
-			method = { RequestMethod.POST })
+	@Deprecated
+	@RequestMapping(value = "/ext/inbound/wa360/callback/{accountKey}/{channelId}/{channelKey}", method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> onWA360Message(@PathVariable(required = false) String accountKey,
 			@PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
 			@RequestBody Map<String, Object> data) {
