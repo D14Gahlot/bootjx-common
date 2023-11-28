@@ -47,6 +47,8 @@ import com.boot.jx.account.doc.DomainSummaryMetaDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaStore;
 import com.boot.jx.account.dto.AccountDashBoardRequestDto;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
+import com.boot.jx.account.dto.AdminAgentAccount;
+import com.boot.jx.account.dto.AdminAgentAccountDto;
 import com.boot.jx.account.dto.ContactTypeCountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.DateWiseHourCountDto;
@@ -58,6 +60,8 @@ import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.api.EventCountDto;
 import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
@@ -92,6 +96,9 @@ public class AccountDashBoardManager {
 
 	@Autowired
 	private PMEnvironment environment;
+	
+	@Autowired
+	AgentStore agentStore;
 
 	public List<DomainDoc> getAllDomainAccount() {
 		Query query = new Query();
@@ -1373,4 +1380,37 @@ public class AccountDashBoardManager {
 		return lstofChanelShotCode;
 	}
 	
+	/** day wise event count summary **/
+
+
+	public AdminAgentAccountDto getAdminAgentSummary() {
+		String tnt = AppContextUtil.getTenant();
+		AdminAgentAccountDto dto = new AdminAgentAccountDto();
+		List<AdminAgentAccountDto> adminAgentLstAccountDtos = new ArrayList<>();
+		List<AdminAgentAccount> adminAgentAccount= new ArrayList<>();
+		
+		
+		
+		List<DomainDoc> domainDocLst =getAllDomainAccount();
+		//for(DomainDoc dom:domainDocLst) {
+		//	LOGGER.info("tnt :"+dom.getDomain());
+		//	AppContextUtil.setTenant(dom.getDomain());
+			List<AgentDoc> agentDocLst=agentStore.findAllAgents(false);
+			
+		
+		for(AgentDoc agent:agentDocLst) {
+			AdminAgentAccount dtoa = new AdminAgentAccount();
+			dtoa.setAgent_name(agent.getAgent_name());
+			dtoa.setAgent_code(agent.getAgent_code());
+			dtoa.setAgent_email(agent.getAgent_email());
+			dtoa.setAgent_number(agent.getAgent_number());
+			dtoa.setAdmin(agent.isAdmin());
+			adminAgentAccount.add(dtoa);
+		}
+		dto.setDomain(tnt);
+		dto.setAdminAgentAccountDtls(adminAgentAccount);
+		//}
+		
+		return dto;
+	}
 }

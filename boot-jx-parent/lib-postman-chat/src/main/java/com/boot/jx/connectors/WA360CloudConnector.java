@@ -308,7 +308,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 			CommonFileStream srcFile = new CommonFileStream().url(mediaUrl).fileType(fileType)
 					.format(FileFormat.from(media.getMimeType()))
-					.header(WA360Constants.BASE_CLOUD_URL, channelConfig.getWa360dc().getApiKey())
+					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 					.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
 			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
@@ -321,6 +321,27 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		}
 	}
 
+	@Override
+	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
+			throws FileNotFoundException, IOException {
+
+		String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig, attachment.getMediaSrc());
+
+		CommonFileStream srcFile = new CommonFileStream().url(mediaUrl)
+				// .fileType(attachment.getMediaType())
+				.format(FileFormat.from(attachment.getMediaMimeType()))
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption(),
+						attachment.getMediaMimeType(), "File"));
+
+		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+
+		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
+		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
+	}
+
+	@Deprecated
 	public CommonFile reloadMedia(Attachment attachment)
 			throws MalformedURLException, FileNotFoundException, IOException {
 		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
@@ -334,25 +355,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
 				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
 		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
-	}
-
-	@Override
-	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
-			throws FileNotFoundException, IOException {
-
-		String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig,attachment.getMediaSrc());
-
-		CommonFileStream srcFile = new CommonFileStream().url(mediaUrl)
-				// .fileType(attachment.getMediaType())
-				.format(FileFormat.from(attachment.getMediaMimeType()))
-				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
-
-		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
-
-		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
-				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
-		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
 	}
 
 	@Override

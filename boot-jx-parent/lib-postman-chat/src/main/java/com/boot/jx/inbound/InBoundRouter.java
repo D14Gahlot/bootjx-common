@@ -18,12 +18,14 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMConstants.ParamKeys;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -62,6 +64,9 @@ public class InBoundRouter {
 	@Autowired
 	private MessageStore messageStore;
 
+	@Autowired
+	private RestService restService;
+
 	public void inboundMessageEvent(String channelId, Map<String, Object> data) {
 		MapModel map = MapModel.from(data);
 		PMConfiguration config = pmEnvironment.config();
@@ -85,7 +90,10 @@ public class InBoundRouter {
 			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
 				connector.onMessageReports(messageBoxEvent.getMessageReports());
 				inBoundStatusService.update(messageBoxEvent.getMessageReports());
+			} else if (ArgUtil.is(channelConfig.getUnhandledInboundForward())) {
+				restService.ajax(channelConfig.getUnhandledInboundForward()).post(data).asNone();
 			}
+
 		} catch (Exception e) {
 			auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);
 		}
