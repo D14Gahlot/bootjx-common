@@ -52,9 +52,9 @@ public class MoengageApi {
 	public ApiResponse<OutBoundReciept, Object> sendMessage(@RequestParam String channelId ,@RequestBody MapModel mapModel) {
 		
 		LOGGER.info("MoengageApi { sendMessage }"+channelId+"\n MAP"+JsonUtil.toJson(mapModel));
-		Map<String, Object> messageMap = mapModel.pathEntry("payload").asMap();
-		System.out.println("\n ===messageMap "+messageMap);
-		//Map<String, Object> messageMap = mapModel.toMap();
+		//Map<String, Object> messageMap = mapModel.pathEntry("payload").asMap();
+		
+		Map<String, Object> messageMap = mapModel.toMap();
 		messageMap = JsonUtil.toJsonMap(messageMap);
 		System.out.println("messageMap  ==="+messageMap);
 		OutboxMessage outBoxmessage=new OutboxMessage();
@@ -72,13 +72,13 @@ public class MoengageApi {
 		ContactMeta contactmeta = new ContactMeta();
 		LOGGER.info("messageWrapper ---"+map);
 		MapModel botreply = MapModel.from(map);
-		MapPathEntry text = botreply.keyEntry("text");
-		MapPathEntry quickReplyEntries = botreply.keyEntry("quick_replies");
-		MapPathEntry attachment = botreply.keyEntry("attachment");
+		//MapPathEntry text = botreply.keyEntry("text");
+		//MapPathEntry quickReplyEntries = botreply.keyEntry("quick_replies");
+		//MapPathEntry attachment = botreply.keyEntry("attachment");
 		/** setting up the template **/
-		MapPathEntry template = botreply.keyEntry("template");
+		//MapPathEntry template = botreply.keyEntry("template");
 	
-		LOGGER.info("messageWrapper ---template "+template);
+		//LOGGER.info("messageWrapper ---template "+template);
 		/** setting the contact **/
 		String to =(String)botreply.get("to");
 		contactmeta.setPhone(to);
@@ -90,7 +90,7 @@ public class MoengageApi {
 		
 	
 		
-		if (attachment.exists()) {
+	/*	if (attachment.exists()) {
 			if (attachment.keyEntry("type").is("template")) {
 				MapPathEntry payload = attachment.keyEntry("payload");
 				if (payload.keyEntry("template_type").is("button")) {
@@ -204,7 +204,7 @@ public class MoengageApi {
 			 return outboxMessage.message(text.asString());
 		}else if(template.exists()) {
 			
-		}
+		}*/
 		return outboxMessage;
 	}
 
