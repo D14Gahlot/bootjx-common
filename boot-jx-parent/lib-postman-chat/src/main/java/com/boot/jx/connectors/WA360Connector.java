@@ -412,7 +412,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
-
+		LOGGER.info("IN message {DR}"+requestMap);
 		if (requestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
 		}
