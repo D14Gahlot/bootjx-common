@@ -531,9 +531,9 @@ public class WA360CloudClient {
 			url = WA360Constants.MEDIA_CLOUD_URL(mid);
 		}
 
-		MapModel resp = null;//restService.ajax(url.replace("/v1/media/", "/"))
-		//		.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).acceptJson().get()
-		//		.asMapModelSafe();
+		MapModel resp = restService.ajax(url.replace("/v1/media/", "/"))
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).acceptJson().get()
+				.asMapModelSafe();
 		return resp.getString("url").replace("https://lookaside.fbsbx.com", WA360Constants.BASE_CLOUD_URL);
 	}
 	
