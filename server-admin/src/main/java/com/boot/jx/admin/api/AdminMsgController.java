@@ -128,8 +128,7 @@ public class AdminMsgController {
 	@RequestMapping(value = "/api/message/v1/session", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> fetchSessionV1(@RequestBody SessionSearchRequest query) {
 		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-		List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
-				query.toStamp);
+		List<ChatSessionDoc> sessions = chatSessionManager.searchByV1(query.status, query.tags, query.fromStamp,query.toStamp);
 		
 		/** for comatability **/
 		
@@ -165,23 +164,10 @@ public class AdminMsgController {
 		}
 		/** for comatability end **/
 		
-		
 		for (ChatSessionDoc chatSessionDoc : sessions) {
 			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
 			chatSessionDtos.add(chatSessionDto);
 		}
-		/**
-		 * remove duplicate /multiple Session for each contact we can filter based on
-		 * name , phone number on any field
-		 **/
-		if (chatSessionDtos != null && !chatSessionDtos.isEmpty()) {
-			Set<String> chatSessionSet = new HashSet<>();
-			chatSessionDtos = chatSessionDtos.stream().filter(e -> chatSessionSet.add(e.getPhone()))
-					.collect(Collectors.toList());
-		}
-		
-		
-		
 		
 		return ApiResponse.buildResults(chatSessionDtos);
 	}

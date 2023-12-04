@@ -690,6 +690,35 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		LOGGER.debug("query {===}" + query);
 		return super.find(query, ChatSessionDoc.class);
 	}
+	
+	
+	
+	public List<ChatSessionDoc> findByStatusOrQuickTagV1(List<CHAT_STATUS> status, List<String> tagCategory,
+			long fromStamp, long toStamp) {
+		List<String> statusLst = new ArrayList<>();;
+		if ((status == null || status.isEmpty() || status.contains(null)) && (tagCategory == null
+				|| tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains(""))) {
+			statusLst.add(CHAT_STATUS.OPEN.toString());
+		} else {
+			for (CHAT_STATUS chatSt : status) {
+				statusLst.add(chatSt.toString());
+			}
+		}
+
+		Query query = new Query();
+
+		query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
+
+		if (statusLst != null && !statusLst.isEmpty()) {
+			query.addCriteria(Criteria.where("status").in(statusLst));
+		}
+		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
+			query.addCriteria(Criteria.where("tagId").in(tagCategory));
+		}
+		query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
+		LOGGER.debug("query {===}" + query);
+		return super.find(query, ChatSessionDoc.class);
+	}
 
 	public String getLastAssignedAgent(Contactable contact) {
 		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)

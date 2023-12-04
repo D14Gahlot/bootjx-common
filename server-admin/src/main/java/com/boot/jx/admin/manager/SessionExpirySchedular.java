@@ -134,8 +134,6 @@ public class SessionExpirySchedular  extends CommonMongoTemplateAbstract<Session
 			String chatSessId = chatSessionDoc.getSessionId();
 			String csid =chatSessionDoc.getContact().getCsid();
 			long startSessionStamp = chatSessionDoc.getStartSessionStamp();
-			System.out.println("csid :"+csid+"\t startSessionStamp :"+startSessionStamp+"\t Id :"+chatSessionDoc.getSessionId());
-			
 			Query wabaQry = new Query();
 			wabaQry.addCriteria(Criteria.where("contact.csid").is(csid));
 			wabaQry.with(new Sort(new Order(Direction.DESC, "created.stamp")));
