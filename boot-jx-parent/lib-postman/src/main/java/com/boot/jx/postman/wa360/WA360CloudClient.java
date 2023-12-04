@@ -301,9 +301,13 @@ public class WA360CloudClient {
 			req.put("video", wa360OutBoundMedia);
 		} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
-			wa360OutBoundMedia.setCaption(null);
+			WA360CloudOutBoundAudio wa360OutBoundMediaAudio = new WA360CloudOutBoundAudio();
+			wa360OutBoundMediaAudio.setLink(attachment.getMediaURL());
+			
+			//wa360OutBoundMedia.setCaption(null);
 			// wa360OutBoundMedia.setFilename(null);
-			req.put("audio", wa360OutBoundMedia);
+			//req.put("audio", wa360OutBoundMedia);
+			req.put("audio", wa360OutBoundMediaAudio);
 		} else {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
 			req.put("document", wa360OutBoundMedia);
@@ -527,9 +531,9 @@ public class WA360CloudClient {
 			url = WA360Constants.MEDIA_CLOUD_URL(mid);
 		}
 
-		MapModel resp = restService.ajax(url.replace("/v1/media/", "/"))
-				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).acceptJson().get()
-				.asMapModelSafe();
+		MapModel resp = null;//restService.ajax(url.replace("/v1/media/", "/"))
+		//		.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).acceptJson().get()
+		//		.asMapModelSafe();
 		return resp.getString("url").replace("https://lookaside.fbsbx.com", WA360Constants.BASE_CLOUD_URL);
 	}
 	
