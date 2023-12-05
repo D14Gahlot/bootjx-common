@@ -698,7 +698,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		List<String> statusLst = new ArrayList<>();;
 		if ((status == null || status.isEmpty() || status.contains(null)) && (tagCategory == null
 				|| tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains(""))) {
-			statusLst.add(CHAT_STATUS.OPEN.toString());
+			//statusLst.add(CHAT_STATUS.OPEN.toString()); for all status
 		} else {
 			for (CHAT_STATUS chatSt : status) {
 				statusLst.add(chatSt.toString());
