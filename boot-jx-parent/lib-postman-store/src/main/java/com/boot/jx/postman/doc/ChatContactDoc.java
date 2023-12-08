@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatInfoDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserDTO;
 import com.boot.jx.postman.dto.ContactPrefsDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
@@ -88,6 +89,11 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 	@Indexed
 	private String profileId;
 	private ChatUserDTO user;
+	private ChatInfoDTO info;
+
+	
+
+	
 
 	private Long createdStamp;
 	private String createdBy;
@@ -352,12 +358,25 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 	public void setUser(ChatUserDTO user) {
 		this.user = user;
 	}
+	
+	public ChatInfoDTO getInfo() {
+		return info;
+	}
 
+	public void setInfo(ChatInfoDTO info) {
+		this.info = info;
+	}
 	public ChatUserDTO user() {
 		if (this.user == null) {
 			this.user = new ChatUserDTO();
 		}
 		return user;
+	}
+	public ChatInfoDTO info() {
+		if (this.info == null) {
+			this.info = new ChatInfoDTO();
+		}
+		return info;
 	}
 
 	public ChatUserProfileDTO profile() {

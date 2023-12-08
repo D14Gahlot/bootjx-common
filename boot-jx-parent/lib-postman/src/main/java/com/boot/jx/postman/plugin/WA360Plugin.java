@@ -42,8 +42,20 @@ public class WA360Plugin implements DefaultChannelPlugin<WA360ConfigDetails> {
 		
 
 		@ConfigMetaProperty(path = "wa360d.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
-				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptPhone;
+		
+		@ConfigMetaProperty(path = "wa360d.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptName;
+
+		public boolean isPromptName() {
+			return promptName;
+		}
+
+		public void setPromptName(boolean promptName) {
+			this.promptName = promptName;
+		}
 
 		@Override
 		public String getLane() {

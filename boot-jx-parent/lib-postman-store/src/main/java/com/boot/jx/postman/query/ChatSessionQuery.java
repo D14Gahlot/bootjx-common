@@ -11,6 +11,7 @@ import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.SafeKeyHashMap;
+import com.boot.model.MapModel.MapEntry;
 
 public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
@@ -41,6 +42,10 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 
 	public Object get(String key) {
 		return this.doc.store().get(key);
+	}
+
+	public MapEntry getEntry(String key) {
+		return new MapEntry(get(key));
 	}
 
 	public ChatSessionQuery put(String key, String object) {
