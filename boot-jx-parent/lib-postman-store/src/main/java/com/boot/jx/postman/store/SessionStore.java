@@ -694,7 +694,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	
 	
 	public List<ChatSessionDoc> findByStatusOrQuickTagV1(List<CHAT_STATUS> status, List<String> tagCategory,
-			long fromStamp, long toStamp) {
+			long startStampLong, long endStampLong) {
 		List<String> statusLst = new ArrayList<>();;
 		if ((status == null || status.isEmpty() || status.contains(null)) && (tagCategory == null
 				|| tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains(""))) {
@@ -704,20 +704,50 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 				statusLst.add(chatSt.toString());
 			}
 		}
+		
+		Criteria criteria = new Criteria();
 
-		Query query = new Query();
+		Query query2 = new Query();
+		
+		
+		Criteria dateCriteria = new Criteria().orOperator(
+				new Criteria().andOperator(Criteria.where("startSessionStamp").gt(startStampLong),
+						Criteria.where("startSessionStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(startStampLong),
+						Criteria.where("closeSessionStamp").lt(endStampLong)),
 
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
+				new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(startStampLong),
+						Criteria.where("assignedDeptStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(startStampLong),
+						Criteria.where("assignedAgentStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(startStampLong),
+						Criteria.where("fistResponseStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(startStampLong),
+						Criteria.where("lastResponseStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(startStampLong),
+						Criteria.where("lastInComingStamp").lt(endStampLong)));
+
+		criteria.andOperator(dateCriteria);
+		
+		
 
 		if (statusLst != null && !statusLst.isEmpty()) {
-			query.addCriteria(Criteria.where("status").in(statusLst));
+			query2.addCriteria(Criteria.where("status").in(statusLst));
 		}
 		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
-			query.addCriteria(Criteria.where("tagId").in(tagCategory));
+			query2.addCriteria(Criteria.where("tagId").in(tagCategory));
 		}
-		query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
-		LOGGER.debug("query {===}" + query);
-		return super.find(query, ChatSessionDoc.class);
+		
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
+		System.out.println("query2 =="+query2);
+		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
+		System.out.println("messages "+messages.size());
+		
+		LOGGER.debug("query {===}" + query2);
+		return messages;
+		
 	}
 
 	public String getLastAssignedAgent(Contactable contact) {

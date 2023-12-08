@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -39,6 +41,7 @@ import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
@@ -53,10 +56,13 @@ import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
 
 @RestController
 public class AdminMsgController {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AdminMsgController.class);
+
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -126,36 +132,80 @@ public class AdminMsgController {
 	
 	
 	@RequestMapping(value = "/api/message/v1/session", method = { RequestMethod.POST })
-	public ApiResponse<ChatSessionDTO, Object> fetchSessionV1(@RequestBody SessionSearchRequest query) {
-		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-		List<ChatSessionDoc> sessions = chatSessionManager.searchByV1(query.status, query.tags, query.fromStamp,query.toStamp);
+	public ApiResponse<ChatSessionDoc, Object> fetchSessionV1(@RequestBody SessionSearchRequest query) {
+		LOGGER.info("fetchSessionV1 :"+JsonUtil.toJson(query));
+		//List<ChatSessionDoc> sessions = chatSessionManager.searchByV1(query.status, query.tags, query.fromStamp,query.toStamp);
+		List<ChatSessionDoc> sessions =new ArrayList<ChatSessionDoc>(); 
+		
+		Long startStampLong = query.fromStamp;
+		Long endStampLong = query.toStamp;
+		
+		Criteria criteria = new Criteria();
+
+		Query query2 = new Query();
+		
+		
+		Criteria dateCriteria = new Criteria().orOperator(
+				new Criteria().andOperator(Criteria.where("startSessionStamp").gt(startStampLong),
+						Criteria.where("startSessionStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(startStampLong),
+						Criteria.where("closeSessionStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(startStampLong),
+						Criteria.where("assignedDeptStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(startStampLong),
+						Criteria.where("assignedAgentStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(startStampLong),
+						Criteria.where("fistResponseStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(startStampLong),
+						Criteria.where("lastResponseStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(startStampLong),
+						Criteria.where("lastInComingStamp").lt(endStampLong)));
+
+		criteria.andOperator(dateCriteria);
+		
+		
+
+		
+		
+		/** start **/
+		
+		List<String> tagCategory = new ArrayList<String>();
+		for (QuickTag tag : query.tags) {
+			tagCategory.add(tag.getId());
+		}
+		List<CHAT_STATUS> status = query.status;
+		
+		
+		List<String> statusLst = new ArrayList<>();;
+		if ((status == null || status.isEmpty() || status.contains(null))) {
+			//statusLst.add(CHAT_STATUS.OPEN.toString()); for all status
+		} else {
+			for (CHAT_STATUS chatSt : status) {
+				statusLst.add(chatSt.toString());
+			}
+		}
+		
+		
+		if (statusLst != null && !statusLst.isEmpty()) {
+			query2.addCriteria(Criteria.where("status").in(statusLst));
+		}
+		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
+			query2.addCriteria(Criteria.where("tagId").in(tagCategory));
+		}
+		
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
+		sessions = mongoTemplate.find(query2, ChatSessionDoc.class);
+		/** end **/
+		
 		
 		/** for comatability **/
 		
 		if(sessions==null || sessions.isEmpty()) {
-			Criteria criteria = new Criteria();
-			Query query2 = new Query();
-			Criteria dateCriteria = new Criteria().orOperator(
-					new Criteria().andOperator(Criteria.where("startSessionStamp").gt(query.fromStamp),
-							Criteria.where("startSessionStamp").lt(query.toStamp)),
-					new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(query.fromStamp),
-							Criteria.where("closeSessionStamp").lt(query.toStamp)),
-
-					new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(query.fromStamp),
-							Criteria.where("assignedDeptStamp").lt(query.toStamp)),
-					new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(query.fromStamp),
-							Criteria.where("assignedAgentStamp").lt(query.toStamp)),
-
-					new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(query.fromStamp),
-							Criteria.where("fistResponseStamp").lt(query.toStamp)),
-					new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(query.fromStamp),
-							Criteria.where("lastResponseStamp").lt(query.toStamp)),
-
-					new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(query.fromStamp),
-							Criteria.where("lastInComingStamp").lt(query.toStamp)));
-
+			query2 = new Query();
 			criteria.andOperator(dateCriteria);
-
 			if (ArgUtil.is(query.agantCode)) {
 				criteria.and("assignedToAgent").is(query.agantCode);
 			}
@@ -163,13 +213,7 @@ public class AdminMsgController {
 			 sessions = mongoTemplate.find(query2, ChatSessionDoc.class);
 		}
 		/** for comatability end **/
-		
-		for (ChatSessionDoc chatSessionDoc : sessions) {
-			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
-			chatSessionDtos.add(chatSessionDto);
-		}
-		
-		return ApiResponse.buildResults(chatSessionDtos);
+		return ApiResponse.buildResults(sessions);
 	}
 	
 	
