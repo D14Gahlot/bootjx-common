@@ -393,6 +393,18 @@ public class AdminMsgController {
 				return ApiResponse.buildResult(lst).message(message);
 			}
 			
+		}else if(CSVHelper.hasExcelSXFormat(file)){
+
+			try {
+				lst = fileService.readExcelXS(templateId, file);
+				message = "Uploaded the file successfully: " + file.getOriginalFilename();
+				OutboxMessage outboxMessage = new OutboxMessage();
+				outboxMessage.setReferenceKey(lst.getReferenceKey());
+				return ApiResponse.buildResult(lst).message(message);
+			} catch (Exception e) {
+				message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+				return ApiResponse.buildResult(lst).message(message);
+			}
 		}else {
 			message = "Please upload a csv or excel file!";
 			return ApiResponse.buildResult(lst).message(message);
