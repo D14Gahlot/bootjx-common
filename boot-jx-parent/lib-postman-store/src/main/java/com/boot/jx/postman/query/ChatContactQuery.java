@@ -259,5 +259,24 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 
 		return this;
 	}
+	
+	  public ChatContactQuery setInfoEmail(String email) {
+
+			this.doc.info().setEmail(email);
+			this.set("info.email", email);
+			return this;
+		}
+	  
+	  public ChatContactQuery setInfoPhone(String phone) {
+			this.doc.info().setPhone(phone);
+			this.set("info.phone", phone);
+			return this;
+		}
+	  
+	  public ChatContactQuery setInfoName(String name) {
+			this.doc.info().setName(name);
+			this.set("info.name", name);
+			return this;
+		}
 
 }
