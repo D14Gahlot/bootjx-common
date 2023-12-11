@@ -38,7 +38,7 @@ import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
-
+import org.apache.poi.ss.formula.eval.NumberEval;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -248,12 +248,12 @@ public class CSVHelper {
 						headerName = cell.getStringCellValue();
 						break;
 					case Cell.CELL_TYPE_NUMERIC: // field that represents number cell type
-						headerName =String.valueOf(cell.getNumericCellValue());
+						NumberEval tempValue=new NumberEval(cell.getNumericCellValue());
+						headerName =tempValue.getStringValue();
 						break;
 					default:
 						headerName =String.valueOf(cell.getStringCellValue());
 					}
-					
 					if(i!=0) {
 						 String columnName =templVarLst.get(j);
 						 columnName = StringUtils.substring(columnName.trim(),(columnName.indexOf(".") + 1));
@@ -266,7 +266,6 @@ public class CSVHelper {
 					}
 				 j++;
 				}
-				System.out.println("");
 				i++;
 				if(map!=null && !map.isEmpty()) {
 					lst.add(map);
@@ -277,7 +276,6 @@ public class CSVHelper {
 			dto.setLstMap(lst);
 			dto.setCsvMap(getMap(lst));
 			dto.setLstErrors(lsterrors);
-			LOGGER.info("Json Util :"+JsonUtil.toJsonPrettyPrint(dto));
 			return dto;
 			
 		} catch (IOException e) {
