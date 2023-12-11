@@ -216,6 +216,12 @@ public class AgentAuthController {
 								.add("/topics/com-filter-agent-" + agent.getAgent_code())));
 
 			}
+		} else if (agentSession.isLoggedIn()) {
+			resp.data(MapModel.createInstance().put("subscriptions",
+					MapModel.createInstance().add("/topics/com-filter-any")
+							.add("/topics/com-filter-domain-" + domainName)
+							.add("/topics/com-filter-dept-" + agentSession.getAgentDept())
+							.add("/topics/com-filter-agent-" + agentSession.getAgentCode())));
 		}
 		return resp;
 	}
