@@ -194,6 +194,39 @@ public class AgentAuthController {
 	}
 
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
+	@RequestMapping(value = { "/app/meta", "/auth/meta", "/pub/meta" },
+			method = { RequestMethod.POST, RequestMethod.GET })
+	@ResponseBody
+	public ApiResponse<Object, AgentResponseAuthDto> authMeta(HttpServletRequest request, HttpServletResponse response,
+			Model model, @RequestParam(required = false) String domainName,
+			@RequestParam(required = false) String domainId, @RequestParam(required = false) String domainUser,
+			@RequestParam(required = false) String domainUserEmail, @RequestParam(required = false) String domainToken,
+			@RequestParam(required = false) String domainTokenValid) throws NoSuchAlgorithmException {
+		ApiResponse<Object, AgentResponseAuthDto> resp = new ApiResponse<Object, AgentResponseAuthDto>();
+		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
+			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
+					domainId, domainToken, false);
+			if (ArgUtil.is(agent)) {
+				resp.meta(agent);
+				resp.data(MapModel.createInstance().put("subscriptions",
+						MapModel.createInstance().add("/topics/com-filter-any")
+								.add("/topics/com-filter-domain-" + domainName)
+								.add("/topics/com-filter-dept-"
+										+ (ArgUtil.is(agent.getDept()) ? agent.getDept().getDept_code() : "none"))
+								.add("/topics/com-filter-agent-" + agent.getAgent_code())));
+
+			}
+		} else if (agentSession.isLoggedIn()) {
+			resp.data(MapModel.createInstance().put("subscriptions",
+					MapModel.createInstance().add("/topics/com-filter-any")
+							.add("/topics/com-filter-domain-" + domainName)
+							.add("/topics/com-filter-dept-" + agentSession.getAgentDept())
+							.add("/topics/com-filter-agent-" + agentSession.getAgentCode())));
+		}
+		return resp;
+	}
+
+	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = { "/plug/**", "/plug", "/plug_{plug}/**", "/plug_{plug}" },
 			method = { RequestMethod.POST, RequestMethod.GET })
 	public String plugOlin(HttpServletRequest request, Model model, @PathVariable(required = false) String plug)

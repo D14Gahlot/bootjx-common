@@ -118,7 +118,7 @@ public class ConfigOptionMetaController {
 					.filter(channel -> channel.equals(contactType)).collect(Collectors.toList()));
 		}
 		List<AChannelConfig> x = pmEnvironment.config().listChannels();
-		//System.out.println(JsonUtil.toJson(x));
+		// System.out.println(JsonUtil.toJson(x));
 		return ApiResponse.buildResults(x);
 	}
 
@@ -131,11 +131,12 @@ public class ConfigOptionMetaController {
 	@ResponseBody
 	@RequestMapping(value = { "/api/options/inbound_queue" }, method = { RequestMethod.GET })
 	public ApiResponse<ClientApp, Object> getInboundQueues(@RequestParam(required = false) CHAT_MODE mode,
-			@RequestParam(required = false) APP_TYPE type) {
-		if (ArgUtil.is(type))
-			return ApiResponse.buildResults(pmEnvironment.config().listApps().stream().filter(app -> app.equals(type))
-					.collect(Collectors.toList()));
-		else if (ArgUtil.is(mode))
+			@RequestParam(required = false) APP_TYPE type, @RequestParam(required = false) APP_TYPE appType) {
+		APP_TYPE clientAppType = ArgUtil.nonEmpty(type, appType);
+		if (ArgUtil.is(clientAppType)) {
+			return ApiResponse.buildResults(pmEnvironment.config().listApps().stream()
+					.filter(app -> app.equals(clientAppType)).collect(Collectors.toList()));
+		} else if (ArgUtil.is(mode))
 			return ApiResponse.buildResults(pmEnvironment.config().listApps().stream().filter(app -> app.equals(mode))
 					.collect(Collectors.toList()));
 		return ApiResponse.buildResults(pmEnvironment.config().listApps());
