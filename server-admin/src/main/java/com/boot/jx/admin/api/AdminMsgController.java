@@ -2,6 +2,7 @@ package com.boot.jx.admin.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +64,6 @@ import com.google.i18n.phonenumbers.NumberParseException;
 public class AdminMsgController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminMsgController.class);
 
-
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
@@ -87,10 +87,9 @@ public class AdminMsgController {
 
 	@Autowired
 	public CSVService fileService;
-	
+
 	@Autowired
 	public ChatSessionManager chatSessionManager;
-
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -125,26 +124,28 @@ public class AdminMsgController {
 		if (ArgUtil.is(agentCode)) {
 			criteria.and("assignedToAgent").is(agentCode);
 		}
-		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
 		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
+
 		return ApiResponse.buildResults(messages);
 	}
-	
-	
+
 	@RequestMapping(value = "/api/message/v1/session", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDoc, Object> fetchSessionV1(@RequestBody SessionSearchRequest query) {
-		LOGGER.info("fetchSessionV1 :"+JsonUtil.toJson(query));
-		//List<ChatSessionDoc> sessions = chatSessionManager.searchByV1(query.status, query.tags, query.fromStamp,query.toStamp);
-		List<ChatSessionDoc> sessions =new ArrayList<ChatSessionDoc>(); 
-		
+		LOGGER.info("fetchSessionV1 :" + JsonUtil.toJson(query));
+		List<ChatSessionDoc> messageSessnDocs = new ArrayList<ChatSessionDoc>();
+		List<ChatSessionDoc> sessions = null;
+		// sessions = chatSessionManager.searchByV1(query.status, query.tags,
+		// query.fromStamp,query.toStamp);
+		sessions = new ArrayList<ChatSessionDoc>();
+
 		Long startStampLong = query.fromStamp;
 		Long endStampLong = query.toStamp;
-		
+
 		Criteria criteria = new Criteria();
 
 		Query query2 = new Query();
-		
-		
+
 		Criteria dateCriteria = new Criteria().orOperator(
 				new Criteria().andOperator(Criteria.where("startSessionStamp").gt(startStampLong),
 						Criteria.where("startSessionStamp").lt(endStampLong)),
@@ -165,58 +166,85 @@ public class AdminMsgController {
 						Criteria.where("lastInComingStamp").lt(endStampLong)));
 
 		criteria.andOperator(dateCriteria);
-		
-		
 
-		
-		
+		if (ArgUtil.is(query.agantCode)) {
+			criteria.and("assignedToAgent").is(query.agantCode);
+		}
+
 		/** start **/
-		
+
 		List<String> tagCategory = new ArrayList<String>();
 		for (QuickTag tag : query.tags) {
 			tagCategory.add(tag.getId());
 		}
+		Collections.sort(tagCategory);
 		List<CHAT_STATUS> status = query.status;
-		
-		
-		List<String> statusLst = new ArrayList<>();;
+		List<String> statusLst = new ArrayList<>();
+		;
 		if ((status == null || status.isEmpty() || status.contains(null))) {
-			//statusLst.add(CHAT_STATUS.OPEN.toString()); for all status
+			LOGGER.info("status :" + status);
 		} else {
 			for (CHAT_STATUS chatSt : status) {
 				statusLst.add(chatSt.toString());
 			}
 		}
-		
-		
+
 //		if (statusLst != null && !statusLst.isEmpty()) {
 //			query2.addCriteria(Criteria.where("status").in(statusLst));
 //		}
 //		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
 //			query2.addCriteria(Criteria.where("tagId").in(tagCategory));
 //		}
-		
-		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
+
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
 		sessions = mongoTemplate.find(query2, ChatSessionDoc.class);
-		/** end **/
-		
-		
-		/** for comatability **/
-		
-		if(sessions==null || sessions.isEmpty()) {
-			query2 = new Query();
-			criteria.andOperator(dateCriteria);
-			if (ArgUtil.is(query.agantCode)) {
-				criteria.and("assignedToAgent").is(query.agantCode);
+
+		List<ChatSessionDoc> statusDocLst = new ArrayList<>();
+		List<ChatSessionDoc> tagLst = new ArrayList<>();
+
+		if (ArgUtil.is(statusLst)) {
+			for (ChatSessionDoc doc : sessions) {
+				for (String sts : statusLst) {
+					if (doc.getStatus() != null && doc.getStatus().equalsIgnoreCase(sts)) {
+						statusDocLst.add(doc);
+					}
+				}
 			}
-			 query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
-			 sessions = mongoTemplate.find(query2, ChatSessionDoc.class);
 		}
-		/** for comatability end **/
-		return ApiResponse.buildResults(sessions);
+
+		if (ArgUtil.is(tagCategory)) {
+			for (ChatSessionDoc doc : sessions) {
+
+				if (ArgUtil.is(doc.getTagId())) {
+					List<String> docTagIdList = doc.getTagId();
+					Collections.sort(docTagIdList);
+					boolean booTag = tagCategory.stream().filter(element -> docTagIdList.contains(element)).findFirst()
+							.isPresent();
+					if (booTag) {
+						if (statusDocLst != null && !statusDocLst.contains(doc)) {
+							tagLst.add(doc);
+						}
+
+					}
+				}
+			}
+		}
+		if (statusDocLst != null && !statusDocLst.isEmpty()) {
+			messageSessnDocs.addAll(statusDocLst);
+		}
+
+		if (tagLst != null && !tagLst.isEmpty()) {
+			messageSessnDocs.addAll(tagLst);
+		}
+
+		if (messageSessnDocs == null || messageSessnDocs.isEmpty()) {
+			messageSessnDocs.addAll(sessions);
+		}
+		/** end **/
+
+		return ApiResponse.buildResults(messageSessnDocs);
 	}
-	
-	
+
 	@RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
 		chatSessionDto = chatArchive.getChatSession(chatSessionDto);
@@ -381,7 +409,7 @@ public class AdminMsgController {
 				message = "Could not upload the file: " + file.getOriginalFilename() + "!";
 				return ApiResponse.buildResult(lst).message(message);
 			}
-		}else if(CSVHelper.hasExcelFormat(file)) {
+		} else if (CSVHelper.hasExcelFormat(file)) {
 			try {
 				lst = fileService.readExcel(templateId, file);
 				message = "Uploaded the file successfully: " + file.getOriginalFilename();
@@ -392,8 +420,8 @@ public class AdminMsgController {
 				message = "Could not upload the file: " + file.getOriginalFilename() + "!";
 				return ApiResponse.buildResult(lst).message(message);
 			}
-			
-		}else if(CSVHelper.hasExcelSXFormat(file)){
+
+		} else if (CSVHelper.hasExcelSXFormat(file)) {
 
 			try {
 				lst = fileService.readExcelXS(templateId, file);
@@ -405,7 +433,7 @@ public class AdminMsgController {
 				message = "Could not upload the file: " + file.getOriginalFilename() + "!";
 				return ApiResponse.buildResult(lst).message(message);
 			}
-		}else {
+		} else {
 			message = "Please upload a csv or excel file!";
 			return ApiResponse.buildResult(lst).message(message);
 		}
