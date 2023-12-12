@@ -18,7 +18,7 @@ public class Attachment implements Serializable {
 			allowableValues = "IMAGE,DOCUMENT,TEXT,PDF,VIDEO,URL,AUDIO")
 	String mediaType;
 
-	@ApiMockModelProperty(example = "IMAGE", value = "Media SubType Type", allowableValues = "STORY_MENTION,SHARE,mediaTargetBackground etc")
+	@ApiMockModelProperty(example = "IMAGE", value = "Media SubType Type", allowableValues = "STORY_MENTION,SHARE,bg_voice etc")
 	String mediaSubType;
 
 	@ApiMockModelProperty(example = "image/png", value = "Mime Type")
@@ -44,24 +44,6 @@ public class Attachment implements Serializable {
 	@ApiMockModelProperty(example = "ABC_PROMO", value = "QuickMedia Code")
 	String mediaCode;
 	
-
-	/*boolean mediaTargetBackground=true;
-
-	public boolean isMediaTargetBackground() {
-		return mediaTargetBackground;
-	}
-
-	public void setMediaTargetBackground(boolean mediaTargetBackground) {
-		this.mediaTargetBackground = mediaTargetBackground;
-	}
-
-	
-	
-	public Attachment bgVoiceAttachment(boolean mediaTargetBackground) {
-		this.mediaTargetBackground = mediaTargetBackground;
-		return this;
-	}*/
-
 
 	public String getMediaURL() {
 		return mediaURL;

@@ -126,7 +126,7 @@ public class ConfigOptionMetaController {
 					.filter(channel -> channel.equals(contactType)).collect(Collectors.toList()));
 		}
 		List<AChannelConfig> x = pmEnvironment.config().listChannels();
-		//System.out.println(JsonUtil.toJson(x));
+		// System.out.println(JsonUtil.toJson(x));
 		return ApiResponse.buildResults(x);
 	}
 
@@ -282,25 +282,24 @@ public class ConfigOptionMetaController {
 	@RequestMapping(value = "/api/meta/chat_status", method = { RequestMethod.GET })
 	public ApiResponse<CHAT_STATUS, Object> chatStatus() {
 		return ApiResponse.buildResults(PMConstants.CHAT_STATUS.values());
-		
+
 	}
+
 	@Autowired
 	AWSFileStore fileStore;
 
 	@RequestMapping(value = "/api/media/{bucket}", method = { RequestMethod.POST })
-	public CommonFile createQuickMedia(@RequestParam(name = "file", required = true) MultipartFile file) {
-			 CommonFile commonfile = fileStore.upload1(file,
-					String.format("%s/{bucket}/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
-					file.getOriginalFilename());
-			String  url = commonfile.getUrl();
-			FileType fileType = commonfile.getFileType();
-			FileFormat fileFormat = commonfile.getFileFormat();
-			
-		
-	
+	public CommonFile createBucketMedia(@PathVariable String bucket,
+			@RequestParam(name = "file", required = true) MultipartFile file,
+			@RequestParam(name = "name", required = false) String name,
+			@RequestParam(name = "folder", required = false) String folder) {
+		String file_name = ArgUtil.nonEmpty(folder, UUID.randomUUID().toString());
+		String folder_path = ArgUtil.nonEmpty(name, UUID.randomUUID().toString());
+
+		CommonFile commonfile = fileStore.upload1(file,
+				String.format("%s",name, AppContextUtil.getTenant(), file_name), folder_path);
+
 		return commonfile;
 
-       }
+	}
 }
-
-
