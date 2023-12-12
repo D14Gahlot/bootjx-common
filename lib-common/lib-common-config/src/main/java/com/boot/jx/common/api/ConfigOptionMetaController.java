@@ -293,11 +293,11 @@ public class ConfigOptionMetaController {
 			@RequestParam(name = "file", required = true) MultipartFile file,
 			@RequestParam(name = "name", required = false) String name,
 			@RequestParam(name = "folder", required = false) String folder) {
-		String file_name = ArgUtil.nonEmpty(folder, UUID.randomUUID().toString());
-		String folder_path = ArgUtil.nonEmpty(name, UUID.randomUUID().toString());
+		String file_name = ArgUtil.nonEmpty(name, UUID.randomUUID().toString());
+		String folder_path = ArgUtil.nonEmpty(folder, UUID.randomUUID().toString());
 
 		CommonFile commonfile = fileStore.upload1(file,
-				String.format("%s %s %s", AppContextUtil.getTenant(), bucket, file_name), folder_path);
+				String.format("%s/%s/%s", AppContextUtil.getTenant(), bucket, file_name), folder_path);
 
 		return commonfile;
 
