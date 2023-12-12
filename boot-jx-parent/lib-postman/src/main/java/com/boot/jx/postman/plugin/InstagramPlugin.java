@@ -42,14 +42,27 @@ public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
 		private String verifyToken;
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String appSecret;
-        
-		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
+		@ConfigMetaProperty(path = "instagram.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
+		
 
-		@ConfigMetaProperty(path = "web.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
-				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
+		@ConfigMetaProperty(path = "instagram.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptPhone;
+		
+		@ConfigMetaProperty(path = "instagram.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptName;
+
+		public boolean isPromptName() {
+			return promptName;
+		}
+
+		public void setPromptName(boolean promptName) {
+			this.promptName = promptName;
+		}
+
 		public boolean isPromptEmail() {
 			return promptEmail;
 		}

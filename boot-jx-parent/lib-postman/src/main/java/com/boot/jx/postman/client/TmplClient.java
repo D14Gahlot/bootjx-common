@@ -108,6 +108,10 @@ public class TmplClient {
 		if (ArgUtil.is(defaultAttachment) && outboxMessage.attachments().size() == 0) {
 			outboxMessage.attachments().add(defaultAttachment);
 		}
+		Attachment backgroundVoice = optionsModel.keyEntry("mediaTargetBackground").as(Attachment.class);
+		if (ArgUtil.is(defaultAttachment) && outboxMessage.attachments().size() == 0) {
+			outboxMessage.attachments().add(backgroundVoice);
+		}
 
 		outboxMessage.options().putAll(options);
 		return outboxMessage;

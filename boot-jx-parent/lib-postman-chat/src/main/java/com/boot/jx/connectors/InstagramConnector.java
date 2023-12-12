@@ -77,52 +77,49 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 			contactQuery.setProfilePic(profile.getProfilePic());
 			contactQuery.setName(profile.getName());
 			contactQuery.setEmail(profile.getEmail());
-			if (ArgUtil.is(inboxMessage.getForm())) {
-				if (ArgUtil.is(inboxMessage.getForm().get("name"))) {
-					String name = ArgUtil.parseAsString(inboxMessage.getForm().get("name"));
-					contactQuery.setName("Rahul");
-				}
-				if (ArgUtil.is(inboxMessage.getForm().get("email"))) {
-					String email = ArgUtil.parseAsString(inboxMessage.getForm().get("email"));
-					contactQuery.setEmail(email);
-					//contactQuery.setEmailVerified(false);
-				}
-				if (ArgUtil.is(inboxMessage.getForm().get("phone"))) {
-					contactQuery.setPhone(ArgUtil.parseAsString(inboxMessage.getForm().get("phone")));
-					//contactQuery.setPhoneVerified(false);
-				}
+			String user_input_type=this.context().session().getEntry("session_init_user_input_type").asString();
+			if(ArgUtil.is(user_input_type))
+					{
+			 if(user_input_type.equals("name"))
+		 		{
+		 	  contactQuery.setInfoName(inboxMessage.getMessage());
+		 		}
+			if(user_input_type.equals("email"))
+			{
+		           contactQuery.setInfoEmail(inboxMessage.getMessage());
 			}
-
-			List<TmplElement> inputs = new ArrayList<TmplElement>();
-			if (ArgUtil.isEmpty(chatContactDoc.getName())) {
-				inputs.add(new TmplElement().code("name").label("Name").type("TEXT"));
-//				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
-//						inputs);
+	        if(user_input_type.equals("phone"))
+			{
+		           contactQuery.setInfoPhone(inboxMessage.getMessage());
 			}
-
+				
+					}
 			ChannelConfig channel = getChannelConfig(inboxMessage);
-
-			if (channel.getInstagram().isPromptEmail()) {
-				if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
-					inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
-//					return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-//							.option("inputs", inputs);
+			
+	      
+			if (channel.getInstagram().isPromptName()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
+					this.context().session().put("session_init_user_input_type", "name");
+					return (OutboxMessage) inboxMessage.replyMessage("Could you please help us with your name");
 				}
-			}
-
-			if (channel.getInstagram().isPromptPhone()) {
-				if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
-					inputs.add(new TmplElement().code("phone").label("Phone").type("PHONE"));
-//					return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue")
-//							.option("inputs", inputs);
-				}
-			}
-
-			if (ArgUtil.is(inputs) && inputs.size() > 0) {
-				return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
-						inputs);
+				
 			}
 			
+			if (channel.getInstagram().isPromptEmail()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
+					this.context().session().put("session_init_user_input_type", "email");	
+					return (OutboxMessage) inboxMessage.replyMessage("Could you please help us with your email");
+				}
+				
+			}
+			
+			if (channel.getInstagram().isPromptPhone()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
+					this.context().session().put("session_init_user_input_type", "phone");
+				return (OutboxMessage) inboxMessage.replyMessage("Could you please help us with your phone");
+				}
+			
+			}
 		} catch (ApiHttpException e) {
 			logManager.error(inboxMessage, e);
 		}
