@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,6 +22,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,10 @@ import com.boot.jx.postman.PMConstants.FILE_TYPE;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+
+import org.apache.poi.ss.formula.eval.NumberEval;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import springfox.documentation.swagger.web.SwaggerApiListingReader;
 
@@ -52,11 +59,21 @@ public class CSVHelper {
 	}
 
 	public static boolean hasExcelFormat(MultipartFile file) {
-		if (!FILE_TYPE.EXCEL.equals(file.getContentType())) {
-			return false;
+		if (FILE_TYPE.EXCEL.equals(file.getContentType()) ||
+			FILE_TYPE.XLS.equals(file.getContentType())) {
+			return true;
 		}
-		return true;
+		return false;
 	}
+	
+	public static boolean hasExcelSXFormat(MultipartFile file) {
+		if (FILE_TYPE.XLSX.equals(file.getContentType())) {
+			return true;
+		}
+		return false;
+	}
+	
+	
 
 	public CsvDto csvToTutorials(String templateId, InputStream is) throws IOException {
 		CsvDto dto = new CsvDto();
@@ -118,6 +135,7 @@ public class CSVHelper {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public CsvDto readExcel(String templateId, InputStream is) throws IOException {
 		CsvDto dto = new CsvDto();
 		HSSFWorkbook wb  = null;
@@ -127,7 +145,6 @@ public class CSVHelper {
 		try {
 
 			List<String> templVarLst = fetchTemplateHeader(templateId);
-
 			dto.setTemplateId(templateId);
 
 			// creating workbook instance that refers to .xls file
@@ -196,6 +213,83 @@ public class CSVHelper {
 		}
 		
 	}
+	
+	
+	/** read xlsx file **/
+	
+	
+	
+ 	@SuppressWarnings("deprecation")
+	public CsvDto readExcelXS(String templateId, InputStream is) throws IOException {
+		CsvDto dto = new CsvDto();
+		XSSFWorkbook wb  = null;
+		List<Map<Object, Object>> lst = new ArrayList<>();
+		List<String> lsterrors = new ArrayList<>();
+		int i =0;
+		try {
+
+			List<String> templVarLst = fetchTemplateHeader(templateId);
+			dto.setTemplateId(templateId);
+			
+			 wb = new XSSFWorkbook(is);
+			XSSFSheet sheet = wb.getSheetAt(0); // creating a Sheet object to retrieve object
+			Iterator<Row> itr = sheet.iterator(); // iterating over excel file
+			
+			while (itr.hasNext()) {
+				Map<Object, Object> map = new HashMap<>();
+				String headerName=null;
+				int j =0;
+				Row row = itr.next();
+				Iterator<Cell> cellIterator = row.cellIterator(); // iterating over each column
+				while (cellIterator.hasNext()) {
+					Cell cell = cellIterator.next();
+					switch (cell.getCellType()) {
+					case Cell.CELL_TYPE_STRING: // field that represents string cell type
+						headerName = cell.getStringCellValue();
+						break;
+					case Cell.CELL_TYPE_NUMERIC: // field that represents number cell type
+						NumberEval tempValue=new NumberEval(cell.getNumericCellValue());
+						headerName =tempValue.getStringValue();
+						break;
+					default:
+						headerName =String.valueOf(cell.getStringCellValue());
+					}
+					if(i!=0) {
+						 String columnName =templVarLst.get(j);
+						 columnName = StringUtils.substring(columnName.trim(),(columnName.indexOf(".") + 1));
+						 if (PMConstants.CONTACTS.equalsIgnoreCase(columnName)) {
+							 headerName = getContactValue(headerName);
+							}
+						 
+						 map.put(columnName, headerName);
+						//LOGGER.info("i "+i+"\t j :"+j+"\t Temp value :"+templVarLst.get(j)+"\t headerName :"+headerName);
+					}
+				 j++;
+				}
+				i++;
+				if(map!=null && !map.isEmpty()) {
+					lst.add(map);
+				}
+			}
+			
+			
+			dto.setLstMap(lst);
+			dto.setCsvMap(getMap(lst));
+			dto.setLstErrors(lsterrors);
+			return dto;
+			
+		} catch (IOException e) {
+			LOGGER.info("readExcel exception "+e.getMessage());
+			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+		}finally {
+			if(wb!=null) {
+				wb.close();
+			}
+		}
+		
+	}
+	
+	
 
 	public List<String> fetchTemplateHeader(String templateId) {
 		Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}");

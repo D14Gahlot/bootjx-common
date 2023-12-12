@@ -312,6 +312,7 @@ public class PMConstants {
 		public static String CSV = "text/csv";
 		public static String EXCEL = "application/vnd.ms-excel";
 		public static String XLS = "application/xls";
+		public static String XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	}
 
 }

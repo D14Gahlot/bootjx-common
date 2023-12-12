@@ -37,7 +37,20 @@ public class CSVService {
 		    try {
 		    	CsvDto dto = csvHelper.readExcel(templateId,file.getInputStream());
 		    	if(dto.getLstErrors().isEmpty()) {
-		    	 mongoTemplate.save(dto);
+		    	   mongoTemplate.save(dto);
+		    	}
+		    	return dto;
+		    } catch (IOException e) {
+		      throw new RuntimeException("fail to store excel data: " + e.getMessage());
+		    }
+		    
+		  }
+	 
+	 public CsvDto readExcelXS(String templateId,MultipartFile file) {
+		    try {
+		    	CsvDto dto = csvHelper.readExcelXS(templateId,file.getInputStream());
+		    	if(dto.getLstErrors().isEmpty()) {
+		    	   mongoTemplate.save(dto);
 		    	}
 		    	return dto;
 		    } catch (IOException e) {

@@ -1,6 +1,9 @@
 package com.boot.jx.postman.plugin;
 
+import com.boot.jx.common.impl.ConfigMeta.CONVERT_TYPE;
 import com.boot.jx.common.impl.ConfigMeta.ConfigMetaProperty;
+import com.boot.jx.common.impl.ConfigMeta.DATA_TYPE;
+import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
@@ -32,6 +35,20 @@ public class WA360Plugin implements DefaultChannelPlugin<WA360ConfigDetails> {
 		@ConfigMetaProperty(path = "wa360d.apiKey", title = "API Key", writeonly = true, desc = "Enter Your WABA Key")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String apiKey;
+		
+		@ConfigMetaProperty(path = "wa360d.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptEmail;
+		
+
+		@ConfigMetaProperty(path = "wa360d.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptPhone;
+		
+		@ConfigMetaProperty(path = "wa360d.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptName;
+		
 
 		@Override
 		public String getLane() {
@@ -52,6 +69,30 @@ public class WA360Plugin implements DefaultChannelPlugin<WA360ConfigDetails> {
 
 		public void setApiKey(String apiKey) {
 			this.apiKey = apiKey;
+		}
+
+		public boolean isPromptEmail() {
+			return promptEmail;
+		}
+
+		public void setPromptEmail(boolean promptEmail) {
+			this.promptEmail = promptEmail;
+		}
+
+		public boolean isPromptPhone() {
+			return promptPhone;
+		}
+
+		public void setPromptPhone(boolean promptPhone) {
+			this.promptPhone = promptPhone;
+		}
+
+		public boolean isPromptName() {
+			return promptName;
+		}
+
+		public void setPromptName(boolean promptName) {
+			this.promptName = promptName;
 		}
 	}
 
