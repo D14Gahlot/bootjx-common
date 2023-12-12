@@ -3,6 +3,7 @@ package com.boot.jx.common.api;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ClientAppConfigConstants;
@@ -24,7 +28,10 @@ import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.dict.FileFormat;
+import com.boot.jx.dict.FileType;
 import com.boot.jx.http.ApiRequest;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
@@ -41,11 +48,12 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
+import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
+//import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
@@ -118,7 +126,7 @@ public class ConfigOptionMetaController {
 					.filter(channel -> channel.equals(contactType)).collect(Collectors.toList()));
 		}
 		List<AChannelConfig> x = pmEnvironment.config().listChannels();
-		//System.out.println(JsonUtil.toJson(x));
+		// System.out.println(JsonUtil.toJson(x));
 		return ApiResponse.buildResults(x);
 	}
 
@@ -274,5 +282,24 @@ public class ConfigOptionMetaController {
 	@RequestMapping(value = "/api/meta/chat_status", method = { RequestMethod.GET })
 	public ApiResponse<CHAT_STATUS, Object> chatStatus() {
 		return ApiResponse.buildResults(PMConstants.CHAT_STATUS.values());
+
+	}
+
+	@Autowired
+	AWSFileStore fileStore;
+
+	@RequestMapping(value = "/api/media/{bucket}", method = { RequestMethod.POST })
+	public CommonFile createBucketMedia(@PathVariable String bucket,
+			@RequestParam(name = "file", required = true) MultipartFile file,
+			@RequestParam(name = "name", required = false) String name,
+			@RequestParam(name = "folder", required = false) String folder) {
+		String file_name = ArgUtil.nonEmpty(folder, UUID.randomUUID().toString());
+		String folder_path = ArgUtil.nonEmpty(name, UUID.randomUUID().toString());
+
+		CommonFile commonfile = fileStore.upload1(file,
+				String.format("%s",name, AppContextUtil.getTenant(), file_name), folder_path);
+
+		return commonfile;
+
 	}
 }
