@@ -88,7 +88,7 @@ public class ConfigConstants {
 
 		POSTMAN_CHAT_FEEDBACK_QUEUE(new ConfigMeta("Default Feedback Queue", PROPERTIES.POSTMAN_CHAT_FEEDBACK_QUEUE)
 				.desc("Default Feedback App").optionsSource("getx:/api/options/inbound_queue").optionsKey("code")
-				.optionsLabel("code").filter("type", APP_TYPE.FEEDBACK)),
+				.optionsLabel("code").filter("appType", APP_TYPE.FEEDBACK)),
 
 		POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 				.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
