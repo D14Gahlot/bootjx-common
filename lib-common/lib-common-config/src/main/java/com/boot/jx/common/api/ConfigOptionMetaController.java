@@ -298,7 +298,7 @@ public class ConfigOptionMetaController {
 		String folder_path = ArgUtil.nonEmpty(folder, UUID.randomUUID().toString());
 
 		CommonFile commonfile = fileStore.upload1(file,
-				String.format("%s/%s/%s", AppContextUtil.getTenant(), bucket, file_name), folder_path);
+				String.format("%s/%s/%s", AppContextUtil.getTenant(), bucket, folder_path), file_name);
 
 		return commonfile;
 
