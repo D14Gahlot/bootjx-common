@@ -12,12 +12,13 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
+public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 
 	@Override
 	public ContactType getContactType() {
@@ -159,7 +160,7 @@ public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
 		return config.getInstagram();
 	}
 
-	@Override
+	/*@Override
 	public void addConfigMeta(List<ConfigMeta> list) {
 		list.add(new ConfigMeta().path("instagram.pageId").title("Instagram Id").createonly());
 		list.add(new ConfigMeta().path("instagram.type").title("Type").optionValues("page").hidden());
@@ -178,7 +179,7 @@ public class InstagramPlugin implements ChannelPlugin<InstagramConfig> {
 		channelDetails.setAccessToken(map.pathEntry("instagram.accessToken").asString(channelDetails.getAccessToken()));
 		channelDetails.setAppSecret(map.pathEntry("instagram.appSecret").asString(channelDetails.getAppSecret()));
 	}
-
+*/
 	@Override
 	public boolean isPushAllowed() {
 		return false;
