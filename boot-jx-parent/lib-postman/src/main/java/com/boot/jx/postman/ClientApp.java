@@ -71,4 +71,9 @@ public interface ClientApp extends Serializable, AuditIdentifier {
 	public default String auditIdentifier() {
 		return this.getQueue();
 	}
+
+	public default String getType() {
+		return this.getAppType();
+	}
+
 }
