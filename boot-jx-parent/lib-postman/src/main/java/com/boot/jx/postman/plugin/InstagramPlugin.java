@@ -43,17 +43,13 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 		private String verifyToken;
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String appSecret;
-		@ConfigMetaProperty(path = "instagram.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
-				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		@ConfigMetaProperty(path = "instagram.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptEmail;
-		
 
-		@ConfigMetaProperty(path = "instagram.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
-				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		@ConfigMetaProperty(path = "instagram.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptPhone;
-		
-		@ConfigMetaProperty(path = "instagram.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS,
-				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+
+		@ConfigMetaProperty(path = "instagram.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptName;
 
 		public boolean isPromptName() {
@@ -79,6 +75,7 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 		public void setPromptPhone(boolean promptPhone) {
 			this.promptPhone = promptPhone;
 		}
+
 		public String getPageId() {
 			return pageId;
 		}
@@ -160,26 +157,35 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 		return config.getInstagram();
 	}
 
-	/*@Override
-	public void addConfigMeta(List<ConfigMeta> list) {
-		list.add(new ConfigMeta().path("instagram.pageId").title("Instagram Id").createonly());
-		list.add(new ConfigMeta().path("instagram.type").title("Type").optionValues("page").hidden());
-		list.add(new ConfigMeta().path("instagram.handler").title("Handle"));
-		list.add(new ConfigMeta().path("instagram.verifyToken").title("Verify Token").writeonly());
-		list.add(new ConfigMeta().path("instagram.accessToken").title("Access Token").writeonly());
-		list.add(new ConfigMeta().path("instagram.appSecret").title("App Secret").writeonly());
-	}
+	/*
+	 * @Override public void addConfigMeta(List<ConfigMeta> list) { list.add(new
+	 * ConfigMeta().path("instagram.pageId").title("Instagram Id").createonly());
+	 * list.add(new
+	 * ConfigMeta().path("instagram.type").title("Type").optionValues("page").hidden
+	 * ()); list.add(new ConfigMeta().path("instagram.handler").title("Handle"));
+	 * list.add(new
+	 * ConfigMeta().path("instagram.verifyToken").title("Verify Token").writeonly())
+	 * ; list.add(new
+	 * ConfigMeta().path("instagram.accessToken").title("Access Token").writeonly())
+	 * ; list.add(new
+	 * ConfigMeta().path("instagram.appSecret").title("App Secret").writeonly()); }
+	 * 
+	 * @Override public void importChannelDetailsFromMap(InstagramConfig
+	 * channelDetails, MapModel map) {
+	 * channelDetails.setPageId(map.pathEntry("instagram.pageId").asString(
+	 * channelDetails.getPageId()));
+	 * channelDetails.setHandler(map.pathEntry("instagram.handler").asString(
+	 * channelDetails.getHandler()));
+	 * channelDetails.setType(map.pathEntry("instagram.type").asString(
+	 * channelDetails.getType()));
+	 * channelDetails.setVerifyToken(map.pathEntry("instagram.verifyToken").asString
+	 * (channelDetails.getVerifyToken()));
+	 * channelDetails.setAccessToken(map.pathEntry("instagram.accessToken").asString
+	 * (channelDetails.getAccessToken()));
+	 * channelDetails.setAppSecret(map.pathEntry("instagram.appSecret").asString(
+	 * channelDetails.getAppSecret())); }
+	 */
 
-	@Override
-	public void importChannelDetailsFromMap(InstagramConfig channelDetails, MapModel map) {
-		channelDetails.setPageId(map.pathEntry("instagram.pageId").asString(channelDetails.getPageId()));
-		channelDetails.setHandler(map.pathEntry("instagram.handler").asString(channelDetails.getHandler()));
-		channelDetails.setType(map.pathEntry("instagram.type").asString(channelDetails.getType()));
-		channelDetails.setVerifyToken(map.pathEntry("instagram.verifyToken").asString(channelDetails.getVerifyToken()));
-		channelDetails.setAccessToken(map.pathEntry("instagram.accessToken").asString(channelDetails.getAccessToken()));
-		channelDetails.setAppSecret(map.pathEntry("instagram.appSecret").asString(channelDetails.getAppSecret()));
-	}
-*/
 	@Override
 	public boolean isPushAllowed() {
 		return false;

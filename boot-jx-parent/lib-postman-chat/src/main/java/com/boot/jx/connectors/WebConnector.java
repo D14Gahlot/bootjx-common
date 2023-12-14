@@ -248,7 +248,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		}
 
 		if (ArgUtil.is(inputs) && inputs.size() > 0) {
-			return (OutboxMessage) inboxMessage.replyMessage("Please fill below inputs to continue").option("inputs",
+			return (OutboxMessage) inboxMessage.replyMessage("Could you please help us with your").option("inputs",
 					inputs);
 		}
 
