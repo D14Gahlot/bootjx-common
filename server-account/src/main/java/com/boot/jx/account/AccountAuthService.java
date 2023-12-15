@@ -1,5 +1,7 @@
 package com.boot.jx.account;
 
+import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,8 +18,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.BusinessUserDoc;
+import com.boot.jx.account.doc.DomainDoc;
+import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.PMCommonConfigImpl;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
@@ -46,6 +52,9 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 
 	@Autowired
 	private AccountAuthProvider adminAuthProvider;
+
+	@Autowired
+	private AccountStore accountStore;
 
 	@Autowired
 	private RestService restService;
@@ -109,6 +118,22 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 		}
 
 		return false;
+	}
+
+	public Optional<DomainDoc> getDomainAsOwner(String domain) {
+		Optional<DomainDoc> domaiNational = Optional.empty();
+		if (sessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+			DomainDoc domainDoc = accountStore.findDomainByName(domain);
+			if (ArgUtil.is(domainDoc)) {
+				domaiNational = Optional.of(domainDoc);
+			}
+		} else {
+			BusinessUserDoc domainUser = sessionBean.domainUser();
+			if (ArgUtil.is(domainUser.getDomains())) {
+				domaiNational = domainUser.getDomains().stream().filter(d -> d.getDomain().equals(domain)).findFirst();
+			}
+		}
+		return domaiNational;
 	}
 
 	@Autowired
