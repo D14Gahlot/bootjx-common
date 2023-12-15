@@ -56,7 +56,7 @@ public class MoengageApi {
 		
 		Map<String, Object> messageMap = mapModel.toMap();
 		messageMap = JsonUtil.toJsonMap(messageMap);
-		System.out.println("messageMap  ==="+messageMap);
+		LOGGER.info("MoengageApi {messageMap  ===}"+messageMap);
 		OutboxMessage outBoxmessage=new OutboxMessage();
 		//outBoxmessage.setRawMessageFormat(messageMap);
 		 outBoxmessage =messageWrapper(messageMap);

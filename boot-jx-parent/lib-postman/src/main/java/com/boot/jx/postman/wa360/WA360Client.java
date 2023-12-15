@@ -675,15 +675,18 @@ public class WA360Client {
 				outboxMessage.contact().getCsid());
 
 		MapModel extTemplate = MapModel.from(outboxMessage.getTemplateExt().getTemplate());
+		
 		MapModel model = MapModel.from(outboxMessage.getModel());
-		MapModel varMap = MapModel.from(outboxMessage.getTemplateExt().getVarMap());
+		MapModel varMap =null;// MapModel.from(outboxMessage.getTemplateExt().getVarMap());
 
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "template");
 		req.put(OutBoundWrapperPaths.TEMPLATE_NAMESPACE, extTemplate.get("namespace"));
 		req.put(OutBoundWrapperPaths.TEMPLATE_NAME, extTemplate.get("name"));
 		req.put(OutBoundWrapperPaths.TEMPLATE_LANGUAGE_CODE, extTemplate.get("language"));
 		req.put(OutBoundWrapperPaths.TEMPLATE_LANGUAGE_POLICY, "deterministic");
-
+		
+		req.putAll(extTemplate);
+		/*
 		MapModel components = MapModel.createInstance();
 		List<Map<String, Object>> extTemplateComponents = extTemplate.keyEntry("components").asListOfMap();
 
@@ -769,8 +772,9 @@ public class WA360Client {
 			}
 
 		}
-
+	
 		req.put(OutBoundWrapperPaths.TEMPLATE_COMPONENTS, components.list());
+		*/
 		return send(req, channelConfig);
 	}
 }

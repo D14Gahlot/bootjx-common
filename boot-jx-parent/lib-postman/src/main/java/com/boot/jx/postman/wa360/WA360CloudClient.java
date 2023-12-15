@@ -547,8 +547,6 @@ System.out.println("sendTemplateRaw :"+JsonUtil.toJson(outboxMessage));
 				.put("to",outboxMessage.contact().getCsid());
 
 		MapModel extTemplate = MapModel.from(outboxMessage.getRawMessageFormat());
-		System.out.println("JSON ---"+JsonUtil.toJsonPrettyPrint(extTemplate));
-		
 		
 		//List<Map<String, Object>> extTemplateComponents = extTemplate.keyEntry("template").asListOfMap();
 		//System.out.println("JSON -extTemplateComponents--"+JsonUtil.toJsonPrettyPrint(extTemplateComponents));
