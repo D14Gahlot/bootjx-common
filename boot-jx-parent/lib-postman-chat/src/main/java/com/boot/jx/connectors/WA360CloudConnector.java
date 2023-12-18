@@ -113,6 +113,48 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		if (chatContactDoc.getPhoneVerified() == null) {
 			contactQuery.setPhoneVerified(true);
 		}
+		
+		String user_input_type = this.context().session().getEntry("session_init_user_input_type").asString();
+		if (ArgUtil.is(user_input_type)) {
+			if (user_input_type.equals("name")) {
+				contactQuery.setInfoName(inboxMessage.getMessage());
+			}
+			if (user_input_type.equals("email")) {
+				contactQuery.setInfoEmail(inboxMessage.getMessage());
+			}
+			if (user_input_type.equals("phone")) {
+				contactQuery.setInfoPhone(inboxMessage.getMessage());
+			}
+
+		}
+		ChannelConfig channel = getChannelConfig(inboxMessage);
+
+		if (channel.getWa360dc().isPromptName()) {
+			if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
+				this.context().session().put("session_init_user_input_type", "name");
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your name");
+			}
+
+		}
+
+		if (channel.getWa360dc().isPromptEmail()) {
+			if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
+				this.context().session().put("session_init_user_input_type", "email");
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your email");
+			}
+
+		}
+
+		if (channel.getWa360dc().isPromptPhone()) {
+			if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
+				this.context().session().put("session_init_user_input_type", "phone");
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
+			}
+
+		}
+
+		
+		
 		return null;
 	}
 
