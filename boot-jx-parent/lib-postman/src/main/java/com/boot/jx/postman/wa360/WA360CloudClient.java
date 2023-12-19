@@ -1,5 +1,7 @@
 package com.boot.jx.postman.wa360;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,9 +46,12 @@ public class WA360CloudClient {
 	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
 	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		StringJoiner msgIds = new StringJoiner(",");
-
+		System.out.println("outboxMessage "+JsonUtil.toJson(outboxMessage));
 		if (ArgUtil.is(outboxMessage.getTemplateExt())) {
 			MapModel resp = sendTemplate(channelConfig, outboxMessage);
+			msgIds.add(getMessageId(resp));
+		}else if(ArgUtil.is(outboxMessage.getRawMessageFormat())) { /** for Moengage **/
+			MapModel resp = sendTemplateRaw(channelConfig, outboxMessage);
 			msgIds.add(getMessageId(resp));
 		} else {
 			boolean isList = false;
@@ -167,10 +172,8 @@ public class WA360CloudClient {
 	}
 
 	private MapModel sendTemplate(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-		MapModel req = MapModel.createInstance()
-				.put("messaging_product", outboxMessage.getContact().getContactType())
-				.put("recipient_type", "individual")
-				.put("to",outboxMessage.contact().getCsid());
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
 		MapModel extTemplate = MapModel.from(outboxMessage.getTemplateExt().getTemplate());
 		MapModel model = MapModel.from(outboxMessage.getModel());
@@ -264,17 +267,16 @@ public class WA360CloudClient {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
 		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		//wa360OutBoundMedia.setFilename(attachment.getMediaName());
-		//if (mediaType.equalsIgnoreCase("image")) {
-		//	wa360OutBoundMedia.setFilename(null);
-		//}
+		// wa360OutBoundMedia.setFilename(attachment.getMediaName());
+		// if (mediaType.equalsIgnoreCase("image")) {
+		// wa360OutBoundMedia.setFilename(null);
+		// }
 		return wa360OutBoundMedia;
 	}
 
 	private MapModel sendText(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
-				.put("recipient_type", "individual")
-				.put("to",outboxMessage.contact().getCsid());
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
 		req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY,
 				StringUtils.wrap("*", outboxMessage.getSubject(), "*\n") + outboxMessage.getMessage());
@@ -283,27 +285,29 @@ public class WA360CloudClient {
 
 	private MapModel sendMedia(ChannelConfig channelConfig, OutboxMessage outboxMessage, Attachment attachment) {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
-				.put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
 		wa360OutBoundMedia.setCaption(ArgUtil.nonEmpty(attachment.getMediaCaption(), outboxMessage.getSubject()));
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		
 
 		if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "image");
-			//wa360OutBoundMedia.setFilename(null);
+			// wa360OutBoundMedia.setFilename(null);
 			req.put("image", wa360OutBoundMedia);
 		} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
-			//wa360OutBoundMedia.setFilename(null);
+			// wa360OutBoundMedia.setFilename(null);
 			req.put("video", wa360OutBoundMedia);
 		} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
-			wa360OutBoundMedia.setCaption(null);
-			//wa360OutBoundMedia.setFilename(null);
-			req.put("audio", wa360OutBoundMedia);
+			WA360CloudOutBoundAudio wa360OutBoundMediaAudio = new WA360CloudOutBoundAudio();
+			wa360OutBoundMediaAudio.setLink(attachment.getMediaURL());
+			
+			//wa360OutBoundMedia.setCaption(null);
+			// wa360OutBoundMedia.setFilename(null);
+			//req.put("audio", wa360OutBoundMedia);
+			req.put("audio", wa360OutBoundMediaAudio);
 		} else {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
 			req.put("document", wa360OutBoundMedia);
@@ -314,8 +318,7 @@ public class WA360CloudClient {
 
 	private MapModel sendList(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons) {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
-				.put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
 		MapModel options = outboxMessage.optionsAsModel();
 
@@ -366,8 +369,7 @@ public class WA360CloudClient {
 
 	private MapModel sendButton(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons) {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
-				.put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
 		req.put(new JsonPath("/interactive/type"), "button");
@@ -423,8 +425,7 @@ public class WA360CloudClient {
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
 		try {
 			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("messages")
-					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
-					.post(req.toMap())
+					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).post(req.toMap())
 					.asMapModel();
 			return resp;
 		} catch (ApiHttpServerException e) {
@@ -524,9 +525,131 @@ public class WA360CloudClient {
 	}
 
 	public String getMediaUrl(ChannelConfig channelConfig, String url) {
+
+		if (url.contains("mid=")) {
+			String mid = url.split("mid=")[1].split("&")[0];
+			url = WA360Constants.MEDIA_CLOUD_URL(mid);
+		}
+
 		MapModel resp = restService.ajax(url.replace("/v1/media/", "/"))
-				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).get().asMapModel();
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).acceptJson().get()
+				.asMapModelSafe();
 		return resp.getString("url").replace("https://lookaside.fbsbx.com", WA360Constants.BASE_CLOUD_URL);
+	}
+	
+	
+	/** Call new metod to post msg directly to waba API **/
+	public MapModel sendTemplateRaw(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+System.out.println("sendTemplateRaw :"+JsonUtil.toJson(outboxMessage));
+		MapModel req = MapModel.createInstance()
+				.put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual")
+				.put("to",outboxMessage.contact().getCsid());
+
+		MapModel extTemplate = MapModel.from(outboxMessage.getRawMessageFormat());
+		
+		//List<Map<String, Object>> extTemplateComponents = extTemplate.keyEntry("template").asListOfMap();
+		//System.out.println("JSON -extTemplateComponents--"+JsonUtil.toJsonPrettyPrint(extTemplateComponents));
+		
+		MapModel model = MapModel.from(outboxMessage.getModel());
+		MapModel varMap = null;//MapModel.from(outboxMessage.getTemplateExt().getVarMap());
+
+		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "template");
+		req.put(OutBoundWrapperPaths.TEMPLATE_NAMESPACE, extTemplate.get("namespace"));
+		req.put(OutBoundWrapperPaths.TEMPLATE_NAME, extTemplate.get("name"));
+		req.put(OutBoundWrapperPaths.TEMPLATE_LANGUAGE_CODE, extTemplate.get("language"));
+		req.put(OutBoundWrapperPaths.TEMPLATE_LANGUAGE_POLICY, "deterministic");
+		
+		req.putAll(extTemplate);
+
+		MapModel components = MapModel.createInstance();
+		//List<Map<String, Object>> extTemplateComponents = null;//extTemplate.keyEntry("components").asListOfMap();
+
+	/*	for (Map<String, Object> extTemplateComponent : extTemplateComponents) {
+			String extTemplateComponentType = (String) extTemplateComponent.get("type");
+			if ("HEADER".equals(extTemplateComponentType)) {
+				TmplComponent headerComponentReq = TmplComponent.createInstance().header();
+				String extTemplateComponentFormat = (String) extTemplateComponent.get("format");
+				if ("TEXT".equals(extTemplateComponentFormat)) {
+					if (varMap.containsKey("header")) {
+						List<Map<String, Object>> headerParametersTemp = varMap.entry("header").asListOfMap();
+						for (Map<String, Object> headerParameter : headerParametersTemp) {
+							String path = (String) headerParameter.get("path");
+							String path2 = (String) headerParameter.get("path2");
+							String defaultValue = (String) headerParameter.get("defaultValue");
+							headerComponentReq.parameter("text",
+									model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+						}
+						if (headerComponentReq.parameters().size() > 0) {
+							components.add(headerComponentReq.build().map());
+						}
+					}
+				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
+					String lowerFormat = extTemplateComponentFormat.toLowerCase();
+					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
+					headerComponentReq.parameter(lowerFormat, media);
+					if (headerComponentReq.parameters().size() > 0) {
+						components.add(headerComponentReq.build().map());
+					}
+				}
+
+			} else if ("BODY".equals(extTemplateComponentType)) {
+				if (varMap.containsKey("body")) {
+					List<Map<String, Object>> bodyParametersTemp = varMap.entry("body").asListOfMap();
+					TmplComponent bodyComponent = TmplComponent.createInstance().body();
+					for (Map<String, Object> bodyParameter : bodyParametersTemp) {
+						String path = (String) bodyParameter.get("path");
+						String path2 = (String) bodyParameter.get("path2");
+						String defaultValue = (String) bodyParameter.get("defaultValue");
+						bodyComponent.parameter("text",
+								model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+					}
+					components.add(bodyComponent.build().map());
+				}
+			} else if ("BUTTONS".equals(extTemplateComponentType)) {
+				List<Map<String, Object>> extTemplateComponentButtons = MapModel.from(extTemplateComponent)
+						.keyEntry("buttons").asListOfMap();
+				List<List<Map<String, Object>>> buttonsParametersVars = varMap.entry("buttons").asListListOfMap();
+
+				for (int i = 0; i < extTemplateComponentButtons.size(); i++) {
+					Map<String, Object> extTemplateComponentButton = extTemplateComponentButtons.get(i);
+					List<Map<String, Object>> buttonParameterVar = CollectionUtil.getArray(buttonsParametersVars, i);
+					if (ArgUtil.is(buttonParameterVar)) {
+						String buttonType = (String) extTemplateComponentButton.get("type");
+						if ("URL".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+									String path = (String) buttonParameter.get("path");
+									String path2 = (String) buttonParameter.get("path2");
+									String defaultValue = (String) buttonParameter.get("defaultValue");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
+									buttonComponent.parameter("text",
+											model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+									components.add(buttonComponent.build().map());
+								}
+							}
+						} else if ("QUICK_REPLY".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+									String path = (String) buttonParameter.get("path");
+									String path2 = (String) buttonParameter.get("path2");
+									String defaultValue = (String) buttonParameter.get("defaultValue");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
+											i);
+									buttonComponent.parameter("payLoad",
+											model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+									components.add(buttonComponent.build().map());
+								}
+							}
+						}
+					}
+				}
+			}
+
+		}*/
+
+		//req.put(OutBoundWrapperPaths.TEMPLATE_COMPONENTS, components.list());
+		return send(req, channelConfig);
 	}
 
 }

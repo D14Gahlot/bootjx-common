@@ -74,4 +74,11 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	public PMConfigurationObject getChatIdleTimeout() {
 		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_IDLE_TIMEOUT);
 	}
+	
+	@Override
+	public PMConfigurationObject getAgentChatDisable() {
+		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CUSTOMER_CHAT_DISABLE);
+	}
+	
+	
 }

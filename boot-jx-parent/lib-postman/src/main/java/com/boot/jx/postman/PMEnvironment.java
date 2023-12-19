@@ -482,6 +482,8 @@ public class PMEnvironment {
 		PMConfigurationObject getAgentHistoryCount();
 
 		String getDefaultInboundQueue(Contactable contact, CHAT_MODE mode);
+		
+		PMConfigurationObject getAgentChatDisable();
 
 	}
 

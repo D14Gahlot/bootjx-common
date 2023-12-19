@@ -355,8 +355,7 @@ public class PartnerController {
 		BusinessUserDoc domainUser = userSessionBean.domainUser();
 
 		if (ArgUtil.is(domainUser.getDomains()) && ArgUtil.is(domain.getId())) {
-			Optional<DomainDoc> domaiNational = domainUser.getDomains().stream()
-					.filter(d -> d.getDomain().equals(domain.getDomain())).findFirst();
+			Optional<DomainDoc> domaiNational = sessionService.getDomainAsOwner(domain.getDomain());
 			if (!domaiNational.isPresent() || !domaiNational.get().getDomain().equals(domain.getDomain())) {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidDomainMultiple")
 						.description("Domain Change Not Allowed"));

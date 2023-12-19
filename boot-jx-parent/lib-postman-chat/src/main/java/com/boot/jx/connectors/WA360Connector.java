@@ -106,6 +106,52 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		if (chatContactDoc.getPhoneVerified() == null) {
 			contactQuery.setPhoneVerified(true);
 		}
+		String user_input_type=this.context().session().getEntry("session_init_user_input_type").asString();
+		if(ArgUtil.is(user_input_type))
+				{
+		 if(user_input_type.equals("name"))
+	 		{
+	 	  contactQuery.setInfoName(inboxMessage.getMessage());
+	 		}
+		if(user_input_type.equals("email"))
+		{
+	           contactQuery.setInfoEmail(inboxMessage.getMessage());
+		}
+        if(user_input_type.equals("phone"))
+		{
+	           contactQuery.setInfoPhone(inboxMessage.getMessage());
+		}
+			
+				}
+		ChannelConfig channel = getChannelConfig(inboxMessage);
+		
+      
+		if (channel.getWa360d().isPromptName()) {
+			if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
+				this.context().session().put("session_init_user_input_type", "name");
+				return (OutboxMessage) inboxMessage.replyMessage("Could you please help us with your name");
+			}
+			
+		}
+		
+		if (channel.getWa360d().isPromptEmail()) {
+			if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
+				this.context().session().put("session_init_user_input_type", "email");	
+				return (OutboxMessage) inboxMessage.replyMessage("Could you please help us with your email");
+			}
+			
+		}
+		
+		if (channel.getWa360d().isPromptPhone()) {
+			if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
+				this.context().session().put("session_init_user_input_type", "phone");
+			return (OutboxMessage) inboxMessage.replyMessage("Could you please help us with your phone");
+			}
+		
+		}
+				
+ 	
+		
 		return null;
 	}
 
@@ -309,6 +355,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		}
 	}
 
+	@Deprecated
 	public CommonFile reloadMedia(Attachment attachment)
 			throws MalformedURLException, FileNotFoundException, IOException {
 		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
@@ -411,7 +458,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
-
+		LOGGER.info("IN message {DR}"+requestMap);
 		if (requestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
 		}

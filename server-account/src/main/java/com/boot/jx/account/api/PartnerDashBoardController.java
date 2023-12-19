@@ -15,6 +15,7 @@ import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
+import com.boot.jx.account.dto.AdminAgentAccountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.TimeZoneOfSet;
@@ -139,6 +140,17 @@ public class PartnerDashBoardController {
 	public ApiResponse<EventCountSummary, Object> getEventCountSummary(String dateRange1, String dateRange2,
 			int days) {
 		EventCountSummary summary = dashBMgr.getEventCountSummary(dateRange1, dateRange2, days);
+		return ApiResponse.buildResult(summary);
+	}
+	
+/** to fetch all domain email id's **/
+	
+	
+	
+	@ResponseBody
+	@RequestMapping(value = { "/pub/admin-agent-dtls" }, method = { RequestMethod.GET })
+	public ApiResponse<AdminAgentAccountDto, Object> getAdminAgentSummary() {
+		AdminAgentAccountDto summary = dashBMgr.getAdminAgentSummary();
 		return ApiResponse.buildResult(summary);
 	}
 

@@ -170,6 +170,15 @@ public class ChatSessionManager {
 		}
 		return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
 	}
+	
+	
+	public List<ChatSessionDoc> searchByV1(List<CHAT_STATUS> status, List<QuickTag> tags, long fromStamp, long toStamp) {
+		List<String> newList = new ArrayList<String>();
+		for (QuickTag tag : tags) {
+			newList.add(tag.getId());
+		}
+		return sessionStore.findByStatusOrQuickTagV1(status, newList, fromStamp, toStamp);
+	}
 
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,
 			String agentDept, long period) {

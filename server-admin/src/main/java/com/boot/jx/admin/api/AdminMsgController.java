@@ -2,6 +2,7 @@ package com.boot.jx.admin.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -40,6 +43,7 @@ import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
@@ -54,10 +58,12 @@ import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
 
 @RestController
 public class AdminMsgController {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AdminMsgController.class);
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -82,10 +88,9 @@ public class AdminMsgController {
 
 	@Autowired
 	public CSVService fileService;
-	
+
 	@Autowired
 	public ChatSessionManager chatSessionManager;
-
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -120,33 +125,127 @@ public class AdminMsgController {
 		if (ArgUtil.is(agentCode)) {
 			criteria.and("assignedToAgent").is(agentCode);
 		}
-		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
 		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
+
 		return ApiResponse.buildResults(messages);
 	}
-	
+
 	@RequestMapping(value = "/api/message/v1/session", method = { RequestMethod.POST })
-	public ApiResponse<ChatSessionDTO, Object> fetchSessionV1(@RequestBody SessionSearchRequest query) {
-		List<ChatSessionDTO> chatSessionDtos = new ArrayList<ChatSessionDTO>();
-		List<ChatSessionDoc> sessions = chatSessionManager.searchBy(query.status, query.tags, query.fromStamp,
-				query.toStamp);
-		for (ChatSessionDoc chatSessionDoc : sessions) {
-			ChatSessionDTO chatSessionDto = chatArchive.withContact(chatSessionDoc);
-			chatSessionDtos.add(chatSessionDto);
+	public ApiResponse<ChatSessionDoc, Object> fetchSessionV1(@RequestBody SessionSearchRequest query) {
+		LOGGER.info("fetchSessionV1 :" + JsonUtil.toJson(query));
+		List<ChatSessionDoc> messageSessnDocs = new ArrayList<ChatSessionDoc>();
+		List<ChatSessionDoc> sessions = null;
+		// sessions = chatSessionManager.searchByV1(query.status, query.tags,
+		// query.fromStamp,query.toStamp);
+		sessions = new ArrayList<ChatSessionDoc>();
+
+		Long startStampLong = query.fromStamp;
+		Long endStampLong = query.toStamp;
+
+		Criteria criteria = new Criteria();
+
+		Query query2 = new Query();
+
+		Criteria dateCriteria = new Criteria().orOperator(
+				new Criteria().andOperator(Criteria.where("startSessionStamp").gt(startStampLong),
+						Criteria.where("startSessionStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(startStampLong),
+						Criteria.where("closeSessionStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(startStampLong),
+						Criteria.where("assignedDeptStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(startStampLong),
+						Criteria.where("assignedAgentStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(startStampLong),
+						Criteria.where("fistResponseStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(startStampLong),
+						Criteria.where("lastResponseStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(startStampLong),
+						Criteria.where("lastInComingStamp").lt(endStampLong)));
+
+		criteria.andOperator(dateCriteria);
+
+		if (ArgUtil.is(query.agantCode)) {
+			criteria.and("assignedToAgent").is(query.agantCode);
 		}
-		/**
-		 * remove duplicate /multiple Session for each contact we can filter based on
-		 * name , phone number on any field
-		 **/
-		if (chatSessionDtos != null && !chatSessionDtos.isEmpty()) {
-			Set<String> chatSessionSet = new HashSet<>();
-			chatSessionDtos = chatSessionDtos.stream().filter(e -> chatSessionSet.add(e.getPhone()))
-					.collect(Collectors.toList());
+
+		/** start **/
+
+		List<String> tagCategory = new ArrayList<String>();
+		for (QuickTag tag : query.tags) {
+			tagCategory.add(tag.getId());
 		}
-		return ApiResponse.buildResults(chatSessionDtos);
+		Collections.sort(tagCategory);
+		List<CHAT_STATUS> status = query.status;
+		List<String> statusLst = new ArrayList<>();
+		;
+		if ((status == null || status.isEmpty() || status.contains(null))) {
+			LOGGER.info("status :" + status);
+		} else {
+			for (CHAT_STATUS chatSt : status) {
+				statusLst.add(chatSt.toString());
+			}
+		}
+
+//		if (statusLst != null && !statusLst.isEmpty()) {
+//			query2.addCriteria(Criteria.where("status").in(statusLst));
+//		}
+//		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
+//			query2.addCriteria(Criteria.where("tagId").in(tagCategory));
+//		}
+
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
+		sessions = mongoTemplate.find(query2, ChatSessionDoc.class);
+
+		List<ChatSessionDoc> statusDocLst = new ArrayList<>();
+		List<ChatSessionDoc> tagLst = new ArrayList<>();
+
+		if (ArgUtil.is(statusLst)) {
+			for (ChatSessionDoc doc : sessions) {
+				for (String sts : statusLst) {
+					if (doc.getStatus() != null && doc.getStatus().equalsIgnoreCase(sts)) {
+						statusDocLst.add(doc);
+					}
+				}
+			}
+		}
+
+		if (ArgUtil.is(tagCategory)) {
+			for (ChatSessionDoc doc : sessions) {
+
+				if (ArgUtil.is(doc.getTagId())) {
+					List<String> docTagIdList = doc.getTagId();
+					Collections.sort(docTagIdList);
+					boolean booTag = tagCategory.stream().filter(element -> docTagIdList.contains(element)).findFirst()
+							.isPresent();
+					if (booTag) {
+						if (statusDocLst != null && !statusDocLst.contains(doc)) {
+							tagLst.add(doc);
+						}
+
+					}
+				}
+			}
+		}
+		if (statusDocLst != null && !statusDocLst.isEmpty()) {
+			messageSessnDocs.addAll(statusDocLst);
+		}
+
+		if (tagLst != null && !tagLst.isEmpty()) {
+			messageSessnDocs.addAll(tagLst);
+		}
+
+		if (messageSessnDocs == null || messageSessnDocs.isEmpty()) {
+			messageSessnDocs.addAll(sessions);
+		}
+		/** end **/
+
+		return ApiResponse.buildResults(messageSessnDocs);
 	}
-	
-	
+
 	@RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
 		chatSessionDto = chatArchive.getChatSession(chatSessionDto);
@@ -330,7 +429,7 @@ public class AdminMsgController {
 				message = "Could not upload the file: " + file.getOriginalFilename() + "!";
 				return ApiResponse.buildResult(lst).message(message);
 			}
-		}else if(CSVHelper.hasExcelFormat(file)) {
+		} else if (CSVHelper.hasExcelFormat(file)) {
 			try {
 				lst = fileService.readExcel(templateId, file);
 				message = "Uploaded the file successfully: " + file.getOriginalFilename();
@@ -341,8 +440,20 @@ public class AdminMsgController {
 				message = "Could not upload the file: " + file.getOriginalFilename() + "!";
 				return ApiResponse.buildResult(lst).message(message);
 			}
-			
-		}else {
+
+		} else if (CSVHelper.hasExcelSXFormat(file)) {
+
+			try {
+				lst = fileService.readExcelXS(templateId, file);
+				message = "Uploaded the file successfully: " + file.getOriginalFilename();
+				OutboxMessage outboxMessage = new OutboxMessage();
+				outboxMessage.setReferenceKey(lst.getReferenceKey());
+				return ApiResponse.buildResult(lst).message(message);
+			} catch (Exception e) {
+				message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+				return ApiResponse.buildResult(lst).message(message);
+			}
+		} else {
 			message = "Please upload a csv or excel file!";
 			return ApiResponse.buildResult(lst).message(message);
 		}

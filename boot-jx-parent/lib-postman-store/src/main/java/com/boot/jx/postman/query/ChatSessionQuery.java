@@ -10,6 +10,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel.MapEntry;
 import com.boot.model.SafeKeyHashMap;
 
 public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
@@ -169,6 +170,10 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		this.doc.contact().copyFrom(contactable);
 		this.set("contact", this.doc.contact());
 		return this;
+	}
+	
+	public MapEntry getEntry(String key) {
+		return new MapEntry(get(key));
 	}
 
 }

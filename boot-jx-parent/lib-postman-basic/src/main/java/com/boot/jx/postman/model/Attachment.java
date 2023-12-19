@@ -15,10 +15,10 @@ public class Attachment implements Serializable {
 	private static final long serialVersionUID = 6420347322076291226L;
 
 	@ApiMockModelProperty(example = "IMAGE", value = "Media Type",
-			allowableValues = "IMAGE,DOCUMENT,TEXT,PDF,VIDEO,URL")
+			allowableValues = "IMAGE,DOCUMENT,TEXT,PDF,VIDEO,URL,AUDIO")
 	String mediaType;
 
-	@ApiMockModelProperty(example = "IMAGE", value = "Media SubType Type", allowableValues = "STORY_MENTION,SHARE etc")
+	@ApiMockModelProperty(example = "IMAGE", value = "Media SubType Type", allowableValues = "STORY_MENTION,SHARE,bg_voice etc")
 	String mediaSubType;
 
 	@ApiMockModelProperty(example = "image/png", value = "Mime Type")
@@ -43,6 +43,7 @@ public class Attachment implements Serializable {
 
 	@ApiMockModelProperty(example = "ABC_PROMO", value = "QuickMedia Code")
 	String mediaCode;
+	
 
 	public String getMediaURL() {
 		return mediaURL;

@@ -52,8 +52,14 @@ public class MoengageApi {
 	public ApiResponse<OutBoundReciept, Object> sendMessage(@RequestParam String channelId ,@RequestBody MapModel mapModel) {
 		
 		LOGGER.info("MoengageApi { sendMessage }"+channelId+"\n MAP"+JsonUtil.toJson(mapModel));
-		Map<String, Object> messageMap = mapModel.pathEntry("message").asMap();
-		OutboxMessage outBoxmessage =messageWrapper(messageMap);
+		//Map<String, Object> messageMap = mapModel.pathEntry("payload").asMap();
+		
+		Map<String, Object> messageMap = mapModel.toMap();
+		messageMap = JsonUtil.toJsonMap(messageMap);
+		LOGGER.info("MoengageApi {messageMap  ===}"+messageMap);
+		OutboxMessage outBoxmessage=new OutboxMessage();
+		//outBoxmessage.setRawMessageFormat(messageMap);
+		 outBoxmessage =messageWrapper(messageMap);
 		LOGGER.info("MoengageApi { outBoxmessage }"+JsonUtil.toJson(outBoxmessage));
 		return ApiResponse.buildResult(messageService.send(channelId,outBoxmessage));
 	}
@@ -61,24 +67,30 @@ public class MoengageApi {
 	
 	
 	private OutboxMessage messageWrapper(Map<String, Object> map) {
-		OutBoundMsg outBoundMsg = new OutBoundMsg();
+		//OutBoundMsg outBoundMsg = new OutBoundMsg();
 		OutboxMessage outboxMessage=new OutboxMessage();
 		ContactMeta contactmeta = new ContactMeta();
+		LOGGER.info("messageWrapper ---"+map);
 		MapModel botreply = MapModel.from(map);
-		MapPathEntry text = botreply.keyEntry("text");
-		MapPathEntry quickReplyEntries = botreply.keyEntry("quick_replies");
-		MapPathEntry attachment = botreply.keyEntry("attachment");
+		//MapPathEntry text = botreply.keyEntry("text");
+		//MapPathEntry quickReplyEntries = botreply.keyEntry("quick_replies");
+		//MapPathEntry attachment = botreply.keyEntry("attachment");
+		/** setting up the template **/
+		//MapPathEntry template = botreply.keyEntry("template");
+	
+		//LOGGER.info("messageWrapper ---template "+template);
 		/** setting the contact **/
 		String to =(String)botreply.get("to");
 		contactmeta.setPhone(to);
 		outboxMessage.setContact(contactmeta);
 		/** end contact **/
 		// set template name 
+		//JsonUtil.toJsonMap(map)
 		outboxMessage.setRawMessageFormat(map);
 		
 	
 		
-		if (attachment.exists()) {
+	/*	if (attachment.exists()) {
 			if (attachment.keyEntry("type").is("template")) {
 				MapPathEntry payload = attachment.keyEntry("payload");
 				if (payload.keyEntry("template_type").is("button")) {
@@ -190,7 +202,9 @@ public class MoengageApi {
 			return outboxMessage;
 		} else if (text.exists()) {
 			 return outboxMessage.message(text.asString());
-		}
+		}else if(template.exists()) {
+			
+		}*/
 		return outboxMessage;
 	}
 
