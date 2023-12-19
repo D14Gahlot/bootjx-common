@@ -20,8 +20,11 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
+import com.boot.jx.contak.dto.ContakModels.ContakActor;
+import com.boot.jx.contak.dto.ContakModels.ContakInboundTrigger;
 import com.boot.jx.contak.manager.ContakApiContext;
 import com.boot.jx.contak.manager.ContakApiContext.AUTH_RULES;
+import com.boot.jx.contak.manager.ContakInboundRouter;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -39,6 +42,9 @@ public class NodeClientV3Controller {
 
 	@Autowired
 	private AWSFileStore fileStore;
+
+	@Autowired
+	private ContakInboundRouter contakInboundManager;
 
 	@ApiRequest(authenticateTenant = true, rules = { AUTH_RULES.VALID_SESSION })
 	@RequestMapping(value = { "/org/{companyId}/hsm/tmpl" }, method = { RequestMethod.GET })
@@ -66,6 +72,10 @@ public class NodeClientV3Controller {
 
 		template.templateId = String.format("%s:%s", template.companyId, template.code);
 		commonMongoTemplate.save(template);
+
+		contakInboundManager.sendSystemEvent(ContakInboundTrigger
+				.type(ContakInboundRouter.USER_INBOUND_TYPE.TEMPLATE_UPDATE).companyId(compoc.getCompanyId()));
+
 		return ApiResponse.buildResult(template);
 	}
 
@@ -78,6 +88,8 @@ public class NodeClientV3Controller {
 				.with(Criteria.where("companyId").is(companyId).and("templateId").is(templateId)).find().asFirst();
 		template.setDeleted(!template.isDeleted());
 		commonMongoTemplate.saveAndAudit(template);
+		contakInboundManager.sendSystemEvent(ContakInboundTrigger
+				.type(ContakInboundRouter.USER_INBOUND_TYPE.TEMPLATE_UPDATE).companyId(compoc.getCompanyId()));
 		return ApiResponse.build().message("Template has been " + (template.isDeleted() ? "deleted" : "restored"));
 	}
 

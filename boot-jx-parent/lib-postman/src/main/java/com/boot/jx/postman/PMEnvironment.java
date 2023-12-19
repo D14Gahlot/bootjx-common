@@ -450,6 +450,8 @@ public class PMEnvironment {
 
 		public String getServiceServer();
 
+		public String getServiceServerByRequest();
+
 		public String getScriptusUrl();
 
 		public String getScriptusSecret();
@@ -501,5 +503,24 @@ public class PMEnvironment {
 
 		String getContactDetailsUrl();
 
+	}
+
+	@Autowired(required = false)
+	private PMCommonConfig pmCommonConfig;
+	@Autowired(required = false)
+	private PMDomainConfig pmDomainConfig;
+	@Autowired(required = false)
+	private PMClientConfig pmClientConfig;
+
+	public PMCommonConfig commonConfig() {
+		return pmCommonConfig;
+	}
+
+	public PMDomainConfig domainConfig() {
+		return pmDomainConfig;
+	}
+
+	public PMClientConfig clientConfig() {
+		return pmClientConfig;
 	}
 }

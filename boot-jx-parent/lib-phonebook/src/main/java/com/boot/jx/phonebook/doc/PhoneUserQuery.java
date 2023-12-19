@@ -57,6 +57,12 @@ public class PhoneUserQuery extends DocQueryBuilder<PhoneUserDoc> {
 		return this;
 	}
 
+	public PhoneUserQuery setDeviceId(String deviceId) {
+		doc.setDeviceId(deviceId);
+		this.set("deviceId", deviceId);
+		return this;
+	}
+
 	public PhoneUserQuery setLastTimeActiveAt(TimeStampIndex timeStampIndex) {
 		doc.setLastActiveAt(timeStampIndex);
 		this.set("lastActiveAt", timeStampIndex);

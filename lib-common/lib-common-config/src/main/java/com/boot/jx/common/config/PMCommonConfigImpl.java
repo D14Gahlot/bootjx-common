@@ -196,7 +196,7 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		}
 
 		map.put("CDN_VERSION", "V3");
-		map.put("CDN_VERSION", getVersion());
+		map.put("CDN_VERSION", appConfig.getAppAppBuildStamp() + "." + getVersion());
 
 		map.put("APP_CONTEXT", appConfig.getAppPrefix());
 		map.put("POSTMAN_CONTEXT", appConfig.getAppPrefix());
@@ -273,6 +273,12 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 	@Override
 	public String getServiceServer() {
 		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(serviceServer);
+	}
+
+	@Override
+	public String getServiceServerByRequest() {
+		return commonHttpRequest.getBaseDomain();
+		// return getServiceServer();
 	}
 
 }

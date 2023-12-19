@@ -161,15 +161,16 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 	private PMEnvironment pmEnvironment;
 
 	public void sendResetMail(ContakUserDoc accountDoc, String emailTemplate, String verifyCode) {
-		postManClient.send(new MessageBox().push(new Email().to(accountDoc.getEmail()).template(emailTemplate)
-				.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
-				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
-				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
-				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.server").asString())
-				.put("link", String.format("https://%s.%s/contak/panel/auth/verify-link?code=%s&account=%s",
-						AppContextUtil.getTenant(), pmEnvironment.keyEntry("mry.prop.service.server").asString(),
-						verifyCode, accountDoc.getEmail()))
-				.put("contactName", accountDoc.getName())));
+		postManClient
+				.send(new MessageBox().push(new Email().to(accountDoc.getEmail()).template(emailTemplate)
+						.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
+						.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
+						.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
+						.put("servicedomain", pmEnvironment.commonConfig().getServiceServerByRequest())
+						.put("link", String.format("https://%s.%s/contak/panel/auth/verify-link?code=%s&account=%s",
+								AppContextUtil.getTenant(), pmEnvironment.commonConfig().getServiceServerByRequest(),
+								verifyCode, accountDoc.getEmail()))
+						.put("contactName", accountDoc.getName())));
 
 	}
 

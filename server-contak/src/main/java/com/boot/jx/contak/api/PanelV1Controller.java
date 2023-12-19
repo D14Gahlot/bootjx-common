@@ -34,6 +34,8 @@ import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
+import com.boot.jx.contak.dto.ContakModels.ContakInboundTrigger;
+import com.boot.jx.contak.manager.ContakInboundRouter;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
@@ -73,6 +75,9 @@ public class PanelV1Controller {
 
 	@Autowired
 	AWSFileStore fileStore;
+
+	@Autowired
+	private ContakInboundRouter contakInboundManager;
 
 	@ApiOperation(value = "Page", hidden = true)
 	@RequestMapping(path = { "", "/", "/**" }, method = { RequestMethod.GET, RequestMethod.POST })
@@ -333,6 +338,10 @@ public class PanelV1Controller {
 		}
 		template.templateId = String.format("%s:%s", template.companyId, template.code);
 		commonMongoTemplate.save(template);
+
+		contakInboundManager.sendSystemEvent(ContakInboundTrigger
+				.type(ContakInboundRouter.USER_INBOUND_TYPE.TEMPLATE_UPDATE).companyId(template.companyId));
+
 		return ApiResponse.buildResult(template);
 	}
 

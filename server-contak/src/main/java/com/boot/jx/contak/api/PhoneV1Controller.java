@@ -88,6 +88,7 @@ public class PhoneV1Controller {
 
 			resp.loginToken = loginToken;
 			phoneUserQuery.setLoginToken(resp.loginToken);
+			phoneUserQuery.setDeviceId(loginDTO.deviceId);
 			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			commonMongoTemplate.update(phoneUserQuery);
 
@@ -108,6 +109,9 @@ public class PhoneV1Controller {
 			phoneUserQuery.setOtpHash(Constants.BLANK);
 			phoneUserQuery.setOtpNounce(Constants.BLANK);
 			phoneUserQuery.setLoginToken(resp.loginToken);
+			phoneUserQuery.setDeviceId(loginDTO.deviceId);
+			//System.out.println("=== loginDTO.deviceId=== " + loginDTO.deviceId);
+
 			phoneUserQuery.setLastLoginAt(TimeStampIndex.now());
 			phoneUserQuery.setAuthToken(CryptoUtil.getEncoder().message(resp.deviceToken).sha2().toString());
 			phoneUserQuery.setOtpCounter(0L);
@@ -148,6 +152,7 @@ public class PhoneV1Controller {
 			OTPDetails otp = OTPUtils.genrateBasicOTP(loginDTO.phone, loginDTO.deviceId);
 
 			phoneService.sendPhoneOTP(loginDTO.phone, otp.getOtp());
+			//System.out.println("=== otp=== "+otp.getOtp());
 
 			long otpStamp = System.currentTimeMillis();
 			nextStamp = getNextStamp(otpStamp, currentCounter);

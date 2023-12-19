@@ -24,6 +24,8 @@ import com.boot.jx.contak.ContakAuthService;
 import com.boot.jx.contak.ContakSessionBean;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
+import com.boot.jx.contak.dto.ContakModels.ContakInboundTrigger;
+import com.boot.jx.contak.manager.ContakInboundRouter;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.utils.ArgUtil;
@@ -52,6 +54,9 @@ public class PanelV2Controller {
 	@Autowired
 	private AWSFileStore fileStore;
 
+	@Autowired
+	private ContakInboundRouter contakInboundManager;
+
 	private void validateCompany(String companyId) {
 		if (!ArgUtil.is(companyId)) {
 			ApiResponseUtil.throwInputException(
@@ -73,6 +78,8 @@ public class PanelV2Controller {
 				.with(Criteria.where("companyId").is(companyId).and("templateId").is(templateId)).find().asFirst();
 		template.setDeleted(!template.isDeleted());
 		commonMongoTemplate.saveAndAudit(template);
+		contakInboundManager.sendSystemEvent(
+				ContakInboundTrigger.type(ContakInboundRouter.USER_INBOUND_TYPE.TEMPLATE_UPDATE).companyId(companyId));
 		return ApiResponse.build().message("Template has been " + (template.isDeleted() ? "deleted" : "restored"));
 	}
 
