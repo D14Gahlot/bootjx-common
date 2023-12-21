@@ -5,6 +5,7 @@ import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.plugin.OAPlugin.OAConfigDetails;
+import com.boot.jx.postman.plugin.PushPlugin.PushConfigDetails;
 import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
@@ -26,6 +27,7 @@ public class ChannelConfig extends AChannelConfig {
 	private InstagramConfig instagram;
 	private WA360ConfigDetails wa360d;
 	private WebConfigDetails web;
+	private PushConfigDetails push;
 	private EmailConfigDetails email;
 	private TwilioConfigDetails twilio;
 	private SMSConfigDetails sms;
@@ -219,6 +221,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setUnhandledInboundForward(String unhandledInboundForward) {
 		this.unhandledInboundForward = unhandledInboundForward;
+	}
+
+	public PushConfigDetails getPush() {
+		return push;
+	}
+
+	public void setPush(PushConfigDetails push) {
+		this.push = push;
 	}
 
 }

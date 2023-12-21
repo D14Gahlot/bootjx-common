@@ -348,24 +348,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType,
 				chatContactDoc, inboxMessage, outboxMessage);
 
-		String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
-		ChannelConfig channelConfig = environment.config().channel(channelId);
-
-		try {
-			if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
-				ConnectorHandler connector = get(channelConfig);
-				if (ArgUtil.is(connector)) {
-					connector.message(channelConfig, messageType, chatContactDoc, outboxMessage, inboxMessage);
-				} else {
-					outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
-				}
-			} else {
-				outboxMessage.logs().add(String.format("ChannelConfig not found for %s", channelId));
-			}
-
-		} catch (Exception e) {
-			LOGGER.error(messageType, e);
-		}
+		message(messageType, chatContactDoc, outboxMessage, inboxMessage);
 
 		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 
@@ -415,4 +398,42 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		}
 	}
 
+	private void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+			IMessageExtended inboxMessage) {
+		String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
+		ChannelConfig channelConfig = environment.config().channel(channelId);
+
+		try {
+			if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
+				ConnectorHandler connector = get(channelConfig);
+				if (ArgUtil.is(connector)) {
+					connector.message(channelConfig, messageType, chatContactDoc, outboxMessage, inboxMessage);
+				} else {
+					outboxMessage.logs().add(String.format("Connector not defined for %s", channelId));
+				}
+			} else {
+				outboxMessage.logs().add(String.format("ChannelConfig not found for %s", channelId));
+			}
+
+		} catch (Exception e) {
+			LOGGER.error(messageType, e);
+		}
+	}
+
+	/**
+	 * This method does not store it in db
+	 * 
+	 * Currently not used anywhere
+	 * 
+	 * @param context
+	 * @param messageType
+	 * @param outboxMessage
+	 * @param inboxMessage
+	 */
+	public void message(MessageContext context, String messageType, OutboxMessage outboxMessage,
+			IMessageExtended inboxMessage) {
+		LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType, null,
+				inboxMessage, outboxMessage);
+		message(messageType, null, outboxMessage, inboxMessage);
+	}
 }

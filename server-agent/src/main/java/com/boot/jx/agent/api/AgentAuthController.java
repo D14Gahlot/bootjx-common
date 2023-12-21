@@ -32,6 +32,8 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.others.PushClient;
+import com.boot.jx.postman.others.PushClient.To;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.tnt.custom.TenantClientResolver;
 import com.boot.model.MapModel;
@@ -208,20 +210,20 @@ public class AgentAuthController {
 					domainId, domainToken, false);
 			if (ArgUtil.is(agent)) {
 				resp.meta(agent);
-				resp.data(MapModel.createInstance().put("subscriptions",
-						MapModel.createInstance().add("/topics/com-filter-any")
-								.add("/topics/com-filter-domain-" + domainName)
-								.add("/topics/com-filter-dept-"
-										+ (ArgUtil.is(agent.getDept()) ? agent.getDept().getDept_code() : "none"))
-								.add("/topics/com-filter-agent-" + agent.getAgent_code())));
+				resp.data(MapModel.createInstance().put("subscriptions", MapModel.createInstance() //
+						.add(PushClient.topics(To.all())).add(PushClient.topics(To.domain())) //
+						.add(PushClient
+								.topics(To.dept(ArgUtil.is(agent.getDept()) ? agent.getDept().getDept_code() : "none"))) //
+						.add(PushClient.topics(To.agent(agent.getAgent_code())))
+
+				));
 
 			}
 		} else if (agentSession.isLoggedIn()) {
 			resp.data(MapModel.createInstance().put("subscriptions",
-					MapModel.createInstance().add("/topics/com-filter-any")
-							.add("/topics/com-filter-domain-" + domainName)
-							.add("/topics/com-filter-dept-" + agentSession.getAgentDept())
-							.add("/topics/com-filter-agent-" + agentSession.getAgentCode())));
+					MapModel.createInstance().add(PushClient.topics(To.all())).add(PushClient.topics(To.domain())) //
+							.add(PushClient.topics(To.dept(agentSession.getAgentDept())))
+							.add(PushClient.topics(To.agent(agentSession.getAgentCode())))));
 		}
 		return resp;
 	}

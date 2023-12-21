@@ -72,6 +72,7 @@ public class PMConstants {
 		public static final String SMS_TWILIO = "smstw";
 		public static final String SMS = "sms";
 		public static final String OA = "oa";
+		public static final String FIREBASE = "firebase";
 		/** WABA cloud **/
 		public static final String WA_360DC = "wac360";
 	}

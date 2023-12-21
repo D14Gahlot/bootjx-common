@@ -54,6 +54,8 @@ import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
+import com.boot.jx.postman.others.PushClient;
+import com.boot.jx.postman.others.PushClient.To;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
@@ -118,6 +120,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Autowired
 	TmplClient tmplClient;
+
+	@Autowired
+	private PushClient pushClient;
 
 	private AgentSessionDoc getAgentSessonAssigned(PMArgs params) {
 
@@ -427,9 +432,16 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		MessageDoc messageDoc = messageStore.findOrCreateMessageDoc(inboxMessage);
 		ChatMessageDTO messageDto = ChatDTOUtil.getChatMessageDTO(messageDoc);
 		messageDto.setName(inboxMessage.getFromName());
+
 		stompTunnelService.sendToTag(inboxMessage.session().getDept(), "/message/receive/new", messageDto);
 		stompTunnelService.sendTo(StompQuery.toAll("/chat/session/delta").toSameOriginApp(), MapModel.createInstance()
 				.put("sessionId", messageDoc.getSessionId()).put("event", "new_message").toMap());
+
+		OutboxMessage notify = new OutboxMessage().message(inboxMessage.getMessage());
+		notify.contact().setCsid(To.dept(inboxMessage.session().getDept()));
+
+		pushClient.send(notify);
+
 		if ("/exit_chat".equalsIgnoreCase(inboxMessage.toReplyEnum())) {
 			ChatSessionDoc chatSessionDoc = sessionStore.getSession(inboxMessage.getSessionId());
 			exitAgentMode(chatSessionDoc, null);
