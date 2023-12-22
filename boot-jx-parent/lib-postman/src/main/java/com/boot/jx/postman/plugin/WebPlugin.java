@@ -26,26 +26,22 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
 		private static final long serialVersionUID = 8692015716138195462L;
 
-		@ConfigMetaProperty(path = "web.site", title = "SiteName", createonly = true,
-				desc = "Enter Website indeitifier, avoid special characters")
+		@ConfigMetaProperty(path = "web.site", title = "SiteName", createonly = true, desc = "Enter Website indeitifier, avoid special characters")
 		private String site;
 
-		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
-				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		@ConfigMetaProperty(path = "instagram.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
+		private boolean promptName;
+
+		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
 
-		@ConfigMetaProperty(path = "web.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
-				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
+		@ConfigMetaProperty(path = "web.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptPhone;
 
-		@ConfigMetaProperty(path = "web.iceBreaker", title = "Ice Breaker Message", optional = true,
-				inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code",
-				optionsLabel = "desc")
+		@ConfigMetaProperty(path = "web.iceBreaker", title = "Ice Breaker Message", optional = true, inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code", optionsLabel = "desc")
 		private String iceBreaker;
 
-		@ConfigMetaProperty(path = "web.welcome", title = "Welcome Back Message", optional = true,
-				inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code",
-				optionsLabel = "desc")
+		@ConfigMetaProperty(path = "web.welcome", title = "Welcome Back Message", optional = true, inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code", optionsLabel = "desc")
 		private String welcomeBack;
 
 		@ConfigMetaProperty(path = "web.title", title = "ChatBox Title")
@@ -81,6 +77,14 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
 		public void setPromptPhone(boolean promptPhone) {
 			this.promptPhone = promptPhone;
+		}
+
+		public boolean isPromptName() {
+			return promptName;
+		}
+
+		public void setPromptName(boolean promptName) {
+			this.promptName = promptName;
 		}
 
 		public String getIceBreaker() {
