@@ -29,15 +29,13 @@ public class WA360CloudPlugin implements DefaultChannelPlugin<WA360CloudConfigDe
 
 		private static final long serialVersionUID = -2397678752642150000L;
 
-		@ConfigMetaProperty(path = "wa360dc.number", title = "Number", createonly = true,
-				desc = "Eneter WABA number with country code")
+		@ConfigMetaProperty(path = "wa360dc.number", title = "Number", createonly = true, desc = "Eneter WABA number with country code")
 		private String number;
 
 		@ConfigMetaProperty(path = "wa360dc.apiKey", title = "API Key", writeonly = true, desc = "Enter Your WABA cloud Key")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String apiKey;
-		
-		
+
 		@ConfigMetaProperty(path = "wa360dc.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
 
@@ -46,6 +44,7 @@ public class WA360CloudPlugin implements DefaultChannelPlugin<WA360CloudConfigDe
 
 		@ConfigMetaProperty(path = "wa360dc.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptName;
+
 		
 
 		@Override
@@ -109,7 +108,6 @@ public class WA360CloudPlugin implements DefaultChannelPlugin<WA360CloudConfigDe
 		return new WA360CloudConfigDetails();
 	}
 
-
 	@Override
 	public boolean isPushAllowed() {
 		return true;
@@ -135,5 +133,4 @@ public class WA360CloudPlugin implements DefaultChannelPlugin<WA360CloudConfigDe
 		return false;
 	}
 
-	
 }

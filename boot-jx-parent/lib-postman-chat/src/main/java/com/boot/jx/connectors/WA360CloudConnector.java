@@ -113,7 +113,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		if (chatContactDoc.getPhoneVerified() == null) {
 			contactQuery.setPhoneVerified(true);
 		}
-		
+
+
 		String user_input_type = this.context().session().getEntry("session_init_user_input_type").asString();
 		if (ArgUtil.is(user_input_type)) {
 			if (user_input_type.equals("name")) {
@@ -153,8 +154,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		}
 
-		
-		
 		return null;
 	}
 
@@ -399,7 +398,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
 	}
 
-	@Override
+
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
 			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
