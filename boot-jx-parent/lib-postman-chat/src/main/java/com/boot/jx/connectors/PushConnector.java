@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
-import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
@@ -40,7 +39,7 @@ import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WEBSITE)
-public class PushConnector extends DefaultConnector<PushConfigDetails, PushPlugin> {
+public class PushConnector extends AbstractConnector<PushConfigDetails, PushPlugin> {
 
 	private static final String WEB_USER_MESSAGE_STR = "WEB_USER_MESSAGE_STR_";
 	private static final Logger LOGGER = LoggerFactory.getLogger(PushConnector.class);
