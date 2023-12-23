@@ -9,9 +9,15 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
@@ -27,7 +33,11 @@ import com.boot.model.MapModel;
 import com.boot.model.UtilityModels.Stringable;
 import com.boot.utils.ArgUtil;
 
+@SuppressWarnings("unchecked")
 public class ChannelPluginProvider {
+	
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChannelPluginProvider.class);
+
 
 	public static interface ChannelPlugin<C extends AChannelDetails> extends ChannelTypeSpecificProps {
 		/**
@@ -231,31 +241,54 @@ public class ChannelPluginProvider {
 		return PLUGIN_MAPPING.getOrDefault(channelType, WEB);
 	}
 
-	public static final WebPlugin WEB = new WebPlugin();
-	public static final FacebookPlugin FACEBOOK = new FacebookPlugin();
-	public static final TwitterPlugin TWITTER = new TwitterPlugin();
-	public static final TelegramPlugin TELEGRAM = new TelegramPlugin();
-	public static final WAGupShupPlugin WA_GUPSHUP = new WAGupShupPlugin();
-	public static final WA360Plugin WA_360D = new WA360Plugin();
-	public static final InstagramPlugin INSTAGRAM = new InstagramPlugin();
-	public static final EmailPlugin EMAIL = new EmailPlugin();
-	public static final OAPlugin OA = new OAPlugin();
+	private static final WebPlugin WEB = new WebPlugin();
+	private static final FacebookPlugin FACEBOOK = new FacebookPlugin();
+	private static final TwitterPlugin TWITTER = new TwitterPlugin();
+	private static final TelegramPlugin TELEGRAM = new TelegramPlugin();
+	private static final WAGupShupPlugin WA_GUPSHUP = new WAGupShupPlugin();
+	private static final WA360Plugin WA_360D = new WA360Plugin();
+	private static final InstagramPlugin INSTAGRAM = new InstagramPlugin();
+	private static final EmailPlugin EMAIL = new EmailPlugin();
+	private static final OAPlugin OA = new OAPlugin();
 	/** WABA CLOUD plugin **/
 	public static final WA360CloudPlugin WA_360DC = new WA360CloudPlugin();
 
 	static {
-		register(WEB);
-		register(FACEBOOK);
-		register(TWITTER);
-		register(TELEGRAM);
-		register(WA_GUPSHUP);
-		register(WA_360D);
-		register(INSTAGRAM);
-		register(EMAIL);
-		register(new SMSPlugin());
-		register(new TwilioSMSPlugin());
-		register(OA);
-		register(WA_360DC);
+//		register(WEB);
+//		register(FACEBOOK);
+//		register(TWITTER);
+//		register(TELEGRAM);
+//		register(WA_GUPSHUP);
+//		register(WA_360D);
+//		register(INSTAGRAM);
+//		register(EMAIL);
+//		register(new SMSPlugin());
+//		register(new TwilioSMSPlugin());
+//		register(OA);
+//		register(WA_360DC);
+		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
+		provider.addIncludeFilter(new AssignableTypeFilter(ChannelPlugin.class));
+
+		Set<BeanDefinition> components = provider.findCandidateComponents("com/boot/jx");
+
+		for (BeanDefinition component : components) {
+			try {
+				Class cls = Class.forName(component.getBeanClassName());
+				@SuppressWarnings("unchecked")
+				Constructor<?> ctor = cls.getConstructor();
+				if (ctor != null) {
+					Object object = ctor.newInstance();
+					if (object != null) {
+						register((ChannelPlugin<AChannelDetails>) object);
+					}
+				}
+
+			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				LOGGER.error("No Default Constructor {}(AmxApiError apiError)", component.getBeanClassName(), e);
+			}
+		}
+
 	}
 
 }

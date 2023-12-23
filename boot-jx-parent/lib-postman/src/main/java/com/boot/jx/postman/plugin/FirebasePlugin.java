@@ -6,10 +6,10 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
-import com.boot.jx.postman.plugin.PushPlugin.PushConfigDetails;
+import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class PushPlugin implements DefaultChannelPlugin<PushConfigDetails> {
+public class FirebasePlugin implements DefaultChannelPlugin<FirebaseConfigDetails> {
 
 	@Override
 	public ContactType getContactType() {
@@ -21,30 +21,22 @@ public class PushPlugin implements DefaultChannelPlugin<PushConfigDetails> {
 		return CHANNEL_TYPE.FIREBASE;
 	}
 
-	public static final class PushConfigDetails extends AChannelDetails {
+	public static final class FirebaseConfigDetails extends AChannelDetails {
 
 		private static final long serialVersionUID = -1204213453486344023L;
 
-		@ConfigMetaProperty(path = "push.title", title = "Title", createonly = true,
-				desc = "Eneter Push Notification Title")
-		private String from;
+		@ConfigMetaProperty(path = "firebase.appName", title = "App Name", createonly = true,
+				desc = "App Name")
+		private String appName;
 
-		@ConfigMetaProperty(path = "push.serverKey", title = "API Key", writeonly = true,
+		@ConfigMetaProperty(path = "firebase.serverKey", title = "API Key", writeonly = true,
 				desc = "Enter Server WABA Key")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String serverKey;
 
 		@Override
 		public String getLane() {
-			return this.from;
-		}
-
-		public String getFrom() {
-			return from;
-		}
-
-		public void setFrom(String from) {
-			this.from = from;
+			return this.appName;
 		}
 
 		public String getServerKey() {
@@ -55,21 +47,29 @@ public class PushPlugin implements DefaultChannelPlugin<PushConfigDetails> {
 			this.serverKey = serverKey;
 		}
 
+		public String getAppName() {
+			return appName;
+		}
+
+		public void setAppName(String appName) {
+			this.appName = appName;
+		}
+
 	}
 
 	@Override
-	public void setDetails(ChannelConfig config, PushConfigDetails details) {
-		config.setPush(details);
+	public void setDetails(ChannelConfig config, FirebaseConfigDetails details) {
+		config.setFirebase(details);
 	}
 
 	@Override
-	public PushConfigDetails getDetails(ChannelConfig config) {
-		return config.getPush();
+	public FirebaseConfigDetails getDetails(ChannelConfig config) {
+		return config.getFirebase();
 	}
 
 	@Override
-	public PushConfigDetails newChannelDetails() {
-		return new PushConfigDetails();
+	public FirebaseConfigDetails newChannelDetails() {
+		return new FirebaseConfigDetails();
 	}
 
 	@Override
