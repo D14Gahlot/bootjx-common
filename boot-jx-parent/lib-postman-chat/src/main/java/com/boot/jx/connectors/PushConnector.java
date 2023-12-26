@@ -1,4 +1,4 @@
-package com.boot.jx.connectors;
+/*package com.boot.jx.connectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,4 +142,4 @@ public class PushConnector extends DefaultConnector<PushConfigDetails, PushPlugi
 		return null;
 	}
 
-}
+}*/

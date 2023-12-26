@@ -77,7 +77,6 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 			this.promptPhone = promptPhone;
 		}
 
-
 		public String getPageId() {
 			return pageId;
 		}
@@ -159,34 +158,25 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 		return config.getInstagram();
 	}
 
-	/*
-	 * @Override public void addConfigMeta(List<ConfigMeta> list) { list.add(new
-	 * ConfigMeta().path("instagram.pageId").title("Instagram Id").createonly());
-	 * list.add(new
-	 * ConfigMeta().path("instagram.type").title("Type").optionValues("page").hidden
-	 * ()); list.add(new ConfigMeta().path("instagram.handler").title("Handle"));
-	 * list.add(new
-	 * ConfigMeta().path("instagram.verifyToken").title("Verify Token").writeonly())
-	 * ; list.add(new
-	 * ConfigMeta().path("instagram.accessToken").title("Access Token").writeonly())
-	 * ; list.add(new
-	 * ConfigMeta().path("instagram.appSecret").title("App Secret").writeonly()); }
-	 * 
-	 * @Override public void importChannelDetailsFromMap(InstagramConfig
-	 * channelDetails, MapModel map) {
-	 * channelDetails.setPageId(map.pathEntry("instagram.pageId").asString(
-	 * channelDetails.getPageId()));
-	 * channelDetails.setHandler(map.pathEntry("instagram.handler").asString(
-	 * channelDetails.getHandler()));
-	 * channelDetails.setType(map.pathEntry("instagram.type").asString(
-	 * channelDetails.getType()));
-	 * channelDetails.setVerifyToken(map.pathEntry("instagram.verifyToken").asString
-	 * (channelDetails.getVerifyToken()));
-	 * channelDetails.setAccessToken(map.pathEntry("instagram.accessToken").asString
-	 * (channelDetails.getAccessToken()));
-	 * channelDetails.setAppSecret(map.pathEntry("instagram.appSecret").asString(
-	 * channelDetails.getAppSecret())); }
-	 */
+	@Override
+	public void addConfigMeta(List<ConfigMeta> list) {
+		list.add(new ConfigMeta().path("instagram.pageId").title("Instagram Id").createonly());
+		list.add(new ConfigMeta().path("instagram.type").title("Type").optionValues("page").hidden());
+		list.add(new ConfigMeta().path("instagram.handler").title("Handle"));
+		list.add(new ConfigMeta().path("instagram.verifyToken").title("Verify Token").writeonly());
+		list.add(new ConfigMeta().path("instagram.accessToken").title("Access Token").writeonly());
+		list.add(new ConfigMeta().path("instagram.appSecret").title("App Secret").writeonly());
+	}
+
+	@Override
+	public void importChannelDetailsFromMap(InstagramConfig channelDetails, MapModel map) {
+		channelDetails.setPageId(map.pathEntry("instagram.pageId").asString(channelDetails.getPageId()));
+		channelDetails.setHandler(map.pathEntry("instagram.handler").asString(channelDetails.getHandler()));
+		channelDetails.setType(map.pathEntry("instagram.type").asString(channelDetails.getType()));
+		channelDetails.setVerifyToken(map.pathEntry("instagram.verifyToken").asString(channelDetails.getVerifyToken()));
+		channelDetails.setAccessToken(map.pathEntry("instagram.accessToken").asString(channelDetails.getAccessToken()));
+		channelDetails.setAppSecret(map.pathEntry("instagram.appSecret").asString(channelDetails.getAppSecret()));
+	}
 
 	@Override
 	public boolean isPushAllowed() {
