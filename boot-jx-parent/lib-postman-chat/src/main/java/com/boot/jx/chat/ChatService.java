@@ -29,6 +29,7 @@ import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class ChatService {
@@ -213,6 +214,8 @@ public class ChatService {
 
 	public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		LOGGER.debug("send(ChatSessionDoc {}, OutboxMessage {})", sessionDoc, outboxMessage);
+		
+		LOGGER.info("send ---"+JsonUtil.toJson(outboxMessage));
 
 		context().session(sessionDoc);
 
