@@ -2,6 +2,7 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
@@ -31,6 +32,9 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 
 	private MessageSession session;
 	private MessageRouter route;
+	
+	/** TP waba con**/
+	private Map<String, Object> tpChanel;
 
 	public String getMessageId() {
 		return messageId;
@@ -243,6 +247,14 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 
 	public void setRoute(MessageRouter route) {
 		this.route = route;
+	}
+
+	public Map<String, Object> getTpChanel() {
+		return tpChanel;
+	}
+
+	public void setTpChanel(Map<String, Object> tpChanel) {
+		this.tpChanel = tpChanel;
 	}
 
 }

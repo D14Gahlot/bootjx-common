@@ -47,4 +47,10 @@ public class WABAConversationQuery extends DocQueryBuilder<WABAConversation> {
 		this.set("meta", meta);
 		return this;
 	}
+	
+	
+	public WABAConversationQuery setChatSession(Map<String, Object> chatSession) {
+		this.set("chatSessionId", chatSession);
+		return this;
+	}
 }

@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -425,6 +426,9 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	}
 
 	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
+		
+		System.out.println("toMessageReport {========}:"+JsonUtil.toJson(requestMap));
+		
 		MessageReport report = this.createMessageReport(channelConfig);
 		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
 
@@ -472,7 +476,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
-
 		List<Object> entryLst = (List<Object>) requestMap.map().get("entry");
 		List<Object> changesLst = new ArrayList<>();
 		LinkedHashMap<String, Object> lMap = null;
@@ -496,13 +499,14 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		if (cloudRequestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
 		}
+		
 
 		if (cloudRequestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = cloudRequestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
 				MessageReport reprt = toMessageReport(channelConfig, statusModel);
-				messageBoxEvent.addMessageReport(reprt);
+				//messageBoxEvent.addMessageReport(reprt);
 				if (Status.SENTX.equals(reprt.getStatus())) {
 					Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
 					if (ArgUtil.is(conversation)) {
@@ -513,8 +517,18 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 						query.setPricing(statusModel.keyEntry("pricing").asMap());
 						query.set("meta.to_country", getCountryCode(reprt.contact().getCsid()));
 						commonMongoTemplate.upsert(query);
+						/** MRU--addded new code to update chatSession doc with Waba expiry time stamp**/
+						Map<String, Object> tpChannelMap = new 	HashMap<>();
+						tpChannelMap.put("ccwExpiry", conversation.get("expiration_timestamp"));
+						tpChannelMap.put("wabaConvesationId", id);
+						if(ArgUtil.is(tpChannelMap)) {
+							reprt.setTpChanel(tpChannelMap);
+						}
+						/** code ended here **/
+						
 					}
 				}
+				messageBoxEvent.addMessageReport(reprt);
 			}
 		}
 

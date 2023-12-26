@@ -39,6 +39,8 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	public static final String LAST_INBOUND_STAMP = "lastInBound";
 	public static final String FIRST_OUTBOUND_STAMP = "firstOutBound";
 	public static final String LAST_OUTBOUND_STAMP = "lastOutBound";
+	/** Customer Care window expiry **/
+	public static final String CUSTOMER_CARE_WIN_EXP_STAMP = "ccwExpiry";
 
 	@Id
 	private String sessionId;
@@ -146,6 +148,8 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	
 	/** session expiry stamp**/
 	private long sessionExpiryStamp;
+	/** waba convesation expirty stamp **/
+	private Map<String, Object> tpChanel;
 
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
@@ -668,5 +672,13 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	public void setSessionExpiryStamp(long sessionExpiryStamp) {
 		this.sessionExpiryStamp = sessionExpiryStamp;
+	}
+
+	public Map<String, Object> getTpChanel() {
+		return tpChanel;
+	}
+
+	public void setTpChanel(Map<String, Object> tpChanel) {
+		this.tpChanel = tpChanel;
 	}
 }
