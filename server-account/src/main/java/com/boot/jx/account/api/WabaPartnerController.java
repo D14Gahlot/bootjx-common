@@ -125,7 +125,8 @@ public class WabaPartnerController {
 		// return "partner-waba";
 	}
 
-	@RequestMapping(value = { "/app/waba/redirect", "/app/waba/redirect/{ticketid}" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/app/waba/redirect", "/app/waba/redirect/{ticketid}" },
+			method = { RequestMethod.GET, RequestMethod.POST })
 	public String redirected(Model model, @PathVariable(required = false, value = "ticketid") String ticketid,
 			@RequestParam(required = false) String client, @RequestParam(required = false) String channels,
 			@RequestParam(required = false) String revoked) {
@@ -369,9 +370,9 @@ public class WabaPartnerController {
 				mongoTemplate.save(channelDoc);
 				return ApiResponse.buildResult(resp.toMap());
 			} catch (ApiHttpClientException e) {
-				//e.printStackTrace();
+				// e.printStackTrace();
 				MapModel error = MapModel.from(e.getResponse().getBody());
-				if(ArgUtil.is(error)) {
+				if (ArgUtil.is(error)) {
 					ApiResponseUtil.addError(error.pathEntry("/meta/developer_message").asString());
 				}
 				throw e;
