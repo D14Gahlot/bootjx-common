@@ -1,5 +1,7 @@
 package com.boot.jx.agent.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +30,7 @@ import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
 import com.boot.jx.http.ApiRequest;
+import com.boot.jx.inbound.InBoundRouter;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMConstants;
@@ -55,6 +58,9 @@ import com.boot.utils.JsonUtil;
 
 @RestController
 public class AgChatSessionController {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(AgChatSessionController.class);
+
 
 	@Autowired
 	private SessionStore sessionStore;
@@ -129,7 +135,12 @@ public class AgChatSessionController {
 		// Session Stuff Logging >
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			outboxMessage.route().setQueueCode(sessionDoc.getAssignedToQueue());
+			LOGGER.info("sendSessionMessage { 1.sessionDoc }"+JsonUtil.toJson(sessionDoc));
+			LOGGER.info("sendSessionMessage { 1.outboxMessage }"+JsonUtil.toJson(outboxMessage));
+			
 			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
+			
+			LOGGER.info("sendSessionMessage { 2.messageDto }"+JsonUtil.toJson(messageDto));
 
 			// Evaluate if required
 			messageDto.setName(agentSession.getAgentCode());
