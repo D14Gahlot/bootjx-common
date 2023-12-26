@@ -1,6 +1,8 @@
 package com.boot.jx.postman.store;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -23,12 +25,14 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
@@ -36,6 +40,7 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.google.common.collect.Lists;
 import com.mongodb.client.result.UpdateResult;
@@ -71,6 +76,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	@Autowired
 	AppConfig appConfig;
 
+	@Autowired
+	SessionStore sessionStore;
+	
 	public static String getCollectionName(Object contactType) {
 		return (MessageDoc.COLLECTION_NAME + "_" + ArgUtil.parseAsString(contactType, "OTHERS"));
 	}
@@ -360,7 +368,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	public void updateStatus(MessageReport messageReport) {
 
 		LOGGER.debug("updateStatus {} {} {}", messageReport.getMessageId(), messageReport.contact().getChannelType(),
-				messageReport.getStatus());
+				messageReport.getStatus(),messageReport.getSessionId());
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
@@ -419,15 +427,25 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 				MessageDoc m = mongoTemplate.findOne(builder.getQuery(), MessageDoc.class, collectionName);
 				if (ArgUtil.is(m)) {
 					updateMessageReport(messageReport, m);
+					/** added for session update **/
+					LOGGER.info("m --------"+JsonUtil.toJson(m));
+					LOGGER.info("messageReport"+JsonUtil.toJson(messageReport));
+					updateSessionExpiryStamp(messageReport,m);
+					updateTpWaba(messageReport,m);
 				}
+				
 			}
 
 			// LOGGER.info(JsonUtil.toJson(builder));
+			/** update session expiry timestamp **/
+			
+			
 		}
 	}
 
 	private void updateMessageReport(MessageReport messageReport, MessageDoc m) {
 		messageReport.from(m);
+		System.out.println("session id "+m.getSessionId());
 		messageReport.session().setQueue(m.getQueue());
 	}
 
@@ -543,5 +561,43 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		List<InboxMessage> x = docs.stream().map(d -> d.getInboxMessage()).collect(Collectors.toList());
 		return x;
 	}
-
+	public void updateSessionExpiryStamp(MessageReport report,MessageDoc m ) {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+		ChatSessionDoc sessionDoc =null;
+		if(ArgUtil.is(m.getSessionId())) {
+			sessionDoc = sessionStore.getSession(m.getSessionId());
+			builder.whereIdSafe(sessionDoc.getSessionId());
+			if(ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpChanel())) {
+				sessionDoc.setSessionId(m.getSessionId());
+				Map<String, Object> tpChannelMap =report.getTpChanel(); 
+				sessionDoc.setTpChanel(tpChannelMap);
+				Long ccwExpiryLong =tpChannelMap.get("ccwExpiry")==null?0L:Long.parseLong(tpChannelMap.get("ccwExpiry").toString());
+				sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
+				builder.set("sessionExpiryStamp", ccwExpiryLong);
+				builder.set("tpChanel", tpChannelMap);
+				mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class,"CHAT_SESSION");
+			}
+		} 
+	}
+	
+	public void updateTpWaba(MessageReport report,MessageDoc m ) {
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+		if(ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpChanel())) {
+			String sessionId =m.getSessionId();
+			String tpWabaId =report.getTpChanel().get("wabaConvesationId").toString(); 
+			LOGGER.info("tpWabaId :"+tpWabaId);
+			if(ArgUtil.is(tpWabaId)) {
+				builder.whereIdSafe(tpWabaId);
+				WABAConversationQuery query = new WABAConversationQuery(tpWabaId);
+				Map<String, Object> chatSessionMap = new HashMap<>();
+				chatSessionMap.put("chatSessionId",sessionId);
+				query.setChatSession(chatSessionMap);
+				commonMongoTemplate.upsert(query);
+			}
+			
+			
+		}
+		
+	}
+	
 }
