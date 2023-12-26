@@ -371,11 +371,13 @@ public class WabaPartnerController {
 				return ApiResponse.buildResult(resp.toMap());
 			} catch (ApiHttpClientException e) {
 
+
 			
 
-				//e.printStackTrace();
+			
+				// e.printStackTrace();
 				MapModel error = MapModel.from(e.getResponse().getBody());
-				if(ArgUtil.is(error)) {
+				if (ArgUtil.is(error)) {
 
 					ApiResponseUtil.addError(error.pathEntry("/meta/developer_message").asString());
 				}
