@@ -1,7 +1,5 @@
 package com.boot.jx.postman.wa360;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +32,6 @@ import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
-import com.boot.utils.JsonUtil.JsonUtilConfigurable;
 import com.boot.utils.StringUtils;
 
 @Component

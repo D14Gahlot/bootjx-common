@@ -46,7 +46,6 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.postman.store.MessageContext;
-import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;

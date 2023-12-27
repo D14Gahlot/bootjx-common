@@ -10,7 +10,6 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.WA360CloudPlugin.WA360CloudConfigDetails;
-
 import com.fasterxml.jackson.annotation.JsonView;
 
 public class WA360CloudPlugin implements DefaultChannelPlugin<WA360CloudConfigDetails> {

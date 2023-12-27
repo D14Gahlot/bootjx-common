@@ -1,17 +1,12 @@
 package com.boot.jx.postman.plugin;
 
-import java.util.List;
-
-import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigMetaProperty;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
-import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
