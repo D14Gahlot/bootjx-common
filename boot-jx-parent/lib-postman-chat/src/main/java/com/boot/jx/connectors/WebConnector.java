@@ -224,8 +224,6 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		List<TmplElement> inputs = new ArrayList<TmplElement>();
 		if (ArgUtil.isEmpty(chatContactDoc.getName())) {
 			inputs.add(new TmplElement().code("name").label("Name").type("TEXT"));
-
-			//return (OutboxMessage) inboxMessage.replyMessage("Please enter your name").option("inputs", inputs);
 //			 return (OutboxMessage) inboxMessage.replyMessage("Please enter your name").option("inputs", inputs);
 
 		}
@@ -234,28 +232,23 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 		if (channel.getWeb().isPromptEmail()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 				inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
-
-				//return (OutboxMessage) inboxMessage.replyMessage("Please enter your email").option("inputs", inputs);
-
-//				 return (OutboxMessage) inboxMessage.replyMessage("Please enter your em").option("inputs", inputs);
-
+				// return (OutboxMessage) inboxMessage.replyMessage("Please enter your
+				// email").option("inputs", inputs);
+				
 			}
 		}
 		if (channel.getWeb().isPromptPhone()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
 				inputs.add(new TmplElement().code("phone").label("Phone").type("PHONE"));
+//			 return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone").option("inputs", inputs);
 
-				//return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone").option("inputs", inputs);
 			}
 		}
 
-
 		if (ArgUtil.is(inputs) && inputs.size() > 0) {
-			return (OutboxMessage) inboxMessage.replyMessage("Please enter your").option("inputs",inputs);
+			return (OutboxMessage) inboxMessage.replyMessage("Please enter your").option("inputs", inputs);
 		}
 
-
-		
 		return null;
 	}
 

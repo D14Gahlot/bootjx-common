@@ -115,7 +115,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			contactQuery.setPhoneVerified(true);
 		}
 
-
 		String user_input_type = this.context().session().getEntry("session_init_user_input_type").asString();
 		if (ArgUtil.is(user_input_type)) {
 			if (user_input_type.equals("name")) {
@@ -152,7 +151,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				this.context().session().put("session_init_user_input_type", "phone");
 				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone number");
 			}
-
 		}
 
 		return null;
@@ -399,6 +397,23 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
 	}
 
+	<<<<<<<HEAD=======
+
+	String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig, attachment.getMediaSrc());
+
+	CommonFileStream srcFile = new CommonFileStream().url(mediaUrl)
+			// .fileType(attachment.getMediaType())
+			.format(FileFormat.from(attachment.getMediaMimeType()))
+			.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
+			.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+
+	File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+
+	CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));return pmFileStoreClient.commitSessionFileSync(srcFile,dstFile);
+	}
+
+	@Override>>>>>>>1 ab2fe93e59c1c54ca172843f269e134f28ad0ae
 
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {

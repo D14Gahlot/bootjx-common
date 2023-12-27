@@ -35,6 +35,38 @@ public class WA360CloudPlugin implements DefaultChannelPlugin<WA360CloudConfigDe
 		@ConfigMetaProperty(path = "wa360dc.apiKey", title = "API Key", writeonly = true, desc = "Enter Your WABA cloud Key")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String apiKey;
+		@ConfigMetaProperty(path = "wa360dc.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptEmail;
+
+		@ConfigMetaProperty(path = "wa360dc.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptPhone;
+
+		@ConfigMetaProperty(path = "wa360dc.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		private boolean promptName;
+
+		public boolean isPromptName() {
+			return promptName;
+		}
+
+		public void setPromptName(boolean promptName) {
+			this.promptName = promptName;
+		}
+
+		public boolean isPromptEmail() {
+			return promptEmail;
+		}
+
+		public void setPromptEmail(boolean promptEmail) {
+			this.promptEmail = promptEmail;
+		}
+
+		public boolean isPromptPhone() {
+			return promptPhone;
+		}
+
+		public void setPromptPhone(boolean promptPhone) {
+			this.promptPhone = promptPhone;
+		}
 
 		@ConfigMetaProperty(path = "wa360dc.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
