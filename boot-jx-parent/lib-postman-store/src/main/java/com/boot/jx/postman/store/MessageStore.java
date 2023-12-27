@@ -431,7 +431,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 					LOGGER.info("m --------"+JsonUtil.toJson(m));
 					LOGGER.info("messageReport"+JsonUtil.toJson(messageReport));
 					updateSessionExpiryStamp(messageReport,m);
-					updateTpWaba(messageReport,m);
+					//updateTpWaba(messageReport,m);
 				}
 				
 			}
@@ -572,7 +572,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 				Map<String, Object> tpChannelMap =report.getTpChanel(); 
 				sessionDoc.setTpChanel(tpChannelMap);
 				Long ccwExpiryLong =tpChannelMap.get("ccwExpiry")==null?0L:Long.parseLong(tpChannelMap.get("ccwExpiry").toString());
-				sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
+				sessionDoc.setSessionExpiryStamp(ccwExpiryLong*1000);
 				builder.set("sessionExpiryStamp", ccwExpiryLong);
 				builder.set("tpChanel", tpChannelMap);
 				mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class,"CHAT_SESSION");
