@@ -1,8 +1,5 @@
 package com.boot.jx.postman.plugin;
 
-import java.util.List;
-
-import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.CONVERT_TYPE;
 import com.boot.jx.common.impl.ConfigMeta.ConfigMetaProperty;
 import com.boot.jx.common.impl.ConfigMeta.DATA_TYPE;
@@ -11,10 +8,8 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
-import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -33,10 +28,13 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 	public static class InstagramConfig extends AChannelDetails {
 
 		private static final long serialVersionUID = -2397678752642150000L;
+		@ConfigMetaProperty(path = "instagram.pageId", title = "Instagram Id", createonly = true)
 		private String pageId;
+		@ConfigMetaProperty(path = "instagram.handler", title = "Handle")
 		private String handler;
+		@ConfigMetaProperty(path = "instagram.type", title = "Type", hidden = true)
 		private String type;
-		
+
 		@ConfigMetaProperty(path = "instagram.accessToken", title = "Access Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String accessToken;
@@ -49,13 +47,11 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 
 		@ConfigMetaProperty(path = "instagram.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptEmail;
-
 		@ConfigMetaProperty(path = "instagram.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptPhone;
-
 		@ConfigMetaProperty(path = "instagram.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptName;
-
+		
 		public boolean isPromptName() {
 			return promptName;
 		}
@@ -161,8 +157,7 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 		return config.getInstagram();
 	}
 
-	
-/*	@Override
+	/*@Override
 	public void addConfigMeta(List<ConfigMeta> list) {
 		list.add(new ConfigMeta().path("instagram.pageId").title("Instagram Id").createonly());
 		list.add(new ConfigMeta().path("instagram.type").title("Type").optionValues("page").hidden());

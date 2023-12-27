@@ -2,14 +2,8 @@ package com.amx.tests;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Properties;
 
-import javax.mail.Folder;
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Store;
 
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.CryptoUtil;

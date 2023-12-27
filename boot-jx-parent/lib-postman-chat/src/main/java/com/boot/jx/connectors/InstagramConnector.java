@@ -107,7 +107,6 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 				if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
 					this.context().session().put("session_init_user_input_type", "phone");
 					return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone number");
-
 				}
 
 			}

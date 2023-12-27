@@ -3,7 +3,6 @@ package com.boot.jx.connectors;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -52,11 +51,8 @@ import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.WA360CloudPlugin;
 import com.boot.jx.postman.plugin.WA360CloudPlugin.WA360CloudConfigDetails;
-import com.boot.jx.postman.plugin.WA360Plugin;
-import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.WABAConversationQuery;
-import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360CloudClient;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
@@ -115,7 +111,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			contactQuery.setPhoneVerified(true);
 		}
 
-
 		String user_input_type = this.context().session().getEntry("session_init_user_input_type").asString();
 		if (ArgUtil.is(user_input_type)) {
 			if (user_input_type.equals("name")) {
@@ -152,7 +147,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				this.context().session().put("session_init_user_input_type", "phone");
 				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone number");
 			}
-
 		}
 
 		return null;
@@ -383,23 +377,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
 	}
 
-	@Deprecated
-	public CommonFile reloadMedia(Attachment attachment)
-			throws MalformedURLException, FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
-				// .fileType(attachment.getMediaType())
-				.format(FileFormat.from(attachment.getMediaMimeType()))
-				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
-
-		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
-
-		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
-				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
-		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
-	}
-
-
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
 			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
@@ -425,9 +402,9 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	}
 
 	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
-		
-		System.out.println("toMessageReport {========}:"+JsonUtil.toJson(requestMap));
-		
+
+		System.out.println("toMessageReport {========}:" + JsonUtil.toJson(requestMap));
+
 		MessageReport report = this.createMessageReport(channelConfig);
 		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
 
@@ -498,14 +475,13 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		if (cloudRequestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
 		}
-		
 
 		if (cloudRequestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = cloudRequestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
 				MessageReport reprt = toMessageReport(channelConfig, statusModel);
-				//messageBoxEvent.addMessageReport(reprt);
+				// messageBoxEvent.addMessageReport(reprt);
 				if (Status.SENTX.equals(reprt.getStatus())) {
 					Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
 					if (ArgUtil.is(conversation)) {
@@ -516,15 +492,17 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 						query.setPricing(statusModel.keyEntry("pricing").asMap());
 						query.set("meta.to_country", getCountryCode(reprt.contact().getCsid()));
 						commonMongoTemplate.upsert(query);
-						/** MRU--addded new code to update chatSession doc with Waba expiry time stamp**/
-						Map<String, Object> tpChannelMap = new 	HashMap<>();
+						/**
+						 * MRU--addded new code to update chatSession doc with Waba expiry time stamp
+						 **/
+						Map<String, Object> tpChannelMap = new HashMap<>();
 						tpChannelMap.put("ccwExpiry", conversation.get("expiration_timestamp"));
 						tpChannelMap.put("wabaConvesationId", id);
-						if(ArgUtil.is(tpChannelMap)) {
+						if (ArgUtil.is(tpChannelMap)) {
 							reprt.setTpChanel(tpChannelMap);
 						}
 						/** code ended here **/
-						
+
 					}
 				}
 				messageBoxEvent.addMessageReport(reprt);

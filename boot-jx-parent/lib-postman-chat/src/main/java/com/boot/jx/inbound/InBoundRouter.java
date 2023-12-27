@@ -18,7 +18,6 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMConstants.ParamKeys;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.MessageBoxEvent;

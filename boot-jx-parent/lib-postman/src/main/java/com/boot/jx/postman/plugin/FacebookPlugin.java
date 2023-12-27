@@ -1,19 +1,16 @@
 package com.boot.jx.postman.plugin;
 
-import java.util.List;
-
-import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.common.impl.ConfigMeta.ConfigMetaProperty;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
-import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
+public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetails> {
 
 	@Override
 	public String getChannelType() {
@@ -28,17 +25,23 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 	public static class FacebookConfigDetails extends AChannelDetails {
 
 		private static final long serialVersionUID = -2397678752642150000L;
+		@ConfigMetaProperty(path = "facebook.pageId", title = "Page Id", createonly = true)
 		private String pageId;
-		private String handler;
+		@ConfigMetaProperty(path = "facebook.type", title = "Type", hidden = true)
 		private String type;
+		@ConfigMetaProperty(path = "facebook.handler", title = "Handler")
+		private String handler;
 
+		@ConfigMetaProperty(path = "facebook.accessToken", title = "Access Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String accessToken;
+		@ConfigMetaProperty(path = "facebook.verifyToken", title = "Verify Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String verifyToken;
+		@ConfigMetaProperty(path = "facebook.appSecret", title = "App Secret", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String appSecret;
-
+		
 		public String getPageId() {
 			return pageId;
 		}
@@ -120,7 +123,7 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 		return config.getFacebook();
 	}
 
-	@Override
+/*	@Override
 	public void addConfigMeta(List<ConfigMeta> list) {
 		list.add(new ConfigMeta().path("facebook.pageId").title("Page Id").createonly());
 		list.add(new ConfigMeta().path("facebook.type").title("Type").optionValues("page").hidden());
@@ -138,7 +141,7 @@ public class FacebookPlugin implements ChannelPlugin<FacebookConfigDetails> {
 		channelDetails.setVerifyToken(map.pathEntry("facebook.verifyToken").asString(channelDetails.getVerifyToken()));
 		channelDetails.setAccessToken(map.pathEntry("facebook.accessToken").asString(channelDetails.getAccessToken()));
 		channelDetails.setAppSecret(map.pathEntry("facebook.appSecret").asString(channelDetails.getAppSecret()));
-	}
+	}*/
 
 	@Override
 	public boolean isPushAllowed() {
