@@ -31,6 +31,7 @@ import com.boot.jx.account.doc.waba.WabaUsageDoc;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.service.EmpAuthService;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -124,7 +125,8 @@ public class WabaPartnerController {
 		// return "partner-waba";
 	}
 
-	@RequestMapping(value = { "/app/waba/redirect", "/app/waba/redirect/{ticketid}" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/app/waba/redirect", "/app/waba/redirect/{ticketid}" },
+			method = { RequestMethod.GET, RequestMethod.POST })
 	public String redirected(Model model, @PathVariable(required = false, value = "ticketid") String ticketid,
 			@RequestParam(required = false) String client, @RequestParam(required = false) String channels,
 			@RequestParam(required = false) String revoked) {
@@ -352,20 +354,30 @@ public class WabaPartnerController {
 				|| allowedChannels.contains(channelId)) {
 			String wabaserver = wabaServer();
 			WabaPartnerDoc partner = getPartnerWabaDoc(null);
-			MapModel resp = restService.ajax(wabaserver)
-					.path("/partners/" + partner.getPartnerId() + "/channels/" + channelId + "/api_keys")
-					.header("Authorization", String.format("%s %s", partner.getAuthorization().get("token_type"),
-							partner.getAuthorization().get("access_token")))
-					.post().acceptJson().asMapModel();
-
-			WabaChannelDoc channelDoc = mongoTemplate.findByIdSafeCheck(channelId, WabaChannelDoc.class);
-			if (ArgUtil.not(channelDoc)) {
-				channelDoc = new WabaChannelDoc();
+			try {
+				MapModel resp = restService.ajax(wabaserver)
+						.path("/partners/" + partner.getPartnerId() + "/channels/" + channelId + "/api_keys")
+						.header("Authorization",
+								String.format("%s %s", partner.getAuthorization().get("token_type"),
+										partner.getAuthorization().get("access_token")))
+						.post().acceptJson().asMapModel();
+				WabaChannelDoc channelDoc = mongoTemplate.findByIdSafeCheck(channelId, WabaChannelDoc.class);
+				if (ArgUtil.not(channelDoc)) {
+					channelDoc = new WabaChannelDoc();
+				}
+				channelDoc.setId(channelId);
+				channelDoc.setKey(resp.toMap());
+				mongoTemplate.save(channelDoc);
+				return ApiResponse.buildResult(resp.toMap());
+			} catch (ApiHttpClientException e) {
+				// e.printStackTrace();
+				MapModel error = MapModel.from(e.getResponse().getBody());
+				if (ArgUtil.is(error)) {
+					ApiResponseUtil.addError(error.pathEntry("/meta/developer_message").asString());
+				}
+				throw e;
 			}
-			channelDoc.setId(channelId);
-			channelDoc.setKey(resp.toMap());
-			mongoTemplate.save(channelDoc);
-			return ApiResponse.buildResult(resp.toMap());
+
 		} else {
 			if (!ArgUtil.is(currentUser)) {
 				ApiResponseUtil.throwException("Access Denied");

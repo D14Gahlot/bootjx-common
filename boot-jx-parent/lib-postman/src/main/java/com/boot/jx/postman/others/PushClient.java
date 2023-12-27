@@ -10,8 +10,9 @@ import com.boot.jx.AppParam;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.PushPlugin.PushConfigDetails;
+import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
 import com.boot.jx.rest.RestService;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
@@ -51,7 +52,15 @@ public class PushClient {
 	private RestService restService;
 
 	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-		PushConfigDetails push = channelConfig.getPush();
+		if (!ArgUtil.is(channelConfig)) {
+			return null;
+		}
+
+		FirebaseConfigDetails firebase = channelConfig.getFirebase();
+
+		if (!ArgUtil.is(firebase)) {
+			return null;
+		}
 
 		HashMap<String, Object> bodyObject = new HashMap<>();
 		bodyObject.put("to", topics(outboxMessage.contact().getCsid()));
@@ -62,15 +71,16 @@ public class PushClient {
 		bodyObject.put("data", outboxMessage.modelMap().entry("data").asMap());
 
 		String response = restService.ajax("https://fcm.googleapis.com/fcm/send")
-				.header("Authorization", "key=" + push.getServerKey()).header("Content-Type", "application/json")
+				.header("Authorization", "key=" + firebase.getServerKey()).header("Content-Type", "application/json")
 				.post(JsonUtil.toJson(bodyObject)).asString();
 
 		return outboxMessage;
 	}
 
 	public OutboxMessage send(OutboxMessage outboxMessage) {
-		ChannelConfig channelConfig = pmEnvironment.config().channel("firebase:mehery");
+		ChannelConfig channelConfig = pmEnvironment.config().channel("firebase:magent");
 		return send(channelConfig, outboxMessage);
+
 	}
 
 }

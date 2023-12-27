@@ -78,7 +78,7 @@ public class PMConstants {
 	}
 
 	public enum CHANNEL_TYPE_ENUM {
-		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa
+		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase
 	}
 
 	public static enum CHAT_STATUS {

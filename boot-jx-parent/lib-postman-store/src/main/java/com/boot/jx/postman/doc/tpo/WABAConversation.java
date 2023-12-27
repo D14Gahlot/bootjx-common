@@ -33,6 +33,9 @@ public class WABAConversation implements Serializable, CreatedTimeStampIndexSupp
 	private Map<String, Object> conversation;
 	private Map<String, Object> pricing;
 	private Map<String, Object> meta;
+	/** Chat session Id **/
+	private Map<String, Object> chatSession;
+	
 
 	public String getId() {
 		return id;
@@ -95,5 +98,13 @@ public class WABAConversation implements Serializable, CreatedTimeStampIndexSupp
 
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
+	}
+
+	public Map<String, Object> getChatSession() {
+		return chatSession;
+	}
+
+	public void setChatSession(Map<String, Object> chatSession) {
+		this.chatSession = chatSession;
 	}
 }

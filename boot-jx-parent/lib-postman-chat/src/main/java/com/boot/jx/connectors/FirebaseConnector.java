@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
-import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
@@ -28,8 +27,8 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.PushPlugin;
-import com.boot.jx.postman.plugin.PushPlugin.PushConfigDetails;
+import com.boot.jx.postman.plugin.FirebasePlugin;
+import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
@@ -39,11 +38,11 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
-@ConnectorMapping(contactType = ContactType.WEBSITE)
-public class PushConnector extends DefaultConnector<PushConfigDetails, PushPlugin> {
+@ConnectorMapping(contactType = ContactType.PUSH)
+public class FirebaseConnector extends AbstractConnector<FirebaseConfigDetails, FirebasePlugin> {
 
 	private static final String WEB_USER_MESSAGE_STR = "WEB_USER_MESSAGE_STR_";
-	private static final Logger LOGGER = LoggerFactory.getLogger(PushConnector.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FirebaseConnector.class);
 
 	@Value("${app.stomp}")
 	boolean stompEnabled;
