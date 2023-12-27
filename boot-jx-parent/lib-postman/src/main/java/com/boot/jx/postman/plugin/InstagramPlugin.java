@@ -56,7 +56,7 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 		private boolean promptPhone;
 		@ConfigMetaProperty(path = "instagram.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
 		private boolean promptName;
-
+		
 		public boolean isPromptName() {
 			return promptName;
 		}

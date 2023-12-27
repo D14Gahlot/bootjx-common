@@ -46,7 +46,7 @@ public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetail
 		@ConfigMetaProperty(path = "facebook.appSecret", title = "App Secret", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String appSecret;
-
+		
 		public String getPageId() {
 			return pageId;
 		}
