@@ -533,7 +533,7 @@ public class WA360CloudClient {
 
 		MapModel resp = restService.ajax(url.replace("/v1/media/", "/"))
 				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).acceptJson().get()
-				.asMapModelSafe();
+				.asMapModel();
 		return resp.getString("url").replace("https://lookaside.fbsbx.com", WA360Constants.BASE_CLOUD_URL);
 	}
 	
