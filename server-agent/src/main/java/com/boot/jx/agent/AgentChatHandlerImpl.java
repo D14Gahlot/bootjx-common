@@ -437,7 +437,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		stompTunnelService.sendTo(StompQuery.toAll("/chat/session/delta").toSameOriginApp(), MapModel.createInstance()
 				.put("sessionId", messageDoc.getSessionId()).put("event", "new_message").toMap());
 
-		OutboxMessage notify = new OutboxMessage().message(inboxMessage.getMessage());
+		OutboxMessage notify = new OutboxMessage()
+				.message(ArgUtil.nonEmpty(inboxMessage.getMessage(), inboxMessage.getFormatType()));
 		notify.contact().setCsid(To.dept(inboxMessage.session().getDept()));
 
 		pushClient.send(notify);
