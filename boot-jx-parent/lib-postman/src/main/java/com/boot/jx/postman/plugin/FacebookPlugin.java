@@ -32,7 +32,7 @@ public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetail
 		private static final long serialVersionUID = -2397678752642150000L;
 		@ConfigMetaProperty(path = "facebook.pageId", title = "Page Id", createonly = true)
 		private String pageId;
-		@ConfigMetaProperty(path = "facebook.type", title = "Type", optionValues = "page", hidden = true)
+		@ConfigMetaProperty(path = "facebook.type", title = "Type", hidden = true)
 		private String type;
 		@ConfigMetaProperty(path = "facebook.handler", title = "Handler")
 		private String handler;

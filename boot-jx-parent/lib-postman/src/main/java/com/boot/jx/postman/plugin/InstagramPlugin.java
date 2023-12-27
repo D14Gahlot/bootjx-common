@@ -37,7 +37,7 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 		private String pageId;
 		@ConfigMetaProperty(path = "instagram.handler", title = "Handle")
 		private String handler;
-		@ConfigMetaProperty(path = "instagram.type", title = "Type", optionValues = "page", hidden = true)
+		@ConfigMetaProperty(path = "instagram.type", title = "Type", hidden = true)
 		private String type;
 
 		@ConfigMetaProperty(path = "instagram.accessToken", title = "Access Token", writeonly = true)
