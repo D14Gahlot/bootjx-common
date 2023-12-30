@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -472,6 +473,13 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 						query.setPricing(statusModel.keyEntry("pricing").asMap());
 						query.set("meta.to_country", getCountryCode(reprt.contact().getCsid()));
 						commonMongoTemplate.upsert(query);
+						Map<String, Object> tpChannelMap = new HashMap<>();
+						tpChannelMap.put("ccwExpiry", conversation.get("expiration_timestamp"));
+						tpChannelMap.put("wabaConvesationId", id);
+						if (ArgUtil.is(tpChannelMap)) {
+							reprt.setTpChanel(tpChannelMap);
+						}
+						
 					}
 				}
 			}
