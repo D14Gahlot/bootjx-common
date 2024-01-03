@@ -46,8 +46,7 @@ public class CampaignManager {
 		}
 			CampaignContactDoc campDoc=new CampaignContactDoc();
 			String  contactType =camp.getChatsessionDto().contact().getContactType();
-			if(contactType.equalsIgnoreCase("WHATSAPP"));
-			{
+			
 			List<Contactable> lists=new ArrayList<Contactable>();
 			lists.add(camp.getChatsessionDto().contact());
 			List<String>camplist=new ArrayList<String>();
@@ -91,7 +90,7 @@ public class CampaignManager {
 			return campDoc;
 			}
 			
-		}
+		
 	}		
 	//public List<CampaignContactDoc> fetchCampaignList(String campaignId) {
 //	return fetchCampaignList(campaignId, true);
