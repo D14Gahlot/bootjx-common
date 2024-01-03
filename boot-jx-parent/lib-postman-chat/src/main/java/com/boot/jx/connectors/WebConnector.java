@@ -221,34 +221,34 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 				contactQuery.setPhoneVerified(false);
 			}
 		}
-		List<TmplElement> inputs = new ArrayList<TmplElement>();
-		if (ArgUtil.isEmpty(chatContactDoc.getName())) {
-			inputs.add(new TmplElement().code("name").label("Name").type("TEXT"));
-//			 return (OutboxMessage) inboxMessage.replyMessage("Please enter your name").option("inputs", inputs);
 
-		}
 		ChannelConfig channel = getChannelConfig(inboxMessage);
-
+		List<TmplElement> inputs = new ArrayList<TmplElement>();
+		if (channel.getWeb().isPromptName()) {
+			if (ArgUtil.isEmpty(chatContactDoc.getName())) {
+				inputs.add(new TmplElement().code("name").type("TEXT"));
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your name").option("inputs", inputs);
+			}
+		}
 		if (channel.getWeb().isPromptEmail()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
-				inputs.add(new TmplElement().code("email").label("Email").type("EMAIL"));
-				// return (OutboxMessage) inboxMessage.replyMessage("Please enter your
-				// email").option("inputs", inputs);
-				
+				inputs.add(new TmplElement().code("email").type("EMAIL"));
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your email").option("inputs", inputs);
+
 			}
 		}
 		if (channel.getWeb().isPromptPhone()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
-				inputs.add(new TmplElement().code("phone").label("Phone").type("PHONE"));
-//			 return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone").option("inputs", inputs);
+				inputs.add(new TmplElement().code("phone").type("PHONE"));
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone").option("inputs", inputs);
 
 			}
 		}
 
-		if (ArgUtil.is(inputs) && inputs.size() > 0) {
-			return (OutboxMessage) inboxMessage.replyMessage("Please enter your").option("inputs", inputs);
-		}
-
+		/*
+		 * if (ArgUtil.is(inputs) && inputs.size() > 0) { return (OutboxMessage)
+		 * inboxMessage.replyMessage("Please enter your").option("inputs", inputs); }
+		 */
 		return null;
 	}
 
