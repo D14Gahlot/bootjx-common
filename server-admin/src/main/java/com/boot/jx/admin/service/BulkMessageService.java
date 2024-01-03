@@ -193,38 +193,6 @@ public class BulkMessageService extends BatchJobExecuter {
 		return session;
 	}
 
-	@Override
-	public BatchJob resetJob(String jobId) {
-		BatchJob oldJob = stopJob(jobId);
-		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
-		session.setStatus("CREATED");
-		mongoTemplate.save(session);
-
-		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
-				PostManUtil.CHANNEL_ID(session.getContactType(), "", session.getLane()));
-
-		ChannelConfig channelConfig = enviroment.config().channel(channelId);
-
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-
-		Query query = new Query().addCriteria(
-				QueryCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
-		builder.set("status", Status.SCHLD.toString());
-
-		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
-
-		return registerJob(JobTaskModel.newBatchJob()
-				// Set Unique Job Id
-				.jobId(session.getBulkSessionId())
-				// Contact Type for each message
-				.data("contactType", session.getContactType())
-				// Channel for each message
-				.data("channelType", channelConfig.getChannelType())
-				// Lane for each message
-				.data("lane", session.getLane()));
-	}
-	
-	
 	public BulkSessionDoc sendToGroup(List<OutboxMessage> bulkMessages) throws NumberParseException {
 
 		OutboxMessage bulkMessage = bulkMessages.get(0);
