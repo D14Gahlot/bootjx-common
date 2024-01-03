@@ -13,9 +13,11 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.manager.AdminManager;
+import com.boot.jx.admin.manager.GroupManager;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.common.dto.GroupReqDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.DocumentUpdateListner;
@@ -44,6 +46,9 @@ public class AdminService {
 
 	@Autowired
 	private DocumentUpdateListner documentUpdateListner;
+	
+	@Autowired
+	GroupManager groupMgr;
 
 	public List<AgentResponseAdminDto> fetchAgents(String agentId, boolean includeInActive) {
 		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId, includeInActive);
@@ -145,6 +150,16 @@ public class AdminService {
 		AgentDoc agent = agentStore.findById(agentId);
 		empAuthService.resetPassword(agent.getAgent_code(), agent.isAdmin());
 		return buildAgentDto(CollectionUtil.asList(agent));
+	}
+	
+	public List<GroupReqDto>  createAndUpdateGroup(GroupReqDto req) {
+		List<GroupReqDto> reqDto = groupMgr.createAndUpdateGroup(req);
+		return reqDto;
+	}
+	
+	public List<GroupReqDto>  fetchGroups(String groupId) {
+		List<GroupReqDto> reqDto = groupMgr.fetchGroups(groupId);
+		return reqDto;
 	}
 
 }

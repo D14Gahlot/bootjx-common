@@ -223,6 +223,103 @@ public class BulkMessageService extends BatchJobExecuter {
 				// Lane for each message
 				.data("lane", session.getLane()));
 	}
+	
+	
+	public BulkSessionDoc sendToGroup(List<OutboxMessage> bulkMessages) throws NumberParseException {
+
+		OutboxMessage bulkMessage = bulkMessages.get(0);
+		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
+		ChannelConfig channelConfig = enviroment.config().channel(channelId);
+		BulkSessionDoc session = new BulkSessionDoc();
+		session.setMessage(bulkMessage.getMessage());
+		session.setTemplateId(bulkMessage.templateId());
+		session.setTemplate(bulkMessage.templateCode());
+		session.setMessageCount(bulkMessage.getTo().size());
+		session.setContactType(bulkMessage.contact().getContactType());
+		session.setLane(bulkMessage.contact().getLane());
+		session.setChannelId(channelId);
+		session.setBulkSessionId(UniqueID.generateString62());
+		session.setGroupId(channelId);
+		session.setGroupTitle(channelId);
+
+		auditDetailProvider.auditCreate(session);
+
+		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
+		String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+
+		PhoneNumber phoneNumber = new PhoneNumber();
+		List<MessageDoc> docs = new ArrayList<MessageDoc>();
+		for (OutboxMessage bulkMsg : bulkMessages) {
+			MessageDoc doc = messageStore.createMessageDoc(bulkMsg);
+			String to = bulkMsg.getTo().get(0);
+			doc.setContactId(null);
+			doc.updateStatus(Status.SCHLD);
+			doc.setBulkSessionId(session.getBulkSessionId());
+			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
+			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			doc.getContact().setPhone(to);
+			doc.setMessage(bulkMsg.getMessage());
+			doc.setHsm(bulkMsg.getHsm());
+			doc.setTemplateId(bulkMsg.templateId());
+			doc.setTemplate(bulkMsg.templateCode());
+			doc.setAttachments(bulkMsg.getAttachments());
+
+			doc.route().setQueueCode(adminApp.getQueue());
+			doc.route().setSendMode(adminApp.getAppMode());
+			doc.route().setSenderApp(adminApp.getAppType());
+			doc.route().setSenderType(MESSAGE_SENDER_TYPE.ADMIN);
+			doc.route().setSenderCode(auditDetailProvider.getAuditUser());
+
+			docs.add(doc);
+		}
+
+		session.setStatus("CREATED");
+		mongoTemplate.save(session);
+		messageStore.insert(docs, bulkMessage.contact().type());
+		registerJob(JobTaskModel.newBatchJob()
+				// Set Unique Job Id
+				.jobId(session.getBulkSessionId())
+				// Contact Type for each message
+				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channelType", channelConfig.getChannelType())
+				// Lane for each message
+				.data("lane", session.getLane()));
+
+		return session;
+	}
+
+	@Override
+	public BatchJob resetJob(String jobId) {
+		BatchJob oldJob = stopJob(jobId);
+		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
+		session.setStatus("CREATED");
+		mongoTemplate.save(session);
+
+		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
+				PostManUtil.CHANNEL_ID(session.getContactType(), "", session.getLane()));
+
+		ChannelConfig channelConfig = enviroment.config().channel(channelId);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+
+		Query query = new Query().addCriteria(
+				QueryCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
+		builder.set("status", Status.SCHLD.toString());
+
+		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
+
+		return registerJob(JobTaskModel.newBatchJob()
+				// Set Unique Job Id
+				.jobId(session.getBulkSessionId())
+				// Contact Type for each message
+				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channelType", channelConfig.getChannelType())
+				// Lane for each message
+				.data("lane", session.getLane()));
+	}
+
 
 	@Override
 	public boolean read(BatchJob currentBatchJob) {

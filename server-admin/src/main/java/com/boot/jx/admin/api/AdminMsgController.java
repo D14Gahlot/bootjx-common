@@ -34,7 +34,9 @@ import com.boot.jx.admin.service.CSVService;
 import com.boot.jx.admin.service.TestMessageService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatSessionService;
+import com.boot.jx.common.doc.GroupDoc;
 import com.boot.jx.common.doc.ImportChatSessionDoc;
+import com.boot.jx.common.dto.GroupSessionDto;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonTemplateMeta;
@@ -315,7 +317,15 @@ public class AdminMsgController {
 			} else {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
 			}
-		} else {
+		}else if(ArgUtil.is(bulkMessage.getGroupId())) {
+			List<OutboxMessage> lstOutBoxMsg = getGroupDetails(bulkMessage);
+			BulkSessionDoc bulkDoc = bulkMessageService.sendMultiple(lstOutBoxMsg);
+			if (ArgUtil.is(bulkDoc)) {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
+			} else {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+			}
+		}else {
 			return ApiResponse.buildResult(testMessageService.send(bulkMessage)).message("Bulk Message Job Created");
 		}
 	}
@@ -490,6 +500,37 @@ public class AdminMsgController {
 					}
 					outboxMsg.setHsm(hsmTemp);
 
+					listOfOutboxMsg.add(outboxMsg);
+				} // end of listOfOutboxMsgs
+
+			}
+
+		}
+		return listOfOutboxMsg;
+	}
+	
+	/** fetch group details **/
+	public List<OutboxMessage> getGroupDetails(OutboxMessage outboxMessage) {
+		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
+		if (outboxMessage != null) {
+			String groupId = outboxMessage.getGroupId();
+			String groupTitle=outboxMessage.getGroupTitle();
+			OutboxMessage otBoxMsg = outboxMessage;
+			String hsmId = otBoxMsg.getHsm().getId();
+			GroupDoc groupDoc = mongoTemplate.findById(groupId, GroupDoc.class);
+			if (ArgUtil.is(groupDoc)) {
+				List<GroupSessionDto> lstDto = groupDoc.getSessions();
+				for (GroupSessionDto dto : lstDto) {
+					OutboxMessage outboxMsg = new OutboxMessage();
+					CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
+					hsmTemp.setId(hsmId);
+					outboxMsg.setGroupId(groupId);
+					outboxMsg.setGroupTitle(groupTitle);
+					outboxMsg.setMessage(otBoxMsg.getMessage());
+					outboxMsg.setAttachments(otBoxMsg.getAttachments());
+					outboxMsg.setContact(otBoxMsg.getContact());
+					outboxMsg.setTo(Arrays.asList(dto.getPhone()));
+					outboxMsg.setHsm(hsmTemp);
 					listOfOutboxMsg.add(outboxMsg);
 				} // end of listOfOutboxMsgs
 

@@ -16,6 +16,7 @@ import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.service.AdminService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.common.dto.GroupReqDto;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.service.ChatDTOUtil;
@@ -117,4 +118,16 @@ public class AdminUserController {
 			return new ApiResponse<ContactDTO, Object>();
 		}
 	}
+	
+	@RequestMapping(value = "/api/create-update-group", method = { RequestMethod.POST })
+	public ApiResponse<GroupReqDto, Object> createAndUpdateGroups(@RequestBody GroupReqDto reqDto){
+			return ApiResponse.buildResults(adminService.createAndUpdateGroup(reqDto));
+		}
+	
+
+	@RequestMapping(value = "/api/fetch/groups", method = { RequestMethod.GET })
+	public ApiResponse<GroupReqDto, Object> fetchGroups(@RequestParam(value = "groupId", required = false) String groupId){
+			return ApiResponse.buildResults(adminService.fetchGroups(groupId));
+		}
+
 }

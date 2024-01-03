@@ -28,9 +28,12 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private List<Object> trace;
 	/** csv refernce key**/
 	private String referenceKey;
-
 	/** **/
 	private Map<String,Object> rawMessageFormat;
+	/** group key**/
+	private String groupId;
+	private String groupTitle;
+	
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -161,6 +164,22 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public void setRawMessageFormat(Map<String, Object> rawMessageFormat) {
 		this.rawMessageFormat = rawMessageFormat;
+	}
+
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getGroupTitle() {
+		return groupTitle;
+	}
+
+	public void setGroupTitle(String groupTitle) {
+		this.groupTitle = groupTitle;
 	}
 
 }
