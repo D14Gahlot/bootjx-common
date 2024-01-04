@@ -13,10 +13,12 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.CampaignDTO;
+import com.boot.jx.admin.dto.GroupReqDto;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
-import com.boot.jx.postman.doc.CampaignContactDoc;
+import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.postman.doc.GroupContactDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.utils.ArgUtil;
@@ -25,59 +27,61 @@ import com.boot.utils.ArgUtil;
 public class CampaignManager {
 	@Autowired
 	MongoTemplate mongoTemplate;
+	@Autowired
+	AuditDetailProvider auditDetailProvider;
    
 
 	
 	
-	public List<CampaignContactDoc> fetchCampaignList(String campaignId, boolean IsActive) {
-		List<CampaignContactDoc> campaignList = new ArrayList<CampaignContactDoc>();
+	public List<GroupContactDoc> fetchGroupLists(String campaignId, boolean IsActive) {
+		List<GroupContactDoc> campaignList = new ArrayList<GroupContactDoc>();
 		if (ArgUtil.is(campaignId)) {
-			CampaignContactDoc campaign = mongoTemplate.findOne(new Query(Criteria.where("_id").is(campaignId)), CampaignContactDoc.class);
+			GroupContactDoc campaign = mongoTemplate.findOne(new Query(Criteria.where("_id").is(campaignId)), GroupContactDoc.class);
 			campaignList.add(campaign);
 		} else {
-			campaignList = mongoTemplate.findAll(CampaignContactDoc.class);
+			campaignList = mongoTemplate.findAll(GroupContactDoc.class);
 		}
 		return campaignList;
 	}
 	
-	public CampaignContactDoc createorUpdateCampaigns(CampaignDTO camp) {
-		if (ArgUtil.isEmpty(camp)) {
+	public GroupContactDoc createorUpdateGroup(GroupReqDto group) {
+		if (ArgUtil.isEmpty(group)) {
 			ApiResponseUtil.throwException("Input Required");
 		}
-			CampaignContactDoc campDoc=new CampaignContactDoc();
-			String  contactType =camp.getChatsessionDto().contact().getContactType();
+			GroupContactDoc groupDoc=new GroupContactDoc();
 			
-			List<Contactable> lists=new ArrayList<Contactable>();
-			lists.add(camp.getChatsessionDto().contact());
+			//String  contactType =camp.getChatsessionDto().contact().getContactType();
+			
+			List<Object> lists=new ArrayList<Object>();
+			lists.addAll(group.getSession());
 			List<String>camplist=new ArrayList<String>();
-			for (Contactable con:lists)
-			{
-				String phone=con.getPhone();
+			
+			for (Object it:lists)
+			{ 
+			;
 			     camplist.add(phone);
 				}
-		if ((ArgUtil.isEmpty(camp.getCampaignId())))
+		if ((ArgUtil.isEmpty(group.getGroupId())))
 				{
-			campDoc.setIsActive(true);
-			campDoc.setTimetsamp(System.currentTimeMillis());
-			//campDoc.getPhone().add(camp.getChatsessionDto().getPhone());
-			campDoc.setCampaign_name(camp.getCampaignName());
-			campDoc.setCampaign_id(null);
-			campDoc.setCreatedBy(camp.getChatsessionDto().contact().getName());
-			// campDoc.setPhone(phone1);
-			// campDoc.setPhone(phone1);
+			groupDoc.setIsActive(true);
+			groupDoc.setCreatedTimestamp(System.currentTimeMillis());
+			groupDoc.setGroupName(group.getGroupName());
+			groupDoc.setGroupId(null);
+			groupDoc.setCreatedBy(auditDetailProvider.getAuditUser());
+		
              
 
 		} else {
-			campDoc.setCampaign_id(camp.getCampaignId());
-			campDoc.setCampaign_name(camp.getCampaignName());
-			campDoc.setCreatedBy(camp.getChatsessionDto().contact().getName());
+			campDoc.setCampaign_id(group.getCampaignId());
+			campDoc.setCampaign_name(group.getCampaignName());
+			campDoc.setCreatedBy(auditDetailProvider.getAuditUser());
 			campDoc.setIsActive(true);
 			//campDoc.setPhone(phone1);
 			campDoc.setTimetsamp(System.currentTimeMillis());
 			//campDoc.setCreatedBy(camp.getChatsessionDto().getName());;
 		}
 
-		if (ArgUtil.isEmpty(camp.getCampaignName())) {
+		if (ArgUtil.isEmpty(group.getCampaignName())) {
 			ApiResponseUtil.throwException("All Inputs Required");
 		}
 

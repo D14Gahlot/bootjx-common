@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.CampaignDTO;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
+import com.boot.jx.admin.dto.GroupReqDto;
 import com.boot.jx.admin.manager.CampaignManager;
 //import com.boot.jx.admin.service.CampaignService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.doc.BulkSessionDoc;
-import com.boot.jx.postman.doc.CampaignContactDoc;
+import com.boot.jx.postman.doc.GroupContactDoc;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
@@ -36,17 +37,17 @@ public class AdminCampaignController {
 	
 
 	@RequestMapping(value = "/pub/campaign/create", method = { RequestMethod.POST })
-	public CampaignContactDoc createorUpdateCampaign(@RequestBody  CampaignDTO campaignDto )
+	public GroupContactDoc createorUpdateGroup(@RequestBody  GroupReqDto groupReqDto )
 	{
 		//List<CampaignContactDoc>list1=campaignManager.createorUpdateCampaigns(campaignDto);
-		return (campaignManager.createorUpdateCampaigns(campaignDto));
+		return (campaignManager.createorUpdateGroup(groupReqDto));
 	}
 	
 	@RequestMapping(value = "/pub/campaign/view", method = { RequestMethod.GET })
-	public List<CampaignContactDoc> fetchCampaign(
-			@RequestParam(value = "campaign_id", required = false) String campaignId,
+	public List<GroupContactDoc> fetchGroup(
+			@RequestParam(value = "campaign_id", required = false) String groupId,
 			@RequestParam(required = false, defaultValue = "false") boolean isActive) {
-		return (campaignManager.fetchCampaignList(campaignId, isActive));
+		return (campaignManager.fetchGroupLists(groupId, isActive));
 	
 	}
 }

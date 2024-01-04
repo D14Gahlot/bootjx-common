@@ -1,43 +1,58 @@
 package com.boot.jx.admin.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.boot.jx.common.dto.DepartmentResponseDto;
-import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
-import com.boot.jx.postman.dto.ChatSessionDTO;
-
-public class CampaignDTO <T extends CampaignDTO<T>> implements ADocumentDTO<T> {
-   @Autowired
-	private ChatSessionDTO chatsessionDto;
-	private String campaignId;
-	private String campaignName;
-	private boolean isActive;
-	//private Map<String,String>info;
+public class GroupReqDto {	
 	
-	public ChatSessionDTO getChatsessionDto() {
-		return chatsessionDto;
+	String groupId;
+	public String getGroupId() {
+		return groupId;
 	}
-	public void setChatsessionDto(ChatSessionDTO chatsessionDto) {
-		this.chatsessionDto = chatsessionDto;
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
 	}
-	public String getCampaignId() {
-		return campaignId;
+	public String getGroupName() {
+		return groupName;
 	}
-	public void setCampaignId(String campaignId) {
-		this.campaignId = campaignId;
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
-	public String getCampaignName() {
-		return campaignName;
+	public List<GroupSessionDto> getSession() {
+		return session;
 	}
-	public void setCampaignName(String campaignName) {
-		this.campaignName = campaignName;
+	public void setSession(List<GroupSessionDto> session) {
+		this.session = session;
 	}
+	public boolean isActive() {
+		return isActive;
+	}
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+	String groupName;
+	List<GroupSessionDto> session;
+	boolean isActive;
+ 
+}
+ 
+class GroupSessionDto{
 	
-	@Override
-	public CampaignDTO newInstance() {
-		return new CampaignDTO();
+	
+	String phone;
+	public String getPhone() {
+		return phone;
 	}
-
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+	public String getContactType() {
+		return contactType;
+	}
+	public void setContactType(String contactType) {
+		this.contactType = contactType;
+	}
+	String contactType;
+	
 }

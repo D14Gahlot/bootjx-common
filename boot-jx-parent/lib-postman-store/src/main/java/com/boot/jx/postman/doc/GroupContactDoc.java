@@ -11,8 +11,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 
 @Document(collection = "CAMPAIGN_CONTACT")
-@TypeAlias("CampaignContactDoc")
-public class CampaignContactDoc implements Serializable{
+@TypeAlias("GroupContactDoc")
+public class GroupContactDoc implements Serializable{
 	/**
 	 * 
 	 */
@@ -20,10 +20,31 @@ public class CampaignContactDoc implements Serializable{
 
 	@Id
 	@Indexed
-	private String campaign_id;
+	private String groupId;
 	
-	private String campaign_name;
-	private long timestamp;
+	public String getGroupId() {
+		return groupId;
+	}
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+	public String getGroupName() {
+		return groupName;
+	}
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+	public long getCreatedTimestamp() {
+		return createdTimestamp;
+	}
+	public void setCreatedTimestamp(long createdTimestamp) {
+		this.createdTimestamp = createdTimestamp;
+	}
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+	private String groupName;
+	private long createdTimestamp;
 	
 	private String createdBy;
 	
@@ -39,12 +60,7 @@ public class CampaignContactDoc implements Serializable{
 	public void setPhone(List<String> phone) {
 		this.phone = phone;
 	}
-	public String getCampaign_name() {
-		return campaign_name;
-	}
-	public void setCampaign_name(String campaign_name) {
-		this.campaign_name = campaign_name;
-	}
+	
 
 	public boolean isActive() {
 		return isActive;
@@ -52,19 +68,7 @@ public class CampaignContactDoc implements Serializable{
 	public void setIsActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-	public String getCampaign_id() {
-		return campaign_id;
-	}
-	public void setCampaign_id(String campaign_id) {
-		this.campaign_id = campaign_id;
-	}
-	
-	public long getTimetsamp() {
-		return timestamp;
-	}
-	public void setTimetsamp(long timestamp) {
-		this.timestamp = timestamp;
-	}
+
 	public String getCreatedBy() {
 		return createdBy;
 	}
