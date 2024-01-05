@@ -486,13 +486,19 @@ public class AdminMsgController {
 			String csvRefKeyId = outboxMessage.getReferenceKey();
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
+			String hsmTemplateCode = null;
 			CsvDto csvDoc = mongoTemplate.findById(csvRefKeyId, CsvDto.class);
+			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
+			if(ArgUtil.is(templateDoc)) {
+				hsmTemplateCode = templateDoc.getCode();
+			}
 			if (ArgUtil.is(csvDoc)) {
 				List<Map<Object, Object>> lstMap = csvDoc.getLstMap();
 				for (Map<Object, Object> map : lstMap) {
 					OutboxMessage outboxMsg = new OutboxMessage();
 					CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
 					hsmTemp.setId(hsmId);
+					hsmTemp.setCode(hsmTemplateCode);
 					outboxMsg.setMessage(otBoxMsg.getMessage());
 					outboxMsg.setAttachments(otBoxMsg.getAttachments());
 					outboxMsg.setContact(otBoxMsg.getContact());
