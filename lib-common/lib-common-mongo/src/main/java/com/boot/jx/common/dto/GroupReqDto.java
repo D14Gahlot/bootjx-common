@@ -7,6 +7,9 @@ public class GroupReqDto {
 	String groupName;
 	List<GroupSessionDto> sessions;
 	boolean isActive;
+	private Long createdStamp;
+	private String createdBy;
+	
 	public String getGroupId() {
 		return groupId;
 	}
@@ -30,6 +33,18 @@ public class GroupReqDto {
 	}
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
+	}
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
+	public String getCreatedBy() {
+		return createdBy;
+	}
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
 	}
 }
 

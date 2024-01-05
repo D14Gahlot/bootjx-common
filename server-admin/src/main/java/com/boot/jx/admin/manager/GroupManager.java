@@ -44,12 +44,12 @@ public class GroupManager {
 				grpDoc.setGroupName(reqDto.getGroupName());
 				grpDoc.setSessions(reqDto.getSessions());
 				grpDoc.setActive(reqDto.isActive());
-				grpDoc.setCreate_by(auditDetailProvider.getAuditUser());
+				grpDoc.setCreatedBy(auditDetailProvider.getAuditUser());
 				grpDoc.setCreatedStamp(System.currentTimeMillis());
 				mongoTemplate.save(grpDoc);
 			}
 		
-		return fetchGroups(reqDto.getGroupId());
+		return fetchGroups(grpDoc.getGroupId());
 	}
 	
 	 public List<GroupReqDto> fetchGroups(String groupId){
