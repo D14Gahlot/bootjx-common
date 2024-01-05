@@ -121,6 +121,7 @@ public class AdminUserController {
 	
 	@RequestMapping(value = "/api/create-update-group", method = { RequestMethod.POST })
 	public ApiResponse<GroupReqDto, Object> createAndUpdateGroups(@RequestBody GroupReqDto reqDto){
+			adminService.checkDupGroupName(reqDto);
 			return ApiResponse.buildResults(adminService.createAndUpdateGroup(reqDto));
 		}
 	
