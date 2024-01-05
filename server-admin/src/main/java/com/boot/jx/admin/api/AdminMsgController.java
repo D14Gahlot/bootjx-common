@@ -44,6 +44,7 @@ import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -319,7 +320,7 @@ public class AdminMsgController {
 			}
 		}else if(ArgUtil.is(bulkMessage.getGroupId())) {
 			List<OutboxMessage> lstOutBoxMsg = getGroupDetails(bulkMessage);
-			BulkSessionDoc bulkDoc = bulkMessageService.sendMultiple(lstOutBoxMsg);
+			BulkSessionDoc bulkDoc = bulkMessageService.sendToGroup(lstOutBoxMsg);
 			if (ArgUtil.is(bulkDoc)) {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
 			} else {
@@ -341,6 +342,16 @@ public class AdminMsgController {
 			} else {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
 			}
+			
+		}else if(ArgUtil.is(bulkMessage.getGroupId())) {
+			List<OutboxMessage> lstOutBoxMsg = getGroupDetails(bulkMessage);
+			BulkSessionDoc bulkDoc = bulkMessageService.sendToGroup(lstOutBoxMsg);
+			if (ArgUtil.is(bulkDoc)) {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
+			} else {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+			}
+	
 		} else {
 			return ApiResponse.buildResult(bulkMessageService.send(bulkMessage)).message("Bulk Message Job Created");
 		}
@@ -517,13 +528,21 @@ public class AdminMsgController {
 			String groupTitle=outboxMessage.getGroupTitle();
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
+			String hsmTemplateCode = null;
+			String groupName = null;
 			GroupDoc groupDoc = mongoTemplate.findById(groupId, GroupDoc.class);
+			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
+			if(ArgUtil.is(templateDoc)) {
+				hsmTemplateCode = templateDoc.getCode();
+			}
 			if (ArgUtil.is(groupDoc)) {
+				groupName =groupDoc.getGroupName(); 
 				List<GroupSessionDto> lstDto = groupDoc.getSessions();
 				for (GroupSessionDto dto : lstDto) {
 					OutboxMessage outboxMsg = new OutboxMessage();
 					CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
 					hsmTemp.setId(hsmId);
+					hsmTemp.setCode(hsmTemplateCode);
 					outboxMsg.setGroupId(groupId);
 					outboxMsg.setGroupTitle(groupTitle);
 					outboxMsg.setMessage(otBoxMsg.getMessage());
@@ -531,6 +550,7 @@ public class AdminMsgController {
 					outboxMsg.setContact(otBoxMsg.getContact());
 					outboxMsg.setTo(Arrays.asList(dto.getPhone()));
 					outboxMsg.setHsm(hsmTemp);
+					outboxMsg.setGroupName(groupName);
 					listOfOutboxMsg.add(outboxMsg);
 				} // end of listOfOutboxMsgs
 

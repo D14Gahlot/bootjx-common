@@ -1,9 +1,9 @@
 package com.boot.jx.common.doc;
 import java.util.List;
 
-import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.common.dto.GroupSessionDto;
@@ -16,7 +16,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 public class GroupDoc implements IDocument, DocVersion {
 	@Id
 	String groupId;
-	@UniqueElements
+	@Indexed(unique = true)
 	String groupName;
 	List<GroupSessionDto> sessions;
 	boolean isActive;

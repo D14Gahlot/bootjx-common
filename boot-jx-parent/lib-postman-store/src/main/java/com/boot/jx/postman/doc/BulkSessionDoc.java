@@ -45,6 +45,7 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 	/** group key**/
 	private String groupId;
 	private String groupTitle;
+	private String groupName;
 	
 
 	private BatchJob job;
@@ -206,6 +207,14 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	public void setGroupTitle(String groupTitle) {
 		this.groupTitle = groupTitle;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 
 }

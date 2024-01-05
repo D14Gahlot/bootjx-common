@@ -33,6 +33,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 	/** group key**/
 	private String groupId;
 	private String groupTitle;
+	private String groupName;
 	
 
 	public OutboxMessage(ContactType contactType) {
@@ -180,6 +181,14 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public void setGroupTitle(String groupTitle) {
 		this.groupTitle = groupTitle;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 
 }
