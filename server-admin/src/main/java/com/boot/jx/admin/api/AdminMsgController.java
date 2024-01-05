@@ -525,7 +525,7 @@ public class AdminMsgController {
 		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
 		if (outboxMessage != null) {
 			String groupId = outboxMessage.getGroupId();
-			String groupTitle=outboxMessage.getGroupTitle();
+			String groupTitle=outboxMessage.getCampaignTitle();
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
 			String hsmTemplateCode = null;
@@ -544,7 +544,7 @@ public class AdminMsgController {
 					hsmTemp.setId(hsmId);
 					hsmTemp.setCode(hsmTemplateCode);
 					outboxMsg.setGroupId(groupId);
-					outboxMsg.setGroupTitle(groupTitle);
+					outboxMsg.setCampaignTitle(groupTitle);
 					outboxMsg.setMessage(otBoxMsg.getMessage());
 					outboxMsg.setAttachments(otBoxMsg.getAttachments());
 					outboxMsg.setContact(otBoxMsg.getContact());

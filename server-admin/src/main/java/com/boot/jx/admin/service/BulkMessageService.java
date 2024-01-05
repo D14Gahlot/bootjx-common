@@ -208,7 +208,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
 		session.setGroupId(bulkMessage.getGroupId());
-		session.setGroupTitle(bulkMessage.getGroupTitle());
+		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		session.setGroupName(bulkMessage.getGroupName());
 
 		auditDetailProvider.auditCreate(session);
