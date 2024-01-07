@@ -76,7 +76,7 @@ public class TestMessageService {
 		session.setMessageCount(bulkMessage.getTo().size());
 		session.setContactType(bulkMessage.contact().getContactType());
 		session.setLane(bulkMessage.contact().getLane());
-
+		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
 

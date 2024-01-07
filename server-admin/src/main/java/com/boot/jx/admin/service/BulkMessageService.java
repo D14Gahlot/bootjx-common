@@ -25,6 +25,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -35,6 +36,7 @@ import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -72,16 +74,22 @@ public class BulkMessageService extends BatchJobExecuter {
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
 
 		ChannelConfig channelConfig = enviroment.config().channel(channelId);
-
+		
+		HSMTemplateDoc templateDoc = mongoTemplate.findById(bulkMessage.templateId(), HSMTemplateDoc.class);
+		CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
+		if(ArgUtil.is(templateDoc)) {
+			hsmTemp.setId(bulkMessage.templateId());
+			hsmTemp.setCode(hsmTemp.getCode());
+			bulkMessage.setHsm(hsmTemp);
+		}
 		BulkSessionDoc session = new BulkSessionDoc();
-
 		session.setMessage(bulkMessage.getMessage());
 		session.setTemplateId(bulkMessage.templateId());
 		session.setTemplate(bulkMessage.templateCode());
 		session.setMessageCount(bulkMessage.getTo().size());
 		session.setContactType(bulkMessage.contact().getContactType());
 		session.setLane(bulkMessage.contact().getLane());
-
+		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
 
@@ -102,6 +110,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.getContact().setPhone(to);
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
+			doc.setHsm(hsmTemp);
 			doc.setTemplateId(bulkMessage.templateId());
 			doc.setTemplate(bulkMessage.templateCode());
 			doc.setAttachments(bulkMessage.getAttachments());
@@ -145,7 +154,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setLane(bulkMessage.contact().getLane());
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
-
+		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
@@ -156,6 +165,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		for (OutboxMessage bulkMsg : bulkMessages) {
 			MessageDoc doc = messageStore.createMessageDoc(bulkMsg);
 			String to = bulkMsg.getTo().get(0);
+		
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
@@ -225,7 +235,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
-			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			//to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
 			doc.setMessage(bulkMsg.getMessage());
 			doc.setHsm(bulkMsg.getHsm());

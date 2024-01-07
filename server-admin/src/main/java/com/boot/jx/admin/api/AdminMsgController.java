@@ -487,6 +487,7 @@ public class AdminMsgController {
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
 			String hsmTemplateCode = null;
+			String groupTitle=outboxMessage.getCampaignTitle();
 			CsvDto csvDoc = mongoTemplate.findById(csvRefKeyId, CsvDto.class);
 			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
 			if(ArgUtil.is(templateDoc)) {
@@ -502,6 +503,7 @@ public class AdminMsgController {
 					outboxMsg.setMessage(otBoxMsg.getMessage());
 					outboxMsg.setAttachments(otBoxMsg.getAttachments());
 					outboxMsg.setContact(otBoxMsg.getContact());
+					outboxMsg.setCampaignTitle(groupTitle);
 					Map<String, Object> data = new HashMap<>();
 					for (Map.Entry<Object, Object> entry : map.entrySet()) {
 						String k = ArgUtil.parseAsString(entry.getKey());
