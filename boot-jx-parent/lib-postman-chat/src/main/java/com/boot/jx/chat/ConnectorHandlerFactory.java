@@ -348,7 +348,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType,
 				chatContactDoc, inboxMessage, outboxMessage);
 
-		message(messageType, chatContactDoc, outboxMessage, inboxMessage);
+		messageByConnector(messageType, chatContactDoc, outboxMessage, inboxMessage);
 
 		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 
@@ -398,7 +398,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		}
 	}
 
-	private void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	private void messageByConnector(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
 			IMessageExtended inboxMessage) {
 		String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
 		ChannelConfig channelConfig = environment.config().channel(channelId);
@@ -430,10 +430,10 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	 * @param outboxMessage
 	 * @param inboxMessage
 	 */
-	public void message(MessageContext context, String messageType, OutboxMessage outboxMessage,
+	public void messageNoStore(MessageContext context, String messageType, OutboxMessage outboxMessage,
 			IMessageExtended inboxMessage) {
 		LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType, null,
 				inboxMessage, outboxMessage);
-		message(messageType, null, outboxMessage, inboxMessage);
+		messageByConnector(messageType, null, outboxMessage, inboxMessage);
 	}
 }
