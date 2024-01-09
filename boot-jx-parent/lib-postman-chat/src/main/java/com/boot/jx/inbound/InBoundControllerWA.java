@@ -199,25 +199,23 @@ public class InBoundControllerWA {
 		connectorHandlerFactory.onChannelUpdate(CHANNEL_TYPE.WA_360D, lane);
 		return ApiResponse.build();
 	}
-	
-	
+
 	@Autowired
 	private WA360CloudConnector w360CloudConnector;
-	
-	
+
 	@RequestMapping(value = "/ext/inbound/wac360/registerwebhook", method = RequestMethod.GET)
 	public ApiResponse<Object, Object> registerCloudWebHook(@RequestParam(required = false) String lane)
-		throws InterruptedException {
-	connectorHandlerFactory.onChannelUpdate(CHANNEL_TYPE.WA_360DC, lane);
-	return ApiResponse.build();
-		}
-		
+			throws InterruptedException {
+		connectorHandlerFactory.onChannelUpdate(CHANNEL_TYPE.WA_360DC, lane);
+		return ApiResponse.build();
+	}
 
 	@Autowired
 	private AuditService auditService;
 
 	@Deprecated
-	@RequestMapping(value = "/ext/inbound/wa360/callback/{accountKey}/{channelId}/{channelKey}", method = { RequestMethod.POST })
+	@RequestMapping(value = "/ext/inbound/wa360/callback/{accountKey}/{channelId}/{channelKey}",
+			method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> onWA360Message(@PathVariable(required = false) String accountKey,
 			@PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey,
 			@RequestBody Map<String, Object> data) {
