@@ -74,12 +74,12 @@ public class BulkMessageService extends BatchJobExecuter {
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
 
 		ChannelConfig channelConfig = enviroment.config().channel(channelId);
-		
 		HSMTemplateDoc templateDoc = mongoTemplate.findById(bulkMessage.templateId(), HSMTemplateDoc.class);
 		CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
-		if(ArgUtil.is(templateDoc)) {
+		if(ArgUtil.is(templateDoc) && !ArgUtil.is(bulkMessage.getHsm().getCode())) {
 			hsmTemp.setId(bulkMessage.templateId());
-			hsmTemp.setCode(hsmTemp.getCode());
+			hsmTemp.setCode(templateDoc.getCode());
+			hsmTemp.setData(bulkMessage.getHsm().getData());
 			bulkMessage.setHsm(hsmTemp);
 		}
 		BulkSessionDoc session = new BulkSessionDoc();
