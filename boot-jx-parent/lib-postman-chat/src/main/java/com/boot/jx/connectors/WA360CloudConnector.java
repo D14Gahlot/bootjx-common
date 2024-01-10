@@ -395,7 +395,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
 	}
 
-	String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig, attachment.getMediaSrc());
+	/*String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig, attachment.getMediaSrc());
 
 	CommonFileStream srcFile = new CommonFileStream().url(mediaUrl)
 			// .fileType(attachment.getMediaType())
@@ -408,7 +408,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
 				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));return pmFileStoreClient.commitSessionFileSync(srcFile,dstFile);
 	}
-
+*/
 
 
 	@Override
@@ -488,6 +488,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
+		LOGGER.info("IN message {DR}" + requestMap);
 		List<Object> entryLst = (List<Object>) requestMap.map().get("entry");
 		List<Object> changesLst = new ArrayList<>();
 		LinkedHashMap<String, Object> lMap = null;
@@ -543,8 +544,14 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				}
 				messageBoxEvent.addMessageReport(reprt);
 			}
+			
 		}
-
+		else
+		{
+			
+		}
+		
+           
 		return messageBoxEvent;
 	}
 

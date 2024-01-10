@@ -1,6 +1,7 @@
 package com.boot.jx.postman.doc.tpo;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
@@ -33,6 +34,7 @@ public class WABAConversation implements Serializable, CreatedTimeStampIndexSupp
 	private Map<String, Object> conversation;
 	private Map<String, Object> pricing;
 	private Map<String, Object> meta;
+	LinkedHashMap<String, Object> lMap = null;
 	/** Chat session Id **/
 	private Map<String, Object> chatSession;
 	
