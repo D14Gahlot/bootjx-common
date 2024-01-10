@@ -33,11 +33,13 @@
 	</noscript>
 	<style th:replace="frags/loader.html :: loader"> </style>
 	<div id=app >
-		<center>
-			<form th:action="${FORM_URL}" method="POST" name="login">
-				<button type="submit" style="background: transparent; border:none;font-size: 10px;">Redirecting...</button>
-			</form>
-		</center>
+		<table>
+			<tr th:each="channel: ${channels}">
+				<td>--</td>
+			    <td th:text="${channel.id}" />
+			    <td>--</td>
+			</tr>
+		</table>
 	</div>
 
 	<script type="text/javascript">

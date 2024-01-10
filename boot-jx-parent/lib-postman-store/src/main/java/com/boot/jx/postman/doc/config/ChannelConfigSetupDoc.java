@@ -17,6 +17,8 @@ public class ChannelConfigSetupDoc implements Serializable {
 
 	@Id
 	private String id;
+	private String title;
+
 	private CHANNEL_TYPE_ENUM channelType;
 	private ContactType contactType;
 
@@ -80,6 +82,14 @@ public class ChannelConfigSetupDoc implements Serializable {
 
 	public void setMetaAppVerifyToken(String metaAppVerifyToken) {
 		this.metaAppVerifyToken = metaAppVerifyToken;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 }
