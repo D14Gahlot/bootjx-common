@@ -9,9 +9,9 @@
 
 	<link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
 
-	<title>[[${CONFIG.PROP_SERVICE_NAME}]] - Account</title>
+	<title>[[${CONFIG.PROP_SERVICE_NAME}]] - Channel Setup</title>
 
-	<style th:replace="frags/loader.html :: style"> </style>
+	<style th:replace="common/loader.html :: style"> </style>
 
 	<script>
 		window.CONST = {
@@ -31,13 +31,19 @@
 		<strong>We're sorry but it doesn't work properly
 			without JavaScript enabled. Please enable it to continue.</strong>
 	</noscript>
-	<style th:replace="frags/loader.html :: loader"> </style>
+	<style th:replace="common/loader.html :: loader"> </style>
 	<div id=app >
-		<table>
+		<table width="100%">
+			<tr height="30%">
+				<td height="30%" ></td>
+			</tr>
 			<tr th:each="channel: ${channels}">
-				<td>--</td>
-			    <td th:text="${channel.id}" />
-			    <td>--</td>
+				<td width="30%"></td>
+			    <td width="40%" style="text-align:center; height: 50px; background-color: rgb(146, 146, 146);" >
+					<a th:href="${'?channelConfigId=' + channel.id}" th:text="${channel.title}">
+					</a>
+				</td>
+			    <td width="30%" ></td>
 			</tr>
 		</table>
 	</div>
