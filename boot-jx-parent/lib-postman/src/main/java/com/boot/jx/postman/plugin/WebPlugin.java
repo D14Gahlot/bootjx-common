@@ -29,13 +29,13 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 		@ConfigMetaProperty(path = "web.site", title = "SiteName", createonly = true, desc = "Enter Website indeitifier, avoid special characters")
 		private String site;
 
-		@ConfigMetaProperty(path = "instagram.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
+		@ConfigMetaProperty(path = "instagram.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptName;
 
 		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
 
-		@ConfigMetaProperty(path = "web.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "false")
+		@ConfigMetaProperty(path = "web.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptPhone;
 
 		@ConfigMetaProperty(path = "web.iceBreaker", title = "Ice Breaker Message", optional = true, inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code", optionsLabel = "desc")
