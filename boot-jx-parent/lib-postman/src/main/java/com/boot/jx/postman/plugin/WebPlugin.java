@@ -29,7 +29,7 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 		@ConfigMetaProperty(path = "web.site", title = "SiteName", createonly = true, desc = "Enter Website indeitifier, avoid special characters")
 		private String site;
 
-		@ConfigMetaProperty(path = "instagram.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		@ConfigMetaProperty(path = "web.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptName;
 
 		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
