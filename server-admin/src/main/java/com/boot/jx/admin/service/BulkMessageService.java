@@ -49,8 +49,11 @@ import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
+import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.mongodb.client.MongoCursor;
 
@@ -105,6 +108,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			to = getPhoneWithPlus(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
@@ -114,7 +118,6 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setTemplateId(bulkMessage.templateId());
 			doc.setTemplate(bulkMessage.templateCode());
 			doc.setAttachments(bulkMessage.getAttachments());
-
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
 			doc.route().setSenderApp(adminApp.getAppType());
@@ -165,10 +168,10 @@ public class BulkMessageService extends BatchJobExecuter {
 		for (OutboxMessage bulkMsg : bulkMessages) {
 			MessageDoc doc = messageStore.createMessageDoc(bulkMsg);
 			String to = bulkMsg.getTo().get(0);
-		
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			to = getPhoneWithPlus(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
@@ -234,15 +237,15 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			to = getPhoneWithPlus(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
-			//to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
 			doc.setMessage(bulkMsg.getMessage());
 			doc.setHsm(bulkMsg.getHsm());
 			doc.setTemplateId(bulkMsg.templateId());
 			doc.setTemplate(bulkMsg.templateCode());
 			doc.setAttachments(bulkMsg.getAttachments());
-
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
 			doc.route().setSenderApp(adminApp.getAppType());
@@ -368,6 +371,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			outboxMessage.setRoute(msg.getRoute());
 
 			ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
+			System.out.println("chatSessionDoc ---"+JsonUtil.toJson(chatSessionDoc));
 			if (ArgUtil.is(chatSessionDoc)) {
 				chatSessionService.initSession(outboxMessage, chatSessionDoc);
 				chatService.send(chatSessionDoc, outboxMessage);
@@ -468,18 +472,27 @@ public class BulkMessageService extends BatchJobExecuter {
 		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
 				CSVParser csvParser = new CSVParser(fileReader,
 						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
-			// List<Tutorial> tutorials = new ArrayList<Tutorial>();
 			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
 			for (CSVRecord csvRecord : csvRecords) {
 				System.out.println("id :" + csvRecord.get("contacts"));
-				// System.out.println("Title :"+ csvRecord.get("Title"));
-				// System.out.println("Description :"+ csvRecord.get("Description"));
-				// System.out.println("id :"+ csvRecord.get("Published"));
-
 			}
 
 		} catch (Exception e) {
 			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
 		}
 	}
+	
+	
+
+	/** adding + sign in a phone if not there **/
+	public static final String PLUS_SIGN="+";
+	private  static String getPhoneWithPlus(String phoneNo) {
+		if (ArgUtil.is(phoneNo)) {
+			if (!phoneNo.startsWith(PLUS_SIGN)) {
+				phoneNo =PLUS_SIGN.concat(phoneNo);
+			}
+		}
+		return phoneNo;
+	}
+	
 }
