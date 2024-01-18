@@ -18,6 +18,7 @@ import com.boot.jx.common.dto.GroupSessionDto;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -40,8 +41,12 @@ public class GroupManager {
 				 grpDoc = commonMongoTemplate.findByIdString(reqDto.getGroupId(), GroupDoc.class);
 				 if(ArgUtil.is(grpDoc)) {
 					grpDoc.setGroupId(grpDoc.getGroupId());
-					grpDoc.setGroupName(reqDto.getGroupName());
-					grpDoc.setSessions(getUniqueList(reqDto.getSessions()));
+					grpDoc.setGroupName(reqDto.getGroupName()==null?grpDoc.getGroupName():reqDto.getGroupName());
+					if(ArgUtil.is(reqDto.getSessions())) {
+						grpDoc.setSessions(getUniqueList(reqDto.getSessions()));
+					}else {
+						grpDoc.setSessions(grpDoc.getSessions());
+					}
 					grpDoc.setActive(reqDto.isActive());
 					grpDoc.setModified_by(auditDetailProvider.getAuditUser());
 					grpDoc.setModifiedStamp(System.currentTimeMillis());
@@ -94,6 +99,34 @@ public class GroupManager {
 	            }
 	        }
 		 return uniqueList;
+	}
+	
+	public List<GroupReqDto> deleteGroups(GroupReqDto req) {
+		GroupDoc grpDoc = new GroupDoc();
+		if(ArgUtil.is(req.getGroupId()) && ArgUtil.is(req.getSessions())) {
+			 grpDoc = commonMongoTemplate.findByIdString(req.getGroupId(), GroupDoc.class);
+			 List<GroupSessionDto> uniLstFromDb=grpDoc.getSessions();
+			 List<GroupSessionDto> uniLstReqDtos= getUniqueList(req.getSessions());
+			 if(ArgUtil.is(uniLstReqDtos) && ArgUtil.is(uniLstFromDb)) {
+				 uniLstFromDb.removeIf(myObject ->
+				 uniLstReqDtos.stream().anyMatch(reqObject ->
+	                        myObject.getContactType().equals(reqObject.getContactType()) &&
+	                        myObject.getPhone().equals(reqObject.getPhone())
+	                        // Add other conditions as needed
+	                )
+				   );
+		
+			 }
+			 
+			 CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+				builder.whereIdSafe(req.getGroupId());
+				builder.set("sessions", uniLstFromDb);
+				builder.set("modifiedStamp", System.currentTimeMillis());
+				builder.set("modified_by", auditDetailProvider.getAuditUser());
+				mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,"GROUPS");
+			 
+		}
+		return fetchGroups(req.getGroupId());
 	}
 
 }
