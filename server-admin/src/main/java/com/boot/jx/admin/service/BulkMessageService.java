@@ -492,7 +492,7 @@ public class BulkMessageService extends BatchJobExecuter {
 				phoneNo =PLUS_SIGN.concat(phoneNo);
 			}
 		}
-		return phoneNo.replaceAll("\\s", "");
+		return phoneNo;
 	}
 	
 }
