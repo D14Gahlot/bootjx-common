@@ -32,6 +32,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.tpo.DummyCollection;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -513,7 +514,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
 		}
 
-		if (cloudRequestMap.containsKey("statuses")) {
+		else if (cloudRequestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = cloudRequestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
@@ -542,15 +543,18 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 					}
 				}
+				
 				messageBoxEvent.addMessageReport(reprt);
 			}
 			
 		}
 		else
+			
 		{
+			DummyCollection d=new DummyCollection(); 
+			d.setList((List<MapModel>) requestMap);
 			
 		}
-		
            
 		return messageBoxEvent;
 	}
