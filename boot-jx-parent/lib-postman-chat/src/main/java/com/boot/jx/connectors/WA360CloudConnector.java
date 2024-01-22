@@ -379,7 +379,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
 	}
 
-
 	@Deprecated
 	public CommonFile reloadMedia(Attachment attachment)
 			throws MalformedURLException, FileNotFoundException, IOException {
@@ -396,21 +395,26 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
 	}
 
-	/*String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig, attachment.getMediaSrc());
-
-	CommonFileStream srcFile = new CommonFileStream().url(mediaUrl)
-			// .fileType(attachment.getMediaType())
-			.format(FileFormat.from(attachment.getMediaMimeType()))
-			.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
-			.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
-
-	File fileb = Urly.parse(attachment.getMediaURL()).toFile();
-
-	CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
-				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));return pmFileStoreClient.commitSessionFileSync(srcFile,dstFile);
-	}
-*/
-
+	/*
+	 * String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig,
+	 * attachment.getMediaSrc());
+	 * 
+	 * CommonFileStream srcFile = new CommonFileStream().url(mediaUrl) //
+	 * .fileType(attachment.getMediaType())
+	 * .format(FileFormat.from(attachment.getMediaMimeType()))
+	 * .header(WA360Constants.D360_CLOUD_API_KEY,
+	 * channelConfig.getWa360dc().getApiKey())
+	 * .name(ArgUtil.nonEmpty(attachment.getMediaName(),
+	 * attachment.getMediaCaption()));
+	 * 
+	 * File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+	 * 
+	 * CommonFile dstFile = new
+	 * CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+	 * .fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(),
+	 * FileType.class));return
+	 * pmFileStoreClient.commitSessionFileSync(srcFile,dstFile); }
+	 */
 
 	@Override
 
@@ -543,19 +547,18 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 					}
 				}
-				
+
 				messageBoxEvent.addMessageReport(reprt);
 			}
-			
-		}
-		else
-			
+
+		} else
+
 		{
-			DummyCollection d=new DummyCollection(); 
-			d.setList((List<MapModel>) requestMap);
-			
+			DummyCollection d = new DummyCollection();
+			d.setIncomingRequest((List<Object>) requestMap);
+
 		}
-           
+
 		return messageBoxEvent;
 	}
 
