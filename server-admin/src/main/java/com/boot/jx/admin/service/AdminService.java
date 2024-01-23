@@ -174,5 +174,10 @@ public class AdminService {
 			
 		}
 	}
+	
+	public List<GroupReqDto>  deleteGroups(GroupReqDto req) {
+		List<GroupReqDto> reqDto = groupMgr.deleteGroups(req);
+		return reqDto;
+	}
 
 }
