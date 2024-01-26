@@ -116,7 +116,7 @@ public class GroupManager {
 	                )
 				   );
 		
-			 }			
+			 }
 			 
 			 CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 				builder.whereIdSafe(req.getGroupId());
