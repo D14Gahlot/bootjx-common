@@ -307,7 +307,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	public boolean read(BatchJob currentBatchJob) {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
 		Query query = new Query().addCriteria(QueryCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
-				.and("status").is(Status.SCHLD.toString())).limit(10);
+				.and("status").is(Status.SCHLD.toString())).limit(50);
 
 		ContactType contactType = doc.contactType();
 		List<MessageDoc> msgs = messageStore.find(query, contactType);
@@ -371,7 +371,6 @@ public class BulkMessageService extends BatchJobExecuter {
 			outboxMessage.setRoute(msg.getRoute());
 
 			ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
-			System.out.println("chatSessionDoc ---"+JsonUtil.toJson(chatSessionDoc));
 			if (ArgUtil.is(chatSessionDoc)) {
 				chatSessionService.initSession(outboxMessage, chatSessionDoc);
 				chatService.send(chatSessionDoc, outboxMessage);
@@ -474,7 +473,7 @@ public class BulkMessageService extends BatchJobExecuter {
 						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
 			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
 			for (CSVRecord csvRecord : csvRecords) {
-				System.out.println("id :" + csvRecord.get("contacts"));
+				//System.out.println("id :" + csvRecord.get("contacts"));
 			}
 
 		} catch (Exception e) {
