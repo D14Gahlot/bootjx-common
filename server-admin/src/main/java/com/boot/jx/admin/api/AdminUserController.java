@@ -3,6 +3,7 @@ package com.boot.jx.admin.api;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -121,7 +122,9 @@ public class AdminUserController {
 	
 	@RequestMapping(value = "/api/create-update-group", method = { RequestMethod.POST })
 	public ApiResponse<GroupReqDto, Object> createAndUpdateGroups(@RequestBody GroupReqDto reqDto){
+		if(StringUtils.isBlank(reqDto.getGroupId())){
 			adminService.checkDupGroupName(reqDto);
+		}	
 			return ApiResponse.buildResults(adminService.createAndUpdateGroup(reqDto));
 		}
 	
