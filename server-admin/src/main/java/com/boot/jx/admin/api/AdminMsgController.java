@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -61,6 +63,7 @@ import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
 
@@ -390,12 +393,20 @@ public class AdminMsgController {
 	public ApiResponse<BulkSessionDoc, Object> getBulkSession(@RequestParam String startStamp,
 			@RequestParam String endStamp, @RequestParam(required = false) String bulkSessionId)
 			throws NumberParseException {
+		Query query =new Query();
 		if (ArgUtil.is(bulkSessionId)) {
-			return ApiResponse.buildResults(mongoTemplate
-					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+			query.addCriteria(QueryCriteria.whereId(bulkSessionId));
+			query.addCriteria(Criteria.where("createdStamp").gt(startStamp).lt(endStamp));
+			query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
+			return ApiResponse.buildResults(mongoTemplate.find(query,BulkSessionDoc.class));
+			//return ApiResponse.buildResults(mongoTemplate
+			//		.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 		}
-		return ApiResponse.buildResults(mongoTemplate
-				.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
+		query.addCriteria(Criteria.where("createdStamp").gt(startStamp).lt(endStamp));
+		query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
+		return ApiResponse.buildResults(mongoTemplate.find(query,BulkSessionDoc.class));
+		//return ApiResponse.buildResults(mongoTemplate
+		//		.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/messages", method = { RequestMethod.POST })
