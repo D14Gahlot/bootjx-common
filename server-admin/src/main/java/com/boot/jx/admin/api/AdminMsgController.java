@@ -392,19 +392,19 @@ public class AdminMsgController {
 		Long endStampLong = ArgUtil.parseAsLong(endStamp);
 		Query query =new Query();
 		if (ArgUtil.is(bulkSessionId)) {
-			query.addCriteria(QueryCriteria.whereId(bulkSessionId));
-			query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
-			query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
-			return ApiResponse.buildResults(mongoTemplate.find(query,BulkSessionDoc.class));
-			//return ApiResponse.buildResults(mongoTemplate
-			//		.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+			//query.addCriteria(QueryCriteria.whereId(bulkSessionId));
+			//query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
+			//query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
+			//return ApiResponse.buildResults(mongoTemplate.find(query,BulkSessionDoc.class));
+			return ApiResponse.buildResults(mongoTemplate
+					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 		}
-		query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
+		/*query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
 		query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
 		List<BulkSessionDoc> lst = mongoTemplate.find(query,BulkSessionDoc.class);
-		return ApiResponse.buildResults(lst);
-		//return ApiResponse.buildResults(mongoTemplate
-		//		.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
+		return ApiResponse.buildResults(lst);*/
+		return ApiResponse.buildResults(mongoTemplate
+				.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/messages", method = { RequestMethod.POST })
