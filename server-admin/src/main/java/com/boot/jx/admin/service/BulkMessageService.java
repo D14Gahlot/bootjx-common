@@ -307,7 +307,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	public boolean read(BatchJob currentBatchJob) {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
 		Query query = new Query().addCriteria(QueryCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
-				.and("status").is(Status.SCHLD.toString())).limit(25);
+				.and("status").is(Status.SCHLD.toString())).limit(10);
 
 		ContactType contactType = doc.contactType();
 		List<MessageDoc> msgs = messageStore.find(query, contactType);
@@ -324,9 +324,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		for (MessageDoc messageDoc : msgs) {
 			push(JobTaskModel.newTasklet(currentBatchJob).taskId(messageDoc.getMessageId()));
 			messageDoc.updateStatus(Status.CRTD);
-			// System.out.println("Status.CRTD"+messageDoc.getContact().getPhone());
 			messageStore.updateStatus(contactType, messageDoc, Status.CRTD, null);
-			// messageStore.save(messageDoc, doc.getContactType());
 		}
 		return false;
 	}
