@@ -32,7 +32,8 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private Map<String,Object> rawMessageFormat;
 	/** group key**/
 	private String groupId;
-	private String groupTitle;
+	private String campaignTitle;
+	private String groupName;
 	
 
 	public OutboxMessage(ContactType contactType) {
@@ -174,12 +175,22 @@ public class OutboxMessage extends Message<OutboxMessage>
 		this.groupId = groupId;
 	}
 
-	public String getGroupTitle() {
-		return groupTitle;
+	
+
+	public String getGroupName() {
+		return groupName;
 	}
 
-	public void setGroupTitle(String groupTitle) {
-		this.groupTitle = groupTitle;
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+	public String getCampaignTitle() {
+		return campaignTitle;
+	}
+
+	public void setCampaignTitle(String campaignTitle) {
+		this.campaignTitle = campaignTitle;
 	}
 
 }

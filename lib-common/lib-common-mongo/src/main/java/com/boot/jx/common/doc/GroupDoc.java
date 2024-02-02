@@ -1,9 +1,9 @@
 package com.boot.jx.common.doc;
 import java.util.List;
 
-import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.common.dto.GroupSessionDto;
@@ -16,12 +16,12 @@ import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 public class GroupDoc implements IDocument, DocVersion {
 	@Id
 	String groupId;
-	@UniqueElements
+	@Indexed(unique = true)
 	String groupName;
 	List<GroupSessionDto> sessions;
 	boolean isActive;
 	private Long createdStamp;
-	private String create_by;
+	private String createdBy;
 	private Long modifiedStamp;
 	private String modified_by;
 	@Override
@@ -59,12 +59,7 @@ public class GroupDoc implements IDocument, DocVersion {
 	public void setCreatedStamp(Long createdStamp) {
 		this.createdStamp = createdStamp;
 	}
-	public String getCreate_by() {
-		return create_by;
-	}
-	public void setCreate_by(String create_by) {
-		this.create_by = create_by;
-	}
+	
 	public Long getModifiedStamp() {
 		return modifiedStamp;
 	}
@@ -82,6 +77,12 @@ public class GroupDoc implements IDocument, DocVersion {
 	}
 	public void setSessions(List<GroupSessionDto> sessions) {
 		this.sessions = sessions;
+	}
+	public String getCreatedBy() {
+		return createdBy;
+	}
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
 	}
 	
 }

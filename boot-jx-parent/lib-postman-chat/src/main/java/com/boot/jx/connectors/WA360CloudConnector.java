@@ -147,7 +147,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		if (channel.getWa360dc().isPromptPhone()) {
 			if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
 				this.context().session().put("session_init_user_input_type", "phone");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone number");
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
 			}
 		}
 
@@ -537,6 +537,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 						/**
 						 * MRU--addded new code to update chatSession doc with Waba expiry time stamp
 						 **/
+						LOGGER.info(" === WABA ID {} "+id);
 						Map<String, Object> tpChannelMap = new HashMap<>();
 						tpChannelMap.put("ccwExpiry", conversation.get("expiration_timestamp"));
 						tpChannelMap.put("wabaConvesationId", id);

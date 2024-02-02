@@ -141,7 +141,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		if (channel.getWa360d().isPromptPhone()) {
 			if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
 				this.context().session().put("session_init_user_input_type", "phone");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone number");
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
 			}
 
 		}
