@@ -288,7 +288,6 @@ public class BulkMessageService extends BatchJobExecuter {
 				.data("lane", session.getLane()));
 	}
 
-
 	@Override
 	public boolean read(BatchJob currentBatchJob) {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
@@ -381,7 +380,8 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		QA list = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
 				QA.project("statuss", QA.objectToArray("stamps")), Aggregation.unwind("statuss"),
-				Aggregation.group("statuss.k").count().as("count"));;
+				Aggregation.group("statuss.k").count().as("count"));
+		;
 
 		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 //				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
@@ -421,9 +421,8 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setCompletedStamp(System.currentTimeMillis());
 		}
 		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())
-				|| !ArgUtil.is(doc.getStatus(), JOB_STATUS.COMPLETED.toString())
-		){
-			doc.setStatus(ArgUtil.parseAsString(currentBatchJob.getStatus(),doc.getStatus()));
+				|| !ArgUtil.is(doc.getStatus(), JOB_STATUS.COMPLETED.toString())) {
+			doc.setStatus(ArgUtil.parseAsString(currentBatchJob.getStatus(), doc.getStatus()));
 			if (completed) {
 				doc.setStatus(JOB_STATUS.COMPLETED.toString());
 			}
