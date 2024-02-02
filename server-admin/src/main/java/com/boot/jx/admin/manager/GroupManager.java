@@ -102,35 +102,7 @@ public class GroupManager {
 		 return uniqueList;
 	}
 	
-	public List<GroupReqDto> deleteGroups(GroupReqDto req) {
-		GroupDoc grpDoc = new GroupDoc();
-		if(ArgUtil.is(req.getGroupId()) && ArgUtil.is(req.getSessions())) {
-			 grpDoc = commonMongoTemplate.findByIdString(req.getGroupId(), GroupDoc.class);
-			 List<GroupSessionDto> uniLstFromDb=grpDoc.getSessions();
-			 List<GroupSessionDto> uniLstReqDtos= getUniqueList(req.getSessions());
-			 if(ArgUtil.is(uniLstReqDtos) && ArgUtil.is(uniLstFromDb)) {
-				 uniLstFromDb.removeIf(myObject ->
-				 uniLstReqDtos.stream().anyMatch(reqObject ->
-	                        myObject.getContactType().equals(reqObject.getContactType()) &&
-	                        myObject.getPhone().equals(reqObject.getPhone())
-	                        // Add other conditions as needed
-	                )
-				   );
-		
-			 }
-			 
-			 CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-				builder.whereIdSafe(req.getGroupId());
-				builder.set("sessions", uniLstFromDb);
-				builder.set("modifiedStamp", System.currentTimeMillis());
-				builder.set("modified_by", auditDetailProvider.getAuditUser());
-				mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), MessageDoc.class,"GROUPS");
-			 
-		}
-		return fetchGroups(req.getGroupId());
-	}
-
-	public List<GroupReqDto> deleteGroups(GroupReqDto req) {
+		public List<GroupReqDto> deleteGroups(GroupReqDto req) {
 		GroupDoc grpDoc = new GroupDoc();
 		if(ArgUtil.is(req.getGroupId()) && ArgUtil.is(req.getSessions())) {
 			 grpDoc = commonMongoTemplate.findByIdString(req.getGroupId(), GroupDoc.class);
