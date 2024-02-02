@@ -172,7 +172,7 @@ public abstract class BatchJobExecuter {
 		return job;
 	}
 
-	@Scheduled(fixedDelay = 20000)
+	@Scheduled(fixedDelay = 50000)
 	public void reader() {
 		read();
 	}

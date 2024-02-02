@@ -307,7 +307,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	public boolean read(BatchJob currentBatchJob) {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
 		Query query = new Query().addCriteria(QueryCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
-				.and("status").is(Status.SCHLD.toString())).limit(10);
+				.and("status").is(Status.SCHLD.toString())).limit(25);
 
 		ContactType contactType = doc.contactType();
 		List<MessageDoc> msgs = messageStore.find(query, contactType);
