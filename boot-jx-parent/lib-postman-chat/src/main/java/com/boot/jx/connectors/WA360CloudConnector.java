@@ -3,6 +3,7 @@ package com.boot.jx.connectors;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -31,6 +32,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.tpo.DummyCollection;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -377,6 +379,45 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
 	}
 
+	@Deprecated
+	public CommonFile reloadMedia(Attachment attachment)
+			throws MalformedURLException, FileNotFoundException, IOException {
+		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+				// .fileType(attachment.getMediaType())
+				.format(FileFormat.from(attachment.getMediaMimeType()))
+				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+
+		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+
+		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
+		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
+	}
+
+	/*
+	 * String mediaUrl = wa360CloudClient.getMediaUrl(channelConfig,
+	 * attachment.getMediaSrc());
+	 * 
+	 * CommonFileStream srcFile = new CommonFileStream().url(mediaUrl) //
+	 * .fileType(attachment.getMediaType())
+	 * .format(FileFormat.from(attachment.getMediaMimeType()))
+	 * .header(WA360Constants.D360_CLOUD_API_KEY,
+	 * channelConfig.getWa360dc().getApiKey())
+	 * .name(ArgUtil.nonEmpty(attachment.getMediaName(),
+	 * attachment.getMediaCaption()));
+	 * 
+	 * File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+	 * 
+	 * CommonFile dstFile = new
+	 * CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+	 * .fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(),
+	 * FileType.class));return
+	 * pmFileStoreClient.commitSessionFileSync(srcFile,dstFile); }
+	 */
+
+	@Override
+
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
 			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
@@ -452,6 +493,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
+		LOGGER.info("IN message {DR}" + requestMap);
 		List<Object> entryLst = (List<Object>) requestMap.map().get("entry");
 		List<Object> changesLst = new ArrayList<>();
 		LinkedHashMap<String, Object> lMap = null;
@@ -476,7 +518,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
 		}
 
-		if (cloudRequestMap.containsKey("statuses")) {
+		else if (cloudRequestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = cloudRequestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
@@ -506,8 +548,16 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 					}
 				}
+
 				messageBoxEvent.addMessageReport(reprt);
 			}
+
+		} else
+
+		{
+			DummyCollection d = new DummyCollection();
+			d.setIncomingRequest((List<Object>) requestMap);
+
 		}
 
 		return messageBoxEvent;

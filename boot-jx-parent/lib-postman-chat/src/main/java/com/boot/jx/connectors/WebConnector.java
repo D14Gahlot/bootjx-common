@@ -165,6 +165,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 			}
 		} else {
 			if (!stompEnabled && environment.keyEntry(PROPERTIES.POSTMAN_CHAT_WEB_QUEUE).asBoolean()) {
+				LOGGER.debug("sendReply to " + contactIdWeb);
 				RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactIdWeb);
 				messageQueue.add(JsonUtil.toJson(outboxMessage));
 			}
@@ -229,6 +230,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 			return (OutboxMessage) inboxMessage.replyMessage("Please enter your name").option("inputs", inputs);
 			}
 		}
+
 		if (channel.getWeb().isPromptEmail()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 				inputs.add(new TmplElement().code("email").type("EMAIL"));

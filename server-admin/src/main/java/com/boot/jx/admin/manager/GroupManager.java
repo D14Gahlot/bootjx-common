@@ -16,6 +16,7 @@ import com.boot.jx.common.doc.GroupDoc;
 import com.boot.jx.common.dto.GroupReqDto;
 import com.boot.jx.common.dto.GroupSessionDto;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
@@ -101,7 +102,7 @@ public class GroupManager {
 		 return uniqueList;
 	}
 	
-	public List<GroupReqDto> deleteGroups(GroupReqDto req) {
+		public List<GroupReqDto> deleteGroups(GroupReqDto req) {
 		GroupDoc grpDoc = new GroupDoc();
 		if(ArgUtil.is(req.getGroupId()) && ArgUtil.is(req.getSessions())) {
 			 grpDoc = commonMongoTemplate.findByIdString(req.getGroupId(), GroupDoc.class);

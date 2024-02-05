@@ -133,6 +133,7 @@ public class AdminUserController {
 	public ApiResponse<GroupReqDto, Object> fetchGroups(@RequestParam(value = "groupId", required = false) String groupId){
 			return ApiResponse.buildResults(adminService.fetchGroups(groupId));
 		}
+	
 	@RequestMapping(value = "/api/delete-group-contacts", method = { RequestMethod.POST })
 	public ApiResponse<GroupReqDto, Object> deleteGroups(@RequestBody GroupReqDto reqDto){
 			return ApiResponse.buildResults(adminService.deleteGroups(reqDto));

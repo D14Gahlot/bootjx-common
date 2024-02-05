@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +38,7 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -94,7 +92,7 @@ public class AdminMsgController {
 
 	@Autowired
 	public ChatSessionManager chatSessionManager;
-
+	
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
 			@RequestParam String endStamp, @RequestParam(required = false) String agentCode,
@@ -183,8 +181,7 @@ public class AdminMsgController {
 		}
 		Collections.sort(tagCategory);
 		List<CHAT_STATUS> status = query.status;
-		List<String> statusLst = new ArrayList<>();
-		;
+		List<String> statusLst = new ArrayList<>();	
 		if ((status == null || status.isEmpty() || status.contains(null))) {
 			LOGGER.info("status :" + status);
 		} else {
@@ -390,10 +387,22 @@ public class AdminMsgController {
 	public ApiResponse<BulkSessionDoc, Object> getBulkSession(@RequestParam String startStamp,
 			@RequestParam String endStamp, @RequestParam(required = false) String bulkSessionId)
 			throws NumberParseException {
+		
+		Long startStampLong = ArgUtil.parseAsLong(startStamp);
+		Long endStampLong = ArgUtil.parseAsLong(endStamp);
+		Query query =new Query();
 		if (ArgUtil.is(bulkSessionId)) {
+			//query.addCriteria(QueryCriteria.whereId(bulkSessionId));
+			//query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
+			//query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
+			//return ApiResponse.buildResults(mongoTemplate.find(query,BulkSessionDoc.class));
 			return ApiResponse.buildResults(mongoTemplate
 					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 		}
+		/*query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
+		query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
+		List<BulkSessionDoc> lst = mongoTemplate.find(query,BulkSessionDoc.class);
+		return ApiResponse.buildResults(lst);*/
 		return ApiResponse.buildResults(mongoTemplate
 				.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
 	}

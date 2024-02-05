@@ -28,6 +28,10 @@ public class WA360CloudOutBoundMedia implements Serializable {
 		    + "\n Do not use with audio or sticker media.")
     public String caption;
 
+    @ApiMockModelProperty(example = "your-video-caption", required = false, value = "your-document-filename",
+    	    notes = "Describes the specified document, image, or video media.\n"
+    		    + "Describes the filename for the specific document. Use only with document media.")
+        public String filename;
  
 
     public String getId() {
@@ -53,6 +57,14 @@ public class WA360CloudOutBoundMedia implements Serializable {
     public void setCaption(String caption) {
 	this.caption = caption;
     }
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
 
    
 }

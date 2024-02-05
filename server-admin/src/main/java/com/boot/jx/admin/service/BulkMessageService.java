@@ -49,8 +49,11 @@ import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
+import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.mongodb.client.MongoCursor;
 
@@ -105,6 +108,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			to = getPhoneWithPlus(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
@@ -114,7 +118,6 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setTemplateId(bulkMessage.templateId());
 			doc.setTemplate(bulkMessage.templateCode());
 			doc.setAttachments(bulkMessage.getAttachments());
-
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
 			doc.route().setSenderApp(adminApp.getAppType());
@@ -165,10 +168,10 @@ public class BulkMessageService extends BatchJobExecuter {
 		for (OutboxMessage bulkMsg : bulkMessages) {
 			MessageDoc doc = messageStore.createMessageDoc(bulkMsg);
 			String to = bulkMsg.getTo().get(0);
-		
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			to = getPhoneWithPlus(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
@@ -234,15 +237,15 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			to = getPhoneWithPlus(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
-			//to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
 			doc.setMessage(bulkMsg.getMessage());
 			doc.setHsm(bulkMsg.getHsm());
 			doc.setTemplateId(bulkMsg.templateId());
 			doc.setTemplate(bulkMsg.templateCode());
 			doc.setAttachments(bulkMsg.getAttachments());
-
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
 			doc.route().setSenderApp(adminApp.getAppType());
@@ -299,12 +302,11 @@ public class BulkMessageService extends BatchJobExecuter {
 				.data("lane", session.getLane()));
 	}
 
-
 	@Override
 	public boolean read(BatchJob currentBatchJob) {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
 		Query query = new Query().addCriteria(QueryCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
-				.and("status").is(Status.SCHLD.toString())).limit(10);
+				.and("status").is(Status.SCHLD.toString())).limit(25);
 
 		ContactType contactType = doc.contactType();
 		List<MessageDoc> msgs = messageStore.find(query, contactType);
@@ -321,9 +323,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		for (MessageDoc messageDoc : msgs) {
 			push(JobTaskModel.newTasklet(currentBatchJob).taskId(messageDoc.getMessageId()));
 			messageDoc.updateStatus(Status.CRTD);
-			// System.out.println("Status.CRTD"+messageDoc.getContact().getPhone());
 			messageStore.updateStatus(contactType, messageDoc, Status.CRTD, null);
-			// messageStore.save(messageDoc, doc.getContactType());
 		}
 		return false;
 	}
@@ -392,7 +392,8 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		QA list = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
 				QA.project("statuss", QA.objectToArray("stamps")), Aggregation.unwind("statuss"),
-				Aggregation.group("statuss.k").count().as("count"));;
+				Aggregation.group("statuss.k").count().as("count"));
+		;
 
 		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 //				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
@@ -432,9 +433,8 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setCompletedStamp(System.currentTimeMillis());
 		}
 		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())
-				|| !ArgUtil.is(doc.getStatus(), JOB_STATUS.COMPLETED.toString())
-		){
-			doc.setStatus(ArgUtil.parseAsString(currentBatchJob.getStatus(),doc.getStatus()));
+				|| !ArgUtil.is(doc.getStatus(), JOB_STATUS.COMPLETED.toString())) {
+			doc.setStatus(ArgUtil.parseAsString(currentBatchJob.getStatus(), doc.getStatus()));
 			if (completed) {
 				doc.setStatus(JOB_STATUS.COMPLETED.toString());
 			}
@@ -468,18 +468,27 @@ public class BulkMessageService extends BatchJobExecuter {
 		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
 				CSVParser csvParser = new CSVParser(fileReader,
 						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
-			// List<Tutorial> tutorials = new ArrayList<Tutorial>();
 			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
 			for (CSVRecord csvRecord : csvRecords) {
-				System.out.println("id :" + csvRecord.get("contacts"));
-				// System.out.println("Title :"+ csvRecord.get("Title"));
-				// System.out.println("Description :"+ csvRecord.get("Description"));
-				// System.out.println("id :"+ csvRecord.get("Published"));
-
+				//System.out.println("id :" + csvRecord.get("contacts"));
 			}
 
 		} catch (Exception e) {
 			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
 		}
 	}
+	
+	
+
+	/** adding + sign in a phone if not there **/
+	public static final String PLUS_SIGN="+";
+	private  static String getPhoneWithPlus(String phoneNo) {
+		if (ArgUtil.is(phoneNo)) {
+			if (!phoneNo.startsWith(PLUS_SIGN)) {
+				phoneNo =PLUS_SIGN.concat(phoneNo);
+			}
+		}
+		return phoneNo;
+	}
+	
 }

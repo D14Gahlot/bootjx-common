@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.FileHandler;
+import java.util.logging.SimpleFormatter;
 
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RedissonClient;
@@ -24,6 +26,7 @@ import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.boot.utils.UniqueID;
 
@@ -169,7 +172,7 @@ public abstract class BatchJobExecuter {
 		return job;
 	}
 
-	@Scheduled(fixedDelay = 2000)
+	@Scheduled(fixedDelay = 50000)
 	public void reader() {
 		read();
 	}
@@ -186,9 +189,7 @@ public abstract class BatchJobExecuter {
 		}
 
 		BatchJob prevjob = jobStatus().get(currentBatchJob.jobUUID());
-
-		if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
-
+	if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
 			AppContextUtil.setTenant(currentBatchJob.getTenant());
 			String sessionId = UniqueID.generateString();
 			AppContextUtil.setSessionId(sessionId);
@@ -200,7 +201,6 @@ public abstract class BatchJobExecuter {
 			RAtomicLong pushedDoneCounter = redisson.getAtomicLong("DONE." + currentBatchJob.jobUUID());
 			currentBatchJob.setPushedTaskCount(Math.max(1, pushedTaskCounter.get()));
 			currentBatchJob.setDoneTaskCount(pushedDoneCounter.get());
-
 			// Moving to next Step
 			if (JOB_STATUS.CREATED == currentBatchJob.getStatus()) {
 				currentBatchJob.setStatus(JOB_STATUS.READING);
@@ -268,7 +268,7 @@ public abstract class BatchJobExecuter {
 				LOGGER.error("READING OR TALLY ERROR", e);
 			}
 
-			LOGGER.debug("{} {} ... {}% = {}/{}", currentBatchJob.jobUUID(), currentBatchJob.getStatus(),
+			LOGGER.info("{} {} ... {}% = {}/{}", currentBatchJob.jobUUID(), currentBatchJob.getStatus(),
 					currentBatchJob.getDonePercent(), currentBatchJob.getDoneTaskCount(),
 					currentBatchJob.getPushedTaskCount());
 
@@ -371,6 +371,7 @@ public abstract class BatchJobExecuter {
 					counter.incrementAndGet();
 					LOGGER.debug("Completed Task {} for NoJob {} {} ", tasklet.getTaskId(), tasklet.jobUUID(),
 							taskJob.getStatus());
+					
 				}
 			} else {
 				LOGGER.debug("Skipping Task {} for NoJob {}", tasklet.getTaskId(), tasklet.jobUUID());
@@ -390,5 +391,8 @@ public abstract class BatchJobExecuter {
 			this.execute();
 		}
 	}
-
+	
+	
 }
+
+

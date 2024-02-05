@@ -167,11 +167,13 @@ public class AdminService {
 	}
 	
 	public void checkDupGroupName(GroupReqDto req) {
+		if(ArgUtil.is(req.getGroupName())) {
 		GroupDoc groupDoc = groupMgr.findGroupByName(req.getGroupName());
-		if(ArgUtil.is(groupDoc)) {
-			ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidNameDuplicate")
-					.description("Group name already exists"));
-			
+			if(ArgUtil.is(groupDoc)) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidNameDuplicate")
+						.description("Group name already exists"));
+				
+			}
 		}
 	}
 	
