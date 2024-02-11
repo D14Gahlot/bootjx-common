@@ -59,6 +59,7 @@ import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
 
@@ -92,6 +93,8 @@ public class AdminMsgController {
 
 	@Autowired
 	public ChatSessionManager chatSessionManager;
+	
+
 	
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -391,20 +394,21 @@ public class AdminMsgController {
 		Long startStampLong = ArgUtil.parseAsLong(startStamp);
 		Long endStampLong = ArgUtil.parseAsLong(endStamp);
 		Query query =new Query();
+		List<BulkSessionDoc> lst = new ArrayList<>();
 		if (ArgUtil.is(bulkSessionId)) {
 			query.addCriteria(QueryCriteria.whereId(bulkSessionId));
 			query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
 			query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
-			return ApiResponse.buildResults(mongoTemplate.find(query,BulkSessionDoc.class));
-			//return ApiResponse.buildResults(mongoTemplate
-			//		.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+			lst = mongoTemplate.find(query,BulkSessionDoc.class);
+			lst =checkNull(lst);
+			return ApiResponse.buildResults(lst);
 		}
 		query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
 		query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
-		List<BulkSessionDoc> lst = mongoTemplate.find(query,BulkSessionDoc.class);
+		lst = mongoTemplate.find(query,BulkSessionDoc.class);
+		lst =checkNull(lst);
 		return ApiResponse.buildResults(lst);
-		//return ApiResponse.buildResults(mongoTemplate
-		//		.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
+		
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/messages", method = { RequestMethod.POST })
@@ -575,6 +579,33 @@ public class AdminMsgController {
 
 		}
 		return listOfOutboxMsg;
+	}
+	
+	private List<BulkSessionDoc>  checkNull(List<BulkSessionDoc>  lstofSession){
+	List<BulkSessionDoc> lst = new ArrayList<>();
+	for(BulkSessionDoc doc :lstofSession) {
+		BulkSessionDoc sDoc = new BulkSessionDoc();
+		sDoc.setBulkSessionId(ArgUtil.parseAsString(doc.getBulkSessionId(), Constants.UNDERSCORE));
+		sDoc.setTemplate(ArgUtil.parseAsString(doc.getTemplate(), Constants.UNDERSCORE));
+		sDoc.setTemplateId(ArgUtil.parseAsString(doc.getTemplateId(), Constants.UNDERSCORE));
+		sDoc.setMessage(ArgUtil.parseAsString(doc.getMessage(), Constants.UNDERSCORE));
+		sDoc.setCampaignTitle(ArgUtil.parseAsString(doc.getCampaignTitle(), Constants.UNDERSCORE));
+		sDoc.setCreatedBy(ArgUtil.parseAsString(doc.getCreatedBy(), Constants.UNDERSCORE));
+		sDoc.setCreatedStamp(doc.getCreatedStamp());
+		sDoc.setContactType(ArgUtil.parseAsString(doc.getContactType(), Constants.UNDERSCORE));
+		sDoc.setChannelId(ArgUtil.parseAsString(doc.getChannelId(), Constants.UNDERSCORE));
+		sDoc.setLane(ArgUtil.parseAsString(doc.getLane(), Constants.UNDERSCORE));
+		sDoc.setMessageCount(doc.getMessageCount()==null?Constants.DEFAULT_INTEGER:doc.getMessageCount());
+		sDoc.setMessageFailedCount(doc.getMessageFailedCount()==null?Constants.DEFAULT_INTEGER:doc.getMessageFailedCount());
+		sDoc.setStats(doc.getStats());
+		sDoc.setJob(doc.getJob());
+		sDoc.setCompletedStamp(doc.getCompletedStamp()==null?Constants.DEFAULT_INTEGER:doc.getCompletedStamp());
+		sDoc.setGroupId(ArgUtil.parseAsString(doc.getGroupId(), Constants.UNDERSCORE));
+		sDoc.setGroupName(ArgUtil.parseAsString(doc.getGroupName(), Constants.UNDERSCORE));
+		
+		lst.add(sDoc);
+	}
+	return lst;
 	}
 
 }
