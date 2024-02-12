@@ -602,6 +602,7 @@ public class AdminMsgController {
 		sDoc.setCompletedStamp(doc.getCompletedStamp()==null?Constants.DEFAULT_INTEGER:doc.getCompletedStamp());
 		sDoc.setGroupId(ArgUtil.parseAsString(doc.getGroupId(), Constants.UNDERSCORE));
 		sDoc.setGroupName(ArgUtil.parseAsString(doc.getGroupName(), Constants.UNDERSCORE));
+		sDoc.setStatus(doc.getStatus());
 		
 		lst.add(sDoc);
 	}
