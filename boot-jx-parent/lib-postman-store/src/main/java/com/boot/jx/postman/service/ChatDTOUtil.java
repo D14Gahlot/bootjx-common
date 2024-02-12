@@ -18,6 +18,7 @@ import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.NumberUtil;
 
@@ -87,23 +88,34 @@ public class ChatDTOUtil {
 		messageDto.setTimestamp(messageDoc.getTimestamp());
 		messageDto.setSessionId(messageDoc.getSessionId());
 		messageDto.setMessageId(messageDoc.getMessageId());
-		messageDto.setMessageIdExt(messageDoc.getMessageIdExt());
-		messageDto.setMessageIdRef(messageDoc.getMessageIdRef());
+		messageDto.setMessageIdExt(ArgUtil.parseAsString(messageDoc.getMessageIdExt(), Constants.UNDERSCORE));
+		messageDto.setMessageIdRef(ArgUtil.parseAsString(messageDoc.getMessageIdRef(), Constants.UNDERSCORE));
 
-		messageDto.setReplyId(messageDoc.getReplyId());
-		messageDto.setReplyIdExt(messageDoc.getReplyIdExt());
-
-		messageDto.setTags(messageDoc.getTags());
-		messageDto.setAttachments(messageDoc.getAttachments());
-		messageDto.setVccards(messageDoc.getVccards());
-		messageDto.setLogs(messageDoc.getLogs());
-		messageDto.setAction(messageDoc.getAction());
+		messageDto.setReplyId(ArgUtil.parseAsString(messageDoc.getReplyId(),Constants.UNDERSCORE));
+		messageDto.setReplyIdExt(ArgUtil.parseAsString(messageDoc.getReplyIdExt(),Constants.UNDERSCORE));
+		if(ArgUtil.is(messageDoc.getTags())) {
+			messageDto.setTags(messageDoc.getTags());
+		}
+		if(ArgUtil.is(messageDoc.getAttachments())) {
+			messageDto.setAttachments(messageDoc.getAttachments());
+		}
+		if(ArgUtil.is(messageDoc.getVccards())) {
+			messageDto.setVccards(messageDoc.getVccards());
+		}
+		if(ArgUtil.is(messageDoc.getLogs())) {
+			messageDto.setLogs(messageDoc.getLogs());
+		}
+		messageDto.setAction(ArgUtil.parseAsString(messageDoc.getAction(), Constants.UNDERSCORE));
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setStamps(messageDoc.getStamps());
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
-		messageDto.setOptions(messageDoc.getOptions());
-		messageDto.setReplyTo(messageDoc.getReplyTo());
+		if(ArgUtil.is(messageDoc.getOptions())) {
+			messageDto.setOptions(messageDoc.getOptions());
+		}
+		if(ArgUtil.is(messageDoc.getReplyTo())) {
+			messageDto.setReplyTo(messageDoc.getReplyTo());
+		}
 
 		if (ArgUtil.is(messageDoc.getContact())) {
 			messageDto.setContact(EntityDtoUtil.entityToDto(messageDoc.getContact(), new ContactDTO()));
