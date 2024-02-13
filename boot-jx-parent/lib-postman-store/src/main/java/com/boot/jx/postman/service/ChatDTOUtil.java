@@ -102,9 +102,7 @@ public class ChatDTOUtil {
 		if(ArgUtil.is(messageDoc.getVccards())) {
 			messageDto.setVccards(messageDoc.getVccards());
 		}
-		if(ArgUtil.is(messageDoc.getLogs())) {
-			messageDto.setLogs(messageDoc.getLogs());
-		}
+		
 		messageDto.setAction(ArgUtil.parseAsString(messageDoc.getAction(), Constants.UNDERSCORE));
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setStamps(messageDoc.getStamps());
@@ -139,6 +137,10 @@ public class ChatDTOUtil {
 
 		if (ArgUtil.isEmpty(messageDto.getName())) {
 			messageDto.setName(messageDto.getSender());
+		}
+		
+		if(ArgUtil.is(messageDoc.getLogs())) {
+			messageDto.setLogs(messageDoc.getLogs());
 		}
 
 		return messageDto;
