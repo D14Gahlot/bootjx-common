@@ -34,17 +34,19 @@ public class ChatMessageDTO implements Serializable {
 	private TagDocument tags;
 	private List<Attachment> attachments;
 	private List<PBVCard> vccards;
+	
 	private String sender;
 	private String status;
-	private Map<String, Long> stamps;
 	private Contactable contact;
 
 	private Map<String, Object> meta;
 	private Map<String, Object> options;
 	private Map<String, Object> replyTo;
-
 	private MessageRouter route;
+	private Map<String, Long> stamps;
 	public List<Object> logs;
+
+	
 
 	public String getText() {
 		return text;
@@ -117,8 +119,6 @@ public class ChatMessageDTO implements Serializable {
 	public void setSender(String sender) {
 		this.sender = sender;
 	}
-
-
 	public String getMessageIdExt() {
 		return messageIdExt;
 	}
@@ -157,14 +157,6 @@ public class ChatMessageDTO implements Serializable {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public Map<String, Long> getStamps() {
-		return stamps;
-	}
-
-	public void setStamps(Map<String, Long> stamps) {
-		this.stamps = stamps;
 	}
 
 	public Contactable getContact() {
@@ -260,7 +252,13 @@ public class ChatMessageDTO implements Serializable {
 	public void setOptions(Map<String, Object> options) {
 		this.options = options;
 	}
-	
+	public Map<String, Long> getStamps() {
+		return stamps;
+	}
+
+	public void setStamps(Map<String, Long> stamps) {
+		this.stamps = stamps;
+	}
 	public List<Object> getLogs() {
 		return logs;
 	}

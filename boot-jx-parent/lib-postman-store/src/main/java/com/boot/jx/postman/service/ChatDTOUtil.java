@@ -2,8 +2,10 @@ package com.boot.jx.postman.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.boot.jx.postman.PMConstants;
@@ -105,14 +107,17 @@ public class ChatDTOUtil {
 		
 		messageDto.setAction(ArgUtil.parseAsString(messageDoc.getAction(), Constants.UNDERSCORE));
 		messageDto.setStatus(messageDoc.getStatus());
-		messageDto.setStamps(messageDoc.getStamps());
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
 		if(ArgUtil.is(messageDoc.getOptions())) {
 			messageDto.setOptions(messageDoc.getOptions());
+		}else {
+			messageDto.setOptions(getDefaultMap(messageDoc.options()));
 		}
 		if(ArgUtil.is(messageDoc.getReplyTo())) {
 			messageDto.setReplyTo(messageDoc.getReplyTo());
+		}else {
+			messageDto.setReplyTo(getDefaultMap(messageDoc.replyTo()));
 		}
 
 		if (ArgUtil.is(messageDoc.getContact())) {
@@ -138,10 +143,11 @@ public class ChatDTOUtil {
 		if (ArgUtil.isEmpty(messageDto.getName())) {
 			messageDto.setName(messageDto.getSender());
 		}
-		
+		messageDto.setStamps(messageDoc.getStamps());
 		if(ArgUtil.is(messageDoc.getLogs())) {
-			messageDto.setLogs(messageDoc.getLogs());
+			messageDto.setLogs(getUniqueLogs(messageDoc.getLogs()));
 		}
+		
 
 		return messageDto;
 	}
@@ -249,5 +255,14 @@ public class ChatDTOUtil {
 
 		return chatSessionDto;
 	}
-
+	
+  private static List<Object> getUniqueLogs(List<Object> listWithDuplicates) {
+        Set<Object> uniqueSet = new HashSet<>(listWithDuplicates);
+        return new ArrayList<>(uniqueSet);
+    }
+  
+  private static Map<String, Object> getDefaultMap(Map<String, Object> defMap){
+	  defMap.put("", "");
+	  return defMap;
+  }
 }
