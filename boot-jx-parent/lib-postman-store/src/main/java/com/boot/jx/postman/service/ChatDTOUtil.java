@@ -2,8 +2,10 @@ package com.boot.jx.postman.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.boot.jx.postman.PMConstants;
@@ -18,6 +20,7 @@ import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.NumberUtil;
 
@@ -87,23 +90,35 @@ public class ChatDTOUtil {
 		messageDto.setTimestamp(messageDoc.getTimestamp());
 		messageDto.setSessionId(messageDoc.getSessionId());
 		messageDto.setMessageId(messageDoc.getMessageId());
-		messageDto.setMessageIdExt(messageDoc.getMessageIdExt());
-		messageDto.setMessageIdRef(messageDoc.getMessageIdRef());
+		messageDto.setMessageIdExt(ArgUtil.parseAsString(messageDoc.getMessageIdExt(), Constants.UNDERSCORE));
+		messageDto.setMessageIdRef(ArgUtil.parseAsString(messageDoc.getMessageIdRef(), Constants.UNDERSCORE));
 
-		messageDto.setReplyId(messageDoc.getReplyId());
-		messageDto.setReplyIdExt(messageDoc.getReplyIdExt());
-
-		messageDto.setTags(messageDoc.getTags());
-		messageDto.setAttachments(messageDoc.getAttachments());
-		messageDto.setVccards(messageDoc.getVccards());
-		messageDto.setLogs(messageDoc.getLogs());
-		messageDto.setAction(messageDoc.getAction());
+		messageDto.setReplyId(ArgUtil.parseAsString(messageDoc.getReplyId(),Constants.UNDERSCORE));
+		messageDto.setReplyIdExt(ArgUtil.parseAsString(messageDoc.getReplyIdExt(),Constants.UNDERSCORE));
+		if(ArgUtil.is(messageDoc.getTags())) {
+			messageDto.setTags(messageDoc.getTags());
+		}
+		if(ArgUtil.is(messageDoc.getAttachments())) {
+			messageDto.setAttachments(messageDoc.getAttachments());
+		}
+		if(ArgUtil.is(messageDoc.getVccards())) {
+			messageDto.setVccards(messageDoc.getVccards());
+		}
+		
+		messageDto.setAction(ArgUtil.parseAsString(messageDoc.getAction(), Constants.UNDERSCORE));
 		messageDto.setStatus(messageDoc.getStatus());
-		messageDto.setStamps(messageDoc.getStamps());
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
-		messageDto.setOptions(messageDoc.getOptions());
-		messageDto.setReplyTo(messageDoc.getReplyTo());
+		if(ArgUtil.is(messageDoc.getOptions())) {
+			messageDto.setOptions(messageDoc.getOptions());
+		}else {
+			messageDto.setOptions(getDefaultMap(messageDoc.options()));
+		}
+		if(ArgUtil.is(messageDoc.getReplyTo())) {
+			messageDto.setReplyTo(messageDoc.getReplyTo());
+		}else {
+			messageDto.setReplyTo(getDefaultMap(messageDoc.replyTo()));
+		}
 
 		if (ArgUtil.is(messageDoc.getContact())) {
 			messageDto.setContact(EntityDtoUtil.entityToDto(messageDoc.getContact(), new ContactDTO()));
@@ -128,6 +143,11 @@ public class ChatDTOUtil {
 		if (ArgUtil.isEmpty(messageDto.getName())) {
 			messageDto.setName(messageDto.getSender());
 		}
+		messageDto.setStamps(messageDoc.getStamps());
+		if(ArgUtil.is(messageDoc.getLogs())) {
+			messageDto.setLogs(getUniqueLogs(messageDoc.getLogs()));
+		}
+		
 
 		return messageDto;
 	}
@@ -235,5 +255,14 @@ public class ChatDTOUtil {
 
 		return chatSessionDto;
 	}
-
+	
+  private static List<Object> getUniqueLogs(List<Object> listWithDuplicates) {
+        Set<Object> uniqueSet = new HashSet<>(listWithDuplicates);
+        return new ArrayList<>(uniqueSet);
+    }
+  
+  private static Map<String, Object> getDefaultMap(Map<String, Object> defMap){
+	  defMap.put("", "");
+	  return defMap;
+  }
 }
