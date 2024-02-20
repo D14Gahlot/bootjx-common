@@ -29,7 +29,7 @@ public class SignupContact implements Serializable {
 	@NotNull
 	private String role;
 
-	private List<Object> products;
+	private List<Object> product;
 
 	@NotNull
 	private String country;
@@ -82,12 +82,12 @@ public class SignupContact implements Serializable {
 		this.country = country;
 	}
 
-	public List<Object> getProducts() {
-		return products;
+	public List<Object> getProduct() {
+		return product;
 	}
 
-	public void setProducts(List<Object> products) {
-		this.products = products;
+	public void setProduct(List<Object> product) {
+		this.product = product;
 	}
 
 }

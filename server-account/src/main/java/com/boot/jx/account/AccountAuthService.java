@@ -164,7 +164,7 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
 				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.server").asString())
 				.put("contactName", accountDoc.getContact().getName()).put("email", accountDoc.getContact().getEmail())
-				.put("products", JsonUtil.toJson(accountDoc.getContact().getProducts()))
+				.put("products", JsonUtil.toJson(accountDoc.getContact().getProduct()))
 				.put("phone", accountDoc.getContact().getPhone())
 				.put("company", accountDoc.getContact().getCompany())));
 	}
