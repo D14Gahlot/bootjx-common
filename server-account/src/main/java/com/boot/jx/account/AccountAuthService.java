@@ -167,6 +167,7 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 				.put("products", JsonUtil.toJson(accountDoc.getContact().getProduct()))
 				.put("phone", accountDoc.getContact().getPhone())
 				.put("company", accountDoc.getContact().getCompany())
+				.put("role", accountDoc.getContact().getRole())
 				.put("country", accountDoc.getContact().getCountry())));
 	}
 
