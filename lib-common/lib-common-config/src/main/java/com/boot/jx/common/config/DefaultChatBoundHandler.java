@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.chat.ChatService;
@@ -201,7 +202,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		messageStore.updateStatus(messageReport);
 
 		if (ArgUtil.is(e)) {
-			logManager.error(inboxMessage, e);
+			logManager.error(inboxMessage, status, e);
 		}
 	}
 
@@ -215,7 +216,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		InBoundMsg msg = new InBoundMsg();
 		msg.messageId = inboxMessage.getMessageId();
 		msg.messageIdExt = inboxMessage.getMessageIdExt();
-		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(), inboxMessage.contact().getEmail(),inboxMessage.contact().getCsid());
+		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(), inboxMessage.contact().getEmail(),
+				inboxMessage.contact().getCsid());
 		msg.contactId = contact.contactId;
 		msg.session = new MsgSession();
 		msg.session.sessionId = inboxMessage.getSessionId();
@@ -266,7 +268,14 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				.debug(pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
-		restService.ajax(forwardUrl).cookie(ParamKeys.X_API_ID, clientAppId).post(wrap).asNone();
+
+		try {
+			restService.ajax(forwardUrl).cookie(ParamKeys.X_API_ID, clientAppId).post(wrap).asNone();
+		} catch (Exception e) {
+			ApiResponseUtil.addError("Connection Error:" + forwardUrl);
+			throw e;
+		}
+
 	}
 
 	@Override
