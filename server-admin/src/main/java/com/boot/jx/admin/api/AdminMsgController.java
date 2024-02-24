@@ -1,5 +1,4 @@
 package com.boot.jx.admin.api;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,7 +37,6 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
-import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -406,7 +404,7 @@ public class AdminMsgController {
 		query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
 		query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
 		lst = mongoTemplate.find(query,BulkSessionDoc.class);
-		lst =checkNull(lst);
+		//lst =checkNull(lst);
 		return ApiResponse.buildResults(lst);
 		
 	}
