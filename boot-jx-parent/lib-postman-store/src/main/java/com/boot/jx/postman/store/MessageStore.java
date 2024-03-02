@@ -426,11 +426,13 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 				builder.limit(result.getModifiedCount());
 				List<MessageDoc> messsages = mongoTemplate.find(builder.getQuery(), MessageDoc.class, collectionName);
 				if (ArgUtil.is(messsages) && ArgUtil.is(messsages.get(0))) {
+					setTemplateDetails(messageReport, messsages.get(0));
 					updateMessageReport(messageReport, messsages.get(0));
 				}
 			} else {
 				MessageDoc m = mongoTemplate.findOne(builder.getQuery(), MessageDoc.class, collectionName);
 				if (ArgUtil.is(m)) {
+					setTemplateDetails(messageReport,m);
 					updateMessageReport(messageReport, m);
 					/** added for session update **/
 					updateSessionExpiryStamp(messageReport, m);
@@ -611,6 +613,12 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 		}
 
+	}
+	
+	public void setTemplateDetails(MessageReport report,MessageDoc m) {
+		report.setType(m.getType());
+		report.setTemplateId(m.getHsm().getId());
+		report.setTemplateCode(m.getHsm().getCode());
 	}
 
 }

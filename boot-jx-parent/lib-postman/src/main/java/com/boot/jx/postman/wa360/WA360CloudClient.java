@@ -149,6 +149,7 @@ public class WA360CloudClient {
 		}
 
 		outboxMessage.setMessageIdExt(msgIds.toString());
+		outboxMessage.setHsm(outboxMessage.getHsm());
 		return outboxMessage;
 	}
 
