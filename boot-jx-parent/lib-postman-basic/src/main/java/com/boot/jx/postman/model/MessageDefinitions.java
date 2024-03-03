@@ -158,11 +158,22 @@ public class MessageDefinitions {
 		public String getReplyId();
 
 		public String getReplyIdExt();
+		
+		/*public String getType();
+		public String setType(String type);
+		public String getTemplateId();
+		public String setTemplateId(String templateId);
+		public String getTemplateCode();
+		public String setTemplateCode(String templatecode);*/
+		
 
 		public default void from(IMessageId message) {
 			setMessageId(message.getMessageId());
 			setMessageIdExt(message.getMessageIdExt());
 			setMessageIdRef(message.getMessageIdRef());
+//			setType(message.getType());
+//			setTemplateId(message.getTemplateId());
+//			setTemplateCode(message.getTemplateCode());
 		}
 
 	}
