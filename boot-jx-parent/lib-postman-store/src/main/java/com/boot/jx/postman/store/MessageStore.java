@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -33,6 +34,7 @@ import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -66,10 +68,10 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	private MongoTemplate mongoTemplate;
 
 	@Autowired
-	CommonMongoTemplate commonMongoTemplate;
+	private CommonMongoTemplate commonMongoTemplate;
 
 	@Value("${postman.chat.session.timeout}")
 	String chatSessionTimeout;
@@ -564,24 +566,25 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	public void updateSessionExpiryStamp(MessageReport report, MessageDoc m) {
-		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 		ChatSessionDoc sessionDoc = null;
 		if (ArgUtil.is(m.getSessionId())) {
-			sessionDoc = sessionStore.getSession(m.getSessionId());
-			builder.whereIdSafe(sessionDoc.getSessionId());
+			ChatSessionQuery builder = new ChatSessionQuery(m.getSessionId());
+			builder.whereIdSafe(m.getSessionId());
 			if (ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpChanel())) {
-				sessionDoc.setSessionId(m.getSessionId());
 				Map<String, Object> tpChannelMap = report.getTpChanel();
-				sessionDoc.setTpChanel(tpChannelMap);
 				Long ccwExpiryLong = tpChannelMap.get("ccwExpiry") == null ? 0L
 						: Long.parseLong(tpChannelMap.get("ccwExpiry").toString());
-				LOGGER.info("ccwExpiryLong :" + ccwExpiryLong + "\t milisecond :" + ccwExpiryLong * 1000);
 				ccwExpiryLong = ccwExpiryLong * 1000;
+				/**
+				 * @deperecated
+				 */
 				sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
 				builder.set("sessionExpiryStamp", ccwExpiryLong);
-				builder.set("tpChanel", tpChannelMap);
-				mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class,
-						"CHAT_SESSION");
+
+				// in Millis
+				tpChannelMap.put("ccwExpiryMillis", ccwExpiryLong);
+				builder.setTpChanel(tpChannelMap);
+				commonMongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 			}
 		}
 	}
@@ -594,16 +597,13 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 			String tpWabaId = report.getTpChanel().get("wabaConvesationId").toString();
 			LOGGER.info("tpWabaId { 2  }:" + tpWabaId);
 			if (ArgUtil.is(tpWabaId)) {
-				Query wabaQry = new Query();
-				wabaQry.addCriteria(Criteria.where("id").is(tpWabaId));
-				WABAConversation wabaDoc = mongoTemplate.findOne(wabaQry, WABAConversation.class,
-						"TP_WABA_CONVERSATIONS");
+				WABAConversation wabaDoc = commonMongoTemplate.findByIdSafeCheck(tpWabaId, WABAConversation.class);
 				if (ArgUtil.is(wabaDoc)) {
 					builder.whereIdSafe(tpWabaId);
 					Map<String, Object> chatSessionMap = new HashMap<>();
 					chatSessionMap.put("chatSessionId", sessionId);
 					builder.set("chatSession", chatSessionMap);
-					mongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), WABAConversation.class,
+					commonMongoTemplate.updateFirst(builder.getQuery(), builder.getUpdate(), WABAConversation.class,
 							"TP_WABA_CONVERSATIONS");
 				}
 
