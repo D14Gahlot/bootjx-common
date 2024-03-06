@@ -455,9 +455,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		LOGGER.info("IN message {DR}" + requestMap);
 		if (requestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
-		}
-
-		if (requestMap.containsKey("statuses")) {
+		} else if (requestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = requestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
@@ -479,7 +477,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 						if (ArgUtil.is(tpChannelMap)) {
 							reprt.setTpChanel(tpChannelMap);
 						}
-						
+
 					}
 				}
 			}

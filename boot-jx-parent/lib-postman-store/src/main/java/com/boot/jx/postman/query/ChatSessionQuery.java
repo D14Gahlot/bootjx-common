@@ -1,6 +1,7 @@
 package com.boot.jx.postman.query;
 
 import java.util.List;
+import java.util.Map;
 
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -171,9 +172,14 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		this.set("contact", this.doc.contact());
 		return this;
 	}
-	
+
 	public MapEntry getEntry(String key) {
 		return new MapEntry(get(key));
+	}
+
+	public void setTpChanel(Map<String, Object> tpChannelMap) {
+		this.doc.setTpChanel(tpChannelMap);
+		this.set("tpChanel", tpChannelMap);
 	}
 
 }

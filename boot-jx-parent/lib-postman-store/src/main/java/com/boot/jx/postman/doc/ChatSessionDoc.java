@@ -145,9 +145,14 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	// @DBRef
 	private MessageDoc lastMsg;
-	
-	/** session expiry stamp**/
+
+	/**
+	 * Should not add anything at this level
+	 */
+	@Deprecated
+	/** session expiry stamp **/
 	private long sessionExpiryStamp;
+
 	/** waba convesation expirty stamp **/
 	private Map<String, Object> tpChanel;
 
@@ -670,6 +675,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 		return sessionExpiryStamp;
 	}
 
+	@Deprecated
 	public void setSessionExpiryStamp(long sessionExpiryStamp) {
 		this.sessionExpiryStamp = sessionExpiryStamp;
 	}
