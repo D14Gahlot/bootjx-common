@@ -574,8 +574,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		ChatSessionDoc sessionDoc = null;
 		if (ArgUtil.is(m.getSessionId())) {
 			if (ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpChanel())) {
-				ChatSessionQuery builder = new ChatSessionQuery(m.getSessionId());
-				builder.whereIdSafe(m.getSessionId());
+				ChatSessionQuery chatSessionQuery = new ChatSessionQuery(m.getSessionId());
+				chatSessionQuery.whereIdSafe(m.getSessionId());
 
 				Map<String, Object> tpChannelMap = report.getTpChanel();
 				Long ccwExpiryLong = tpChannelMap.get("ccwExpiry") == null ? 0L
@@ -585,13 +585,13 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 				 * @deperecated
 				 */
 				sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
-				builder.set("sessionExpiryStamp", ccwExpiryLong);
+				chatSessionQuery.set("sessionExpiryStamp", ccwExpiryLong);
 
 				// in Millis
 				tpChannelMap.put("ccwExpiryMillis", ccwExpiryLong);
 				tpChannelMap.put("sessionExpiryStamp", ccwExpiryLong);
-				builder.setTpChanel(tpChannelMap);
-				commonMongoTemplate.updateFirst(builder);
+				chatSessionQuery.setTpChanel(tpChannelMap);
+				commonMongoTemplate.updateFirst(chatSessionQuery);
 			}
 		}
 	}
