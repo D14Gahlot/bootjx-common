@@ -471,12 +471,9 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 						query.setPricing(statusModel.keyEntry("pricing").asMap());
 						query.set("meta.to_country", getCountryCode(reprt.contact().getCsid()));
 						commonMongoTemplate.upsert(query);
-						Map<String, Object> tpChannelMap = new HashMap<>();
-						tpChannelMap.put("ccwExpiry", conversation.get("expiration_timestamp"));
-						tpChannelMap.put("wabaConvesationId", id);
-						if (ArgUtil.is(tpChannelMap)) {
-							reprt.setTpChanel(tpChannelMap);
-						}
+						reprt.setTpMeta(
+								MapModel.createInstance().put("ccwExpiry", conversation.get("expiration_timestamp"))
+										.put("wabaConvesationId", id).toMap());
 
 					}
 				}

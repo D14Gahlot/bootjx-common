@@ -154,7 +154,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	private long sessionExpiryStamp;
 
 	/** waba convesation expirty stamp **/
-	private Map<String, Object> tpChanel;
+	private Map<String, Object> tpMeta;
 
 	public long getLastInComingStamp() {
 		return lastInComingStamp;
@@ -680,11 +680,11 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 		this.sessionExpiryStamp = sessionExpiryStamp;
 	}
 
-	public Map<String, Object> getTpChanel() {
-		return tpChanel;
+	public Map<String, Object> getTpMeta() {
+		return tpMeta;
 	}
 
-	public void setTpChanel(Map<String, Object> tpChanel) {
-		this.tpChanel = tpChanel;
+	public void setTpMeta(Map<String, Object> tpMeta) {
+		this.tpMeta = tpMeta;
 	}
 }

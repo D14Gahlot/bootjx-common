@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -535,13 +534,9 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 						/**
 						 * MRU--addded new code to update chatSession doc with Waba expiry time stamp
 						 **/
-						LOGGER.info(" === WABA ID {} " + id);
-						Map<String, Object> tpChannelMap = new HashMap<>();
-						tpChannelMap.put("ccwExpiry", conversation.get("expiration_timestamp"));
-						tpChannelMap.put("wabaConvesationId", id);
-						if (ArgUtil.is(tpChannelMap)) {
-							reprt.setTpChanel(tpChannelMap);
-						}
+						reprt.setTpMeta(
+								MapModel.createInstance().put("ccwExpiry", conversation.get("expiration_timestamp"))
+										.put("wabaConvesationId", id).toMap());
 						/** code ended here **/
 
 					}

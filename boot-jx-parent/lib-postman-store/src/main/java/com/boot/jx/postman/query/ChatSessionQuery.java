@@ -177,9 +177,9 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		return new MapEntry(get(key));
 	}
 
-	public ChatSessionQuery setTpChanel(Map<String, Object> tpChannelMap) {
-		this.doc.setTpChanel(tpChannelMap);
-		this.set("tpChanel", tpChannelMap);
+	public ChatSessionQuery setTpMeta(Map<String, Object> tpMeta) {
+		this.doc.setTpMeta(tpMeta);
+		this.set("tpMeta", tpMeta);
 		return this;
 	}
 

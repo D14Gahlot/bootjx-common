@@ -569,12 +569,12 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 	public void updateSessionExpiryStamp(MessageReport report, MessageDoc m) {
 		if (ArgUtil.is(m.getSessionId())) {
-			if (ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpChanel())) {
+			if (ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpMeta())) {
 				ChatSessionQuery chatSessionQuery = new ChatSessionQuery(m.getSessionId());
 
-				Map<String, Object> tpChannelMap = report.getTpChanel();
-				Long ccwExpiryLong = tpChannelMap.get("ccwExpiry") == null ? 0L
-						: Long.parseLong(tpChannelMap.get("ccwExpiry").toString());
+				Map<String, Object> tpMeta = report.getTpMeta();
+				Long ccwExpiryLong = tpMeta.get("ccwExpiry") == null ? 0L
+						: Long.parseLong(tpMeta.get("ccwExpiry").toString());
 				ccwExpiryLong = ccwExpiryLong * 1000;
 				/**
 				 * @deperecated
@@ -583,9 +583,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 				chatSessionQuery.set("sessionExpiryStamp", ccwExpiryLong);
 
 				// in Millis
-				tpChannelMap.put("ccwExpiryMillis", ccwExpiryLong);
-				tpChannelMap.put("sessionExpiryStamp", ccwExpiryLong);
-				chatSessionQuery.setTpChanel(tpChannelMap);
+				tpMeta.put("ccwExpiryMillis", ccwExpiryLong);
+				tpMeta.put("sessionExpiryStamp", ccwExpiryLong);
+				chatSessionQuery.setTpMeta(tpMeta);
 				commonMongoTemplate.updateFirst(chatSessionQuery);
 			}
 		}
@@ -593,9 +593,9 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 	public void updateTpWaba(MessageReport report, MessageDoc m) {
 		LOGGER.info("getSessionId { 1 } :" + m.getSessionId());
-		if (ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpChanel())) {
+		if (ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpMeta())) {
 			String sessionId = m.getSessionId();
-			String tpWabaId = report.getTpChanel().get("wabaConvesationId").toString();
+			String tpWabaId = report.getTpMeta().get("wabaConvesationId").toString();
 			LOGGER.info("tpWabaId { 2  }:" + tpWabaId);
 			if (ArgUtil.is(tpWabaId)) {
 				WABAConversation wabaDoc = commonMongoTemplate.findByIdSafeCheck(tpWabaId, WABAConversation.class);
