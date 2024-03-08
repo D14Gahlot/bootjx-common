@@ -589,6 +589,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 				// in Millis
 				tpChannelMap.put("ccwExpiryMillis", ccwExpiryLong);
+				tpChannelMap.put("sessionExpiryStamp", ccwExpiryLong);
 				builder.setTpChanel(tpChannelMap);
 				commonMongoTemplate.updateFirst(builder);
 			}
