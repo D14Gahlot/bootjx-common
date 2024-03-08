@@ -1,6 +1,5 @@
 package com.boot.jx.postman.store;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -22,10 +20,10 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -34,16 +32,15 @@ import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
-import com.boot.jx.postman.query.ChatSessionQuery;
-import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
+import com.boot.jx.postman.query.ChatSessionQuery;
+import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.google.common.collect.Lists;
 import com.mongodb.client.result.UpdateResult;
@@ -571,7 +568,6 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 	}
 
 	public void updateSessionExpiryStamp(MessageReport report, MessageDoc m) {
-		ChatSessionDoc sessionDoc = null;
 		if (ArgUtil.is(m.getSessionId())) {
 			if (ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpChanel())) {
 				ChatSessionQuery chatSessionQuery = new ChatSessionQuery(m.getSessionId());
@@ -583,7 +579,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 				/**
 				 * @deperecated
 				 */
-				sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
+				//sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
 				chatSessionQuery.set("sessionExpiryStamp", ccwExpiryLong);
 
 				// in Millis
