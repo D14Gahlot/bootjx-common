@@ -575,7 +575,6 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		if (ArgUtil.is(m.getSessionId())) {
 			if (ArgUtil.is(m.getSessionId()) && ArgUtil.is(report.getTpChanel())) {
 				ChatSessionQuery chatSessionQuery = new ChatSessionQuery(m.getSessionId());
-				chatSessionQuery.whereIdSafe(m.getSessionId());
 
 				Map<String, Object> tpChannelMap = report.getTpChanel();
 				Long ccwExpiryLong = tpChannelMap.get("ccwExpiry") == null ? 0L
@@ -605,11 +604,8 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 			if (ArgUtil.is(tpWabaId)) {
 				WABAConversation wabaDoc = commonMongoTemplate.findByIdSafeCheck(tpWabaId, WABAConversation.class);
 				if (ArgUtil.is(wabaDoc)) {
-					CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-					builder.whereIdSafe(tpWabaId);
-					Map<String, Object> chatSessionMap = new HashMap<>();
-					chatSessionMap.put("chatSessionId", sessionId);
-					builder.set("chatSession", chatSessionMap);
+					WABAConversationQuery builder = new WABAConversationQuery(tpWabaId);
+					builder.set("chatSession.chatSessionId", sessionId);
 					commonMongoTemplate.updateFirst(builder);
 				}
 
