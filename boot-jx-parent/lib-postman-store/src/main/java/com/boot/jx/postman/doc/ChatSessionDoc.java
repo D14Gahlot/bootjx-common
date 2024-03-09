@@ -613,7 +613,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	public ChatMessageDTO lastMsg() {
 		return this.msg().get("lastMsg");
 	}
-
+	
 	public ChatMessageDTO lastOutBoundMsg() {
 		return this.msg().get("lastOutBoundMsg");
 	}
