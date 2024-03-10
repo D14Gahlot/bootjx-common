@@ -1750,7 +1750,6 @@ public class AdminDashBoardManager {
 
 	public String getSummaryId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
-		System.out.println("Json Util ="+JsonUtil.toJson(dto));
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
 			return tenant + "_" + dto.getDate() + "_" + "wa";
 		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
@@ -2231,7 +2230,7 @@ public class AdminDashBoardManager {
 
 
 	public Map<Object, Map<Object, Long>> removeSandBoxNumber(Map<Object, Map<Object, Long>> hourWiseCount) {
-		
+		if (hourWiseCount!=null && !hourWiseCount.isEmpty()) {
 		// Remove entries with keys containing "wa_" and no characters after "wa_"
         Iterator<Map.Entry<Object, Map<Object, Long>>> iterator = hourWiseCount.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -2240,6 +2239,7 @@ public class AdminDashBoardManager {
                 iterator.remove();
             }
         }
+		}
        return hourWiseCount;
 	}
 

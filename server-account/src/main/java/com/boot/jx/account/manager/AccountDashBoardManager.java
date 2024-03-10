@@ -1419,7 +1419,7 @@ public class AccountDashBoardManager {
 	
 	
 	public Map<Object, Map<Object, Long>> removeSandBoxNumber(Map<Object, Map<Object, Long>> hourWiseCount) {
-	
+		if (hourWiseCount!=null && !hourWiseCount.isEmpty()) {
 		// Remove entries with keys containing "wa_" and no characters after "wa_"
         Iterator<Map.Entry<Object, Map<Object, Long>>> iterator = hourWiseCount.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -1428,6 +1428,7 @@ public class AccountDashBoardManager {
                 iterator.remove();
             }
         }
+		}
        return hourWiseCount;
 	}
 	
