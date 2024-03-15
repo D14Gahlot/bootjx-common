@@ -279,7 +279,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 		try {
 			(externalTimeout ? restHookService.ajax(forwardUrl) : restService.ajax(forwardUrl))
-					.cookie(ParamKeys.X_API_ID, clientAppId).post(wrap).asNone();
+					.cookie(ParamKeys.X_API_ID, clientAppId).postJson(wrap).asNone();
 		} catch (Exception e) {
 			ApiResponseUtil.addError("Connection Error:" + forwardUrl);
 			throw e;
@@ -312,7 +312,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 								.appId(defaultClient.getId());
 						wrap.contacts = CollectionUtil.asList(contact);
 						wrap.statuses = CollectionUtil.asList(status);
-						restHookService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+						restHookService.ajax(defaultClient.getWebhook()).postJson(wrap).asNone();
 					}
 
 				} catch (Exception e) {
@@ -444,7 +444,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 								.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
-				restHookService.ajax(webhookUrl).cookie(ParamKeys.X_API_ID, defaultClient.getId()).post(wrap).asNone();
+				restHookService.ajax(webhookUrl).cookie(ParamKeys.X_API_ID, defaultClient.getId()).postJson(wrap).asNone();
 			}
 		} catch (Exception e) {
 			logManager.error(event, e);

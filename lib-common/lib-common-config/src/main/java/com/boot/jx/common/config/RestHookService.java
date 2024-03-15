@@ -22,9 +22,8 @@ public class RestHookService {
 					.build();
 			HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
 			requestFactory.setHttpClient(httpClient);
-			requestFactory.setConnectTimeout(3000); // 5 seconds
-			requestFactory.setReadTimeout(5000); // 10 seconds
-
+			requestFactory.setConnectTimeout(3000); // 3-5 seconds
+			requestFactory.setReadTimeout(5000); // 5 seconds
 			restTemplate = new RestTemplate(requestFactory);
 			restService.getLocalRestTemplate(restTemplate);
 		}
