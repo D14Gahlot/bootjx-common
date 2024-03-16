@@ -3,6 +3,7 @@ package com.boot.jx.setup;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +23,8 @@ import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.doc.config.ChannelConfigSetupDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 
@@ -85,6 +89,24 @@ public class ChannelSetupController {
 		}
 		return "app-setup-channel";
 
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.POST })
+	public MapModel setupChannelSave(@RequestParam String channelConfigId, @RequestBody Map<String, Object> response)
+			throws FileNotFoundException, IOException {
+		MapModel returnVal = MapModel.createInstance();
+
+		ChannelConfigSetupDoc setup = commonMongoTemplate.findById(channelConfigId, ChannelConfigSetupDoc.class);
+		if (ArgUtil.is(setup)) {
+			ChannelConfigTempDoc respDoc = new ChannelConfigTempDoc();
+			respDoc.setChannelConfigId(channelConfigId);
+			respDoc.setResp(response);
+			respDoc.setChannelType(setup.getChannelType());
+			commonMongoTemplate.save(respDoc);
+			returnVal.put("id", respDoc.getId());
+		}
+		return returnVal;
 	}
 
 }

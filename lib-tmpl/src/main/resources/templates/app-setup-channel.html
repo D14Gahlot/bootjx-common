@@ -86,14 +86,15 @@
 	  function launchWhatsAppSignup() {
 	    // Launch Facebook login
 	    FB.login(function (response) {
-	      if (response.authResponse) {
-			const code = response.authResponse.code;
-	        const accessToken = response.authResponse.accessToken;
-	        alert("accessToken"+accessToken)
-	        //Use this token to call the debug_token API and get the shared WABA's ID
-	      } else {
-	        console.log('User cancelled login or did not fully authorize.');
-	      }
+			if(window.channel_setup_listner){
+				window.channel_setup_listner({
+					channelType : '[[${selectedChannel.channelType.name()}]]',
+					channelType : '[[${selectedChannel.id}]]',
+					resp : response
+				})
+			} else {
+				console.log("channel_setup_listner:response",response)
+			}
 	    }, {
 	      config_id: '[[${selectedChannel.metaConfigId}]]', // configuration ID obtained in the previous step goes here
 	      response_type: 'code',     // must be set to 'code' for System User access token
