@@ -24,11 +24,11 @@
 			CONFIG: [(${CONFIG_JSON})]
 		};
 	</script>
-	
+
 	<span th:switch="${channelSelected}" th:remove="tag">
-		<span th:case="'true'" th:remove="tag">
-			
-				<span th:switch="${selectedChannel.channelType}" th:remove="tag">
+		<span th:case="true" th:remove="tag">
+
+				<span th:switch="${selectedChannel.channelType.name()}" th:remove="tag">
 					<span th:case="'wacfb'" th:remove="tag">
 <script>
   window.fbAsyncInit = function() {
@@ -74,9 +74,11 @@
 		</table>
 	</div>
 
+
+
 	<span th:switch="${channelSelected}" th:remove="tag">
-		<span th:case="'true'" th:remove="tag">
-				<span th:switch="${selectedChannel.channelType}" th:remove="tag">
+		<span th:case="true" th:remove="tag">
+				<span th:switch="${selectedChannel.channelType.name()}" th:remove="tag">
 					<span th:case="'wacfb'" th:remove="tag">
 
 	<script>
@@ -85,7 +87,9 @@
 	    // Launch Facebook login
 	    FB.login(function (response) {
 	      if (response.authResponse) {
+			const code = response.authResponse.code;
 	        const accessToken = response.authResponse.accessToken;
+	        alert("accessToken"+accessToken)
 	        //Use this token to call the debug_token API and get the shared WABA's ID
 	      } else {
 	        console.log('User cancelled login or did not fully authorize.');
@@ -95,8 +99,9 @@
 	      response_type: 'code',     // must be set to 'code' for System User access token
 	      override_default_response_type: true,
 	      extras: {
+			//channelId :'[[${selectedChannel.id}]]', //  
 	        setup: {
-	          channelId :'[[${selectedChannel.id}]]' // Prefilled data can go here
+	          // Prefilled data can go here
 	        }
 	      }
 	    });

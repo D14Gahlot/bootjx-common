@@ -56,7 +56,7 @@ public class ChannelSetupController {
 			MongoQueryBuilder<ChannelConfigSetupDoc> q = MongoQueryBuilder.collection(ChannelConfigSetupDoc.class)
 					.page(pageNo, pageSize);
 			if (ArgUtil.is(channelConfigId)) {
-				q = q.whereId(channelConfigId);
+				q = q.whereIdSafe(channelConfigId);
 			}
 			if (ArgUtil.is(channelType)) {
 				q.search("channelType", ArgUtil.parseAsString(channelType));
