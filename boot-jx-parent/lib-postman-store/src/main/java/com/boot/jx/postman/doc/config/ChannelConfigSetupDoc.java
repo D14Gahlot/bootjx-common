@@ -7,11 +7,12 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 
 @Document(collection = "CONFIG_CHANNEL_SETUP")
 @TypeAlias("ChannelConfigSetup")
-public class ChannelConfigSetupDoc implements Serializable {
+public class ChannelConfigSetupDoc extends TimeStampDoc implements Serializable {
 
 	private static final long serialVersionUID = -6368905475787041196L;
 

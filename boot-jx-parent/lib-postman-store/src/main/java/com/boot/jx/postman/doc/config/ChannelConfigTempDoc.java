@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.model.TimeModels.ITimeStampIndex;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "TEMP_CONFIG_CHANNEL")
@@ -31,15 +32,8 @@ public class ChannelConfigTempDoc implements Serializable {
 	@JsonView(PMEnvironment.ProtectedProperty.class)
 	protected String channelKey;
 
-	private boolean isProxyEnabled;
-	private boolean isSandbox;
-	private boolean isShared;
-	private boolean isDisabled;
-	private boolean isDeleted;
-	private String server;
-
 	private String channelConfigId;
-
+	
 	private Map<String, Object> resp;
 
 	public String getId() {
@@ -64,54 +58,6 @@ public class ChannelConfigTempDoc implements Serializable {
 
 	public void setLane(String lane) {
 		this.lane = lane;
-	}
-
-	public boolean isProxyEnabled() {
-		return isProxyEnabled;
-	}
-
-	public void setProxyEnabled(boolean isProxyEnabled) {
-		this.isProxyEnabled = isProxyEnabled;
-	}
-
-	public boolean isSandbox() {
-		return isSandbox;
-	}
-
-	public void setSandbox(boolean isSandbox) {
-		this.isSandbox = isSandbox;
-	}
-
-	public boolean isShared() {
-		return isShared;
-	}
-
-	public void setShared(boolean isShared) {
-		this.isShared = isShared;
-	}
-
-	public boolean isDisabled() {
-		return isDisabled;
-	}
-
-	public void setDisabled(boolean isDisabled) {
-		this.isDisabled = isDisabled;
-	}
-
-	public boolean isDeleted() {
-		return isDeleted;
-	}
-
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
-	}
-
-	public String getServer() {
-		return server;
-	}
-
-	public void setServer(String server) {
-		this.server = server;
 	}
 
 	public CHANNEL_TYPE_ENUM getChannelType() {
