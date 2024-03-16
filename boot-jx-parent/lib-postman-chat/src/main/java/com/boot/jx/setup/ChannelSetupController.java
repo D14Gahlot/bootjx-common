@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.cdn.BootJxConfigService;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
@@ -27,6 +28,7 @@ import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.Constants;
 
 @Controller
 public class ChannelSetupController {
@@ -42,6 +44,9 @@ public class ChannelSetupController {
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
+	@Autowired(required = false)
+	private BootJxConfigService bootJxConfigService;
+
 	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET })
 	public String setupChannel(@RequestParam(required = false) CHANNEL_TYPE_ENUM channelType,
 			@RequestParam(required = false) String channelConfigId,
@@ -52,30 +57,28 @@ public class ChannelSetupController {
 			throws FileNotFoundException, IOException {
 
 		List<ChannelConfigSetupDoc> channels = CollectionUtil.asList();
+		MongoQueryBuilder<ChannelConfigSetupDoc> q = MongoQueryBuilder.collection(ChannelConfigSetupDoc.class)
+				.page(pageNo, pageSize);
 		if (ArgUtil.is(channelConfigId)) {
-			channels = CollectionUtil
-					.asList(commonMongoTemplate.findByIdSafeCheck(channelConfigId, ChannelConfigSetupDoc.class));
-
-		} else {
-			MongoQueryBuilder<ChannelConfigSetupDoc> q = MongoQueryBuilder.collection(ChannelConfigSetupDoc.class)
-					.page(pageNo, pageSize);
-			if (ArgUtil.is(channelConfigId)) {
-				q = q.whereIdSafe(channelConfigId);
-			}
-			if (ArgUtil.is(channelType)) {
-				q.search("channelType", ArgUtil.parseAsString(channelType));
-			}
-			if (ArgUtil.is(sortBy)) {
-				q = q.sortBy(sortBy, Direction.fromString(sortDir));
-			}
-			channels = commonMongoTemplate.find(q);
+			q = q.whereIdSafe(channelConfigId);
 		}
+		if (ArgUtil.is(channelType)) {
+			q.search("channelType", ArgUtil.parseAsString(channelType));
+		}
+		if (ArgUtil.is(sortBy)) {
+			q = q.sortBy(sortBy, Direction.fromString(sortDir));
+		}
+		channels = commonMongoTemplate.find(q);
 
 		model.addAttribute("APP_NAME", appConfig.getAppName());
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("CDN_URL", appConfig.getAppPrefix());
 		if (ArgUtil.is(appCommonConfig)) {
 			model.addAllAttributes(appCommonConfig.appAttributes());
+		}
+		if (ArgUtil.is(bootJxConfigService)) {
+			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnAEntry("dev")
+					.preventUpgradeInsecureRequest().map());
 		}
 		model.addAttribute("APP_USER", "");
 		model.addAttribute("APP_USER_NAME", "User");
@@ -84,8 +87,10 @@ public class ChannelSetupController {
 
 		boolean channelSelected = (channels.size() == 1);
 		model.addAttribute("channelSelected", channelSelected);
+		model.addAttribute("selectedChannelConfigId", Constants.BLANK);
 		if (channelSelected) {
 			model.addAttribute("selectedChannel", channels.get(0));
+			model.addAttribute("selectedChannelConfigId", channels.get(0).getId());
 		}
 		return "app-setup-channel";
 

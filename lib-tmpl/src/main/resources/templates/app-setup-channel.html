@@ -11,18 +11,15 @@
 
 	<title>[[${CONFIG.PROP_SERVICE_NAME}]] - Channel Setup</title>
 
+	<style th:replace="common/cdn.html :: metas"> </style>
 	<style th:replace="common/loader.html :: style"> </style>
-
+	<style th:replace="common/cdn.html :: header"> </style>
+	<style th:replace="common/cdn.html :: const"> </style>
 	<script>
-		window.CONST = {
-			TENANT : '[[${TENANT}]]',
-			dev: '[[${CDN_DEBUG}]]',
-			CDN_URL: '[[${CDN_URL}]]', //
-			APP_CONTEXT: '[[${APP_CONTEXT}]]', APP: '[[${APP}]]', //
-			remoteJsVersion: '[[${CDN_VERSION}]]', //
-			CONTEXT: '[[${APP_CONTEXT}]]', "APP_USER": '[[${APP_USER}]]', "APP_DEPT": '[[${APP_DEPT}]]', "APP_USER_ROLE": '[[${APP_USER_ROLE}]]',
-			CONFIG: [(${CONFIG_JSON})]
-		};
+		window.CONST.extend({
+			provider : "whatsapp",
+			setupConfigId : '[[${selectedChannelId}]]'
+		});
 	</script>
 
 	<span th:switch="${channelSelected}" th:remove="tag">
@@ -58,22 +55,20 @@
 			without JavaScript enabled. Please enable it to continue.</strong>
 	</noscript>
 	<style th:replace="common/loader.html :: loader"> </style>
-	<div id=app >
-		<table width="100%">
-			<tr height="30%">
-				<td height="30%" ></td>
-			</tr>
-			<tr th:each="channel: ${channels}">
-				<td width="30%"></td>
-			    <td width="40%" style="text-align:center; height: 50px; background-color: rgb(146, 146, 146);" >
-					<a th:href="${'?channelConfigId=' + channel.id}" th:text="${channel.title}">
-					</a>
-				</td>
-			    <td width="30%" ></td>
-			</tr>
-		</table>
-	</div>
-
+	<style th:replace="common/cdn.html :: body"></style>
+	<table width="100%">
+		<tr height="30%">
+			<td height="30%" ></td>
+		</tr>
+		<tr th:each="channel: ${channels}">
+			<td width="30%"></td>
+		    <td width="40%" style="text-align:center; height: 50px; background-color: rgb(146, 146, 146);" >
+				<a th:href="${'?channelConfigId=' + channel.id}" th:text="${channel.title}">
+				</a>
+			</td>
+		    <td width="30%" ></td>
+		</tr>
+	</table>
 
 
 	<span th:switch="${channelSelected}" th:remove="tag">
@@ -89,7 +84,7 @@
 			if(window.channel_setup_listner){
 				window.channel_setup_listner({
 					channelType : '[[${selectedChannel.channelType.name()}]]',
-					channelType : '[[${selectedChannel.id}]]',
+					setupConfigId : '[[${selectedChannel.id}]]',
 					resp : response
 				})
 			} else {
