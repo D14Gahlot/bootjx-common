@@ -15,16 +15,21 @@
 	<style th:replace="common/loader.html :: style"> </style>
 	<style th:replace="common/cdn.html :: header"> </style>
 	<style th:replace="common/cdn.html :: const"> </style>
-	<script>
-		window.CONST.extend({
-			provider : "whatsapp",
-			setupConfigId : '[[${selectedChannelId}]]'
-		});
-	</script>
 
 	<span th:switch="${channelSelected}" th:remove="tag">
 		<span th:case="true" th:remove="tag">
 
+	<script>
+		window.CONST.extend({
+			channelConfig : {
+				id : '[[${selectedChannel.id}]]',
+				channelType : '[[${selectedChannel.channelType}]]',
+				contactType : '[[${selectedChannel.contactType}]]',
+				title : '[[${selectedChannel.title}]]',
+			}
+		});
+	</script>
+	
 				<span th:switch="${selectedChannel.channelType.name()}" th:remove="tag">
 					<span th:case="'wacfb'" th:remove="tag">
 <script>
