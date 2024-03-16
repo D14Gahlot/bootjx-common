@@ -76,8 +76,13 @@ public class ChannelSetupController {
 		model.addAttribute("APP_USER", "");
 		model.addAttribute("APP_USER_NAME", "User");
 		model.addAttribute("APP_USER_ROLE", "['GUEST']");
-		model.addAttribute("channels",channels);
+		model.addAttribute("channels", channels);
 
+		boolean channelSelected = (channels.size() == 1);
+		model.addAttribute("channelSelected", channelSelected);
+		if (channelSelected) {
+			model.addAttribute("selectedChannel", channels.get(0));
+		}
 		return "app-setup-channel";
 
 	}

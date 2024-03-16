@@ -24,6 +24,32 @@
 			CONFIG: [(${CONFIG_JSON})]
 		};
 	</script>
+	
+	<span th:switch="${channelSelected}" th:remove="tag">
+		<span th:case="'true'" th:remove="tag">
+			
+				<span th:switch="${selectedChannel.channelType}" th:remove="tag">
+					<span th:case="'wacfb'" th:remove="tag">
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId            : '[[${selectedChannel.metaAppId}]]',
+      autoLogAppEvents : true,
+      xfbml            : true,
+      version          : 'v18.0'
+    });
+  };
+</script>
+<script async defer crossorigin="anonymous"
+  src="https://connect.facebook.net/en_US/sdk.js">
+</script>
+
+					</span>		
+				</span>	
+				
+		</span>
+	</span>
+	
 </head>
 
 <body>
@@ -47,6 +73,45 @@
 			</tr>
 		</table>
 	</div>
+
+	<span th:switch="${channelSelected}" th:remove="tag">
+		<span th:case="'true'" th:remove="tag">
+				<span th:switch="${selectedChannel.channelType}" th:remove="tag">
+					<span th:case="'wacfb'" th:remove="tag">
+
+	<script>
+	  // Facebook Login with JavaScript SDK
+	  function launchWhatsAppSignup() {
+	    // Launch Facebook login
+	    FB.login(function (response) {
+	      if (response.authResponse) {
+	        const accessToken = response.authResponse.accessToken;
+	        //Use this token to call the debug_token API and get the shared WABA's ID
+	      } else {
+	        console.log('User cancelled login or did not fully authorize.');
+	      }
+	    }, {
+	      config_id: '[[${selectedChannel.metaConfigId}]]', // configuration ID obtained in the previous step goes here
+	      response_type: 'code',     // must be set to 'code' for System User access token
+	      override_default_response_type: true,
+	      extras: {
+	        setup: {
+	          channelId :'[[${selectedChannel.id}]]' // Prefilled data can go here
+	        }
+	      }
+	    });
+	  }
+	</script>
+
+	<button onclick="launchWhatsAppSignup()"
+	  style="background-color: #1877f2; border: 0; border-radius: 4px; color: #fff; cursor: pointer; font-family: Helvetica, Arial, sans-serif; font-size: 16px; font-weight: bold; height: 40px; padding: 0 24px;">
+	  Login with Facebook
+	</button>
+
+					</span>		
+				</span>	
+		</span>
+	</span>
 
 	<script type="text/javascript">
 		window.onload = function(){

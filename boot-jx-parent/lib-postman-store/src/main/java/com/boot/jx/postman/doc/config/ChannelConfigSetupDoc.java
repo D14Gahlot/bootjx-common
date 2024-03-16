@@ -23,6 +23,7 @@ public class ChannelConfigSetupDoc implements Serializable {
 	private ContactType contactType;
 
 	private String metaAppId;
+	private String metaConfigId;
 	private String metaAppSecret;
 	private String metaAppVerifyToken;
 
@@ -90,6 +91,14 @@ public class ChannelConfigSetupDoc implements Serializable {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public String getMetaConfigId() {
+		return metaConfigId;
+	}
+
+	public void setMetaConfigId(String metaConfigId) {
+		this.metaConfigId = metaConfigId;
 	}
 
 }
