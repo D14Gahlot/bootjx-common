@@ -73,12 +73,14 @@ public class PMConstants {
 		public static final String SMS = "sms";
 		public static final String OA = "oa";
 		public static final String FIREBASE = "firebase";
-		/** WABA cloud **/
+		/** WABA cloud via 360d **/
 		public static final String WA_360DC = "wac360";
+		/** WABA cloud via FB **/
+		public static final String WACFB = "wacfb";
 	}
 
 	public enum CHANNEL_TYPE_ENUM {
-		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase
+		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase, wacfb
 	}
 
 	public static enum CHAT_STATUS {
