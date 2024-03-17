@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.json.NamedEntityDeserializer.NamedMapModel;
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
+import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.service.AdminService;
 import com.boot.jx.api.ApiResponse;
@@ -137,6 +139,19 @@ public class AdminUserController {
 	@RequestMapping(value = "/api/delete-group-contacts", method = { RequestMethod.POST })
 	public ApiResponse<GroupReqDto, Object> deleteGroups(@RequestBody GroupReqDto reqDto){
 			return ApiResponse.buildResults(adminService.deleteGroups(reqDto));
+		}
+	
+	@RequestMapping(value = "/api/add-update-customer-mast-field", method = { RequestMethod.POST })
+	public ApiResponse<CustomerMasterFieldDto, Object> createAndUpdateCustmerMasterFiled(@RequestBody CustomerMasterFieldDto reqDto){
+		if(StringUtils.isBlank(reqDto.getId())){
+			adminService.checkDupFieldCode(reqDto);
+		}	
+		return ApiResponse.buildResults(adminService.addEditCustomerMastFields(reqDto));
+	}
+	
+	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.GET })
+	public ApiResponse<CustomerMasterFieldDto, Object> fetchCusMasFields(@RequestParam(value = "id", required = false) String id){
+			return ApiResponse.buildResults(adminService.fetchCustomerMstFields(id));
 		}
 
 }
