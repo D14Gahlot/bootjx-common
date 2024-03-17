@@ -23,6 +23,8 @@ import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.cdn.BootJxConfigService;
 
 import gui.ava.html.image.generator.HtmlImageGenerator;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Controller
 public class MediaController {
@@ -39,23 +41,27 @@ public class MediaController {
 	private BootJxConfigService bootJxConfigService;
 
 	@ResponseBody
+
 	@RequestMapping(value = "/media/text/to/image", method = { RequestMethod.POST })
-	public ResponseEntity<byte[]> setupChannelSave(@RequestParam String text)
-			throws FileNotFoundException, IOException {
+	public ResponseEntity<byte[]> setupChannelSave(
+
+			@ApiParam @RequestParam String text) throws FileNotFoundException, IOException {
 
 		File file = File.createTempFile("tmp", ".png");
 //		Converter.convertHTML("<h1>Convert HTML to Image in Java</h1>", ".", new ImageSaveOptions(ImageFormat.Jpeg),
 //				file.getAbsolutePath());
-		
-	    HtmlImageGenerator imageGenerator = new HtmlImageGenerator() {
-	        protected JEditorPane createJEditorPane() {
-	            JEditorPane editor = super.createJEditorPane();
-	            editor.setOpaque(false); // The solution
-	            return editor;
-	        }
-	    };
-	    imageGenerator.loadHtml("<div style='width:400px;background: lightblue url(\"https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_116x41dp.png\") no-repeat fixed center;'>"+text+"</div>");
-	    imageGenerator.saveAsImage(file);
+
+		HtmlImageGenerator imageGenerator = new HtmlImageGenerator() {
+			protected JEditorPane createJEditorPane() {
+				JEditorPane editor = super.createJEditorPane();
+				editor.setOpaque(false); // The solution
+				return editor;
+			}
+		};
+		imageGenerator.loadHtml(
+				"<div style='width:400px;'>"
+						+ text + "</div>");
+		imageGenerator.saveAsImage(file);
 
 		byte[] image = Files.readAllBytes(file.toPath());
 		return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
