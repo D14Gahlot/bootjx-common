@@ -170,9 +170,9 @@ public class ChatSessionManager {
 		}
 		return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
 	}
-	
-	
-	public List<ChatSessionDoc> searchByV1(List<CHAT_STATUS> status, List<QuickTag> tags, long fromStamp, long toStamp) {
+
+	public List<ChatSessionDoc> searchByV1(List<CHAT_STATUS> status, List<QuickTag> tags, long fromStamp,
+			long toStamp) {
 		List<String> newList = new ArrayList<String>();
 		for (QuickTag tag : tags) {
 			newList.add(tag.getId());
@@ -386,6 +386,11 @@ public class ChatSessionManager {
 			return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept,
 					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
 		}
+
+		if (!pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_ORG).asBoolean(false)) {
+			query.add(CHAT_ASSIGN_GROUP.TEAM);
+		}
+
 		return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept,
 				DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 3 / 2);
 	}
