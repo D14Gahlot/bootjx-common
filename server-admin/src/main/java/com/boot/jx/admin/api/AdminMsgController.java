@@ -398,7 +398,7 @@ public class AdminMsgController {
 			query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
 			query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
 			lst = mongoTemplate.find(query,BulkSessionDoc.class);
-			lst =checkNull(lst);
+			//lst =checkNull(lst);
 			return ApiResponse.buildResults(lst);
 		}
 		query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
