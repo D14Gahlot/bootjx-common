@@ -8,14 +8,14 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.model.TimeModels.ITimeStampIndex;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "TEMP_CONFIG_CHANNEL")
 @TypeAlias("ChannelConfigTemp")
-public class ChannelConfigTempDoc implements Serializable {
+public class ChannelConfigTempDoc extends TimeStampDoc implements Serializable {
 
 	private static final long serialVersionUID = -6368905475787041196L;
 
@@ -33,7 +33,7 @@ public class ChannelConfigTempDoc implements Serializable {
 	protected String channelKey;
 
 	private String channelConfigId;
-	
+
 	private Map<String, Object> resp;
 
 	public String getId() {
