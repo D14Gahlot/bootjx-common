@@ -43,7 +43,7 @@ import com.boot.utils.JsonPath;
 import com.boot.utils.StringUtils;
 
 @Component
-public class WacfbClient{
+public class WacfbClient2{
 	@Autowired
 	private RestService restService;
 
