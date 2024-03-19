@@ -90,11 +90,11 @@ public class ChatDTOUtil {
 		messageDto.setTimestamp(messageDoc.getTimestamp());
 		messageDto.setSessionId(messageDoc.getSessionId());
 		messageDto.setMessageId(messageDoc.getMessageId());
-		messageDto.setMessageIdExt(ArgUtil.parseAsString(messageDoc.getMessageIdExt(), Constants.UNDERSCORE));
-		messageDto.setMessageIdRef(ArgUtil.parseAsString(messageDoc.getMessageIdRef(), Constants.UNDERSCORE));
+		messageDto.setMessageIdExt(ArgUtil.parseAsString(messageDoc.getMessageIdExt(), Constants.BLANK));
+		messageDto.setMessageIdRef(ArgUtil.parseAsString(messageDoc.getMessageIdRef(), Constants.BLANK));
 
-		messageDto.setReplyId(ArgUtil.parseAsString(messageDoc.getReplyId(), Constants.UNDERSCORE));
-		messageDto.setReplyIdExt(ArgUtil.parseAsString(messageDoc.getReplyIdExt(), Constants.UNDERSCORE));
+		messageDto.setReplyId(ArgUtil.parseAsString(messageDoc.getReplyId(), Constants.BLANK));
+		messageDto.setReplyIdExt(ArgUtil.parseAsString(messageDoc.getReplyIdExt(), Constants.BLANK));
 		if (ArgUtil.is(messageDoc.getTags())) {
 			messageDto.setTags(messageDoc.getTags());
 		}
@@ -105,7 +105,7 @@ public class ChatDTOUtil {
 			messageDto.setVccards(messageDoc.getVccards());
 		}
 
-		messageDto.setAction(ArgUtil.parseAsString(messageDoc.getAction(), Constants.UNDERSCORE));
+		messageDto.setAction(ArgUtil.parseAsString(messageDoc.getAction(), Constants.BLANK));
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
