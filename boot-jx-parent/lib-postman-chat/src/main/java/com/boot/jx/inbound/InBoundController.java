@@ -170,7 +170,7 @@ public class InBoundController {
 	@RequestMapping(value = "/ext/inbound/v2/{channelType}/callback/{accountKey}", method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> inboundMessageBoxEventAll(@PathVariable(required = false) String channelType,
 			@PathVariable(required = false) String accountKey, @RequestBody Map<String, Object> data) {
-		if (ArgUtil.is(channelType, CHANNEL_TYPE.FACEBOOK, CHANNEL_TYPE.INSTAGRAM)) {
+		if (ArgUtil.is(channelType, CHANNEL_TYPE.FACEBOOK, CHANNEL_TYPE.INSTAGRAM, CHANNEL_TYPE.WACFB)) {
 			MapModel requestMap = MapModel.from(data);
 			FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
 			requestMap.toJson();

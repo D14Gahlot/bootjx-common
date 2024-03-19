@@ -20,11 +20,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.cdn.BootJxConfigService;
+import com.boot.jx.chat.ConnectorHandlerFactory;
+import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
-import com.boot.jx.postman.doc.config.ChannelConfigSetupDoc;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -47,21 +51,29 @@ public class ChannelSetupController {
 	@Autowired(required = false)
 	private BootJxConfigService bootJxConfigService;
 
+	@Autowired
+	private ConnectorHandlerFactory connectorHandlerFactory;
+
+	@Autowired
+	private PMEnvironment pmEnvironment;
+
 	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET })
 	public String setupChannel(@RequestParam(required = false) CHANNEL_TYPE_ENUM channelType,
-			@RequestParam(required = false) String channelConfigId,
+			@RequestParam(required = false) String masterChannelId,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false) String sortBy,
 			@RequestParam(required = false, defaultValue = "asc") String sortDir, Model model)
 			throws FileNotFoundException, IOException {
 
-		List<ChannelConfigSetupDoc> channels = CollectionUtil.asList();
-		MongoQueryBuilder<ChannelConfigSetupDoc> q = MongoQueryBuilder.collection(ChannelConfigSetupDoc.class)
-				.page(pageNo, pageSize);
-		if (ArgUtil.is(channelConfigId)) {
-			q = q.whereIdSafe(channelConfigId);
+		List<ChannelConfigDoc> channels = CollectionUtil.asList();
+		MongoQueryBuilder<ChannelConfigDoc> q = MongoQueryBuilder.collection(ChannelConfigDoc.class).page(pageNo,
+				pageSize);
+		if (ArgUtil.is(masterChannelId)) {
+			q = q.whereIdSafe(masterChannelId);
 		}
+		q.where("isMaster", true);
+		
 		if (ArgUtil.is(channelType)) {
 			q.search("channelType", ArgUtil.parseAsString(channelType));
 		}
@@ -98,19 +110,27 @@ public class ChannelSetupController {
 
 	@ResponseBody
 	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.POST })
-	public MapModel setupChannelSave(@RequestParam String channelConfigId, @RequestBody Map<String, Object> response)
+	public MapModel setupChannelSave(@RequestParam String masterChannelId, @RequestBody Map<String, Object> response)
 			throws FileNotFoundException, IOException {
 		MapModel returnVal = MapModel.createInstance();
 
-		ChannelConfigSetupDoc setup = commonMongoTemplate.findById(channelConfigId, ChannelConfigSetupDoc.class);
-		if (ArgUtil.is(setup)) {
+		ChannelConfig master = pmEnvironment.local().channel(masterChannelId);
+
+		// ChannelConfigSetupDoc setup = commonMongoTemplate.findById(channelConfigId,
+		// ChannelConfigSetupDoc.class);
+		if (ArgUtil.is(master)) {
 			ChannelConfigTempDoc respDoc = new ChannelConfigTempDoc();
-			respDoc.setChannelConfigId(channelConfigId);
+			respDoc.setChannelConfigId(masterChannelId);
 			respDoc.setResp(response);
-			respDoc.setChannelType(setup.getChannelType());
+			respDoc.setChannelType(master.getChannelType());
 			commonMongoTemplate.save(respDoc);
 			returnVal.put("id", respDoc.getId());
+			ConnectorHandler connector = connectorHandlerFactory.get(master.getContactType(), master.getChannelType());
+			if (ArgUtil.is(connector)) {
+				connector.onRegister(master, respDoc);
+			}
 		}
+		
 		return returnVal;
 	}
 

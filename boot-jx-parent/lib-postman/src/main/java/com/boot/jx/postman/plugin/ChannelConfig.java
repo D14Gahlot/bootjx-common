@@ -6,9 +6,6 @@ import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.plugin.OAPlugin.OAConfigDetails;
-
-import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
-
 import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
@@ -16,6 +13,7 @@ import com.boot.jx.postman.plugin.TwitterPlugin.TwitterConfigDetails;
 import com.boot.jx.postman.plugin.WA360CloudPlugin.WA360CloudConfigDetails;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
+import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 
 public class ChannelConfig extends AChannelConfig {
@@ -35,6 +33,7 @@ public class ChannelConfig extends AChannelConfig {
 	private TwilioConfigDetails twilio;
 	private SMSConfigDetails sms;
 	private WA360CloudConfigDetails wa360dc;
+	private WACFBConfigDetails wacfb;
 	private OAConfigDetails oa;
 
 	private boolean isPushAllowed;
@@ -232,6 +231,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setFirebase(FirebaseConfigDetails firebase) {
 		this.firebase = firebase;
+	}
+
+	public WACFBConfigDetails getWacfb() {
+		return wacfb;
+	}
+
+	public void setWacfb(WACFBConfigDetails wacfb) {
+		this.wacfb = wacfb;
 	}
 
 }

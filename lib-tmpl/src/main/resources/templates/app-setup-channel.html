@@ -25,17 +25,17 @@
 				id : '[[${selectedChannel.id}]]',
 				channelType : '[[${selectedChannel.channelType}]]',
 				contactType : '[[${selectedChannel.contactType}]]',
-				title : '[[${selectedChannel.title}]]',
+				title : '[[${selectedChannel.wacfb.masterAppTitle}]]',
 			}
 		});
 	</script>
 	
-				<span th:switch="${selectedChannel.channelType.name()}" th:remove="tag">
+				<span th:switch="${selectedChannel.channelType}" th:remove="tag">
 					<span th:case="'wacfb'" th:remove="tag">
 <script>
   window.fbAsyncInit = function() {
     FB.init({
-      appId            : '[[${selectedChannel.metaAppId}]]',
+      appId            : '[[${selectedChannel.wacfb.masterAppId}]]',
       autoLogAppEvents : true,
       xfbml            : true,
       version          : 'v18.0'
@@ -67,8 +67,9 @@
 		</tr>
 		<tr th:each="channel: ${channels}">
 			<td width="30%"></td>
-		    <td width="40%" style="text-align:center; height: 50px; background-color: rgb(146, 146, 146);" >
-				<a th:href="${'?channelConfigId=' + channel.id}" th:text="${channel.title}">
+		    <td width="40%" style="text-align:center; height: 50px; background-color: rgb(254, 255, 255);" >
+				<a th:href="${'?masterChannelId=' + channel.id}">
+					<span th:text="${channel.name}"></span>
 				</a>
 			</td>
 		    <td width="30%" ></td>
@@ -78,7 +79,7 @@
 
 	<span th:switch="${channelSelected}" th:remove="tag">
 		<span th:case="true" th:remove="tag">
-				<span th:switch="${selectedChannel.channelType.name()}" th:remove="tag">
+				<span th:switch="${selectedChannel.channelType}" th:remove="tag">
 					<span th:case="'wacfb'" th:remove="tag">
 
 	<script>
@@ -88,15 +89,15 @@
 	    FB.login(function (response) {
 			if(window.channel_setup_listner){
 				window.channel_setup_listner({
-					channelType : '[[${selectedChannel.channelType.name()}]]',
-					channelConfigId : '[[${selectedChannel.id}]]',
+					channelType : '[[${selectedChannel.channelType}]]',
+					masterChannelId : '[[${selectedChannel.id}]]',
 					response : response
 				})
 			} else {
 				console.log("channel_setup_listner:response",response)
 			}
 	    }, {
-	      config_id: '[[${selectedChannel.metaConfigId}]]', // configuration ID obtained in the previous step goes here
+	      config_id: '[[${selectedChannel.wacfb.masterAppConfigId}]]', // configuration ID obtained in the previous step goes here
 	      response_type: 'code',     // must be set to 'code' for System User access token
 	      override_default_response_type: true,
 	      extras: {

@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
-import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -26,7 +25,7 @@ public class ChannelConfigTempDoc extends TimeStampDoc implements Serializable {
 	private String domain;
 	private String lane;
 	@Indexed
-	private CHANNEL_TYPE_ENUM channelType;
+	private String channelType;
 	private String channelId;
 
 	@JsonView(PMEnvironment.ProtectedProperty.class)
@@ -60,11 +59,11 @@ public class ChannelConfigTempDoc extends TimeStampDoc implements Serializable {
 		this.lane = lane;
 	}
 
-	public CHANNEL_TYPE_ENUM getChannelType() {
+	public String getChannelType() {
 		return channelType;
 	}
 
-	public void setChannelType(CHANNEL_TYPE_ENUM channelType) {
+	public void setChannelType(String channelType) {
 		this.channelType = channelType;
 	}
 

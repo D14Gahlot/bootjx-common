@@ -29,13 +29,14 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
-import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBDate;
 import com.boot.jx.postman.pbook.PBEmail;
@@ -47,16 +48,14 @@ import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.WA360Plugin;
-import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.plugin.WacfbPlugin;
 import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
-import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
+import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -70,7 +69,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Component
-@ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_360D)
+@ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WACFB)
 public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbPlugin> {
 
 	public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
@@ -90,6 +89,16 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
+
+	public void onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
+
+		MapModel response = restService.ajax("https://graph.facebook.com/v17.0").path("oauth/access_token")
+				.field("client_id", setup.getWacfb().getMasterAppId())
+				.field("client_secret", setup.getWacfb().getMasterAppSecret())
+				.field("code", MapModel.from(channelConfigTemp.getResp()).pathEntry("authResponse.code").asString())
+				.submit().asMapModel();
+
+	}
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
@@ -526,4 +535,3 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	}
 
 }
-

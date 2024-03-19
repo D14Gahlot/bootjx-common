@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.connectors.FacebookConnector;
 import com.boot.jx.connectors.InstagramConnector;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.fb.InstagramClient;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.wacfb.WacfbClient;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.utils.ArgUtil;
 
@@ -44,6 +46,9 @@ public class InBoundControllerFB {
 	private InstagramClient instaClient;
 
 	@Autowired
+	private WacfbClient wacfbClient;
+
+	@Autowired
 	private FacebookConnector facebookConnector;
 
 	@Autowired
@@ -54,6 +59,9 @@ public class InBoundControllerFB {
 
 	@Autowired
 	private CommonHttpRequest commonHttpRequest;
+
+	@Autowired
+	private CommonMongoTemplate commonMongoTemplate;
 
 	@RequestMapping(value = { "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}",
 			"/ext/inbound/v2/fb/callback/{accountKey}" }, method = RequestMethod.GET)
@@ -84,6 +92,22 @@ public class InBoundControllerFB {
 		}
 		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 		return instaClient.registerWebhook(channelConfig, token, challenge);
+	}
+
+	@RequestMapping(value = { "/ext/inbound/wacfb/callback",
+			"/ext/inbound/v2/wacfb/callback/{accountKey}/{channelId}/{channelKey}",
+			"/ext/inbound/v2/wacfb/callback/{accountKey}" }, method = RequestMethod.GET)
+	public Object getWA(@RequestParam(name = "hub.verify_token") String token,
+			@RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,
+			@RequestHeader(required = false, value = "X-Hub-Signature") String signature,
+			// V2Params
+			@PathVariable(required = false) String channelType, @PathVariable(required = false) String accountKey,
+			@PathVariable(required = false) String channelId, @PathVariable(required = false) String channelKey) {
+		if (!ArgUtil.is(channelId)) {
+			channelId = commonHttpRequest.getRequestParam("channelId");
+		}
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		return wacfbClient.registerWebhook(channelConfig, token, challenge);
 	}
 
 	@Deprecated
