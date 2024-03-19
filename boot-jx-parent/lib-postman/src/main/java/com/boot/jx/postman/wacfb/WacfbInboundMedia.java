@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WACFBInboundMedia2 {
+public class WACFBInboundMedia {
 
     @Deprecated
     @ApiMockModelProperty(example = "/file/of/vdo", value = "absolute-filepath-on-coreapp", hidden = true)
