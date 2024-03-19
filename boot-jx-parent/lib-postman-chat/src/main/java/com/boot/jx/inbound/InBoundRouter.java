@@ -2,6 +2,7 @@ package com.boot.jx.inbound;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -15,11 +16,13 @@ import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.logger.AuditService;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMAuditEvent;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.MessageStore;
@@ -66,6 +69,9 @@ public class InBoundRouter {
 	@Autowired
 	private RestService restService;
 
+	@Autowired
+	private CommonMongoTemplate commonMongoTemplate;
+
 	public void inboundMessageEvent(String channelId, Map<String, Object> data) {
 		MapModel map = MapModel.from(data);
 		PMConfiguration config = pmEnvironment.config();
@@ -80,17 +86,27 @@ public class InBoundRouter {
 		try {
 			MessageBoxEvent messageBoxEvent = connector.inboundMessageBoxEvent(channelConfig, map,
 					new MessageBoxEvent());
-			if (ArgUtil.is(messageBoxEvent.getInboxMessages())) {
+			if (ArgUtil.is(messageBoxEvent) && ArgUtil.is(messageBoxEvent.getInboxMessages())) {
 				messageBoxEvent.getInboxMessages().forEach(inboxMessage -> {
 					connector.prompt(inboxMessage);
 					inBoundService.pushMessageToInvokeAsync(inboxMessage);
 				});
 				connector.onReceiveInboxMessage(messageBoxEvent.getInboxMessages());
-			} else if (ArgUtil.is(messageBoxEvent.getMessageReports())) {
+			} else if (ArgUtil.is(messageBoxEvent) && ArgUtil.is(messageBoxEvent.getMessageReports())) {
 				connector.onMessageReports(messageBoxEvent.getMessageReports());
 				inBoundStatusService.update(messageBoxEvent.getMessageReports());
 			} else if (ArgUtil.is(channelConfig.getUnhandledInboundForward())) {
 				restService.ajax(channelConfig.getUnhandledInboundForward()).post(data).asNone();
+			} else {
+				PayloadDumpCollection d = new PayloadDumpCollection();
+				d.setType("UNHANDLED_INBOX_EVENT");
+				if (ArgUtil.is(channelConfig)) {
+					d.setContactType(channelConfig.getContactType());
+					d.setChannelType(channelConfig.getChannelType());
+					d.setChannelId(channelConfig.getChannelId());
+				}
+				d.setDump(data);
+				commonMongoTemplate.save(d);
 			}
 
 		} catch (Exception e) {

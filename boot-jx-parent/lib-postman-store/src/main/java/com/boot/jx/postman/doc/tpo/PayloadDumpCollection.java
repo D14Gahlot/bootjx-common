@@ -1,19 +1,37 @@
 package com.boot.jx.postman.doc.tpo;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.dict.ContactType;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampDoc;
+
 @Document(collection = "PAYLOAD_DUMP")
-public class PayloadDumpCollection {
+public class PayloadDumpCollection extends UpdatedTimeStampDoc implements Serializable {
+
+	private static final long serialVersionUID = -2060292937777425005L;
 
 	@Id
 	private String dumpId;
 
 	@Indexed
 	private String type;
+
+	@Indexed
+	private ContactType contactType;
+
+	@Indexed
+	private String channelType;
+
+	@Indexed
+	private String channelId;
+
+	private Map<String, Object> dump;
 
 	List<Object> incomingRequest;
 
@@ -39,6 +57,38 @@ public class PayloadDumpCollection {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public ContactType getContactType() {
+		return contactType;
+	}
+
+	public void setContactType(ContactType contactType) {
+		this.contactType = contactType;
+	}
+
+	public String getChannelType() {
+		return channelType;
+	}
+
+	public void setChannelType(String channelType) {
+		this.channelType = channelType;
+	}
+
+	public String getChannelId() {
+		return channelId;
+	}
+
+	public void setChannelId(String channelId) {
+		this.channelId = channelId;
+	}
+
+	public Map<String, Object> getDump() {
+		return dump;
+	}
+
+	public void setDump(Map<String, Object> dump) {
+		this.dump = dump;
 	}
 
 }
