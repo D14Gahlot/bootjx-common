@@ -6,7 +6,7 @@ import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WACFBOutBoundMedia implements Serializable {
+public class WacfbOutBoundMedia implements Serializable {
 
     private static final long serialVersionUID = -654441367316876851L;
 

@@ -71,11 +71,11 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WA_360D)
-public class WACFbConnector extends AbstractConnector<WACFBConfigDetails, WacfbPlugin> {
+public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbPlugin> {
 
 	public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(WACFbConnector.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WacfbConnector.class);
 	@Autowired
 	private RestService restService;
 
