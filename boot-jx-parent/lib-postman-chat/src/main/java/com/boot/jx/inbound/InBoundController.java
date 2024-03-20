@@ -31,8 +31,11 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
+import com.boot.jx.postman.PMConfiguration;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
+import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -40,6 +43,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
@@ -69,6 +73,9 @@ public class InBoundController {
 
 	@Autowired
 	private InBoundRouter inBoundRouter;
+
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
@@ -211,6 +218,64 @@ public class InBoundController {
 				}
 
 			});
+		}
+		return ApiResponse.build();
+	}
+
+	@RequestMapping(value = "/ext/inbound/v3/{channelType}/callback/{accountKey}/{channelId}/{channelKey}",
+			method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> inboundMessageBoxEventV3(@PathVariable(required = false) String channelType,
+			@PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
+			@PathVariable(required = false) String channelKey, @RequestBody Map<String, Object> data) {
+		if (ArgUtil.is(channelType, CHANNEL_TYPE.FACEBOOK, CHANNEL_TYPE.INSTAGRAM, CHANNEL_TYPE.WACFB)) {
+			MapModel requestMap = MapModel.from(data);
+			FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
+			requestMap.toJson();
+			request.getEntry().forEach(pageEntry -> {
+
+				MapModel newData = MapModel.createInstance();
+				newData.put("object", request.getObject());
+				ArrayList<Object> entry = new ArrayList<Object>();
+				entry.add(JsonUtil.toJsonMap(pageEntry));
+				newData.put("entry", entry);
+
+				String pageId = pageEntry.getId();
+				if (ArgUtil.is(channelType, CHANNEL_TYPE.WACFB)) {
+					pageId = MapModel.from(pageEntry.getChanges().get(0))
+							.path(FacebookConstants.WABAPaths.DISPLAY_PHONE_NUMBER).asString();
+				}
+
+				List<ChannelConfigDupsDoc> channels = channelList.getIfPresent(pageId);
+				if (!ArgUtil.is(channels) || channels.size() < 1) {
+					channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
+							.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted")
+									.is(false).and("channelType").is(channelType)));
+					if (ArgUtil.is(channels)) {
+						channelList.put(pageId, channels);
+					}
+				}
+				if (ArgUtil.is(channels)) {
+					for (ChannelConfigDupsDoc channel : channels) {
+						try {
+							AppContextUtil.clear();
+							AppContextUtil.setTenant(channel.getDomain());
+							AppContextUtil.init();
+							inBoundRouter.inboundMessageEventAsync(channel.getChannelId(), newData.map());
+							AppContextUtil.clear();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				} else if (ArgUtil.is(pageId)) {
+					String channelIdForDomain = PostManUtil.CHANNEL_ID(channelType, pageId);
+					inBoundRouter.inboundMessageEventAsync(channelIdForDomain, newData.map());
+				} else {
+					inBoundRouter.inboundMessageEventAsync(channelId, newData.map());
+				}
+
+			});
+		} else {
+			inBoundRouter.inboundMessageEvent(PostManUtil.CHANNEL_ID_DECODED(channelId), data);
 		}
 		return ApiResponse.build();
 	}

@@ -54,8 +54,7 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 		@Override
 		public String getLane() {
-			// TODO Auto-generated method stub
-			return null;
+			return number;
 		}
 
 		public String getNumber() {
@@ -142,49 +141,41 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 	@Override
 	public WACFBConfigDetails newChannelDetails() {
-		// TODO Auto-generated method stub
-		return null;
+		return new WACFBConfigDetails();
 	}
 
 	@Override
 	public void setDetails(ChannelConfig config, WACFBConfigDetails details) {
-		// TODO Auto-generated method stub
-
+		config.setWacfb(details);
 	}
 
 	@Override
 	public WACFBConfigDetails getDetails(ChannelConfig config) {
-		// TODO Auto-generated method stub
-		return null;
+		return config.getWacfb();
 	}
 
 	@Override
 	public boolean isPushAllowed() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isPushOnlyApproved() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isPushFreeTextAllowed() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isPushToNewContactAllowed() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isWebhookManual() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

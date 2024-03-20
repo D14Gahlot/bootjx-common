@@ -94,9 +94,12 @@ public class InBoundControllerFB {
 		return instaClient.registerWebhook(channelConfig, token, challenge);
 	}
 
-	@RequestMapping(value = { "/ext/inbound/wacfb/callback",
-			"/ext/inbound/v2/wacfb/callback/{accountKey}/{channelId}/{channelKey}",
-			"/ext/inbound/v2/wacfb/callback/{accountKey}" }, method = RequestMethod.GET)
+	@RequestMapping(
+			value = { "/ext/inbound/wacfb/callback",
+					"/ext/inbound/v2/wacfb/callback/{accountKey}/{channelId}/{channelKey}",
+					"/ext/inbound/v2/wacfb/callback/{accountKey}",
+					"/ext/inbound/v3/wacfb/callback/{accountKey}/{channelId}/{channelKey}", },
+			method = RequestMethod.GET)
 	public Object getWA(@RequestParam(name = "hub.verify_token") String token,
 			@RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,
 			@RequestHeader(required = false, value = "X-Hub-Signature") String signature,
