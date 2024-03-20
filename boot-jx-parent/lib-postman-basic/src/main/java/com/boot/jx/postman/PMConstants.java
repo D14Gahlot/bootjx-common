@@ -231,6 +231,35 @@ public class PMConstants {
 		return CHANNEL_TYPE(ArgUtil.parseAsString(contactType), channel);
 	}
 
+	public static ContactType CONTACT_TYPE(String channel) {
+		if (!ArgUtil.is(channel)) {
+			return ContactType.WEBSITE;
+		}
+		switch (channel) {
+		case CHANNEL_TYPE.WA_360D:
+		case CHANNEL_TYPE.WA_360DC:
+		case CHANNEL_TYPE.WA_GUPSHUP:
+		case CHANNEL_TYPE.WA_GUPSHUP_LEGACY:
+		case CHANNEL_TYPE.WACFB:
+			return ContactType.WHATSAPP;
+		case CHANNEL_TYPE.FACEBOOK:
+			return ContactType.FACEBOOK;
+		case CHANNEL_TYPE.INSTAGRAM:
+			return ContactType.INSTAGRAM;
+		case CHANNEL_TYPE.TWITTER:
+			return ContactType.TWITTER;
+		case CHANNEL_TYPE.WEB:
+			return ContactType.WEBSITE;
+		case CHANNEL_TYPE.SMS:
+		case CHANNEL_TYPE.SMS_TWILIO:
+			return ContactType.SMS;
+		case CHANNEL_TYPE.EMAIL:
+			return ContactType.EMAIL;
+		default:
+			return ContactType.WEBSITE;
+		}
+	}
+
 	public static class CHAT_SESSION_ACTIONS {
 		public static final String ADD_STICKY_NOTE = "ADD_STICKY_NOTE";
 		public static final String RESOLVE = "RESOLVE";

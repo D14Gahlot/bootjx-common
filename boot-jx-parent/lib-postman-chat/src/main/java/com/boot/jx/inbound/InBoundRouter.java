@@ -2,7 +2,6 @@ package com.boot.jx.inbound;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -23,7 +22,9 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
+import com.boot.jx.postman.manager.ConfigManager;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -70,6 +71,9 @@ public class InBoundRouter {
 	private RestService restService;
 
 	@Autowired
+	private ConfigManager configManager;
+
+	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
 	public void inboundMessageEvent(String channelId, Map<String, Object> data) {
@@ -77,6 +81,12 @@ public class InBoundRouter {
 		PMConfiguration config = pmEnvironment.config();
 		ChannelConfig channelConfig = config.channel(channelId);
 
+		if (!ArgUtil.is(channelConfig)) {
+			Contactable c = PostManUtil.parseChannelId(channelId);
+			channelConfig = configManager.saveChannelConfig(c.getChannelType(),
+					MapModel.createInstance().put("channelId", channelId).put("lane", c.getLane()).toMap());
+
+		}
 		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 
 		if (!ArgUtil.is(connector)) {
@@ -95,7 +105,7 @@ public class InBoundRouter {
 			} else if (ArgUtil.is(messageBoxEvent) && ArgUtil.is(messageBoxEvent.getMessageReports())) {
 				connector.onMessageReports(messageBoxEvent.getMessageReports());
 				inBoundStatusService.update(messageBoxEvent.getMessageReports());
-			} else if (ArgUtil.is(channelConfig.getUnhandledInboundForward())) {
+			} else if (ArgUtil.is(channelConfig) && ArgUtil.is(channelConfig.getUnhandledInboundForward())) {
 				restService.ajax(channelConfig.getUnhandledInboundForward()).post(data).asNone();
 			} else {
 				PayloadDumpCollection d = new PayloadDumpCollection();

@@ -3,13 +3,14 @@ package com.boot.jx.postman.fb;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FacebookEntry implements Serializable {
 	private static final long serialVersionUID = 4844872478399699245L;
 	private String id;
 	private Long time;
 	private List<FacebookMessaging> messaging = new ArrayList<>();
-	private List<Object> changes = new ArrayList<>();
+	private List<Map<String,Object>> changes = new ArrayList<>();
 
 	public String getId() {
 		return id;
@@ -35,11 +36,11 @@ public class FacebookEntry implements Serializable {
 		this.messaging = messaging;
 	}
 
-	public List<Object> getChanges() {
+	public List<Map<String,Object>> getChanges() {
 		return changes;
 	}
 
-	public void setChanges(List<Object> changes) {
+	public void setChanges(List<Map<String,Object>> changes) {
 		this.changes = changes;
 	}
 }

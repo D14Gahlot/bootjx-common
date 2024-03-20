@@ -35,9 +35,8 @@ import com.boot.utils.ArgUtil;
 
 @SuppressWarnings("unchecked")
 public class ChannelPluginProvider {
-	
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChannelPluginProvider.class);
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChannelPluginProvider.class);
 
 	public static interface ChannelPlugin<C extends AChannelDetails> extends ChannelTypeSpecificProps {
 		/**
@@ -63,7 +62,7 @@ public class ChannelPluginProvider {
 		public default ChannelConfig updateChannelConfig(ChannelConfig config, AChannelDetails details) {
 			updatePluginSpecs(config);
 			// Channel Specific Properties
-			config.setLane(details.getLane().replaceAll("[^a-zA-Z0-9\\_]+", ""));
+			config.setLane(ArgUtil.nonEmpty(details.getLane(), config.getLane()).replaceAll("[^a-zA-Z0-9\\_]+", ""));
 
 			setDetails(config, (C) details);
 			return config;

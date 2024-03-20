@@ -251,20 +251,24 @@ public class ConfigManagerImpl implements ConfigManager {
 		return null;
 	}
 
+	@Override
 	public void save(ChannelConfig config) {
 		pmEnvironment.addChannel(config);
 		this.refresh();
 		connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
 	}
 
+	@Override
 	public ChannelConfig saveChannelConfig(String channelType, Map<String, Object> data) {
 		MapModel map = MapModel.from(data);
 		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
 		String channelId = map.getString("channelId");
+		String lane = map.getString("lane");
 		if (ArgUtil.is(data)) {
 			ChannelConfig config = pmEnvironment.local().channel(channelId);
 			if (config == null) {
 				config = new ChannelConfig();
+				config.setLane(lane);
 			}
 			plugin.importChannelConfigFromMap(config, map, channelType);
 			save(config);
