@@ -59,6 +59,7 @@ public class WacfbClient {
 		}
 	}
 
+	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
 	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		StringJoiner msgIds = new StringJoiner(",");
 
