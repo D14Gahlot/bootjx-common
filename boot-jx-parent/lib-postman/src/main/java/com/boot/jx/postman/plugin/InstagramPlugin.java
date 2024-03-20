@@ -7,8 +7,8 @@ import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
+import com.boot.jx.postman.plugin.FacebookPlugin.MetaMasterConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -25,7 +25,7 @@ public class InstagramPlugin implements DefaultChannelPlugin<InstagramConfig> {
 		return CHANNEL_TYPE.INSTAGRAM;
 	}
 
-	public static class InstagramConfig extends AChannelDetails {
+	public static class InstagramConfig extends MetaMasterConfigDetails {
 
 		private static final long serialVersionUID = -2397678752642150000L;
 		@ConfigMetaProperty(path = "instagram.pageId", title = "Instagram Id", createonly = true)

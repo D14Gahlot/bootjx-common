@@ -7,8 +7,8 @@ import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
+import com.boot.jx.postman.plugin.FacebookPlugin.MetaMasterConfigDetails;
 import com.fasterxml.jackson.annotation.JsonView;
 
 public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails> {
@@ -22,21 +22,16 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 		return ContactType.WHATSAPP;
 	}
 
-	public static class WACFBConfigDetails extends AChannelDetails {
+	public static class WACFBConfigDetails extends MetaMasterConfigDetails {
 
 		private static final long serialVersionUID = 5956062194604118502L;
-
-		private String masterAppTitle;
-		private String masterAppId;
-		private String masterAppConfigId;
-		private String masterAppSecret;
-		private String masterAppVerifyToken;
 
 		@ConfigMetaProperty(path = "wacfb.number", title = "Number", createonly = true,
 				desc = "Enter WABA number with country code")
 		private String number;
 
-		@ConfigMetaProperty(path = "wa3cfb.acessToken", title = "Acess Token", writeonly = true, desc = "Enter Your WABA Key")
+		@ConfigMetaProperty(path = "wa3cfb.acessToken", title = "Acess Token", writeonly = true,
+				desc = "Enter Your WABA Key")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String acessToken;
 
@@ -95,46 +90,6 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 		public void setPromptName(boolean promptName) {
 			this.promptName = promptName;
-		}
-
-		public String getMasterAppTitle() {
-			return masterAppTitle;
-		}
-
-		public void setMasterAppTitle(String masterAppTitle) {
-			this.masterAppTitle = masterAppTitle;
-		}
-
-		public String getMasterAppId() {
-			return masterAppId;
-		}
-
-		public void setMasterAppId(String masterAppId) {
-			this.masterAppId = masterAppId;
-		}
-
-		public String getMasterAppConfigId() {
-			return masterAppConfigId;
-		}
-
-		public void setMasterAppConfigId(String masterAppConfigId) {
-			this.masterAppConfigId = masterAppConfigId;
-		}
-
-		public String getMasterAppSecret() {
-			return masterAppSecret;
-		}
-
-		public void setMasterAppSecret(String masterAppSecret) {
-			this.masterAppSecret = masterAppSecret;
-		}
-
-		public String getMasterAppVerifyToken() {
-			return masterAppVerifyToken;
-		}
-
-		public void setMasterAppVerifyToken(String masterAppVerifyToken) {
-			this.masterAppVerifyToken = masterAppVerifyToken;
 		}
 
 	}
