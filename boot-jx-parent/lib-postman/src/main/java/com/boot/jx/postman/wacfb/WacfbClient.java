@@ -30,12 +30,10 @@ import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
-import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.wa360.WA360Constants;
+import com.boot.jx.postman.wa360.WA360OutBoundMedia;
 import com.boot.jx.postman.wa360.WA360Constants.OutBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360Constants.TmplComponent;
-import com.boot.jx.postman.wa360.WA360OutBoundMedia;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -48,16 +46,6 @@ import com.boot.utils.StringUtils;
 public class WacfbClient{
 	@Autowired
 	private RestService restService;
-	
-	public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
-		WACFBConfigDetails config = channelConfig.getWacfb();
-		String verifyToken = config.getMasterAppVerifyToken();
-		if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
-			return challenge;
-		} else {
-			return "Wrong Token";
-		}
-	}
 
 	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
 	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
@@ -790,7 +778,5 @@ public class WacfbClient{
 		*/
 		return send(req, channelConfig);
 	}
-
-
 }
 
