@@ -36,9 +36,9 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 				desc = "Enter WABA number with country code")
 		private String number;
 
-		@ConfigMetaProperty(path = "wa3cfb.apiKey", title = "API Key", writeonly = true, desc = "Enter Your WABA Key")
+		@ConfigMetaProperty(path = "wa3cfb.acessToken", title = "Acess Token", writeonly = true, desc = "Enter Your WABA Key")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
-		private String apiKey;
+		private String acessToken;
 
 		@ConfigMetaProperty(path = "wacfb.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
@@ -66,12 +66,12 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 			this.number = number;
 		}
 
-		public String getApiKey() {
-			return apiKey;
+		public String getAcessToken() {
+			return acessToken;
 		}
 
-		public void setApiKey(String apiKey) {
-			this.apiKey = apiKey;
+		public void setAcessToken(String acessToken) {
+			this.acessToken = acessToken;
 		}
 
 		public boolean isPromptEmail() {
