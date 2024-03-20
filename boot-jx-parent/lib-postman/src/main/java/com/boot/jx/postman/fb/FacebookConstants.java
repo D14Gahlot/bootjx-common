@@ -27,6 +27,7 @@ public class FacebookConstants {
 	}
 
 	public static class WABAPaths {
+		public static final JsonPath CHANGES = new JsonPath("entry/[0]/changes");
 		public static final JsonPath DISPLAY_PHONE_NUMBER = new JsonPath("value/metadata/display_phone_number");
 		public static final JsonPath PHONE_NUMBER_ID = new JsonPath("value/metadata/phone_number_id");
 	}

@@ -30,6 +30,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -463,33 +464,39 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
 		LOGGER.info("IN message {DR}" + requestMap);
-		if (requestMap.containsKey("messages")) {
-			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
-		} else if (requestMap.containsKey("statuses")) {
-			List<Map<String, Object>> statusMaps = requestMap.keyEntry("statuses").asListOfMap();
-			for (Map<String, Object> statusMap : statusMaps) {
-				MapModel statusModel = MapModel.from(statusMap);
-				MessageReport reprt = toMessageReport(channelConfig, statusModel);
-				messageBoxEvent.addMessageReport(reprt);
-				if (Status.SENTX.equals(reprt.getStatus())) {
-					Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
-					if (ArgUtil.is(conversation)) {
-						String id = String.format("%s_%s", channelConfig.getChannelId(), conversation.get("id"));
-						WABAConversationQuery query = new WABAConversationQuery(id);
-						query.setContact(reprt.contact());
-						query.setConversation(conversation);
-						query.setPricing(statusModel.keyEntry("pricing").asMap());
-						query.set("meta.to_country", getCountryCode(reprt.contact().getCsid()));
-						commonMongoTemplate.upsert(query);
-						reprt.setTpMeta(
-								MapModel.createInstance().put("ccwExpiry", conversation.get("expiration_timestamp"))
-										.put("wabaConvesationId", id).toMap());
 
+		List<Map<String, Object>> changes = requestMap.path(FacebookConstants.WABAPaths.CHANGES).asListOfMap();
+
+		changes.forEach(change -> {
+			MapModel changeMap = MapModel.from(change).keyEntry("value").asMapModel();
+
+			if (changeMap.containsKey("messages")) {
+				messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, changeMap));
+			} else if (changeMap.containsKey("statuses")) {
+				List<Map<String, Object>> statusMaps = changeMap.keyEntry("statuses").asListOfMap();
+				for (Map<String, Object> statusMap : statusMaps) {
+					MapModel statusModel = MapModel.from(statusMap);
+					MessageReport reprt = toMessageReport(channelConfig, statusModel);
+					messageBoxEvent.addMessageReport(reprt);
+					if (Status.SENTX.equals(reprt.getStatus())) {
+						Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
+						if (ArgUtil.is(conversation)) {
+							String id = String.format("%s_%s", channelConfig.getChannelId(), conversation.get("id"));
+							WABAConversationQuery query = new WABAConversationQuery(id);
+							query.setContact(reprt.contact());
+							query.setConversation(conversation);
+							query.setPricing(statusModel.keyEntry("pricing").asMap());
+							query.set("meta.to_country", getCountryCode(reprt.contact().getCsid()));
+							commonMongoTemplate.upsert(query);
+							reprt.setTpMeta(
+									MapModel.createInstance().put("ccwExpiry", conversation.get("expiration_timestamp"))
+											.put("wabaConvesationId", id).toMap());
+
+						}
 					}
 				}
 			}
-		}
-
+		});
 		return messageBoxEvent;
 	}
 
