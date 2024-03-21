@@ -658,15 +658,17 @@ public class WacfbClient {
 
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
 		try {
-			StringReader stringReader=new StringReader(channelConfig.getWacfb().getAcessToken());
-			MapModel resp = restService.ajax(WacfbConstants.BASE_URL).path(WacfbConstants.Version +channelConfig.getWacfb().getPhoneNumberId()+"/messages")
-					.authorization(stringReader).post(req.toMap())
-					.asMapModel();
+			StringReader stringReader = new StringReader(
+					channelConfig.getWacfb().getAcessToken());
+			MapModel resp = restService.ajax("https://graph.facebook.com/v17.0")
+					.path(channelConfig.getWacfb().getPhoneNumberId()+"/messages").authorization(stringReader)
+					.post(req.toMap()).asMapModel();
 			return resp;
 		} catch (ApiHttpServerException e) {
 			throw e;
-//			return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
-//					e.getHttpStatus().value());
+			// return
+			// MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
+			// e.getHttpStatus().value());
 		} catch (ApiHttpException e) {
 			return MapModel.from(e.getResponse().getBody());
 		}
