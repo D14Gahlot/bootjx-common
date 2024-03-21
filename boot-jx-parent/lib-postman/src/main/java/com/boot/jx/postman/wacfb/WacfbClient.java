@@ -1,5 +1,6 @@
 package com.boot.jx.postman.wacfb;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -657,8 +658,9 @@ public class WacfbClient {
 
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
 		try {
+			StringReader stringReader=new StringReader(channelConfig.getWacfb().getAcessToken());
 			MapModel resp = restService.ajax(WacfbConstants.BASE_URL).path(WacfbConstants.Version +channelConfig.getWacfb().getPhoneNumberId()+"/messages")
-					.authorization(WacfbConstants.ACCESS_TOKEN,channelConfig.getWacfb().getAcessToken()).post(req.toMap())
+					.authorization(stringReader).post(req.toMap())
 					.asMapModel();
 			return resp;
 		} catch (ApiHttpServerException e) {
