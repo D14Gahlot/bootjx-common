@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
@@ -41,6 +42,7 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 
@@ -256,6 +258,18 @@ public class ConfigManagerImpl implements ConfigManager {
 		pmEnvironment.addChannel(config);
 		this.refresh();
 		connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
+	}
+
+	@Override
+	@Async
+	public void saveForDomain(ChannelConfig config, String domain) {
+		AppContextUtil.clear();
+		AppContextUtil.setTenant(domain);
+		AppContextUtil.init();
+		Map<String, Object> map = JsonUtil.toMap(config);
+		map.remove("id");
+		map.remove("channelId");
+		this.saveChannelConfig(config.getChannelType(), map);
 	}
 
 	@Override

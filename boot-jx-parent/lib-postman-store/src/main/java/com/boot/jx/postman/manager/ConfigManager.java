@@ -13,4 +13,12 @@ public interface ConfigManager {
 	void save(ChannelConfig config);
 
 	ChannelConfig saveChannelConfig(String channelType, Map<String, Object> data);
+
+	/**
+	 * This mehthod will add channel for specidfied domain, in asyn manner
+	 * 
+	 * @param config
+	 * @param domain
+	 */
+	void saveForDomain(ChannelConfig config, String domain);
 }
