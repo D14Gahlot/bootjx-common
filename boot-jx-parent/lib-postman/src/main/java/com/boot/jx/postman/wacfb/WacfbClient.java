@@ -1,6 +1,5 @@
 package com.boot.jx.postman.wacfb;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -554,7 +553,7 @@ public class WacfbClient {
 		try {
 			MapModel resp = restService.ajax("https://graph.facebook.com/v17.0")
 					.path(channelConfig.getWacfb().getPhoneNumberId() + "/messages")
-					.authBearer(channelConfig.getWacfb().getAcessToken()).post(req.toMap()).asMapModel();
+					.authBearer(channelConfig.getWacfb().getAccessToken()).post(req.toMap()).asMapModel();
 			return resp;
 		} catch (ApiHttpServerException e) {
 			throw e;

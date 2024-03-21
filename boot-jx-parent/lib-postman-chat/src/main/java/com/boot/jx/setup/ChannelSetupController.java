@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.cdn.BootJxConfigService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
@@ -33,7 +33,6 @@ import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.manager.ConfigManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -71,6 +70,7 @@ public class ChannelSetupController {
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET })
 	public String setupChannel(@RequestParam(required = false) CHANNEL_TYPE_ENUM channelType,
+			@RequestParam(required = false) ContactType contactType,
 			@RequestParam(required = false) String masterChannelId,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
@@ -95,6 +95,9 @@ public class ChannelSetupController {
 
 		if (ArgUtil.is(channelType)) {
 			q.search("channelType", ArgUtil.parseAsString(channelType));
+		}
+		if (ArgUtil.is(contactType)) {
+			q.search("contactType", ArgUtil.parseAsString(contactType));
 		}
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));

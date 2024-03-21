@@ -18,6 +18,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.AmxApiException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -65,6 +66,7 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.PhoneUtil;
 import com.boot.utils.Urly;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -94,12 +96,48 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
-		MapModel response = restService.ajax("https://graph.facebook.com/v17.0").path("oauth/access_token")
-				.field("client_id", setup.getWacfb().getMasterAppId())
-				.field("client_secret", setup.getWacfb().getMasterAppSecret())
-				.field("code", MapModel.from(channelConfigTemp.getResp()).pathEntry("authResponse.code").asString())
-				.submit().asMapModel();
-		channelConfigTemp.log("oauth/access_token", response.toMap());
+		try {
+			MapModel accessToken = restService.ajax("https://graph.facebook.com/v18.0").path("/oauth/access_token")
+					.field("client_id", setup.getWacfb().getMasterAppId())
+					.field("client_secret", setup.getWacfb().getMasterAppSecret())
+					.field("code", MapModel.from(channelConfigTemp.getResp()).pathEntry("authResponse.code").asString())
+					.submit().asMapModel();
+			channelConfigTemp.log("oauth/access_token", accessToken.toMap());
+
+			String userAccessToken = accessToken.keyEntry("access_token").asString();
+
+			MapModel debugToken = restService.ajax("https://graph.facebook.com/v18.0").path("/debug_token")
+					.queryParam("input_token", userAccessToken)
+					.authBearer(setup.getWacfb().getMasterAppId() + "|" + setup.getWacfb().getMasterAppSecret()).get()
+					.asMapModel();
+			channelConfigTemp.log("/debug_token", debugToken.toMap());
+
+			String assignedBusinessid = debugToken.pathEntry("/data/granular_scopes/[0]/target_ids/[0]").asString();
+
+			MapModel phoneNumbers = restService.ajax("https://graph.facebook.com/v18.0/").path(assignedBusinessid)
+					.path("/phone_numbers")
+					.authBearer(userAccessToken)
+//					.queryParam("fields",
+//							"display_phone_number,certificate,name_status,new_certificate,new_name_status")
+					.get().asMapModel();
+			channelConfigTemp.log("/phone_numbers", debugToken.toMap());
+
+			phoneNumbers.keyEntry("data").asListOfMap().forEach(phone -> {
+				MapModel phoneMap = MapModel.from(phone);
+				ChannelConfig channel = new ChannelConfig();
+				channel.setWacfb(new WACFBConfigDetails());
+				channel.getWacfb().setAccessToken(userAccessToken);
+				channel.getWacfb()
+						.setNumber(PhoneUtil.phone(phoneMap.keyEntry("display_phone_number").asString()));
+				channel.getWacfb().setPhoneNumberId(phoneMap.keyEntry("id").asString());
+				channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
+				channel.setName(phoneMap.keyEntry("verified_name").asString());
+				channels.add(channel);
+			});
+
+		} catch (ApiHttpException e) {
+			channelConfigTemp.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
+		}
 		commonMongoTemplate.save(channelConfigTemp);
 		return channels;
 	}
