@@ -18,12 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.cdn.BootJxConfigService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
-import com.boot.jx.filter.AppRequestUtil;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
@@ -32,7 +31,9 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.manager.ConfigManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -64,6 +65,9 @@ public class ChannelSetupController {
 	@Autowired
 	private CommonHttpRequest commonHttpRequest;
 
+	@Autowired
+	private ConfigManager configManager;
+
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET })
 	public String setupChannel(@RequestParam(required = false) CHANNEL_TYPE_ENUM channelType,
@@ -73,12 +77,13 @@ public class ChannelSetupController {
 			@RequestParam(required = false) String sortBy,
 			@RequestParam(required = false, defaultValue = "asc") String sortDir, Model model)
 			throws FileNotFoundException, IOException {
-		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getSubDomain());
-		
-		System.out.println("tnt="+AppContextUtil.getTenant());
-		System.out.println("domainName="+domainName);
-		System.out.println("header:tnt="+commonHttpRequest.get("tnt"));
-		System.out.println("tnt="+AppContextUtil.getTenant());
+		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),
+				commonHttpRequest.getSubDomain());
+
+		// System.out.println("tnt="+AppContextUtil.getTenant());
+		// System.out.println("domainName="+domainName);
+		// System.out.println("header:tnt="+commonHttpRequest.get("tnt"));
+		// System.out.println("tnt="+AppContextUtil.getTenant());
 
 		List<ChannelConfigDoc> channels = CollectionUtil.asList();
 		MongoQueryBuilder<ChannelConfigDoc> q = MongoQueryBuilder.collection(ChannelConfigDoc.class).page(pageNo,
@@ -123,11 +128,13 @@ public class ChannelSetupController {
 	}
 
 	@ResponseBody
+	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.POST })
 	public MapModel setupChannelSave(@RequestParam String masterChannelId, @RequestBody Map<String, Object> response)
 			throws FileNotFoundException, IOException {
+		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),
+				commonHttpRequest.getSubDomain());
 		MapModel returnVal = MapModel.createInstance();
-
 		ChannelConfig master = pmEnvironment.local().channel(masterChannelId);
 
 		// ChannelConfigSetupDoc setup = commonMongoTemplate.findById(channelConfigId,
@@ -146,7 +153,7 @@ public class ChannelSetupController {
 					for (ChannelConfig channel : channels) {
 						channel.setContactType(master.getContactType());
 						channel.setChannelType(master.getChannelType());
-
+						configManager.saveForDomain(channel, domainName);
 					}
 				}
 

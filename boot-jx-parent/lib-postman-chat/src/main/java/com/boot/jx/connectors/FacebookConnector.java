@@ -79,7 +79,10 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 				channel.getFacebook().setAccessToken(pagemap.keyEntry("access_token").asString());
 				channel.getFacebook().setPageId(pagemap.keyEntry("id").asString());
 				channel.getFacebook().setHandler(channel.getFacebook().getPageId());
+				channel.getFacebook().setType("page");
+				channel.getFacebook().setMasterAppId(setup.getFacebook().getMasterAppId());
 				channel.setName(pagemap.keyEntry("name").asString());
+				channels.add(channel);
 			});
 		} catch (ApiHttpException e) {
 			channelConfigTemp.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
