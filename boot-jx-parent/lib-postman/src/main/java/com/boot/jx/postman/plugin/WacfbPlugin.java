@@ -26,15 +26,20 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 		private static final long serialVersionUID = 5956062194604118502L;
 
-		@ConfigMetaProperty(path = "wacfb.number", title = "Number", createonly = true,
+		@ConfigMetaProperty(path = "wacfb.phoneNumber", title = "Phone Number", createonly = true,
 				desc = "Enter WABA number with country code")
-		private String number;
+		private String phoneNumber;
 
 		@ConfigMetaProperty(path = "wa3cfb.acessToken", title = "Acess Token", writeonly = true,
-				desc = "Enter Your WABA Key")
+				desc = "Enter Your Acess Token")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String acessToken;
-
+		
+		@ConfigMetaProperty(path = "wa3cfb.phoneNumberId", title = "Phone Number Id", writeonly = true,
+				desc = "Enter Your Phone Number Id")
+		@JsonView(PMEnvironment.ProtectedProperty.class)
+		private String phoneNumberId;
+		
 		@ConfigMetaProperty(path = "wacfb.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
@@ -49,15 +54,15 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 		@Override
 		public String getLane() {
-			return number;
+			return phoneNumber;
 		}
 
-		public String getNumber() {
-			return number;
+		public String getPhoneNumber() {
+			return phoneNumber;
 		}
 
-		public void setNumber(String number) {
-			this.number = number;
+		public void setPhoneNumber(String phoneNumber) {
+			this.phoneNumber = phoneNumber;
 		}
 
 		public String getAcessToken() {
