@@ -19,9 +19,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.cdn.BootJxConfigService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.filter.AppRequestUtil;
+import com.boot.jx.http.ApiRequest;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
@@ -57,6 +61,10 @@ public class ChannelSetupController {
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
+
+	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET })
 	public String setupChannel(@RequestParam(required = false) CHANNEL_TYPE_ENUM channelType,
 			@RequestParam(required = false) String masterChannelId,
@@ -65,6 +73,12 @@ public class ChannelSetupController {
 			@RequestParam(required = false) String sortBy,
 			@RequestParam(required = false, defaultValue = "asc") String sortDir, Model model)
 			throws FileNotFoundException, IOException {
+		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getSubDomain());
+		
+		System.out.println("tnt="+AppContextUtil.getTenant());
+		System.out.println("domainName="+domainName);
+		System.out.println("header:tnt="+commonHttpRequest.get("tnt"));
+		System.out.println("tnt="+AppContextUtil.getTenant());
 
 		List<ChannelConfigDoc> channels = CollectionUtil.asList();
 		MongoQueryBuilder<ChannelConfigDoc> q = MongoQueryBuilder.collection(ChannelConfigDoc.class).page(pageNo,
@@ -73,7 +87,7 @@ public class ChannelSetupController {
 			q = q.whereIdSafe(masterChannelId);
 		}
 		q.where("isMaster", true);
-		
+
 		if (ArgUtil.is(channelType)) {
 			q.search("channelType", ArgUtil.parseAsString(channelType));
 		}
@@ -127,10 +141,18 @@ public class ChannelSetupController {
 			returnVal.put("id", respDoc.getId());
 			ConnectorHandler connector = connectorHandlerFactory.get(master.getContactType(), master.getChannelType());
 			if (ArgUtil.is(connector)) {
-				connector.onRegister(master, respDoc);
+				List<ChannelConfig> channels = connector.onRegister(master, respDoc);
+				if (ArgUtil.is(channels)) {
+					for (ChannelConfig channel : channels) {
+						channel.setContactType(master.getContactType());
+						channel.setChannelType(master.getChannelType());
+
+					}
+				}
+
 			}
 		}
-		
+
 		return returnVal;
 	}
 

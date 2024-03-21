@@ -47,7 +47,7 @@ public class InstagramClient implements MessageClient {
 
 	public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
 		InstagramConfig config = channelConfig.getInstagram();
-		String verifyToken = config.getVerifyToken();
+		String verifyToken = channelConfig.isMaster() ? config.getMasterAppVerifyToken() : config.getVerifyToken();
 		if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
 			return challenge;
 		} else {

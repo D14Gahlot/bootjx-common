@@ -19,20 +19,18 @@
 	<span th:switch="${channelSelected}" th:remove="tag">
 		<span th:case="true" th:remove="tag">
 
-	<script>
-		window.CONST.extend({
-			channelConfig : {
-				id : '[[${selectedChannel.id}]]',
-				channelType : '[[${selectedChannel.channelType}]]',
-				contactType : '[[${selectedChannel.contactType}]]',
-				title : '[[${selectedChannel.wacfb.masterAppTitle}]]',
-			}
-		});
-	</script>
-	
 				<span th:switch="${selectedChannel.channelType}" th:remove="tag">
+					
 					<span th:case="'wacfb'" th:remove="tag">
 <script>
+	window.CONST.extend({
+		channelConfig : {
+			id : '[[${selectedChannel.id}]]',
+			channelType : '[[${selectedChannel.channelType}]]',
+			contactType : '[[${selectedChannel.contactType}]]',
+			title : '[[${selectedChannel.wacfb.masterAppTitle}]]',
+		}
+	});
   window.fbAsyncInit = function() {
     FB.init({
       appId            : '[[${selectedChannel.wacfb.masterAppId}]]',
@@ -45,8 +43,32 @@
 <script async defer crossorigin="anonymous"
   src="https://connect.facebook.net/en_US/sdk.js">
 </script>
-
-					</span>		
+					</span>	
+					<span th:case="'fb'" th:remove="tag">
+<script>
+	window.CONST.extend({
+		channelConfig : {
+			id : '[[${selectedChannel.id}]]',
+			channelType : '[[${selectedChannel.channelType}]]',
+			contactType : '[[${selectedChannel.contactType}]]',
+			title : '[[${selectedChannel.facebook.masterAppTitle}]]',
+		}
+	});
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId            : '[[${selectedChannel.facebook.masterAppId}]]',
+      autoLogAppEvents : true,
+      xfbml            : true,
+      version          : 'v18.0'
+    });
+  };
+</script>
+<script async defer crossorigin="anonymous"
+  src="https://connect.facebook.net/en_US/sdk.js">
+</script>
+					</span>					
+					
+						
 				</span>	
 				
 		</span>
@@ -81,41 +103,57 @@
 		<span th:case="true" th:remove="tag">
 				<span th:switch="${selectedChannel.channelType}" th:remove="tag">
 					<span th:case="'wacfb'" th:remove="tag">
-
-	<script>
-	  // Facebook Login with JavaScript SDK
-	  function launchWhatsAppSignup() {
-	    // Launch Facebook login
-	    FB.login(function (response) {
-			if(window.channel_setup_listner){
-				window.channel_setup_listner({
-					channelType : '[[${selectedChannel.channelType}]]',
-					masterChannelId : '[[${selectedChannel.id}]]',
-					response : response
-				})
-			} else {
-				console.log("channel_setup_listner:response",response)
-			}
-	    }, {
-	      config_id: '[[${selectedChannel.wacfb.masterAppConfigId}]]', // configuration ID obtained in the previous step goes here
-	      response_type: 'code',     // must be set to 'code' for System User access token
-	      override_default_response_type: true,
-	      extras: {
-			//channelId :'[[${selectedChannel.id}]]', //  
-	        setup: {
-	          // Prefilled data can go here
-	        }
-	      }
-	    });
-	  }
-	</script>
-
-	<button onclick="launchWhatsAppSignup()" hidden
-	  style="background-color: #1877f2; border: 0; border-radius: 4px; color: #fff; cursor: pointer; font-family: Helvetica, Arial, sans-serif; font-size: 16px; font-weight: bold; height: 40px; padding: 0 24px;">
-	  Login with Facebook
-	</button>
-
-					</span>		
+						<script>
+						  function launchWhatsAppSignup() {
+						    FB.login(function (response) {
+								if(window.channel_setup_listner){
+									window.channel_setup_listner({
+										channelType : '[[${selectedChannel.channelType}]]',
+										masterChannelId : '[[${selectedChannel.id}]]',
+										response : response
+									})
+								} else {
+									console.log("channel_setup_listner:response",response)
+								}
+						    }, {
+						      config_id: '[[${selectedChannel.wacfb.masterAppConfigId}]]', // configuration ID obtained in the previous step goes here
+						      response_type: 'code',     // must be set to 'code' for System User access token
+						      override_default_response_type: true,
+						      extras: {
+						        setup: {
+						        }
+						      }
+						    });
+						  }
+						</script>
+					</span>
+					<span th:case="'fb'" th:remove="tag">
+						<script>
+						  function launchWhatsAppSignup() {
+						    FB.login(function (response) {
+								if(window.channel_setup_listner){
+									window.channel_setup_listner({
+										channelType : '[[${selectedChannel.channelType}]]',
+										masterChannelId : '[[${selectedChannel.id}]]',
+										response : response
+									})
+								} else {
+									console.log("channel_setup_listner:response",response)
+								}
+						    }, {
+						      config_id: '[[${selectedChannel.facebook.masterAppConfigId}]]', // configuration ID obtained in the previous step goes here
+						      response_type: 'code',     // must be set to 'code' for System User access token
+						      override_default_response_type: true,
+						      extras: {
+						        setup: {
+						        }
+						      }
+						    });
+						  }
+						</script>
+					</span>
+					
+							
 				</span>	
 		</span>
 	</span>

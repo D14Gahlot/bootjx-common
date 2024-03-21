@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -91,14 +92,16 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
-	public void onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
-
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
+		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		MapModel response = restService.ajax("https://graph.facebook.com/v17.0").path("oauth/access_token")
 				.field("client_id", setup.getWacfb().getMasterAppId())
 				.field("client_secret", setup.getWacfb().getMasterAppSecret())
 				.field("code", MapModel.from(channelConfigTemp.getResp()).pathEntry("authResponse.code").asString())
 				.submit().asMapModel();
-
+		channelConfigTemp.log("oauth/access_token", response.toMap());
+		commonMongoTemplate.save(channelConfigTemp);
+		return channels;
 	}
 
 	@Override

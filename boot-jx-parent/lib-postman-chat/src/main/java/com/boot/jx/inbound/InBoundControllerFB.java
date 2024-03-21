@@ -64,7 +64,8 @@ public class InBoundControllerFB {
 	private CommonMongoTemplate commonMongoTemplate;
 
 	@RequestMapping(value = { "/ext/inbound/v2/fb/callback/{accountKey}/{channelId}/{channelKey}",
-			"/ext/inbound/v2/fb/callback/{accountKey}" }, method = RequestMethod.GET)
+			"/ext/inbound/v2/fb/callback/{accountKey}",
+			"/ext/inbound/v3/fb/callback/{accountKey}/{channelId}/{channelKey}"}, method = RequestMethod.GET)
 	public Object get(@RequestParam(name = "hub.verify_token") String token,
 			@RequestParam(name = "hub.challenge") String challenge,
 			@RequestHeader(required = false, value = "X-Hub-Signature") String signature,
@@ -79,7 +80,8 @@ public class InBoundControllerFB {
 
 	@RequestMapping(
 			value = { "/ext/inbound/ig/callback", "/ext/inbound/v2/ig/callback/{accountKey}/{channelId}/{channelKey}",
-					"/ext/inbound/v2/ig/callback/{accountKey}" },
+					"/ext/inbound/v2/ig/callback/{accountKey}",
+					"/ext/inbound/v3/ig/callback/{accountKey}/{channelId}/{channelKey}"},
 			method = RequestMethod.GET)
 	public Object get(@RequestParam(name = "hub.verify_token") String token,
 			@RequestParam(name = "hub.challenge") String challenge, @RequestParam(required = false) String lane,

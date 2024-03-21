@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.fb.FacbookAttachment;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookEntry;
@@ -32,6 +36,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.FacebookPlugin;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
@@ -48,6 +53,40 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
+
+	@Autowired
+	private RestService restService;
+
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
+		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
+		try {
+			MapModel accessToken = restService.ajax("https://graph.facebook.com/v18.0").path("/oauth/access_token")
+					.field("client_id", setup.getFacebook().getMasterAppId())
+					.field("client_secret", setup.getFacebook().getMasterAppSecret())
+					.field("code", MapModel.from(channelConfigTemp.getResp()).pathEntry("authResponse.code").asString())
+					.submit().asMapModel();
+			channelConfigTemp.log("oauth/access_token", accessToken.toMap());
+
+			MapModel me = restService.ajax("https://graph.facebook.com/v18.0").path("/me/accounts")
+					.queryParam("access_token", accessToken.keyEntry("access_token").asString())
+					.queryParam("fields", "id,name,access_token,link").get().asMapModel();
+			channelConfigTemp.log("me/accounts", me.toMap());
+
+			me.keyEntry("data").asListOfMap().forEach(page -> {
+				MapModel pagemap = MapModel.from(page);
+				ChannelConfig channel = new ChannelConfig();
+				channel.setFacebook(new FacebookConfigDetails());
+				channel.getFacebook().setAccessToken(pagemap.keyEntry("access_token").asString());
+				channel.getFacebook().setPageId(pagemap.keyEntry("id").asString());
+				channel.getFacebook().setHandler(channel.getFacebook().getPageId());
+				channel.setName(pagemap.keyEntry("name").asString());
+			});
+		} catch (ApiHttpException e) {
+			channelConfigTemp.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
+		}
+		commonMongoTemplate.save(channelConfigTemp);
+		return channels;
+	}
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
@@ -66,7 +105,6 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 		return inboxMessage;
 	}
 
-	
 	@Override
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChannelConfig config = getChannelConfig(inboxMessage);

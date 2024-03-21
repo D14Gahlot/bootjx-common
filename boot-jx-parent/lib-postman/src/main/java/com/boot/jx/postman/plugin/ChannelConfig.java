@@ -36,6 +36,7 @@ public class ChannelConfig extends AChannelConfig {
 	private WACFBConfigDetails wacfb;
 	private OAConfigDetails oa;
 
+	private boolean isMaster;
 	private boolean isPushAllowed;
 	private boolean isPushOnlyApproved;
 	private boolean isPushFreeTextAllowed;
@@ -239,6 +240,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setWacfb(WACFBConfigDetails wacfb) {
 		this.wacfb = wacfb;
+	}
+
+	public boolean isMaster() {
+		return isMaster;
+	}
+
+	public void setMaster(boolean isMaster) {
+		this.isMaster = isMaster;
 	}
 
 }

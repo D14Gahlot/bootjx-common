@@ -235,8 +235,9 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 
 		void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException;
 
-		default void onRegister(ChannelConfig setup, ChannelConfigTempDoc resp) {
+		default List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc resp) {
 			LOGGER.error("Channel onRegister NOT FOUND ");
+			return null;
 		}
 
 	}
