@@ -22,33 +22,34 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 		return ContactType.WHATSAPP;
 	}
 
+	@ConfigMetaProperty(context = "wacfb")
 	public static class WACFBConfigDetails extends MetaMasterConfigDetails {
 
 		private static final long serialVersionUID = 5956062194604118502L;
 
-		@ConfigMetaProperty(path = "wacfb.number", title = "Phone Number", createonly = true,
+		@ConfigMetaProperty(path = "number", title = "Phone Number", createonly = true,
 				desc = "Enter WABA number with country code")
 		private String number;
 
-		@ConfigMetaProperty(path = "wa3cfb.accessToken", title = "Access Token", writeonly = true,
-				desc = "Enter Your Acess Token")
+		@ConfigMetaProperty(path = "accessToken", title = "Access Token", writeonly = true,
+				desc = "Enter Your Access Token")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String accessToken;
 
-		@ConfigMetaProperty(path = "wa3cfb.phoneNumberId", title = "Phone Number Id", writeonly = true,
+		@ConfigMetaProperty(path = "phoneNumberId", title = "Phone Number Id", createonly = true,
 				desc = "Enter Your Phone Number Id")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String phoneNumberId;
 
-		@ConfigMetaProperty(path = "wacfb.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
+		@ConfigMetaProperty(path = "promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
 
-		@ConfigMetaProperty(path = "wacfb.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
+		@ConfigMetaProperty(path = "promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptPhone;
 
-		@ConfigMetaProperty(path = "wacfb.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS,
+		@ConfigMetaProperty(path = "promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptName;
 

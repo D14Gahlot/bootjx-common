@@ -142,14 +142,6 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		return channels;
 	}
 
-	@Override
-	public void onChannelUpdate(ChannelConfig channelConfig) {
-		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-		restService.ajax(WA360Constants.BASE_URL).path("v1/configs/webhook")
-				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-				.post(MapModel.createInstance().put("url", webhookUrl).toMap()).asMap();
-	}
-
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChatContactQuery contactQuery = messageContext.contact();
 		ChatContactDoc chatContactDoc = contactQuery.getDoc();

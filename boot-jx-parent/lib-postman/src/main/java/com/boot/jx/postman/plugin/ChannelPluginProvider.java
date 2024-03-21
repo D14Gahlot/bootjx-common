@@ -32,6 +32,8 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.UtilityModels.Stringable;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.ClazzUtil;
+import com.boot.utils.Constants;
 
 @SuppressWarnings("unchecked")
 public class ChannelPluginProvider {
@@ -149,11 +151,21 @@ public class ChannelPluginProvider {
 		@Override
 		default public void addConfigMeta(List<ConfigMeta> configMetaList) {
 			Class<?> clazz = AopProxyUtils.ultimateTargetClass(newChannelDetails());
-			for (Field field : clazz.getDeclaredFields()) {
+			String pathContext = Constants.BLANK;
+			if (clazz.isAnnotationPresent(ConfigMetaProperty.class)) {
+				ConfigMetaProperty annotation = clazz.getAnnotation(ConfigMetaProperty.class);
+				if (ArgUtil.is(annotation.context())) {
+					pathContext = annotation.context() + ".";
+				}
+			}
+			Field[] fields = ClazzUtil.getAllFields(clazz);
+
+			for (Field field : fields) {
 				if (field.isAnnotationPresent(ConfigMetaProperty.class)) {
 					ConfigMetaProperty annotation = field.getAnnotation(ConfigMetaProperty.class);
-					ConfigMeta cm = new ConfigMeta().path(annotation.path()).pathRaw(annotation.pathRaw())
-							.title(annotation.title()).desc(annotation.desc()).createonly(annotation.createonly())
+					String path = pathContext + annotation.path();
+					ConfigMeta cm = new ConfigMeta().path(path).pathRaw(annotation.pathRaw()).title(annotation.title())
+							.desc(annotation.desc()).createonly(annotation.createonly())
 							.writeonly(annotation.writeonly()).optional(annotation.optional())
 							.inputType(annotation.inputType());
 					if (annotation.inputType() == INPUT_TYPE.OPTIONS && annotation.dataType() == DATA_TYPE.SWITCH
@@ -167,6 +179,10 @@ public class ChannelPluginProvider {
 						cm.defaultValue(annotation.defaultValue());
 					}
 
+					if (annotation.hidden()) {
+						cm.hidden();
+					}
+
 					configMetaList.add(cm);
 				}
 			}
@@ -175,7 +191,18 @@ public class ChannelPluginProvider {
 		@Override
 		default public void importChannelDetailsFromMap(T channelDetails, MapModel map) {
 			Class<?> clazz = AopProxyUtils.ultimateTargetClass(channelDetails);
-			for (Field field : clazz.getDeclaredFields()) {
+
+			String pathContext = Constants.BLANK;
+			if (clazz.isAnnotationPresent(ConfigMetaProperty.class)) {
+				ConfigMetaProperty annotation = clazz.getAnnotation(ConfigMetaProperty.class);
+				if (ArgUtil.is(annotation.context())) {
+					pathContext = annotation.context() + ".";
+				}
+			}
+
+			Field[] fields = ClazzUtil.getAllFields(clazz);
+
+			for (Field field : fields) {
 				if (field.isAnnotationPresent(ConfigMetaProperty.class)) {
 					ConfigMetaProperty annotation = field.getAnnotation(ConfigMetaProperty.class);
 					// pd = new PropertyDescriptor(field.getName(), clazz);
@@ -185,36 +212,35 @@ public class ChannelPluginProvider {
 						Method getter = pd.getReadMethod();
 						Type type = field.getGenericType();
 						String typeName = type.getTypeName();
+						String path = pathContext + annotation.path();
 						// Class<?> componentType = ((Class<?>) type).getComponentType();
 						try {
 							Object currentValue = getter.invoke(channelDetails);
 							if ("java.lang.String".equals(typeName)) {
 								setter.invoke(channelDetails,
-										map.pathEntry(annotation.path()).asString(ArgUtil.parseAsString(currentValue)));
+										map.pathEntry(path).asString(ArgUtil.parseAsString(currentValue)));
 							} else if ("int".equals(typeName) || "java.lang.Integer".equals(typeName)) {
-								setter.invoke(channelDetails, map.pathEntry(annotation.path())
-										.asInteger(ArgUtil.parseAsInteger(currentValue)));
+								setter.invoke(channelDetails,
+										map.pathEntry(path).asInteger(ArgUtil.parseAsInteger(currentValue)));
 							} else if ("boolean".equals(typeName) || "java.lang.Boolean".equals(typeName)) {
-								setter.invoke(channelDetails, map.pathEntry(annotation.path())
-										.asBoolean(ArgUtil.parseAsBoolean(currentValue)));
+								setter.invoke(channelDetails,
+										map.pathEntry(path).asBoolean(ArgUtil.parseAsBoolean(currentValue)));
 							} else if ("java.lang.String[]".equals(typeName)) {
-								setter.invoke(channelDetails, map.pathEntry(annotation.path()).value());
+								setter.invoke(channelDetails, map.pathEntry(path).value());
 							} else if (type instanceof Class && ((Class<?>) type).isEnum()) {
-								setter.invoke(channelDetails, map.pathEntry(annotation.path())
-										.asEnum(ArgUtil.parseAsEnum(currentValue, type), type));
+								setter.invoke(channelDetails,
+										map.pathEntry(path).asEnum(ArgUtil.parseAsEnum(currentValue, type), type));
 							} else if (typeName.startsWith("java.util.Map<java.lang.String")) {
-								setter.invoke(channelDetails, map.pathEntry(annotation.path()).asMap());
+								setter.invoke(channelDetails, map.pathEntry(path).asMap());
 							} else if (Stringable.class.isAssignableFrom((Class<?>) type)
 									|| ((Class<?>) type).isAssignableFrom(Stringable.class)) {
 								Class<?> cl = Class.forName(typeName);
 								Constructor<?> cons = cl.getConstructor();
 								Stringable o = (Stringable) cons.newInstance();
-								o.fromString(map.pathEntry(ArgUtil.nonEmpty(annotation.pathRaw(), annotation.path()))
-										.asString());
+								o.fromString(map.pathEntry(ArgUtil.nonEmpty(annotation.pathRaw(), path)).asString());
 								setter.invoke(channelDetails, o);
 							} else {
-								setter.invoke(channelDetails,
-										map.pathEntry(annotation.path()).defaultValue(currentValue));
+								setter.invoke(channelDetails, map.pathEntry(path).defaultValue(currentValue));
 							}
 						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 								| ClassNotFoundException | NoSuchMethodException | SecurityException

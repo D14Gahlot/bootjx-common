@@ -24,10 +24,26 @@ public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetail
 
 	public static abstract class MetaMasterConfigDetails extends AChannelDetails {
 		private static final long serialVersionUID = -2174315212703629204L;
+		@ConfigMetaProperty(path = "masterAppTitle", title = "masterAppTitle", createonly = true, hidden = true,
+				readonly = true, desc = "masterAppId")
 		private String masterAppTitle;
+
+		@ConfigMetaProperty(path = "masterAppId", title = "masterAppId", createonly = true, hidden = true,
+				readonly = true, desc = "masterAppId")
 		private String masterAppId;
+
+		@ConfigMetaProperty(path = "masterAppConfigId", title = "masterAppConfigId", createonly = true, hidden = true,
+				readonly = true, desc = "masterAppConfigId")
 		private String masterAppConfigId;
+
+		@ConfigMetaProperty(path = "masterAppSecret", title = "masterAppSecret", createonly = true, hidden = true,
+				readonly = true, desc = "masterAppSecret")
+		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String masterAppSecret;
+
+		@ConfigMetaProperty(path = "masterAppVerifyToken", title = "masterAppVerifyToken", createonly = true,
+				hidden = true, readonly = true, desc = "masterAppVerifyToken")
+		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String masterAppVerifyToken;
 
 		public String getMasterAppTitle() {
