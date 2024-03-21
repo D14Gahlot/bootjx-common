@@ -40,6 +40,15 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String phoneNumberId;
 		
+		
+		public String getPhoneNumberId() {
+			return phoneNumberId;
+		}
+
+		public void setPhoneNumberId(String phoneNumberId) {
+			this.phoneNumberId = phoneNumberId;
+		}
+
 		@ConfigMetaProperty(path = "wacfb.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
