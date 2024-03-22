@@ -37,6 +37,10 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.JsonPath;
+import com.boot.utils.UniqueID;
+
+import net.bytebuddy.asm.Advice.Return;
 
 @Controller
 public class ChannelSetupController {
@@ -68,41 +72,11 @@ public class ChannelSetupController {
 	private ConfigManager configManager;
 
 	@ApiRequest(tenant = "app")
-	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET })
+	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET, RequestMethod.POST })
 	public String setupChannel(@RequestParam(required = false) CHANNEL_TYPE_ENUM channelType,
-			@RequestParam(required = false) ContactType contactType,
-			@RequestParam(required = false) String masterChannelId,
-			@RequestParam(required = false, defaultValue = "0") int pageNo,
-			@RequestParam(required = false, defaultValue = "25") int pageSize,
-			@RequestParam(required = false) String sortBy,
-			@RequestParam(required = false, defaultValue = "asc") String sortDir, Model model)
+			@RequestParam(required = false) String postKey, @RequestParam(required = false) ContactType contactType,
+			@RequestParam(required = false) String masterChannelId, Model model)
 			throws FileNotFoundException, IOException {
-		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),
-				commonHttpRequest.getSubDomain());
-
-		// System.out.println("tnt="+AppContextUtil.getTenant());
-		// System.out.println("domainName="+domainName);
-		// System.out.println("header:tnt="+commonHttpRequest.get("tnt"));
-		// System.out.println("tnt="+AppContextUtil.getTenant());
-
-		List<ChannelConfigDoc> channels = CollectionUtil.asList();
-		MongoQueryBuilder<ChannelConfigDoc> q = MongoQueryBuilder.collection(ChannelConfigDoc.class).page(pageNo,
-				pageSize);
-		if (ArgUtil.is(masterChannelId)) {
-			q = q.whereIdSafe(masterChannelId);
-		}
-		q.where("isMaster", true);
-
-		if (ArgUtil.is(channelType)) {
-			q.search("channelType", ArgUtil.parseAsString(channelType));
-		}
-		if (ArgUtil.is(contactType)) {
-			q.search("contactType", ArgUtil.parseAsString(contactType));
-		}
-		if (ArgUtil.is(sortBy)) {
-			q = q.sortBy(sortBy, Direction.fromString(sortDir));
-		}
-		channels = commonMongoTemplate.find(q);
 
 		model.addAttribute("APP_NAME", appConfig.getAppName());
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
@@ -117,6 +91,39 @@ public class ChannelSetupController {
 		model.addAttribute("APP_USER", "");
 		model.addAttribute("APP_USER_NAME", "User");
 		model.addAttribute("APP_USER_ROLE", "['GUEST']");
+
+		if (!ArgUtil.is(postKey)) {
+			model.addAttribute("FORM_URL", appConfig.getAppPrefix() + "/ext/setup/channel");
+			model.addAttribute("postKey", UniqueID.generateString62());
+			model.addAttribute("channelType", channelType);
+			model.addAttribute("contactType", contactType);
+			model.addAttribute("masterChannelId", masterChannelId);
+			return "app-setup-channel-post";
+		}
+
+		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),
+				commonHttpRequest.getSubDomain());
+
+		// System.out.println("tnt="+AppContextUtil.getTenant());
+		// System.out.println("domainName="+domainName);
+		// System.out.println("header:tnt="+commonHttpRequest.get("tnt"));
+		// System.out.println("tnt="+AppContextUtil.getTenant());
+
+		List<ChannelConfigDoc> channels = CollectionUtil.asList();
+		MongoQueryBuilder<ChannelConfigDoc> q = MongoQueryBuilder.collection(ChannelConfigDoc.class).page(0, 25);
+		if (ArgUtil.is(masterChannelId)) {
+			q = q.whereIdSafe(masterChannelId);
+		}
+		q.where("isMaster", true);
+
+		if (ArgUtil.is(channelType)) {
+			q.search("channelType", ArgUtil.parseAsString(channelType));
+		}
+		if (ArgUtil.is(contactType)) {
+			q.search("contactType", ArgUtil.parseAsString(contactType));
+		}
+		channels = commonMongoTemplate.find(q);
+
 		model.addAttribute("channels", channels);
 
 		boolean channelSelected = (channels.size() == 1);
@@ -130,9 +137,18 @@ public class ChannelSetupController {
 
 	}
 
+	@ApiRequest(tenant = "app")
+	@RequestMapping(value = "/ext/setup/channel/callback/fb", method = { RequestMethod.GET, RequestMethod.POST })
+	public String setupChannelCallback(@RequestParam(required = false) String code, Model model)
+			throws FileNotFoundException, IOException {
+		model.addAttribute("response", MapModel.createInstance().put(JsonPath.at("authResponse.code"), code).toJson());
+		return this.setupChannel(CHANNEL_TYPE_ENUM.fb, UniqueID.generateString62(), ContactType.FACEBOOK,
+				Constants.BLANK, model);
+	}
+
 	@ResponseBody
 	@ApiRequest(tenant = "app")
-	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.POST })
+	@RequestMapping(value = "/ext/setup/channel/resp", method = { RequestMethod.POST })
 	public MapModel setupChannelSave(@RequestParam String masterChannelId, @RequestBody Map<String, Object> response)
 			throws FileNotFoundException, IOException {
 		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),

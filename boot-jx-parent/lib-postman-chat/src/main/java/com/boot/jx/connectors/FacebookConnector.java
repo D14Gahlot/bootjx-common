@@ -39,6 +39,8 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.URLBuilder;
+import com.boot.utils.Urly;
 
 @Component
 @ConnectorMapping(contactType = ContactType.FACEBOOK)
@@ -60,16 +62,31 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		try {
+
+			MapModel resp = MapModel.from(channelConfigTemp.getResp());
+			String redirectUri = resp.pathEntry("_.redirect_uri").asString();
+
 			MapModel accessToken = restService.ajax("https://graph.facebook.com/v18.0").path("/oauth/access_token")
 					.field("client_id", setup.getFacebook().getMasterAppId())
 					.field("client_secret", setup.getFacebook().getMasterAppSecret())
-					.field("code", MapModel.from(channelConfigTemp.getResp()).pathEntry("authResponse.code").asString())
+					// .field("redirect_uri", redirectUri)
+					.field("code", resp.pathEntry("authResponse.code").asString())
+					//
 					.submit().asMapModel();
 			channelConfigTemp.log("oauth/access_token", accessToken.toMap());
 
+//			MapModel accessToken2 = restService.ajax("https://graph.facebook.com/v18.0").path("/oauth/access_token")
+//					.field("client_id", setup.getFacebook().getMasterAppId())
+//					.field("client_secret", setup.getFacebook().getMasterAppSecret())
+//					.field("fb_exchange_token", accessToken.keyEntry("access_token").asString())
+//					.field("grant_type", "fb_exchange_token")
+//					.submit().asMapModel();
+//			channelConfigTemp.log("oauth/access_token2", accessToken2.toMap());
+
 			MapModel me = restService.ajax("https://graph.facebook.com/v18.0").path("/me/accounts")
 					.queryParam("access_token", accessToken.keyEntry("access_token").asString())
-					.queryParam("fields", "id,name,access_token,link").get().asMapModel();
+					// .queryParam("fields", "id,name,access_token,link")
+					.get().asMapModel();
 			channelConfigTemp.log("me/accounts", me.toMap());
 
 			me.keyEntry("data").asListOfMap().forEach(page -> {
@@ -93,7 +110,14 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
-		ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
+		restService.ajax("https://graph.facebook.com/v18.0/").path(channelConfig.getFacebook().getPageId())
+				.path("/subscribed_apps").field("access_token", channelConfig.getFacebook().getAccessToken())
+				.field("subscribed_fields",
+						"message_deliveries, message_echoes, message_reads, messages, messaging_optins, messaging_postbacks")
+				.submit().asMap();
+		// channelConfigTemp.log("me/accounts", subscriptions.toMap());
+		// ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer
+		// Portal.");
 	}
 
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
