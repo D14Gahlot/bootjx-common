@@ -87,23 +87,24 @@ public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetail
 		}
 	}
 
+	@ConfigMetaProperty(context = "facebook")
 	public static class FacebookConfigDetails extends MetaMasterConfigDetails {
 
 		private static final long serialVersionUID = -2397678752642150000L;
-		@ConfigMetaProperty(path = "facebook.pageId", title = "Page Id", createonly = true)
+		@ConfigMetaProperty(path = "pageId", title = "Page Id", createonly = true)
 		private String pageId;
-		@ConfigMetaProperty(path = "facebook.type", title = "Type", hidden = true)
+		@ConfigMetaProperty(path = "type", title = "Type", hidden = true)
 		private String type;
-		@ConfigMetaProperty(path = "facebook.handler", title = "Handler")
+		@ConfigMetaProperty(path = "handler", title = "Handler")
 		private String handler;
 
-		@ConfigMetaProperty(path = "facebook.accessToken", title = "Access Token", writeonly = true)
+		@ConfigMetaProperty(path = "accessToken", title = "Access Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String accessToken;
-		@ConfigMetaProperty(path = "facebook.verifyToken", title = "Verify Token", writeonly = true)
+		@ConfigMetaProperty(path = "verifyToken", title = "Verify Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String verifyToken;
-		@ConfigMetaProperty(path = "facebook.appSecret", title = "App Secret", writeonly = true)
+		@ConfigMetaProperty(path = "appSecret", title = "App Secret", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String appSecret;
 

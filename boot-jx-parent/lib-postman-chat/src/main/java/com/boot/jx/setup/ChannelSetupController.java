@@ -146,6 +146,15 @@ public class ChannelSetupController {
 				Constants.BLANK, model);
 	}
 
+	@ApiRequest(tenant = "app")
+	@RequestMapping(value = "/ext/setup/channel/callback/ig", method = { RequestMethod.GET, RequestMethod.POST })
+	public String setupChannelCallbackIg(@RequestParam(required = false) String code, Model model)
+			throws FileNotFoundException, IOException {
+		model.addAttribute("response", MapModel.createInstance().put(JsonPath.at("authResponse.code"), code).toJson());
+		return this.setupChannel(CHANNEL_TYPE_ENUM.ig, UniqueID.generateString62(), ContactType.INSTAGRAM,
+				Constants.BLANK, model);
+	}
+
 	@ResponseBody
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel/resp", method = { RequestMethod.POST })
