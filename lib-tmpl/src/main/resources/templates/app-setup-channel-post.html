@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3" class="loadable loading">
+
+<head>
+	<meta charset=utf-8>
+	<meta http-equiv=X-UA-Compatible content="IE=edge">
+	<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+	<link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
+	<title>[[${CONFIG.PROP_SERVICE_NAME}]] - Channel Setup</title>
+
+	<style th:replace="common/cdn.html :: metas"> </style>
+	<style th:replace="common/loader.html :: style"> </style>
+	<style th:replace="common/cdn.html :: header"> </style>
+	<style th:replace="common/cdn.html :: const"> </style>
+</head>
+
+<body>
+	<noscript>
+		<strong>We're sorry but it doesn't work properly
+			without JavaScript enabled. Please enable it to continue.</strong>
+	</noscript>
+	<style th:replace="frags/loader.html :: loader"> </style>
+	<div id=app >
+		<center>
+			<form th:action="${FORM_URL}" method="POST" name="login">
+				<input type="hidden" name="postKey" th:value="${postKey}" />
+				<input type="hidden" name="channelType" th:value="${channelType}" />
+				<input type="hidden" name="contactType" th:value="${contactType}" />
+				<input type="hidden" name="masterChannelId" th:value="${masterChannelId}" />
+				<button type="submit" style="background: transparent; border:none;font-size: 10px;">Redirecting...</button>
+			</form>
+		</center>
+	</div>
+
+	<script type="text/javascript">
+		window.onload = function(){
+		  	document.forms['login'].submit();
+		}
+	</script>
+</body>
+
+</html>

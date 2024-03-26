@@ -29,6 +29,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -155,7 +156,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
 		default void onChannelUpdate(ChannelConfig channelConfig) {
-			LOGGER.error("WEBHOOK REGISTRATION NOT FOUND ");
+			LOGGER.error("WEBHOOK onChannelUpdate NOT FOUND ");
 		}
 
 		default InboxMessage createInboxMessage(ChannelConfig channelConfig, InboxMessage inboxMessage) {
@@ -233,6 +234,11 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 				throws FileNotFoundException, IOException;
 
 		void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException;
+
+		default List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc resp) {
+			LOGGER.error("Channel onRegister NOT FOUND ");
+			return null;
+		}
 
 	}
 

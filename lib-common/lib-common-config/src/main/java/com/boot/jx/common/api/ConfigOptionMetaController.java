@@ -46,7 +46,6 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
-import com.boot.jx.postman.doc.config.ChannelConfigSetupDoc;
 import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
@@ -159,26 +158,6 @@ public class ConfigOptionMetaController {
 	// Config APIS
 	@Autowired
 	private ConfigManagerImpl configManager;
-
-	// Setup
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/setup/channel/configs", method = { RequestMethod.POST })
-	public ApiResponse<ChannelConfigSetupDoc, Object> channelConfigSetup(
-			@RequestBody ChannelConfigSetupDoc configSetup) {
-		commonMongoTemplate.save(configSetup);
-		return ApiResponse.buildResults(configSetup);
-	}
-
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/setup/channel_configs", method = { RequestMethod.GET })
-	public ApiResponse<ChannelConfigSetupDoc, Object> channelConfigSetup(
-			@RequestParam(required = false) String channelSetupId) {
-		if (ArgUtil.is(channelSetupId)) {
-			return ApiResponse
-					.buildResult(commonMongoTemplate.findByIdSafeCheck(channelSetupId, ChannelConfigSetupDoc.class));
-		}
-		return ApiResponse.buildResults(commonMongoTemplate.findAll(ChannelConfigSetupDoc.class));
-	}
 
 	// PREFS
 	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })

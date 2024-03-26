@@ -20,15 +20,27 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.cdn.BootJxConfigService;
+import com.boot.jx.chat.ConnectorHandlerFactory;
+import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.dict.ContactType;
+import com.boot.jx.http.ApiRequest;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
-import com.boot.jx.postman.doc.config.ChannelConfigSetupDoc;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.manager.ConfigManager;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.JsonPath;
+import com.boot.utils.UniqueID;
+
+import net.bytebuddy.asm.Advice.Return;
 
 @Controller
 public class ChannelSetupController {
@@ -47,28 +59,24 @@ public class ChannelSetupController {
 	@Autowired(required = false)
 	private BootJxConfigService bootJxConfigService;
 
-	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET })
-	public String setupChannel(@RequestParam(required = false) CHANNEL_TYPE_ENUM channelType,
-			@RequestParam(required = false) String channelConfigId,
-			@RequestParam(required = false, defaultValue = "0") int pageNo,
-			@RequestParam(required = false, defaultValue = "25") int pageSize,
-			@RequestParam(required = false) String sortBy,
-			@RequestParam(required = false, defaultValue = "asc") String sortDir, Model model)
-			throws FileNotFoundException, IOException {
+	@Autowired
+	private ConnectorHandlerFactory connectorHandlerFactory;
 
-		List<ChannelConfigSetupDoc> channels = CollectionUtil.asList();
-		MongoQueryBuilder<ChannelConfigSetupDoc> q = MongoQueryBuilder.collection(ChannelConfigSetupDoc.class)
-				.page(pageNo, pageSize);
-		if (ArgUtil.is(channelConfigId)) {
-			q = q.whereIdSafe(channelConfigId);
-		}
-		if (ArgUtil.is(channelType)) {
-			q.search("channelType", ArgUtil.parseAsString(channelType));
-		}
-		if (ArgUtil.is(sortBy)) {
-			q = q.sortBy(sortBy, Direction.fromString(sortDir));
-		}
-		channels = commonMongoTemplate.find(q);
+	@Autowired
+	private PMEnvironment pmEnvironment;
+
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
+
+	@Autowired
+	private ConfigManager configManager;
+
+	@ApiRequest(tenant = "app")
+	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET, RequestMethod.POST })
+	public String setupChannel(@RequestParam(required = false) CHANNEL_TYPE_ENUM channelType,
+			@RequestParam(required = false) String postKey, @RequestParam(required = false) ContactType contactType,
+			@RequestParam(required = false) String masterChannelId, Model model)
+			throws FileNotFoundException, IOException {
 
 		model.addAttribute("APP_NAME", appConfig.getAppName());
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
@@ -83,6 +91,39 @@ public class ChannelSetupController {
 		model.addAttribute("APP_USER", "");
 		model.addAttribute("APP_USER_NAME", "User");
 		model.addAttribute("APP_USER_ROLE", "['GUEST']");
+
+		if (!ArgUtil.is(postKey)) {
+			model.addAttribute("FORM_URL", appConfig.getAppPrefix() + "/ext/setup/channel");
+			model.addAttribute("postKey", UniqueID.generateString62());
+			model.addAttribute("channelType", channelType);
+			model.addAttribute("contactType", contactType);
+			model.addAttribute("masterChannelId", masterChannelId);
+			return "app-setup-channel-post";
+		}
+
+		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),
+				commonHttpRequest.getSubDomain());
+
+		// System.out.println("tnt="+AppContextUtil.getTenant());
+		// System.out.println("domainName="+domainName);
+		// System.out.println("header:tnt="+commonHttpRequest.get("tnt"));
+		// System.out.println("tnt="+AppContextUtil.getTenant());
+
+		List<ChannelConfigDoc> channels = CollectionUtil.asList();
+		MongoQueryBuilder<ChannelConfigDoc> q = MongoQueryBuilder.collection(ChannelConfigDoc.class).page(0, 25);
+		if (ArgUtil.is(masterChannelId)) {
+			q = q.whereIdSafe(masterChannelId);
+		}
+		q.where("isMaster", true);
+
+		if (ArgUtil.is(channelType)) {
+			q.search("channelType", ArgUtil.parseAsString(channelType));
+		}
+		if (ArgUtil.is(contactType)) {
+			q.search("contactType", ArgUtil.parseAsString(contactType));
+		}
+		channels = commonMongoTemplate.find(q);
+
 		model.addAttribute("channels", channels);
 
 		boolean channelSelected = (channels.size() == 1);
@@ -96,21 +137,57 @@ public class ChannelSetupController {
 
 	}
 
-	@ResponseBody
-	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.POST })
-	public MapModel setupChannelSave(@RequestParam String channelConfigId, @RequestBody Map<String, Object> response)
+	@ApiRequest(tenant = "app")
+	@RequestMapping(value = "/ext/setup/channel/callback/fb", method = { RequestMethod.GET, RequestMethod.POST })
+	public String setupChannelCallback(@RequestParam(required = false) String code, Model model)
 			throws FileNotFoundException, IOException {
-		MapModel returnVal = MapModel.createInstance();
+		model.addAttribute("response", MapModel.createInstance().put(JsonPath.at("authResponse.code"), code).toJson());
+		return this.setupChannel(CHANNEL_TYPE_ENUM.fb, UniqueID.generateString62(), ContactType.FACEBOOK,
+				Constants.BLANK, model);
+	}
 
-		ChannelConfigSetupDoc setup = commonMongoTemplate.findById(channelConfigId, ChannelConfigSetupDoc.class);
-		if (ArgUtil.is(setup)) {
+	@ApiRequest(tenant = "app")
+	@RequestMapping(value = "/ext/setup/channel/callback/ig", method = { RequestMethod.GET, RequestMethod.POST })
+	public String setupChannelCallbackIg(@RequestParam(required = false) String code, Model model)
+			throws FileNotFoundException, IOException {
+		model.addAttribute("response", MapModel.createInstance().put(JsonPath.at("authResponse.code"), code).toJson());
+		return this.setupChannel(CHANNEL_TYPE_ENUM.ig, UniqueID.generateString62(), ContactType.INSTAGRAM,
+				Constants.BLANK, model);
+	}
+
+	@ResponseBody
+	@ApiRequest(tenant = "app")
+	@RequestMapping(value = "/ext/setup/channel/resp", method = { RequestMethod.POST })
+	public MapModel setupChannelSave(@RequestParam String masterChannelId, @RequestBody Map<String, Object> response)
+			throws FileNotFoundException, IOException {
+		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),
+				commonHttpRequest.getSubDomain());
+		MapModel returnVal = MapModel.createInstance();
+		ChannelConfig master = pmEnvironment.local().channel(masterChannelId);
+
+		// ChannelConfigSetupDoc setup = commonMongoTemplate.findById(channelConfigId,
+		// ChannelConfigSetupDoc.class);
+		if (ArgUtil.is(master)) {
 			ChannelConfigTempDoc respDoc = new ChannelConfigTempDoc();
-			respDoc.setChannelConfigId(channelConfigId);
+			respDoc.setChannelConfigId(masterChannelId);
 			respDoc.setResp(response);
-			respDoc.setChannelType(setup.getChannelType());
+			respDoc.setChannelType(master.getChannelType());
 			commonMongoTemplate.save(respDoc);
 			returnVal.put("id", respDoc.getId());
+			ConnectorHandler connector = connectorHandlerFactory.get(master.getContactType(), master.getChannelType());
+			if (ArgUtil.is(connector)) {
+				List<ChannelConfig> channels = connector.onRegister(master, respDoc);
+				if (ArgUtil.is(channels)) {
+					for (ChannelConfig channel : channels) {
+						channel.setContactType(master.getContactType());
+						channel.setChannelType(master.getChannelType());
+						configManager.saveForDomain(channel, domainName);
+					}
+				}
+
+			}
 		}
+
 		return returnVal;
 	}
 

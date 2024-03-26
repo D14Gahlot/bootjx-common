@@ -48,7 +48,7 @@ public class FacebooClient implements MessageClient {
 
 	public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
 		FacebookConfigDetails config = channelConfig.getFacebook();
-		String verifyToken = config.getVerifyToken();
+		String verifyToken = channelConfig.isMaster() ? config.getMasterAppVerifyToken() : config.getVerifyToken();
 		if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
 			return challenge;
 		} else {

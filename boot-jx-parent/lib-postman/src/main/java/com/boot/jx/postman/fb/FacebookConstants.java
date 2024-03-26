@@ -26,6 +26,12 @@ public class FacebookConstants {
 		public static final String HUMAN_AGENT = "HUMAN_AGENT";
 	}
 
+	public static class WABAPaths {
+		public static final JsonPath CHANGES = new JsonPath("entry/[0]/changes");
+		public static final JsonPath DISPLAY_PHONE_NUMBER = new JsonPath("value/metadata/display_phone_number");
+		public static final JsonPath PHONE_NUMBER_ID = new JsonPath("value/metadata/phone_number_id");
+	}
+
 	public static String MESSAGE_TAG(String messageType) {
 
 		if (!ArgUtil.is(messageType)) {
@@ -61,7 +67,7 @@ public class FacebookConstants {
 		case MessageCategoryType.HUMAN_AGENT:
 			return MessageTypes.HUMAN_AGENT;
 		}
-		
+
 		return null;
 	}
 }
