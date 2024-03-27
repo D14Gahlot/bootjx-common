@@ -84,6 +84,9 @@ public class ChannelSetupController {
 		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),
 				commonHttpRequest.getSubDomain());
 
+		model.addAttribute("domain", domainName);
+		model.addAttribute("PROP_SERVICE_SERVER", pmCommonConfig.getServiceServerByRequest());
+
 		model.addAttribute("APP_NAME", appConfig.getAppName());
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("CDN_URL", appConfig.getAppPrefix());
@@ -110,7 +113,6 @@ public class ChannelSetupController {
 			model.addAttribute("channelType", channelType);
 			model.addAttribute("contactType", contactType);
 			model.addAttribute("masterChannelId", masterChannelId);
-			model.addAttribute("domain", domainName);
 			return "app-setup-channel-post";
 		}
 
@@ -137,7 +139,6 @@ public class ChannelSetupController {
 		model.addAttribute("channels", channels);
 
 		boolean channelSelected = (channels.size() == 1);
-		model.addAttribute("domain", domainName);
 		model.addAttribute("channelSelected", channelSelected);
 		model.addAttribute("selectedChannelConfigId", Constants.BLANK);
 		if (channelSelected) {
