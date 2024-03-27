@@ -131,6 +131,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract<ConfigStore> {
 		String domain = ArgUtil.nonEmpty(masterDoc.getDomain(), AppContextUtil.getTenant());
 		masterDoc.setId(domain + ":" + configDoc.getId());
 		masterDoc.setChannelId(configDoc.getChannelId());
+		masterDoc.setDomain(domain);
 		AppContextUtil.clear();
 		AppContextUtil.setTenant(Tenants.getDefault());
 		AppContextUtil.init();
@@ -146,6 +147,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract<ConfigStore> {
 		PrefsConfigDoc masterDoc = EntityDtoUtil.dtoToEntity(prefsConfigDoc, new PrefsConfigDoc());
 		String domain = ArgUtil.nonEmpty(masterDoc.getDomain(), AppContextUtil.getTenant());
 		masterDoc.setId(domain + ":" + prefsConfigDoc.getId());
+		masterDoc.setDomain(domain);
 		AppContextUtil.clear();
 		AppContextUtil.setTenant(Tenants.getDefault());
 		AppContextUtil.init();
@@ -161,6 +163,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract<ConfigStore> {
 		PermsConfigDoc masterDoc = EntityDtoUtil.dtoToEntity(permConfigDoc, new PermsConfigDoc());
 		String domain = ArgUtil.nonEmpty(masterDoc.getDomain(), AppContextUtil.getTenant());
 		masterDoc.setId(domain + ":" + permConfigDoc.getId());
+		masterDoc.setDomain(domain);
 		AppContextUtil.clear();
 		AppContextUtil.setTenant(Tenants.getDefault());
 		AppContextUtil.init();
