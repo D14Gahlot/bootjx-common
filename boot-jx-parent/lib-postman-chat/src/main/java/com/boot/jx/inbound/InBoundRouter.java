@@ -83,8 +83,8 @@ public class InBoundRouter {
 
 		if (!ArgUtil.is(channelConfig)) {
 			Contactable c = PostManUtil.parseChannelId(channelId);
-			channelConfig = configManager.saveChannelConfig(c.getChannelType(),
-					MapModel.createInstance().put("channelId", channelId).put("lane", c.getLane()).toMap());
+			channelConfig = configManager.saveChannelConfig(c.getChannelType(), MapModel.createInstance()
+					.put("channelId", channelId).put("lane", c.getLane()).put("isAutoCreated", true).toMap());
 
 		}
 		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
