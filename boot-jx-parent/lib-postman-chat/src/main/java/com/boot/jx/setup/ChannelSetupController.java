@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.cdn.BootJxConfigService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
@@ -161,8 +162,8 @@ public class ChannelSetupController {
 	@ResponseBody
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel/resp", method = { RequestMethod.POST })
-	public MapModel setupChannelSave(@RequestParam String masterChannelId, @RequestBody Map<String, Object> response)
-			throws FileNotFoundException, IOException {
+	public ApiResponse<Object, MapModel> setupChannelSave(@RequestParam String masterChannelId,
+			@RequestBody Map<String, Object> response) throws FileNotFoundException, IOException {
 		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),
 				commonHttpRequest.getSubDomain());
 		MapModel returnVal = MapModel.createInstance();
@@ -190,8 +191,8 @@ public class ChannelSetupController {
 
 			}
 		}
-
-		return returnVal;
+		return ApiResponse.buildMeta(returnVal).redirectUrl(String.format("https://%s.%s/admin/app/setup/channels",
+				domainName, pmCommonConfig.getServiceServerByRequest(), appConfig.getAppPrefix()));
 	}
 
 }
