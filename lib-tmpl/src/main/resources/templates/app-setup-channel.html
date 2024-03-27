@@ -15,7 +15,12 @@
 	<style th:replace="common/loader.html :: style"> </style>
 	<style th:replace="common/cdn.html :: header"> </style>
 	<style th:replace="common/cdn.html :: const"> </style>
-
+	
+	<script>
+		window.CONST.config({
+			domain : '[[${domain}]]'
+		});
+	</script>
 <span th:switch="${channelSelected}" th:remove="tag">
 	<span th:case="true" th:remove="tag">
 

@@ -34,6 +34,7 @@ import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.manager.ConfigManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
@@ -98,8 +99,13 @@ public class ChannelSetupController {
 		model.addAttribute("APP_USER_ROLE", "['GUEST']");
 
 		if (!ArgUtil.is(postKey)) {
-			model.addAttribute("FORM_URL", String.format("https://app.%s%s/ext/setup/channel",
-					pmCommonConfig.getServiceServerByRequest(), appConfig.getAppPrefix()));
+			if (Tenants.isDefault(domainName)) {
+				model.addAttribute("FORM_URL", String.format("%s/ext/setup/channel", appConfig.getAppPrefix()));
+			} else {
+				model.addAttribute("FORM_URL", String.format("https://app.%s%s/ext/setup/channel",
+						pmCommonConfig.getServiceServerByRequest(), appConfig.getAppPrefix()));
+			}
+
 			model.addAttribute("postKey", UniqueID.generateString62());
 			model.addAttribute("channelType", channelType);
 			model.addAttribute("contactType", contactType);
@@ -131,6 +137,7 @@ public class ChannelSetupController {
 		model.addAttribute("channels", channels);
 
 		boolean channelSelected = (channels.size() == 1);
+		model.addAttribute("domain", domainName);
 		model.addAttribute("channelSelected", channelSelected);
 		model.addAttribute("selectedChannelConfigId", Constants.BLANK);
 		if (channelSelected) {
