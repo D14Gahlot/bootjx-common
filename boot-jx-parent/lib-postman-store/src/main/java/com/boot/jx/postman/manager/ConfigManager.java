@@ -10,6 +10,8 @@ public interface ConfigManager {
 
 	void refresh();
 
+	void refresh(String configType, String configId);
+
 	void save(ChannelConfig config);
 
 	ChannelConfig saveChannelConfig(String channelType, Map<String, Object> data);

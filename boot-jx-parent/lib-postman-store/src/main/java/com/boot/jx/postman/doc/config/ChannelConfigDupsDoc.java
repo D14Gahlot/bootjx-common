@@ -21,9 +21,14 @@ public class ChannelConfigDupsDoc implements Serializable {
 
 	@Indexed
 	private String domain;
+
+	@Indexed
 	private String lane;
+
 	@Indexed
 	private String channelType;
+
+	@Indexed
 	private String channelId;
 
 	@JsonView(PMEnvironment.ProtectedProperty.class)
@@ -32,7 +37,9 @@ public class ChannelConfigDupsDoc implements Serializable {
 	private boolean isProxyEnabled;
 	private boolean isSandbox;
 	private boolean isShared;
+	@Indexed
 	private boolean isDisabled;
+	@Indexed
 	private boolean isDeleted;
 	private String server;
 

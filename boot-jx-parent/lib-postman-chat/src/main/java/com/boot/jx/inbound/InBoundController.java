@@ -31,9 +31,8 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
-import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.fb.FacebookHookRequest;
@@ -43,7 +42,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
-import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
@@ -59,9 +58,6 @@ public class InBoundController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundController.class);
 
-	private Cache<String, List<ChannelConfigDupsDoc>> channelList = CacheBuilder.newBuilder().maximumSize(1000)
-			.expireAfterWrite(1, TimeUnit.HOURS).build();
-
 	@Autowired
 	private InBoundService inBoundService;
 
@@ -76,6 +72,9 @@ public class InBoundController {
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
+
+	@Autowired
+	ConfigMaster configMaster;
 
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
@@ -191,15 +190,7 @@ public class InBoundController {
 
 				String pageId = pageEntry.getId();
 
-				List<ChannelConfigDupsDoc> channels = channelList.getIfPresent(pageId);
-				if (!ArgUtil.is(channels) || channels.size() < 1) {
-					channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
-							.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted")
-									.is(false).and("channelType").is(channelType)));
-					if (ArgUtil.is(channels)) {
-						channelList.put(pageId, channels);
-					}
-				}
+				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
 				if (ArgUtil.is(channels)) {
 					for (ChannelConfigDupsDoc channel : channels) {
 						try {
@@ -245,15 +236,7 @@ public class InBoundController {
 							.path(FacebookConstants.WABAPaths.DISPLAY_PHONE_NUMBER).asString();
 				}
 
-				List<ChannelConfigDupsDoc> channels = channelList.getIfPresent(pageId);
-				if (!ArgUtil.is(channels) || channels.size() < 1) {
-					channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
-							.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted")
-									.is(false).and("channelType").is(channelType)));
-					if (ArgUtil.is(channels)) {
-						channelList.put(pageId, channels);
-					}
-				}
+				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
 				if (ArgUtil.is(channels)) {
 					for (ChannelConfigDupsDoc channel : channels) {
 						try {

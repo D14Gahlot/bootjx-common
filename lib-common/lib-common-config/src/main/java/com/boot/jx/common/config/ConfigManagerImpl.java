@@ -14,6 +14,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.boot.jx.AppConfigPackage.AppSharedConfigChange;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
@@ -256,20 +257,8 @@ public class ConfigManagerImpl implements ConfigManager {
 	@Override
 	public void save(ChannelConfig config) {
 		pmEnvironment.addChannel(config);
-		this.refresh();
+		this.refresh(ChannelConfigDoc.DOCUMENT_NAME, config.getChannelId());
 		connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
-	}
-
-	@Override
-	@Async
-	public void saveForDomain(ChannelConfig config, String domain) {
-		AppContextUtil.clear();
-		AppContextUtil.setTenant(domain);
-		AppContextUtil.init();
-		Map<String, Object> map = JsonUtil.toMap(config);
-		map.remove("id");
-		map.remove("channelId");
-		this.saveChannelConfig(config.getChannelType(), map);
 	}
 
 	@Override
@@ -292,6 +281,18 @@ public class ConfigManagerImpl implements ConfigManager {
 		return getChannelConfig(channelId);
 	}
 
+	@Override
+	@Async
+	public void saveForDomain(ChannelConfig config, String domain) {
+		AppContextUtil.clear();
+		AppContextUtil.setTenant(domain);
+		AppContextUtil.init();
+		Map<String, Object> map = JsonUtil.toMap(config);
+		map.remove("id");
+		map.remove("channelId");
+		this.saveChannelConfig(config.getChannelType(), map);
+	}
+
 	public ChannelConfig updateChannelConfig(String channelId, String action) {
 		if (ArgUtil.is(channelId)) {
 			ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
@@ -304,7 +305,7 @@ public class ConfigManagerImpl implements ConfigManager {
 				ApiResponseUtil.throwUnAuthorizedException("Cannot Edit Sandbox Channel");
 			}
 			pmEnvironment.updateChannel(channelConfig, action);
-			this.refresh();
+			this.refresh(ChannelConfigDoc.DOCUMENT_NAME, channelId);
 			return channelConfig;
 		}
 		return null;
@@ -365,6 +366,14 @@ public class ConfigManagerImpl implements ConfigManager {
 	@Override
 	public void refresh() {
 		sharedConfigManager.clear();
+	}
+
+	@Override
+	public void refresh(String configType, String configId) {
+		AppSharedConfigChange change = new AppSharedConfigChange();
+		change.setConfigId(configId);
+		change.setConfigType(configType);
+		sharedConfigManager.clear(change);
 	}
 
 	@Autowired
