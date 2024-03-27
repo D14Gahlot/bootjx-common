@@ -234,19 +234,14 @@ public class InBoundController {
 
 				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
 				if (ArgUtil.is(channels)) {
-					String oDomain = AppContextUtil.getTenant();
 					for (ChannelConfigDupsDoc channel : channels) {
 						try {
-							AppContextUtil.clear();
-							AppContextUtil.setTenant(channel.getDomain());
-							AppContextUtil.init();
-							inBoundRouter.inboundMessageEventAsync(channel.getChannelId(), newData.map());
-							AppContextUtil.clear();
+							inBoundRouter.inboundMessageEventAsync(channel.getDomain(), channel.getChannelId(),
+									newData.map());
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
-					AppContextUtil.setTenant(oDomain);
 				} else if (ArgUtil.is(pageId)) {
 					String channelIdForDomain = PostManUtil.CHANNEL_ID(channelType, pageId);
 					inBoundRouter.inboundMessageEventAsync(channelIdForDomain, newData.map());
