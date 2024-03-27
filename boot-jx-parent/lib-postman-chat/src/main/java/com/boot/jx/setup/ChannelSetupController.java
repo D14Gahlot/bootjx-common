@@ -98,7 +98,7 @@ public class ChannelSetupController {
 		model.addAttribute("APP_USER_ROLE", "['GUEST']");
 
 		if (!ArgUtil.is(postKey)) {
-			model.addAttribute("FORM_URL", String.format("https://app.%s/%s/ext/setup/channel",
+			model.addAttribute("FORM_URL", String.format("https://app.%s%s/ext/setup/channel",
 					pmCommonConfig.getServiceServerByRequest(), appConfig.getAppPrefix()));
 			model.addAttribute("postKey", UniqueID.generateString62());
 			model.addAttribute("channelType", channelType);

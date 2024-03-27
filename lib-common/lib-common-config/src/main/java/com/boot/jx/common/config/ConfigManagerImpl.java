@@ -267,11 +267,14 @@ public class ConfigManagerImpl implements ConfigManager {
 		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
 		String channelId = map.getString("channelId");
 		String lane = map.getString("lane");
+		boolean isAutoCreated = map.entry("isAutoCreated").asBoolean(Boolean.FALSE);
+
 		if (ArgUtil.is(data)) {
 			ChannelConfig config = pmEnvironment.local().channel(channelId);
 			if (config == null) {
 				config = new ChannelConfig();
 				config.setLane(lane);
+				config.setAutoCreated(isAutoCreated);
 			}
 			plugin.importChannelConfigFromMap(config, map, channelType);
 			save(config);

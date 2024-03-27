@@ -34,6 +34,7 @@ public class ChannelConfigDupsDoc implements Serializable {
 	@JsonView(PMEnvironment.ProtectedProperty.class)
 	protected String channelKey;
 
+	private boolean isAutoCreated;
 	private boolean isProxyEnabled;
 	private boolean isSandbox;
 	private boolean isShared;
@@ -137,6 +138,14 @@ public class ChannelConfigDupsDoc implements Serializable {
 
 	public void setChannelKey(String channelKey) {
 		this.channelKey = channelKey;
+	}
+
+	public boolean isAutoCreated() {
+		return isAutoCreated;
+	}
+
+	public void setAutoCreated(boolean isAutoCreated) {
+		this.isAutoCreated = isAutoCreated;
 	}
 
 }
