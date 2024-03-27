@@ -114,7 +114,7 @@ public class ConfigOptionMetaController {
 
 	// Option APIS
 	@JsonView(PMEnvironment.PublicProperty.class)
-	@RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/pub/options/channels", "/api/options/channels" }, method = { RequestMethod.GET })
 	@ResponseBody
 	public ApiResponse<AChannelConfig, Object> listActiveLanes(
 			@RequestParam(required = false) ContactType contactType) {
