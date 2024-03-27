@@ -234,6 +234,7 @@ public class InBoundController {
 
 				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
 				if (ArgUtil.is(channels)) {
+					String oDomain = AppContextUtil.getTenant();
 					for (ChannelConfigDupsDoc channel : channels) {
 						try {
 							AppContextUtil.clear();
@@ -245,6 +246,7 @@ public class InBoundController {
 							e.printStackTrace();
 						}
 					}
+					AppContextUtil.setTenant(oDomain);
 				} else if (ArgUtil.is(pageId)) {
 					String channelIdForDomain = PostManUtil.CHANNEL_ID(channelType, pageId);
 					inBoundRouter.inboundMessageEventAsync(channelIdForDomain, newData.map());
