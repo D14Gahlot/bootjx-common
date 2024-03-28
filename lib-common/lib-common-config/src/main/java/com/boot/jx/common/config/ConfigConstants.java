@@ -34,6 +34,7 @@ public class ConfigConstants {
 	public static final String GROUP_AGENT = "AGENT";
 	public static final String GROUP_NLP = "NLP";
 	public static final String GROUP_DEV = "DEVELOPMENT";
+	public static final String CHANNELS = "CHANNELS";
 
 	public static enum APP_KEY implements EntryMeta {
 
@@ -318,6 +319,17 @@ public class ConfigConstants {
 		BUILD_VERSION(
 				new ConfigMeta("BUILD_VERSION", "perms.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
 		CONTACT_CENTER(new ConfigMeta("Contact Center", "perms.contact.center").optionsOnOff()),
+		CHANNEL_AUTOCONFIGURE_FACEBOOK(new ConfigMeta("AutoConfigure Facebook", "perms.channel.autoconfigure.facebook")
+				.optionsOnOff().group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_WHATSAPP(new ConfigMeta("AutoConfigure WhatsApp", "perms.channel.autoconfigure.whatsapp")
+				.optionsOnOff().group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_INSTAGRAM(
+				new ConfigMeta("AutoConfigure Instagram", "perms.channel.autoconfigure.instagram").optionsOnOff()
+						.group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_TELEGRAM(new ConfigMeta("AutoConfigure Telegram", "perms.channel.autoconfigure.telegram")
+				.optionsOnOff().group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_TWITTER(new ConfigMeta("AutoConfigure Twitter", "perms.channel.autoconfigure.twitter")
+				.optionsOnOff().group(CHANNELS)),
 		// Ends here
 		;
 
