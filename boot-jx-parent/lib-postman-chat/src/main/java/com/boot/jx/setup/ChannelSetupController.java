@@ -194,6 +194,7 @@ public class ChannelSetupController {
 						channel.setContactType(master.getContactType());
 						channel.setChannelType(master.getChannelType());
 						configManager.saveForDomain(channel, domainName);
+						returnVal.put(channel.getChannelId(), domainName);
 					}
 				}
 
