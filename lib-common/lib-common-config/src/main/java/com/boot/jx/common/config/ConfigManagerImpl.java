@@ -14,6 +14,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.boot.jx.AppConfigPackage.AppSharedConfigChange;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
@@ -256,8 +257,31 @@ public class ConfigManagerImpl implements ConfigManager {
 	@Override
 	public void save(ChannelConfig config) {
 		pmEnvironment.addChannel(config);
-		this.refresh();
+		this.refresh(ChannelConfigDoc.DOCUMENT_NAME, config.getChannelId());
 		connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
+	}
+
+	@Override
+	public ChannelConfig saveChannelConfig(String channelType, Map<String, Object> data) {
+		MapModel map = MapModel.from(data);
+		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
+		String channelId = map.getString("channelId");
+		String lane = map.getString("lane");
+		boolean isAutoCreated = map.entry("isAutoCreated").asBoolean(Boolean.FALSE);
+
+		if (ArgUtil.is(data)) {
+			ChannelConfig config = pmEnvironment.local().channel(channelId);
+			if (config == null) {
+				config = new ChannelConfig();
+				config.setLane(lane);
+				config.setAutoCreated(isAutoCreated);
+			}
+			plugin.importChannelConfigFromMap(config, map, channelType);
+			save(config);
+			channelId = config.getChannelId();
+
+		}
+		return getChannelConfig(channelId);
 	}
 
 	@Override
@@ -272,26 +296,6 @@ public class ConfigManagerImpl implements ConfigManager {
 		this.saveChannelConfig(config.getChannelType(), map);
 	}
 
-	@Override
-	public ChannelConfig saveChannelConfig(String channelType, Map<String, Object> data) {
-		MapModel map = MapModel.from(data);
-		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
-		String channelId = map.getString("channelId");
-		String lane = map.getString("lane");
-		if (ArgUtil.is(data)) {
-			ChannelConfig config = pmEnvironment.local().channel(channelId);
-			if (config == null) {
-				config = new ChannelConfig();
-				config.setLane(lane);
-			}
-			plugin.importChannelConfigFromMap(config, map, channelType);
-			save(config);
-			channelId = config.getChannelId();
-
-		}
-		return getChannelConfig(channelId);
-	}
-
 	public ChannelConfig updateChannelConfig(String channelId, String action) {
 		if (ArgUtil.is(channelId)) {
 			ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
@@ -304,7 +308,7 @@ public class ConfigManagerImpl implements ConfigManager {
 				ApiResponseUtil.throwUnAuthorizedException("Cannot Edit Sandbox Channel");
 			}
 			pmEnvironment.updateChannel(channelConfig, action);
-			this.refresh();
+			this.refresh(ChannelConfigDoc.DOCUMENT_NAME, channelId);
 			return channelConfig;
 		}
 		return null;
@@ -365,6 +369,14 @@ public class ConfigManagerImpl implements ConfigManager {
 	@Override
 	public void refresh() {
 		sharedConfigManager.clear();
+	}
+
+	@Override
+	public void refresh(String configType, String configId) {
+		AppSharedConfigChange change = new AppSharedConfigChange();
+		change.setConfigId(configId);
+		change.setConfigType(configType);
+		sharedConfigManager.clear(change);
 	}
 
 	@Autowired

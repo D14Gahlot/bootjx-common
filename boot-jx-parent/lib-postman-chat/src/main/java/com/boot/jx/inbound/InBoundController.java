@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,10 +28,9 @@ import com.boot.jx.chat.ChatProxyManager;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.mongo.CommonMongoQB.MQB;
-import com.boot.jx.postman.PMConfiguration;
-import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.fb.FacebookHookRequest;
@@ -43,7 +40,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
-import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
@@ -51,16 +48,11 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.Random;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 @RestController
 public class InBoundController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundController.class);
-
-	private Cache<String, List<ChannelConfigDupsDoc>> channelList = CacheBuilder.newBuilder().maximumSize(1000)
-			.expireAfterWrite(1, TimeUnit.HOURS).build();
 
 	@Autowired
 	private InBoundService inBoundService;
@@ -76,6 +68,9 @@ public class InBoundController {
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
+
+	@Autowired
+	ConfigMaster configMaster;
 
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
@@ -191,15 +186,7 @@ public class InBoundController {
 
 				String pageId = pageEntry.getId();
 
-				List<ChannelConfigDupsDoc> channels = channelList.getIfPresent(pageId);
-				if (!ArgUtil.is(channels) || channels.size() < 1) {
-					channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
-							.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted")
-									.is(false).and("channelType").is(channelType)));
-					if (ArgUtil.is(channels)) {
-						channelList.put(pageId, channels);
-					}
-				}
+				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
 				if (ArgUtil.is(channels)) {
 					for (ChannelConfigDupsDoc channel : channels) {
 						try {
@@ -245,23 +232,12 @@ public class InBoundController {
 							.path(FacebookConstants.WABAPaths.DISPLAY_PHONE_NUMBER).asString();
 				}
 
-				List<ChannelConfigDupsDoc> channels = channelList.getIfPresent(pageId);
-				if (!ArgUtil.is(channels) || channels.size() < 1) {
-					channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
-							.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted")
-									.is(false).and("channelType").is(channelType)));
-					if (ArgUtil.is(channels)) {
-						channelList.put(pageId, channels);
-					}
-				}
+				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
 				if (ArgUtil.is(channels)) {
 					for (ChannelConfigDupsDoc channel : channels) {
 						try {
-							AppContextUtil.clear();
-							AppContextUtil.setTenant(channel.getDomain());
-							AppContextUtil.init();
-							inBoundRouter.inboundMessageEventAsync(channel.getChannelId(), newData.map());
-							AppContextUtil.clear();
+							inBoundRouter.inboundMessageEventAsync(channel.getDomain(), channel.getChannelId(),
+									newData.map());
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

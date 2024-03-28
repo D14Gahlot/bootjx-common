@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
@@ -83,8 +84,8 @@ public class InBoundRouter {
 
 		if (!ArgUtil.is(channelConfig)) {
 			Contactable c = PostManUtil.parseChannelId(channelId);
-			channelConfig = configManager.saveChannelConfig(c.getChannelType(),
-					MapModel.createInstance().put("channelId", channelId).put("lane", c.getLane()).toMap());
+			channelConfig = configManager.saveChannelConfig(c.getChannelType(), MapModel.createInstance()
+					.put("channelId", channelId).put("lane", c.getLane()).put("isAutoCreated", true).toMap());
 
 		}
 		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
@@ -126,6 +127,14 @@ public class InBoundRouter {
 
 	@Async
 	public void inboundMessageEventAsync(String channelId, Map<String, Object> data) {
+		this.inboundMessageEvent(channelId, data);
+	}
+
+	@Async
+	public void inboundMessageEventAsync(String domain, String channelId, Map<String, Object> data) {
+		AppContextUtil.clear();
+		AppContextUtil.setTenant(domain);
+		AppContextUtil.init();
 		this.inboundMessageEvent(channelId, data);
 	}
 

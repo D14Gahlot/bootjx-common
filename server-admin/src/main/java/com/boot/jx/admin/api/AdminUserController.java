@@ -141,17 +141,5 @@ public class AdminUserController {
 			return ApiResponse.buildResults(adminService.deleteGroups(reqDto));
 		}
 	
-	@RequestMapping(value = "/api/add-update-customer-mast-field", method = { RequestMethod.POST })
-	public ApiResponse<CustomerMasterFieldDto, Object> createAndUpdateCustmerMasterFiled(@RequestBody CustomerMasterFieldDto reqDto){
-		if(StringUtils.isBlank(reqDto.getId())){
-			adminService.checkDupFieldCode(reqDto);
-		}	
-		return ApiResponse.buildResults(adminService.addEditCustomerMastFields(reqDto));
-	}
 	
-	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.GET })
-	public ApiResponse<CustomerMasterFieldDto, Object> fetchCusMasFields(@RequestParam(value = "id", required = false) String id){
-			return ApiResponse.buildResults(adminService.fetchCustomerMstFields(id));
-		}
-
 }

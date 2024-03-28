@@ -36,6 +36,7 @@ public class ChannelConfig extends AChannelConfig {
 	private WACFBConfigDetails wacfb;
 	private OAConfigDetails oa;
 
+	private boolean isAutoCreated;
 	private boolean isMaster;
 	private boolean isPushAllowed;
 	private boolean isPushOnlyApproved;
@@ -248,6 +249,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
+	}
+
+	public boolean isAutoCreated() {
+		return isAutoCreated;
+	}
+
+	public void setAutoCreated(boolean isAutoCreated) {
+		this.isAutoCreated = isAutoCreated;
 	}
 
 }

@@ -10,8 +10,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
+import com.boot.jx.admin.dto.CustomerProfileMasterDto;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
+import com.boot.jx.common.doc.CustomerProfileMasterDoc;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -80,6 +83,37 @@ public List<CustomerMasterFieldDto> addAndEditMasterfield(CustomerMasterFieldDto
 	public CustomerMasterFieldDoc toCheckDupFieldCode(String fieldCode) {
 		CustomerMasterFieldDoc mstDoc = mongoTemplate.findOne(new Query(Criteria.where("fieldCode").is(fieldCode)),CustomerMasterFieldDoc.class);
 	return mstDoc;
+	}
+	
+	public  List<CustomerProfileMasterDto> uploadFile(CommonFile comfile){
+		CustomerProfileMasterDoc doc = new CustomerProfileMasterDoc();
+		doc.setFiles(comfile);
+		doc.setCreateBy(auditDetailProvider.getAuditUser());
+		doc.setCreatedStamp(System.currentTimeMillis());
+		commonMongoTemplate.save(doc);
+		return null;
+		
+	}
+	
+	public List<CustomerProfileMasterDto> fetchCustomerProfileMasterDoc(String id) {
+		
+		List<CustomerProfileMasterDto> dtoLst = new ArrayList<>();
+		CustomerProfileMasterDoc cmProfileDoc = null;
+		if (ArgUtil.is(id)) {
+			cmProfileDoc = commonMongoTemplate.findByIdString(id, CustomerProfileMasterDoc.class);
+			if (ArgUtil.is(cmProfileDoc)) {
+				CustomerProfileMasterDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new CustomerProfileMasterDto());
+				dtoLst.add(dto);
+			}
+		} else {
+			List<CustomerProfileMasterDoc> lstProfileDocs = mongoTemplate.findAll(CustomerProfileMasterDoc.class);
+			for (CustomerProfileMasterDoc doc : lstProfileDocs) {
+				CustomerProfileMasterDto dto = EntityDtoUtil.entityToDto(doc, new CustomerProfileMasterDto());
+				dtoLst.add(dto);
+			}
+		}
+
+		return dtoLst;
 	}
 	
 

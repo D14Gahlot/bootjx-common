@@ -188,27 +188,7 @@ public class AdminService {
 		return reqDto;
 	}
 
-	public List<CustomerMasterFieldDto> addEditCustomerMastFields(CustomerMasterFieldDto req) {
-		List<CustomerMasterFieldDto> lstCmfields = cmFieldMgr.addAndEditMasterfield(req);
-		return lstCmfields;
-	}
-
-	public List<CustomerMasterFieldDto> fetchCustomerMstFields(String id) {
-
-		List<CustomerMasterFieldDto> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id);
-		return lstCmfields;
-	}
 	
-	public void checkDupFieldCode(CustomerMasterFieldDto req) {
-		if (ArgUtil.is(req.getId())) {
-			CustomerMasterFieldDoc groupDoc = cmFieldMgr.toCheckDupFieldCode(req.getFieldCode());
-			if (ArgUtil.is(groupDoc)) {
-				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidNameDuplicate")
-						.description("Field code already exists"));
-
-			}
-		}
-	}
 
 
 }
