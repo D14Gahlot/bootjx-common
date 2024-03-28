@@ -184,6 +184,7 @@ public class ChannelSetupController {
 			respDoc.setChannelConfigId(masterChannelId);
 			respDoc.setResp(response);
 			respDoc.setChannelType(master.getChannelType());
+			respDoc.setDomain(domainName);
 			commonMongoTemplate.save(respDoc);
 			returnVal.put("id", respDoc.getId());
 			ConnectorHandler connector = connectorHandlerFactory.get(master.getContactType(), master.getChannelType());

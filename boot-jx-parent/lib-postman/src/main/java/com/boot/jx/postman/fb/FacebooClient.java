@@ -73,7 +73,7 @@ public class FacebooClient implements MessageClient {
 
 	public FacebookUserProfile getUserProfile(ChannelConfig config, Contactable contact) {
 		return restService.ajax("https://graph.facebook.com").path("/{psid}").pathParam("psid", contact.getCsid())
-				.queryParam("fields", "first_name,last_name,profile_pic,email,id")
+				.queryParam("fields", "first_name,last_name,profile_pic,id")
 				.queryParam("access_token", config.getFacebook().getAccessToken()).get().as(FacebookUserProfile.class);
 	}
 
