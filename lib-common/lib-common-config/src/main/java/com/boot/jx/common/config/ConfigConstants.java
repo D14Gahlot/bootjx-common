@@ -35,6 +35,7 @@ public class ConfigConstants {
 	public static final String GROUP_NLP = "NLP";
 	public static final String GROUP_DEV = "DEVELOPMENT";
 	public static final String CHANNELS = "CHANNELS";
+	public static final String BOT = "BOT";
 
 	public static enum APP_KEY implements EntryMeta {
 
@@ -330,6 +331,7 @@ public class ConfigConstants {
 				.optionsOnOff().group(CHANNELS)),
 		CHANNEL_AUTOCONFIGURE_TWITTER(new ConfigMeta("AutoConfigure Twitter", "perms.channel.autoconfigure.twitter")
 				.optionsOnOff().group(CHANNELS)),
+		BOT_FLOW_BUILDER(new ConfigMeta("Bot Flow Builder", "perms.bot.flow.builder").optionsOnOff().group(BOT)),
 		// Ends here
 		;
 
