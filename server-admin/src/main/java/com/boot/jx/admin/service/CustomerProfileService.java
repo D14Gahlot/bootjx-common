@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
+import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.CustomerProfileMasterDto;
 import com.boot.jx.admin.manager.CustomerMasterFldMgr;
@@ -13,6 +14,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.utils.ArgUtil;
 
 @Service
@@ -57,5 +59,25 @@ public class CustomerProfileService {
 		return cmFieldMgr.fetchCustomerProfileMasterDoc(id);
 		
 	}
+	
+	public List<CustomerProfileMasterDto> fetchCustomerContactProfile(String id){
+		return cmFieldMgr.fetchCustomerContactProfile(id);
+		
+	}
+	
+
+	public List<CustomerContactDto> fetchCustomerContactDetails(String id){
+		return cmFieldMgr.fetchCustomerContactDetails(id);
+		
+	}
+	
+	public CustomerContactProfileDoc fetchCustomerContactInfo(String id,String customerId,String phoneno){
+		return cmFieldMgr.fetchCustomerContactInfo(id,customerId,phoneno);
+		
+	}
+	
+	
+	
+	
 
 }

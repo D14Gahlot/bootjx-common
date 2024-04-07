@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.CustomerProfileMasterDto;
 import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 
 @RestController
 public class CustomerProfileContoller {
@@ -51,7 +53,6 @@ public class CustomerProfileContoller {
 		CommonFile url = fileStore.upload1(file,
 				String.format("%s/profileExcel/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
 				file.getOriginalFilename());
-		System.out.println("url "+ url.getUrl());
 		cusProfileService.uploadFile(url);
 		return ApiResponse.buildResults(url);
 	
@@ -61,6 +62,23 @@ public class CustomerProfileContoller {
 	@RequestMapping(value = "/api/fetch/customer/master/profile", method = { RequestMethod.GET })
 	public ApiResponse<CustomerProfileMasterDto, Object> fetchCustomerProfileMasterDoc(@RequestParam(value = "id", required = false) String id){
 			return ApiResponse.buildResults(cusProfileService.fetchCustomerProfileMasterDoc(id));
+		}
+	
+	@RequestMapping(value = "/api/fetch/customer/upload/profile", method = { RequestMethod.GET })
+	public ApiResponse<CustomerProfileMasterDto, Object> fetchCustomerContactProfile(@RequestParam(value = "id", required = true) String id){
+			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactProfile(id));
+		}
+	
+	@RequestMapping(value = "/api/save/customer/upload/contact/details", method = { RequestMethod.POST })
+	public ApiResponse<CustomerContactDto, Object> fetchCustomerContactDetails(@RequestParam(value = "id", required = true) String id){
+			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactDetails(id));
+		}
+	
+	@RequestMapping(value = "/api/agent/customer/contact/info", method = { RequestMethod.GET })
+	public ApiResponse<CustomerContactProfileDoc, Object> fetchCustomerContactInfo(@RequestParam(value = "id", required = true) String id,
+			@RequestParam(value = "customerId", required = false) String customerId,
+			@RequestParam(value = "phoneno", required = false) String phoneno){
+			return ApiResponse.buildResult(cusProfileService.fetchCustomerContactInfo(id,customerId,phoneno));
 		}
 	
 	

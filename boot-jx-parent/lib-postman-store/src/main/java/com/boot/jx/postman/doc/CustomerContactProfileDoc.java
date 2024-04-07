@@ -1,15 +1,26 @@
-package com.boot.jx.admin.dto;
+package com.boot.jx.postman.doc;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
-import com.boot.jx.model.CommonFile;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.SimpleDocument;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
+@Document(collection = "CUSTOMER_PROFILE_NEW")
+public class CustomerContactProfileDoc implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {
+	private static final long serialVersionUID = 1281605084248923642L;
 
-public class CustomerProfileMasterDto {
-
-	
+	@Id
 	private String id;
-	CommonFile files;
+	List<Map<String,Object>> contactmap =new ArrayList<>();
+	private String contactIdRef;
+	
 	private String isactive;
 	private Date createdDate;
 	private Long createdStamp;
@@ -18,13 +29,31 @@ public class CustomerProfileMasterDto {
 	private Long modifiedStamp;
 	private String modifiedBy;
 	
+	@Override
 	public String getId() {
-		return id;
+		// TODO Auto-generated method stub
+		return null;
 	}
+	@Override
 	public void setId(String id) {
-		this.id = id;
+		// TODO Auto-generated method stub
+		
 	}
-	
+	public List<Map<String, Object>> getContactmap() {
+		return contactmap;
+	}
+	public void setContactmap(List<Map<String, Object>> contactmap) {
+		this.contactmap = contactmap;
+	}
+	public String getContactIdRef() {
+		return contactIdRef;
+	}
+	public void setContactIdRef(String contactIdRef) {
+		this.contactIdRef = contactIdRef;
+	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 	public String getIsactive() {
 		return isactive;
 	}
@@ -67,11 +96,4 @@ public class CustomerProfileMasterDto {
 	public void setModifiedBy(String modifiedBy) {
 		this.modifiedBy = modifiedBy;
 	}
-	public CommonFile getFiles() {
-		return files;
-	}
-	public void setFiles(CommonFile files) {
-		this.files = files;
-	}
-	
 }
