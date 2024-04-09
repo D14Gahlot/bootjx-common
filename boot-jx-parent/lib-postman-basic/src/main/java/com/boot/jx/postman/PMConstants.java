@@ -51,6 +51,20 @@ public class PMConstants {
 		public static final String OA_MEMBER = "OA_MEMBER";
 	}
 
+	public enum APP_MODULES {
+		ADMIN("/admin"), AGENT("/agent"), CALENDAR("/nexus/calendar"), SOCIAL("/nexus/social");
+
+		private String path;
+
+		APP_MODULES(String path) {
+			this.path = path;
+		}
+
+		public String getPath() {
+			return path;
+		}
+	}
+
 	public static class MESSAGE_BOUND_TYPE {
 		public static final String INBOUND = "I";
 		public static final String INBOUND_IMPORTED = "Ii";

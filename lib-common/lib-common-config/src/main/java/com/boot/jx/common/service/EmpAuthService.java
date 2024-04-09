@@ -1,7 +1,10 @@
 package com.boot.jx.common.service;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,6 +117,11 @@ public class EmpAuthService {
 		return null;
 	}
 
+	public AgentResponseAuthDto loginByDomainToken(UserAuthToken userAuthToken) throws NoSuchAlgorithmException {
+		return loginByDomainToken(userAuthToken.getDomainUser(), userAuthToken.getDomainUserEmail(),
+				userAuthToken.getDomainName(), userAuthToken.getDomainId(), userAuthToken.getDomainToken(), true);
+	}
+
 	public AgentResponseAuthDto loginByDomainToken(String username, String userEmail, String domainName,
 			String domainId, String domainToken, boolean adminPanel) throws NoSuchAlgorithmException {
 		if (!ArgUtil.areEqual(AppContextUtil.getTenant(), domainName)) {
@@ -131,10 +139,24 @@ public class EmpAuthService {
 				agent.getAuthKey());
 
 		if (ArgUtil.is(agent) && builder.validate(domainToken)) {
+			fixAppModules(agent);
 			DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
 			return new AgentResponseAuthDto().importFrom(agent).dept(new DepartmentResponseAuthDto().importFrom(dept));
 		}
 		return null;
+	}
+
+	public void fixAppModules(AgentDoc agent) {
+		Set<String> appModules = new HashSet<String>(agent.appModules());
+
+		if (agent.isAdmin() && !appModules.contains(PMConstants.APP_MODULES.ADMIN.name())) {
+			appModules.add(PMConstants.APP_MODULES.ADMIN.name());
+		}
+
+		if (agent.getIsEnabled() && !appModules.contains(PMConstants.APP_MODULES.AGENT.name())) {
+			appModules.add(PMConstants.APP_MODULES.AGENT.name());
+		}
+		agent.setAppModules(new ArrayList<String>(appModules));
 	}
 
 	public boolean resetPassword(String username, boolean admin) throws NoSuchAlgorithmException {

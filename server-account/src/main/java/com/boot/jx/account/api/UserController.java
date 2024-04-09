@@ -1,12 +1,12 @@
 package com.boot.jx.account.api;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,20 +19,16 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.UserAuthTokenDoc;
+import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.dto.UserAuthToken;
 import com.boot.jx.common.service.EmpAuthService;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.HSMTemplate3rdParty;
-import com.boot.jx.postman.model.OutboxMessage;
-import com.boot.jx.postman.others.OAClient;
-import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
-import com.boot.utils.OTPUtils;
 import com.boot.utils.OTPUtils.OTPDetails;
+import com.boot.utils.UniqueID;
 
 @Controller
 @RequestMapping("/user")
@@ -49,6 +45,9 @@ public class UserController {
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
+
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
 
 	@RequestMapping(value = { "/auth/**", "/app/**" }, method = { RequestMethod.GET })
 	public String home(Model model, @RequestParam(required = false) String theme) {
@@ -87,7 +86,47 @@ public class UserController {
 		} else if (ArgUtil.is(loginToken.getDomainUserPhone())) {
 			empAuthService.sendOTP(loginToken);
 		}
+
+		if (ArgUtil.is(loginToken.getDomainToken())) {
+			tokenId = ArgUtil.nonEmpty(tokenId, loginToken.getTokenId());
+			UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
+			if (!ArgUtil.is(loginDoc)) {
+				loginDoc = EntityDtoUtil.dtoToEntity(loginToken, new UserAuthTokenDoc());
+			}
+			loginDoc.setSsoToken(UniqueID.generateString62());
+			mongoTemplate.save(loginDoc);
+			commonHttpRequest.setCookie("tokenId", tokenId, "/user", 3600 * 8);
+			commonHttpRequest.setCookie("ssoToken", loginDoc.getSsoToken(), "/user", 3600 * 8);
+		}
 		return ApiResponse.buildData(loginToken);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/pub/logout", method = { RequestMethod.GET })
+	public ApiResponse<UserAuthToken, Object> ssoLogout(@CookieValue(required = false) String tokenId)
+			throws NoSuchAlgorithmException {
+		UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
+		if (ArgUtil.is(loginDoc)) {
+			loginDoc.setInvalid(true);
+			mongoTemplate.save(loginDoc);
+		} else {
+			loginDoc = null;
+		}
+		return ApiResponse.buildResult(loginDoc);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/pub/sso", method = { RequestMethod.GET })
+	public ApiResponse<AgentResponseAuthDto, UserAuthToken> ssoLogin(@CookieValue(required = false) String tokenId,
+			@CookieValue(required = false) String ssoToken) throws NoSuchAlgorithmException {
+		UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
+		AgentResponseAuthDto agent = null;
+		if (ArgUtil.is(loginDoc) && ArgUtil.is(loginDoc.getSsoToken(), ssoToken)) {
+			agent = empAuthService.loginByDomainToken(loginDoc);
+		} else {
+			loginDoc = null;
+		}
+		return ApiResponse.buildResult(agent, loginDoc);
 	}
 
 	@ResponseBody
