@@ -100,6 +100,8 @@ public class UserController {
 			mongoTemplate.save(loginDoc);
 			commonHttpRequest.setCookie("tokenId", loginDoc.getTokenId(), "/user", 3600 * 8);
 			commonHttpRequest.setCookie("ssoToken", loginDoc.getSsoToken(), "/user", 3600 * 8);
+			commonHttpRequest.setCookie("mtoken", loginDoc.getTokenId() + ":" + loginDoc.getSsoToken(), "/user",
+					3600 * 8);
 		}
 		return ApiResponse.buildData(loginToken);
 	}
