@@ -89,13 +89,16 @@ public class UserController {
 
 		if (ArgUtil.is(loginToken.getDomainToken())) {
 			tokenId = ArgUtil.nonEmpty(tokenId, loginToken.getTokenId());
-			UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
+			UserAuthTokenDoc loginDoc = null;
+			if (ArgUtil.is(tokenId)) {
+				loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
+			}
 			if (!ArgUtil.is(loginDoc)) {
 				loginDoc = EntityDtoUtil.dtoToEntity(loginToken, new UserAuthTokenDoc());
 			}
 			loginDoc.setSsoToken(UniqueID.generateString62());
 			mongoTemplate.save(loginDoc);
-			commonHttpRequest.setCookie("tokenId", tokenId, "/user", 3600 * 8);
+			commonHttpRequest.setCookie("tokenId", loginDoc.getTokenId(), "/user", 3600 * 8);
 			commonHttpRequest.setCookie("ssoToken", loginDoc.getSsoToken(), "/user", 3600 * 8);
 		}
 		return ApiResponse.buildData(loginToken);
