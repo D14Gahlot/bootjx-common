@@ -18,7 +18,6 @@ import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.model.InputFile;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
