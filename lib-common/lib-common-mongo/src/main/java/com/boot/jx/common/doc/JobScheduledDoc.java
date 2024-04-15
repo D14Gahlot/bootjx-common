@@ -18,7 +18,7 @@ public class JobScheduledDoc {
 	@Id
 	private String id;
 	private String  jobtype;
-	Map<String, Object> input = new HashMap<String, Object>();
+	//Map<String, Object> input = new HashMap<String, Object>();
 	List<Map<String, Object>> inputLst = new ArrayList<>();
 	private String isactive;
 	private Long createdStamp;
@@ -68,12 +68,7 @@ public class JobScheduledDoc {
 	public void setTime(TimeStampIndex time) {
 		this.time = time;
 	}
-	public Map<String, Object> getInput() {
-		return input;
-	}
-	public void setInput(Map<String, Object> input) {
-		this.input = input;
-	}
+	
 	public List<Map<String, Object>> getInputLst() {
 		return inputLst;
 	}

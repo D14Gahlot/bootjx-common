@@ -104,15 +104,16 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 		JobScheduledDoc doc = new JobScheduledDoc();
 		List<Map<String,Object>> lstMaps = new ArrayList<>();
 		try {
-		InputFile inputFile = new InputFile();
-		inputFile.setPath(comfile.getPath());
-		inputFile.setTitle(comfile.getTitle());
-		inputFile.setFileFormat(comfile.getFileFormat());
-		inputFile.setExtension(comfile.getExtension());
-		inputFile.setUrl(comfile.getUrl());
-		inputFile.setContentLength(comfile.getContentLength());
+//		InputFile inputFile = new InputFile();
+//		inputFile.setPath(comfile.getPath());
+//		inputFile.setTitle(comfile.getTitle());
+//		inputFile.setFileFormat(comfile.getFileFormat());
+//		inputFile.setExtension(comfile.getExtension());
+//		inputFile.setUrl(comfile.getUrl());
+//		inputFile.setContentLength(comfile.getContentLength());
+		comfile.setBody(null);	
 		Map<String, Object> mapObj = new HashMap<String,Object>();
-		mapObj.put("file", inputFile);
+		mapObj.put("file", comfile);
 		lstMaps.add(mapObj);
 		//doc.setInput(mapObj);
 		doc.setInputLst(lstMaps);
