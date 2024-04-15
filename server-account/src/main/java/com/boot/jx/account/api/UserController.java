@@ -126,7 +126,8 @@ public class UserController {
 			@CookieValue(required = false) String ssoToken) throws NoSuchAlgorithmException {
 		UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
 		AgentResponseAuthDto agent = null;
-		if (ArgUtil.is(loginDoc) && ArgUtil.is(loginDoc.getSsoToken(), ssoToken) && !loginDoc.isInvalid()) {
+		if (ArgUtil.is(loginDoc) && ArgUtil.is(loginDoc.getSsoToken(), ssoToken) && !loginDoc.isInvalid()
+				&& !loginDoc.isExpired()) {
 			agent = empAuthService.loginByDomainToken(loginDoc);
 		} else {
 			loginDoc = null;
