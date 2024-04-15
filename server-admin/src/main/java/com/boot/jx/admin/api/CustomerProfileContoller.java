@@ -1,6 +1,5 @@
 package com.boot.jx.admin.api;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,10 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
-import com.boot.jx.admin.dto.CustomerProfileMasterDto;
+import com.boot.jx.admin.dto.JobScheduledDto;
 import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
+import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 
@@ -44,28 +44,24 @@ public class CustomerProfileContoller {
 	@Autowired
 	AWSFileStore fileStore;
 	@RequestMapping(value = "/api/upload/pofile", method = { RequestMethod.POST })
-	public ApiResponse<CommonFile, Object> uploadExcel(
+	public ApiResponse<JobScheduledDoc, Object> uploadExcel(
 			@RequestParam(name = "file", required = false) MultipartFile file) {
-//		CommonFile url = fileStore.upload1(file,
-//				String.format("%s%s%s", AppContextUtil.getTenant(), UUID.randomUUID()),
-//				file.getOriginalFilename());
-		
 		CommonFile url = fileStore.upload1(file,
 				String.format("%s/profileExcel/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
 				file.getOriginalFilename());
-		cusProfileService.uploadFile(url);
-		return ApiResponse.buildResults(url);
+		JobScheduledDoc jobSch = cusProfileService.uploadFile(url);
+		return ApiResponse.buildResults(jobSch);
 	
 	}
  
 	
-	@RequestMapping(value = "/api/fetch/customer/master/profile", method = { RequestMethod.GET })
-	public ApiResponse<CustomerProfileMasterDto, Object> fetchCustomerProfileMasterDoc(@RequestParam(value = "id", required = false) String id){
+	@RequestMapping(value = "/api/fetch/schdelued/jobs/", method = { RequestMethod.GET })
+	public ApiResponse<JobScheduledDto, Object> fetchCustomerProfileMasterDoc(@RequestParam(value = "id", required = false) String id){
 			return ApiResponse.buildResults(cusProfileService.fetchCustomerProfileMasterDoc(id));
 		}
 	
-	@RequestMapping(value = "/api/fetch/customer/upload/profile", method = { RequestMethod.GET })
-	public ApiResponse<CustomerProfileMasterDto, Object> fetchCustomerContactProfile(@RequestParam(value = "id", required = true) String id){
+	@RequestMapping(value = "/api/fetch/customer/contact/profile", method = { RequestMethod.GET })
+	public ApiResponse<JobScheduledDto, Object> fetchCustomerContactProfile(@RequestParam(value = "id", required = true) String id){
 			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactProfile(id));
 		}
 	

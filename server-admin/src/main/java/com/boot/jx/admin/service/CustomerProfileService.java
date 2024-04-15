@@ -8,11 +8,12 @@ import org.springframework.stereotype.Service;
 
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
-import com.boot.jx.admin.dto.CustomerProfileMasterDto;
+import com.boot.jx.admin.dto.JobScheduledDto;
 import com.boot.jx.admin.manager.CustomerMasterFldMgr;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
+import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.utils.ArgUtil;
@@ -48,19 +49,19 @@ public class CustomerProfileService {
 		}
 	}
 	
-	public List<CustomerProfileMasterDto> uploadFile(CommonFile comfile){
+	public JobScheduledDoc uploadFile(CommonFile comfile){
 		return cmFieldMgr.uploadFile(comfile);
 		
 	}
 	
 	
 	
-	public List<CustomerProfileMasterDto> fetchCustomerProfileMasterDoc(String id){
+	public List<JobScheduledDto> fetchCustomerProfileMasterDoc(String id){
 		return cmFieldMgr.fetchCustomerProfileMasterDoc(id);
 		
 	}
 	
-	public List<CustomerProfileMasterDto> fetchCustomerContactProfile(String id){
+	public List<JobScheduledDto> fetchCustomerContactProfile(String id){
 		return cmFieldMgr.fetchCustomerContactProfile(id);
 		
 	}

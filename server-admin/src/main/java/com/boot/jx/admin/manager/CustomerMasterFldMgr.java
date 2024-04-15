@@ -1,6 +1,7 @@
 package com.boot.jx.admin.manager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,14 +13,18 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
-import com.boot.jx.admin.dto.CustomerProfileMasterDto;
+import com.boot.jx.admin.dto.JobScheduledDto;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
-import com.boot.jx.common.doc.CustomerProfileMasterDoc;
+import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.InputFile;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 
 @Component
@@ -95,30 +100,53 @@ public class CustomerMasterFldMgr {
 		return mstDoc;
 	}
 
-	public List<CustomerProfileMasterDto> uploadFile(CommonFile comfile) {
-		CustomerProfileMasterDoc doc = new CustomerProfileMasterDoc();
-		doc.setFiles(comfile);
+public JobScheduledDoc uploadFile(CommonFile comfile) {
+		JobScheduledDoc doc = new JobScheduledDoc();
+		List<Map<String,Object>> lstMaps = new ArrayList<>();
+		try {
+		InputFile inputFile = new InputFile();
+		inputFile.setPath(comfile.getPath());
+		inputFile.setTitle(comfile.getTitle());
+		inputFile.setFileFormat(comfile.getFileFormat());
+		inputFile.setExtension(comfile.getExtension());
+		inputFile.setUrl(comfile.getUrl());
+		inputFile.setContentLength(comfile.getContentLength());
+		Map<String, Object> mapObj = new HashMap<String,Object>();
+		mapObj.put("file", inputFile);
+		lstMaps.add(mapObj);
+		//doc.setInput(mapObj);
+		doc.setInputLst(lstMaps);
+		doc.setIsactive(Constants.YES);
 		doc.setCreateBy(auditDetailProvider.getAuditUser());
 		doc.setCreatedStamp(System.currentTimeMillis());
+		doc.setJobtype("customer_profile_bulk_upload");
+		doc.setTime(TimeStampIndex.now());
+		doc.setStatus(ArgUtil.parseAsString(Status.SCHLD));
 		commonMongoTemplate.save(doc);
+	
+		return doc;
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		return null;
-
 	}
+	
+	
+	public List<JobScheduledDto> fetchCustomerProfileMasterDoc(String id) {
 
-	public List<CustomerProfileMasterDto> fetchCustomerProfileMasterDoc(String id) {
-
-		List<CustomerProfileMasterDto> dtoLst = new ArrayList<>();
-		CustomerProfileMasterDoc cmProfileDoc = null;
+		List<JobScheduledDto> dtoLst = new ArrayList<>();
+		JobScheduledDoc cmProfileDoc = null;
 		if (ArgUtil.is(id)) {
-			cmProfileDoc = commonMongoTemplate.findByIdString(id, CustomerProfileMasterDoc.class);
+			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
 			if (ArgUtil.is(cmProfileDoc)) {
-				CustomerProfileMasterDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new CustomerProfileMasterDto());
+				JobScheduledDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobScheduledDto());
 				dtoLst.add(dto);
 			}
 		} else {
-			List<CustomerProfileMasterDoc> lstProfileDocs = mongoTemplate.findAll(CustomerProfileMasterDoc.class);
-			for (CustomerProfileMasterDoc doc : lstProfileDocs) {
-				CustomerProfileMasterDto dto = EntityDtoUtil.entityToDto(doc, new CustomerProfileMasterDto());
+			List<JobScheduledDoc> lstProfileDocs = mongoTemplate.findAll(JobScheduledDoc.class);
+			for (JobScheduledDoc doc : lstProfileDocs) {
+				JobScheduledDto dto = EntityDtoUtil.entityToDto(doc, new JobScheduledDto());
 				dtoLst.add(dto);
 			}
 		}
@@ -128,17 +156,17 @@ public class CustomerMasterFldMgr {
 
 	/** read customer contacts from s3 bucket -excel **/
 
-	public List<CustomerProfileMasterDto> fetchCustomerContactProfile(String id) {
-		List<CustomerProfileMasterDto> dtoLst = new ArrayList<>();
-		CustomerProfileMasterDoc cmProfileDoc = null;
+	public List<JobScheduledDto> fetchCustomerContactProfile(String id) {
+		List<JobScheduledDto> dtoLst = new ArrayList<>();
+		JobScheduledDoc cmProfileDoc = null;
 		String url = null;
 		if (ArgUtil.is(id)) {
-			cmProfileDoc = commonMongoTemplate.findByIdString(id, CustomerProfileMasterDoc.class);
+			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
 			if (ArgUtil.is(cmProfileDoc)) {
-				url = cmProfileDoc.getFiles().getUrl();
-				CustomerProfileMasterDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new CustomerProfileMasterDto());
+				//url = cmProfileDoc.getFileUploadMap().
+				//JobScheduledDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobScheduledDto());
 
-				dtoLst.add(dto);
+				//dtoLst.add(dto);
 			}
 		}
 
@@ -150,13 +178,13 @@ public class CustomerMasterFldMgr {
 
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
 		List<CustomerContactDto> dtoLst = new ArrayList<>();
-		CustomerProfileMasterDoc cmProfileDoc = null;
+		JobScheduledDoc cmProfileDoc = null;
 		String url = null;
 		if (ArgUtil.is(id)) {
-			cmProfileDoc = commonMongoTemplate.findByIdString(id, CustomerProfileMasterDoc.class);
+			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
 			if (ArgUtil.is(cmProfileDoc)) {
 				List<Map<String, Object>> maps = null;
-				url = cmProfileDoc.getFiles().getUrl();
+				//url = cmProfileDoc.getFiles().getUrl();
 				CustomerContactDto dto = new CustomerContactDto();
 				dto.setId(id);
 				dto.setSuccessMaps(null);
