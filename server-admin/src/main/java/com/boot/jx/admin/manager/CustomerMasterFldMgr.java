@@ -13,9 +13,10 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
-import com.boot.jx.admin.dto.JobScheduledDto;
+import com.boot.jx.admin.dto.JobsResponseDto;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.common.doc.JobScheduledDoc;
+import com.boot.jx.common.doc.JobsOutPutDoc;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
@@ -133,20 +134,20 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 	}
 	
 	
-	public List<JobScheduledDto> fetchCustomerProfileMasterDoc(String id) {
+	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id) {
 
-		List<JobScheduledDto> dtoLst = new ArrayList<>();
+		List<JobsResponseDto> dtoLst = new ArrayList<>();
 		JobScheduledDoc cmProfileDoc = null;
 		if (ArgUtil.is(id)) {
 			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
 			if (ArgUtil.is(cmProfileDoc)) {
-				JobScheduledDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobScheduledDto());
+				JobsResponseDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
 				dtoLst.add(dto);
 			}
 		} else {
 			List<JobScheduledDoc> lstProfileDocs = mongoTemplate.findAll(JobScheduledDoc.class);
 			for (JobScheduledDoc doc : lstProfileDocs) {
-				JobScheduledDto dto = EntityDtoUtil.entityToDto(doc, new JobScheduledDto());
+				JobsResponseDto dto = EntityDtoUtil.entityToDto(doc, new JobsResponseDto());
 				dtoLst.add(dto);
 			}
 		}
@@ -156,8 +157,8 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 
 	/** read customer contacts from s3 bucket -excel **/
 
-	public List<JobScheduledDto> fetchCustomerContactProfile(String id) {
-		List<JobScheduledDto> dtoLst = new ArrayList<>();
+	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
+		List<JobsResponseDto> dtoLst = new ArrayList<>();
 		JobScheduledDoc cmProfileDoc = null;
 		String url = null;
 		if (ArgUtil.is(id)) {
@@ -232,5 +233,21 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 
 		}
 		return profileDoc;
+	}
+	
+	public List<JobsResponseDto> saveJobsOutPut(String id,List<Map<String,Object>> maps) {
+		if(ArgUtil.is(maps)) {
+			JobsOutPutDoc jobsOpDoc = new JobsOutPutDoc();
+			jobsOpDoc.setJobid(id);
+			jobsOpDoc.setOutputLst(maps);
+			jobsOpDoc.setIsactive(Constants.YES);
+			jobsOpDoc.setCreateBy(auditDetailProvider.getAuditUser());
+			jobsOpDoc.setCreatedStamp(System.currentTimeMillis());
+			jobsOpDoc.setJobtype("customer_profile_bulk_upload");
+			jobsOpDoc.setTime(TimeStampIndex.now());
+			jobsOpDoc.setStatus(ArgUtil.parseAsString(Status.SCHLD));
+			commonMongoTemplate.save(jobsOpDoc);
+		}
+		return null;
 	}
 }

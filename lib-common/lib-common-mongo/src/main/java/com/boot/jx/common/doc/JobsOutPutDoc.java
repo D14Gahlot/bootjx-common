@@ -1,25 +1,30 @@
-package com.boot.jx.admin.dto;
+package com.boot.jx.common.doc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 
+@Document(collection="JOBS_OUTPUT")
+@TypeAlias("JobsOutPutDoc")
+public class JobsOutPutDoc {
 
-public class JobScheduledDto {
-
-	
+	@Id
 	private String id;
 	private String  jobtype;
-	Map<String, Object> input = new HashMap<String, Object>();
-	List<Map<String, Object>> inputLst = new ArrayList<>();
+	List<Map<String, Object>> outputLst = new ArrayList<>();
 	private String isactive;
 	private Long createdStamp;
 	private String createBy;
 	public String status;
 	public TimeStampIndex time;
+	public String jobid;
 	public String getId() {
 		return id;
 	}
@@ -32,12 +37,7 @@ public class JobScheduledDto {
 	public void setJobtype(String jobtype) {
 		this.jobtype = jobtype;
 	}
-	public Map<String, Object> getInput() {
-		return input;
-	}
-	public void setInput(Map<String, Object> input) {
-		this.input = input;
-	}
+	
 	public String getIsactive() {
 		return isactive;
 	}
@@ -68,13 +68,19 @@ public class JobScheduledDto {
 	public void setTime(TimeStampIndex time) {
 		this.time = time;
 	}
-	public List<Map<String, Object>> getInputLst() {
-		return inputLst;
-	}
-	public void setInputLst(List<Map<String, Object>> inputLst) {
-		this.inputLst = inputLst;
-	}
 	
-	
+
+	public String getJobid() {
+		return jobid;
+	}
+	public void setJobid(String jobid) {
+		this.jobid = jobid;
+	}
+	public List<Map<String, Object>> getOutputLst() {
+		return outputLst;
+	}
+	public void setOutputLst(List<Map<String, Object>> outputLst) {
+		this.outputLst = outputLst;
+	}
 	
 }

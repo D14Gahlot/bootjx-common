@@ -1,6 +1,7 @@
 package com.boot.jx.admin.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
-import com.boot.jx.admin.dto.JobScheduledDto;
+import com.boot.jx.admin.dto.JobsResponseDto;
 import com.boot.jx.admin.manager.CustomerMasterFldMgr;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
@@ -56,12 +57,12 @@ public class CustomerProfileService {
 	
 	
 	
-	public List<JobScheduledDto> fetchCustomerProfileMasterDoc(String id){
+	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id){
 		return cmFieldMgr.fetchCustomerProfileMasterDoc(id);
 		
 	}
 	
-	public List<JobScheduledDto> fetchCustomerContactProfile(String id){
+	public List<JobsResponseDto> fetchCustomerContactProfile(String id){
 		return cmFieldMgr.fetchCustomerContactProfile(id);
 		
 	}
@@ -78,6 +79,11 @@ public class CustomerProfileService {
 	}
 	
 	
+	
+	public List<JobsResponseDto> saveJobsOutPut(String id,List<Map<String,Object>> maps){
+		return cmFieldMgr.saveJobsOutPut(id,maps);
+		
+	}
 	
 	
 

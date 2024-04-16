@@ -1,5 +1,7 @@
 package com.boot.jx.admin.api;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
-import com.boot.jx.admin.dto.JobScheduledDto;
+import com.boot.jx.admin.dto.JobsResponseDto;
 import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
@@ -56,12 +58,12 @@ public class CustomerProfileContoller {
  
 	
 	@RequestMapping(value = "/api/fetch/schdelued/jobs/", method = { RequestMethod.GET })
-	public ApiResponse<JobScheduledDto, Object> fetchCustomerProfileMasterDoc(@RequestParam(value = "id", required = false) String id){
+	public ApiResponse<JobsResponseDto, Object> fetchCustomerProfileMasterDoc(@RequestParam(value = "id", required = false) String id){
 			return ApiResponse.buildResults(cusProfileService.fetchCustomerProfileMasterDoc(id));
 		}
 	
 	@RequestMapping(value = "/api/fetch/customer/contact/profile", method = { RequestMethod.GET })
-	public ApiResponse<JobScheduledDto, Object> fetchCustomerContactProfile(@RequestParam(value = "id", required = true) String id){
+	public ApiResponse<JobsResponseDto, Object> fetchCustomerContactProfile(@RequestParam(value = "id", required = true) String id){
 			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactProfile(id));
 		}
 	
@@ -77,5 +79,8 @@ public class CustomerProfileContoller {
 			return ApiResponse.buildResult(cusProfileService.fetchCustomerContactInfo(id,customerId,phoneno));
 		}
 	
-	
+	@RequestMapping(value = "/api/save/jobs/output", method = { RequestMethod.POST })
+	public ApiResponse<JobsResponseDto, Object> saveJobsOutPut(@RequestParam(value = "id", required = true) String id,@RequestBody List<Map<String, Object>> maps){
+			return ApiResponse.buildResults(cusProfileService.saveJobsOutPut(id,maps));
+		}
 }
