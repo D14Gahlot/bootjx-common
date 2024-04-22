@@ -84,21 +84,7 @@ public class AgMainController {
 				chatSessionDto = chatArchive.withMessages(chatSessionDto);
 				}
 				
-				// chatSessionDtos.add(chatSessionDto);
-				/** added by B **/
-				if(query.contactTypes()!=null && query.contactTypes().size()>0 && ArgUtil.is(agentSession.getAgentCode()) && ArgUtil.is(agentSession.getAgentDept())) {
-					for (ContactType contactType : query.contactTypes()) {
-						String docAssignAgent=chatSessionDoc.getAssignedToAgent();
-						String docAssignDept=chatSessionDoc.getAssignedToDept();
-						if(contactType.name().equals(chatSessionDoc.getContactType()) 
-							&& (ArgUtil.is(docAssignAgent) && docAssignAgent.equalsIgnoreCase(agentSession.getAgentCode()))
-							&& (ArgUtil.is(docAssignDept) && docAssignDept.equalsIgnoreCase(agentSession.getAgentDept()))) {
-							chatSessionDtos.add(chatSessionDto);
-						}
-					}
-				}else {
-					 chatSessionDtos.add(chatSessionDto);
-				}/** code end here **/
+				chatSessionDtos.add(chatSessionDto);
 				
 			}
 		}
