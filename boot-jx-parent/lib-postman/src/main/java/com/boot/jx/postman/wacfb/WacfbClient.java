@@ -382,7 +382,7 @@ public class WacfbClient {
 				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 					String lowerFormat = extTemplateComponentFormat
 							.toLowerCase();
-					WA360OutBoundMedia media = createMedia(lowerFormat,
+					WacfbOutBoundMedia media = createMedia(lowerFormat,
 							outboxMessage.getAttachments().get(0));
 					if ("video".equals(lowerFormat)
 							|| ("document".equals(lowerFormat))) {
@@ -475,16 +475,16 @@ public class WacfbClient {
 		return send(req, channelConfig);
 	}
 
-	private WA360OutBoundMedia createMedia(String mediaType,
+	private WacfbOutBoundMedia createMedia(String mediaType,
 			Attachment attachment) {
-		WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
-		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
-		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		wa360OutBoundMedia.setFilename(attachment.getMediaName());
+		WacfbOutBoundMedia wacfb360OutBoundMedia = new WacfbOutBoundMedia();
+		wacfb360OutBoundMedia.setCaption(attachment.getMediaCaption());
+		wacfb360OutBoundMedia.setLink(attachment.getMediaURL());
+		wacfb360OutBoundMedia.setFilename(attachment.getMediaName());
 		if (mediaType.equalsIgnoreCase("image")) {
-			wa360OutBoundMedia.setFilename(null);
+			wacfb360OutBoundMedia.setFilename(null);
 		}
-		return wa360OutBoundMedia;
+		return wacfb360OutBoundMedia;
 	}
 
 	private MapModel sendText(ChannelConfig channelConfig,
@@ -505,31 +505,31 @@ public class WacfbClient {
 				.put("recipient_type", "individual")
 				.put("to", outboxMessage.contact().getCsid());
 
-		WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
-		wa360OutBoundMedia.setCaption(ArgUtil.nonEmpty(
+		WacfbOutBoundMedia wacfbOutBoundMedia = new WacfbOutBoundMedia();
+		wacfbOutBoundMedia.setCaption(ArgUtil.nonEmpty(
 				attachment.getMediaCaption(), outboxMessage.getSubject()));
-		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		wa360OutBoundMedia.setFilename(attachment.getMediaName());
+		wacfbOutBoundMedia.setLink(attachment.getMediaURL());
+		wacfbOutBoundMedia.setFilename(attachment.getMediaName());
 
 		if (ArgUtil.areEqual(attachment.getMediaType(),
 				FileType.IMAGE.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "image");
-			wa360OutBoundMedia.setFilename(null);
-			req.put("image", wa360OutBoundMedia);
+			wacfbOutBoundMedia.setFilename(null);
+			req.put("image", wacfbOutBoundMedia);
 		} else if (ArgUtil.areEqual(attachment.getMediaType(),
 				FileType.VIDEO.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
-			wa360OutBoundMedia.setFilename(null);
-			req.put("video", wa360OutBoundMedia);
+			wacfbOutBoundMedia.setFilename(null);
+			req.put("video", wacfbOutBoundMedia);
 		} else if (ArgUtil.areEqual(attachment.getMediaType(),
 				FileType.AUDIO.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
-			wa360OutBoundMedia.setCaption(null);
-			wa360OutBoundMedia.setFilename(null);
-			req.put("audio", wa360OutBoundMedia);
+			wacfbOutBoundMedia.setCaption(null);
+			wacfbOutBoundMedia.setFilename(null);
+			req.put("audio", wacfbOutBoundMedia);
 		} else {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "document");
-			req.put("document", wa360OutBoundMedia);
+			req.put("document", wacfbOutBoundMedia);
 		}
 
 		return send(req, channelConfig);

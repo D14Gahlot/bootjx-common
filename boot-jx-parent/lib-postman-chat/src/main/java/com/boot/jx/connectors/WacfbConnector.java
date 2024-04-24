@@ -59,6 +59,7 @@ import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360InboundMedia;
+import com.boot.jx.postman.wacfb.WacfbInboundMedia;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -393,7 +394,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	private void formatMedia(InboxMessage inboxMessage, MapModel map, ChannelConfig channelConfig, JsonPath path,
 			FileType fileType) {
 		try {
-			WA360InboundMedia media = map.entry(path).as(WA360InboundMedia.class);
+			WacfbInboundMedia media = map.entry(path).as(WacfbInboundMedia.class);
 			CommonFileStream srcFile = new CommonFileStream().url(WA360Constants.MEDIA_URL(media.getId()))
 					.fileType(fileType).format(FileFormat.from(media.getMimeType()))
 					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
@@ -418,7 +419,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
 				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
 
-		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
+		File fileb = Urly.parse(attachment.getMediaId()).toFile();
 
 		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
 				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
