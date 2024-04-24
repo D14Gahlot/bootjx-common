@@ -35,19 +35,16 @@ public class AgentProxyController {
 
 	@CrossOrigin(origins = "*")
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
-	@ApiOperation(value = "Try API's", hidden = true)
-
-	@RequestMapping(value = { "/nexus/{pathHash}" })
+	@ApiOperation(value = "Try API's")
+	@RequestMapping(value = { "/pub/nexus/**" })
 	public MapModel proxch(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
-			HttpServletResponse response, @PathVariable String domainHash, @PathVariable String pathHash)
+			HttpServletResponse response)
 			throws URISyntaxException, MalformedURLException {
 		// String domain =
 		// CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
 		// URL url = new URL(domain);
-		String path = CryptoUtil.getEncoder().message(pathHash).decodeBase64Hack().toString();
-
 		return MapModel
-				.fromSafe(service.processProxyRequest(nexusUrl, path, body, method, request, response).getBody());
+				.fromSafe(service.forwardRequest("/pub/nexus/", nexusUrl, body, method, request, response).getBody());
 	}
 
 }
