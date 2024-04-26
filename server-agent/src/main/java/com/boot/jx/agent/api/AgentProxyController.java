@@ -35,11 +35,23 @@ public class AgentProxyController {
 
 	@CrossOrigin(origins = "*")
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
-	@ApiOperation(value = "Try API's")
-	@RequestMapping(value = { "/pub/nexus/**" })
+	@ApiOperation(value = "ProxyAPI")
+	@RequestMapping(value = { "/nexus/**" })
 	public MapModel proxch(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
-			HttpServletResponse response)
-			throws URISyntaxException, MalformedURLException {
+			HttpServletResponse response) throws URISyntaxException, MalformedURLException {
+		// String domain =
+		// CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
+		// URL url = new URL(domain);
+		return MapModel
+				.fromSafe(service.forwardRequest("/nexus/", nexusUrl, body, method, request, response).getBody());
+	}
+
+	@CrossOrigin(origins = "*")
+	@ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Only for test")
+	@RequestMapping(value = { "/pub/nexus/**" })
+	public MapModel proxch2(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
+			HttpServletResponse response) throws URISyntaxException, MalformedURLException {
 		// String domain =
 		// CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
 		// URL url = new URL(domain);
