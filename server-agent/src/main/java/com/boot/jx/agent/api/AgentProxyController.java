@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.http.ApiRequest;
@@ -41,6 +42,7 @@ public class AgentProxyController {
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "ProxyAPI")
 	@RequestMapping(value = { "/nexus/**" })
+	@ResponseBody
 	public MapModel proxch(@RequestBody(required = false) String body, HttpServletRequest request,
 			HttpServletResponse response) throws URISyntaxException, MalformedURLException {
 		// String domain =
@@ -55,10 +57,12 @@ public class AgentProxyController {
 				.fromSafe(service.forwardRequest("/nexus/", nexusUrl, body, addHeaders, request, response).getBody());
 	}
 
+	
 	@CrossOrigin(origins = "*")
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Only for test")
 	@RequestMapping(value = { "/pub/nexus/**" })
+	@ResponseBody
 	public MapModel proxch2(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
 			HttpServletResponse response) throws URISyntaxException, MalformedURLException {
 		// String domain =
