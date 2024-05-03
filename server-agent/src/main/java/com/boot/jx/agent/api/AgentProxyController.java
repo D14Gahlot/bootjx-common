@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.ProxyService;
@@ -52,12 +53,12 @@ public class AgentProxyController {
 		Map<String, String> addHeaders = new HashMap<String, String>();
 		addHeaders.put("x-agent-code", agentSession.getAgentCode());
 		addHeaders.put("x-agent-user", agentSession.getAuthUser());
+		addHeaders.put("tnt", AppContextUtil.getTenant());
 
 		return MapModel
 				.fromSafe(service.forwardRequest("/nexus/", nexusUrl, body, addHeaders, request, response).getBody());
 	}
 
-	
 	@CrossOrigin(origins = "*")
 	@ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Only for test")
@@ -72,7 +73,8 @@ public class AgentProxyController {
 		Map<String, String> addHeaders = new HashMap<String, String>();
 		addHeaders.put("x-agent-code", agentSession.getAgentCode());
 		addHeaders.put("x-agent-user", agentSession.getAuthUser());
-		
+		addHeaders.put("tnt", AppContextUtil.getTenant());
+
 		return MapModel.fromSafe(
 				service.forwardRequest("/pub/nexus/", nexusUrl, body, addHeaders, request, response).getBody());
 	}
