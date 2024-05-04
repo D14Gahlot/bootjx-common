@@ -332,6 +332,13 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(params.getAssignToDeptCode()), chatArchiveBuilder
 				.sessionDTO().from(chatSessionDoc).withContact().isAssigned(params.getAssignToAgentCode()).get());
 
+		// Push Notification
+		OutboxMessage notify = new OutboxMessage()
+				.message(ArgUtil.is(chatSessionDoc.getLastMsg()) ? chatSessionDoc.getLastMsg().getMessage()
+						: chatSessionDoc.getContactName());
+		notify.contact().setCsid(To.dept(params.getAssignToDeptCode()));
+		pushClient.send(notify);
+
 		return params;
 	}
 
@@ -437,10 +444,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		stompTunnelService.sendTo(StompQuery.toAll("/chat/session/delta").toSameOriginApp(), MapModel.createInstance()
 				.put("sessionId", messageDoc.getSessionId()).put("event", "new_message").toMap());
 
+		// Push Notification
 		OutboxMessage notify = new OutboxMessage()
 				.message(ArgUtil.nonEmpty(inboxMessage.getMessage(), inboxMessage.getFormatType()));
 		notify.contact().setCsid(To.dept(inboxMessage.session().getDept()));
-
 		pushClient.send(notify);
 
 		if ("/exit_chat".equalsIgnoreCase(inboxMessage.toReplyEnum())) {

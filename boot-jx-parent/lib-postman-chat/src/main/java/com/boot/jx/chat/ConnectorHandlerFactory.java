@@ -29,6 +29,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -155,7 +156,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
 		default void onChannelUpdate(ChannelConfig channelConfig) {
-			LOGGER.error("WEBHOOK REGISTRATION NOT FOUND ");
+			LOGGER.error("WEBHOOK onChannelUpdate NOT FOUND ");
 		}
 
 		default InboxMessage createInboxMessage(ChannelConfig channelConfig, InboxMessage inboxMessage) {
@@ -233,6 +234,11 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 				throws FileNotFoundException, IOException;
 
 		void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException;
+
+		default List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc resp) {
+			LOGGER.error("Channel onRegister NOT FOUND ");
+			return null;
+		}
 
 	}
 
@@ -348,7 +354,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType,
 				chatContactDoc, inboxMessage, outboxMessage);
 
-		message(messageType, chatContactDoc, outboxMessage, inboxMessage);
+		messageByConnector(messageType, chatContactDoc, outboxMessage, inboxMessage);
 
 		MessageDoc messageDoc = messageStore.createOrUpdate(outboxMessage);
 
@@ -398,7 +404,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 		}
 	}
 
-	private void message(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
+	private void messageByConnector(String messageType, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
 			IMessageExtended inboxMessage) {
 		String channelId = PostManUtil.CHANNEL_ID(outboxMessage.contact());
 		ChannelConfig channelConfig = environment.config().channel(channelId);
@@ -430,10 +436,10 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	 * @param outboxMessage
 	 * @param inboxMessage
 	 */
-	public void message(MessageContext context, String messageType, OutboxMessage outboxMessage,
+	public void messageNoStore(MessageContext context, String messageType, OutboxMessage outboxMessage,
 			IMessageExtended inboxMessage) {
 		LOGGER.debug("message(String {}, ChatContactDoc {}, IMessageExtended {}, OutboxMessage {})", messageType, null,
 				inboxMessage, outboxMessage);
-		message(messageType, null, outboxMessage, inboxMessage);
+		messageByConnector(messageType, null, outboxMessage, inboxMessage);
 	}
 }

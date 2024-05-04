@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3" class="loadable loading">
+
+<head>
+	<meta charset=utf-8>
+	<meta http-equiv=X-UA-Compatible content="IE=edge">
+	<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+
+	<link rel="shortcut icon" th:href="${CDN_URL}+'/favicon.ico'" />
+
+	<title>[[${CONFIG.PROP_SERVICE_NAME}]] - Channel Setup</title>
+
+	<style th:replace="common/cdn.html :: metas"> </style>
+	<style th:replace="common/loader.html :: style"> </style>
+	<style th:replace="common/cdn.html :: header"> </style>
+	<style th:replace="common/cdn.html :: const"> </style>
+	
+	<script>
+		window.CONST.config({
+			domain : '[[${domain}]]',
+			PROP_SERVICE_SERVER : '[[${PROP_SERVICE_SERVER}]]'
+		});
+	</script>
+<span th:switch="${channelSelected}" th:remove="tag">
+	<span th:case="true" th:remove="tag">
+
+		<span th:switch="${selectedChannel.channelType}" th:remove="tag">
+
+			<span th:case="'wacfb'" th:remove="tag">
+				<script>
+					window.CONST.extend({
+						channelConfig : {
+							id : '[[${selectedChannel.id}]]',
+							channelType : '[[${selectedChannel.channelType}]]',
+							contactType : '[[${selectedChannel.contactType}]]',
+							title : '[[${selectedChannel.wacfb.masterAppTitle}]]',
+						}
+					});
+				  window.fbAsyncInit = function() {
+				    FB.init({
+				      appId            : '[[${selectedChannel.wacfb.masterAppId}]]',
+				      autoLogAppEvents : true,
+				      xfbml            : true,
+				      version          : 'v18.0'
+				    });
+				  };
+				</script>
+				<script async defer crossorigin="anonymous"
+				  src="https://connect.facebook.net/en_US/sdk.js">
+				</script>
+			</span>	
+					
+			<span th:case="'fb'" th:remove="tag">
+				<script>
+					function cb(d){return d}
+					window.CONST.extend({
+						channelConfig : {
+							id : '[[${selectedChannel.id}]]',
+							masterChannelId :  '[[${selectedChannel.id}]]',
+							channelType : '[[${selectedChannel.channelType}]]',
+							contactType : '[[${selectedChannel.contactType}]]',
+							title : '[[${selectedChannel.facebook.masterAppTitle}]]',
+							masterAppId : '[[${selectedChannel.facebook.masterAppId}]]',
+							masterAppConfigId : '[[${selectedChannel.facebook.masterAppConfigId}]]',
+							response : cb( [(${response})] )
+						}
+					});
+				  window.fbAsyncInit = function() {
+				    FB.init({
+				      appId            : '[[${selectedChannel.facebook.masterAppId}]]',
+				      autoLogAppEvents : true,
+				      xfbml            : true,
+				      version          : 'v18.0'
+				    });
+				  };
+				</script>
+				<script async defer crossorigin="anonymous"
+				  src="https://connect.facebook.net/en_US/sdk.js">
+				</script>
+			</span>					
+		
+			<span th:case="'ig'" th:remove="tag">
+				<script>
+					function cb(d){return d}
+					window.CONST.extend({
+						channelConfig : {
+							id : '[[${selectedChannel.id}]]',
+							masterChannelId :  '[[${selectedChannel.id}]]',
+							channelType : '[[${selectedChannel.channelType}]]',
+							contactType : '[[${selectedChannel.contactType}]]',
+							title : '[[${selectedChannel.instagram.masterAppTitle}]]',
+							masterAppId : '[[${selectedChannel.instagram.masterAppId}]]',
+							masterAppConfigId : '[[${selectedChannel.instagram.masterAppConfigId}]]',
+							response : cb( [(${response})] )
+						}
+					});
+				  window.fbAsyncInit = function() {
+				    FB.init({
+				      appId            : '[[${selectedChannel.instagram.masterAppId}]]',
+				      autoLogAppEvents : true,
+				      xfbml            : true,
+				      version          : 'v18.0'
+				    });
+				  };
+				</script>
+				<script async defer crossorigin="anonymous"
+				  src="https://connect.facebook.net/en_US/sdk.js">
+				</script>
+			</span>	
+			
+					
+		</span>	
+	</span>
+</span>
+	
+</head>
+
+<body>
+	<noscript>
+		<strong>We're sorry but it doesn't work properly
+			without JavaScript enabled. Please enable it to continue.</strong>
+	</noscript>
+	<style th:replace="common/loader.html :: loader"> </style>
+	<style th:replace="common/cdn.html :: body"></style>
+	<table width="100%">
+		<tr height="30%">
+			<td height="30%" ></td>
+		</tr>
+		<tr th:each="channel: ${channels}">
+			<td width="30%"></td>
+		    <td width="40%" style="text-align:center; height: 50px; background-color: rgb(254, 255, 255);" >
+				<a th:href="${'?masterChannelId=' + channel.id}">
+					<span th:text="${channel.name}"></span>
+				</a>
+			</td>
+		    <td width="30%" ></td>
+		</tr>
+	</table>
+
+
+	<span th:switch="${channelSelected}" th:remove="tag">
+		<span th:case="true" th:remove="tag">
+				<span th:switch="${selectedChannel.channelType}" th:remove="tag">
+					<span th:case="'wacfb'" th:remove="tag">
+						<script>
+						  function launchWhatsAppSignup() {
+						    FB.login(function (response) {
+								if(window.channel_setup_listner){
+									window.channel_setup_listner({
+										channelType : '[[${selectedChannel.channelType}]]',
+										masterChannelId : '[[${selectedChannel.id}]]',
+										response : response
+									})
+								} else {
+									console.log("channel_setup_listner:response",response)
+								}
+						    }, {
+						      config_id: '[[${selectedChannel.wacfb.masterAppConfigId}]]', // configuration ID obtained in the previous step goes here
+						      response_type: 'code',     // must be set to 'code' for System User access token
+						      override_default_response_type: true,
+						      extras: {
+								"sessionInfoVersion": 2,  //  Receive Session Logging Info
+						        setup: {
+						        }
+						      }
+						    });
+						  }
+						</script>
+					</span>
+					<span th:case="'fb'" th:remove="tag">
+						<script>
+						  function launchWhatsAppSignup() {
+							//FB.getLoginStatus(function(response) {
+							//	console.log("getLoginStatus",response);
+							    //statusChangeCallback(response);
+							//});  
+						    FB.login(function (response) {
+								if(window.channel_setup_listner){
+									window.channel_setup_listner({
+										channelType : '[[${selectedChannel.channelType}]]',
+										masterChannelId : '[[${selectedChannel.id}]]',
+										response : response
+									})
+								} else {
+									console.log("channel_setup_listner:response",response)
+								}
+						    }, {
+						      config_id: '[[${selectedChannel.facebook.masterAppConfigId}]]', // configuration ID obtained in the previous step goes here
+						      response_type: 'code',     // must be set to 'code' for System User access token
+						      override_default_response_type: true,
+						      extras: {
+								 //"sessionInfoVersion": 2,  //  Receive Session Logging Info
+						        setup: {
+						        }
+						      }
+						    });
+						  }
+						</script>
+					</span>
+					<span th:case="'ig'" th:remove="tag">
+						<script>
+						  function launchWhatsAppSignup() {
+						    FB.login(function (response) {
+								if(window.channel_setup_listner){
+									window.channel_setup_listner({
+										channelType : '[[${selectedChannel.channelType}]]',
+										masterChannelId : '[[${selectedChannel.id}]]',
+										response : response
+									})
+								} else {
+									console.log("channel_setup_listner:response",response)
+								}
+						    }, {
+							  //display : 'dialog',
+						      config_id: '[[${selectedChannel.instagram.masterAppConfigId}]]', // configuration ID obtained in the previous step goes here
+						      response_type: 'code',     // must be set to 'code' for System User access token
+						      override_default_response_type: true,
+						      extras: {
+								 //"sessionInfoVersion": 2,  //  Receive Session Logging Info
+						        setup: {"channel":"IG_API_ONBOARDING"}
+						      }
+						    });
+						  }
+						</script>
+					</span>
+							
+				</span>	
+		</span>
+	</span>
+
+	<script type="text/javascript">
+		window.onload = function(){
+		  	//document.forms['login'].submit();
+		}
+	</script>
+</body>
+
+
+
+
+
+</html>

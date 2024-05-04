@@ -28,8 +28,6 @@ import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.dict.FileFormat;
-import com.boot.jx.dict.FileType;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -48,7 +46,6 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
-import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.config.PermsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
@@ -117,7 +114,7 @@ public class ConfigOptionMetaController {
 
 	// Option APIS
 	@JsonView(PMEnvironment.PublicProperty.class)
-	@RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/pub/options/channels", "/api/options/channels" }, method = { RequestMethod.GET })
 	@ResponseBody
 	public ApiResponse<AChannelConfig, Object> listActiveLanes(
 			@RequestParam(required = false) ContactType contactType) {

@@ -32,6 +32,7 @@ import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class MessageService {
@@ -268,8 +269,13 @@ public class MessageService {
 							.description("Session Cannot be initialized for given contact"));
 		}
 		String messageId = outboxMessage.getMessageId();
-
-		return new OutBoundReciept().id(messageId);
+		OutBoundReciept outBoundReciept= new OutBoundReciept();
+		outBoundReciept.setId(messageId);
+		outBoundReciept.setTemplateCode(outboxMessage.templateCode());
+		outBoundReciept.setTemplateId(outboxMessage.getHsm().getId());
+		outBoundReciept.setType(ArgUtil.nonEmpty(outboxMessage.getType(), "O"));
+		return outBoundReciept;
+		//return new OutBoundReciept().id(messageId);
 	}
 
 }

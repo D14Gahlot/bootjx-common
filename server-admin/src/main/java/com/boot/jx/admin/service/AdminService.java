@@ -10,13 +10,20 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
+
 import com.boot.jx.admin.dto.AgentResponseAdminDto;
+import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.admin.manager.AdminManager;
+import com.boot.jx.admin.manager.CustomerMasterFldMgr;
 import com.boot.jx.admin.manager.GroupManager;
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
+import com.boot.jx.common.doc.GroupDoc;
 import com.boot.jx.common.dto.GroupReqDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.common.store.AgentStore;
@@ -46,9 +53,12 @@ public class AdminService {
 
 	@Autowired
 	private DocumentUpdateListner documentUpdateListner;
-	
+
 	@Autowired
 	GroupManager groupMgr;
+
+	@Autowired
+	CustomerMasterFldMgr cmFieldMgr;
 
 	public List<AgentResponseAdminDto> fetchAgents(String agentId, boolean includeInActive) {
 		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId, includeInActive);
@@ -151,15 +161,34 @@ public class AdminService {
 		empAuthService.resetPassword(agent.getAgent_code(), agent.isAdmin());
 		return buildAgentDto(CollectionUtil.asList(agent));
 	}
-	
-	public List<GroupReqDto>  createAndUpdateGroup(GroupReqDto req) {
+
+	public List<GroupReqDto> createAndUpdateGroup(GroupReqDto req) {
 		List<GroupReqDto> reqDto = groupMgr.createAndUpdateGroup(req);
 		return reqDto;
 	}
-	
-	public List<GroupReqDto>  fetchGroups(String groupId) {
+
+	public List<GroupReqDto> fetchGroups(String groupId) {
 		List<GroupReqDto> reqDto = groupMgr.fetchGroups(groupId);
 		return reqDto;
 	}
+
+	public void checkDupGroupName(GroupReqDto req) {
+		if (ArgUtil.is(req.getGroupName())) {
+			GroupDoc groupDoc = groupMgr.findGroupByName(req.getGroupName());
+			if (ArgUtil.is(groupDoc)) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidNameDuplicate")
+						.description("Group name already exists"));
+
+			}
+		}
+	}
+
+	public List<GroupReqDto> deleteGroups(GroupReqDto req) {
+		List<GroupReqDto> reqDto = groupMgr.deleteGroups(req);
+		return reqDto;
+	}
+
+	
+
 
 }

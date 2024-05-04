@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatClient;
 import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.chat.ChatService;
@@ -76,6 +77,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	private RestService restService;
 
 	@Autowired
+	private RestHookService restHookService;
+
+	@Autowired
 	protected ChatLogger logManager;
 
 	@Autowired
@@ -135,7 +139,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						inboxMessage.setOriginalMessage(null);
 						chatClient.forward(defaultClient.getForward() + PATH.INBOUND_FRWRD, inboxMessage);
 					} else if (ArgUtil.is(defaultClient.getWebhook())) {
-						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId());
+						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId(), true);
 					} else {
 						// if (APP_TYPE.APP_SCRIPT.equals(appType)) {
 						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
@@ -201,7 +205,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		messageStore.updateStatus(messageReport);
 
 		if (ArgUtil.is(e)) {
-			logManager.error(inboxMessage, e);
+			logManager.error(inboxMessage, status, e);
 		}
 	}
 
@@ -210,12 +214,18 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	}
 
 	private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl, String clientAppId) {
+		forward2Webhook(inboxMessage, forwardUrl, clientAppId, false);
+	}
+
+	private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl, String clientAppId,
+			boolean externalTimeout) {
 		InBoundContact contact = InBoundContact.from(inboxMessage.contact());
 
 		InBoundMsg msg = new InBoundMsg();
 		msg.messageId = inboxMessage.getMessageId();
 		msg.messageIdExt = inboxMessage.getMessageIdExt();
-		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(), inboxMessage.contact().getEmail(),inboxMessage.contact().getCsid());
+		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(), inboxMessage.contact().getEmail(),
+				inboxMessage.contact().getCsid());
 		msg.contactId = contact.contactId;
 		msg.session = new MsgSession();
 		msg.session.sessionId = inboxMessage.getSessionId();
@@ -266,7 +276,15 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				.debug(pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
-		restService.ajax(forwardUrl).cookie(ParamKeys.X_API_ID, clientAppId).post(wrap).asNone();
+
+		try {
+			(externalTimeout ? restHookService.ajax(forwardUrl) : restService.ajax(forwardUrl))
+					.cookie(ParamKeys.X_API_ID, clientAppId).postJson(wrap).asNone();
+		} catch (Exception e) {
+			ApiResponseUtil.addError("Connection Error:" + forwardUrl);
+			throw e;
+		}
+
 	}
 
 	@Override
@@ -294,7 +312,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 								.appId(defaultClient.getId());
 						wrap.contacts = CollectionUtil.asList(contact);
 						wrap.statuses = CollectionUtil.asList(status);
-						restService.ajax(defaultClient.getWebhook()).post(wrap).asNone();
+						restHookService.ajax(defaultClient.getWebhook()).postJson(wrap).asNone();
 					}
 
 				} catch (Exception e) {
@@ -426,7 +444,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 								.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
-				restService.ajax(webhookUrl).cookie(ParamKeys.X_API_ID, defaultClient.getId()).post(wrap).asNone();
+				restHookService.ajax(webhookUrl).cookie(ParamKeys.X_API_ID, defaultClient.getId()).postJson(wrap).asNone();
 			}
 		} catch (Exception e) {
 			logManager.error(event, e);

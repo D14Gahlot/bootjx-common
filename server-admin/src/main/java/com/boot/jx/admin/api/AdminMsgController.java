@@ -1,14 +1,10 @@
 package com.boot.jx.admin.api;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +40,7 @@ import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -60,6 +57,7 @@ import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.google.i18n.phonenumbers.NumberParseException;
 
@@ -93,7 +91,9 @@ public class AdminMsgController {
 
 	@Autowired
 	public ChatSessionManager chatSessionManager;
+	
 
+	
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
 			@RequestParam String endStamp, @RequestParam(required = false) String agentCode,
@@ -182,8 +182,7 @@ public class AdminMsgController {
 		}
 		Collections.sort(tagCategory);
 		List<CHAT_STATUS> status = query.status;
-		List<String> statusLst = new ArrayList<>();
-		;
+		List<String> statusLst = new ArrayList<>();	
 		if ((status == null || status.isEmpty() || status.contains(null))) {
 			LOGGER.info("status :" + status);
 		} else {
@@ -319,7 +318,7 @@ public class AdminMsgController {
 			}
 		}else if(ArgUtil.is(bulkMessage.getGroupId())) {
 			List<OutboxMessage> lstOutBoxMsg = getGroupDetails(bulkMessage);
-			BulkSessionDoc bulkDoc = bulkMessageService.sendMultiple(lstOutBoxMsg);
+			BulkSessionDoc bulkDoc = bulkMessageService.sendToGroup(lstOutBoxMsg);
 			if (ArgUtil.is(bulkDoc)) {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
 			} else {
@@ -341,6 +340,16 @@ public class AdminMsgController {
 			} else {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
 			}
+			
+		}else if(ArgUtil.is(bulkMessage.getGroupId())) {
+			List<OutboxMessage> lstOutBoxMsg = getGroupDetails(bulkMessage);
+			BulkSessionDoc bulkDoc = bulkMessageService.sendToGroup(lstOutBoxMsg);
+			if (ArgUtil.is(bulkDoc)) {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
+			} else {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+			}
+	
 		} else {
 			return ApiResponse.buildResult(bulkMessageService.send(bulkMessage)).message("Bulk Message Job Created");
 		}
@@ -379,12 +388,25 @@ public class AdminMsgController {
 	public ApiResponse<BulkSessionDoc, Object> getBulkSession(@RequestParam String startStamp,
 			@RequestParam String endStamp, @RequestParam(required = false) String bulkSessionId)
 			throws NumberParseException {
+		
+		Long startStampLong = ArgUtil.parseAsLong(startStamp);
+		Long endStampLong = ArgUtil.parseAsLong(endStamp);
+		Query query =new Query();
+		List<BulkSessionDoc> lst = new ArrayList<>();
 		if (ArgUtil.is(bulkSessionId)) {
-			return ApiResponse.buildResults(mongoTemplate
-					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+			query.addCriteria(QueryCriteria.whereId(bulkSessionId));
+			query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
+			query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
+			lst = mongoTemplate.find(query,BulkSessionDoc.class);
+			lst =checkNull(lst);
+			return ApiResponse.buildResults(lst);
 		}
-		return ApiResponse.buildResults(mongoTemplate
-				.find(new Query().with(new Sort(Sort.Direction.DESC, "createdStamp")), BulkSessionDoc.class));
+		query.addCriteria(Criteria.where("createdStamp").gt(startStampLong).lt(endStampLong));
+		query.with(new Sort(Sort.Direction.DESC, "createdStamp"));
+		lst = mongoTemplate.find(query,BulkSessionDoc.class);
+		lst =checkNull(lst);
+		return ApiResponse.buildResults(lst);
+		
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/messages", method = { RequestMethod.POST })
@@ -475,16 +497,24 @@ public class AdminMsgController {
 			String csvRefKeyId = outboxMessage.getReferenceKey();
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
+			String hsmTemplateCode = null;
+			String groupTitle=outboxMessage.getCampaignTitle();
 			CsvDto csvDoc = mongoTemplate.findById(csvRefKeyId, CsvDto.class);
+			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
+			if(ArgUtil.is(templateDoc)) {
+				hsmTemplateCode = templateDoc.getCode();
+			}
 			if (ArgUtil.is(csvDoc)) {
 				List<Map<Object, Object>> lstMap = csvDoc.getLstMap();
 				for (Map<Object, Object> map : lstMap) {
 					OutboxMessage outboxMsg = new OutboxMessage();
 					CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
 					hsmTemp.setId(hsmId);
+					hsmTemp.setCode(hsmTemplateCode);
 					outboxMsg.setMessage(otBoxMsg.getMessage());
 					outboxMsg.setAttachments(otBoxMsg.getAttachments());
 					outboxMsg.setContact(otBoxMsg.getContact());
+					outboxMsg.setCampaignTitle(groupTitle);
 					Map<String, Object> data = new HashMap<>();
 					for (Map.Entry<Object, Object> entry : map.entrySet()) {
 						String k = ArgUtil.parseAsString(entry.getKey());
@@ -514,23 +544,32 @@ public class AdminMsgController {
 		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
 		if (outboxMessage != null) {
 			String groupId = outboxMessage.getGroupId();
-			String groupTitle=outboxMessage.getGroupTitle();
+			String groupTitle=outboxMessage.getCampaignTitle();
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
+			String hsmTemplateCode = null;
+			String groupName = null;
 			GroupDoc groupDoc = mongoTemplate.findById(groupId, GroupDoc.class);
+			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
+			if(ArgUtil.is(templateDoc)) {
+				hsmTemplateCode = templateDoc.getCode();
+			}
 			if (ArgUtil.is(groupDoc)) {
+				groupName =groupDoc.getGroupName(); 
 				List<GroupSessionDto> lstDto = groupDoc.getSessions();
 				for (GroupSessionDto dto : lstDto) {
 					OutboxMessage outboxMsg = new OutboxMessage();
 					CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
 					hsmTemp.setId(hsmId);
+					hsmTemp.setCode(hsmTemplateCode);
 					outboxMsg.setGroupId(groupId);
-					outboxMsg.setGroupTitle(groupTitle);
+					outboxMsg.setCampaignTitle(groupTitle);
 					outboxMsg.setMessage(otBoxMsg.getMessage());
 					outboxMsg.setAttachments(otBoxMsg.getAttachments());
 					outboxMsg.setContact(otBoxMsg.getContact());
 					outboxMsg.setTo(Arrays.asList(dto.getPhone()));
 					outboxMsg.setHsm(hsmTemp);
+					outboxMsg.setGroupName(groupName);
 					listOfOutboxMsg.add(outboxMsg);
 				} // end of listOfOutboxMsgs
 
@@ -538,6 +577,34 @@ public class AdminMsgController {
 
 		}
 		return listOfOutboxMsg;
+	}
+	
+	private List<BulkSessionDoc>  checkNull(List<BulkSessionDoc>  lstofSession){
+	List<BulkSessionDoc> lst = new ArrayList<>();
+	for(BulkSessionDoc doc :lstofSession) {
+		BulkSessionDoc sDoc = new BulkSessionDoc();
+		sDoc.setBulkSessionId(ArgUtil.parseAsString(doc.getBulkSessionId(), Constants.BLANK));
+		sDoc.setTemplate(ArgUtil.parseAsString(doc.getTemplate(), Constants.BLANK));
+		sDoc.setTemplateId(ArgUtil.parseAsString(doc.getTemplateId(), Constants.BLANK));
+		sDoc.setMessage(ArgUtil.parseAsString(doc.getMessage(), Constants.BLANK));
+		sDoc.setCampaignTitle(ArgUtil.parseAsString(doc.getCampaignTitle(), Constants.BLANK));
+		sDoc.setCreatedBy(ArgUtil.parseAsString(doc.getCreatedBy(), Constants.BLANK));
+		sDoc.setCreatedStamp(doc.getCreatedStamp());
+		sDoc.setContactType(ArgUtil.parseAsString(doc.getContactType(), Constants.BLANK));
+		sDoc.setChannelId(ArgUtil.parseAsString(doc.getChannelId(), Constants.BLANK));
+		sDoc.setLane(ArgUtil.parseAsString(doc.getLane(), Constants.BLANK));
+		sDoc.setMessageCount(doc.getMessageCount()==null?Constants.DEFAULT_INTEGER:doc.getMessageCount());
+		sDoc.setMessageFailedCount(doc.getMessageFailedCount()==null?Constants.DEFAULT_INTEGER:doc.getMessageFailedCount());
+		sDoc.setStats(doc.getStats());
+		sDoc.setJob(doc.getJob());
+		sDoc.setCompletedStamp(doc.getCompletedStamp()==null?Constants.DEFAULT_INTEGER:doc.getCompletedStamp());
+		sDoc.setGroupId(ArgUtil.parseAsString(doc.getGroupId(), Constants.BLANK));
+		sDoc.setGroupName(ArgUtil.parseAsString(doc.getGroupName(), Constants.BLANK));
+		sDoc.setStatus(doc.getStatus());
+		
+		lst.add(sDoc);
+	}
+	return lst;
 	}
 
 }

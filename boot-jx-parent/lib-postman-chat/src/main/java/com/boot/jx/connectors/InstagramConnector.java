@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.fb.FacbookAttachment;
 import com.boot.jx.postman.fb.FacebookConstants.InBoundWrapperPaths;
 import com.boot.jx.postman.fb.FacebookEntry;
@@ -31,6 +35,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.InstagramPlugin;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
@@ -42,8 +47,60 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	@Autowired
 	private InstagramClient instaClient;
 
+	@Autowired
+	private RestService restService;
+
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
+		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
+		try {
+
+			MapModel resp = MapModel.from(channelConfigTemp.getResp());
+			String redirectUri = resp.pathEntry("_.redirect_uri").asString();
+
+			MapModel accessToken = restService.ajax("https://graph.facebook.com/v18.0").path("/oauth/access_token")
+					.field("client_id", setup.getInstagram().getMasterAppId())
+					.field("client_secret", setup.getInstagram().getMasterAppSecret())
+					// .field("redirect_uri", redirectUri)
+					.field("code", resp.pathEntry("authResponse.code").asString())
+					//
+					.submit().asMapModel();
+			channelConfigTemp.log("oauth/access_token", accessToken.toMap());
+
+			MapModel me = restService.ajax("https://graph.facebook.com/v18.0").path("/me/accounts")
+					.queryParam("access_token", accessToken.keyEntry("access_token").asString())
+					.queryParam("fields", "id,name,access_token,instagram_business_account").get().asMapModel();
+
+			channelConfigTemp.log("me/accounts", me.toMap());
+
+			me.keyEntry("data").asListOfMap().forEach(page -> {
+				MapModel pagemap = MapModel.from(page);
+				ChannelConfig channel = new ChannelConfig();
+				channel.setInstagram(new InstagramConfig());
+				channel.getInstagram().setAccessToken(pagemap.keyEntry("access_token").asString());
+				channel.getInstagram().setPageId(pagemap.pathEntry("instagram_business_account.id").asString());
+				channel.getInstagram().setFbPageId(pagemap.keyEntry("id").asString());
+				channel.getInstagram().setHandler(channel.getInstagram().getPageId());
+				channel.getInstagram().setType("page");
+				channel.getInstagram().setMasterAppId(setup.getInstagram().getMasterAppId());
+				channel.setName(pagemap.keyEntry("name").asString());
+				channels.add(channel);
+			});
+		} catch (ApiHttpException e) {
+			channelConfigTemp.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
+		}
+
+		commonMongoTemplate.save(channelConfigTemp);
+
+		return channels;
+	}
+
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
+		restService.ajax("https://graph.facebook.com/v18.0/").path(channelConfig.getInstagram().getFbPageId())
+				.path("/subscribed_apps").field("access_token", channelConfig.getInstagram().getAccessToken())
+				.field("subscribed_fields",
+						"message_deliveries, message_echoes, message_reads, messages, messaging_optins, messaging_postbacks")
+				.submit().asMap();
 		ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
 	}
 
@@ -106,7 +163,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 			if (channel.getInstagram().isPromptPhone()) {
 				if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
 					this.context().session().put("session_init_user_input_type", "phone");
-					return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone number");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
 				}
 
 			}

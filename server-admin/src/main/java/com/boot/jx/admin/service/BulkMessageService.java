@@ -25,6 +25,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
+import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -35,6 +36,7 @@ import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -47,8 +49,11 @@ import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
+import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.mongodb.client.MongoCursor;
 
@@ -72,16 +77,22 @@ public class BulkMessageService extends BatchJobExecuter {
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
 
 		ChannelConfig channelConfig = enviroment.config().channel(channelId);
-
+		HSMTemplateDoc templateDoc = mongoTemplate.findById(bulkMessage.templateId(), HSMTemplateDoc.class);
+		CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
+		if(ArgUtil.is(templateDoc) && !ArgUtil.is(bulkMessage.getHsm().getCode())) {
+			hsmTemp.setId(bulkMessage.templateId());
+			hsmTemp.setCode(templateDoc.getCode());
+			hsmTemp.setData(bulkMessage.getHsm().getData());
+			bulkMessage.setHsm(hsmTemp);
+		}
 		BulkSessionDoc session = new BulkSessionDoc();
-
 		session.setMessage(bulkMessage.getMessage());
 		session.setTemplateId(bulkMessage.templateId());
 		session.setTemplate(bulkMessage.templateCode());
 		session.setMessageCount(bulkMessage.getTo().size());
 		session.setContactType(bulkMessage.contact().getContactType());
 		session.setLane(bulkMessage.contact().getLane());
-
+		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
 
@@ -97,15 +108,16 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			to = getPhoneWithPlus(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
+			doc.setHsm(hsmTemp);
 			doc.setTemplateId(bulkMessage.templateId());
 			doc.setTemplate(bulkMessage.templateCode());
 			doc.setAttachments(bulkMessage.getAttachments());
-
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
 			doc.route().setSenderApp(adminApp.getAppType());
@@ -145,7 +157,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setLane(bulkMessage.contact().getLane());
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
-
+		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
@@ -159,6 +171,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			to = getPhoneWithPlus(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
@@ -207,8 +220,9 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setLane(bulkMessage.contact().getLane());
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
-		session.setGroupId(channelId);
-		session.setGroupTitle(channelId);
+		session.setGroupId(bulkMessage.getGroupId());
+		session.setCampaignTitle(bulkMessage.getCampaignTitle());
+		session.setGroupName(bulkMessage.getGroupName());
 
 		auditDetailProvider.auditCreate(session);
 
@@ -223,6 +237,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			to = getPhoneWithPlus(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
@@ -231,7 +246,6 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setTemplateId(bulkMsg.templateId());
 			doc.setTemplate(bulkMsg.templateCode());
 			doc.setAttachments(bulkMsg.getAttachments());
-
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
 			doc.route().setSenderApp(adminApp.getAppType());
@@ -309,9 +323,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		for (MessageDoc messageDoc : msgs) {
 			push(JobTaskModel.newTasklet(currentBatchJob).taskId(messageDoc.getMessageId()));
 			messageDoc.updateStatus(Status.CRTD);
-			// System.out.println("Status.CRTD"+messageDoc.getContact().getPhone());
 			messageStore.updateStatus(contactType, messageDoc, Status.CRTD, null);
-			// messageStore.save(messageDoc, doc.getContactType());
 		}
 		return false;
 	}
@@ -456,18 +468,27 @@ public class BulkMessageService extends BatchJobExecuter {
 		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is));
 				CSVParser csvParser = new CSVParser(fileReader,
 						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
-			// List<Tutorial> tutorials = new ArrayList<Tutorial>();
 			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
 			for (CSVRecord csvRecord : csvRecords) {
-				System.out.println("id :" + csvRecord.get("contacts"));
-				// System.out.println("Title :"+ csvRecord.get("Title"));
-				// System.out.println("Description :"+ csvRecord.get("Description"));
-				// System.out.println("id :"+ csvRecord.get("Published"));
-
+				//System.out.println("id :" + csvRecord.get("contacts"));
 			}
 
 		} catch (Exception e) {
 			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
 		}
 	}
+	
+	
+
+	/** adding + sign in a phone if not there **/
+	public static final String PLUS_SIGN="+";
+	private  static String getPhoneWithPlus(String phoneNo) {
+		if (ArgUtil.is(phoneNo)) {
+			if (!phoneNo.startsWith(PLUS_SIGN)) {
+				phoneNo =PLUS_SIGN.concat(phoneNo);
+			}
+		}
+		return phoneNo;
+	}
+	
 }

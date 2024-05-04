@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.doc.tpo.DummyCollection;
+import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -147,7 +146,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		if (channel.getWa360dc().isPromptPhone()) {
 			if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
 				this.context().session().put("session_init_user_input_type", "phone");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone number");
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
 			}
 		}
 
@@ -512,13 +511,11 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			keys.add(t.getKey());
 		}
 		MapModel cloudRequestMap = MapModel.from(lMap);
-		LOGGER.info("Keys " + JsonUtil.toJson(keys) + "\t Map Model :" + cloudRequestMap);
+		LOGGER.debug("Keys " + JsonUtil.toJson(keys) + "\t Map Model :" + cloudRequestMap);
 
 		if (cloudRequestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
-		}
-
-		else if (cloudRequestMap.containsKey("statuses")) {
+		} else if (cloudRequestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = cloudRequestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
@@ -537,12 +534,9 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 						/**
 						 * MRU--addded new code to update chatSession doc with Waba expiry time stamp
 						 **/
-						Map<String, Object> tpChannelMap = new HashMap<>();
-						tpChannelMap.put("ccwExpiry", conversation.get("expiration_timestamp"));
-						tpChannelMap.put("wabaConvesationId", id);
-						if (ArgUtil.is(tpChannelMap)) {
-							reprt.setTpChanel(tpChannelMap);
-						}
+						reprt.setTpMeta(
+								MapModel.createInstance().put("ccwExpiry", conversation.get("expiration_timestamp"))
+										.put("wabaConvesationId", id).toMap());
 						/** code ended here **/
 
 					}
@@ -551,11 +545,11 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				messageBoxEvent.addMessageReport(reprt);
 			}
 
-		} else
-
-		{
-			DummyCollection d = new DummyCollection();
+		} else {
+			PayloadDumpCollection d = new PayloadDumpCollection();
+			d.setType("WABAC_WEBHOOK_OTHERS");
 			d.setIncomingRequest((List<Object>) requestMap);
+			commonMongoTemplate.save(d);
 
 		}
 

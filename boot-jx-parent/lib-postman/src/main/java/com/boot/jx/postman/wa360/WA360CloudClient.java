@@ -43,7 +43,7 @@ public class WA360CloudClient {
 	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
 	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		StringJoiner msgIds = new StringJoiner(",");
-		System.out.println("outboxMessage "+JsonUtil.toJson(outboxMessage));
+
 		if (ArgUtil.is(outboxMessage.getTemplateExt())) {
 			MapModel resp = sendTemplate(channelConfig, outboxMessage);
 			msgIds.add(getMessageId(resp));
@@ -149,6 +149,7 @@ public class WA360CloudClient {
 		}
 
 		outboxMessage.setMessageIdExt(msgIds.toString());
+		outboxMessage.setHsm(outboxMessage.getHsm());
 		return outboxMessage;
 	}
 
@@ -264,9 +265,9 @@ public class WA360CloudClient {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
 		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		 wa360OutBoundMedia.setFilename(attachment.getMediaName());
+		wa360OutBoundMedia.setFilename(attachment.getMediaName());
 		 if (mediaType.equalsIgnoreCase("image")) {
-		wa360OutBoundMedia.setFilename(null);
+			 wa360OutBoundMedia.setFilename(null);
 		 }
 		return wa360OutBoundMedia;
 	}

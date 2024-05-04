@@ -8,9 +8,10 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
 
-@Document(collection = "CONFIG_CHANNEL")
+@Document(collection = ChannelConfigDoc.DOCUMENT_NAME)
 @TypeAlias("ConfigChannel")
 public class ChannelConfigDoc extends ChannelConfig {
+	public static final String DOCUMENT_NAME = "CONFIG_CHANNEL";
 
 	private static final long serialVersionUID = -6368905475787041196L;
 

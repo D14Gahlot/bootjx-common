@@ -213,7 +213,7 @@ public class PostManUtil {
 		if (CHANNEL_TYPE.WA_GUPSHUP_LEGACY.equals(channelType)) {
 			channelType = CHANNEL_TYPE.WA_GUPSHUP;
 		}
-		
+
 		return String.format("%s:%s", channelType, lane).toLowerCase();
 	}
 
@@ -234,6 +234,16 @@ public class PostManUtil {
 
 	public static String CHANNEL_ID(Contactable contactable) {
 		return CHANNEL_ID(contactable.getContactType(), contactable.getChannelType(), contactable.getLane());
+	}
+
+	public static Contactable parseChannelId(String channelId) {
+		String channelIdDecoded = CHANNEL_ID_DECODED(channelId);
+		String[] channelIds = channelIdDecoded.split(":");
+		Contactable contactMeta = new ContactMeta();
+		contactMeta.setContactType(ArgUtil.parseAsString(PMConstants.CONTACT_TYPE(channelIds[0])));
+		contactMeta.setLane(channelIds[1]);
+		contactMeta.setChannelType(channelIds[0]);
+		return contactMeta;
 	}
 
 	public static String UNIQUE_API_KEY() {

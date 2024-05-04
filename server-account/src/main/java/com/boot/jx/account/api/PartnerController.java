@@ -158,6 +158,12 @@ public class PartnerController {
 					new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
 							.description("Email address already in use."));
 		}
+		
+		if(signupContact.getProduct()==null || signupContact.getProduct().isEmpty()) {
+			ApiResponseUtil.throwDuplicateInputException("Select at least one product you are interested in.",
+					new ApiFieldError().obzect("signupContact").field("product").codeKey("ValidProduct")
+							.description("Select at least one product you are interested in."));
+		}
 
 		AccountMeta keys = new AccountMeta();
 		keys.setEmailVerificationCode(UUID.randomUUID().toString());

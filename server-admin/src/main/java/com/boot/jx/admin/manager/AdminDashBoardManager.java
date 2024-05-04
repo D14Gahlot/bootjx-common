@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1227,6 +1228,7 @@ public class AdminDashBoardManager {
 		hourWiseCount = MapUtils.getHourdefaultValue(hourWiseCountMap, channelLst, hourCntMap, tnt);
 
 		hourWiseCount = sortMap(hourWiseCount);
+		hourWiseCount =removeSandBoxNumber(hourWiseCount);
 
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 		dto.setTenant(tnt);
@@ -1325,6 +1327,7 @@ public class AdminDashBoardManager {
 		dayWiseMap = MapUtils.defaultValue(dayWiseCountMap, channelLst, dateRanMap, tnt);
 
 		dayWiseMap = sortMap(dayWiseMap);
+		dayWiseMap =removeSandBoxNumber(dayWiseMap);
 
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
 
@@ -1587,7 +1590,7 @@ public class AdminDashBoardManager {
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 
 		dateWiseSummary = sortMap(dateWiseSummary);
-
+		
 		dto.setTenant(tnt);
 		dto.setMap(map);
 		dto.setMonth(monthYear);
@@ -1747,7 +1750,6 @@ public class AdminDashBoardManager {
 
 	public String getSummaryId(SummaryDocDto dto) {
 		String tenant = dto.getDomain();
-		System.out.println("Json Util ="+JsonUtil.toJson(dto));
 		if (dto.getChannel().contains(ContactType.WHATSAPP.name())) {
 			return tenant + "_" + dto.getDate() + "_" + "wa";
 		} else if (dto.getChannel().contains(ContactType.FACEBOOK.name())) {
@@ -2227,7 +2229,19 @@ public class AdminDashBoardManager {
 	}
 
 
-
+	public Map<Object, Map<Object, Long>> removeSandBoxNumber(Map<Object, Map<Object, Long>> hourWiseCount) {
+		if (hourWiseCount!=null && !hourWiseCount.isEmpty()) {
+		// Remove entries with keys containing "wa_" and no characters after "wa_"
+        Iterator<Map.Entry<Object, Map<Object, Long>>> iterator = hourWiseCount.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Object, Map<Object, Long>> entry = iterator.next();
+            if (entry.getKey().toString().matches(".*wa_\\b")) {
+                iterator.remove();
+            }
+        }
+		}
+       return hourWiseCount;
+	}
 
 
 }

@@ -1,5 +1,6 @@
 package com.boot.jx.common.doc;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class AgentDoc implements IDocument, DocVersion {
 	private boolean isDuperAdmin;
 	private boolean isDefaultValue;
 	private Boolean isEnabled;
+
+	@Indexed
+	private List<String> appModules;
 
 	@Indexed
 	private List<ResourceDocument> quicktags;
@@ -288,4 +292,17 @@ public class AgentDoc implements IDocument, DocVersion {
 		this.quickskills = quickskills;
 	}
 
+	public List<String> getAppModules() {
+		return appModules;
+	}
+
+	public void setAppModules(List<String> appModules) {
+		this.appModules = appModules;
+	}
+
+	public List<String> appModules() {
+		if (ArgUtil.isEmpty(this.appModules))
+			this.appModules = new ArrayList<String>();
+		return appModules;
+	}
 }

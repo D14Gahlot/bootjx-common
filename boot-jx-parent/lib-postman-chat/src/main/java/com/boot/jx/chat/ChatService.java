@@ -96,7 +96,6 @@ public class ChatService {
 		if (messageEvents != null) {
 			messageEvents.onMessageOutbound(outboxMessage);
 		}
-
 		return messageDoc;
 	}
 
