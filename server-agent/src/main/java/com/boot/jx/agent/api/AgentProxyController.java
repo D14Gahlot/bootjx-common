@@ -40,7 +40,7 @@ public class AgentProxyController {
 	private AgentSessionBean agentSession;
 
 	@CrossOrigin(origins = "*")
-	@ApiRequest(type = RequestType.NO_TRACK_PING)
+	// @ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "ProxyAPI")
 	@RequestMapping(value = { "/nexus/**" })
 	@ResponseBody
@@ -60,7 +60,7 @@ public class AgentProxyController {
 	}
 
 	@CrossOrigin(origins = "*")
-	@ApiRequest(type = RequestType.NO_TRACK_PING)
+	// @ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Only for test")
 	@RequestMapping(value = { "/pub/nexus/**" })
 	@ResponseBody
