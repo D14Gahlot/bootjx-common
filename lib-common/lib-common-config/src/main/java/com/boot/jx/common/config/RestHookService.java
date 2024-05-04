@@ -18,10 +18,10 @@ import com.boot.utils.TimeUtils.TimePeriod;
 public class RestHookService implements AjaxRestService {
 
 	@Value("${app.webhook.connect.timeout}")
-	private TimePeriod webhookConnectTimout;
+	private String webhookConnectTimout;
 
 	@Value("${app.webhook.read.timeout}")
-	private TimePeriod webhookReadTimout;
+	private String webhookReadTimout;
 
 	RestTemplate restTemplate;
 
@@ -32,8 +32,10 @@ public class RestHookService implements AjaxRestService {
 					.build();
 			HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
 			requestFactory.setHttpClient(httpClient);
-			requestFactory.setConnectTimeout(ArgUtil.parseAsInteger(webhookConnectTimout.toMillis())); // 3-5 seconds
-			requestFactory.setReadTimeout(ArgUtil.parseAsInteger(webhookReadTimout.toMillis())); // 5 seconds
+			requestFactory.setConnectTimeout(ArgUtil.parseAsInteger(TimePeriod.from(webhookConnectTimout).toMillis())); // 3-5
+																														// seconds
+			requestFactory.setReadTimeout(ArgUtil.parseAsInteger(TimePeriod.from(webhookReadTimout).toMillis())); // 5
+																													// seconds
 			restTemplate = new RestTemplate(requestFactory);
 			restService.getLocalRestTemplate(restTemplate);
 		}
