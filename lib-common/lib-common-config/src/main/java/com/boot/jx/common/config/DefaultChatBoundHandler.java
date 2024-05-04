@@ -278,8 +278,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		wrap.messages = CollectionUtil.asList(msg);
 
 		try {
-			(externalTimeout ? restHookService.ajax(forwardUrl) : restService.ajax(forwardUrl))
-					.cookie(ParamKeys.X_API_ID, clientAppId).postJson(wrap).asNone();
+			(externalTimeout ? restHookService : restService).ajax(forwardUrl).cookie(ParamKeys.X_API_ID, clientAppId)
+					.postJson(wrap).asNone();
 		} catch (Exception e) {
 			ApiResponseUtil.addError("Connection Error:" + forwardUrl);
 			throw e;
@@ -429,9 +429,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		LOGGER.debug("Forwarding Session Routing Event to Xternal Service ");
 		try {
 			APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
+			boolean internalwebhook = APP_TYPE.APP_SCRIPT.equals(appType);
 
-			String webhookUrl = APP_TYPE.APP_SCRIPT.equals(appType)
-					? (pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD)
+			String webhookUrl = internalwebhook ? (pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD)
 					: defaultClient.getWebhook();
 
 			if (ArgUtil.is(webhookUrl)) {
@@ -444,7 +444,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 								.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
-				restHookService.ajax(webhookUrl).cookie(ParamKeys.X_API_ID, defaultClient.getId()).postJson(wrap).asNone();
+				(internalwebhook ? restService : restHookService).ajax(webhookUrl)
+						.cookie(ParamKeys.X_API_ID, defaultClient.getId()).postJson(wrap).asNone();
 			}
 		} catch (Exception e) {
 			logManager.error(event, e);
