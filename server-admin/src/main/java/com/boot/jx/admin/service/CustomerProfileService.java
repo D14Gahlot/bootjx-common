@@ -17,6 +17,7 @@ import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.utils.ArgUtil;
 
 @Service
@@ -73,8 +74,8 @@ public class CustomerProfileService {
 		
 	}
 	
-	public CustomerContactProfileDoc fetchCustomerContactInfo(String id,String customerId,String phoneno){
-		return cmFieldMgr.fetchCustomerContactInfo(id,customerId,phoneno);
+	public List<CustomerProfileDoc> fetchCustomerContactInfo(String id,String customerId,String phoneno,String emailid){
+		return cmFieldMgr.fetchCustomerContactInfo(id,customerId,phoneno,emailid);
 		
 	}
 	
@@ -86,5 +87,15 @@ public class CustomerProfileService {
 	}
 	
 	
+	
+	public List<JobsResponseDto> fetchJobsOutPut(String id){
+		return cmFieldMgr.fetchJobsOutPut(id);
+		
+	}
+	
+	
+	public List<CustomerProfileDoc> saveCustomerProfile(String id){
+		return cmFieldMgr.saveCustomerProfileMaster(id);
+	}
 
 }

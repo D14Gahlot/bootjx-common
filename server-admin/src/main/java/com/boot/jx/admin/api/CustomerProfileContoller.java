@@ -23,6 +23,7 @@ import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 
 @RestController
 public class CustomerProfileContoller {
@@ -73,14 +74,28 @@ public class CustomerProfileContoller {
 		}
 	
 	@RequestMapping(value = "/api/agent/customer/contact/info", method = { RequestMethod.GET })
-	public ApiResponse<CustomerContactProfileDoc, Object> fetchCustomerContactInfo(@RequestParam(value = "id", required = true) String id,
+	public ApiResponse<CustomerProfileDoc, Object> fetchCustomerContactInfo(@RequestParam(value = "id", required = true) String id,
 			@RequestParam(value = "customerId", required = false) String customerId,
-			@RequestParam(value = "phoneno", required = false) String phoneno){
-			return ApiResponse.buildResult(cusProfileService.fetchCustomerContactInfo(id,customerId,phoneno));
+			@RequestParam(value = "phoneno", required = false) String phoneno,
+			@RequestParam(value = "emailid", required = false) String emailid){
+			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactInfo(id,customerId,phoneno,emailid));
 		}
 	
 	@RequestMapping(value = "/api/save/jobs/output", method = { RequestMethod.POST })
 	public ApiResponse<JobsResponseDto, Object> saveJobsOutPut(@RequestParam(value = "id", required = true) String id,@RequestBody List<Map<String, Object>> maps){
 			return ApiResponse.buildResults(cusProfileService.saveJobsOutPut(id,maps));
+		}
+	
+
+	@RequestMapping(value = "/api/fetch/jobs/output", method = { RequestMethod.GET })
+	public ApiResponse<JobsResponseDto, Object> fetchJobsOutPut(@RequestParam(value = "id", required = false) String id){
+			return ApiResponse.buildResults(cusProfileService.fetchJobsOutPut(id));
+		}	
+	
+	
+	
+	@RequestMapping(value = "/api/save/customer/profile/contact/details", method = { RequestMethod.POST })
+	public ApiResponse<CustomerProfileDoc, Object> saveCustomerProfile(@RequestParam(value = "id", required = true) String id){
+			return ApiResponse.buildResults(cusProfileService.saveCustomerProfile(id));
 		}
 }

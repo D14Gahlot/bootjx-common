@@ -250,6 +250,10 @@ public class AdminMsgController {
 	@RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
 		chatSessionDto = chatArchive.getChatSession(chatSessionDto);
+		if(ArgUtil.is(chatSessionDto) && chatSessionDto.getTagId()!=null && !chatSessionDto.getTagId().isEmpty()) {
+			List<String> tagCodeList = chatArchive.getTagCodeFromId(chatSessionDto.getTagId());
+			chatSessionDto.setTagId(tagCodeList);
+		}
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
 		chatSessionDto = chatArchive.withMessages(chatSessionDto);
 		return ApiResponse.buildData(chatSessionDto);
