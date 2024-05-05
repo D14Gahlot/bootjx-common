@@ -24,7 +24,7 @@ import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ClientAppConfigConstants;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
+import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.dict.ContactType;
@@ -46,7 +46,7 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
-import com.boot.jx.postman.doc.config.PermsConfigDoc;
+import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
@@ -231,45 +231,45 @@ public class ConfigOptionMetaController {
 	}
 
 	/**************
-	 * PERMS
+	 * Features
 	 ************/
 
 	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/perm", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, Object> setPerm(@RequestBody PermsConfigDoc map) {
-		configManager.savePerm(map);
-		return ApiResponse.buildResults(configManager.getPerms());
+	@RequestMapping(value = "/api/feature", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestBody FeaturesConfigDoc map) {
+		configManager.saveFeature(map);
+		return ApiResponse.buildResults(configManager.getFeature());
 	}
 
 	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/perm", method = { RequestMethod.PUT })
-	public ApiResponse<Map<String, Object>, Object> setPerm(@RequestParam PERMS_KEY key, @RequestParam String value,
+	@RequestMapping(value = "/api/feature", method = { RequestMethod.PUT })
+	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestParam FEATURES_KEY key, @RequestParam String value,
 			@RequestParam(defaultValue = "false") boolean shared) {
-		PermsConfigDoc map = new PermsConfigDoc();
+		FeaturesConfigDoc map = new FeaturesConfigDoc();
 		map.setKey(key.getKey());
 		map.setValue(value);
 		map.setShared(shared);
-		return setPerm(map);
+		return setFeature(map);
 	}
 
 	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/perm/{key}", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, Object> setPerm(@PathVariable("key") PERMS_KEY key,
-			@RequestBody PermsConfigDoc map) {
+	@RequestMapping(value = "/api/feature/{key}", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, Object> setFeature(@PathVariable("key") FEATURES_KEY key,
+			@RequestBody FeaturesConfigDoc map) {
 		map.setKey(key.getKey());
-		return setPerm(map);
+		return setFeature(map);
 	}
 
-	@RequestMapping(value = "/api/perm", method = { RequestMethod.GET })
-	public ApiResponse<Map<String, Object>, Object> getPerm(@RequestParam(required = false) PERMS_KEY key) {
-		return ApiResponse.buildResults(configManager.getPerm(key));
+	@RequestMapping(value = "/api/feature", method = { RequestMethod.GET })
+	public ApiResponse<Map<String, Object>, Object> getFeature(@RequestParam(required = false) FEATURES_KEY key) {
+		return ApiResponse.buildResults(configManager.getFeature(key));
 	}
 
 	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/perm", method = { RequestMethod.DELETE })
-	public ApiResponse<Map<String, Object>, Object> deletePerm(@RequestParam(required = false) PERMS_KEY key) {
+	@RequestMapping(value = "/api/feature", method = { RequestMethod.DELETE })
+	public ApiResponse<Map<String, Object>, Object> deleteFeature(@RequestParam(required = false) FEATURES_KEY key) {
 		configManager.deletePerm(key);
-		return ApiResponse.buildResults(configManager.getPerms());
+		return ApiResponse.buildResults(configManager.getFeature());
 	}
 
 	@RequestMapping(value = "/api/meta/chat_states", method = { RequestMethod.GET })

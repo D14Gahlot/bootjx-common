@@ -18,7 +18,7 @@ import com.boot.jx.AppConfigPackage.AppSharedConfigChange;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
-import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
+import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.postman.ClientApp;
@@ -30,7 +30,7 @@ import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.PermsConfigDoc;
+import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.manager.ConfigManager;
@@ -314,17 +314,17 @@ public class ConfigManagerImpl implements ConfigManager {
 		return null;
 	}
 
-	public List<Map<String, Object>> getPerms() {
+	public List<Map<String, Object>> getFeature() {
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		for (ConfigMeta meta : ConfigConstants.PERMS_CONFIG_LIST) {
-			list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.permEntry(meta.getKey())).toMap());
+			list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.featureEntry(meta.getKey())).toMap());
 		}
 		return list;
 	}
 
-	public List<Map<String, Object>> getPerm(PERMS_KEY key) {
+	public List<Map<String, Object>> getFeature(FEATURES_KEY key) {
 		if (!ArgUtil.is(key)) {
-			return this.getPerms();
+			return this.getFeature();
 		}
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		BuilderMap mapBuilder = MapBuilder.map();
@@ -334,32 +334,32 @@ public class ConfigManagerImpl implements ConfigManager {
 				mapBuilder.put("meta", meta);
 			}
 		}
-		mapBuilder.put("domain", this.pmEnvironment.local().permEntry(key)) // Domain
-				.put("shared", this.pmEnvironment.shared().permEntry(key)) // Shared
-				.put("config", this.pmEnvironment.permEntry(key)) // Resolved
+		mapBuilder.put("domain", this.pmEnvironment.local().featureEntry(key)) // Domain
+				.put("shared", this.pmEnvironment.shared().featureEntry(key)) // Shared
+				.put("config", this.pmEnvironment.featureEntry(key)) // Resolved
 		;
 		list.add(mapBuilder.toMap());
 		return list;
 	}
 
-	public void savePerm(PermsConfigDoc config) {
-		PMConfigurationObject configObject = pmEnvironment.local().permEntry(config.getKey());
+	public void saveFeature(FeaturesConfigDoc config) {
+		PMConfigurationObject configObject = pmEnvironment.local().featureEntry(config.getKey());
 		configObject.setKey(config.getKey());
 		configObject.setValue(config.getValue());
 		configObject.setShared(config.isShared());
 		configObject.setDomain(AppContextUtil.getTenant());
 		configObject.setServer(pmCommonConfig.getServiceServer());
 
-		PermsConfigDoc prefsConfigDoc = new PermsConfigDoc();
+		FeaturesConfigDoc prefsConfigDoc = new FeaturesConfigDoc();
 		prefsConfigDoc.setId(configObject.getKey() + "." + pmCommonConfig.getServiceServer());
 		prefsConfigDoc = EntityDtoUtil.dtoToEntity(configObject, prefsConfigDoc);
-		configStore.savePermConfig(prefsConfigDoc);
+		configStore.saveFeatureConfig(prefsConfigDoc);
 		this.refresh();
 	}
 
-	public void deletePerm(PERMS_KEY key) {
-		pmEnvironment.local().perms().remove(key);
-		PermsConfigDoc prefsConfigDoc = new PermsConfigDoc();
+	public void deletePerm(FEATURES_KEY key) {
+		pmEnvironment.local().features().remove(key);
+		FeaturesConfigDoc prefsConfigDoc = new FeaturesConfigDoc();
 		prefsConfigDoc.setKey(key.getKey());
 		prefsConfigDoc.setId(prefsConfigDoc.getKey() + "." + pmCommonConfig.getServiceServer());
 		configStore.remove(prefsConfigDoc);

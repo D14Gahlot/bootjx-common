@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
+import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
@@ -126,9 +126,9 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 
 	private SafeKeyHashMap<Object> permsConfigAttributes() {
 		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
-		for (PERMS_KEY config : ConfigConstants.PERMS_KEY.values()) {
+		for (FEATURES_KEY config : ConfigConstants.FEATURES_KEY.values()) {
 			setup.put(config.name(),
-					ArgUtil.nonEmpty(pmEnvironment.permEntry(config.getKey()).getValue(), config.getDefaultValue()));
+					ArgUtil.nonEmpty(pmEnvironment.featureEntry(config.getKey()).getValue(), config.getDefaultValue()));
 		}
 		return setup;
 	}
