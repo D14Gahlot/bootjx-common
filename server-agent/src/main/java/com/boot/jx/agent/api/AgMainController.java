@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,7 +21,6 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
-import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
 import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
@@ -41,7 +39,6 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
 @RestController

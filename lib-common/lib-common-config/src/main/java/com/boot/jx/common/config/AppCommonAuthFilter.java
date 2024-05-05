@@ -105,6 +105,9 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 			}
 		}
 
+		public Object getUserSharedProfile() {
+			return this.getAuthUser();
+		}
 	}
 
 	@Autowired(required = false)
