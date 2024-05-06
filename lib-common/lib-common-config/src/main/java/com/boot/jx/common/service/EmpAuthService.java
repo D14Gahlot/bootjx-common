@@ -111,6 +111,7 @@ public class EmpAuthService {
 			throws NoSuchAlgorithmException {
 		AgentDoc agent = validateAgent(username, username, passsword, admin);
 		if (ArgUtil.is(agent)) {
+			fixAppModules(agent);
 			DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
 			return new AgentResponseAuthDto().importFrom(agent).dept(new DepartmentResponseAuthDto().importFrom(dept));
 		}
