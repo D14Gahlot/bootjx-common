@@ -33,6 +33,7 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.APP_MODULES;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -50,6 +51,7 @@ import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 //import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -113,6 +115,29 @@ public class ConfigOptionMetaController {
 	}
 
 	// Option APIS
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@RequestMapping(value = { "/api/config/modules", "/pub/config/modules" }, method = { RequestMethod.GET })
+	public ApiResponse<APP_MODULES, Object> getAppModules(
+			@RequestParam(required = false, defaultValue = "false") boolean master) {
+		if (master) {
+			return ApiResponse.buildResults(CollectionUtil.asList(APP_MODULES.values()));
+		}
+		List<APP_MODULES> modules = new ArrayList<PMConstants.APP_MODULES>();
+		for (APP_MODULES appModule : APP_MODULES.values()) {
+			if (ArgUtil.is(appModule, APP_MODULES.ADMIN, APP_MODULES.AGENT)) {
+				modules.add(appModule);
+			} else {
+				for (FEATURES_KEY featureKey : FEATURES_KEY.values()) {
+					if (featureKey.name().equals("APP_MODULE_" + appModule.name())
+							&& pmEnvironment.featureEntry(featureKey).asBoolean()) {
+						modules.add(appModule);
+					}
+				}
+			}
+		}
+		return ApiResponse.buildResults(modules);
+	}
+
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@RequestMapping(value = { "/pub/options/channels", "/api/options/channels" }, method = { RequestMethod.GET })
 	@ResponseBody
@@ -243,8 +268,8 @@ public class ConfigOptionMetaController {
 
 	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.PUT })
-	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestParam FEATURES_KEY key, @RequestParam String value,
-			@RequestParam(defaultValue = "false") boolean shared) {
+	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestParam FEATURES_KEY key,
+			@RequestParam String value, @RequestParam(defaultValue = "false") boolean shared) {
 		FeaturesConfigDoc map = new FeaturesConfigDoc();
 		map.setKey(key.getKey());
 		map.setValue(value);

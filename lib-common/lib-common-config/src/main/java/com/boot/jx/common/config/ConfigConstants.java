@@ -337,7 +337,11 @@ public class ConfigConstants {
 				.optionsOnOff().group(CHANNELS)),
 		BOT_FLOW_BUILDER(new ConfigMeta("Bot Flow Builder", "feature.bot.flow.builder").optionsOnOff().group(BOT)),
 		APP_MODULE_CALENDAR(
-				new ConfigMeta("App Module Calendar", "feature.app.module.calandar").optionsOnOff().group(APP_MODULES)),
+				new ConfigMeta("Calendar Module", "feature.app.module.calandar").optionsOnOff().group(APP_MODULES)),
+		APP_MODULE_AGENT(new ConfigMeta("Agent Module", "feature.app.module.agent").optionsOnOff().group(APP_MODULES)),
+		APP_MODULE_ADMIN(new ConfigMeta("Admin Module", "feature.app.module.admin").optionsOnOff().group(APP_MODULES)),
+		APP_MODULE_SOCIAL(
+				new ConfigMeta("Social Module", "feature.app.module.social").optionsOnOff().group(APP_MODULES)),
 		// Ends here
 		;
 
