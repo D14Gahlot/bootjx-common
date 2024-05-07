@@ -131,11 +131,7 @@ public class InBoundController {
 	@RequestMapping(value = "/ext/release/v2/", method = { RequestMethod.POST })
 	public ApiResponse<Contactable, Object> inboundMessageBoxRelease(@RequestBody Contactable contact) {
 		String contactId = PostManUtil.CONTACT_ID(contact);
-		proxyManager.hold(contactId);
-		// inBoundService.hold().put(contactId, "RELEASING");
-		InboxMessage msg = new InboxMessage();
-		msg.setContact(contact);
-		inBoundService.invokeMethodsRelease(msg);
+		inBoundService.invokeMethodsRelease(contactId);
 		return ApiResponse.buildResult(contact).meta(contactId);
 	}
 
