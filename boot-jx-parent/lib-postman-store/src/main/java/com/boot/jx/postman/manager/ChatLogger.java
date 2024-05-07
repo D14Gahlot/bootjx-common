@@ -16,7 +16,6 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
@@ -143,6 +142,8 @@ public class ChatLogger {
 	}
 
 	private void toLogs(Throwable e, MessageDocLogs doc) {
+		doc.logs().add(e.getMessage());
+
 		StackTraceElement[] traces = e.getStackTrace();
 
 		if (traces.length > 0 && traces[0].toString().length() > 0) {
