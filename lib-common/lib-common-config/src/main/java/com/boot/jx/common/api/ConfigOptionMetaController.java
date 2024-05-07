@@ -286,7 +286,11 @@ public class ConfigOptionMetaController {
 	}
 
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.GET })
-	public ApiResponse<Map<String, Object>, Object> getFeature(@RequestParam(required = false) FEATURES_KEY key) {
+	public ApiResponse<Map<String, Object>, Object> getFeature(@RequestParam(required = false) FEATURES_KEY key,
+			@RequestParam(required = false) boolean refresh) {
+		if (refresh) {
+			configManager.refresh();
+		}
 		return ApiResponse.buildResults(configManager.getFeature(key));
 	}
 
