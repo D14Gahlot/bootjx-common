@@ -103,7 +103,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	@Autowired
 	private AgentStore agentStore;
 
-	@Autowired
+	@Autowired(required = false)
 	private AgentSessionBean agentSession;
 
 	@Autowired
