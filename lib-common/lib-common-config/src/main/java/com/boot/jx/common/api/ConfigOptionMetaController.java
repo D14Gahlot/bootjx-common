@@ -259,14 +259,14 @@ public class ConfigOptionMetaController {
 	 * Features
 	 ************/
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestBody FeaturesConfigDoc map) {
 		configManager.saveFeature(map);
 		return ApiResponse.buildResults(configManager.getFeature());
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.PUT })
 	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestParam FEATURES_KEY key,
 			@RequestParam String value, @RequestParam(defaultValue = "false") boolean shared) {
@@ -277,7 +277,7 @@ public class ConfigOptionMetaController {
 		return setFeature(map);
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature/{key}", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setFeature(@PathVariable("key") FEATURES_KEY key,
 			@RequestBody FeaturesConfigDoc map) {
@@ -290,7 +290,7 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(configManager.getFeature(key));
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.DELETE })
 	public ApiResponse<Map<String, Object>, Object> deleteFeature(@RequestParam(required = false) FEATURES_KEY key) {
 		configManager.deletePerm(key);
