@@ -55,8 +55,8 @@ public class AgentProxyController {
 		addHeaders.put("x-agent-user", agentSession.getAuthUser());
 		addHeaders.put("tnt", AppContextUtil.getTenant());
 
-		return MapModel
-				.fromSafe(service.forwardRequest("/nexus/", nexusUrl, body, addHeaders, request, response).getBody());
+		return MapModel.fromSafe(
+				service.forwardRequestNoRetry("/nexus/", nexusUrl, body, addHeaders, request, response).getBody());
 	}
 
 	@CrossOrigin(origins = "*")
@@ -76,7 +76,7 @@ public class AgentProxyController {
 		addHeaders.put("tnt", AppContextUtil.getTenant());
 
 		return MapModel.fromSafe(
-				service.forwardRequest("/pub/nexus/", nexusUrl, body, addHeaders, request, response).getBody());
+				service.forwardRequestNoRetry("/pub/nexus/", nexusUrl, body, addHeaders, request, response).getBody());
 	}
 
 }
