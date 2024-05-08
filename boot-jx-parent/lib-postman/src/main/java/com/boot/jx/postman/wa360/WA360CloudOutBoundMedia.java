@@ -3,10 +3,11 @@ package com.boot.jx.postman.wa360;
 import java.io.Serializable;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WA360CloudOutBoundMedia implements Serializable {
+public class WA360CloudOutBoundMedia implements JsonIgnoreNull {
 
     private static final long serialVersionUID = -654441367316876851L;
 
