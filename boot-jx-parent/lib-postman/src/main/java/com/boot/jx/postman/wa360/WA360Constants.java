@@ -103,6 +103,8 @@ public class WA360Constants {
 	public static final String D360_CLOUD_API_KEY = "D360-API-KEY";
 	public static final String BASE_URL = "https://waba.360dialog.io";
 	public static final String BASE_CLOUD_URL = "https://waba-v2.360dialog.io";
+	public static final String META_GRAPH_BASE_URL = "https://graph.facebook.com";
+	public static final String META_WA_CLOUD_URL = META_GRAPH_BASE_URL + "/v19.0/";
 
 	public static String MEDIA_URL(String mediaId) {
 		return BASE_URL + "/v1/media/" + mediaId;

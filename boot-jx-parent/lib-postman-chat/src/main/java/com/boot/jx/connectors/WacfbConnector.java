@@ -55,10 +55,10 @@ import com.boot.jx.postman.plugin.WacfbPlugin;
 import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.WABAConversationQuery;
-import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360InboundMedia;
+import com.boot.jx.postman.wacfb.WacfbClient;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -86,7 +86,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	private PMFileStoreClient pmFileStoreClient;
 
 	@Autowired
-	private WA360Client wa360Client;
+	private WacfbClient waClient;
 
 	@Autowired
 	private PMClientConfig pmClientConfig;
@@ -452,7 +452,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				isValidContact = optin(channelConfig, chatContactDoc);
 			}
 			if (isValidContact) {
-				wa360Client.send(channelConfig, outboxMessage);
+				waClient.send(channelConfig, outboxMessage);
 				outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 			} else {
 				outboxMessage.logs().add(String.format("Invalid Contact for %s", chatContactDoc));
@@ -574,7 +574,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				phone = String.format("+%s", phone);
 			}
 
-			MapModel resp = wa360Client.fetchContact(phone, channelConfig);
+			MapModel resp = waClient.fetchContact(phone, channelConfig);
 			String waId = resp.getString("wa_id");
 
 			String input = resp.getString("input");

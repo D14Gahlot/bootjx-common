@@ -31,6 +31,7 @@ import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
+import com.boot.jx.postman.wa360.WA360CloudOutBoundMedia;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.OutBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360Constants.TmplComponent;
@@ -41,6 +42,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
 
 @Component
@@ -64,13 +66,10 @@ public class WacfbClient {
 		StringJoiner msgIds = new StringJoiner(",");
 
 		if (ArgUtil.is(outboxMessage.getTemplateExt())) {
-			MapModel resp = null;
-			/** calling raw template /directly waba api for moengage **/
-			if (outboxMessage.getRawMessageFormat() != null && !outboxMessage.getRawMessageFormat().isEmpty()) {
-				resp = sendTemplateRaw(channelConfig, outboxMessage);
-			} else {
-				resp = sendTemplate(channelConfig, outboxMessage);
-			}
+			MapModel resp = sendTemplate(channelConfig, outboxMessage);
+			msgIds.add(getMessageId(resp));
+		} else if (ArgUtil.is(outboxMessage.getRawMessageFormat())) { /** for Moengage **/
+			MapModel resp = sendTemplateRaw(channelConfig, outboxMessage);
 			msgIds.add(getMessageId(resp));
 		} else {
 			boolean isList = false;
@@ -171,6 +170,7 @@ public class WacfbClient {
 		}
 
 		outboxMessage.setMessageIdExt(msgIds.toString());
+		outboxMessage.setHsm(outboxMessage.getHsm());
 		return outboxMessage;
 	}
 
@@ -179,7 +179,7 @@ public class WacfbClient {
 		if (ArgUtil.is(outboxMessage.getAttachments())) {
 			for (Attachment attachment : outboxMessage.getAttachments()) {
 				if (ArgUtil.is(textMessage) && ArgUtil.isEqual(attachment.getMediaType(), FileType.IMAGE.toString(),
-						FileType.VIDEO.toString())) {
+						FileType.VIDEO.toString(), FileType.DOCUMENT.toString())) {
 					attachment.setMediaCaption(textMessage);
 					textMessage = null;
 				}
@@ -242,7 +242,7 @@ public class WacfbClient {
 				if (ArgUtil.is(card.getUrls())) {
 					MapModel urls = MapModel.createInstance();
 					for (PBWebsite url : card.getUrls()) {
-						urls.put("type", url.getType()).put("urls", url.getUrl()).map2list();
+						urls.put("type", url.getType()).put("url", url.getUrl()).map2list();
 					}
 					contacts.put("urls", urls.list());
 				}
@@ -263,8 +263,9 @@ public class WacfbClient {
 
 			if (locations.size() > 0) {
 				for (Object location : locations.list()) {
-					MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
-							outboxMessage.contact().getCsid());
+					MapModel req = MapModel.createInstance()
+							.put("messaging_product", outboxMessage.getContact().getContactType())
+							.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 					req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "location");
 					req.put("location", location);
 					textMessage = null;
@@ -274,8 +275,9 @@ public class WacfbClient {
 			}
 
 			if (contacts.size() > 0) {
-				MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
-						outboxMessage.contact().getCsid());
+				MapModel req = MapModel.createInstance()
+						.put("messaging_product", outboxMessage.getContact().getContactType())
+						.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 				req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "contacts");
 				req.put("contacts", contacts.list());
 				textMessage = null;
@@ -287,8 +289,8 @@ public class WacfbClient {
 	}
 
 	private MapModel sendTemplate(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
 		MapModel extTemplate = MapModel.from(outboxMessage.getTemplateExt().getTemplate());
 		MapModel model = MapModel.from(outboxMessage.getModel());
@@ -313,10 +315,7 @@ public class WacfbClient {
 						List<Map<String, Object>> headerParametersTemp = varMap.entry("header").asListOfMap();
 						for (Map<String, Object> headerParameter : headerParametersTemp) {
 							String path = (String) headerParameter.get("path");
-							String path2 = (String) headerParameter.get("path2");
-							String defaultValue = (String) headerParameter.get("defaultValue");
-							headerComponentReq.parameter("text",
-									model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+							headerComponentReq.parameter("text", model.pathEntry(path).asString());
 						}
 						if (headerComponentReq.parameters().size() > 0) {
 							components.add(headerComponentReq.build().map());
@@ -324,10 +323,7 @@ public class WacfbClient {
 					}
 				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
-					WA360OutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
-					if ("video".equals(lowerFormat) || ("document".equals(lowerFormat))) {
-						media.setCaption(null);
-					}
+					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());
@@ -340,10 +336,7 @@ public class WacfbClient {
 					TmplComponent bodyComponent = TmplComponent.createInstance().body();
 					for (Map<String, Object> bodyParameter : bodyParametersTemp) {
 						String path = (String) bodyParameter.get("path");
-						String path2 = (String) bodyParameter.get("path2");
-						String defaultValue = (String) bodyParameter.get("defaultValue");
-						bodyComponent.parameter("text",
-								model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+						bodyComponent.parameter("text", model.pathEntry(path).asString());
 					}
 					components.add(bodyComponent.build().map());
 				}
@@ -361,11 +354,8 @@ public class WacfbClient {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
 									String path = (String) buttonParameter.get("path");
-									String path2 = (String) buttonParameter.get("path2");
-									String defaultValue = (String) buttonParameter.get("defaultValue");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
-									buttonComponent.parameter("text",
-											model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+									buttonComponent.parameter("text", model.pathEntry(path).asString());
 									components.add(buttonComponent.build().map());
 								}
 							}
@@ -373,12 +363,9 @@ public class WacfbClient {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
 									String path = (String) buttonParameter.get("path");
-									String path2 = (String) buttonParameter.get("path2");
-									String defaultValue = (String) buttonParameter.get("defaultValue");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
-									buttonComponent.parameter("payLoad",
-											model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
+									buttonComponent.parameter("payLoad", model.pathEntry(path).asString());
 									components.add(buttonComponent.build().map());
 								}
 							}
@@ -393,8 +380,8 @@ public class WacfbClient {
 		return send(req, channelConfig);
 	}
 
-	private WA360OutBoundMedia createMedia(String mediaType, Attachment attachment) {
-		WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
+	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
+		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
 		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
 		wa360OutBoundMedia.setFilename(attachment.getMediaName());
@@ -405,8 +392,8 @@ public class WacfbClient {
 	}
 
 	private MapModel sendText(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
 		req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY,
 				StringUtils.wrap("*", outboxMessage.getSubject(), "*\n") + outboxMessage.getMessage());
@@ -414,10 +401,10 @@ public class WacfbClient {
 	}
 
 	private MapModel sendMedia(ChannelConfig channelConfig, OutboxMessage outboxMessage, Attachment attachment) {
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
-		WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
+		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
 		wa360OutBoundMedia.setCaption(ArgUtil.nonEmpty(attachment.getMediaCaption(), outboxMessage.getSubject()));
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
 		wa360OutBoundMedia.setFilename(attachment.getMediaName());
@@ -426,12 +413,14 @@ public class WacfbClient {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "image");
 			wa360OutBoundMedia.setFilename(null);
 			req.put("image", wa360OutBoundMedia);
+
 		} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
 			wa360OutBoundMedia.setFilename(null);
 			req.put("video", wa360OutBoundMedia);
 		} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 			req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
+
 			wa360OutBoundMedia.setCaption(null);
 			wa360OutBoundMedia.setFilename(null);
 			req.put("audio", wa360OutBoundMedia);
@@ -444,8 +433,8 @@ public class WacfbClient {
 	}
 
 	private MapModel sendList(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons) {
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
 		MapModel options = outboxMessage.optionsAsModel();
 
@@ -495,8 +484,8 @@ public class WacfbClient {
 	}
 
 	private MapModel sendButton(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons) {
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
 		req.put(new JsonPath("/interactive/type"), "button");
@@ -550,8 +539,9 @@ public class WacfbClient {
 	}
 
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
+
 		try {
-			MapModel resp = restService.ajax("https://graph.facebook.com/v17.0")
+			MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
 					.path(channelConfig.getWacfb().getPhoneNumberId() + "/messages")
 					.authBearer(channelConfig.getWacfb().getAccessToken()).post(req.toMap()).asMapModel();
 			return resp;
@@ -592,8 +582,8 @@ public class WacfbClient {
 
 	public MapModel fetchContact(String contact, ChannelConfig channelConfig) {
 		try {
-			MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/contacts")
-					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/contacts")
+					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 					.post(MapModel.createInstance().put("blocking", "wait")
 							.put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact).toMap())
 					.asMapModel();
@@ -607,14 +597,14 @@ public class WacfbClient {
 	}
 
 	public MapModel fetchTemplates(ChannelConfig channelConfig) {
-		MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
-				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).get().asMapModel();
+		MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates")
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).get().asMapModel();
 		return resp;
 	}
 
 	public MapModel deleteTemplates(ChannelConfig channelConfig, String templateName) {
-		MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates/{templateName}")
-				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+		MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates/{templateName}")
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 				.pathParam("templateName", templateName).delete().asMapModel();
 		return resp;
 	}
@@ -622,8 +612,8 @@ public class WacfbClient {
 	public MapModel updateTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
 			String templateName = req.getString("name");
-			MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates/{templateName}")
-					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates/{templateName}")
+					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
 					.pathParam("templateName", templateName).post(req.toMap()).asMapModel();
 
 			return resp;
@@ -638,9 +628,8 @@ public class WacfbClient {
 
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
-			req.remove("status");
-			MapModel resp = restService.ajax(WA360Constants.BASE_URL).path("v1/configs/templates")
-					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey()).post(req.toMap())
+			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates")
+					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).post(req.toMap())
 					.asMapModel();
 
 			return resp;
@@ -653,42 +642,31 @@ public class WacfbClient {
 		}
 	}
 
-	public MapModel mock(MapModel req) {
-		try {
-			MapModel resp = restService
-					.ajax("https://requestly.dev/api/mockv2/v1/messages?rq_uid=EaRk251ISeNyNfNTHKZ4ifiZbGv1")
-					.header("user-agent",
-							"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36")
-					.get().asMapModel();
-			return resp;
-		} catch (ApiHttpServerException e) {
-			throw e;
-			// return
-			// MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
-			// e.getHttpStatus().value());
-		} catch (ApiHttpException e) {
-			return MapModel.from(e.getResponse().getBody());
-		}
-	}
+	public String getMediaUrl(ChannelConfig channelConfig, String url) {
 
-	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
-	public OutboxMessage mock(OutboxMessage outboxMessage) {
-		StringJoiner msgIds = new StringJoiner(",");
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
-		MapModel resp = mock(req);
-		msgIds.add(getMessageId(resp));
-		outboxMessage.setMessageIdExt(msgIds.toString());
-		return outboxMessage;
+		if (url.contains("mid=")) {
+			String mid = url.split("mid=")[1].split("&")[0];
+			url = WA360Constants.MEDIA_CLOUD_URL(mid);
+		}
+
+		MapModel resp = restService.ajax(url.replace("/v1/media/", "/"))
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).acceptJson().get()
+				.asMapModel();
+		return resp.getString("url").replace("https://lookaside.fbsbx.com", WA360Constants.BASE_CLOUD_URL);
 	}
 
 	/** Call new metod to post msg directly to waba API **/
 	public MapModel sendTemplateRaw(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+		System.out.println("sendTemplateRaw :" + JsonUtil.toJson(outboxMessage));
+		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
+				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual").put("to",
-				outboxMessage.contact().getCsid());
+		MapModel extTemplate = MapModel.from(outboxMessage.getRawMessageFormat());
 
-		MapModel extTemplate = MapModel.from(outboxMessage.getTemplateExt().getTemplate());
+		// List<Map<String, Object>> extTemplateComponents =
+		// extTemplate.keyEntry("template").asListOfMap();
+		// System.out.println("JSON
+		// -extTemplateComponents--"+JsonUtil.toJsonPrettyPrint(extTemplateComponents));
 
 		MapModel model = MapModel.from(outboxMessage.getModel());
 		MapModel varMap = null;// MapModel.from(outboxMessage.getTemplateExt().getVarMap());
@@ -700,10 +678,12 @@ public class WacfbClient {
 		req.put(OutBoundWrapperPaths.TEMPLATE_LANGUAGE_POLICY, "deterministic");
 
 		req.putAll(extTemplate);
+
+		MapModel components = MapModel.createInstance();
+		// List<Map<String, Object>> extTemplateComponents =
+		// null;//extTemplate.keyEntry("components").asListOfMap();
+
 		/*
-		 * MapModel components = MapModel.createInstance(); List<Map<String, Object>>
-		 * extTemplateComponents = extTemplate.keyEntry("components").asListOfMap();
-		 * 
 		 * for (Map<String, Object> extTemplateComponent : extTemplateComponents) {
 		 * String extTemplateComponentType = (String) extTemplateComponent.get("type");
 		 * if ("HEADER".equals(extTemplateComponentType)) { TmplComponent
@@ -720,7 +700,7 @@ public class WacfbClient {
 		 * (headerComponentReq.parameters().size() > 0) {
 		 * components.add(headerComponentReq.build().map()); } } } else if
 		 * (ArgUtil.is(outboxMessage.getAttachments())) { String lowerFormat =
-		 * extTemplateComponentFormat.toLowerCase(); WA360OutBoundMedia media =
+		 * extTemplateComponentFormat.toLowerCase(); WA360CloudOutBoundMedia media =
 		 * createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 		 * headerComponentReq.parameter(lowerFormat, media); if
 		 * (headerComponentReq.parameters().size() > 0) {
@@ -766,9 +746,9 @@ public class WacfbClient {
 		 * components.add(buttonComponent.build().map()); } } } } } }
 		 * 
 		 * }
-		 * 
-		 * req.put(OutBoundWrapperPaths.TEMPLATE_COMPONENTS, components.list());
 		 */
+
+		// req.put(OutBoundWrapperPaths.TEMPLATE_COMPONENTS, components.list());
 		return send(req, channelConfig);
 	}
 }
