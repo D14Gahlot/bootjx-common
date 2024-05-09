@@ -107,16 +107,16 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			channelConfigTemp.log("oauth/access_token", accessToken.toMap());
 
 			String userAccessToken = accessToken.keyEntry("access_token").asString();
-			String assignedBusinessid = resp.pathEntry("_.waba_id").asString();
+			String assignedWaBaId = resp.pathEntry("_.waba_id").asString();
 			String phoneNumberId = resp.pathEntry("_.phone_number_id").asString();
 
-			if (!ArgUtil.is(assignedBusinessid)) {
+			if (!ArgUtil.is(assignedWaBaId)) {
 				MapModel debugToken = restService.ajax("https://graph.facebook.com/v18.0").path("/debug_token")
 						.queryParam("input_token", userAccessToken)
 						.authBearer(setup.getWacfb().getMasterAppId() + "|" + setup.getWacfb().getMasterAppSecret())
 						.get().asMapModel();
 				channelConfigTemp.log("/debug_token", debugToken.toMap());
-				assignedBusinessid = debugToken.pathEntry("/data/granular_scopes/[0]/target_ids/[0]").asString();
+				assignedWaBaId = debugToken.pathEntry("/data/granular_scopes/[0]/target_ids/[0]").asString();
 			}
 
 			if (ArgUtil.is(phoneNumberId)) {
@@ -129,14 +129,16 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channel.getWacfb().setAccessToken(userAccessToken);
 				channel.getWacfb().setNumber(PhoneUtil.phone(phoneMap.keyEntry("display_phone_number").asString()));
 				channel.getWacfb().setPhoneNumberId(phoneMap.keyEntry("id").asString());
+				channel.getWacfb().setWabaId(assignedWaBaId);
 				channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
 				channels.add(channel);
 
 			} else {
-				MapModel phoneNumbers = restService.ajax("https://graph.facebook.com/v18.0/").path(assignedBusinessid)
+				MapModel phoneNumbers = restService.ajax("https://graph.facebook.com/v18.0/").path(assignedWaBaId)
 						.path("/phone_numbers").authBearer(userAccessToken).get().asMapModel();
 				channelConfigTemp.log("/phone_numbers", phoneNumbers.toMap());
+				final String assignedWaBaIdFinal = assignedWaBaId;
 
 				phoneNumbers.keyEntry("data").asListOfMap().forEach(phone -> {
 					MapModel phoneMap = MapModel.from(phone);
@@ -145,6 +147,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 					channel.getWacfb().setAccessToken(userAccessToken);
 					channel.getWacfb().setNumber(PhoneUtil.phone(phoneMap.keyEntry("display_phone_number").asString()));
 					channel.getWacfb().setPhoneNumberId(phoneMap.keyEntry("id").asString());
+					channel.getWacfb().setWabaId(assignedWaBaIdFinal);
 					channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
 					channel.setName(phoneMap.keyEntry("verified_name").asString());
 					channels.add(channel);

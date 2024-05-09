@@ -36,10 +36,11 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String accessToken;
 
-		@ConfigMetaProperty(path = "phoneNumberId", title = "Phone Number Id", createonly = true,
-				desc = "Enter Your Phone Number Id")
-		@JsonView(PMEnvironment.ProtectedProperty.class)
+		@ConfigMetaProperty(path = "phoneNumberId", title = "Phone Number Id", desc = "Enter Your Phone Number Id")
 		private String phoneNumberId;
+
+		@ConfigMetaProperty(path = "wabaId", title = "WaBa Id", desc = "Enter Your WaBa Id", optional = true)
+		private String wabaId;
 
 		@ConfigMetaProperty(path = "promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
@@ -104,6 +105,14 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 		public void setPromptName(boolean promptName) {
 			this.promptName = promptName;
+		}
+
+		public String getWabaId() {
+			return wabaId;
+		}
+
+		public void setWabaId(String wabaId) {
+			this.wabaId = wabaId;
 		}
 
 	}
