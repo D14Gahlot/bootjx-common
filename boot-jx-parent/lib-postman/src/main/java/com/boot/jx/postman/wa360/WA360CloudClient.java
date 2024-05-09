@@ -22,6 +22,13 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
+import com.boot.jx.postman.pbook.PBAddress;
+import com.boot.jx.postman.pbook.PBDate;
+import com.boot.jx.postman.pbook.PBEmail;
+import com.boot.jx.postman.pbook.PBLocation;
+import com.boot.jx.postman.pbook.PBPhone;
+import com.boot.jx.postman.pbook.PBVCard;
+import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Constants.OutBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360Constants.TmplComponent;
@@ -189,6 +196,105 @@ public class WA360CloudClient {
 				}
 				MapModel resp = sendMedia(channelConfig, outboxMessage,
 						attachment);
+				msgIds.add(getMessageId(resp));
+			}
+		}
+		else if (ArgUtil.is(outboxMessage.getVccards()) && outboxMessage.getVccards().size() > 0) {
+			MapModel locations = MapModel.createInstance();
+			MapModel contacts = MapModel.createInstance();
+
+			for (PBVCard card : outboxMessage.getVccards()) {
+				if (ArgUtil.is(card.getLocations())) {
+					for (PBLocation location : card.getLocations()) {
+						locations.put("longitude", location.getLongitude());
+						locations.put("latitude", location.getLatitude());
+						locations.put("name", location.getName());
+						locations.put("address", location.getAddress());
+						locations.map2list();
+					}
+				}
+
+				if (ArgUtil.is(card.getName())) {
+					contacts.put(WA360Constants.OutBoundWrapperPaths.NAME_FIRST_NAME, card.getName().getFirstName());
+					contacts.put(WA360Constants.OutBoundWrapperPaths.NAME_LAST_NAME, card.getName().getLastName());
+					contacts.put(WA360Constants.OutBoundWrapperPaths.NAME_FORMATTED_NAME,
+							card.getName().getFormattedName());
+				}
+
+				if (ArgUtil.is(card.getWork()) && card.getWork().size() > 0) {
+					contacts.put(WA360Constants.OutBoundWrapperPaths.ORG_COMPANY, card.getWork().get(0).getCompany());
+					contacts.put(WA360Constants.OutBoundWrapperPaths.ORG_DEPARTMENT,
+							card.getWork().get(0).getDepartment());
+					contacts.put(WA360Constants.OutBoundWrapperPaths.ORG_TITLE, card.getWork().get(0).getTitle());
+				}
+
+				if (ArgUtil.is(card.getDates()) && card.getDates().size() > 0) {
+					for (PBDate date : card.getDates()) {
+						if ("birthday".equalsIgnoreCase(date.getType())) {
+							contacts.put("birthday", date.getDate());
+						}
+					}
+				}
+
+				if (ArgUtil.is(card.getEmails())) {
+					MapModel emails = MapModel.createInstance();
+					for (PBEmail email : card.getEmails()) {
+						emails.put("type", email.getType()).put("email", email.getEmail()).map2list();
+					}
+					contacts.put("emails", emails.list());
+				}
+
+				if (ArgUtil.is(card.getPhones())) {
+					MapModel phones = MapModel.createInstance();
+					for (PBPhone phone : card.getPhones()) {
+						phones.put("type", phone.getType()).put("phone", phone.getPhone()).map2list();
+					}
+					contacts.put("phones", phones.list());
+				}
+
+				if (ArgUtil.is(card.getUrls())) {
+					MapModel urls = MapModel.createInstance();
+					for (PBWebsite url : card.getUrls()) {
+						urls.put("type", url.getType()).put("url", url.getUrl()).map2list();
+					}
+					contacts.put("urls", urls.list());
+				}
+
+				if (ArgUtil.is(card.getAddresses())) {
+					MapModel addresses = MapModel.createInstance();
+					for (PBAddress address : card.getAddresses()) {
+						addresses.put("type", address.getType()).put("city", address.getCity())
+								.put("country", address.getCountry()).put("country_code", address.getCountryCode())
+								.put("state", address.getState()).put("street", address.getStreet())
+								.put("zip", address.getZip()).map2list();
+					}
+					contacts.put("addresses", addresses.list());
+				}
+				if (contacts.size() > 0)
+					contacts.map2list();
+			}
+
+			if (locations.size() > 0) {
+				for (Object location : locations.list()) {
+					MapModel req = MapModel.createInstance().put("messaging_product",
+							outboxMessage.getContact().getContactType()).put("recipient_type", "individual").put("to",
+							outboxMessage.contact().getCsid());
+					req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "location");
+					req.put("location", location);
+					textMessage = null;
+					MapModel resp = send(req, channelConfig);
+					msgIds.add(getMessageId(resp));
+				}
+			}
+
+			if (contacts.size() > 0) {
+				MapModel req = MapModel.createInstance().put("messaging_product",
+						outboxMessage.getContact().getContactType()).put("recipient_type", "individual").put("to",
+						outboxMessage.contact().getCsid());
+				req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "contacts");
+				req.put("contacts", contacts.list());
+				textMessage = null;
+				MapModel resp = send(req, channelConfig);
 				msgIds.add(getMessageId(resp));
 			}
 		}
