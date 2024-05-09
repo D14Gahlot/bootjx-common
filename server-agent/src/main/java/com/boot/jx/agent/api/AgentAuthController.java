@@ -191,6 +191,7 @@ public class AgentAuthController {
 		model.addAttribute("APP_USER", agentSession.getAgentCode());
 		model.addAttribute("APP_DEPT", agentSession.getAgentDept());
 		model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(agentSession.getRole()));
+		model.addAttribute("APP_USER_PROFILE", agentSession.getProfile());
 
 		return "app-agent";
 	}

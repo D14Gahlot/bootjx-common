@@ -21,7 +21,7 @@ import com.boot.jx.postman.PMEnvironment.PMEnvironmentProvider;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.PermsConfigDoc;
+import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -85,9 +85,9 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 				localConfiguration.setPref(prefsConfig, serviceServer);
 			}
 
-			List<PermsConfigDoc> permsConfigs = configMaster.findAll(PermsConfigDoc.class);
-			for (PermsConfigDoc permsConfig : permsConfigs) {
-				localConfiguration.setPerm(permsConfig, serviceServer);
+			List<FeaturesConfigDoc> featuresConfigs = configMaster.findAll(FeaturesConfigDoc.class);
+			for (FeaturesConfigDoc featureConfig : featuresConfigs) {
+				localConfiguration.setFeature(featureConfig, serviceServer);
 			}
 
 			List<ChannelConfigDoc> channels = configMaster.findAll(ChannelConfigDoc.class);
@@ -125,8 +125,8 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 				for (Entry<String, PMConfigurationObject> entry : localConfiguration.prefs().entrySet()) {
 					newSharedConfiguration.setPref(entry.getValue(), serviceServer);
 				}
-				for (Entry<String, PMConfigurationObject> entry : localConfiguration.perms().entrySet()) {
-					newSharedConfiguration.setPerm(entry.getValue(), serviceServer);
+				for (Entry<String, PMConfigurationObject> entry : localConfiguration.features().entrySet()) {
+					newSharedConfiguration.setFeature(entry.getValue(), serviceServer);
 				}
 				List<ChannelConfigDoc> sandboxChannels = configMaster.findAll(ChannelConfigDoc.class);
 				for (ChannelConfigDoc channel : sandboxChannels) {

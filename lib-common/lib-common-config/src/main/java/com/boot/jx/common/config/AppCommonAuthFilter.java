@@ -26,6 +26,8 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 	public static class ACCESS_RULES {
 		public static final String ONLY_DUPERUSER = "ONLY_DUPERUSER";
 
+		public static final String ONLY_SUPERDEV = "ONLY_SUPERDEV";
+
 		/**
 		 * If domain is master domain
 		 */
@@ -105,6 +107,9 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 			}
 		}
 
+		public Object getUserSharedProfile() {
+			return this.getAuthUser();
+		}
 	}
 
 	@Autowired(required = false)
@@ -119,6 +124,12 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 			}
 			return (appCommonAuthUserLocal != null)
 					&& appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.DUPER_USER);
+		} else if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_SUPERDEV)) {
+			if (!ArgUtil.is(appCommonAuthUserLocal)) {
+				return false;
+			}
+			return (appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.DUPER_USER)
+					|| appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.SUPER_DEV));
 		} else if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN)
 				&& Tenants.isDefault(AppContextUtil.getTenant())) {
 			return (appCommonAuthUserLocal != null)

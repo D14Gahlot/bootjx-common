@@ -14,7 +14,7 @@ import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.PermsConfigDoc;
+import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.utils.PostManUtil;
@@ -67,8 +67,8 @@ public class ConfigMaster extends CommonMongoTemplateAbstract<ConfigMaster> {
 		configStore.saveCompanyVar(companyVarsConfig);
 	}
 
-	public void savePermConfig(PermsConfigDoc permConfigDoc) {
-		configStore.savePermConfig(permConfigDoc);
+	public void saveFeatureConfig(FeaturesConfigDoc permConfigDoc) {
+		configStore.saveFeatureConfig(permConfigDoc);
 		configStore.saveMaster(permConfigDoc);
 	}
 

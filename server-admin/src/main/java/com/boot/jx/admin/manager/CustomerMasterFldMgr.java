@@ -2,9 +2,12 @@ package com.boot.jx.admin.manager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -20,15 +23,21 @@ import com.boot.jx.common.doc.JobsOutPutDoc;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.pbook.PBPhone;
+import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 
 @Component
 public class CustomerMasterFldMgr {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerMasterFldMgr.class);
 	@Autowired
 	MongoTemplate mongoTemplate;
 
@@ -39,6 +48,9 @@ public class CustomerMasterFldMgr {
 
 	@Autowired
 	ExcelHelper excelHelper;
+	
+	@Autowired
+	ContactStore contactStore;
 
 	public List<CustomerMasterFieldDto> addAndEditMasterfield(CustomerMasterFieldDto reqDto) {
 
@@ -122,7 +134,7 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 		doc.setCreatedStamp(System.currentTimeMillis());
 		doc.setJobtype("customer_profile_bulk_upload");
 		doc.setTime(TimeStampIndex.now());
-		doc.setStatus(ArgUtil.parseAsString(Status.SCHLD));
+		doc.setStatus(ArgUtil.parseAsString(Status.CRTD));
 		commonMongoTemplate.save(doc);
 	
 		return doc;
@@ -180,6 +192,9 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
 		List<CustomerContactDto> dtoLst = new ArrayList<>();
 		JobScheduledDoc cmProfileDoc = null;
+		
+		List<CustomerProfileDoc> lstCusProMap = new ArrayList<>();
+		
 		String url = null;
 		if (ArgUtil.is(id)) {
 			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
@@ -195,6 +210,7 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 
 				try {
 					maps = excelHelper.convertExcelToFormattedString();
+					lstCusProMap =excelHelper.createCustomerProfile();
 					dto.setSuccessMaps(maps);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -202,6 +218,7 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 				}
 
 				saveCustomerContactProfile(id, maps);
+				//saveCustomerProfileMaster(id, lstCusProMap);
 				dtoLst.add(dto);
 			}
 		}
@@ -210,6 +227,28 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 
 		return dtoLst;
 
+	}
+
+	public List<CustomerProfileDoc> saveCustomerProfileMaster(String id) {
+		List<CustomerProfileDoc> docs=new ArrayList<>();
+		List<CustomerProfileDoc> lstCusProMap =null;
+		try {
+			lstCusProMap =excelHelper.createCustomerProfile();
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (ArgUtil.is(id) && lstCusProMap != null && !lstCusProMap.isEmpty()) {
+			LOGGER.info("saveCustomerProfileMaster size :"+lstCusProMap.size());
+			for(CustomerProfileDoc doc :lstCusProMap) {
+				commonMongoTemplate.save(doc);
+				docs.add(doc);
+			}
+		}
+		
+		return docs;
 	}
 
 	public void saveCustomerContactProfile(String id, List<Map<String, Object>> maps) {
@@ -225,14 +264,30 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 
 	}
 
-	public CustomerContactProfileDoc fetchCustomerContactInfo(String refId, String customerId, String phoneno) {
-		CustomerContactProfileDoc profileDoc = null;
+	public List<CustomerProfileDoc> fetchCustomerContactInfo(String refId, String customerId, String phoneno, String emailid) {
+		List<CustomerProfileDoc> cpLst = new ArrayList<>(); 
+		CustomerProfileDoc profileDoc = null;
+		List<Criteria> orOperator = new LinkedList<Criteria>();
+		
 		if (ArgUtil.is(refId)) {
 			profileDoc = mongoTemplate.findOne(new Query(Criteria.where("contactIdRef").is(refId)),
-					CustomerContactProfileDoc.class);
+					CustomerProfileDoc.class);
 
+		}if(ArgUtil.is(phoneno)) {
+				PBPhone ph = contactStore.parsePhone(new PBPhone().phone(phoneno));
+				orOperator.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
+						.and("countryCallingCode").is(ph.countryCallingCode)));
 		}
-		return profileDoc;
+		
+		if (ArgUtil.is(emailid)) {
+			orOperator.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(emailid)));
+		}
+
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
+		cpLst = contactStore.find(qb);
+		return cpLst;
+		
 	}
 	
 	public List<JobsResponseDto> saveJobsOutPut(String id,List<Map<String,Object>> maps) {
@@ -250,4 +305,28 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 		}
 		return null;
 	}
+	public List<JobsResponseDto> fetchJobsOutPut(String id) {
+		List<JobsResponseDto> lstDtos = new ArrayList<>();
+		JobsOutPutDoc jobsOpDoc =null;
+		if (ArgUtil.is(id)) {
+			jobsOpDoc = commonMongoTemplate.findByIdString(id, JobsOutPutDoc.class);
+			if(ArgUtil.is(jobsOpDoc)) {
+				JobsResponseDto dto = EntityDtoUtil.entityToDto(jobsOpDoc, new JobsResponseDto());
+				dto.setInputLst(jobsOpDoc.getOutputLst());
+				lstDtos.add(dto);
+			}
+			
+		}else {
+			List<JobsOutPutDoc> lstDocs = commonMongoTemplate.findAll(JobsOutPutDoc.class);
+			for(JobsOutPutDoc op:lstDocs) {
+				JobsResponseDto dto = EntityDtoUtil.entityToDto(jobsOpDoc, new JobsResponseDto());
+				dto.setInputLst(op.getOutputLst());
+				lstDtos.add(dto);
+			}
+		}
+		return lstDtos;
+		
+	}
+	
 }
+	
