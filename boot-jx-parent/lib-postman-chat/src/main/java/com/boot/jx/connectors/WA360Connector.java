@@ -455,9 +455,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		LOGGER.info("IN message {DR}" + requestMap);
 		if (requestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap));
-		}
-
-		if (requestMap.containsKey("statuses")) {
+		} else if (requestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = requestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
 				MapModel statusModel = MapModel.from(statusMap);
@@ -473,13 +471,10 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 						query.setPricing(statusModel.keyEntry("pricing").asMap());
 						query.set("meta.to_country", getCountryCode(reprt.contact().getCsid()));
 						commonMongoTemplate.upsert(query);
-						Map<String, Object> tpChannelMap = new HashMap<>();
-						tpChannelMap.put("ccwExpiry", conversation.get("expiration_timestamp"));
-						tpChannelMap.put("wabaConvesationId", id);
-						if (ArgUtil.is(tpChannelMap)) {
-							reprt.setTpChanel(tpChannelMap);
-						}
-						
+						reprt.setTpMeta(
+								MapModel.createInstance().put("ccwExpiry", conversation.get("expiration_timestamp"))
+										.put("wabaConvesationId", id).toMap());
+
 					}
 				}
 			}

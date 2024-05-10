@@ -69,6 +69,12 @@
 			<version>${handlebars-version}</version>
 		</dependency>
 
+ <dependency>
+    <groupId>com.github.hkirk</groupId>
+    <artifactId>java-html2image</artifactId>
+    <version>0.9</version>
+  </dependency>
+
 	</dependencies>
 
 
@@ -106,7 +112,10 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-
+		  <repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		  </repository>
 	</repositories>
 
 </project>

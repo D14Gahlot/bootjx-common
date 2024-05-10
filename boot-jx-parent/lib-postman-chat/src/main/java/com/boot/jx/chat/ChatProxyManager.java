@@ -1,13 +1,12 @@
 package com.boot.jx.chat;
 
-import java.util.Map;
-
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppSharedConfig;
+import com.boot.jx.AppConfigPackage.AppSharedConfigChange;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.cache.CacheBox;
 import com.boot.jx.def.ICacheBox;
@@ -98,7 +97,7 @@ public class ChatProxyManager implements AppSharedConfig {
 	}
 
 	@Override
-	public void clear(Map<String, String> map) {
+	public void clear(AppSharedConfigChange change) {
 		String tnt = AppContextUtil.getTenant();
 
 	}

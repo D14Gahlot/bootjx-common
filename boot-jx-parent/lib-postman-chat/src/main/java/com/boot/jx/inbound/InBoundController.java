@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,9 +28,11 @@ import com.boot.jx.chat.ChatProxyManager;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
+import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.fb.FacebookHookRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
@@ -40,6 +40,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.postman.store.ConfigStore;
 import com.boot.jx.scope.vendor.VendorContext.ApiVendorHeaders;
 import com.boot.jx.utils.PostManUtil;
@@ -47,16 +48,11 @@ import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.Random;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 @RestController
 public class InBoundController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InBoundController.class);
-
-	private Cache<String, List<ChannelConfigDupsDoc>> channelList = CacheBuilder.newBuilder().maximumSize(1000)
-			.expireAfterWrite(1, TimeUnit.HOURS).build();
 
 	@Autowired
 	private InBoundService inBoundService;
@@ -69,6 +65,12 @@ public class InBoundController {
 
 	@Autowired
 	private InBoundRouter inBoundRouter;
+
+	@Autowired
+	private PMEnvironment pmEnvironment;
+
+	@Autowired
+	ConfigMaster configMaster;
 
 	@ApiVendorHeaders
 	@RequestMapping(value = "/int/inbound/callback", method = RequestMethod.POST)
@@ -131,11 +133,7 @@ public class InBoundController {
 	@RequestMapping(value = "/ext/release/v2/", method = { RequestMethod.POST })
 	public ApiResponse<Contactable, Object> inboundMessageBoxRelease(@RequestBody Contactable contact) {
 		String contactId = PostManUtil.CONTACT_ID(contact);
-		proxyManager.hold(contactId);
-		// inBoundService.hold().put(contactId, "RELEASING");
-		InboxMessage msg = new InboxMessage();
-		msg.setContact(contact);
-		inBoundService.invokeMethodsRelease(msg);
+		inBoundService.invokeMethodsRelease(contactId);
 		return ApiResponse.buildResult(contact).meta(contactId);
 	}
 
@@ -170,7 +168,7 @@ public class InBoundController {
 	@RequestMapping(value = "/ext/inbound/v2/{channelType}/callback/{accountKey}", method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> inboundMessageBoxEventAll(@PathVariable(required = false) String channelType,
 			@PathVariable(required = false) String accountKey, @RequestBody Map<String, Object> data) {
-		if (ArgUtil.is(channelType, CHANNEL_TYPE.FACEBOOK, CHANNEL_TYPE.INSTAGRAM)) {
+		if (ArgUtil.is(channelType, CHANNEL_TYPE.FACEBOOK, CHANNEL_TYPE.INSTAGRAM, CHANNEL_TYPE.WACFB)) {
 			MapModel requestMap = MapModel.from(data);
 			FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
 			requestMap.toJson();
@@ -184,15 +182,7 @@ public class InBoundController {
 
 				String pageId = pageEntry.getId();
 
-				List<ChannelConfigDupsDoc> channels = channelList.getIfPresent(pageId);
-				if (!ArgUtil.is(channels) || channels.size() < 1) {
-					channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class)
-							.where(Criteria.where("lane").is(pageId).and("isDisabled").is(false).and("isDeleted")
-									.is(false).and("channelType").is(channelType)));
-					if (ArgUtil.is(channels)) {
-						channelList.put(pageId, channels);
-					}
-				}
+				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
 				if (ArgUtil.is(channels)) {
 					for (ChannelConfigDupsDoc channel : channels) {
 						try {
@@ -211,6 +201,53 @@ public class InBoundController {
 				}
 
 			});
+		}
+		return ApiResponse.build();
+	}
+
+	@RequestMapping(value = "/ext/inbound/v3/{channelType}/callback/{accountKey}/{channelId}/{channelKey}",
+			method = { RequestMethod.POST })
+	public ApiResponse<Object, Object> inboundMessageBoxEventV3(@PathVariable(required = false) String channelType,
+			@PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
+			@PathVariable(required = false) String channelKey, @RequestBody Map<String, Object> data) {
+		if (ArgUtil.is(channelType, CHANNEL_TYPE.FACEBOOK, CHANNEL_TYPE.INSTAGRAM, CHANNEL_TYPE.WACFB)) {
+			MapModel requestMap = MapModel.from(data);
+			FacebookHookRequest request = requestMap.as(FacebookHookRequest.class);
+			requestMap.toJson();
+			request.getEntry().forEach(pageEntry -> {
+
+				MapModel newData = MapModel.createInstance();
+				newData.put("object", request.getObject());
+				ArrayList<Object> entry = new ArrayList<Object>();
+				entry.add(JsonUtil.toJsonMap(pageEntry));
+				newData.put("entry", entry);
+
+				String pageId = pageEntry.getId();
+				if (ArgUtil.is(channelType, CHANNEL_TYPE.WACFB)) {
+					pageId = MapModel.from(pageEntry.getChanges().get(0))
+							.path(FacebookConstants.WABAPaths.DISPLAY_PHONE_NUMBER).asString();
+				}
+
+				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
+				if (ArgUtil.is(channels)) {
+					for (ChannelConfigDupsDoc channel : channels) {
+						try {
+							inBoundRouter.inboundMessageEventAsync(channel.getDomain(), channel.getChannelId(),
+									newData.map());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				} else if (ArgUtil.is(pageId)) {
+					String channelIdForDomain = PostManUtil.CHANNEL_ID(channelType, pageId);
+					inBoundRouter.inboundMessageEventAsync(channelIdForDomain, newData.map());
+				} else {
+					inBoundRouter.inboundMessageEventAsync(channelId, newData.map());
+				}
+
+			});
+		} else {
+			inBoundRouter.inboundMessageEvent(PostManUtil.CHANNEL_ID_DECODED(channelId), data);
 		}
 		return ApiResponse.build();
 	}

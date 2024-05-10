@@ -51,6 +51,20 @@ public class PMConstants {
 		public static final String OA_MEMBER = "OA_MEMBER";
 	}
 
+	public enum APP_MODULES {
+		ADMIN("/admin"), AGENT("/agent"), CALENDAR("/nexus/calendar"), SOCIAL("/nexus/social");
+
+		private String path;
+
+		APP_MODULES(String path) {
+			this.path = path;
+		}
+
+		public String getPath() {
+			return path;
+		}
+	}
+
 	public static class MESSAGE_BOUND_TYPE {
 		public static final String INBOUND = "I";
 		public static final String INBOUND_IMPORTED = "Ii";
@@ -73,12 +87,14 @@ public class PMConstants {
 		public static final String SMS = "sms";
 		public static final String OA = "oa";
 		public static final String FIREBASE = "firebase";
-		/** WABA cloud **/
+		/** WABA cloud via 360d **/
 		public static final String WA_360DC = "wac360";
+		/** WABA cloud via FB **/
+		public static final String WACFB = "wacfb";
 	}
 
 	public enum CHANNEL_TYPE_ENUM {
-		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase
+		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase, wacfb
 	}
 
 	public static enum CHAT_STATUS {
@@ -229,6 +245,35 @@ public class PMConstants {
 		return CHANNEL_TYPE(ArgUtil.parseAsString(contactType), channel);
 	}
 
+	public static ContactType CONTACT_TYPE(String channel) {
+		if (!ArgUtil.is(channel)) {
+			return ContactType.WEBSITE;
+		}
+		switch (channel) {
+		case CHANNEL_TYPE.WA_360D:
+		case CHANNEL_TYPE.WA_360DC:
+		case CHANNEL_TYPE.WA_GUPSHUP:
+		case CHANNEL_TYPE.WA_GUPSHUP_LEGACY:
+		case CHANNEL_TYPE.WACFB:
+			return ContactType.WHATSAPP;
+		case CHANNEL_TYPE.FACEBOOK:
+			return ContactType.FACEBOOK;
+		case CHANNEL_TYPE.INSTAGRAM:
+			return ContactType.INSTAGRAM;
+		case CHANNEL_TYPE.TWITTER:
+			return ContactType.TWITTER;
+		case CHANNEL_TYPE.WEB:
+			return ContactType.WEBSITE;
+		case CHANNEL_TYPE.SMS:
+		case CHANNEL_TYPE.SMS_TWILIO:
+			return ContactType.SMS;
+		case CHANNEL_TYPE.EMAIL:
+			return ContactType.EMAIL;
+		default:
+			return ContactType.WEBSITE;
+		}
+	}
+
 	public static class CHAT_SESSION_ACTIONS {
 		public static final String ADD_STICKY_NOTE = "ADD_STICKY_NOTE";
 		public static final String RESOLVE = "RESOLVE";
@@ -287,6 +332,7 @@ public class PMConstants {
 	}
 
 	public static class PROPERTIES {
+		public static final String POSTMAN_AGENT_TAB_ORG = "postman.agent.tab.org";
 		public static final String POSTMAN_CHAT_SESSION_TIMEOUT = "postman.chat.session.timeout";
 		public static final String POSTMAN_CHAT_FEEDBACK_QUEUE = "postman.chat.feedback.queue";
 		public static final String POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED = "postman.agent.chat.autoreply.resolved";

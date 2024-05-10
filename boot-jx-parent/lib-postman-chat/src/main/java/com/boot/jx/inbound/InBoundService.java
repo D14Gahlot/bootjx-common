@@ -136,6 +136,14 @@ public class InBoundService extends ATaskLimiter {
 		}
 	}
 
+	public void invokeMethodsRelease(String contactId) {
+		proxyManager.release(contactId);
+		InboxMessage msg = new InboxMessage();
+		msg.contact().setContactId(contactId);
+		msg.setContact(msg.contact());
+		invokeMethodsRelease(msg);
+	}
+
 	public InboxMessage invokeMethodsAsync(InboxMessage inboxMessageOriginal) {
 		return this.invokeMethodsInternalSafely(inboxMessageOriginal, true);
 	}
@@ -148,7 +156,7 @@ public class InBoundService extends ATaskLimiter {
 		try {
 			return this.invokeMethodsInternal(inboxMessageOriginal, asyncMode);
 		} catch (Exception e) {
-			messageStore.reject(inboxMessageOriginal,e);
+			messageStore.reject(inboxMessageOriginal, e);
 		}
 		return inboxMessageOriginal;
 	}
@@ -268,11 +276,7 @@ public class InBoundService extends ATaskLimiter {
 	public void doTaskSafely(TunnelTask task) {
 		if ("MESSAGE_RELEASE".equals(task.getName())) {
 			String contactId = task.getId();
-			proxyManager.release(contactId);
-			InboxMessage msg = new InboxMessage();
-			msg.contact().setContactId(contactId);
-			msg.setContact(msg.contact());
-			invokeMethodsRelease(msg);
+			invokeMethodsRelease(contactId);
 		}
 	}
 

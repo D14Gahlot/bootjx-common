@@ -13,6 +13,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
@@ -74,6 +75,7 @@ public class ChatArchiveService {
 	}
 
 	public ChatSessionDTO getChatSession(String sessionId) {
+		
 		return ChatDTOUtil.getChatSessionDTO(getChatSessionDoc(sessionId));
 	}
 
@@ -150,6 +152,19 @@ public class ChatArchiveService {
 	public ChatSessionDTO getChatSessionDto(ChatSessionDTO chatSessionDto) {
 		ChatSessionDoc sessionDoc = sessionStore.getSession(chatSessionDto.getSessionId());
 		return getChatSessionDto(sessionDoc, null);
+	}
+	
+	public List<String> getTagCodeFromId(List<String> tags){
+		List<String> tagCodeList = new ArrayList<>();
+		for(String tagid:tags) {
+			QuickTag quickTag = mongoTemplate.findById(tagid, QuickTag.class);
+			if(ArgUtil.is(quickTag)) {
+				tagCodeList.add(quickTag.getCode());
+			}else {
+				tagCodeList.add(tagid);
+			}
+		}
+		return tagCodeList;
 	}
 
 }

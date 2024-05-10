@@ -1,5 +1,7 @@
 package com.boot.jx.postman.manager;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,16 +9,19 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.exception.AmxApiError;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.doc.MessageDocAbstract;
+import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
@@ -99,6 +104,10 @@ public class ChatLogger {
 	}
 
 	public void error(LogMessage inboxMessage, Throwable e) {
+		this.error(inboxMessage, null, e);
+	}
+
+	public void error(LogMessage inboxMessage, Status status, Throwable e) {
 		MessageDocLogs doc = new MessageDocLogs();
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setMessageId(inboxMessage.getMessageId());
@@ -109,6 +118,7 @@ public class ChatLogger {
 		doc.setTimestamp(System.currentTimeMillis());
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setMessage(e.getMessage());
+		doc.setStatus(ArgUtil.parseAsString(status));
 
 		toLogs(e, doc);
 
@@ -132,6 +142,8 @@ public class ChatLogger {
 	}
 
 	private void toLogs(Throwable e, MessageDocLogs doc) {
+		doc.logs().add(e.getMessage());
+
 		StackTraceElement[] traces = e.getStackTrace();
 
 		if (traces.length > 0 && traces[0].toString().length() > 0) {
@@ -144,6 +156,11 @@ public class ChatLogger {
 			AmxApiError r = ((ApiHttpException) e).getResponse();
 			doc.setHttpResp(MapModel.from(r.getBody()).toMap());
 			doc.setHttpStatusCode(r.getRawStatusCode());
+		}
+
+		List<ApiFieldError> errors = ApiResponseUtil.getErrors();
+		if (ArgUtil.is(errors)) {
+			doc.trace().add(errors);
 		}
 
 	}

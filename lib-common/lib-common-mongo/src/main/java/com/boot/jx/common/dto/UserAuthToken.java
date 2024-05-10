@@ -20,6 +20,9 @@ public class UserAuthToken implements Serializable {
 	private String domainUserPhone;
 	private String app;
 	private String event;
+	private String ssoToken;
+	private boolean expired;
+	private boolean invalid;
 
 	// OTP
 	@ApiMockModelProperty(example = "xxxxxxxx", required = false)
@@ -125,4 +128,29 @@ public class UserAuthToken implements Serializable {
 	public void setEvent(String event) {
 		this.event = event;
 	}
+
+	public String getSsoToken() {
+		return ssoToken;
+	}
+
+	public void setSsoToken(String ssoToken) {
+		this.ssoToken = ssoToken;
+	}
+
+	public boolean isExpired() {
+		return expired;
+	}
+
+	public void setExpired(boolean expired) {
+		this.expired = expired;
+	}
+
+	public boolean isInvalid() {
+		return invalid;
+	}
+
+	public void setInvalid(boolean invalid) {
+		this.invalid = invalid;
+	}
+
 }

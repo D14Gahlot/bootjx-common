@@ -24,7 +24,7 @@ import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ClientAppConfigConstants;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
+import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.dict.ContactType;
@@ -33,6 +33,7 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.APP_MODULES;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -46,11 +47,11 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
-import com.boot.jx.postman.doc.config.ChannelConfigSetupDoc;
-import com.boot.jx.postman.doc.config.PermsConfigDoc;
+import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 //import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -115,7 +116,30 @@ public class ConfigOptionMetaController {
 
 	// Option APIS
 	@JsonView(PMEnvironment.PublicProperty.class)
-	@RequestMapping(value = { "/api/options/channels" }, method = { RequestMethod.GET })
+	@RequestMapping(value = { "/api/config/modules", "/pub/config/modules" }, method = { RequestMethod.GET })
+	public ApiResponse<APP_MODULES, Object> getAppModules(
+			@RequestParam(required = false, defaultValue = "false") boolean master) {
+		if (master) {
+			return ApiResponse.buildResults(CollectionUtil.asList(APP_MODULES.values()));
+		}
+		List<APP_MODULES> modules = new ArrayList<PMConstants.APP_MODULES>();
+		for (APP_MODULES appModule : APP_MODULES.values()) {
+			if (ArgUtil.is(appModule, APP_MODULES.ADMIN, APP_MODULES.AGENT)) {
+				modules.add(appModule);
+			} else {
+				for (FEATURES_KEY featureKey : FEATURES_KEY.values()) {
+					if (featureKey.name().equals("APP_MODULE_" + appModule.name())
+							&& pmEnvironment.featureEntry(featureKey).asBoolean()) {
+						modules.add(appModule);
+					}
+				}
+			}
+		}
+		return ApiResponse.buildResults(modules);
+	}
+
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@RequestMapping(value = { "/pub/options/channels", "/api/options/channels" }, method = { RequestMethod.GET })
 	@ResponseBody
 	public ApiResponse<AChannelConfig, Object> listActiveLanes(
 			@RequestParam(required = false) ContactType contactType) {
@@ -159,26 +183,6 @@ public class ConfigOptionMetaController {
 	// Config APIS
 	@Autowired
 	private ConfigManagerImpl configManager;
-
-	// Setup
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/setup/channel/configs", method = { RequestMethod.POST })
-	public ApiResponse<ChannelConfigSetupDoc, Object> channelConfigSetup(
-			@RequestBody ChannelConfigSetupDoc configSetup) {
-		commonMongoTemplate.save(configSetup);
-		return ApiResponse.buildResults(configSetup);
-	}
-
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/setup/channel_configs", method = { RequestMethod.GET })
-	public ApiResponse<ChannelConfigSetupDoc, Object> channelConfigSetup(
-			@RequestParam(required = false) String channelSetupId) {
-		if (ArgUtil.is(channelSetupId)) {
-			return ApiResponse
-					.buildResult(commonMongoTemplate.findByIdSafeCheck(channelSetupId, ChannelConfigSetupDoc.class));
-		}
-		return ApiResponse.buildResults(commonMongoTemplate.findAll(ChannelConfigSetupDoc.class));
-	}
 
 	// PREFS
 	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })
@@ -252,45 +256,49 @@ public class ConfigOptionMetaController {
 	}
 
 	/**************
-	 * PERMS
+	 * Features
 	 ************/
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/perm", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, Object> setPerm(@RequestBody PermsConfigDoc map) {
-		configManager.savePerm(map);
-		return ApiResponse.buildResults(configManager.getPerms());
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
+	@RequestMapping(value = "/api/feature", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestBody FeaturesConfigDoc map) {
+		configManager.saveFeature(map);
+		return ApiResponse.buildResults(configManager.getFeature());
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/perm", method = { RequestMethod.PUT })
-	public ApiResponse<Map<String, Object>, Object> setPerm(@RequestParam PERMS_KEY key, @RequestParam String value,
-			@RequestParam(defaultValue = "false") boolean shared) {
-		PermsConfigDoc map = new PermsConfigDoc();
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
+	@RequestMapping(value = "/api/feature", method = { RequestMethod.PUT })
+	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestParam FEATURES_KEY key,
+			@RequestParam String value, @RequestParam(defaultValue = "false") boolean shared) {
+		FeaturesConfigDoc map = new FeaturesConfigDoc();
 		map.setKey(key.getKey());
 		map.setValue(value);
 		map.setShared(shared);
-		return setPerm(map);
+		return setFeature(map);
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/perm/{key}", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, Object> setPerm(@PathVariable("key") PERMS_KEY key,
-			@RequestBody PermsConfigDoc map) {
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
+	@RequestMapping(value = "/api/feature/{key}", method = { RequestMethod.POST })
+	public ApiResponse<Map<String, Object>, Object> setFeature(@PathVariable("key") FEATURES_KEY key,
+			@RequestBody FeaturesConfigDoc map) {
 		map.setKey(key.getKey());
-		return setPerm(map);
+		return setFeature(map);
 	}
 
-	@RequestMapping(value = "/api/perm", method = { RequestMethod.GET })
-	public ApiResponse<Map<String, Object>, Object> getPerm(@RequestParam(required = false) PERMS_KEY key) {
-		return ApiResponse.buildResults(configManager.getPerm(key));
+	@RequestMapping(value = "/api/feature", method = { RequestMethod.GET })
+	public ApiResponse<Map<String, Object>, Object> getFeature(@RequestParam(required = false) FEATURES_KEY key,
+			@RequestParam(required = false) boolean refresh) {
+		if (refresh) {
+			configManager.refresh();
+		}
+		return ApiResponse.buildResults(configManager.getFeature(key));
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER })
-	@RequestMapping(value = "/api/perm", method = { RequestMethod.DELETE })
-	public ApiResponse<Map<String, Object>, Object> deletePerm(@RequestParam(required = false) PERMS_KEY key) {
+	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
+	@RequestMapping(value = "/api/feature", method = { RequestMethod.DELETE })
+	public ApiResponse<Map<String, Object>, Object> deleteFeature(@RequestParam(required = false) FEATURES_KEY key) {
 		configManager.deletePerm(key);
-		return ApiResponse.buildResults(configManager.getPerms());
+		return ApiResponse.buildResults(configManager.getFeature());
 	}
 
 	@RequestMapping(value = "/api/meta/chat_states", method = { RequestMethod.GET })

@@ -34,7 +34,9 @@ public class ConfigConstants {
 	public static final String GROUP_AGENT = "AGENT";
 	public static final String GROUP_NLP = "NLP";
 	public static final String GROUP_DEV = "DEVELOPMENT";
-
+	public static final String CHANNELS = "CHANNELS";
+	public static final String BOT = "BOT";
+	public static final String APP_MODULES = "APP_MODULES";
 
 	public static enum APP_KEY implements EntryMeta {
 
@@ -115,11 +117,14 @@ public class ConfigConstants {
 						// .optionValues("1hr", "2hr", "4hr", "8hr", "12hr", "16hr", "20hr", "24hr",
 						// "2d", "5d", "3d", "7d")
 						.group(GROUP_CUSTOMER_CHAT)),
-		
-		
-		POSTMAN_AGENT_CUSTOMER_CONTACT_INFO_MASK(new ConfigMeta("Mask Number","postman.agent.customer.contact.info.mask").optionsOnOff().group(GROUP_AGENT)),
 
-		POSTMAN_AGENT_CUSTOMER_CHAT_DISABLE(new ConfigMeta("Disable Voice Record, Emoji and Attachments","postman.agent.customer.chat.disable").optionsOnOff().group(GROUP_AGENT)),
+		POSTMAN_AGENT_CUSTOMER_CONTACT_INFO_MASK(
+				new ConfigMeta("Mask Number", "postman.agent.customer.contact.info.mask").optionsOnOff()
+						.group(GROUP_AGENT)),
+
+		POSTMAN_AGENT_CUSTOMER_CHAT_DISABLE(
+				new ConfigMeta("Disable Voice Record, Emoji and Attachments", "postman.agent.customer.chat.disable")
+						.optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_CHAT_IDLE_TIMEOUT(new ConfigMeta("Chat Alert Timer", "postman.chat.idle.timeout")
 				.optionValues("5min", "10min", "15min", "20min", "25min", "30min").group(GROUP_AGENT)),
@@ -222,7 +227,7 @@ public class ConfigConstants {
 						new ConfigOption(TimeUtils.toMillis("3w")).label("+3Weeks"))
 				.defaultValue(0).group(GROUP_AGENT)),
 
-		POSTMAN_AGENT_TAB_ORG(new ConfigMeta("Agent can see Other Teams Chats", "postman.agent.tab.org")
+		POSTMAN_AGENT_TAB_ORG(new ConfigMeta("Agent can see Other Teams Chats", PROPERTIES.POSTMAN_AGENT_TAB_ORG)
 				.desc("Enables Org tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_TAB_NONAGENT(
@@ -311,11 +316,32 @@ public class ConfigConstants {
 
 	}
 
-	public static enum PERMS_KEY implements EntryMeta {
+	public static enum FEATURES_KEY implements EntryMeta {
 
 		BUILD_VERSION(
-				new ConfigMeta("BUILD_VERSION", "perms.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
-		CONTACT_CENTER(new ConfigMeta("Contact Center", "perms.contact.center").optionsOnOff()),
+				new ConfigMeta("BUILD_VERSION", "feature.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
+		CONTACT_CENTER(new ConfigMeta("Contact Center", "feature.contact.center").optionsOnOff()),
+		CHANNEL_AUTOCONFIGURE_FACEBOOK(
+				new ConfigMeta("AutoConfigure Facebook", "feature.channel.autoconfigure.facebook").optionsOnOff()
+						.group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_WHATSAPP(
+				new ConfigMeta("AutoConfigure WhatsApp", "feature.channel.autoconfigure.whatsapp").optionsOnOff()
+						.group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_INSTAGRAM(
+				new ConfigMeta("AutoConfigure Instagram", "feature.channel.autoconfigure.instagram").optionsOnOff()
+						.group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_TELEGRAM(
+				new ConfigMeta("AutoConfigure Telegram", "feature.channel.autoconfigure.telegram").optionsOnOff()
+						.group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_TWITTER(new ConfigMeta("AutoConfigure Twitter", "feature.channel.autoconfigure.twitter")
+				.optionsOnOff().group(CHANNELS)),
+		BOT_FLOW_BUILDER(new ConfigMeta("Bot Flow Builder", "feature.bot.flow.builder").optionsOnOff().group(BOT)),
+		APP_MODULE_CALENDAR(
+				new ConfigMeta("Calendar Module", "feature.app.module.calandar").optionsOnOff().group(APP_MODULES)),
+		APP_MODULE_AGENT(new ConfigMeta("Agent Module", "feature.app.module.agent").optionsOnOff().group(APP_MODULES)),
+		APP_MODULE_ADMIN(new ConfigMeta("Admin Module", "feature.app.module.admin").optionsOnOff().group(APP_MODULES)),
+		APP_MODULE_SOCIAL(
+				new ConfigMeta("Social Module", "feature.app.module.social").optionsOnOff().group(APP_MODULES)),
 		// Ends here
 		;
 
@@ -323,7 +349,7 @@ public class ConfigConstants {
 		private Object defaultValue;
 		private String ukey;
 
-		PERMS_KEY(ConfigMeta defaultFalse) {
+		FEATURES_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
 			this.ukey = defaultFalse.getUkey();
 			ConfigConstants.PERMS_CONFIG_LIST.add(defaultFalse);
@@ -346,7 +372,7 @@ public class ConfigConstants {
 
 	static {
 		ConfigConstants.SETUP_KEY.values();
-		ConfigConstants.PERMS_KEY.values();
+		ConfigConstants.FEATURES_KEY.values();
 	}
 
 }

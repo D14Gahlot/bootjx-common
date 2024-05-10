@@ -43,4 +43,8 @@ public class AdminSessionBean extends AppCommonAuthUser implements Serializable,
 		}
 		return PMConstants.DEFAULT.NO_USER;
 	}
+
+	public Object getUserSharedProfile() {
+		return profile;
+	}
 }

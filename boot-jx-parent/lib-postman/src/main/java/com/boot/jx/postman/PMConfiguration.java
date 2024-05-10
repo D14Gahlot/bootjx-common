@@ -150,7 +150,7 @@ public interface PMConfiguration extends Serializable {
 			return new SafeKeyHashMap<PMConfigurationObject>(prefs);
 		}
 
-		public SafeKeyHashMap<PMConfigurationObject> perms() {
+		public SafeKeyHashMap<PMConfigurationObject> features() {
 			if (ArgUtil.isEmpty(perms)) {
 				perms = new HashMap<String, PMConfigurationObject>();
 			}
@@ -165,12 +165,12 @@ public interface PMConfiguration extends Serializable {
 			return this.keyEntry(entry.getKey());
 		}
 
-		public PMConfigurationObject permEntry(String key) {
+		public PMConfigurationObject featureEntry(String key) {
 			return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
 		}
 
-		public PMConfigurationObject permEntry(EntryMeta entry) {
-			return this.permEntry(entry.getKey());
+		public PMConfigurationObject featureEntry(EntryMeta entry) {
+			return this.featureEntry(entry.getKey());
 		}
 
 		public PMConfigurationObject getPref(String key, Object value) {
@@ -197,25 +197,25 @@ public interface PMConfiguration extends Serializable {
 			return this;
 		}
 
-		public PMConfigurationObject getPerm(String key, Object value) {
-			return perms().getOrDefault(key, new PMConfigurationObject(key, value));
+		public PMConfigurationObject getFeature(String key, Object value) {
+			return features().getOrDefault(key, new PMConfigurationObject(key, value));
 		}
 
-		public PMConfiguration setPerm(PMConfigurationObject map) {
-			this.perms().put(map.getKey(), map);
+		public PMConfiguration setFeature(PMConfigurationObject map) {
+			this.features().put(map.getKey(), map);
 			return this;
 		}
 
-		public PMConfiguration setPerm(PMConfigurationObject map, String server) {
+		public PMConfiguration setFeature(PMConfigurationObject map, String server) {
 			if (ArgUtil.is(map.getServer())) {
 				if (ArgUtil.is(map.getServer(), server)) {
-					return this.setPerm(map);
+					return this.setFeature(map);
 				}
 				return this;
 			} else {
-				PMConfigurationObject existing = this.perms().get(map.getKey());
+				PMConfigurationObject existing = this.features().get(map.getKey());
 				if (!ArgUtil.is(existing) || !ArgUtil.is(existing.getServer())) {
-					return this.setPerm(map);
+					return this.setFeature(map);
 				}
 			}
 			return this;

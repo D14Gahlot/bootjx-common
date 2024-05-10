@@ -1,5 +1,8 @@
 package com.boot.jx.connectors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.fb.FacbookAttachment;
 import com.boot.jx.postman.fb.FacebooClient;
 import com.boot.jx.postman.fb.FacebookEntry;
@@ -32,8 +36,11 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.FacebookPlugin;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.URLBuilder;
+import com.boot.utils.Urly;
 
 @Component
 @ConnectorMapping(contactType = ContactType.FACEBOOK)
@@ -49,9 +56,68 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
 
+	@Autowired
+	private RestService restService;
+
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
+		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
+		try {
+
+			MapModel resp = MapModel.from(channelConfigTemp.getResp());
+			String redirectUri = resp.pathEntry("_.redirect_uri").asString();
+
+			MapModel accessToken = restService.ajax("https://graph.facebook.com/v18.0").path("/oauth/access_token")
+					.field("client_id", setup.getFacebook().getMasterAppId())
+					.field("client_secret", setup.getFacebook().getMasterAppSecret())
+					// .field("redirect_uri", redirectUri)
+					.field("code", resp.pathEntry("authResponse.code").asString())
+					//
+					.submit().asMapModel();
+			channelConfigTemp.log("oauth/access_token", accessToken.toMap());
+
+//			MapModel accessToken2 = restService.ajax("https://graph.facebook.com/v18.0").path("/oauth/access_token")
+//					.field("client_id", setup.getFacebook().getMasterAppId())
+//					.field("client_secret", setup.getFacebook().getMasterAppSecret())
+//					.field("fb_exchange_token", accessToken.keyEntry("access_token").asString())
+//					.field("grant_type", "fb_exchange_token")
+//					.submit().asMapModel();
+//			channelConfigTemp.log("oauth/access_token2", accessToken2.toMap());
+
+			MapModel me = restService.ajax("https://graph.facebook.com/v18.0").path("/me/accounts")
+					.queryParam("access_token", accessToken.keyEntry("access_token").asString())
+					// .queryParam("fields", "id,name,access_token,link")
+					.get().asMapModel();
+			channelConfigTemp.log("me/accounts", me.toMap());
+
+			me.keyEntry("data").asListOfMap().forEach(page -> {
+				MapModel pagemap = MapModel.from(page);
+				ChannelConfig channel = new ChannelConfig();
+				channel.setFacebook(new FacebookConfigDetails());
+				channel.getFacebook().setAccessToken(pagemap.keyEntry("access_token").asString());
+				channel.getFacebook().setPageId(pagemap.keyEntry("id").asString());
+				channel.getFacebook().setHandler(channel.getFacebook().getPageId());
+				channel.getFacebook().setType("page");
+				channel.getFacebook().setMasterAppId(setup.getFacebook().getMasterAppId());
+				channel.setName(pagemap.keyEntry("name").asString());
+				channels.add(channel);
+			});
+		} catch (ApiHttpException e) {
+			channelConfigTemp.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
+		}
+		commonMongoTemplate.save(channelConfigTemp);
+		return channels;
+	}
+
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
-		ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer Portal.");
+		restService.ajax("https://graph.facebook.com/v18.0/").path(channelConfig.getFacebook().getPageId())
+				.path("/subscribed_apps").field("access_token", channelConfig.getFacebook().getAccessToken())
+				.field("subscribed_fields",
+						"message_deliveries, message_echoes, message_reads, messages, messaging_optins, messaging_postbacks")
+				.submit().asMap();
+		// channelConfigTemp.log("me/accounts", subscriptions.toMap());
+		// ApiResponseUtil.addWarning("Set webhook URL manually from Facebook Developer
+		// Portal.");
 	}
 
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
@@ -66,7 +132,6 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 		return inboxMessage;
 	}
 
-	
 	@Override
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChannelConfig config = getChannelConfig(inboxMessage);

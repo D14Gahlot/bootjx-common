@@ -1,5 +1,4 @@
 package com.boot.jx.admin.api;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,7 +37,6 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
-import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -252,6 +250,10 @@ public class AdminMsgController {
 	@RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDTO, Object> getMessagesForSession(@RequestBody ChatSessionDTO chatSessionDto) {
 		chatSessionDto = chatArchive.getChatSession(chatSessionDto);
+		if(ArgUtil.is(chatSessionDto) && chatSessionDto.getTagId()!=null && !chatSessionDto.getTagId().isEmpty()) {
+			List<String> tagCodeList = chatArchive.getTagCodeFromId(chatSessionDto.getTagId());
+			chatSessionDto.setTagId(tagCodeList);
+		}
 		chatSessionDto = chatArchive.withContact(chatSessionDto);
 		chatSessionDto = chatArchive.withMessages(chatSessionDto);
 		return ApiResponse.buildData(chatSessionDto);
@@ -585,23 +587,23 @@ public class AdminMsgController {
 	List<BulkSessionDoc> lst = new ArrayList<>();
 	for(BulkSessionDoc doc :lstofSession) {
 		BulkSessionDoc sDoc = new BulkSessionDoc();
-		sDoc.setBulkSessionId(ArgUtil.parseAsString(doc.getBulkSessionId(), Constants.UNDERSCORE));
-		sDoc.setTemplate(ArgUtil.parseAsString(doc.getTemplate(), Constants.UNDERSCORE));
-		sDoc.setTemplateId(ArgUtil.parseAsString(doc.getTemplateId(), Constants.UNDERSCORE));
-		sDoc.setMessage(ArgUtil.parseAsString(doc.getMessage(), Constants.UNDERSCORE));
-		sDoc.setCampaignTitle(ArgUtil.parseAsString(doc.getCampaignTitle(), Constants.UNDERSCORE));
-		sDoc.setCreatedBy(ArgUtil.parseAsString(doc.getCreatedBy(), Constants.UNDERSCORE));
+		sDoc.setBulkSessionId(ArgUtil.parseAsString(doc.getBulkSessionId(), Constants.BLANK));
+		sDoc.setTemplate(ArgUtil.parseAsString(doc.getTemplate(), Constants.BLANK));
+		sDoc.setTemplateId(ArgUtil.parseAsString(doc.getTemplateId(), Constants.BLANK));
+		sDoc.setMessage(ArgUtil.parseAsString(doc.getMessage(), Constants.BLANK));
+		sDoc.setCampaignTitle(ArgUtil.parseAsString(doc.getCampaignTitle(), Constants.BLANK));
+		sDoc.setCreatedBy(ArgUtil.parseAsString(doc.getCreatedBy(), Constants.BLANK));
 		sDoc.setCreatedStamp(doc.getCreatedStamp());
-		sDoc.setContactType(ArgUtil.parseAsString(doc.getContactType(), Constants.UNDERSCORE));
-		sDoc.setChannelId(ArgUtil.parseAsString(doc.getChannelId(), Constants.UNDERSCORE));
-		sDoc.setLane(ArgUtil.parseAsString(doc.getLane(), Constants.UNDERSCORE));
+		sDoc.setContactType(ArgUtil.parseAsString(doc.getContactType(), Constants.BLANK));
+		sDoc.setChannelId(ArgUtil.parseAsString(doc.getChannelId(), Constants.BLANK));
+		sDoc.setLane(ArgUtil.parseAsString(doc.getLane(), Constants.BLANK));
 		sDoc.setMessageCount(doc.getMessageCount()==null?Constants.DEFAULT_INTEGER:doc.getMessageCount());
 		sDoc.setMessageFailedCount(doc.getMessageFailedCount()==null?Constants.DEFAULT_INTEGER:doc.getMessageFailedCount());
 		sDoc.setStats(doc.getStats());
 		sDoc.setJob(doc.getJob());
 		sDoc.setCompletedStamp(doc.getCompletedStamp()==null?Constants.DEFAULT_INTEGER:doc.getCompletedStamp());
-		sDoc.setGroupId(ArgUtil.parseAsString(doc.getGroupId(), Constants.UNDERSCORE));
-		sDoc.setGroupName(ArgUtil.parseAsString(doc.getGroupName(), Constants.UNDERSCORE));
+		sDoc.setGroupId(ArgUtil.parseAsString(doc.getGroupId(), Constants.BLANK));
+		sDoc.setGroupName(ArgUtil.parseAsString(doc.getGroupName(), Constants.BLANK));
 		sDoc.setStatus(doc.getStatus());
 		
 		lst.add(sDoc);

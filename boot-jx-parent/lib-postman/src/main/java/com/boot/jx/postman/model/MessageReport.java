@@ -34,7 +34,10 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 	private MessageRouter route;
 	
 	/** TP waba con**/
-	private Map<String, Object> tpChanel;
+	private Map<String, Object> tpMeta;
+	private String type;
+	private String templateId;
+	private String templateCode;
 
 	public String getMessageId() {
 		return messageId;
@@ -249,12 +252,36 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 		this.route = route;
 	}
 
-	public Map<String, Object> getTpChanel() {
-		return tpChanel;
+	public Map<String, Object> getTpMeta() {
+		return tpMeta;
 	}
 
-	public void setTpChanel(Map<String, Object> tpChanel) {
-		this.tpChanel = tpChanel;
+	public void setTpMeta(Map<String, Object> tpMeta) {
+		this.tpMeta = tpMeta;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getTemplateCode() {
+		return templateCode;
+	}
+
+	public void setTemplateCode(String templateCode) {
+		this.templateCode = templateCode;
 	}
 
 }

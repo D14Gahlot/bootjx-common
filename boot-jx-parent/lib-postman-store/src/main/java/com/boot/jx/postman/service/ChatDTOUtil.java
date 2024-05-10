@@ -90,33 +90,33 @@ public class ChatDTOUtil {
 		messageDto.setTimestamp(messageDoc.getTimestamp());
 		messageDto.setSessionId(messageDoc.getSessionId());
 		messageDto.setMessageId(messageDoc.getMessageId());
-		messageDto.setMessageIdExt(ArgUtil.parseAsString(messageDoc.getMessageIdExt(), Constants.UNDERSCORE));
-		messageDto.setMessageIdRef(ArgUtil.parseAsString(messageDoc.getMessageIdRef(), Constants.UNDERSCORE));
+		messageDto.setMessageIdExt(ArgUtil.parseAsString(messageDoc.getMessageIdExt(), Constants.BLANK));
+		messageDto.setMessageIdRef(ArgUtil.parseAsString(messageDoc.getMessageIdRef(), Constants.BLANK));
 
-		messageDto.setReplyId(ArgUtil.parseAsString(messageDoc.getReplyId(),Constants.UNDERSCORE));
-		messageDto.setReplyIdExt(ArgUtil.parseAsString(messageDoc.getReplyIdExt(),Constants.UNDERSCORE));
-		if(ArgUtil.is(messageDoc.getTags())) {
+		messageDto.setReplyId(ArgUtil.parseAsString(messageDoc.getReplyId(), Constants.BLANK));
+		messageDto.setReplyIdExt(ArgUtil.parseAsString(messageDoc.getReplyIdExt(), Constants.BLANK));
+		if (ArgUtil.is(messageDoc.getTags())) {
 			messageDto.setTags(messageDoc.getTags());
 		}
-		if(ArgUtil.is(messageDoc.getAttachments())) {
+		if (ArgUtil.is(messageDoc.getAttachments())) {
 			messageDto.setAttachments(messageDoc.getAttachments());
 		}
-		if(ArgUtil.is(messageDoc.getVccards())) {
+		if (ArgUtil.is(messageDoc.getVccards())) {
 			messageDto.setVccards(messageDoc.getVccards());
 		}
-		
-		messageDto.setAction(ArgUtil.parseAsString(messageDoc.getAction(), Constants.UNDERSCORE));
+
+		messageDto.setAction(ArgUtil.parseAsString(messageDoc.getAction(), Constants.BLANK));
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
-		if(ArgUtil.is(messageDoc.getOptions())) {
+		if (ArgUtil.is(messageDoc.getOptions())) {
 			messageDto.setOptions(messageDoc.getOptions());
-		}else {
+		} else {
 			messageDto.setOptions(getDefaultMap(messageDoc.options()));
 		}
-		if(ArgUtil.is(messageDoc.getReplyTo())) {
+		if (ArgUtil.is(messageDoc.getReplyTo())) {
 			messageDto.setReplyTo(messageDoc.getReplyTo());
-		}else {
+		} else {
 			messageDto.setReplyTo(getDefaultMap(messageDoc.replyTo()));
 		}
 
@@ -144,10 +144,9 @@ public class ChatDTOUtil {
 			messageDto.setName(messageDto.getSender());
 		}
 		messageDto.setStamps(messageDoc.getStamps());
-		if(ArgUtil.is(messageDoc.getLogs())) {
+		if (ArgUtil.is(messageDoc.getLogs())) {
 			messageDto.setLogs(getUniqueLogs(messageDoc.getLogs()));
 		}
-		
 
 		return messageDto;
 	}
@@ -197,6 +196,8 @@ public class ChatDTOUtil {
 		chatSessionDto.setAssignedDeptStamp(chatSessionDoc.getAssignedDeptStamp());
 		chatSessionDto.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 		chatSessionDto.setLastResponseStamp(chatSessionDoc.getLastResponseStamp());
+
+		chatSessionDto.setTpMeta(chatSessionDoc.getTpMeta());
 
 		if (ArgUtil.is(chatSessionDoc.getUpdated())) {
 			chatSessionDto.setUpdatedStamp(chatSessionDoc.getUpdated().getStamp());
@@ -255,14 +256,14 @@ public class ChatDTOUtil {
 
 		return chatSessionDto;
 	}
-	
-  private static List<Object> getUniqueLogs(List<Object> listWithDuplicates) {
-        Set<Object> uniqueSet = new HashSet<>(listWithDuplicates);
-        return new ArrayList<>(uniqueSet);
-    }
-  
-  private static Map<String, Object> getDefaultMap(Map<String, Object> defMap){
-	  defMap.put("", "");
-	  return defMap;
-  }
+
+	private static List<Object> getUniqueLogs(List<Object> listWithDuplicates) {
+		Set<Object> uniqueSet = new HashSet<>(listWithDuplicates);
+		return new ArrayList<>(uniqueSet);
+	}
+
+	private static Map<String, Object> getDefaultMap(Map<String, Object> defMap) {
+		defMap.put("", "");
+		return defMap;
+	}
 }

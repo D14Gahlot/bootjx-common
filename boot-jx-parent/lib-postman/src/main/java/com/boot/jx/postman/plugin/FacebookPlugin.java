@@ -22,26 +22,92 @@ public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetail
 		return ContactType.FACEBOOK;
 	}
 
-	public static class FacebookConfigDetails extends AChannelDetails {
+	public static abstract class MetaMasterConfigDetails extends AChannelDetails {
+		private static final long serialVersionUID = -2174315212703629204L;
+		@ConfigMetaProperty(path = "masterAppTitle", title = "masterAppTitle", createonly = true, hidden = true,
+				readonly = true, desc = "masterAppId")
+		private String masterAppTitle;
+
+		@ConfigMetaProperty(path = "masterAppId", title = "masterAppId", createonly = true, hidden = true,
+				readonly = true, desc = "masterAppId")
+		private String masterAppId;
+
+		@ConfigMetaProperty(path = "masterAppConfigId", title = "masterAppConfigId", createonly = true, hidden = true,
+				readonly = true, desc = "masterAppConfigId")
+		private String masterAppConfigId;
+
+		@ConfigMetaProperty(path = "masterAppSecret", title = "masterAppSecret", createonly = true, hidden = true,
+				readonly = true, desc = "masterAppSecret")
+		@JsonView(PMEnvironment.ProtectedProperty.class)
+		private String masterAppSecret;
+
+		@ConfigMetaProperty(path = "masterAppVerifyToken", title = "masterAppVerifyToken", createonly = true,
+				hidden = true, readonly = true, desc = "masterAppVerifyToken")
+		@JsonView(PMEnvironment.ProtectedProperty.class)
+		private String masterAppVerifyToken;
+
+		public String getMasterAppTitle() {
+			return masterAppTitle;
+		}
+
+		public void setMasterAppTitle(String masterAppTitle) {
+			this.masterAppTitle = masterAppTitle;
+		}
+
+		public String getMasterAppId() {
+			return masterAppId;
+		}
+
+		public void setMasterAppId(String masterAppId) {
+			this.masterAppId = masterAppId;
+		}
+
+		public String getMasterAppConfigId() {
+			return masterAppConfigId;
+		}
+
+		public void setMasterAppConfigId(String masterAppConfigId) {
+			this.masterAppConfigId = masterAppConfigId;
+		}
+
+		public String getMasterAppSecret() {
+			return masterAppSecret;
+		}
+
+		public void setMasterAppSecret(String masterAppSecret) {
+			this.masterAppSecret = masterAppSecret;
+		}
+
+		public String getMasterAppVerifyToken() {
+			return masterAppVerifyToken;
+		}
+
+		public void setMasterAppVerifyToken(String masterAppVerifyToken) {
+			this.masterAppVerifyToken = masterAppVerifyToken;
+		}
+	}
+
+	@ConfigMetaProperty(context = "facebook")
+	public static class FacebookConfigDetails extends MetaMasterConfigDetails {
 
 		private static final long serialVersionUID = -2397678752642150000L;
-		@ConfigMetaProperty(path = "facebook.pageId", title = "Page Id", createonly = true)
+		@ConfigMetaProperty(path = "pageId", title = "Page Id", createonly = true)
 		private String pageId;
-		@ConfigMetaProperty(path = "facebook.type", title = "Type", hidden = true)
+		@ConfigMetaProperty(path = "type", title = "Type", hidden = true)
 		private String type;
-		@ConfigMetaProperty(path = "facebook.handler", title = "Handler")
+		@ConfigMetaProperty(path = "handler", title = "Handler")
 		private String handler;
 
-		@ConfigMetaProperty(path = "facebook.accessToken", title = "Access Token", writeonly = true)
+		@ConfigMetaProperty(path = "accessToken", title = "Access Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String accessToken;
-		@ConfigMetaProperty(path = "facebook.verifyToken", title = "Verify Token", writeonly = true)
+		@ConfigMetaProperty(path = "verifyToken", title = "Verify Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String verifyToken;
-		@ConfigMetaProperty(path = "facebook.appSecret", title = "App Secret", writeonly = true)
+		@ConfigMetaProperty(path = "appSecret", title = "App Secret", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String appSecret;
-		
+
 		public String getPageId() {
 			return pageId;
 		}
@@ -123,25 +189,34 @@ public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetail
 		return config.getFacebook();
 	}
 
-/*	@Override
-	public void addConfigMeta(List<ConfigMeta> list) {
-		list.add(new ConfigMeta().path("facebook.pageId").title("Page Id").createonly());
-		list.add(new ConfigMeta().path("facebook.type").title("Type").optionValues("page").hidden());
-		list.add(new ConfigMeta().path("facebook.handler").title("Handler"));
-		list.add(new ConfigMeta().path("facebook.verifyToken").title("Verify Token").writeonly());
-		list.add(new ConfigMeta().path("facebook.accessToken").title("Access Token").writeonly());
-		list.add(new ConfigMeta().path("facebook.appSecret").title("App Secret").writeonly());
-	}
-
-	@Override
-	public void importChannelDetailsFromMap(FacebookConfigDetails channelDetails, MapModel map) {
-		channelDetails.setPageId(map.pathEntry("facebook.pageId").asString(channelDetails.getPageId()));
-		channelDetails.setHandler(map.pathEntry("facebook.handler").asString(channelDetails.getHandler()));
-		channelDetails.setType(map.pathEntry("facebook.type").asString(channelDetails.getType()));
-		channelDetails.setVerifyToken(map.pathEntry("facebook.verifyToken").asString(channelDetails.getVerifyToken()));
-		channelDetails.setAccessToken(map.pathEntry("facebook.accessToken").asString(channelDetails.getAccessToken()));
-		channelDetails.setAppSecret(map.pathEntry("facebook.appSecret").asString(channelDetails.getAppSecret()));
-	}*/
+	/*
+	 * @Override public void addConfigMeta(List<ConfigMeta> list) { list.add(new
+	 * ConfigMeta().path("facebook.pageId").title("Page Id").createonly());
+	 * list.add(new
+	 * ConfigMeta().path("facebook.type").title("Type").optionValues("page").hidden(
+	 * )); list.add(new ConfigMeta().path("facebook.handler").title("Handler"));
+	 * list.add(new
+	 * ConfigMeta().path("facebook.verifyToken").title("Verify Token").writeonly());
+	 * list.add(new
+	 * ConfigMeta().path("facebook.accessToken").title("Access Token").writeonly());
+	 * list.add(new
+	 * ConfigMeta().path("facebook.appSecret").title("App Secret").writeonly()); }
+	 * 
+	 * @Override public void importChannelDetailsFromMap(FacebookConfigDetails
+	 * channelDetails, MapModel map) {
+	 * channelDetails.setPageId(map.pathEntry("facebook.pageId").asString(
+	 * channelDetails.getPageId()));
+	 * channelDetails.setHandler(map.pathEntry("facebook.handler").asString(
+	 * channelDetails.getHandler()));
+	 * channelDetails.setType(map.pathEntry("facebook.type").asString(channelDetails
+	 * .getType()));
+	 * channelDetails.setVerifyToken(map.pathEntry("facebook.verifyToken").asString(
+	 * channelDetails.getVerifyToken()));
+	 * channelDetails.setAccessToken(map.pathEntry("facebook.accessToken").asString(
+	 * channelDetails.getAccessToken()));
+	 * channelDetails.setAppSecret(map.pathEntry("facebook.appSecret").asString(
+	 * channelDetails.getAppSecret())); }
+	 */
 
 	@Override
 	public boolean isPushAllowed() {
