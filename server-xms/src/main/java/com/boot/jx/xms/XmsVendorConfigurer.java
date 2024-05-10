@@ -93,7 +93,7 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 
 		if (!ArgUtil.is(apiKeyConfig)) {
 			if (TimeUtils.isExpired(config.getUpdateStamp(), CONFIG_REFRESH_TIME)) {
-				appConfigPackage.clear(null);
+				appConfigPackage.clear();
 				config = pmEnvironment.local();
 			}
 			if (!ArgUtil.is(apiKeyConfig)) {
