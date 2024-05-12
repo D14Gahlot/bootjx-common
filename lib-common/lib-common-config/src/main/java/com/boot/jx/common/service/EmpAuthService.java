@@ -120,7 +120,7 @@ public class EmpAuthService {
 
 	public AgentResponseAuthDto loginByDomainToken(UserAuthToken userAuthToken) throws NoSuchAlgorithmException {
 		return loginByDomainToken(userAuthToken.getDomainUser(), userAuthToken.getDomainUserEmail(),
-				userAuthToken.getDomainName(), userAuthToken.getDomainId(), userAuthToken.getDomainToken(), true);
+				userAuthToken.getDomainName(), userAuthToken.getDomainId(), userAuthToken.getDomainToken(), false);
 	}
 
 	public AgentResponseAuthDto loginByDomainToken(String username, String userEmail, String domainName,
