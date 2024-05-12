@@ -191,16 +191,19 @@ public class AdminMsgController {
 			}
 		}
 
-//		if (statusLst != null && !statusLst.isEmpty()) {
-//			query2.addCriteria(Criteria.where("status").in(statusLst));
-//		}
-//		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
-//			query2.addCriteria(Criteria.where("tagId").in(tagCategory));
-//		}
-
+		if (statusLst != null && !statusLst.isEmpty()) {
+			query2.addCriteria(Criteria.where("status").in(statusLst));
+		}
+		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
+			query2.addCriteria(Criteria.where("tagId").in(tagCategory));
+		}
+		
 		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
 		sessions = mongoTemplate.find(query2, ChatSessionDoc.class);
 
+		
+	/*	
+		
 		List<ChatSessionDoc> statusDocLst = new ArrayList<>();
 		List<ChatSessionDoc> tagLst = new ArrayList<>();
 
@@ -242,9 +245,10 @@ public class AdminMsgController {
 		if (messageSessnDocs == null || messageSessnDocs.isEmpty()) {
 			messageSessnDocs.addAll(sessions);
 		}
+		return ApiResponse.buildResults(messageSessnDocs);*/
 		/** end **/
 
-		return ApiResponse.buildResults(messageSessnDocs);
+		return ApiResponse.buildResults(sessions);
 	}
 
 	@RequestMapping(value = "/api/message/messages", method = { RequestMethod.POST })
