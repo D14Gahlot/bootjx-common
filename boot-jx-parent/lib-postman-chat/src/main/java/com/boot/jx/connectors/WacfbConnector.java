@@ -59,6 +59,7 @@ import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360InboundMedia;
+import com.boot.jx.postman.wacfb.WacfbClient;
 import com.boot.jx.postman.wacfb.WacfbInboundMedia;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
@@ -87,7 +88,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	private PMFileStoreClient pmFileStoreClient;
 
 	@Autowired
-	private WA360Client wa360Client;
+	private WacfbClient wacfbClient;
 
 	@Autowired
 	private PMClientConfig pmClientConfig;
@@ -397,7 +398,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			WacfbInboundMedia media = map.entry(path).as(WacfbInboundMedia.class);
 			CommonFileStream srcFile = new CommonFileStream().url(WA360Constants.MEDIA_URL(media.getId()))
 					.fileType(fileType).format(FileFormat.from(media.getMimeType()))
-					.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+					.authBearer(channelConfig.getWacfb().getAccessToken())
 					.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
 			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
@@ -432,7 +433,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
 				// .fileType(attachment.getMediaType())
 				.format(FileFormat.from(attachment.getMediaMimeType()))
-				.header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
+				.authBearer(channelConfig.getWacfb().getAccessToken())
 				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
 
 		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
@@ -453,7 +454,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				isValidContact = optin(channelConfig, chatContactDoc);
 			}
 			if (isValidContact) {
-				wa360Client.send(channelConfig, outboxMessage);
+				wacfbClient.send(channelConfig, outboxMessage);
 				outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 			} else {
 				outboxMessage.logs().add(String.format("Invalid Contact for %s", chatContactDoc));
@@ -575,7 +576,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				phone = String.format("+%s", phone);
 			}
 
-			MapModel resp = wa360Client.fetchContact(phone, channelConfig);
+			MapModel resp = wacfbClient.fetchContact(phone, channelConfig);
 			String waId = resp.getString("wa_id");
 
 			String input = resp.getString("input");

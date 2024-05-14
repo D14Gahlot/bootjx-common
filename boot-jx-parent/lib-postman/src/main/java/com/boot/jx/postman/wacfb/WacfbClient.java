@@ -334,7 +334,7 @@ public class WacfbClient {
 	private MapModel sendTemplate(ChannelConfig channelConfig,
 			OutboxMessage outboxMessage) {
 		MapModel req = MapModel.createInstance()
-				.put("messaging_product", "whatsapp")
+				.put("messaging_product",outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual")
 				.put("to", outboxMessage.contact().getCsid());
 
@@ -490,6 +490,8 @@ public class WacfbClient {
 	private MapModel sendText(ChannelConfig channelConfig,
 			OutboxMessage outboxMessage) {
 		MapModel req = MapModel.createInstance()
+				.put("messaging_product",
+						outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual")
 				.put("to", outboxMessage.contact().getCsid());
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
@@ -502,6 +504,7 @@ public class WacfbClient {
 	private MapModel sendMedia(ChannelConfig channelConfig,
 			OutboxMessage outboxMessage, Attachment attachment) {
 		MapModel req = MapModel.createInstance()
+				.put("messaging_product",outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual")
 				.put("to", outboxMessage.contact().getCsid());
 
@@ -538,6 +541,7 @@ public class WacfbClient {
 	private MapModel sendList(ChannelConfig channelConfig,
 			OutboxMessage outboxMessage, List<TmplElement> buttons) {
 		MapModel req = MapModel.createInstance()
+				.put("messaging_product",outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual")
 				.put("to", outboxMessage.contact().getCsid());
 
@@ -594,6 +598,7 @@ public class WacfbClient {
 	private MapModel sendButton(ChannelConfig channelConfig,
 			OutboxMessage outboxMessage, List<TmplElement> buttons) {
 		MapModel req = MapModel.createInstance()
+				.put("messaging_product",outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual")
 				.put("to", outboxMessage.contact().getCsid());
 
@@ -656,7 +661,7 @@ public class WacfbClient {
 
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
 		try {
-			MapModel resp = restService.ajax("https://graph.facebook.com/v17.0")
+			MapModel resp = restService.ajax("https://graph.facebook.com/v18.0/")
 					.path(channelConfig.getWacfb().getPhoneNumberId()
 							+ "/messages")
 					.authBearer(channelConfig.getWacfb().getAccessToken())
@@ -706,15 +711,16 @@ public class WacfbClient {
 
 	public MapModel fetchContact(String contact, ChannelConfig channelConfig) {
 		try {
-			MapModel resp = restService.ajax(WA360Constants.BASE_URL)
-					.path("v1/contacts")
-					.header(WA360Constants.D360_API_KEY,
-							channelConfig.getWa360d().getApiKey())
+			MapModel resp = restService.ajax("https://graph.facebook.com/v18.0/")
+					.path(channelConfig.getWacfb().getPhoneNumberId()
+							+ "/v1/contacts")
+					.authBearer(channelConfig.getWacfb().getAccessToken())
 					.post(MapModel.createInstance().put("blocking", "wait")
 							.put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS,
 									contact)
 							.toMap())
 					.asMapModel();
+			System.out.println("resp:"+resp);
 			return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS)
 					.asMapModel();
 		} catch (ApiHttpServerException e) {
@@ -727,20 +733,18 @@ public class WacfbClient {
 	}
 
 	public MapModel fetchTemplates(ChannelConfig channelConfig) {
-		MapModel resp = restService.ajax(WA360Constants.BASE_URL)
-				.path("v1/configs/templates")
-				.header(WA360Constants.D360_API_KEY,
-						channelConfig.getWa360d().getApiKey())
+		MapModel resp = restService.ajax("https://graph.facebook.com/v18.0/")
+				.path(channelConfig.getWacfb().getPhoneNumberId()+"/v1/configs/templates")
+				.authBearer(channelConfig.getWacfb().getAccessToken())
 				.get().asMapModel();
 		return resp;
 	}
 
 	public MapModel deleteTemplates(ChannelConfig channelConfig,
 			String templateName) {
-		MapModel resp = restService.ajax(WA360Constants.BASE_URL)
-				.path("v1/configs/templates/{templateName}")
-				.header(WA360Constants.D360_API_KEY,
-						channelConfig.getWa360d().getApiKey())
+		MapModel resp = restService.ajax("https://graph.facebook.com/v18.0/")
+			.path(channelConfig.getWacfb().getPhoneNumberId()+"/v1/configs/templates/{templateName}")
+			.authBearer(channelConfig.getWacfb().getAccessToken())
 				.pathParam("templateName", templateName).delete().asMapModel();
 		return resp;
 	}
@@ -748,10 +752,9 @@ public class WacfbClient {
 	public MapModel updateTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
 			String templateName = req.getString("name");
-			MapModel resp = restService.ajax(WA360Constants.BASE_URL)
-					.path("v1/configs/templates/{templateName}")
-					.header(WA360Constants.D360_API_KEY,
-							channelConfig.getWa360d().getApiKey())
+			MapModel resp = restService.ajax("https://graph.facebook.com/v18.0/")
+				.path(channelConfig.getWacfb().getPhoneNumberId()+"/v1/configs/templates/{templateName}")
+				.authBearer(channelConfig.getWacfb().getAccessToken())
 					.pathParam("templateName", templateName).post(req.toMap())
 					.asMapModel();
 
@@ -769,10 +772,9 @@ public class WacfbClient {
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
 			req.remove("status");
-			MapModel resp = restService.ajax(WA360Constants.BASE_URL)
-					.path("v1/configs/templates")
-					.header(WA360Constants.D360_API_KEY,
-							channelConfig.getWa360d().getApiKey())
+			MapModel resp = restService.ajax("https://graph.facebook.com/v18.0/")
+				.path(channelConfig.getWacfb().getPhoneNumberId()+"/v1/configs/templates")
+				.authBearer(channelConfig.getWacfb().getAccessToken())
 					.post(req.toMap()).asMapModel();
 
 			return resp;
