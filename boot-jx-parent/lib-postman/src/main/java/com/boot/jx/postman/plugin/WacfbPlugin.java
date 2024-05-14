@@ -39,6 +39,11 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 		@ConfigMetaProperty(path = "phoneNumberId", title = "Phone Number Id", desc = "Enter Your Phone Number Id")
 		private String phoneNumberId;
 
+		@ConfigMetaProperty(path = "verificationPin", title = "Verification Pin", writeonly = true, optional = true,
+				desc = "Enter Your Phone Number Id")
+		@JsonView(PMEnvironment.ProtectedProperty.class)
+		private String verificationPin;
+
 		@ConfigMetaProperty(path = "wabaId", title = "WaBa Id", desc = "Enter Your WaBa Id", optional = true)
 		private String wabaId;
 
@@ -113,6 +118,14 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 		public void setWabaId(String wabaId) {
 			this.wabaId = wabaId;
+		}
+
+		public String getVerificationPin() {
+			return verificationPin;
+		}
+
+		public void setVerificationPin(String verificationPin) {
+			this.verificationPin = verificationPin;
 		}
 
 	}
