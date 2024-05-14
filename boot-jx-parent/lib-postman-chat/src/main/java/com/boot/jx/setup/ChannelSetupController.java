@@ -22,6 +22,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.cdn.BootJxConfigService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.common.config.PMCommonConfigImpl;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
@@ -134,6 +135,9 @@ public class ChannelSetupController {
 		if (ArgUtil.is(contactType)) {
 			q.search("contactType", ArgUtil.parseAsString(contactType));
 		}
+
+		q.search("server", ArgUtil.parseAsString(pmCommonConfig.getServiceServer()));
+
 		channels = commonMongoTemplate.find(q);
 
 		model.addAttribute("channels", channels);
