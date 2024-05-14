@@ -212,7 +212,8 @@ public class AdminMsgController {
 		
 		
 		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
-		query2.addCriteria(Criteria.where("tagId").all(tagCategory));
+		 //query2.addCriteria(Criteria.where("tagId").all(tagCategory));
+			query2.addCriteria(Criteria.where("tagId").is(tagCategory));
 		}
 		
 		
