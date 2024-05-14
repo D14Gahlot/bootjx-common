@@ -6,6 +6,7 @@ import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Deprecated
 public class WA360CloudOutBoundAudio implements Serializable {
 
     private static final long serialVersionUID = -654441367316876851L;

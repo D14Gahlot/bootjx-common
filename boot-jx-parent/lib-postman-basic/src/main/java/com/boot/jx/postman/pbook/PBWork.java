@@ -12,6 +12,7 @@ public class PBWork implements Serializable {
 	String company;
 	String department;
 	String title;
+	String label;
 
 	public String getCompany() {
 		return company;
@@ -35,6 +36,14 @@ public class PBWork implements Serializable {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 }

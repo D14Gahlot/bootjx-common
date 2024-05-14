@@ -75,8 +75,14 @@ public class AgMainController {
 								agentSession.getAgentDept(), null, Constants.BLANK)
 						&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
 					chatSessionDto = chatArchive.withMessages(chatSessionDto);
+				}else if(ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
+							agentSession.getAgentDept(), null, Constants.BLANK)
+					&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) { //added by mru for test
+				chatSessionDto = chatArchive.withMessages(chatSessionDto);
 				}
+				
 				chatSessionDtos.add(chatSessionDto);
+				
 			}
 		}
 		if (away != null) {
@@ -102,6 +108,7 @@ public class AgMainController {
 		query.limit = limit;
 		query.add(ArgUtil.parseAsEnumT(tab, CHAT_ASSIGN_GROUP.class));
 		query.add(ArgUtil.parseAsEnumT(searchStatus, CHAT_STATE.class));
+		//System.out.println("query MRU SEARCH "+JsonUtil.toJsonPrettyPrint(query));
 		return getSessionAssignments(withMessage, status, away, new ArrayList<ChatSessionDTO>(), query);
 	}
 

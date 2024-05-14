@@ -143,4 +143,8 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable,
 		return this.stamps;
 	}
 
+	public Object getUserSharedProfile() {
+		return profile;
+	}
+
 }

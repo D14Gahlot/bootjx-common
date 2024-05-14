@@ -8,9 +8,9 @@ import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 
-@Document(collection = "CONFIG_PERMS")
-@TypeAlias("PermsConfig")
-public class PermsConfigDoc extends PMConfigurationObject implements IDocument, JsonIgnoreUnknown {
+@Document(collection = "CONFIG_FEATURES")
+@TypeAlias("FeaturesConfig")
+public class FeaturesConfigDoc extends PMConfigurationObject implements IDocument, JsonIgnoreUnknown {
 
 	private static final long serialVersionUID = -4251710793999219993L;
 

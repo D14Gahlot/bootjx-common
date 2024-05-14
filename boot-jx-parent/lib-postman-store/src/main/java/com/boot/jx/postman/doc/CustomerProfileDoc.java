@@ -1,6 +1,8 @@
 package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -14,6 +16,7 @@ import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBWebsite;
+import com.boot.jx.postman.pbook.PBWork;
 import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 
@@ -33,6 +36,8 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 	public Set<PBEmail> emails;
 	public Set<PBAddress> addresses;
 	public Set<PBWebsite> urls;
+	public Set<PBWork> works;
+	public Map<String, Object> additionalInfo = new HashMap<>();
 
 	public String rmCode;
 
@@ -71,5 +76,86 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 		}
 		return this.emails;
 	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public PBName getName() {
+		return name;
+	}
+
+	public void setName(PBName name) {
+		this.name = name;
+	}
+
+	public Set<PBPhone> getPhones() {
+		return phones;
+	}
+
+	public void setPhones(Set<PBPhone> phones) {
+		this.phones = phones;
+	}
+
+	public Set<PBEmail> getEmails() {
+		return emails;
+	}
+
+	public void setEmails(Set<PBEmail> emails) {
+		this.emails = emails;
+	}
+
+	public Set<PBAddress> getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(Set<PBAddress> addresses) {
+		this.addresses = addresses;
+	}
+
+	public Set<PBWebsite> getUrls() {
+		return urls;
+	}
+
+	public void setUrls(Set<PBWebsite> urls) {
+		this.urls = urls;
+	}
+
+	public String getRmCode() {
+		return rmCode;
+	}
+
+	public void setRmCode(String rmCode) {
+		this.rmCode = rmCode;
+	}
+
+	public Map<String, Object> getAdditionalInfo() {
+		return additionalInfo;
+	}
+
+	public void setAdditionalInfo(Map<String, Object> additionalInfo) {
+		this.additionalInfo = additionalInfo;
+	}
+
+	public Set<PBWork> getWorks() {
+		return works;
+	}
+
+	public void setWorks(Set<PBWork> works) {
+		this.works = works;
+	}
+
+	
+	public Set<PBWork> works() {
+		if (works == null) {
+			this.works = new TreeSet<PBWork>();
+		}
+		return this.works;
+	}
+	
 
 }

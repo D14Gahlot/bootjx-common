@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.common.config.ConfigConstants.PERMS_KEY;
+import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
+import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
@@ -54,6 +55,9 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 
 	@Autowired
 	private AppConfig appConfig;
+
+	@Autowired(required = false)
+	private AppCommonAuthUser appCommonAuthUser;
 
 	@Value("${mry.duperadmin.email}")
 	private String duperEmail;
@@ -124,11 +128,11 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		return map;
 	}
 
-	private SafeKeyHashMap<Object> permsConfigAttributes() {
+	private SafeKeyHashMap<Object> featuresConfigAttributes() {
 		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
-		for (PERMS_KEY config : ConfigConstants.PERMS_KEY.values()) {
+		for (FEATURES_KEY config : ConfigConstants.FEATURES_KEY.values()) {
 			setup.put(config.name(),
-					ArgUtil.nonEmpty(pmEnvironment.permEntry(config.getKey()).getValue(), config.getDefaultValue()));
+					ArgUtil.nonEmpty(pmEnvironment.featureEntry(config.getKey()).getValue(), config.getDefaultValue()));
 		}
 		return setup;
 	}
@@ -173,7 +177,12 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 		Map<String, Object> map = commonAttributes();
 		map.putAll(appConfigAttributes());
 		map.put("SETUP", setupConfigAttributes());
-		map.put("PERMS", permsConfigAttributes());
+		SafeKeyHashMap<Object> features = featuresConfigAttributes();
+		map.put("PERMS", features);
+		map.put("FEATURES", features);
+		if (ArgUtil.is(appCommonAuthUser)) {
+			map.put("PROFILE", appCommonAuthUser.getUserSharedProfile());
+		}
 		map.put("timestamp", System.currentTimeMillis());
 		return map;
 	}

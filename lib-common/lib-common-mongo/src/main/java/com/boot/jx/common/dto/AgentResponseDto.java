@@ -41,6 +41,8 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 	@JsonProperty("dept_id")
 	private String dept_id;
 
+	private List<String> appModules;
+
 	private List<ResourceDocument> quicktags;
 
 	private List<ResourceDocument> quicklabels;
@@ -170,6 +172,14 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	public void setAgent_number(String agent_number) {
 		this.agent_number = agent_number;
+	}
+
+	public List<String> getAppModules() {
+		return appModules;
+	}
+
+	public void setAppModules(List<String> appModules) {
+		this.appModules = appModules;
 	}
 
 }

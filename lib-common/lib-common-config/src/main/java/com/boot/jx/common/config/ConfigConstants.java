@@ -34,6 +34,9 @@ public class ConfigConstants {
 	public static final String GROUP_AGENT = "AGENT";
 	public static final String GROUP_NLP = "NLP";
 	public static final String GROUP_DEV = "DEVELOPMENT";
+	public static final String CHANNELS = "CHANNELS";
+	public static final String BOT = "BOT";
+	public static final String APP_MODULES = "APP_MODULES";
 
 	public static enum APP_KEY implements EntryMeta {
 
@@ -313,11 +316,32 @@ public class ConfigConstants {
 
 	}
 
-	public static enum PERMS_KEY implements EntryMeta {
+	public static enum FEATURES_KEY implements EntryMeta {
 
 		BUILD_VERSION(
-				new ConfigMeta("BUILD_VERSION", "perms.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
-		CONTACT_CENTER(new ConfigMeta("Contact Center", "perms.contact.center").optionsOnOff()),
+				new ConfigMeta("BUILD_VERSION", "feature.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
+		CONTACT_CENTER(new ConfigMeta("Contact Center", "feature.contact.center").optionsOnOff()),
+		CHANNEL_AUTOCONFIGURE_FACEBOOK(
+				new ConfigMeta("AutoConfigure Facebook", "feature.channel.autoconfigure.facebook").optionsOnOff()
+						.group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_WHATSAPP(
+				new ConfigMeta("AutoConfigure WhatsApp", "feature.channel.autoconfigure.whatsapp").optionsOnOff()
+						.group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_INSTAGRAM(
+				new ConfigMeta("AutoConfigure Instagram", "feature.channel.autoconfigure.instagram").optionsOnOff()
+						.group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_TELEGRAM(
+				new ConfigMeta("AutoConfigure Telegram", "feature.channel.autoconfigure.telegram").optionsOnOff()
+						.group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_TWITTER(new ConfigMeta("AutoConfigure Twitter", "feature.channel.autoconfigure.twitter")
+				.optionsOnOff().group(CHANNELS)),
+		BOT_FLOW_BUILDER(new ConfigMeta("Bot Flow Builder", "feature.bot.flow.builder").optionsOnOff().group(BOT)),
+		APP_MODULE_CALENDAR(
+				new ConfigMeta("Calendar Module", "feature.app.module.calandar").optionsOnOff().group(APP_MODULES)),
+		APP_MODULE_AGENT(new ConfigMeta("Agent Module", "feature.app.module.agent").optionsOnOff().group(APP_MODULES)),
+		APP_MODULE_ADMIN(new ConfigMeta("Admin Module", "feature.app.module.admin").optionsOnOff().group(APP_MODULES)),
+		APP_MODULE_SOCIAL(
+				new ConfigMeta("Social Module", "feature.app.module.social").optionsOnOff().group(APP_MODULES)),
 		// Ends here
 		;
 
@@ -325,7 +349,7 @@ public class ConfigConstants {
 		private Object defaultValue;
 		private String ukey;
 
-		PERMS_KEY(ConfigMeta defaultFalse) {
+		FEATURES_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
 			this.ukey = defaultFalse.getUkey();
 			ConfigConstants.PERMS_CONFIG_LIST.add(defaultFalse);
@@ -348,7 +372,7 @@ public class ConfigConstants {
 
 	static {
 		ConfigConstants.SETUP_KEY.values();
-		ConfigConstants.PERMS_KEY.values();
+		ConfigConstants.FEATURES_KEY.values();
 	}
 
 }
