@@ -134,6 +134,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channel.getWacfb().setNumber(PhoneUtil.phone(phoneMap.keyEntry("display_phone_number").asString()));
 				channel.getWacfb().setPhoneNumberId(phoneMap.keyEntry("id").asString());
 				channel.getWacfb().setVerificationPin(verificationPin);
+				channel.getWacfb().setVerifyToken(setup.getWacfb().getMasterAppVerifyToken());
 				channel.getWacfb().setWabaId(assignedWaBaId);
 				channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
