@@ -139,12 +139,12 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
 				channels.add(channel);
 
-				MapModel setPinResp = restService.ajax("https://graph.facebook.com/v18.0/").path(assignedWaBaId)
+				MapModel setPinResp = restService.ajax("https://graph.facebook.com/v18.0/").path(phoneNumberId)
 						.authBearer(userAccessToken).postJson(MapModel.createInstance().put("pin", verificationPin))
 						.asMapModel();
 				channelConfigTemp.log("/setPin", setPinResp.toMap());
 
-				MapModel registerResp = restService.ajax("https://graph.facebook.com/v18.0/").path(assignedWaBaId)
+				MapModel registerResp = restService.ajax("https://graph.facebook.com/v18.0/").path(phoneNumberId)
 						.path("/register").authBearer(userAccessToken)
 						.postJson(MapModel.createInstance().put("pin", verificationPin)).asMapModel();
 				channelConfigTemp.log("/register", registerResp.toMap());
