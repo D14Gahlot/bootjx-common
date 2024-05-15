@@ -142,7 +142,8 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channels.add(channel);
 
 				MapModel subscribeResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
-						.path("/subscribed_apps").authBearer(userAccessToken).post().asMapModel();
+						.path("/subscribed_apps").authBearer(setup.getWacfb().getMasterSUAccessToken()).post()
+						.asMapModel();
 
 				channelConfigTemp.log("/subscribed_apps", subscribeResp.toMap());
 
@@ -187,19 +188,19 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
-		String webhookUrl = null;
-		try {
-			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-			MapModel webhook = MapModel.createInstance().put("override_callback_uri", webhookUrl).put("verify_token",
-					channelConfig.getWacfb().getVerifyToken());
-
-			restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
-					.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
-					.postJson(webhook.toMap()).asMapModel();
-
-		} catch (Exception e) {
-			logManager.error("While Setting " + webhookUrl, e);
-		}
+//		String webhookUrl = null;
+//		try {
+//			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+//			MapModel webhook = MapModel.createInstance().put("override_callback_uri", webhookUrl).put("verify_token",
+//					channelConfig.getWacfb().getVerifyToken());
+//
+//			restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
+//					.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
+//					.postJson(webhook.toMap()).asMapModel();
+//
+//		} catch (Exception e) {
+//			logManager.error("While Setting " + webhookUrl, e);
+//		}
 	}
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {

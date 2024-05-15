@@ -41,6 +41,11 @@ public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetail
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String masterAppSecret;
 
+		@ConfigMetaProperty(path = "masterSUAccessToken", title = "masterSUAccessToken", createonly = true,
+				hidden = true, readonly = true, desc = "masterSUAccessToken")
+		@JsonView(PMEnvironment.ProtectedProperty.class)
+		private String masterSUAccessToken;
+
 		@ConfigMetaProperty(path = "masterAppVerifyToken", title = "masterAppVerifyToken", createonly = true,
 				hidden = true, readonly = true, desc = "masterAppVerifyToken")
 		@JsonView(PMEnvironment.ProtectedProperty.class)
@@ -85,6 +90,15 @@ public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetail
 		public void setMasterAppVerifyToken(String masterAppVerifyToken) {
 			this.masterAppVerifyToken = masterAppVerifyToken;
 		}
+
+		public String getMasterSUAccessToken() {
+			return masterSUAccessToken;
+		}
+
+		public void setMasterSUAccessToken(String masterSUAccessToken) {
+			this.masterSUAccessToken = masterSUAccessToken;
+		}
+
 	}
 
 	@ConfigMetaProperty(context = "facebook")
