@@ -181,6 +181,10 @@ public class InBoundController {
 				newData.put("entry", entry);
 
 				String pageId = pageEntry.getId();
+				if (ArgUtil.is(channelType, CHANNEL_TYPE.WACFB)) {
+					pageId = MapModel.from(pageEntry.getChanges().get(0))
+							.path(FacebookConstants.WABAPaths.DISPLAY_PHONE_NUMBER).asString();
+				}
 
 				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
 				if (ArgUtil.is(channels)) {

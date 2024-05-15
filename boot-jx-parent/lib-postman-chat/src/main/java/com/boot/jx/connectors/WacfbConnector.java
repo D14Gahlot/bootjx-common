@@ -150,6 +150,15 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 						.asMapModel();
 				channelConfigTemp.log("/register", registerResp.toMap());
 
+				String webhookUrl = pmClientConfig.getWebhookUrl(channel);
+				MapModel subscribeResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
+						.path(channel.getWacfb().getWabaId()).path("/subscribed_apps")
+						.authBearer(channel.getWacfb().getAccessToken())
+						.postJson(MapModel.createInstance().put("override_callback_uri", webhookUrl)
+								.put("verify_token", setup.getWacfb().getMasterAppVerifyToken()).toMap())
+						.asMapModel();
+				channelConfigTemp.log("/subscribed_apps", subscribeResp.toMap());
+
 			} else {
 				MapModel phoneNumbers = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
 						.path("/phone_numbers").authBearer(userAccessToken).get().asMapModel();
@@ -176,6 +185,11 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 		commonMongoTemplate.save(channelConfigTemp);
 		return channels;
+	}
+
+	@Override
+	public void onChannelUpdate(ChannelConfig channelConfig) {
+		// NOT REQUIRED?
 	}
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
