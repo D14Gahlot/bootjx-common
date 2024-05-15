@@ -53,7 +53,7 @@ public class WacfbClient {
 
 	public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
 		WACFBConfigDetails config = channelConfig.getWacfb();
-		String verifyToken = config.getMasterAppVerifyToken();
+		String verifyToken = ArgUtil.nonEmpty(config.getMasterAppVerifyToken(), config.getVerifyToken());
 		if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
 			return challenge;
 		} else {

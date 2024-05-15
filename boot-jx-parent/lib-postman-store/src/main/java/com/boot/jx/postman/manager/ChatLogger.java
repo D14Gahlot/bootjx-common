@@ -20,7 +20,6 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.doc.MessageDocAbstract;
-import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
@@ -165,7 +164,7 @@ public class ChatLogger {
 
 	}
 
-	public void error(Throwable e) {
+	public void error(String message, Throwable e) {
 		if (ArgUtil.is(messageContext.getMessage())) {
 			this.error(messageContext.getMessage(), e);
 		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
@@ -175,9 +174,14 @@ public class ChatLogger {
 			doc.setType("E");
 			doc.setTimestamp(System.currentTimeMillis());
 			doc.setTraceId(AppContextUtil.getTraceId());
-			doc.setMessage(e.getMessage());
+			doc.setMessage(message);
+			toLogs(e, doc);
 			messageStore.save(doc);
 		}
+	}
+
+	public void error(Throwable e) {
+		this.error(e.getMessage(), e);
 	}
 
 	private void log(MessageDocAbstract doc, String message, Object[] debugMessage) {

@@ -33,6 +33,7 @@ import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.fb.FacebookConstants;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -69,6 +70,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
 import com.boot.utils.PhoneUtil;
+import com.boot.utils.Random;
+import com.boot.utils.UniqueID;
 import com.boot.utils.Urly;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -101,7 +104,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		try {
 			MapModel resp = MapModel.from(channelConfigTemp.getResp());
 
-			MapModel accessToken = restService.ajax("https://graph.facebook.com/v18.0").path("/oauth/access_token")
+			MapModel accessToken = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path("oauth/access_token")
 					.field("client_id", setup.getWacfb().getMasterAppId())
 					.field("client_secret", setup.getWacfb().getMasterAppSecret())
 					.field("code", resp.pathEntry("authResponse.code").asString()).submit().asMapModel();
@@ -113,7 +116,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			String phoneNumberId = resp.pathEntry("_.phone_number_id").asString();
 
 			if (!ArgUtil.is(assignedWaBaId)) {
-				MapModel debugToken = restService.ajax("https://graph.facebook.com/v18.0").path("/debug_token")
+				MapModel debugToken = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path("debug_token")
 						.queryParam("input_token", userAccessToken)
 						.authBearer(setup.getWacfb().getMasterAppId() + "|" + setup.getWacfb().getMasterAppSecret())
 						.get().asMapModel();
@@ -121,8 +124,10 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				assignedWaBaId = debugToken.pathEntry("/data/granular_scopes/[0]/target_ids/[0]").asString();
 			}
 
+			String verificationPin = Random.randomNumeric(6);
+
 			if (ArgUtil.is(phoneNumberId)) {
-				MapModel phoneMap = restService.ajax("https://graph.facebook.com/v18.0/").path(phoneNumberId)
+				MapModel phoneMap = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
 						.authBearer(userAccessToken).get().asMapModel();
 				channelConfigTemp.log("/phone_number_by_id", phoneMap.toMap());
 
@@ -131,13 +136,32 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channel.getWacfb().setAccessToken(userAccessToken);
 				channel.getWacfb().setNumber(PhoneUtil.phone(phoneMap.keyEntry("display_phone_number").asString()));
 				channel.getWacfb().setPhoneNumberId(phoneMap.keyEntry("id").asString());
+				channel.getWacfb().setVerificationPin(verificationPin);
+				channel.getWacfb().setVerifyToken(setup.getWacfb().getMasterAppVerifyToken());
 				channel.getWacfb().setWabaId(assignedWaBaId);
 				channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
 				channels.add(channel);
 
+				MapModel subscribeResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
+						.path("/subscribed_apps").authBearer(setup.getWacfb().getMasterSUAccessToken()).post()
+						.asMapModel();
+
+				channelConfigTemp.log("/subscribed_apps", subscribeResp.toMap());
+
+				MapModel setPinResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
+						.authBearer(userAccessToken)
+						.postJson(MapModel.createInstance().put("pin", verificationPin).toMap()).asMapModel();
+				channelConfigTemp.log("/setPin", setPinResp.toMap());
+
+				MapModel registerResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
+						.path("/register").authBearer(userAccessToken).postJson(MapModel.createInstance()
+								.put("pin", verificationPin).put("messaging_product", "whatsapp").toMap())
+						.asMapModel();
+				channelConfigTemp.log("/register", registerResp.toMap());
+
 			} else {
-				MapModel phoneNumbers = restService.ajax("https://graph.facebook.com/v18.0/").path(assignedWaBaId)
+				MapModel phoneNumbers = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
 						.path("/phone_numbers").authBearer(userAccessToken).get().asMapModel();
 				channelConfigTemp.log("/phone_numbers", phoneNumbers.toMap());
 				final String assignedWaBaIdFinal = assignedWaBaId;
@@ -149,6 +173,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 					channel.getWacfb().setAccessToken(userAccessToken);
 					channel.getWacfb().setNumber(PhoneUtil.phone(phoneMap.keyEntry("display_phone_number").asString()));
 					channel.getWacfb().setPhoneNumberId(phoneMap.keyEntry("id").asString());
+					// channel.getWacfb().setVerificationPin(verificationPin);
 					channel.getWacfb().setWabaId(assignedWaBaIdFinal);
 					channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
 					channel.setName(phoneMap.keyEntry("verified_name").asString());
@@ -161,6 +186,23 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 		commonMongoTemplate.save(channelConfigTemp);
 		return channels;
+	}
+
+	@Override
+	public void onChannelUpdate(ChannelConfig channelConfig) {
+//		String webhookUrl = null;
+//		try {
+//			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+//			MapModel webhook = MapModel.createInstance().put("override_callback_uri", webhookUrl).put("verify_token",
+//					channelConfig.getWacfb().getVerifyToken());
+//
+//			restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
+//					.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
+//					.postJson(webhook.toMap()).asMapModel();
+//
+//		} catch (Exception e) {
+//			logManager.error("While Setting " + webhookUrl, e);
+//		}
 	}
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {

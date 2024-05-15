@@ -194,9 +194,28 @@ public class AdminMsgController {
 		if (statusLst != null && !statusLst.isEmpty()) {
 			query2.addCriteria(Criteria.where("status").in(statusLst));
 		}
-		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
+		
+//		if(tagCategory!=null && !tagCategory.isEmpty()) { 
+//		Criteria[] criteriaArray = new Criteria[tagCategory.size()]; 
+//		for (int i = 0; i < tagCategory.size(); i++){
+//			criteriaArray[i] = Criteria.where("tagId").is(tagCategory.get(i));
+//			 } 
+//			//query2.addCriteria(new Criteria().andOperator(criteriaArray)); 
+//		query2.addCriteria(Criteria.where("tagId").andOperator(criteriaArray));
+//		
+//		}
+		 
+		
+		/*if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
 			query2.addCriteria(Criteria.where("tagId").in(tagCategory));
+		}*/
+		
+		
+		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
+		 //query2.addCriteria(Criteria.where("tagId").all(tagCategory));
+			query2.addCriteria(Criteria.where("tagId").is(tagCategory));
 		}
+		
 		
 		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
 		sessions = mongoTemplate.find(query2, ChatSessionDoc.class);

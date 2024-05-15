@@ -320,7 +320,7 @@ public class ConfigConstants {
 
 		BUILD_VERSION(
 				new ConfigMeta("BUILD_VERSION", "feature.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
-		CONTACT_CENTER(new ConfigMeta("Contact Center", "feature.contact.center").optionsOnOff()),
+		CONTACT_CENTER(new ConfigMeta("Customer Profile", "feature.contact.center").optionsOnOff()),
 		CHANNEL_AUTOCONFIGURE_FACEBOOK(
 				new ConfigMeta("AutoConfigure Facebook", "feature.channel.autoconfigure.facebook").optionsOnOff()
 						.group(CHANNELS)),
