@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.attoparser.trace.MarkupTraceEvent.NonMinimizedStandaloneElementEndTraceEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,9 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
+import com.boot.jx.admin.dto.SearchCustomerProfileDto;
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.common.doc.JobsOutPutDoc;
@@ -28,12 +34,16 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.pbook.PBEmail;
+import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.UniqueID;
 
 @Component
 public class CustomerMasterFldMgr {
@@ -326,6 +336,63 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 		}
 		return lstDtos;
 		
+	}
+
+	public List<CustomerProfileDoc> deDeuplicateCheck(CustomerProfileRequest request) {
+		List<CustomerProfileDoc> cpLst = new ArrayList<>(); 
+		List<Criteria> orOperator = new LinkedList<Criteria>();
+		
+		Set<PBPhone> setPbPhone =  new TreeSet<PBPhone>();
+		Set<PBEmail> setPbEmail =  new TreeSet<PBEmail>();
+		
+//		if (ArgUtil.is(refId)) {
+//			profileDoc = mongoTemplate.findOne(new Query(Criteria.where("contactIdRef").is(refId)),
+//					CustomerProfileDoc.class);
+//
+//		}
+		PBPhone ph = new PBPhone();
+		PBEmail pEmail = new PBEmail();
+		if(ArgUtil.is(request.getPhone())) {
+				 ph = contactStore.parsePhone(new PBPhone().phone(request.getPhone()));
+				orOperator.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
+						.and("countryCallingCode").is(ph.countryCallingCode)));
+		}
+		
+		if (ArgUtil.is(request.getEmail())) {
+			orOperator.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(request.getEmail())));
+		}
+
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
+		cpLst = contactStore.find(qb);
+		if(cpLst!=null && !cpLst.isEmpty() && cpLst.size()>1) {
+			
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("phone").codeKey("ValidNameDuplicate")
+					.description("Field code already exists"));
+		}
+		
+		CustomerProfileDoc cProfileDoc = new CustomerProfileDoc();
+		cProfileDoc.setName(request.getName());
+		if(ArgUtil.is(ph)) {
+			ph.setUuid(UniqueID.generateString());
+			setPbPhone.add(ph);
+		}
+		
+		if(ArgUtil.is(request.getEmail())) {
+			pEmail.setUuid(UniqueID.generateString());
+			pEmail.setEmail(request.getEmail());
+			pEmail.setLabel("Email");
+			setPbEmail.add(pEmail);
+			
+		}
+		cProfileDoc.setPhones(setPbPhone);
+		cProfileDoc.setEmails(setPbEmail);
+		cProfileDoc.setCode(request.getCode());
+		cProfileDoc.setCreatedStamp(System.currentTimeMillis());
+		cProfileDoc.setCreatedBy(auditDetailProvider.getAuditUser());
+		mongoTemplate.save(cProfileDoc);
+		cpLst.add(cProfileDoc);
+		return cpLst;
 	}
 	
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
+import com.boot.jx.admin.dto.SearchCustomerProfileDto;
 import com.boot.jx.admin.manager.CustomerMasterFldMgr;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
@@ -18,6 +19,7 @@ import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.utils.ArgUtil;
 
 @Service
@@ -96,6 +98,10 @@ public class CustomerProfileService {
 	
 	public List<CustomerProfileDoc> saveCustomerProfile(String id){
 		return cmFieldMgr.saveCustomerProfileMaster(id);
+	}
+	
+	public List<CustomerProfileDoc> deDeuplicateCheck(CustomerProfileRequest searQry) {
+		return cmFieldMgr.deDeuplicateCheck(searQry);
 	}
 
 }

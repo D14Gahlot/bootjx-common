@@ -38,8 +38,10 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 	public Set<PBWebsite> urls;
 	public Set<PBWork> works;
 	public Map<String, Object> additionalInfo = new HashMap<>();
-
 	public String rmCode;
+	private Long createdStamp;
+	private String createdBy;
+	
 
 	public String getId() {
 		return id;
@@ -155,6 +157,26 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 			this.works = new TreeSet<PBWork>();
 		}
 		return this.works;
+	}
+
+	public Long getCreatedStamp() {
+		return createdStamp;
+	}
+
+	public void setCreatedStamp(Long createdStamp) {
+		this.createdStamp = createdStamp;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 	
 

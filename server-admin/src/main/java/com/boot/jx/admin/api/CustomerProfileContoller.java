@@ -17,6 +17,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
+import com.boot.jx.admin.dto.SearchCustomerProfileDto;
 import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
@@ -24,6 +25,7 @@ import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.dto.CustomerProfileRequest;
 
 @RestController
 public class CustomerProfileContoller {
@@ -98,4 +100,10 @@ public class CustomerProfileContoller {
 	public ApiResponse<CustomerProfileDoc, Object> saveCustomerProfile(@RequestParam(value = "id", required = true) String id){
 			return ApiResponse.buildResults(cusProfileService.saveCustomerProfile(id));
 		}
+	
+	@RequestMapping(value = "/api/customer/de-duplicate/save", method = { RequestMethod.POST })
+	public ApiResponse<CustomerProfileDoc, Object> deDeuplicateCheck(@RequestBody CustomerProfileRequest request){
+			return ApiResponse.buildResults(cusProfileService.deDeuplicateCheck(request));
+		}
+	
 }
