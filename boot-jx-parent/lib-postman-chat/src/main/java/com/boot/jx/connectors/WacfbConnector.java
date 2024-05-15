@@ -187,18 +187,18 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
-
+		String webhookUrl = null;
 		try {
-			MapModel webhook = MapModel.createInstance()
-					.put("override_callback_uri", pmClientConfig.getWebhookUrl(channelConfig))
-					.put("verify_token", channelConfig.getWacfb().getVerifyToken());
+			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+			MapModel webhook = MapModel.createInstance().put("override_callback_uri", webhookUrl).put("verify_token",
+					channelConfig.getWacfb().getVerifyToken());
 
 			restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
 					.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
 					.postJson(webhook.toMap()).asMapModel();
 
 		} catch (Exception e) {
-			logManager.error(e);
+			logManager.error("While Setting " + webhookUrl, e);
 		}
 	}
 
