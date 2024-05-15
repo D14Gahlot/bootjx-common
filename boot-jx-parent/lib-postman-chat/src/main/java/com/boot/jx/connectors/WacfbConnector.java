@@ -101,7 +101,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		try {
 			MapModel resp = MapModel.from(channelConfigTemp.getResp());
 
-			MapModel accessToken = restService.ajax("https://graph.facebook.com/v18.0").path("/oauth/access_token")
+			MapModel accessToken = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path("oauth/access_token")
 					.field("client_id", setup.getWacfb().getMasterAppId())
 					.field("client_secret", setup.getWacfb().getMasterAppSecret())
 					.field("code", resp.pathEntry("authResponse.code").asString()).submit().asMapModel();
@@ -113,7 +113,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			String phoneNumberId = resp.pathEntry("_.phone_number_id").asString();
 
 			if (!ArgUtil.is(assignedWaBaId)) {
-				MapModel debugToken = restService.ajax("https://graph.facebook.com/v18.0").path("/debug_token")
+				MapModel debugToken = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path("debug_token")
 						.queryParam("input_token", userAccessToken)
 						.authBearer(setup.getWacfb().getMasterAppId() + "|" + setup.getWacfb().getMasterAppSecret())
 						.get().asMapModel();
@@ -124,7 +124,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			String verificationPin = Random.randomNumeric(6);
 
 			if (ArgUtil.is(phoneNumberId)) {
-				MapModel phoneMap = restService.ajax("https://graph.facebook.com/v18.0/").path(phoneNumberId)
+				MapModel phoneMap = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
 						.authBearer(userAccessToken).get().asMapModel();
 				channelConfigTemp.log("/phone_number_by_id", phoneMap.toMap());
 
@@ -139,18 +139,18 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
 				channels.add(channel);
 
-				MapModel setPinResp = restService.ajax("https://graph.facebook.com/v18.0/").path(phoneNumberId)
+				MapModel setPinResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
 						.authBearer(userAccessToken).postJson(MapModel.createInstance().put("pin", verificationPin))
 						.asMapModel();
 				channelConfigTemp.log("/setPin", setPinResp.toMap());
 
-				MapModel registerResp = restService.ajax("https://graph.facebook.com/v18.0/").path(phoneNumberId)
+				MapModel registerResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
 						.path("/register").authBearer(userAccessToken)
 						.postJson(MapModel.createInstance().put("pin", verificationPin)).asMapModel();
 				channelConfigTemp.log("/register", registerResp.toMap());
 
 			} else {
-				MapModel phoneNumbers = restService.ajax("https://graph.facebook.com/v18.0/").path(assignedWaBaId)
+				MapModel phoneNumbers = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
 						.path("/phone_numbers").authBearer(userAccessToken).get().asMapModel();
 				channelConfigTemp.log("/phone_numbers", phoneNumbers.toMap());
 				final String assignedWaBaIdFinal = assignedWaBaId;
@@ -162,7 +162,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 					channel.getWacfb().setAccessToken(userAccessToken);
 					channel.getWacfb().setNumber(PhoneUtil.phone(phoneMap.keyEntry("display_phone_number").asString()));
 					channel.getWacfb().setPhoneNumberId(phoneMap.keyEntry("id").asString());
-					channel.getWacfb().setVerificationPin(verificationPin);
+					// channel.getWacfb().setVerificationPin(verificationPin);
 					channel.getWacfb().setWabaId(assignedWaBaIdFinal);
 					channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
 					channel.setName(phoneMap.keyEntry("verified_name").asString());
