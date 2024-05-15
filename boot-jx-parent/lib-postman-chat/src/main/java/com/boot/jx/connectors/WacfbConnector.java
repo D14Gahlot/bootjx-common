@@ -141,6 +141,11 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
 				channels.add(channel);
 
+				MapModel subscribeResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
+						.path("/subscribed_apps").authBearer(userAccessToken).post().asMapModel();
+
+				channelConfigTemp.log("/subscribed_apps", subscribeResp.toMap());
+
 				MapModel setPinResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
 						.authBearer(userAccessToken)
 						.postJson(MapModel.createInstance().put("pin", verificationPin).toMap()).asMapModel();
