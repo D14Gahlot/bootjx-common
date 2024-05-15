@@ -140,13 +140,14 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channels.add(channel);
 
 				MapModel setPinResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
-						.authBearer(userAccessToken).postJson(MapModel.createInstance().put("pin", verificationPin))
-						.asMapModel();
+						.authBearer(userAccessToken)
+						.postJson(MapModel.createInstance().put("pin", verificationPin).toMap()).asMapModel();
 				channelConfigTemp.log("/setPin", setPinResp.toMap());
 
 				MapModel registerResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
-						.path("/register").authBearer(userAccessToken)
-						.postJson(MapModel.createInstance().put("pin", verificationPin)).asMapModel();
+						.path("/register").authBearer(userAccessToken).postJson(MapModel.createInstance()
+								.put("pin", verificationPin).put("messaging_product", "whatsapp").toMap())
+						.asMapModel();
 				channelConfigTemp.log("/register", registerResp.toMap());
 
 			} else {
