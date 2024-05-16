@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
@@ -33,7 +32,6 @@ import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.fb.FacebookConstants;
-import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -52,14 +50,14 @@ import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelClient;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.WacfbPlugin;
 import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.WABAConversationQuery;
-import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
-import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.postman.wacfb.WacfbClient;
 import com.boot.jx.postman.wacfb.WacfbInboundMedia;
 import com.boot.jx.rest.RestService;
@@ -71,7 +69,6 @@ import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
 import com.boot.utils.PhoneUtil;
 import com.boot.utils.Random;
-import com.boot.utils.UniqueID;
 import com.boot.utils.Urly;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -98,6 +95,11 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
+
+	@Override
+	public ChannelClient getClient() {
+		return this.waClient;
+	}
 
 	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
@@ -621,18 +623,17 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				phone = String.format("+%s", phone);
 			}
 
-		/*	MapModel resp = waClient.fetchContact(phone, channelConfig);
-			String waId = resp.getString("wa_id");
-
-			String input = resp.getString("input");
-			String status = resp.getString("status");
-
-			if ("valid".equals(status)) {
-				ChatContactQuery chatContactQuery = new ChatContactQuery(chatContactDoc);
-				chatContactQuery.updateLastOptInStamp();
-				commonMongoTemplate.updateFirst(chatContactQuery);
-				return true;
-			//}*/
+			/*
+			 * MapModel resp = waClient.fetchContact(phone, channelConfig); String waId =
+			 * resp.getString("wa_id");
+			 * 
+			 * String input = resp.getString("input"); String status =
+			 * resp.getString("status");
+			 * 
+			 * if ("valid".equals(status)) { ChatContactQuery chatContactQuery = new
+			 * ChatContactQuery(chatContactDoc); chatContactQuery.updateLastOptInStamp();
+			 * commonMongoTemplate.updateFirst(chatContactQuery); return true; //}
+			 */
 		}
 		return !ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp());
 	}

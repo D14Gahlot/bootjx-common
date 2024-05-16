@@ -1,11 +1,14 @@
 package com.boot.jx.postman.plugin;
 
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,14 +20,17 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 
+import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.CONVERT_TYPE;
 import com.boot.jx.common.impl.ConfigMeta.ConfigMetaProperty;
 import com.boot.jx.common.impl.ConfigMeta.DATA_TYPE;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.ChannelTypeSpecificProps;
@@ -39,6 +45,60 @@ import com.boot.utils.Constants;
 public class ChannelPluginProvider {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChannelPluginProvider.class);
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Lazy
+	public @interface ConnectorMapping {
+		ContactType[] contactType();
+
+		String[] channel() default "DEFAULT";
+	}
+
+	public static abstract class ChannelBasedFactory<T> extends ScopedBeanFactory<String, T> {
+		private static final long serialVersionUID = 1L;
+
+		public ChannelBasedFactory(List<T> beans) {
+			super(beans);
+		}
+
+		@Override
+		public String[] getKeys(T lib) {
+			ConnectorMapping annotation = lib.getClass().getAnnotation(ConnectorMapping.class);
+			List<String> zoom = new ArrayList<String>();
+			if (annotation != null) {
+				for (ContactType contactType : annotation.contactType()) {
+					for (String channel : annotation.channel()) {
+						zoom.add(String.format("%s_%s", contactType, channel));
+					}
+				}
+				return zoom.toArray(new String[0]);
+			}
+			return null;
+		}
+
+		public T get(ContactType contactType, String channel) {
+			LOGGER.debug("get(ContactType {}, String {})", contactType, channel);
+			String precisedKey = String.format("%s_%s", contactType, channel);
+			T x = this.get(precisedKey);
+			if (ArgUtil.is(x)) {
+				return x;
+			}
+			precisedKey = String.format("%s_DEFAULT", contactType);
+			return this.get(precisedKey);
+		}
+
+		abstract public T getDefault();
+
+		public T get(ChannelConfig channelConfig) {
+			if (ArgUtil.is(channelConfig)) {
+				T connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
+				if (ArgUtil.is(connector)) {
+					return connector;
+				}
+			}
+			return getDefault();
+		}
+	}
 
 	public static interface ChannelPlugin<C extends AChannelDetails> extends ChannelTypeSpecificProps {
 		/**
