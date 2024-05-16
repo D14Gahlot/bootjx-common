@@ -67,7 +67,7 @@ public class AdminObjectsController {
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
-
+		//System.out.println(q.build().getQuery().toString());
 		return messageStore.find(q);
 	}
 
