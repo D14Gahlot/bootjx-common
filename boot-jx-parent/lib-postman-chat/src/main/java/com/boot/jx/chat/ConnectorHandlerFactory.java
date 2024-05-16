@@ -238,9 +238,7 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 			return null;
 		}
 
-		default ChannelClient getClient() {
-			return null;
-		}
+		public ChannelClient getClient(ChannelConfig channelConfig);
 	}
 
 	public ConnectorHandlerFactory(List<ConnectorHandler> libs) {
