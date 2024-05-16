@@ -94,6 +94,7 @@ public class ChatSessionService {
 					}
 				} catch (Exception e) {
 					logManager.error(inboxMessage, e);
+					//e.printStackTrace();
 				}
 				if (initd) {
 					inboxMessage.session().setInitMessage(true);

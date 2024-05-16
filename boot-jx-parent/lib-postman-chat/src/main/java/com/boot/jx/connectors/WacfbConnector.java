@@ -225,7 +225,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 		ChannelConfig channel = getChannelConfig(inboxMessage);
 
-		if (channel.getWa360d().isPromptName()) {
+		if (channel.getWacfb().isPromptName()) {
 			if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
 				this.context().session().put("session_init_user_input_type", "name");
 				return (OutboxMessage) inboxMessage.replyMessage("Please enter your name");
@@ -233,7 +233,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 		}
 
-		if (channel.getWa360d().isPromptEmail()) {
+		if (channel.getWacfb().isPromptEmail()) {
 			if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
 				this.context().session().put("session_init_user_input_type", "email");
 				return (OutboxMessage) inboxMessage.replyMessage("Please enter your email");
@@ -241,7 +241,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 		}
 
-		if (channel.getWa360d().isPromptPhone()) {
+		if (channel.getWacfb().isPromptPhone()) {
 			if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
 				this.context().session().put("session_init_user_input_type", "phone");
 				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
