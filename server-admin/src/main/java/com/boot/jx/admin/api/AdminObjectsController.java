@@ -48,14 +48,14 @@ public class AdminObjectsController {
 			case "pageSize":
 			case "pageNo":
 			case "sortBy":
+			case "sortDir":
 			case "id":
 				break;
 			default:
 				String paramValue = commonHttpRequest.getRequest().getParameter(param);
 				if (ArgUtil.is(paramValue)) {
-					q.where("param").is(paramValue);
+					q.where(param).is(paramValue);
 				}
-				break;
 			}
 		}
 
