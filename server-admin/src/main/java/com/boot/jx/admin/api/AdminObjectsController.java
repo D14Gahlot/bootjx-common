@@ -24,6 +24,7 @@ import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.model.UtilityModels.PublicJsonProperty;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
@@ -54,7 +55,11 @@ public class AdminObjectsController {
 			default:
 				String paramValue = commonHttpRequest.getRequest().getParameter(param);
 				if (ArgUtil.is(paramValue)) {
-					q.where(param).is(paramValue);
+					if (paramValue.startsWith("*") && paramValue.endsWith("*")) {
+						q.search(param, StringUtils.trim(paramValue, '*'));
+					} else {
+						q.where(param).is(paramValue);
+					}
 				}
 			}
 		}
@@ -143,8 +148,7 @@ public class AdminObjectsController {
 				getPaginatedBulk(PayloadDumpCollection.class, "PAYLOAD_DUMP", pageNo, pageSize, sortBy, sortDir));
 	}
 
-	@RequestMapping(value = { "/api/objects/channel_setup_logs", "/pub/objects/channel_setup_logs" },
-			method = { RequestMethod.GET })
+	@RequestMapping(value = { "/api/objects/channel_setup_logs" }, method = { RequestMethod.GET })
 	@JsonView(PublicJsonProperty.class)
 	public ApiResponse<ChannelConfigTempDoc, Object> channelSetupLogs(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
