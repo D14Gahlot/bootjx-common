@@ -30,7 +30,6 @@ import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.fb.FacebookHookRequest;

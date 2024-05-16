@@ -46,7 +46,6 @@ import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelClient;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.WA360Plugin;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
@@ -89,11 +88,6 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
-
-	@Override
-	public ChannelClient getClient() {
-		return this.wa360Client;
-	}
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {

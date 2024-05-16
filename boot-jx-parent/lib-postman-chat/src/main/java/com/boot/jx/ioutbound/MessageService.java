@@ -32,7 +32,6 @@ import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 
 @Component
 public class MessageService {
