@@ -621,7 +621,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				phone = String.format("+%s", phone);
 			}
 
-			MapModel resp = waClient.fetchContact(phone, channelConfig);
+		/*	MapModel resp = waClient.fetchContact(phone, channelConfig);
 			String waId = resp.getString("wa_id");
 
 			String input = resp.getString("input");
@@ -632,7 +632,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				chatContactQuery.updateLastOptInStamp();
 				commonMongoTemplate.updateFirst(chatContactQuery);
 				return true;
-			}
+			//}*/
 		}
 		return !ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp());
 	}

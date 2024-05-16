@@ -17,6 +17,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360CloudClient;
 import com.boot.jx.postman.wa360.WA360Template;
+import com.boot.jx.postman.wacfb.WacfbClient;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -30,6 +31,9 @@ public class ThirdPartyTemplateManager {
 	
 	@Autowired
 	private WA360CloudClient wa360CloudClient;
+	
+	@Autowired
+	private WacfbClient wacfbClient;
 
 	@Autowired
 	CommonMongoTemplate commonMongoTemplate;
@@ -39,7 +43,12 @@ public class ThirdPartyTemplateManager {
 		
 		if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
 			resp = wa360CloudClient.fetchTemplates(channelConfig);
-		}else {
+		}
+		else if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WACFB))
+		{
+			resp=wacfbClient.fetchTemplates(channelConfig);
+		}
+		else {
 			resp = wa360Client.fetchTemplates(channelConfig);
 		}
 
@@ -87,14 +96,23 @@ public class ThirdPartyTemplateManager {
 				|| "paused".equalsIgnoreCase(status)) {
 			if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
 				resp = wa360CloudClient.updateTemplates(channelConfig, MapModel.from(templateStructure));
-			}else {
+			}else if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WACFB))
+			{
+				resp=wacfbClient.updateTemplates(channelConfig, MapModel.from(templateStructure));
+			}
+			else {
 			resp = wa360Client.updateTemplates(channelConfig, MapModel.from(templateStructure));
 			}
 		} else {
 			
 			if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WA_360DC)) {
 				resp = wa360CloudClient.createTemplates(channelConfig, MapModel.from(templateStructure));
-			}else {
+			}
+			else if(channelConfig.getChannelType().equalsIgnoreCase(CHANNEL_TYPE.WACFB))
+			{
+				resp=wacfbClient.createTemplates(channelConfig, MapModel.from(templateStructure));
+			}
+			else {
 			resp = wa360Client.createTemplates(channelConfig, MapModel.from(templateStructure));
 			}
 		}
