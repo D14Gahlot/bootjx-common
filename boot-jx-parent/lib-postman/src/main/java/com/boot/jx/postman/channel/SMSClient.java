@@ -1,4 +1,4 @@
-package com.boot.jx.postman.others;
+package com.boot.jx.postman.channel;
 
 import java.util.Map;
 import java.util.Map.Entry;

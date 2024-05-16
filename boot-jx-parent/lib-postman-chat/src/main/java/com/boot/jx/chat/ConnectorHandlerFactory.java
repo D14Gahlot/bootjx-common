@@ -2,9 +2,6 @@ package com.boot.jx.chat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -13,7 +10,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.boot.common.ScopedBeanFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
@@ -26,6 +22,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -39,6 +36,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelBasedFactory;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
@@ -51,7 +49,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
-public class ConnectorHandlerFactory extends ScopedBeanFactory<String, ConnectorHandler> {
+public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandler> {
 
 	private static final long serialVersionUID = 4007091611441725719L;
 
@@ -240,14 +238,7 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 			return null;
 		}
 
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Lazy
-	public @interface ConnectorMapping {
-		ContactType[] contactType();
-
-		String[] channel() default "DEFAULT";
+		public ChannelClient getClient(ChannelConfig channelConfig);
 	}
 
 	public ConnectorHandlerFactory(List<ConnectorHandler> libs) {
@@ -255,39 +246,8 @@ public class ConnectorHandlerFactory extends ScopedBeanFactory<String, Connector
 	}
 
 	@Override
-	public String[] getKeys(ConnectorHandler lib) {
-		ConnectorMapping annotation = lib.getClass().getAnnotation(ConnectorMapping.class);
-		List<String> zoom = new ArrayList<String>();
-		if (annotation != null) {
-			for (ContactType contactType : annotation.contactType()) {
-				for (String channel : annotation.channel()) {
-					zoom.add(String.format("%s_%s", contactType, channel));
-				}
-			}
-			return zoom.toArray(new String[0]);
-		}
-		return null;
-	}
-
-	public ConnectorHandler get(ContactType contactType, String channel) {
-		LOGGER.debug("get(ContactType {}, String {})", contactType, channel);
-		String precisedKey = String.format("%s_%s", contactType, channel);
-		ConnectorHandler x = this.get(precisedKey);
-		if (ArgUtil.is(x)) {
-			return x;
-		}
-		precisedKey = String.format("%s_DEFAULT", contactType);
-		return this.get(precisedKey);
-	}
-
-	public ConnectorHandler get(ChannelConfig channelConfig) {
-		if (ArgUtil.is(channelConfig)) {
-			ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
-			if (ArgUtil.is(connector)) {
-				return connector;
-			}
-		}
-		return defaultConnector;
+	public ConnectorHandler getDefault() {
+		return this.defaultConnector;
 	}
 
 	@Autowired(required = false)

@@ -32,8 +32,21 @@ public class WacfbOutBoundMedia implements Serializable {
 	    notes = "Describes the specified document, image, or video media.\n"
 		    + "Describes the filename for the specific document. Use only with document media.")
     public String filename;
+    
+    @ApiMockModelProperty(example = "media-id", required =false, value = "your-media-Id",
+    	    notes = "media Id is used to send media for Wacfb ")
+        public String mediaId;
+    
 
-    public String getId() {
+    public String getMediaId() {
+		return mediaId;
+	}
+
+	public void setMediaId(String mediaId) {
+		this.mediaId = mediaId;
+	}
+
+	public String getId() {
 	return id;
     }
 

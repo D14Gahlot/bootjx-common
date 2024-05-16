@@ -34,8 +34,19 @@ public class WacfbInboundMedia {
 
     @ApiMockModelProperty(example = "m3232kaoe4belrr", value = "Metadata pertaining to sticker media.", hidden = true)
     public Object metadata;
+    
+    @ApiMockModelProperty(example = "928821678902042", value = "mediaId")
+    public String mediaId;
 
-    public String getFile() {
+    public String getMediaId() {
+		return mediaId;
+	}
+
+	public void setMediaId(String mediaId) {
+		this.mediaId = mediaId;
+	}
+
+	public String getFile() {
 	return file;
     }
 
