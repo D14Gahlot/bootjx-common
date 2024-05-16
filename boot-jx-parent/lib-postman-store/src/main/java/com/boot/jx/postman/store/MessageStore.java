@@ -450,8 +450,10 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 		// UPdate Template Details
 		messageReport.setType(m.getType());
-		messageReport.setTemplateId(m.getHsm().getId());
-		messageReport.setTemplateCode(m.getHsm().getCode());
+		if (ArgUtil.is(m.getHsm())) {
+			messageReport.setTemplateId(m.getHsm().getId());
+			messageReport.setTemplateCode(m.getHsm().getCode());
+		}
 	}
 
 	public void insert(List<MessageDoc> messages, ContactType contactType) {
@@ -579,7 +581,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 				/**
 				 * @deperecated
 				 */
-				//sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
+				// sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
 				chatSessionQuery.set("sessionExpiryStamp", ccwExpiryLong);
 
 				// in Millis

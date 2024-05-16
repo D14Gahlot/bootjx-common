@@ -38,6 +38,7 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.INSTAGRAM)
@@ -266,6 +267,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		String csid = m.getSender().get("id");
 		report.contact().setCsid(csid);
 		report.setChangeStamp(m.getTimestamp());
+		// System.out.println("FacebookMessaging======" + JsonUtil.toJson(m));
 		if (ArgUtil.is(m.getRead())) {
 			report.setChangeStamp(m.getReadWatermark());
 			report.setStatus(Status.READ);
@@ -303,7 +305,8 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		pageEntry.getMessaging().forEach(m -> {
 			if ((ArgUtil.is(m.getMessage()) && (m.getMessage().isIs_deleted())) // Message is deleted
 					|| ArgUtil.is(m.getRead()) // or Message is Read
-			) {
+					|| ArgUtil.is(m.getPostBack()) // Postback
+					|| ArgUtil.is(m.getReaction())) {
 				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
 			} else if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
 				InboxMessage inboxMessage = toInboxMessage(m, channelConfig);
