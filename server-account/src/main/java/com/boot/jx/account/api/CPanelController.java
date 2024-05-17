@@ -21,8 +21,9 @@ import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.ConfigManagerImpl;
+import com.boot.jx.common.models.AppAuthModels;
+import com.boot.jx.common.models.AppAuthModels.ACCESS_RULES;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
@@ -78,7 +79,7 @@ public class CPanelController {
 		return "app-cpanel";
 	}
 
-	@ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
+	@ApiRequest(rules = AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER)
 	@ResponseBody
 	@RequestMapping(value = "/api/manage/user/role", method = { RequestMethod.POST })
 	@JsonView(PMEnvironment.PublicProperty.class)

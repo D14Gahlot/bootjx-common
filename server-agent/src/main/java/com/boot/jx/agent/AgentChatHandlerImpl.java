@@ -28,6 +28,8 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.common.dto.DepartmentResponseAuthDto;
+import com.boot.jx.common.models.AppAuthModels.AppCommonAuthUserProfile;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
@@ -487,13 +489,14 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	private void beforeSend(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.hsm().getCode())) {
-			AgentResponseAuthDto p = ArgUtil.is(agentSession) ? agentSession.getProfile() : null;
-			if (ArgUtil.is(p)
-					&& ArgUtil.is(agentSession.getProfile().getAgent_code(), chatSessionDoc.getAssignedToAgent())) {
-				OutboxMessage.AGENT_NAME.save(outboxMessage.model(), agentSession.getProfile().getAgent_name());
-				OutboxMessage.AGENT_CODE.save(outboxMessage.model(), agentSession.getProfile().getAgent_code());
-				OutboxMessage.TEAM_NAME.save(outboxMessage.model(), agentSession.getProfile().getDept().getDept_name());
-				OutboxMessage.TEAM_CODE.save(outboxMessage.model(), agentSession.getProfile().getDept().getDept_code());
+			AppCommonAuthUserProfile profile = ArgUtil.is(agentSession) ? agentSession.getProfile() : null;
+			if (ArgUtil.is(profile)
+					&& ArgUtil.is(agentSession.getProfile().getCode(), chatSessionDoc.getAssignedToAgent())) {
+				DepartmentResponseAuthDto dept = ((AgentResponseAuthDto) profile).getDept();
+				OutboxMessage.AGENT_NAME.save(outboxMessage.model(), profile.getName());
+				OutboxMessage.AGENT_CODE.save(outboxMessage.model(), profile.getCode());
+				OutboxMessage.TEAM_NAME.save(outboxMessage.model(), dept.getDept_name());
+				OutboxMessage.TEAM_CODE.save(outboxMessage.model(), dept.getDept_code());
 			} else {
 				if (ArgUtil.is(chatSessionDoc.getAssignedToAgent())) {
 					AgentDoc agent = agentStore.findByCode(chatSessionDoc.getAssignedToAgent());

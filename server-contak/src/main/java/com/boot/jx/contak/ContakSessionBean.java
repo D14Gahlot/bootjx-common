@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
+import com.boot.jx.common.models.AppAuthModels;
+import com.boot.jx.common.models.AppAuthModels.AppCommonAuthUser;
 import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.postman.PMConstants;
@@ -15,7 +16,7 @@ import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class ContakSessionBean extends AppCommonAuthUser implements Serializable {
+public class ContakSessionBean extends AppAuthModels.AppCommonAuthUser implements Serializable {
 
 	private static final long serialVersionUID = 3090820592497487481L;
 	private ContakUserDoc account;

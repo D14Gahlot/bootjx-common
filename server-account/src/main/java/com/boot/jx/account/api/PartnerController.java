@@ -40,9 +40,10 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
-import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.dto.UserAuthToken;
+import com.boot.jx.common.models.AppAuthModels;
+import com.boot.jx.common.models.AppAuthModels.ACCESS_RULES;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
@@ -269,7 +270,7 @@ public class PartnerController {
 		return ApiResponse.build().message("Domain available");
 	}
 
-	@ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
+	@ApiRequest(rules = AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER)
 	@ResponseBody
 	@RequestMapping(value = { "/api/users" }, method = { RequestMethod.GET })
 	public ApiResponse<Map<String, Object>, Object> getDomainUsers() {

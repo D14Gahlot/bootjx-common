@@ -1,140 +1,43 @@
 package com.boot.jx.common.config;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthFilter;
-import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 
 @Component
 public class AppCommonAuthFilter implements AppAuthFilter {
 
-	public static class ACCESS_RULES {
-		public static final String ONLY_DUPERUSER = "ONLY_DUPERUSER";
-
-		public static final String ONLY_SUPERDEV = "ONLY_SUPERDEV";
-
-		/**
-		 * If domain is master domain
-		 */
-		public static final String ONLY_DUPERUSER_FOR_MASTER_DOMAIN = "ONLY_DUPERUSER_FOR_MASTER_DOMAIN";
-
-		/**
-		 * Only domain admin can do this
-		 */
-		public static final String ONLY_DOMAIN_ADMIN = "ONLY_DOMAIN_ADMIN";
-	}
-
-	public static abstract class AppCommonAuthUser implements AppAuthUser, Serializable {
-
-		private static final long serialVersionUID = 5305577408399630086L;
-		private Set<String> role;
-		private Set<String> domain;
-
-		public boolean hasAccess(ApiRequestDetail apiRequest, CommonHttpRequest req) {
-			return true;
-		}
-
-		public Set<String> getRole() {
-			return role;
-		}
-
-		public void setRole(Set<String> role) {
-			this.role = role;
-		}
-
-		public Set<String> role() {
-			if (this.role == null) {
-				this.role = new HashSet<String>();
-			}
-			return this.role;
-		}
-
-		public void addRole(String... roles) {
-			for (String newRole : roles) {
-				this.role().add(newRole);
-			}
-		}
-
-		public boolean hasRoleAny(String... roles) {
-			this.role = this.role();
-			for (String newRole : roles) {
-				if (this.role.contains(newRole)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public boolean hasRoleAll(String... roles) {
-			this.role = this.role();
-			for (String newRole : roles) {
-				if (!this.role.contains(newRole)) {
-					return false;
-				}
-			}
-			return true;
-		}
-
-		public Set<String> getDomain() {
-			return domain;
-		}
-
-		public void setDomain(Set<String> domain) {
-			this.domain = domain;
-		}
-
-		public void addDomain(String... domains) {
-			if (this.domain == null) {
-				this.domain = new HashSet<String>();
-			}
-			for (String newDomain : domains) {
-				this.domain.add(newDomain);
-			}
-		}
-
-		public Object getUserSharedProfile() {
-			return this.getAuthUser();
-		}
-	}
-
 	@Autowired(required = false)
-	private AppCommonAuthUser appCommonAuthUser;
+	private AppAuthModels.AppCommonAuthUser appCommonAuthUser;
 
 	@Override
 	public boolean filterAppRequest(ApiRequestDetail apiRequest, CommonHttpRequest req, String traceId) {
-		AppCommonAuthUser appCommonAuthUserLocal = appCommonAuthUser;
-		if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DUPERUSER)) {
+		AppAuthModels.AppCommonAuthUser appCommonAuthUserLocal = appCommonAuthUser;
+		if (apiRequest.getRules().contains(AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER)) {
 			if (!ArgUtil.is(appCommonAuthUserLocal)) {
 				return false;
 			}
 			return (appCommonAuthUserLocal != null)
 					&& appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.DUPER_USER);
-		} else if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_SUPERDEV)) {
+		} else if (apiRequest.getRules().contains(AppAuthModels.ACCESS_RULES.ONLY_SUPERDEV)) {
 			if (!ArgUtil.is(appCommonAuthUserLocal)) {
 				return false;
 			}
 			return (appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.DUPER_USER)
 					|| appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.SUPER_DEV));
-		} else if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN)
+		} else if (apiRequest.getRules().contains(AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN)
 				&& Tenants.isDefault(AppContextUtil.getTenant())) {
 			return (appCommonAuthUserLocal != null)
 					&& appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.DUPER_USER);
-		} else if (apiRequest.getRules().contains(ACCESS_RULES.ONLY_DOMAIN_ADMIN)) {
+		} else if (apiRequest.getRules().contains(AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN)) {
 			return (appCommonAuthUserLocal != null)
 					&& appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.ADMIN);
 		} else
