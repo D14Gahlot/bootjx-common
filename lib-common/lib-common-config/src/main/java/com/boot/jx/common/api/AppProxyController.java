@@ -25,7 +25,7 @@ import com.boot.model.MapModel;
 import io.swagger.annotations.ApiOperation;
 
 @Controller
-public class AgentProxyController {
+public class AppProxyController {
 
 	// private final RestTemplate restTemplate;
 	@Autowired
