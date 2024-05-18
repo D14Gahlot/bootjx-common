@@ -132,7 +132,7 @@ public class PartnerController {
 
 		if (userSessionBean.hasAdminAccesTo(domain)) {
 			UserAuthToken userLoginToken = empAuthService.createSuperLoginToken("superadmin",
-					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), "admin");
+					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), panel);
 			model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
 			model.addAttribute("DOMAIN_USER_EMAIL", userLoginToken.getDomainUserEmail());
 			model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
@@ -159,8 +159,8 @@ public class PartnerController {
 					new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
 							.description("Email address already in use."));
 		}
-		
-		if(signupContact.getProduct()==null || signupContact.getProduct().isEmpty()) {
+
+		if (signupContact.getProduct() == null || signupContact.getProduct().isEmpty()) {
 			ApiResponseUtil.throwDuplicateInputException("Select at least one product you are interested in.",
 					new ApiFieldError().obzect("signupContact").field("product").codeKey("ValidProduct")
 							.description("Select at least one product you are interested in."));

@@ -187,7 +187,7 @@ public class EmpAuthService {
 	}
 
 	private AgentDoc getAgentByCodeAndStatus(String username, String email, String status, boolean admin) {
-		if (admin && ArgUtil.areEqual(superAdminUser, username)) {
+		if (ArgUtil.areEqual(superAdminUser, username)) {
 			AgentDoc agentLocal = new AgentDoc();
 			agentLocal.setAgent_code(username);
 			agentLocal.setAgent_email(email);
