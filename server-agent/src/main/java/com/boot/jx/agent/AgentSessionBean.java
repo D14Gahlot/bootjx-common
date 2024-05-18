@@ -113,7 +113,7 @@ public class AgentSessionBean extends AppAuthModels.AppCommonAuthUser
 		if (ArgUtil.is(this.agentCode)) {
 			return this.agentCode;
 		} else if (ArgUtil.is(this.getProfile())) {
-			return this.getProfile().getCode();
+			return this.getProfile().code();
 		}
 		return ArgUtil.anyOf(AppContextUtil.getActorId(), PMConstants.DEFAULT.NO_USER);
 	}

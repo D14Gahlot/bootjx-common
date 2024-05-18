@@ -184,17 +184,17 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 	}
 
 	@Override
-	public String getCode() {
+	public String code() {
 		return this.agent_code;
 	}
 
 	@Override
-	public String getEmail() {
+	public String email() {
 		return this.agent_email;
 	}
 
 	@Override
-	public String getName() {
+	public String name() {
 		return this.agent_name;
 	}
 

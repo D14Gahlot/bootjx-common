@@ -16,11 +16,11 @@ public class AppAuthModels {
 
 		public boolean isSuperAdmin();
 
-		public String getCode();
+		public String code();
 
-		public String getEmail();
+		public String email();
 
-		public String getName();
+		public String name();
 
 		public boolean isEnabled();
 

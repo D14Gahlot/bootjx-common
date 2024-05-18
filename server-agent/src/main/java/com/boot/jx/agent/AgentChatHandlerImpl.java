@@ -491,10 +491,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		if (ArgUtil.is(outboxMessage.hsm().getCode())) {
 			AppCommonAuthUserProfile profile = ArgUtil.is(agentSession) ? agentSession.getProfile() : null;
 			if (ArgUtil.is(profile)
-					&& ArgUtil.is(agentSession.getProfile().getCode(), chatSessionDoc.getAssignedToAgent())) {
+					&& ArgUtil.is(agentSession.getProfile().code(), chatSessionDoc.getAssignedToAgent())) {
 				DepartmentResponseAuthDto dept = ((AgentResponseAuthDto) profile).getDept();
-				OutboxMessage.AGENT_NAME.save(outboxMessage.model(), profile.getName());
-				OutboxMessage.AGENT_CODE.save(outboxMessage.model(), profile.getCode());
+				OutboxMessage.AGENT_NAME.save(outboxMessage.model(), profile.name());
+				OutboxMessage.AGENT_CODE.save(outboxMessage.model(), profile.code());
 				OutboxMessage.TEAM_NAME.save(outboxMessage.model(), dept.getDept_name());
 				OutboxMessage.TEAM_CODE.save(outboxMessage.model(), dept.getDept_code());
 			} else {

@@ -49,7 +49,7 @@ public class AppProxyController {
 		// URL url = new URL(domain);
 
 		Map<String, String> addHeaders = new HashMap<String, String>();
-		addHeaders.put("x-agent-code", appCommonAuthUser.getProfile().getCode());
+		addHeaders.put("x-agent-code", appCommonAuthUser.getProfile().code());
 		addHeaders.put("x-agent-user", appCommonAuthUser.getAuthUser());
 		addHeaders.put("tnt", AppContextUtil.getTenant());
 
@@ -69,7 +69,7 @@ public class AppProxyController {
 		// URL url = new URL(domain);
 
 		Map<String, String> addHeaders = new HashMap<String, String>();
-		addHeaders.put("x-agent-code", appCommonAuthUser.getProfile().getCode());
+		addHeaders.put("x-agent-code", appCommonAuthUser.getProfile().code());
 		addHeaders.put("x-agent-user", appCommonAuthUser.getAuthUser());
 		addHeaders.put("tnt", AppContextUtil.getTenant());
 

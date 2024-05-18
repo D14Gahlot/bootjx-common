@@ -27,9 +27,9 @@ public class AdminSessionBean extends AppAuthModels.AppCommonAuthUser
 	public String getAuthUser() {
 		if (ArgUtil.is(this.getProfile())) {
 			if (getProfile().isSuperAdmin()) {
-				return String.format("%s:%s", this.getProfile().getCode(), this.getProfile().getEmail());
+				return String.format("%s:%s", this.getProfile().code(), this.getProfile().email());
 			} else {
-				return this.getProfile().getCode();
+				return this.getProfile().code();
 			}
 		}
 		return PMConstants.DEFAULT.NO_USER;
