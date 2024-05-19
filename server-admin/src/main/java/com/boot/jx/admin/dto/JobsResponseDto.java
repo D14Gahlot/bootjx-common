@@ -1,6 +1,5 @@
 package com.boot.jx.admin.dto;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +12,8 @@ public class JobsResponseDto {
 	
 	private String id;
 	private String  jobtype;
-	Map<String, Object> input = new HashMap<String, Object>();
-	List<Map<String, Object>> inputLst = new ArrayList<>();
+	Map<String, List<Object>> input = new HashMap<String, List<Object>>();
+	Map<String, List<Object>> outPut = new HashMap<String, List<Object>>();
 	private String isactive;
 	private Long createdStamp;
 	private String createBy;
@@ -32,12 +31,7 @@ public class JobsResponseDto {
 	public void setJobtype(String jobtype) {
 		this.jobtype = jobtype;
 	}
-	public Map<String, Object> getInput() {
-		return input;
-	}
-	public void setInput(Map<String, Object> input) {
-		this.input = input;
-	}
+	
 	public String getIsactive() {
 		return isactive;
 	}
@@ -68,13 +62,18 @@ public class JobsResponseDto {
 	public void setTime(TimeStampIndex time) {
 		this.time = time;
 	}
-	public List<Map<String, Object>> getInputLst() {
-		return inputLst;
+	public void setInput(Map<String, List<Object>> input) {
+		this.input = input;
 	}
-	public void setInputLst(List<Map<String, Object>> inputLst) {
-		this.inputLst = inputLst;
+	public Map<String, List<Object>> getInput() {
+		return input;
 	}
-	
+	public Map<String, List<Object>> getOutPut() {
+		return outPut;
+	}
+	public void setOutPut(Map<String, List<Object>> outPut) {
+		this.outPut = outPut;
+	}
 	
 	
 }

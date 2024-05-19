@@ -1,6 +1,5 @@
 package com.boot.jx.common.doc;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,13 +17,16 @@ public class JobScheduledDoc {
 	@Id
 	private String id;
 	private String  jobtype;
-	//Map<String, Object> input = new HashMap<String, Object>();
-	List<Map<String, Object>> inputLst = new ArrayList<>();
+	Map<String, List<Object>> input = new HashMap<String, List<Object>>();
 	private String isactive;
 	private Long createdStamp;
 	private String createBy;
 	public String status;
 	public TimeStampIndex time;
+	
+	
+	
+	
 	public String getId() {
 		return id;
 	}
@@ -68,12 +70,11 @@ public class JobScheduledDoc {
 	public void setTime(TimeStampIndex time) {
 		this.time = time;
 	}
-	
-	public List<Map<String, Object>> getInputLst() {
-		return inputLst;
+	public Map<String, List<Object>> getInput() {
+		return input;
 	}
-	public void setInputLst(List<Map<String, Object>> inputLst) {
-		this.inputLst = inputLst;
+	public void setInput(Map<String, List<Object>> input) {
+		this.input = input;
 	}
 	
 }

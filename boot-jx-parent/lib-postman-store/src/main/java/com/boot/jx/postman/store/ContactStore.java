@@ -1,5 +1,7 @@
 package com.boot.jx.postman.store;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +14,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
 import com.boot.jx.model.ModelPatch.ModelPatches;
@@ -234,6 +238,9 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			case "rmCode":
 				qb.setunset("rmCode", patch.value().asString());
 				break;
+			case "additionalInfo":
+				qb.setunset("additionalInfo", patch.value().asString());
+				break;	
 			default:
 				break;
 			}
@@ -242,6 +249,48 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 
 		return doc;
+	}
+	
+	public CustomerProfileDoc findProfileByCode(String code) {
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(Criteria.where("code").is(code));
+		return findOne(qb);
+	}
+	
+	
+	public void checkDuplicate(ModelPatches req) {
+		CustomerProfileDoc cusPfDoc=null;
+		
+		for (ModelPatch patch : req.getPatches()) {
+			switch (patch.getField()) {
+			case "email":
+			case "emails":
+				PBEmail email = patch.value().as(PBEmail.class);
+				cusPfDoc =findProfileByEmail(email.getEmail());
+				if(ArgUtil.is(cusPfDoc)) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField()).codeKey("ValidPhoneDuplicate")
+					.description(patch.getField()+" already exists"));
+				}
+				break;
+			case "phone":
+			case "phones":
+				PBPhone phone = parsePhone(patch.value().as(PBPhone.class));
+				cusPfDoc =findProfileByPhone(phone.getPhone());
+				if(ArgUtil.is(cusPfDoc)) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField()).codeKey("ValidPhoneDuplicate")
+						.description(patch.getField()+" already exists"));
+				}
+				break;
+			case "code":
+				cusPfDoc =findProfileByCode(patch.getValue().toString());
+				if(ArgUtil.is(cusPfDoc)) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField()).codeKey("ValidPhoneDuplicate")
+						.description(patch.getField()+" already exists"));
+				}
+				break;
+		}
+	 }
+		
 	}
 
 }

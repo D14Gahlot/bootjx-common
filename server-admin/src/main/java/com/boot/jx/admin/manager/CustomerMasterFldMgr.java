@@ -124,27 +124,22 @@ public class CustomerMasterFldMgr {
 
 public JobScheduledDoc uploadFile(CommonFile comfile) {
 		JobScheduledDoc doc = new JobScheduledDoc();
-		List<Map<String,Object>> lstMaps = new ArrayList<>();
+		Map<String,List<Object>> input = new HashMap<>();
+		List<Object> files=new ArrayList<>();
+		
+		
 		try {
-//		InputFile inputFile = new InputFile();
-//		inputFile.setPath(comfile.getPath());
-//		inputFile.setTitle(comfile.getTitle());
-//		inputFile.setFileFormat(comfile.getFileFormat());
-//		inputFile.setExtension(comfile.getExtension());
-//		inputFile.setUrl(comfile.getUrl());
-//		inputFile.setContentLength(comfile.getContentLength());
 		comfile.setBody(null);	
-		Map<String, Object> mapObj = new HashMap<String,Object>();
-		mapObj.put("file", comfile);
-		lstMaps.add(mapObj);
-		//doc.setInput(mapObj);
-		doc.setInputLst(lstMaps);
+		files.add(comfile);
+		input.put("files", files);
+		doc.setInput(input);
 		doc.setIsactive(Constants.YES);
 		doc.setCreateBy(auditDetailProvider.getAuditUser());
 		doc.setCreatedStamp(System.currentTimeMillis());
 		doc.setJobtype("customer_profile_bulk_upload");
 		doc.setTime(TimeStampIndex.now());
 		doc.setStatus(ArgUtil.parseAsString(Status.CRTD));
+		
 		commonMongoTemplate.save(doc);
 	
 		return doc;
@@ -160,16 +155,24 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 
 		List<JobsResponseDto> dtoLst = new ArrayList<>();
 		JobScheduledDoc cmProfileDoc = null;
+		JobsOutPutDoc jobsOutPutDoc =null;
+		JobsResponseDto  dto = null;
 		if (ArgUtil.is(id)) {
 			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
 			if (ArgUtil.is(cmProfileDoc)) {
-				JobsResponseDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
+				 dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
 				dtoLst.add(dto);
 			}
+			jobsOutPutDoc =commonMongoTemplate.findByIdString(id, JobsOutPutDoc.class); 
+			if(ArgUtil.is(jobsOutPutDoc)) {
+				JobsResponseDto dtoJOutput = EntityDtoUtil.entityToDto(jobsOutPutDoc, new JobsResponseDto());
+				dto.setOutPut(dtoJOutput.getOutPut());	
+			}
+			
 		} else {
 			List<JobScheduledDoc> lstProfileDocs = mongoTemplate.findAll(JobScheduledDoc.class);
 			for (JobScheduledDoc doc : lstProfileDocs) {
-				JobsResponseDto dto = EntityDtoUtil.entityToDto(doc, new JobsResponseDto());
+				dto = EntityDtoUtil.entityToDto(doc, new JobsResponseDto());
 				dtoLst.add(dto);
 			}
 		}
@@ -276,7 +279,7 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 
 	public List<CustomerProfileDoc> fetchCustomerContactInfo(String refId, String customerId, String phoneno, String emailid) {
 		List<CustomerProfileDoc> cpLst = new ArrayList<>(); 
-		CustomerProfileDoc profileDoc = null;
+		CustomerProfileDoc profileDoc = new CustomerProfileDoc();
 		List<Criteria> orOperator = new LinkedList<Criteria>();
 		
 		if (ArgUtil.is(refId)) {
@@ -300,15 +303,15 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 		
 	}
 	
-	public List<JobsResponseDto> saveJobsOutPut(String id,List<Map<String,Object>> maps) {
+	public List<JobsResponseDto> saveJobsOutPut(String id,Map<String,List<Object>> maps) {
 		if(ArgUtil.is(maps)) {
 			JobsOutPutDoc jobsOpDoc = new JobsOutPutDoc();
 			jobsOpDoc.setJobid(id);
-			jobsOpDoc.setOutputLst(maps);
+			jobsOpDoc.setOutput(jobsOpDoc.getOutput());
 			jobsOpDoc.setIsactive(Constants.YES);
 			jobsOpDoc.setCreateBy(auditDetailProvider.getAuditUser());
 			jobsOpDoc.setCreatedStamp(System.currentTimeMillis());
-			jobsOpDoc.setJobtype("customer_profile_bulk_upload");
+			jobsOpDoc.setJobtype("customer_profile_bulk_output");
 			jobsOpDoc.setTime(TimeStampIndex.now());
 			jobsOpDoc.setStatus(ArgUtil.parseAsString(Status.SCHLD));
 			commonMongoTemplate.save(jobsOpDoc);
@@ -322,7 +325,7 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 			jobsOpDoc = commonMongoTemplate.findByIdString(id, JobsOutPutDoc.class);
 			if(ArgUtil.is(jobsOpDoc)) {
 				JobsResponseDto dto = EntityDtoUtil.entityToDto(jobsOpDoc, new JobsResponseDto());
-				dto.setInputLst(jobsOpDoc.getOutputLst());
+				dto.setInput(dto.getInput());
 				lstDtos.add(dto);
 			}
 			
@@ -330,13 +333,14 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 			List<JobsOutPutDoc> lstDocs = commonMongoTemplate.findAll(JobsOutPutDoc.class);
 			for(JobsOutPutDoc op:lstDocs) {
 				JobsResponseDto dto = EntityDtoUtil.entityToDto(jobsOpDoc, new JobsResponseDto());
-				dto.setInputLst(op.getOutputLst());
+				dto.setOutPut(dto.getOutPut());
 				lstDtos.add(dto);
 			}
 		}
 		return lstDtos;
 		
 	}
+	//PBPhone ph = parsePhone(new PBPhone().phone(phone));
 
 	public List<CustomerProfileDoc> deDeuplicateCheck(CustomerProfileRequest request) {
 		List<CustomerProfileDoc> cpLst = new ArrayList<>(); 
@@ -344,7 +348,7 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 		
 		Set<PBPhone> setPbPhone =  new TreeSet<PBPhone>();
 		Set<PBEmail> setPbEmail =  new TreeSet<PBEmail>();
-		
+		CustomerProfileDoc profileDoc = null;
 //		if (ArgUtil.is(refId)) {
 //			profileDoc = mongoTemplate.findOne(new Query(Criteria.where("contactIdRef").is(refId)),
 //					CustomerProfileDoc.class);
@@ -353,23 +357,28 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 		PBPhone ph = new PBPhone();
 		PBEmail pEmail = new PBEmail();
 		if(ArgUtil.is(request.getPhone())) {
-				 ph = contactStore.parsePhone(new PBPhone().phone(request.getPhone()));
-				orOperator.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
-						.and("countryCallingCode").is(ph.countryCallingCode)));
+			 profileDoc =contactStore.findProfileByPhone(request.getPhone());
+			if(profileDoc!=null) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("phone").codeKey("ValidNameDuplicate")
+						.description("Field code already exists"));
+			}
+			
+			 ph = contactStore.parsePhone(new PBPhone().phone(request.getPhone()));
+			orOperator.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
+					.and("countryCallingCode").is(ph.countryCallingCode)));
 		}
-		
+	
 		if (ArgUtil.is(request.getEmail())) {
+			
+			profileDoc =contactStore.findProfileByEmail(request.getEmail());
+			if(profileDoc!=null) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("email").codeKey("ValidNameDuplicate")
+						.description("Field code already exists"));
+			}
 			orOperator.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(request.getEmail())));
 		}
 
-		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
-				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
-		cpLst = contactStore.find(qb);
-		if(cpLst!=null && !cpLst.isEmpty() && cpLst.size()>1) {
-			
-			ApiResponseUtil.throwInputException(new ApiFieldError().field("phone").codeKey("ValidNameDuplicate")
-					.description("Field code already exists"));
-		}
+
 		
 		CustomerProfileDoc cProfileDoc = new CustomerProfileDoc();
 		cProfileDoc.setName(request.getName());
@@ -394,6 +403,30 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 		cpLst.add(cProfileDoc);
 		return cpLst;
 	}
+
+	public List<CustomerProfileDoc> fetchCustomeProfile(SearchCustomerProfileDto search) {
+		List<Criteria> orOperator = new LinkedList<Criteria>();
+		
+		
+		if (ArgUtil.is(search.getChatContactId())) {
+			orOperator.add(Criteria.where("chatcontactId").elemMatch(Criteria.where("chatcontactId").is(search.getChatContactId())));
+
+		}
+		
+		if (ArgUtil.is(search.getEmailId())) {
+			orOperator.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(search.getEmailId())));
+		}
+		if (ArgUtil.is(search.getPhone())) {
+			PBPhone ph = contactStore.parsePhone(new PBPhone().phone(search.getPhone()));
+			orOperator.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
+					.and("countryCallingCode").is(ph.countryCallingCode)));
+		}
+
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
+		return contactStore.find(qb);
+	}
 	
 }
+
 	

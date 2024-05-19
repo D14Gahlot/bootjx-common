@@ -80,16 +80,10 @@ public class CustomerProfileService {
 		return cmFieldMgr.fetchCustomerContactInfo(id,customerId,phoneno,emailid);
 		
 	}
-	
-	
-	
-	public List<JobsResponseDto> saveJobsOutPut(String id,List<Map<String,Object>> maps){
+	public List<JobsResponseDto> saveJobsOutPut(String id,Map<String,List<Object>> maps){
 		return cmFieldMgr.saveJobsOutPut(id,maps);
 		
 	}
-	
-	
-	
 	public List<JobsResponseDto> fetchJobsOutPut(String id){
 		return cmFieldMgr.fetchJobsOutPut(id);
 		
@@ -102,6 +96,11 @@ public class CustomerProfileService {
 	
 	public List<CustomerProfileDoc> deDeuplicateCheck(CustomerProfileRequest searQry) {
 		return cmFieldMgr.deDeuplicateCheck(searQry);
+	}
+
+	public List<CustomerProfileDoc>  fetchCustomeProfile(SearchCustomerProfileDto search) {
+		// TODO Auto-generated method stub
+		return cmFieldMgr.fetchCustomeProfile(search);
 	}
 
 }

@@ -84,7 +84,7 @@ public class CustomerProfileContoller {
 		}
 	
 	@RequestMapping(value = "/api/save/jobs/output", method = { RequestMethod.POST })
-	public ApiResponse<JobsResponseDto, Object> saveJobsOutPut(@RequestParam(value = "id", required = true) String id,@RequestBody List<Map<String, Object>> maps){
+	public ApiResponse<JobsResponseDto, Object> saveJobsOutPut(@RequestParam(value = "id", required = true) String id,@RequestBody Map<String, List<Object>> maps){
 			return ApiResponse.buildResults(cusProfileService.saveJobsOutPut(id,maps));
 		}
 	
@@ -104,6 +104,11 @@ public class CustomerProfileContoller {
 	@RequestMapping(value = "/api/customer/de-duplicate/save", method = { RequestMethod.POST })
 	public ApiResponse<CustomerProfileDoc, Object> deDeuplicateCheck(@RequestBody CustomerProfileRequest request){
 			return ApiResponse.buildResults(cusProfileService.deDeuplicateCheck(request));
+		}
+	
+	@RequestMapping(value = "/api/search/customer/profile", method = { RequestMethod.POST })
+	public ApiResponse<CustomerProfileDoc, Object> fetchCustomeProfile(@RequestBody SearchCustomerProfileDto search){
+			return ApiResponse.buildResults(cusProfileService.fetchCustomeProfile(search));
 		}
 	
 }

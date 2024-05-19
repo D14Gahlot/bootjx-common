@@ -1,6 +1,5 @@
 package com.boot.jx.common.doc;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,7 @@ public class JobsOutPutDoc {
 	@Id
 	private String id;
 	private String  jobtype;
-	List<Map<String, Object>> outputLst = new ArrayList<>();
+	Map<String, List<Object>> output = new HashMap<String, List<Object>>();
 	private String isactive;
 	private Long createdStamp;
 	private String createBy;
@@ -76,11 +75,12 @@ public class JobsOutPutDoc {
 	public void setJobid(String jobid) {
 		this.jobid = jobid;
 	}
-	public List<Map<String, Object>> getOutputLst() {
-		return outputLst;
+	public Map<String, List<Object>> getOutput() {
+		return output;
 	}
-	public void setOutputLst(List<Map<String, Object>> outputLst) {
-		this.outputLst = outputLst;
+	public void setOutput(Map<String, List<Object>> output) {
+		this.output = output;
 	}
+	
 	
 }
