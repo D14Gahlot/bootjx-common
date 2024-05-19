@@ -11,12 +11,14 @@ import com.boot.jx.model.AuditCreateEntity.AuditableEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
 import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocument;
 import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocumentKeyDeserializer;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Document(collection = "DICT_QUICK_TAG")
 @TypeAlias("QuickTag")
 @JsonDeserialize(as = QuickTag.class, keyUsing = ResourceDocumentKeyDeserializer.class)
-public class QuickTag implements Serializable, AuditableEntity, ResourceDocument, ADocumentDTO<QuickTag> {
+public class QuickTag
+		implements Serializable, AuditableEntity, ResourceDocument, ADocumentDTO<QuickTag>, Comparable<QuickTag> {
 
 	private static final long serialVersionUID = 2845094878124818820L;
 	@Id
@@ -106,5 +108,18 @@ public class QuickTag implements Serializable, AuditableEntity, ResourceDocument
 	@Override
 	public ADocumentDTO<QuickTag> newInstance() {
 		return new QuickTag();
+	}
+
+	@Override
+	public int compareTo(QuickTag o) {
+		if (ArgUtil.is(this.getId()) && ArgUtil.is(o.getId())) {
+			return this.getId().compareTo(o.getId());
+		} else if (ArgUtil.is(this.getCode()) && ArgUtil.is(o.getCode())) {
+			return this.getCode().compareTo(o.getCode());
+		} else if (ArgUtil.is(this.getTitle()) && ArgUtil.is(o.getTitle())) {
+			return this.getTitle().compareTo(o.getTitle());
+		} else {
+			return this.toString().compareTo(o.toString());
+		}
 	}
 }

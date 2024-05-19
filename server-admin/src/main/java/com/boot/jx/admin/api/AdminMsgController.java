@@ -135,7 +135,40 @@ public class AdminMsgController {
 
 	@RequestMapping(value = "/api/message/v2/session", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDoc, Object> fetchSessionV2(@RequestBody SessionSearchQuery query) {
-		List<ChatSessionDoc> sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(query);
+
+		long startStampLong = query.fromStamp;
+		long endStampLong = query.toStamp;
+
+		Criteria dateCriteria = new Criteria().orOperator(
+				new Criteria().andOperator(Criteria.where("startSessionStamp").gt(startStampLong),
+						Criteria.where("startSessionStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(startStampLong),
+						Criteria.where("closeSessionStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(startStampLong),
+						Criteria.where("assignedDeptStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(startStampLong),
+						Criteria.where("assignedAgentStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(startStampLong),
+						Criteria.where("fistResponseStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(startStampLong),
+						Criteria.where("lastResponseStamp").lt(endStampLong)),
+
+				new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(startStampLong),
+						Criteria.where("lastInComingStamp").lt(endStampLong)));
+
+		if (ArgUtil.is(query.text)) {
+			dateCriteria.orOperator(
+					// Check all fields
+					Criteria.where("contactId").regex("" + query.text + "", "i"),
+					Criteria.where("contactName").regex("" + query.text + "", "i"), // @Deprecated
+					Criteria.where("contact.name").regex("" + query.text + "", "i"),
+					Criteria.where("contact.phone").regex("" + query.text + "", "i"),
+					Criteria.where("contact.email").regex("" + query.text + "", "i"));
+		}
+
+		List<ChatSessionDoc> sessions = chatSessionManager.findChatSessionsByQuery(query, dateCriteria);
 		return ApiResponse.buildResults(sessions);
 	}
 

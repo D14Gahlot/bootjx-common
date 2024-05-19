@@ -180,44 +180,15 @@ public class ChatSessionManager {
 		return sessionStore.findByStatusOrQuickTagV1(status, newList, fromStamp, toStamp);
 	}
 
-	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query) {
-		long toDate = query.toStamp / TimeUtils.Constants.MILLIS_IN_DAY;
-		long fromDate = query.fromStamp / TimeUtils.Constants.MILLIS_IN_DAY;
+	public List<ChatSessionDoc> findChatSessionsByQuery(SessionSearchQuery query, Criteria searchCriteria) {
 
-		if (query.graceStamp == 0L) {
-			query.graceStamp = toDate - 2 * TimeUtils.Constants.MILLIS_IN_DAY;
-		}
-		
 		Query query2 = new Query();
 
 		List<Criteria> criterias = new ArrayList<Criteria>();
 
-		Criteria primaryCriteria = Criteria.where("primary").is(true);
+		Criteria primaryCriteria = new Criteria();// .where("primary").is(true);
 
-		Criteria rangeCriteria = Criteria.where("updated.day").gte(fromDate);
-
-		if (toDate > 0L) {
-			rangeCriteria.lte(toDate);
-		}
-
-		if (ArgUtil.is(query.text)) {
-
-			criterias.add(rangeCriteria.orOperator(
-					// Check all fields
-					Criteria.where("contactId").regex("" + query.text + "", "i"),
-					Criteria.where("contactName").regex("" + query.text + "", "i"), // @Deprecated
-					Criteria.where("contact.name").regex("" + query.text + "", "i"),
-					Criteria.where("contact.phone").regex("" + query.text + "", "i"),
-					Criteria.where("contact.email").regex("" + query.text + "", "i")));
-		} else {
-			criterias.add(
-					// Within Watermark
-					rangeCriteria.orOperator(
-							// Customer has replied within CustomerCareWindow
-							Criteria.where("lastInComingStamp").gt(query.graceStamp),
-							// Agent Has been Assigned to it
-							Criteria.where("lastOutGoingStamp").gt(query.graceStamp)));
-		}
+		criterias.add(searchCriteria);
 
 		if (query.hasClosed()) {
 			criterias.add(Criteria.where("active").is(false).and("resolved").is(true));
@@ -382,27 +353,38 @@ public class ChatSessionManager {
 		period = Math.min(DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX, period);
 		Calendar timeout = Calendar.getInstance();
 		timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-
-		query.fromStamp = timeout.getTimeInMillis();
-		// long watermarkStampDay = timeout.getTimeInMillis() /
-		// TimeUtils.Constants.MILLIS_IN_DAY;
+		long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
 
 		timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 		long graceStamp = timeout.getTimeInMillis();
 
-		// long toDate = watermarkStampDay;
+		timeout.setTimeInMillis(timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX * 5);
+		long searchableFromDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY; // Searchable
+																								// FromDate
+																								// Limit
+		Criteria rangeCriteria = Criteria.where("primary").is(true);
 
 		if (ArgUtil.is(query.text)) {
-			timeout.setTimeInMillis(
-					timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX * 5);
-			query.fromStamp = timeout.getTimeInMillis();
-			// toDate = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
+
+			rangeCriteria.and("updated.day").gte(searchableFromDay).orOperator(
+					// Check all fields
+					Criteria.where("contactId").regex("" + query.text + "", "i"),
+					Criteria.where("contactName").regex("" + query.text + "", "i"), // @Deprecated
+					Criteria.where("contact.name").regex("" + query.text + "", "i"),
+					Criteria.where("contact.phone").regex("" + query.text + "", "i"),
+					Criteria.where("contact.email").regex("" + query.text + "", "i"));
+		} else {
+			// Within Watermark
+			rangeCriteria.and("updated.day").gte(watermarkStampDay).orOperator(
+					// Customer has replied within CustomerCareWindow
+					Criteria.where("lastInComingStamp").gt(graceStamp),
+					// Agent Has been Assigned to it
+					Criteria.where("lastOutGoingStamp").gt(graceStamp));
 		}
 
-		query.graceStamp = graceStamp;
 		query.agentCode = agentCode;
 		query.agentDept = agentDept;
-		return findChatSessionDocByAgentAndUnAssigned(query);
+		return findChatSessionsByQuery(query, rangeCriteria);
 	}
 
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,
