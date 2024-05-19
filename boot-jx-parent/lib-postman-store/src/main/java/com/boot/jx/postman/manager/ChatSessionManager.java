@@ -180,40 +180,24 @@ public class ChatSessionManager {
 		return sessionStore.findByStatusOrQuickTagV1(status, newList, fromStamp, toStamp);
 	}
 
-	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,
-			String agentDept, long period) {
+	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query) {
+		long toDate = query.toStamp / TimeUtils.Constants.MILLIS_IN_DAY;
+		long fromDate = query.fromStamp / TimeUtils.Constants.MILLIS_IN_DAY;
 
-		period = Math.min(DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX, period);
-		Calendar timeout = Calendar.getInstance();
-		timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-		long watermarkStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
-
-		timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
-		long graceStamp = timeout.getTimeInMillis();
-
-		long toDate = watermarkStampDay;
-
-		if (ArgUtil.is(query.text)) {
-			timeout.setTimeInMillis(
-					timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX * 5);
-			toDate = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
+		if (query.graceStamp == 0L) {
+			query.graceStamp = toDate - 2 * TimeUtils.Constants.MILLIS_IN_DAY;
 		}
-
-		return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept, 0L, toDate, graceStamp);
-	}
-
-	private List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,
-			String agentDept, long fromDate, long toDate, long graceStamp) {
+		
 		Query query2 = new Query();
 
 		List<Criteria> criterias = new ArrayList<Criteria>();
 
 		Criteria primaryCriteria = Criteria.where("primary").is(true);
 
-		Criteria rangeCriteria = Criteria.where("updated.day").gte(toDate);
+		Criteria rangeCriteria = Criteria.where("updated.day").gte(fromDate);
 
-		if (fromDate > 0L) {
-			rangeCriteria.lte(fromDate);
+		if (toDate > 0L) {
+			rangeCriteria.lte(toDate);
 		}
 
 		if (ArgUtil.is(query.text)) {
@@ -230,9 +214,9 @@ public class ChatSessionManager {
 					// Within Watermark
 					rangeCriteria.orOperator(
 							// Customer has replied within CustomerCareWindow
-							Criteria.where("lastInComingStamp").gt(graceStamp),
+							Criteria.where("lastInComingStamp").gt(query.graceStamp),
 							// Agent Has been Assigned to it
-							Criteria.where("lastOutGoingStamp").gt(graceStamp)));
+							Criteria.where("lastOutGoingStamp").gt(query.graceStamp)));
 		}
 
 		if (query.hasClosed()) {
@@ -329,10 +313,10 @@ public class ChatSessionManager {
 			if (!query.hasClosed() && !query.hasExpired()) {
 				query.add(CHAT_MODE.AGENT);
 			}
-			primaryCriteria = primaryCriteria.and("assignedToDept").is(agentDept);
+			primaryCriteria = primaryCriteria.and("assignedToDept").is(query.agentDept);
 			criterias.add(new Criteria().orOperator(
 					// Assigned to Me
-					Criteria.where("assignedToAgent").is(agentCode),
+					Criteria.where("assignedToAgent").is(query.agentCode),
 					// Assigned to None
 					Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
 			//
@@ -343,7 +327,7 @@ public class ChatSessionManager {
 			}
 			criterias.add(new Criteria().orOperator(
 					// Not Assigned to Me
-					Criteria.where("assignedToDept").is(agentDept).and("assignedToAgent").ne(agentCode)
+					Criteria.where("assignedToDept").is(query.agentDept).and("assignedToAgent").ne(query.agentCode)
 			//
 			));
 		} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
@@ -352,7 +336,7 @@ public class ChatSessionManager {
 			}
 			criterias.add(new Criteria().orOperator(
 					// Not Assigned to Me
-					Criteria.where("assignedToDept").ne(agentDept),
+					Criteria.where("assignedToDept").ne(query.agentDept),
 					// Assigned to No-Org
 					Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
 			//
@@ -390,6 +374,35 @@ public class ChatSessionManager {
 		// }
 		return sessionStore.find(
 				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));
+	}
+
+	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,
+			String agentDept, long period) {
+
+		period = Math.min(DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX, period);
+		Calendar timeout = Calendar.getInstance();
+		timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
+
+		query.fromStamp = timeout.getTimeInMillis();
+		// long watermarkStampDay = timeout.getTimeInMillis() /
+		// TimeUtils.Constants.MILLIS_IN_DAY;
+
+		timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
+		long graceStamp = timeout.getTimeInMillis();
+
+		// long toDate = watermarkStampDay;
+
+		if (ArgUtil.is(query.text)) {
+			timeout.setTimeInMillis(
+					timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX * 5);
+			query.fromStamp = timeout.getTimeInMillis();
+			// toDate = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
+		}
+
+		query.graceStamp = graceStamp;
+		query.agentCode = agentCode;
+		query.agentDept = agentDept;
+		return findChatSessionDocByAgentAndUnAssigned(query);
 	}
 
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,

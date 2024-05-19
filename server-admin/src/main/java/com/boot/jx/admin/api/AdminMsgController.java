@@ -135,7 +135,7 @@ public class AdminMsgController {
 
 	@RequestMapping(value = "/api/message/v2/session", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDoc, Object> fetchSessionV2(@RequestBody SessionSearchQuery query) {
-		List<ChatSessionDoc> sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(query, null, null);
+		List<ChatSessionDoc> sessions = chatSessionManager.findChatSessionDocByAgentAndUnAssigned(query);
 		return ApiResponse.buildResults(sessions);
 	}
 

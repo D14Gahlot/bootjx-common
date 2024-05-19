@@ -40,6 +40,10 @@ public class SessionSearchQuery {
 	public long fromStamp;
 	public long toStamp;
 	public int limit;
+	public long graceStamp;
+
+	public String agentCode;
+	public String agentDept;
 
 	public TreeSet<CHAT_ASSIGN_GROUP> tabs() {
 		if (tabs == null) {
