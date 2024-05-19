@@ -29,6 +29,9 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 
 	@Indexed(sparse = true, unique = true)
 	public String code;
+	
+	
+	public String chatcontactId;
 
 	public PBName name;
 
@@ -177,6 +180,14 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
+	}
+
+	public String getChatcontactId() {
+		return chatcontactId;
+	}
+
+	public void setChatcontactId(String chatcontactId) {
+		this.chatcontactId = chatcontactId;
 	}
 	
 
