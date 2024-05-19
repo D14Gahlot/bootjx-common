@@ -76,6 +76,7 @@ public class AdminCustomerController {
 	@RequestMapping(value = "/profile", method = { RequestMethod.PATCH })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> modifyProfiles(@RequestBody ModelPatches req) {
+		contactStore.checkDuplicate(req);
 		return ApiResponse.buildResult(contactStore.patchCustomerProfile(req));
 	}
 
