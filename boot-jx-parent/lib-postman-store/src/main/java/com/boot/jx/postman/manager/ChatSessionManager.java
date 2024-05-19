@@ -191,18 +191,34 @@ public class ChatSessionManager {
 		timeout.setTimeInMillis(timeout.getTimeInMillis() - period);
 		long graceStamp = timeout.getTimeInMillis();
 
+		long toDate = watermarkStampDay;
+
+		if (ArgUtil.is(query.text)) {
+			timeout.setTimeInMillis(
+					timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX * 5);
+			toDate = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
+		}
+
+		return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept, 0L, toDate, graceStamp);
+	}
+
+	private List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,
+			String agentDept, long fromDate, long toDate, long graceStamp) {
 		Query query2 = new Query();
 
 		List<Criteria> criterias = new ArrayList<Criteria>();
 
 		Criteria primaryCriteria = Criteria.where("primary").is(true);
 
+		Criteria rangeCriteria = Criteria.where("updated.day").gte(toDate);
+
+		if (fromDate > 0L) {
+			rangeCriteria.lte(fromDate);
+		}
+
 		if (ArgUtil.is(query.text)) {
 
-			timeout.setTimeInMillis(
-					timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX * 5);
-			long searchableStampDay = timeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY;
-			criterias.add(Criteria.where("updated.day").gte(searchableStampDay).orOperator(
+			criterias.add(rangeCriteria.orOperator(
 					// Check all fields
 					Criteria.where("contactId").regex("" + query.text + "", "i"),
 					Criteria.where("contactName").regex("" + query.text + "", "i"), // @Deprecated
@@ -212,7 +228,7 @@ public class ChatSessionManager {
 		} else {
 			criterias.add(
 					// Within Watermark
-					Criteria.where("updated.day").gte(watermarkStampDay).orOperator(
+					rangeCriteria.orOperator(
 							// Customer has replied within CustomerCareWindow
 							Criteria.where("lastInComingStamp").gt(graceStamp),
 							// Agent Has been Assigned to it
