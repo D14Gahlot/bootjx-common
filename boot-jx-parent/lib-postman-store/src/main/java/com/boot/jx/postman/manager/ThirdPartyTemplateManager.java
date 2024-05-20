@@ -29,7 +29,7 @@ public class ThirdPartyTemplateManager {
 
 	@Autowired
 	private ChannelClientFactory clientFactory;
-
+	
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 

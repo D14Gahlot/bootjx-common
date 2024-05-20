@@ -63,9 +63,11 @@ public class ChannelPluginProvider {
 
 		@Override
 		public String[] getKeys(T lib) {
-			ConnectorMapping annotation = lib.getClass().getAnnotation(ConnectorMapping.class);
+			ConnectorMapping annotation = ClazzUtil.getAnnotationFromBean(lib, ConnectorMapping.class);
+			// lib.getClass().getAnnotation();
 			List<String> zoom = new ArrayList<String>();
 			if (annotation != null) {
+				//LOGGER.debug("get(ContactType {}, String {})", annotation.contactType(), annotation.channel());
 				for (ContactType contactType : annotation.contactType()) {
 					for (String channel : annotation.channel()) {
 						zoom.add(String.format("%s_%s", contactType, channel));
