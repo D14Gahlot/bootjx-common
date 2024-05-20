@@ -70,10 +70,10 @@ public class CustomerProfileContoller {
 			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactProfile(id));
 		}
 	
-	@RequestMapping(value = "/api/save/customer/upload/contact/details", method = { RequestMethod.POST })
-	public ApiResponse<CustomerContactDto, Object> fetchCustomerContactDetails(@RequestParam(value = "id", required = true) String id){
-			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactDetails(id));
-		}
+//	@RequestMapping(value = "/api/save/customer/upload/contact/details", method = { RequestMethod.POST })
+//	public ApiResponse<CustomerContactDto, Object> fetchCustomerContactDetails(@RequestParam(value = "id", required = true) String id){
+//			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactDetails(id));
+//		}
 	
 	@RequestMapping(value = "/api/agent/customer/contact/info", method = { RequestMethod.GET })
 	public ApiResponse<CustomerProfileDoc, Object> fetchCustomerContactInfo(@RequestParam(value = "id", required = true) String id,
@@ -83,16 +83,16 @@ public class CustomerProfileContoller {
 			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactInfo(id,customerId,phoneno,emailid));
 		}
 	
-	@RequestMapping(value = "/api/save/jobs/output", method = { RequestMethod.POST })
-	public ApiResponse<JobsResponseDto, Object> saveJobsOutPut(@RequestParam(value = "id", required = true) String id,@RequestBody Map<String, List<Object>> maps){
-			return ApiResponse.buildResults(cusProfileService.saveJobsOutPut(id,maps));
-		}
-	
-
-	@RequestMapping(value = "/api/fetch/jobs/output", method = { RequestMethod.GET })
-	public ApiResponse<JobsResponseDto, Object> fetchJobsOutPut(@RequestParam(value = "id", required = false) String id){
-			return ApiResponse.buildResults(cusProfileService.fetchJobsOutPut(id));
-		}	
+//	@RequestMapping(value = "/api/save/jobs/output", method = { RequestMethod.POST })
+//	public ApiResponse<JobsResponseDto, Object> saveJobsOutPut(@RequestParam(value = "id", required = true) String id,@RequestBody Map<String, List<Object>> maps){
+//			return ApiResponse.buildResults(cusProfileService.saveJobsOutPut(id,maps));
+//		}
+//	
+//
+//	@RequestMapping(value = "/api/fetch/jobs/output", method = { RequestMethod.GET })
+//	public ApiResponse<JobsResponseDto, Object> fetchJobsOutPut(@RequestParam(value = "id", required = false) String id){
+//			return ApiResponse.buildResults(cusProfileService.fetchJobsOutPut(id));
+//		}	
 	
 	
 	
