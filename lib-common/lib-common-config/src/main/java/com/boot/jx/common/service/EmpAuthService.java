@@ -206,6 +206,7 @@ public class EmpAuthService {
 		query2.addCriteria(Criteria.where("isactive").is(status).orOperator(Criteria.where("agent_code").is(username),
 				Criteria.where("agent_code").regex("^" + username + "$", "i"), Criteria.where("agent_email").is(email),
 				Criteria.where("agent_email").regex("^" + email + "$", "i")));
+		//System.out.println("" + query2.toString());
 		AgentDoc agent = CollectionUtil.getOne(mongoTemplate.find(query2, AgentDoc.class));
 
 		if (admin && ArgUtil.is(agent)) {
@@ -305,12 +306,12 @@ public class EmpAuthService {
 		return userLoginToken;
 	}
 
-	public void sendOTP(UserAuthToken loginToken) {
+	public boolean sendOTP(UserAuthToken loginToken) {
 
 		PMConfigurationObject mfaEnabled = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_ENABLED);
 
 		if (!mfaEnabled.exists() || !mfaEnabled.asBoolean()) {
-			return;
+			return false;
 		}
 
 		OTPDetails otpDetails = OTPUtils.genrateBasicOTP(loginToken.getDomainUser(), loginToken.getApp());
@@ -319,7 +320,7 @@ public class EmpAuthService {
 		// .asString("oa:mehery");
 
 		if (!otpChannel.exists()) {
-			return;
+			return false;
 		}
 
 		ChannelConfig channel = pmEnvironment.config().channel(otpChannel.asString());
@@ -329,7 +330,7 @@ public class EmpAuthService {
 		}
 
 		if (!ArgUtil.is(channel) || !ArgUtil.is(channel.getOa())) {
-			return;
+			return false;
 		}
 
 		OutboxMessage ob = new OutboxMessage();
@@ -355,6 +356,7 @@ public class EmpAuthService {
 
 		// Details to SHOW/MASK to UI
 		loginToken.setTokenId(loginDoc.getTokenId());
+		return true;
 	}
 
 	private HashBuilder getHashBuilder(String username, String email, String domainName, String domainId,
