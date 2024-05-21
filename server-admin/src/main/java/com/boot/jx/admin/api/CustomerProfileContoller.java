@@ -41,6 +41,11 @@ public class CustomerProfileContoller {
 		return ApiResponse.buildResults(cusProfileService.addEditCustomerMastFields(reqDto));
 	}
 	
+	@RequestMapping(value = "/api/add-update-customer-mast-field", method = { RequestMethod.DELETE })
+	public ApiResponse<CustomerMasterFieldDto, Object> deleteCustmerMasterFiled(@RequestBody CustomerMasterFieldDto reqDto){
+		return ApiResponse.buildResults(cusProfileService.deleteCustmerMasterFiled(reqDto));
+	}
+	
 	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.GET })
 	public ApiResponse<CustomerMasterFieldDto, Object> fetchCusMasFields(@RequestParam(value = "id", required = false) String id){
 			return ApiResponse.buildResults(cusProfileService.fetchCustomerMstFields(id));
@@ -89,10 +94,10 @@ public class CustomerProfileContoller {
 //		}
 //	
 //
-//	@RequestMapping(value = "/api/fetch/jobs/output", method = { RequestMethod.GET })
-//	public ApiResponse<JobsResponseDto, Object> fetchJobsOutPut(@RequestParam(value = "id", required = false) String id){
-//			return ApiResponse.buildResults(cusProfileService.fetchJobsOutPut(id));
-//		}	
+	@RequestMapping(value = "/api/fetch/jobs/output", method = { RequestMethod.GET })
+	public ApiResponse<JobsResponseDto, Object> fetchJobsOutPut(@RequestParam(value = "id", required = false) String id){
+			return ApiResponse.buildResults(cusProfileService.fetchJobsOutPut(id));
+		}	
 	
 	
 	

@@ -103,4 +103,9 @@ public class CustomerProfileService {
 		return cmFieldMgr.fetchCustomeProfile(search);
 	}
 
+	public List<CustomerMasterFieldDto> deleteCustmerMasterFiled(CustomerMasterFieldDto reqDto) {
+		// TODO Auto-generated method stub
+		return cmFieldMgr.deleteCustmerMasterFiled(reqDto);
+	}
+
 }

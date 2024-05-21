@@ -12,6 +12,7 @@ public class JobsResponseDto {
 	
 	private String id;
 	private String  jobtype;
+	private String  jobid;
 	Map<String, List<Object>> input = new HashMap<String, List<Object>>();
 	Map<String, List<Object>> outPut = new HashMap<String, List<Object>>();
 	private String isactive;
@@ -73,6 +74,12 @@ public class JobsResponseDto {
 	}
 	public void setOutPut(Map<String, List<Object>> outPut) {
 		this.outPut = outPut;
+	}
+	public String getJobid() {
+		return jobid;
+	}
+	public void setJobid(String jobid) {
+		this.jobid = jobid;
 	}
 	
 	

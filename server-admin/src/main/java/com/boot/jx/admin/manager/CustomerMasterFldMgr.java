@@ -117,6 +117,19 @@ public class CustomerMasterFldMgr {
 		return dtoLst;
 	}
 
+	public List<CustomerMasterFieldDto> deleteCustmerMasterFiled(CustomerMasterFieldDto reqDto) {
+		if (ArgUtil.is(reqDto.getId())) {
+				MongoQueryBuilder<CustomerMasterFieldDoc> builder = MongoQueryBuilder.collection(CustomerMasterFieldDoc.class)
+						.whereId(reqDto.getId());
+				builder.set("isactive", ArgUtil.parseAsString(reqDto.getIsactive(), Constants.DELETED_SOFT));
+				builder.set("modifiedStamp", System.currentTimeMillis());
+				builder.set("modifiedBy", auditDetailProvider.getAuditUser());
+				mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), CustomerMasterFieldDoc.class);
+		}
+		return fetchCustomerMasfields(null);
+	}
+	
+	
 	public CustomerMasterFieldDoc toCheckDupFieldCode(String fieldCode) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("fieldCode").is(fieldCode).and("active").is(Constants.YES));
@@ -165,11 +178,11 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 				 dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
 				dtoLst.add(dto);
 			}
-			jobsOutPutDoc =commonMongoTemplate.findByIdString(id, JobsOutPutDoc.class); 
-			if(ArgUtil.is(jobsOutPutDoc)) {
-				JobsResponseDto dtoJOutput = EntityDtoUtil.entityToDto(jobsOutPutDoc, new JobsResponseDto());
-				dto.setOutPut(dtoJOutput.getOutPut());	
-			}
+//			jobsOutPutDoc =commonMongoTemplate.findByIdString(id, JobsOutPutDoc.class); 
+//			if(ArgUtil.is(jobsOutPutDoc)) {
+//				JobsResponseDto dtoJOutput = EntityDtoUtil.entityToDto(jobsOutPutDoc, new JobsResponseDto());
+//				dto.setOutPut(dtoJOutput.getOutPut());	
+//			}
 			
 		} else {
 			List<JobScheduledDoc> lstProfileDocs = mongoTemplate.findAll(JobScheduledDoc.class);
@@ -327,15 +340,15 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 			jobsOpDoc = commonMongoTemplate.findByIdString(id, JobsOutPutDoc.class);
 			if(ArgUtil.is(jobsOpDoc)) {
 				JobsResponseDto dto = EntityDtoUtil.entityToDto(jobsOpDoc, new JobsResponseDto());
-				dto.setInput(dto.getInput());
+				//dto.setOutPut(null);
 				lstDtos.add(dto);
 			}
 			
 		}else {
 			List<JobsOutPutDoc> lstDocs = commonMongoTemplate.findAll(JobsOutPutDoc.class);
 			for(JobsOutPutDoc op:lstDocs) {
-				JobsResponseDto dto = EntityDtoUtil.entityToDto(jobsOpDoc, new JobsResponseDto());
-				dto.setOutPut(dto.getOutPut());
+				JobsResponseDto dto = EntityDtoUtil.entityToDto(op, new JobsResponseDto());
+				//dto.setOutPut(dto.getOutPut());
 				lstDtos.add(dto);
 			}
 		}
@@ -428,6 +441,8 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
 		return contactStore.find(qb);
 	}
+
+	
 	
 }
 
