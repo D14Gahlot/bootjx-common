@@ -111,7 +111,8 @@ public class AdminAuthController {
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/",
 			// Sub Apps
-			"/_{subapp}", "/_{subapp}/", "/_{subapp}/*" }, method = { RequestMethod.GET, RequestMethod.POST })
+			"/_{subapp}", "/_{subapp}/", "/_{subapp}/*", "/_{subapp}/**" },
+			method = { RequestMethod.GET, RequestMethod.POST })
 	public String home(Model model, HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(required = false) String domainName, @RequestParam(required = false) String domainId,
 			@RequestParam(required = false) String domainUser, @RequestParam(required = false) String domainUserEmail,
