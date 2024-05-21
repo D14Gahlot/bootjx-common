@@ -1,7 +1,5 @@
 package com.boot.jx.postman.store;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -205,7 +203,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	public CustomerProfileDoc patchCustomerProfile(ModelPatches req) {
 		CustomerProfileDoc doc = findById(req.getId(), CustomerProfileDoc.class);
 		SimpleDocQueryBuilder qb = SimpleDocQueryBuilder.doc(doc);
-
 		for (ModelPatch patch : req.getPatches()) {
 			switch (patch.getField()) {
 			case "email":
@@ -260,8 +257,10 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	
 	public void checkDuplicate(ModelPatches req) {
 		CustomerProfileDoc cusPfDoc=null;
+	
 		
 		for (ModelPatch patch : req.getPatches()) {
+		if(patch.getCommand().equals(ModelPatchCommand.ADD)){
 			switch (patch.getField()) {
 			case "email":
 			case "emails":
@@ -291,6 +290,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 	 }
 		
+	}
 	}
 
 }

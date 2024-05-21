@@ -77,7 +77,7 @@ public class CustomerMasterFldMgr {
 						reqDto.getFieldDesc() == null ? cmFieldDoc.getFieldDesc() : reqDto.getFieldDesc());
 				cmFieldDoc.setFieldType(
 						reqDto.getFieldType() == null ? cmFieldDoc.getFieldType() : reqDto.getFieldType());
-				cmFieldDoc.setIsactive(reqDto.getIsactive());
+				cmFieldDoc.setIsactive(ArgUtil.parseAsString(reqDto.getIsactive(), Constants.YES));
 				cmFieldDoc.setModifiedBy(auditDetailProvider.getAuditUser());
 				cmFieldDoc.setModifiedStamp(System.currentTimeMillis());
 				mongoTemplate.save(cmFieldDoc);
@@ -87,7 +87,7 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc.setFieldLabel(reqDto.getFieldLabel());
 			cmFieldDoc.setFieldDesc(reqDto.getFieldDesc());
 			cmFieldDoc.setFieldType(reqDto.getFieldType());
-			cmFieldDoc.setIsactive(reqDto.getIsactive());
+			cmFieldDoc.setIsactive(ArgUtil.parseAsString(reqDto.getIsactive(), Constants.YES));
 			cmFieldDoc.setCreateBy(auditDetailProvider.getAuditUser());
 			cmFieldDoc.setCreatedStamp(System.currentTimeMillis());
 			mongoTemplate.save(cmFieldDoc);
@@ -109,7 +109,8 @@ public class CustomerMasterFldMgr {
 			List<CustomerMasterFieldDoc> lstGropDocs = mongoTemplate.findAll(CustomerMasterFieldDoc.class);
 			for (CustomerMasterFieldDoc doc : lstGropDocs) {
 				CustomerMasterFieldDto dto = EntityDtoUtil.entityToDto(doc, new CustomerMasterFieldDto());
-				dtoLst.add(dto);
+				if(ArgUtil.is(dto.getIsactive()) && !dto.getIsactive().equalsIgnoreCase(Constants.DELETED_SOFT))
+				 dtoLst.add(dto);
 			}
 		}
 
@@ -117,8 +118,9 @@ public class CustomerMasterFldMgr {
 	}
 
 	public CustomerMasterFieldDoc toCheckDupFieldCode(String fieldCode) {
-		CustomerMasterFieldDoc mstDoc = mongoTemplate.findOne(new Query(Criteria.where("fieldCode").is(fieldCode)),
-				CustomerMasterFieldDoc.class);
+		Query query = new Query();
+		query.addCriteria(Criteria.where("fieldCode").is(fieldCode).and("active").is(Constants.YES));
+		CustomerMasterFieldDoc mstDoc = mongoTemplate.findOne(query,CustomerMasterFieldDoc.class);
 		return mstDoc;
 	}
 

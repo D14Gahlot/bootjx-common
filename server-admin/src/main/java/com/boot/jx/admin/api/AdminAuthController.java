@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -108,13 +109,15 @@ public class AdminAuthController {
 	}
 
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
-	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" },
+	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/",
+			// Sub Apps
+			"/_{subapp}", "/_{subapp}/", "/_{subapp}/*", "/_{subapp}/**" },
 			method = { RequestMethod.GET, RequestMethod.POST })
 	public String home(Model model, HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(required = false) String domainName, @RequestParam(required = false) String domainId,
 			@RequestParam(required = false) String domainUser, @RequestParam(required = false) String domainUserEmail,
-			@RequestParam(required = false) String domainToken, @RequestParam(required = false) String domainTokenValid)
-			throws NoSuchAlgorithmException {
+			@RequestParam(required = false) String domainToken, @RequestParam(required = false) String domainTokenValid,
+			@PathVariable(required = false) String subapp) throws NoSuchAlgorithmException {
 
 		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
@@ -166,6 +169,12 @@ public class AdminAuthController {
 		} else {
 			model.addAttribute("APP_USER", "");
 			model.addAttribute("APP_USER_ROLE", "['GUEST']");
+		}
+
+		if (ArgUtil.is(subapp)) {
+			model.addAttribute("APP", subapp);
+		} else {
+			model.addAttribute("APP", "admin");
 		}
 		return "app-admin";
 	}
