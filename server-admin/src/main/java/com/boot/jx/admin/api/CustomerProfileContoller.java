@@ -95,8 +95,9 @@ public class CustomerProfileContoller {
 //	
 //
 	@RequestMapping(value = "/api/fetch/jobs/output", method = { RequestMethod.GET })
-	public ApiResponse<JobsResponseDto, Object> fetchJobsOutPut(@RequestParam(value = "id", required = false) String id){
-			return ApiResponse.buildResults(cusProfileService.fetchJobsOutPut(id));
+	public ApiResponse<JobsResponseDto, Object> fetchJobsOutPut(@RequestParam(value = "id", required = false) String id,
+			@RequestParam(value = "jobid", required = false) String jobid){
+			return ApiResponse.buildResults(cusProfileService.fetchJobsOutPut(id,jobid));
 		}	
 	
 	

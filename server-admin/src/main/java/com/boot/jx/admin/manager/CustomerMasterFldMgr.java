@@ -333,25 +333,32 @@ public JobScheduledDoc uploadFile(CommonFile comfile) {
 		}
 		return null;
 	}
-	public List<JobsResponseDto> fetchJobsOutPut(String id) {
+	public List<JobsResponseDto> fetchJobsOutPut(String id,String jobid) {
 		List<JobsResponseDto> lstDtos = new ArrayList<>();
+		List<JobsOutPutDoc> lstDocs =new ArrayList<>();
 		JobsOutPutDoc jobsOpDoc =null;
-		if (ArgUtil.is(id)) {
-			jobsOpDoc = commonMongoTemplate.findByIdString(id, JobsOutPutDoc.class);
-			if(ArgUtil.is(jobsOpDoc)) {
-				JobsResponseDto dto = EntityDtoUtil.entityToDto(jobsOpDoc, new JobsResponseDto());
-				//dto.setOutPut(null);
+		if (ArgUtil.is(id) || ArgUtil.is(jobid)) {
+			Query qryQuery =new Query();
+			 Criteria criteria = new Criteria().orOperator(
+			            Criteria.where("id").is(id),
+			            Criteria.where("jobid").is(jobid)
+			        );
+			 qryQuery.addCriteria(criteria); 
+			
+			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
+		}else {
+			lstDocs = commonMongoTemplate.findAll(JobsOutPutDoc.class);
+			
+		}
+		
+		if(lstDocs!=null && !lstDocs.isEmpty()) {
+			for(JobsOutPutDoc op:lstDocs) {
+				JobsResponseDto dto = EntityDtoUtil.entityToDto(op, new JobsResponseDto());
 				lstDtos.add(dto);
 			}
 			
-		}else {
-			List<JobsOutPutDoc> lstDocs = commonMongoTemplate.findAll(JobsOutPutDoc.class);
-			for(JobsOutPutDoc op:lstDocs) {
-				JobsResponseDto dto = EntityDtoUtil.entityToDto(op, new JobsResponseDto());
-				//dto.setOutPut(dto.getOutPut());
-				lstDtos.add(dto);
-			}
 		}
+		
 		return lstDtos;
 		
 	}

@@ -84,8 +84,8 @@ public class CustomerProfileService {
 		return cmFieldMgr.saveJobsOutPut(id,maps);
 		
 	}
-	public List<JobsResponseDto> fetchJobsOutPut(String id){
-		return cmFieldMgr.fetchJobsOutPut(id);
+	public List<JobsResponseDto> fetchJobsOutPut(String id,String jobid){
+		return cmFieldMgr.fetchJobsOutPut(id,jobid);
 		
 	}
 	
