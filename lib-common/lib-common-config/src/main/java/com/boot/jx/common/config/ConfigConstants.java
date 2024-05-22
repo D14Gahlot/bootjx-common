@@ -228,7 +228,7 @@ public class ConfigConstants {
 				.defaultValue(0).group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_TAB_ORG(new ConfigMeta("Agent can see Other Teams Chats", PROPERTIES.POSTMAN_AGENT_TAB_ORG)
-				.desc("Enables Org tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
+				.hidden().deprecated().desc("Enables Org tab in Agent Panel").optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_TAB_LEVEL(new ConfigMeta("Agent can see Chats Assigned to", PROPERTIES.POSTMAN_AGENT_TAB_LEVEL)
 				.desc("Enables Tabs in Agent Panel").optionValues("TEAM", "ORGANIZATION").group(GROUP_AGENT)),
