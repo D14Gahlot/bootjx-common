@@ -21,6 +21,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.MongoUtils;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants;
@@ -280,10 +281,30 @@ public class ChatSessionManager {
 			}
 		}
 
-		if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
-			if (!query.hasClosed() && !query.hasExpired()) {
-				query.add(CHAT_MODE.AGENT);
+		if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
+
+			List<Criteria> orgCriterias = new ArrayList<Criteria>();
+
+			if (!query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
+				// Not Assigned to MyTeam
+				orgCriterias.add(Criteria.where("assignedToDept").ne(query.agentDept));
 			}
+			// Assigned to No-Org
+			orgCriterias.add(Criteria.where("assignedToDept").is(null));
+			orgCriterias.add(Criteria.where("assignedToDept").exists(false));
+
+			criterias.add(MongoUtils.anyCriteria(orgCriterias));
+
+		} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
+			Criteria teamCriteria = Criteria.where("assignedToDept").is(query.agentDept);
+
+			if (!query.contains(CHAT_ASSIGN_GROUP.ME)) {
+				// Not Assigned to ME
+				teamCriteria.and("assignedToAgent").ne(query.agentCode);
+			}
+
+			criterias.add(teamCriteria);
+		} else if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
 			primaryCriteria = primaryCriteria.and("assignedToDept").is(query.agentDept);
 			criterias.add(new Criteria().orOperator(
 					// Assigned to Me
@@ -292,44 +313,11 @@ public class ChatSessionManager {
 					Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
 			//
 			));
-		} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
-			if (!query.hasClosed() && !query.hasExpired()) {
-				query.add(CHAT_MODE.AGENT);
-			}
-			criterias.add(new Criteria().orOperator(
-					// Not Assigned to Me
-					Criteria.where("assignedToDept").is(query.agentDept).and("assignedToAgent").ne(query.agentCode)
-			//
-			));
-		} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
-			if (!pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_NONAGENT).asBoolean(false)) {
-				query.add(CHAT_MODE.AGENT);
-			}
-			criterias.add(new Criteria().orOperator(
-					// Not Assigned to Me
-					Criteria.where("assignedToDept").ne(query.agentDept),
-					// Assigned to No-Org
-					Criteria.where("assignedToDept").is(null), Criteria.where("assignedToDept").exists(false)
-			//
-			));
 		}
 
-		if (query.contains(CHAT_MODE.AGENT)) {
-			primaryCriteria = primaryCriteria.and("mode").is("AGENT");
+		if (ArgUtil.is(query.modes())) {
+			primaryCriteria = primaryCriteria.and("mode").in(query.modes());
 		}
-
-//			else if (query.contains(CHAT_ASSIGN_GROUP.HISTORY)) {
-//				primaryCriteria = primaryCriteria.and("mode").is("AGENT");
-//				Calendar hisotryTimeout = Calendar.getInstance();
-//				hisotryTimeout.setTimeInMillis(
-//						hisotryTimeout.getTimeInMillis() - PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
-//				criterias.add(new Criteria().orOperator(
-//						// Updated before to Me
-//						Criteria.where("updated.day")
-//								.lte(hisotryTimeout.getTimeInMillis() / TimeUtils.Constants.MILLIS_IN_DAY)
-//				//
-//				));
-//			}
 
 		int limit = Math.min(Math.max(50, query.limit), pmDomainConfig.getAgentHistoryCount().asInteger(150));
 		query2.addCriteria(
@@ -398,8 +386,48 @@ public class ChatSessionManager {
 					PMConstants.DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD + historyPeriod);
 		}
 
-		if (!pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_ORG).asBoolean(false)) {
-			query.add(CHAT_ASSIGN_GROUP.TEAM);
+		// Agent Access level
+		CHAT_ASSIGN_GROUP accessLevel = pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_LEVEL)
+				.asEnum(CHAT_ASSIGN_GROUP.class);
+
+		if (!ArgUtil.is(accessLevel)) {
+			if (pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_ORG).asBoolean(false)) {
+				accessLevel = CHAT_ASSIGN_GROUP.ORG;
+			} else {
+				accessLevel = CHAT_ASSIGN_GROUP.TEAM;
+			}
+		}
+
+		if (!query.containsAny(CHAT_ASSIGN_GROUP.ORG, CHAT_ASSIGN_GROUP.TEAM, CHAT_ASSIGN_GROUP.ME)) {
+			if (ArgUtil.is(accessLevel)) {
+				query.add(accessLevel);
+			}
+		} else {
+			switch (accessLevel) {
+			case TEAM:
+				query.tabs().remove(CHAT_ASSIGN_GROUP.ORG);
+				break;
+			case ME:
+				query.tabs().remove(CHAT_ASSIGN_GROUP.ORG);
+				query.tabs().remove(CHAT_ASSIGN_GROUP.TEAM);
+				break;
+			default:
+				break;
+			}
+		}
+
+		if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
+			if (!query.hasClosed() && !query.hasExpired()) {
+				query.add(CHAT_MODE.AGENT);
+			}
+		} else if (query.contains(CHAT_ASSIGN_GROUP.TEAM)) {
+			if (!query.hasClosed() && !query.hasExpired()) {
+				query.add(CHAT_MODE.AGENT);
+			}
+		} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
+			if (!pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_NONAGENT).asBoolean(false)) {
+				query.add(CHAT_MODE.AGENT);
+			}
 		}
 
 		return findChatSessionDocByAgentAndUnAssigned(query, agentCode, agentDept,

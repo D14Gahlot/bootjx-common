@@ -341,6 +341,7 @@ public class PMConstants {
 		public static final String POSTMAN_AGENT_2FA_CHANNEL = "postman.agent.2fa.channel";
 		public static final String POSTMAN_CHAT_WEB_CHANNEL = "postman.chat.web.channel";
 		public static final String POSTMAN_CHAT_WEB_QUEUE = "postman.chat.web.queue.enabled";
+		public static final String POSTMAN_AGENT_TAB_LEVEL = "postman.agent.tab.level";
 	}
 
 	public static class ParamKeys {
