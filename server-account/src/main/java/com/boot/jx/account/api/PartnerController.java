@@ -369,6 +369,7 @@ public class PartnerController {
 			}
 			domaiNational.get().setCompany(domain.getCompany());
 			domaiNational.get().setSocial(domain.getSocial());
+			domaiNational.get().setServer(domain.getServer());
 			accountStore.save(domaiNational.get());
 			accountStore.save(domainUser);
 			return ApiResponse.build().message("Details updated");
