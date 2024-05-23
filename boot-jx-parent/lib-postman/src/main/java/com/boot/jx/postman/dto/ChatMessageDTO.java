@@ -7,13 +7,14 @@ import java.util.Map;
 
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.pbook.PBVCard;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatMessageDTO implements Serializable {
+public class ChatMessageDTO implements Serializable, IMessageId {
 	private static final long serialVersionUID = 7766790295486098869L;
 	private String text;
 	private String template;
@@ -34,7 +35,7 @@ public class ChatMessageDTO implements Serializable {
 	private TagDocument tags;
 	private List<Attachment> attachments;
 	private List<PBVCard> vccards;
-	
+
 	private String sender;
 	private String status;
 	private Contactable contact;
@@ -45,8 +46,6 @@ public class ChatMessageDTO implements Serializable {
 	private MessageRouter route;
 	private Map<String, Long> stamps;
 	public List<Object> logs;
-
-	
 
 	public String getText() {
 		return text;
@@ -119,6 +118,7 @@ public class ChatMessageDTO implements Serializable {
 	public void setSender(String sender) {
 		this.sender = sender;
 	}
+
 	public String getMessageIdExt() {
 		return messageIdExt;
 	}
@@ -252,6 +252,7 @@ public class ChatMessageDTO implements Serializable {
 	public void setOptions(Map<String, Object> options) {
 		this.options = options;
 	}
+
 	public Map<String, Long> getStamps() {
 		return stamps;
 	}
@@ -259,6 +260,7 @@ public class ChatMessageDTO implements Serializable {
 	public void setStamps(Map<String, Long> stamps) {
 		this.stamps = stamps;
 	}
+
 	public List<Object> getLogs() {
 		return logs;
 	}

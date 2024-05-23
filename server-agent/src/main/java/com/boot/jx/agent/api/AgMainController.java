@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -75,14 +76,18 @@ public class AgMainController {
 								agentSession.getAgentDept(), null, Constants.BLANK)
 						&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) {
 					chatSessionDto = chatArchive.withMessages(chatSessionDto);
-				}else if(ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
-							agentSession.getAgentDept(), null, Constants.BLANK)
-					&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) { //added by mru for test
-				chatSessionDto = chatArchive.withMessages(chatSessionDto);
+				} else if (ArgUtil.isEqual(chatSessionDto.getAssignedToDept(), DEFAULT.NO_DEPT,
+						agentSession.getAgentDept(), null, Constants.BLANK)
+						&& ArgUtil.isEqual(chatSessionDto.getAssignedToAgent(), agentSession.getAgentCode(), null)) { // added
+																														// by
+																														// mru
+																														// for
+																														// test
+					chatSessionDto = chatArchive.withMessages(chatSessionDto);
 				}
-				
+
 				chatSessionDtos.add(chatSessionDto);
-				
+
 			}
 		}
 		if (away != null) {
@@ -96,7 +101,8 @@ public class AgMainController {
 	}
 
 	@ApiRequest(type = RequestType.POLL)
-	@RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.GET })
+	@RequestMapping(value = { "/api/sessions/assignments", "/api/sessions/assignments.json" },
+			method = { RequestMethod.GET }, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(
 			@RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
 			@RequestParam(required = false) Boolean away,
@@ -108,12 +114,13 @@ public class AgMainController {
 		query.limit = limit;
 		query.add(ArgUtil.parseAsEnumT(tab, CHAT_ASSIGN_GROUP.class));
 		query.add(ArgUtil.parseAsEnumT(searchStatus, CHAT_STATE.class));
-		//System.out.println("query MRU SEARCH "+JsonUtil.toJsonPrettyPrint(query));
+		// System.out.println("query MRU SEARCH "+JsonUtil.toJsonPrettyPrint(query));
 		return getSessionAssignments(withMessage, status, away, new ArrayList<ChatSessionDTO>(), query);
 	}
 
 	@ApiRequest(type = RequestType.POLL)
-	@RequestMapping(value = "/api/sessions/assignments", method = { RequestMethod.POST })
+	@RequestMapping(value = { "/api/sessions/assignments", "/api/sessions/assignments.json" },
+			method = { RequestMethod.POST }, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionsAssignments(@RequestBody SessionSearchQuery query,
 			@RequestParam(defaultValue = "false") boolean withMessage, @RequestParam(required = false) Boolean status,
 			@RequestParam(required = false) Boolean away, @RequestParam(required = false) String search) {

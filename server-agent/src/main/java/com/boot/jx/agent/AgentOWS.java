@@ -30,7 +30,7 @@ import com.boot.jx.app.CommonAppLauncher;
 public class AgentOWS extends CommonAppLauncher {
 
 	/**
-	 * The main method.
+	 * The main method.ˍ
 	 *
 	 * @param args the arguments
 	 * @throws IOException

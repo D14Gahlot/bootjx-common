@@ -197,7 +197,7 @@ public class ChatSessionManager {
 			criterias.add(Criteria.where("resolved").is(true));
 		} else if (query.contains(CHAT_STATE.OUTBOUND)) {
 			query.add(CHAT_MODE.AGENT);
-			criterias.add(Criteria.where("active").is(true).and("lastInBoundMsg").exists(false)
+			criterias.add(Criteria.where("active").is(true).and("msg.lastInBoundMsg").exists(false)
 					.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)));
 		} else if (query.hasExpired()) {
 			Calendar expiryWatermark = Calendar.getInstance();
@@ -222,8 +222,7 @@ public class ChatSessionManager {
 			criterias.add(new Criteria() //
 					.andOperator(Criteria.where("active").is(true) //
 							.orOperator(Criteria.where("resolved").exists(false), Criteria.where("resolved").is(false)))
-					.orOperator(Criteria.where("lastInBoundMsg").exists(true),
-							Criteria.where("msg.lastInBoundMsg").exists(true))//
+					.and("msg.lastInBoundMsg").exists(true)//
 			);
 		}
 
@@ -319,7 +318,7 @@ public class ChatSessionManager {
 			primaryCriteria = primaryCriteria.and("mode").in(query.modes());
 		}
 
-		int limit = Math.min(Math.max(50, query.limit), pmDomainConfig.getAgentHistoryCount().asInteger(150));
+		int limit = Math.min(query.limit == 0 ? 50 : query.limit, pmDomainConfig.getAgentHistoryCount().asInteger(150));
 		query2.addCriteria(
 				// Only Agent Chats
 				primaryCriteria
@@ -327,12 +326,12 @@ public class ChatSessionManager {
 						.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
-		// System.out.println(query2.toString());
+		//System.out.println(query2.toString());
 		// if (LOGGER.isDebugEnabled()) {
 		ApiResponseUtil.addLog(query2.toString());
 		// }
-		return sessionStore.find(
-				CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2).skipDBRefByNames("lastMsg"));
+		return sessionStore.find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query2)
+				.skipDBRefByNames("lastMsg", "lastInBoundMsg", "lastOutBoundMsg"));
 	}
 
 	public List<ChatSessionDoc> findChatSessionDocByAgentAndUnAssigned(SessionSearchQuery query, String agentCode,
@@ -415,7 +414,7 @@ public class ChatSessionManager {
 				break;
 			}
 		}
-
+//
 		if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
 			if (!query.hasClosed() && !query.hasExpired()) {
 				query.add(CHAT_MODE.AGENT);

@@ -336,7 +336,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		// Push Notification
 		OutboxMessage notify = new OutboxMessage()
-				.message(ArgUtil.is(chatSessionDoc.getLastMsg()) ? chatSessionDoc.getLastMsg().getMessage()
+				.message(ArgUtil.is(chatSessionDoc.lastMsg()) ? chatSessionDoc.lastMsg().getText()
 						: chatSessionDoc.getContactName());
 		notify.contact().setCsid(To.dept(params.getAssignToDeptCode()));
 		pushClient.send(notify);

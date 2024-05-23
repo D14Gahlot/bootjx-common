@@ -108,7 +108,7 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	}
 
 	public ChatSessionQuery setLastInBoundMsg(MessageDoc lastInBoundMsg, String contactType) {
-		this.doc.setLastInBoundMsg(lastInBoundMsg);
+		//this.doc.setLastInBoundMsg(lastInBoundMsg);
 		this.set("lastInBoundMsgId", lastInBoundMsg.getMessageId());
 		this.ref("lastInBoundMsg", lastInBoundMsg.getMessageId(), MessageStore.getCollectionName(contactType));
 		this.set("msg.lastInBoundMsg", ChatDTOUtil.getChatMessageDTO(lastInBoundMsg));
@@ -116,7 +116,7 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	}
 
 	public ChatSessionQuery setLastOutBoundMsg(MessageDoc lastOutBoundMsg, String contactType) {
-		this.doc.setLastOutBoundMsg(lastOutBoundMsg);
+		//this.doc.setLastOutBoundMsg(lastOutBoundMsg);
 		this.ref("lastOutBoundMsg", lastOutBoundMsg.getMessageId(), MessageStore.getCollectionName(contactType));
 		this.set("msg.lastOutBoundMsg", ChatDTOUtil.getChatMessageDTO(lastOutBoundMsg));
 		return this;
