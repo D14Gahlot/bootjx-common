@@ -1,7 +1,5 @@
 package com.boot.jx.admin.api;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
 import com.boot.jx.admin.dto.SearchCustomerProfileDto;
@@ -23,7 +20,6 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 
@@ -33,23 +29,35 @@ public class CustomerProfileContoller {
 	@Autowired
 	CustomerProfileService cusProfileService;
 
-	@RequestMapping(value = "/api/add-update-customer-mast-field", method = { RequestMethod.POST })
-	public ApiResponse<CustomerMasterFieldDto, Object> createAndUpdateCustmerMasterFiled(@RequestBody CustomerMasterFieldDto reqDto){
+
+	
+	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.POST })
+	public ApiResponse<CustomerMasterFieldDto, Object> createUpdateCusMasFields(@RequestBody CustomerMasterFieldDto reqDto){
 		if(StringUtils.isBlank(reqDto.getId())){
 			cusProfileService.checkDupFieldCode(reqDto);
 		}	
 		return ApiResponse.buildResults(cusProfileService.addEditCustomerMastFields(reqDto));
-	}
+		}
 	
-	@RequestMapping(value = "/api/add-update-customer-mast-field", method = { RequestMethod.DELETE })
-	public ApiResponse<CustomerMasterFieldDto, Object> deleteCustmerMasterFiled(@RequestBody CustomerMasterFieldDto reqDto){
-		return ApiResponse.buildResults(cusProfileService.deleteCustmerMasterFiled(reqDto));
-	}
+	
+	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.PATCH })
+	public ApiResponse<CustomerMasterFieldDto, Object> updateCusMasFields(@RequestBody CustomerMasterFieldDto reqDto){
+		if(StringUtils.isBlank(reqDto.getId())){
+			cusProfileService.checkDupFieldCode(reqDto);
+		}	
+		return ApiResponse.buildResults(cusProfileService.addEditCustomerMastFields(reqDto));
+		}
+	
+	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.DELETE})
+	public ApiResponse<CustomerMasterFieldDto, Object> deleteCusMasFields(@RequestBody CustomerMasterFieldDto reqDto){
+			return ApiResponse.buildResults(cusProfileService.deleteCustmerMasterFiled(reqDto));
+		}
 	
 	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.GET })
 	public ApiResponse<CustomerMasterFieldDto, Object> fetchCusMasFields(@RequestParam(value = "id", required = false) String id){
 			return ApiResponse.buildResults(cusProfileService.fetchCustomerMstFields(id));
 		}
+	
 	
 	@Autowired
 	AWSFileStore fileStore;
