@@ -235,10 +235,14 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			case "rmCode":
 				qb.setunset("rmCode", patch.value().asString());
 				break;
-			case "additionalInfo":
-				qb.setunset("additionalInfo", patch.value().asString());
-				break;
+//			case "additionalInfo": @Rabil :- Need per filed update not all field at once
+//				qb.setunset("additionalInfo", patch.value().asString());
+//				break;
 			default:
+				// TODO:- @Rabil - Check additonal validty in Masters and its type in master,
+				// then based on type of field do conversion below and update instead
+				// using.asString() for all
+				qb.setunset("additionalInfo." + patch.getField(), patch.value().asString());
 				break;
 			}
 			update(qb);
