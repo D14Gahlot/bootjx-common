@@ -17,20 +17,19 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
-import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.utils.ArgUtil;
 
 @Service
 public class CustomerProfileService {
-	
+
 	@Autowired
 	MongoTemplate mongoTemplate;
-	
+
 	@Autowired
 	CustomerMasterFldMgr cmFieldMgr;
-	
+
 	public List<CustomerMasterFieldDto> addEditCustomerMastFields(CustomerMasterFieldDto req) {
 		List<CustomerMasterFieldDto> lstCmfields = cmFieldMgr.addAndEditMasterfield(req);
 		return lstCmfields;
@@ -41,7 +40,7 @@ public class CustomerProfileService {
 		List<CustomerMasterFieldDto> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id);
 		return lstCmfields;
 	}
-	
+
 	public void checkDupFieldCode(CustomerMasterFieldDto req) {
 		if (ArgUtil.is(req.getId())) {
 			CustomerMasterFieldDoc groupDoc = cmFieldMgr.toCheckDupFieldCode(req.getFieldCode());
@@ -52,59 +51,56 @@ public class CustomerProfileService {
 			}
 		}
 	}
-	
-	public JobScheduledDoc uploadFile(CommonFile comfile){
-		return cmFieldMgr.uploadFile(comfile);
-		
-	}
-	
-	
-	
-	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id){
-		return cmFieldMgr.fetchCustomerProfileMasterDoc(id);
-		
-	}
-	
-	public List<JobsResponseDto> fetchCustomerContactProfile(String id){
-		return cmFieldMgr.fetchCustomerContactProfile(id);
-		
-	}
-	
 
-	public List<CustomerContactDto> fetchCustomerContactDetails(String id){
+	public JobScheduledDoc uploadFile(CommonFile comfile) {
+		return cmFieldMgr.uploadFile(comfile);
+
+	}
+
+	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id) {
+		return cmFieldMgr.fetchCustomerProfileMasterDoc(id);
+
+	}
+
+	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
+		return cmFieldMgr.fetchCustomerContactProfile(id);
+
+	}
+
+	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
 		return cmFieldMgr.fetchCustomerContactDetails(id);
-		
+
 	}
-	
-	public List<CustomerProfileDoc> fetchCustomerContactInfo(String id,String customerId,String phoneno,String emailid){
-		return cmFieldMgr.fetchCustomerContactInfo(id,customerId,phoneno,emailid);
-		
+
+	public List<CustomerProfileDoc> fetchCustomerContactInfo(String id, String customerId, String phoneno,
+			String emailid) {
+		return cmFieldMgr.fetchCustomerContactInfo(id, customerId, phoneno, emailid);
+
 	}
-	public List<JobsResponseDto> saveJobsOutPut(String id,Map<String,List<Object>> maps){
-		return cmFieldMgr.saveJobsOutPut(id,maps);
-		
+
+	public List<JobsResponseDto> saveJobsOutPut(String id, Map<String, List<Object>> maps) {
+		return cmFieldMgr.saveJobsOutPut(id, maps);
+
 	}
-	public List<JobsResponseDto> fetchJobsOutPut(String id,String jobid){
-		return cmFieldMgr.fetchJobsOutPut(id,jobid);
-		
+
+	public List<JobsResponseDto> fetchJobsOutPut(String id, String jobid) {
+		return cmFieldMgr.fetchJobsOutPut(id, jobid);
+
 	}
-	
-	
-	public List<CustomerProfileDoc> saveCustomerProfile(String id){
+
+	public List<CustomerProfileDoc> saveCustomerProfile(String id) {
 		return cmFieldMgr.saveCustomerProfileMaster(id);
 	}
-	
+
 	public List<CustomerProfileDoc> deDeuplicateCheck(CustomerProfileRequest searQry) {
 		return cmFieldMgr.deDeuplicateCheck(searQry);
 	}
 
-	public List<CustomerProfileDoc>  fetchCustomeProfile(SearchCustomerProfileDto search) {
-		// TODO Auto-generated method stub
+	public List<CustomerProfileDoc> fetchCustomeProfile(SearchCustomerProfileDto search) {
 		return cmFieldMgr.fetchCustomeProfile(search);
 	}
 
 	public List<CustomerMasterFieldDto> deleteCustmerMasterFiled(CustomerMasterFieldDto reqDto) {
-		// TODO Auto-generated method stub
 		return cmFieldMgr.deleteCustmerMasterFiled(reqDto);
 	}
 

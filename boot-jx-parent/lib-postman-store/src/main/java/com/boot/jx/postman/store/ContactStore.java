@@ -237,7 +237,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				break;
 			case "additionalInfo":
 				qb.setunset("additionalInfo", patch.value().asString());
-				break;	
+				break;
 			default:
 				break;
 			}
@@ -247,50 +247,48 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 		return doc;
 	}
-	
+
 	public CustomerProfileDoc findProfileByCode(String code) {
 		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
 				.where(Criteria.where("code").is(code));
 		return findOne(qb);
 	}
-	
-	
+
 	public void checkDuplicate(ModelPatches req) {
-		CustomerProfileDoc cusPfDoc=null;
-	
-		
+		CustomerProfileDoc cusPfDoc = null;
+
 		for (ModelPatch patch : req.getPatches()) {
-		if(patch.getCommand().equals(ModelPatchCommand.ADD)){
-			switch (patch.getField()) {
-			case "email":
-			case "emails":
-				PBEmail email = patch.value().as(PBEmail.class);
-				cusPfDoc =findProfileByEmail(email.getEmail());
-				if(ArgUtil.is(cusPfDoc)) {
-				ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField()).codeKey("ValidPhoneDuplicate")
-					.description(patch.getField()+" already exists"));
+			if (patch.getCommand().equals(ModelPatchCommand.ADD)) {
+				switch (patch.getField()) {
+				case "email":
+				case "emails":
+					PBEmail email = patch.value().as(PBEmail.class);
+					cusPfDoc = findProfileByEmail(email.getEmail());
+					if (ArgUtil.is(cusPfDoc)) {
+						ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField())
+								.codeKey("ValidEmailDuplicate").description(patch.getField() + " already exists"));
+					}
+					break;
+				case "phone":
+				case "phones":
+					PBPhone phone = parsePhone(patch.value().as(PBPhone.class));
+					cusPfDoc = findProfileByPhone(phone.getPhone());
+					if (ArgUtil.is(cusPfDoc)) {
+						ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField())
+								.codeKey("ValidPhoneDuplicate").description(patch.getField() + " already exists"));
+					}
+					break;
+				case "code":
+					cusPfDoc = findProfileByCode(patch.value().asString());
+					if (ArgUtil.is(cusPfDoc)) {
+						ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField())
+								.codeKey("ValidCodeDuplicate").description(patch.getField() + " already exists"));
+					}
+					break;
 				}
-				break;
-			case "phone":
-			case "phones":
-				PBPhone phone = parsePhone(patch.value().as(PBPhone.class));
-				cusPfDoc =findProfileByPhone(phone.getPhone());
-				if(ArgUtil.is(cusPfDoc)) {
-				ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField()).codeKey("ValidPhoneDuplicate")
-						.description(patch.getField()+" already exists"));
-				}
-				break;
-			case "code":
-				cusPfDoc =findProfileByCode(patch.getValue().toString());
-				if(ArgUtil.is(cusPfDoc)) {
-				ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField()).codeKey("ValidPhoneDuplicate")
-						.description(patch.getField()+" already exists"));
-				}
-				break;
+			}
+
 		}
-	 }
-		
-	}
 	}
 
 }

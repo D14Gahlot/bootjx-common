@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.SimpleDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBName;
@@ -21,7 +22,8 @@ import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 
 @Document(collection = "CUSTOMER_PROFILE")
-public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {
+public class CustomerProfileDoc extends TimeStampDoc
+		implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {
 	private static final long serialVersionUID = 1281605084248923642L;
 
 	@Id
@@ -29,8 +31,7 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 
 	@Indexed(sparse = true, unique = true)
 	public String code;
-	
-	
+
 	public String chatcontactId;
 
 	public PBName name;
@@ -41,10 +42,8 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 	public Set<PBWebsite> urls;
 	public Set<PBWork> works;
 	public Map<String, Object> additionalInfo = new HashMap<>();
+
 	public String rmCode;
-	private Long createdStamp;
-	private String createdBy;
-	
 
 	public String getId() {
 		return id;
@@ -154,28 +153,11 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 		this.works = works;
 	}
 
-	
 	public Set<PBWork> works() {
 		if (works == null) {
 			this.works = new TreeSet<PBWork>();
 		}
 		return this.works;
-	}
-
-	public Long getCreatedStamp() {
-		return createdStamp;
-	}
-
-	public void setCreatedStamp(Long createdStamp) {
-		this.createdStamp = createdStamp;
-	}
-
-	public String getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
 	}
 
 	public static long getSerialversionuid() {
@@ -189,6 +171,5 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 	public void setChatcontactId(String chatcontactId) {
 		this.chatcontactId = chatcontactId;
 	}
-	
 
 }
