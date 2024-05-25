@@ -212,6 +212,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				break;
 			case "phone":
 			case "phones":
+			case "mobile":
+			case "mobiles":
 				PBPhone phone = parsePhone(patch.value().as(PBPhone.class));
 				qb.setunset("phones", patch(patch.getCommand(), doc.phones(), phone));
 				break;
@@ -234,6 +236,14 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				break;
 			case "rmCode":
 				qb.setunset("rmCode", patch.value().asString());
+				break;
+			case "emailsAlt":
+				PBEmail emailsAlt = patch.value().as(PBEmail.class);
+				qb.setunset("emailsAlt", patch(patch.getCommand(), doc.emailsAlt(), emailsAlt));
+				break;
+			case "phonesAlt":
+				PBPhone phonesAlt = parsePhone(patch.value().as(PBPhone.class));
+				qb.setunset("phonesAlt", patch(patch.getCommand(), doc.phonesAlt(), phonesAlt));
 				break;
 //			case "additionalInfo": @Rabil :- Need per filed update not all field at once
 //				qb.setunset("additionalInfo", patch.value().asString());
