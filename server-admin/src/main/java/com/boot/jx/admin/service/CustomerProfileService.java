@@ -67,6 +67,7 @@ public class CustomerProfileService {
 
 	}
 
+	@Deprecated
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
 		return cmFieldMgr.fetchCustomerContactDetails(id);
 

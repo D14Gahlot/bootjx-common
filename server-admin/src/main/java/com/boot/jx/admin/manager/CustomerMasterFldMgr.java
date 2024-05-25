@@ -203,6 +203,7 @@ public class CustomerMasterFldMgr {
 
 	}
 
+	@Deprecated
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
 		List<CustomerContactDto> dtoLst = new ArrayList<>();
 		JobScheduledDoc cmProfileDoc = null;

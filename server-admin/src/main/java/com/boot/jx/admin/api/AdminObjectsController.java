@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +20,8 @@ import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
+import com.boot.jx.postman.doc.MessageHold;
+import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.store.MessageStore;
@@ -67,7 +70,7 @@ public class AdminObjectsController {
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
-		//System.out.println(q.build().getQuery().toString());
+		// System.out.println(q.build().getQuery().toString());
 		return messageStore.find(q);
 	}
 
@@ -160,5 +163,19 @@ public class AdminObjectsController {
 			@RequestParam(required = false) String lane) {
 		return ApiResponse.buildResults(
 				getPaginatedBulk(ChannelConfigTempDoc.class, "TEMP_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
+	}
+
+	@RequestMapping(value = { "/api/objects/messages/{messageQueueType}" }, method = { RequestMethod.GET })
+	@JsonView(PublicJsonProperty.class)
+	public ApiResponse<MessageHold, Object> rejectedMessages(@RequestParam(required = false) String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir,
+			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
+			@RequestParam(required = false) String channelId, @RequestParam(required = false) String domain,
+			@RequestParam(required = false) String lane, @PathVariable MESSAGE_QUEUE_TYPE messageQueueType) {
+		return ApiResponse.buildResults(
+				getPaginatedBulk(MessageHold.class, "MESSAGE_" + messageQueueType, pageNo, pageSize, sortBy, sortDir));
 	}
 }
