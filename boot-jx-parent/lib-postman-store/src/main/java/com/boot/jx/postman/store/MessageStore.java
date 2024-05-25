@@ -126,8 +126,10 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setFormatSubType(inboxMessage.getFormatSubType());
 
 		ContactDetailDoc contact = new ContactDetailDoc();
+		//contact.copyFrom(inboxMessage.contact()); TOO MUCH DATA
 		contact.setPhone(inboxMessage.getFrom());
 		contact.setContactType(ArgUtil.parseAsString(contactType));
+		contact.setChannelType(inboxMessage.contact().getChannelType());
 		doc.setContact(contact);
 
 		updateMessageDoc(inboxMessage, doc);

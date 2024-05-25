@@ -235,8 +235,12 @@ public class PMConstants {
 				return CHANNEL_TYPE.WA_GUPSHUP;
 			} else if (CHANNEL_TYPE.WA_360DC.equals(channel)) {
 				return CHANNEL_TYPE.WA_360DC;
+			} else if (CHANNEL_TYPE.WA_360D.equals(channel)) {
+				return CHANNEL_TYPE.WA_360D;
+			} else if (CHANNEL_TYPE.WACFB.equals(channel)) {
+				return CHANNEL_TYPE.WACFB;
 			}
-			return CHANNEL_TYPE.WA_360D;
+			return CHANNEL_TYPE.WA_360DC;
 		}
 		return null;
 	}
