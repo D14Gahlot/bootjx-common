@@ -610,7 +610,7 @@ public class AccountDashBoardManager {
 				dto.setLane(getLane(doc.getContactId()));
 				String id = getSummaryId(dto);
 				dto.setId(id);
-				if (ArgUtil.is(dto.getId())) {
+				if (ArgUtil.is(dto.getId()) && ArgUtil.is(doc.getType())) {
 					lstSummDto.add(dto);
 				}
 				String channelid = getSummaryWithChannelId(dto);
@@ -626,8 +626,6 @@ public class AccountDashBoardManager {
 
 		}
 		Map<Object, Long> summaryMap = new HashMap<>();
-//		Map<String, Map<String, Long>> datwWiseCount = lstSummDto.stream().collect(Collectors.groupingBy(
-//				SummaryDocDto::getId, Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting())));
 
 		/** day wise count **/
 		Map<String, Map<String, Long>> dayWiseCountMap = hourCntLst.stream()
