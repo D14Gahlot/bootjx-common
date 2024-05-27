@@ -279,7 +279,7 @@ public class AccountDashBoardManager {
 				dto.setDomain(tnt);
 				String id = getSummaryId(dto);
 				dto.setId(id);
-				if (ArgUtil.is(dto.getId())) {
+				if (ArgUtil.is(dto.getId()) && ArgUtil.is(doc.getType())) {
 					lstSummDto.add(dto);
 				}
 
