@@ -2036,7 +2036,7 @@ public class AdminDashBoardManager {
 				dto.setDomain(tnt);
 				String id = getSummaryWithChannelId(dto);
 				dto.setId(id);
-				if (ArgUtil.is(dto.getId())) {
+				if (ArgUtil.is(dto.getId()) && ArgUtil.is(dto.getUniqueContactId())) {
 					lstSummDto.add(dto);
 				}
 			}
