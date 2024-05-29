@@ -454,7 +454,6 @@ public class WacfbClient implements ChannelClient {
 									components
 											.add(buttonComponent.build().map());
 
-									
 
 								}
 							}
