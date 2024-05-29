@@ -159,4 +159,9 @@ public class WA360Constants {
 		}
 
 	}
+
+	public static String META_WA_CLOUD_URL(String mediaId) {
+		// TODO Auto-generated method stub
+		return META_WA_CLOUD_URL + "/" + mediaId;
+	}
 }
