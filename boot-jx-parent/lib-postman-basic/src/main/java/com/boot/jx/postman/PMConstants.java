@@ -78,8 +78,6 @@ public class PMConstants {
 		public static final String TELEGRAM = "tg";
 		public static final String TWITTER = "tw";
 		public static final String FACEBOOK = "fb";
-		public static final String WA_GUPSHUP = "wags";
-		public static final String WA_360D = "wa360";
 		public static final String WEB = "web";
 		public static final String INSTAGRAM = "ig";
 		public static final String EMAIL = "mailto";
@@ -87,10 +85,15 @@ public class PMConstants {
 		public static final String SMS = "sms";
 		public static final String OA = "oa";
 		public static final String FIREBASE = "firebase";
+
+		// WhatsApp Channels
+		public static final String WA_GUPSHUP = "wags";
+		public static final String WA_360D = "wa360";
 		/** WABA cloud via 360d **/
 		public static final String WA_360DC = "wac360";
 		/** WABA cloud via FB **/
 		public static final String WACFB = "wacfb";
+
 	}
 
 	public enum CHANNEL_TYPE_ENUM {

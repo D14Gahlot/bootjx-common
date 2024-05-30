@@ -246,6 +246,29 @@ public class PostManUtil {
 		return contactMeta;
 	}
 
+	public static String CHANNEL_TYPE_FALLBACK(String channel) {
+		if (ArgUtil.not(channel)) {
+			return null;
+		}
+		switch (channel) {
+		case CHANNEL_TYPE.WA_360D:
+			return CHANNEL_TYPE.WA_360DC;
+		case CHANNEL_TYPE.WA_360DC:
+			return CHANNEL_TYPE.WACFB;
+		case CHANNEL_TYPE.WA_GUPSHUP:
+			return CHANNEL_TYPE.WACFB;
+		default:
+			return null;
+		}
+	}
+
+	public static String CHANNEL_ID_FALLBACK(String channelId) {
+		Contactable c = PostManUtil.parseChannelId(channelId);
+		String channelType = CHANNEL_TYPE_FALLBACK(c.getChannelType());
+		c.setChannelType(channelType);
+		return PostManUtil.CHANNEL_ID(c);
+	}
+
 	public static String UNIQUE_API_KEY() {
 		return String.format("%s%s", UniqueID.generateString(), Random.randomAlphaNumeric(10));
 	}
