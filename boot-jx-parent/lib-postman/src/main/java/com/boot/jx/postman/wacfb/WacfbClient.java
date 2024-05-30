@@ -18,8 +18,8 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
-import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessagePrompt;
@@ -370,10 +370,20 @@ public class WacfbClient implements ChannelClient {
 									String path = (String) buttonParameter.get("path");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
-									buttonComponent.parameter("payLoad", model.pathEntry(path).asString());
+									buttonComponent.parameter("payload", model.pathEntry(path).asString());
 									components.add(buttonComponent.build().map());
 								}
 							}
+						}
+					} else {
+						String buttonType = (String) extTemplateComponentButton.get("type");
+						List<TmplElement> buttons = outboxMessage.optionActionButtons();
+						TmplElement button = CollectionUtil.getArray(buttons, i);
+						if (ArgUtil.is(button) && "QUICK_REPLY".equals(button.getType())
+								&& "QUICK_REPLY".equals(buttonType)) {
+							TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
+							buttonComponent.parameter("payload", "reply_id:" + button.getCode());
+							components.add(buttonComponent.build().map());
 						}
 					}
 				}

@@ -369,11 +369,21 @@ public class WA360Client implements ChannelClient {
 									String defaultValue = (String) buttonParameter.get("defaultValue");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
-									buttonComponent.parameter("payLoad",
+									buttonComponent.parameter("payload",
 											model.pathEntry(path).pathEntrySafe(path2).asString(defaultValue));
 									components.add(buttonComponent.build().map());
 								}
 							}
+						}
+					} else {
+						String buttonType = (String) extTemplateComponentButton.get("type");
+						List<TmplElement> buttons = outboxMessage.optionActionButtons();
+						TmplElement button = CollectionUtil.getArray(buttons, i);
+						if (ArgUtil.is(button) && "QUICK_REPLY".equals(button.getType())
+								&& "QUICK_REPLY".equals(buttonType)) {
+							TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
+							buttonComponent.parameter("payload", "reply_id:" + button.getCode());
+							components.add(buttonComponent.build().map());
 						}
 					}
 				}

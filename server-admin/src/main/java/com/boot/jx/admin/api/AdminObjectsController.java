@@ -29,7 +29,9 @@ import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.PublicJsonProperty;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
@@ -78,7 +80,7 @@ public class AdminObjectsController {
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
-		ApiResponseUtil.addLog(q.toString());
+		ApiResponseUtil.addLog(q.build().getQuery().toString());
 		// System.out.println(q.build().getQuery().toString());
 		return comonMongoTemplate.find(q);
 	}
@@ -205,6 +207,9 @@ public class AdminObjectsController {
 			if (ArgUtil.is(chatSessionDoc)) {
 				contactType = ContactType.valueOf(chatSessionDoc.getContactType());
 			}
+		} else if (ArgUtil.is(channelId)) {
+			Contactable c = PostManUtil.parseChannelId(channelId);
+			contactType = c.type();
 		}
 
 		if (!ArgUtil.is(contactType)) {
