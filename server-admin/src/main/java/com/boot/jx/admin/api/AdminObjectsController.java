@@ -196,8 +196,7 @@ public class AdminObjectsController {
 			@RequestParam(required = false, defaultValue = "desc") String sortDir,
 			@RequestParam(required = false) String sessionId, @RequestParam(required = false) ContactType contactType,
 			@RequestParam(required = false) String channelType, @RequestParam(required = false) String channelId,
-			@RequestParam(required = false) String domain, @RequestParam(required = false) String lane,
-			@PathVariable MESSAGE_QUEUE_TYPE messageQueueType) {
+			@RequestParam(required = false) String domain, @RequestParam(required = false) String lane) {
 
 		if (ArgUtil.is(sessionId)) {
 			ChatSessionDoc chatSessionDoc = comonMongoTemplate.findById(sessionId, ChatSessionDoc.class);
