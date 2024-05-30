@@ -78,6 +78,7 @@ public class AdminObjectsController {
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
+		ApiResponseUtil.addLog(q.toString());
 		// System.out.println(q.build().getQuery().toString());
 		return comonMongoTemplate.find(q);
 	}
