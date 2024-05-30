@@ -160,12 +160,12 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 	@Override
 	public boolean isPushAllowed() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isPushOnlyApproved() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -175,7 +175,7 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 	@Override
 	public boolean isPushToNewContactAllowed() {
-		return false;
+		return true;
 	}
 
 	@Override
