@@ -218,6 +218,8 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 			inboxMessage.form().put("reply_title", m.getPostBack().getTitle());
 		}
 
+		inboxMessage.setOriginalMessage(m);
+		
 		return inboxMessage;
 	}
 
