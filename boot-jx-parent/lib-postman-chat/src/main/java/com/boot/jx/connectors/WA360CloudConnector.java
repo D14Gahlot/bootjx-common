@@ -205,8 +205,12 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
-			inboxMessage.form().put("reply_payload", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString());
-
+			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
+			inboxMessage.form().put("reply_payload", reply_payload);
+			if (ArgUtil.is(reply_payload) && reply_payload.startsWith("reply_id:")) {
+				String reply_id  = reply_payload.replaceFirst("reply_id:", "");
+				inboxMessage.form().put("reply_id", reply_id);
+			}
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("image".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.IMAGE);
@@ -443,7 +447,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
 
-		System.out.println("toMessageReport {========}:" + JsonUtil.toJson(requestMap));
+		// System.out.println("toMessageReport {========}:" +
+		// JsonUtil.toJson(requestMap));
 
 		MessageReport report = this.createMessageReport(channelConfig);
 		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
@@ -457,7 +462,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		report.setMessageIdExt(requestMap.getString("id"));
 
 		String status = requestMap.getString("status");
-		LOGGER.info("toMessageReport csid-Receiepent mob no - status:" + csid + "--" + status);
 
 		if ("sent".equals(status)) {
 			report.setStatus(Status.SENTX);

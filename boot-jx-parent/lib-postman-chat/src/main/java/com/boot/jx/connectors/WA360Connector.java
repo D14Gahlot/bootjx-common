@@ -200,8 +200,12 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
-			inboxMessage.form().put("reply_payload", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString());
-
+			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
+			inboxMessage.form().put("reply_payload", reply_payload);
+			if (ArgUtil.is(reply_payload) && reply_payload.startsWith("reply_id:")) {
+				String reply_id  = reply_payload.replaceFirst("reply_id:", "");
+				inboxMessage.form().put("reply_id", reply_id);
+			}
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("image".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.IMAGE);
@@ -408,11 +412,9 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
 		MessageReport report = this.createMessageReport(channelConfig);
 		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
-		LOGGER.info("1.toMessageReport csid :" + csid);
 		if (!ArgUtil.is(csid)) {
 			csid = requestMap.getString("recipient_id");
 		}
-		LOGGER.info("2.toMessageReport csid :" + csid);
 		report.contact().setCsid(csid);
 		report.setChangeStamp(requestMap.getLong("timestamp", 0L) * 1000);
 		report.setMessageIdExt(requestMap.getString("id"));

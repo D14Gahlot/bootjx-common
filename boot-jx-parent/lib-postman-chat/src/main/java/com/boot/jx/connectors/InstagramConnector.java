@@ -38,7 +38,6 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.INSTAGRAM)

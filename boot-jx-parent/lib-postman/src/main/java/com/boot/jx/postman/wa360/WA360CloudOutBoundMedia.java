@@ -1,7 +1,5 @@
 package com.boot.jx.postman.wa360;
 
-import java.io.Serializable;
-
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
