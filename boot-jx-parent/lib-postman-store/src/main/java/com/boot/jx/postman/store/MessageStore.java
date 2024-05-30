@@ -46,7 +46,7 @@ import com.google.common.collect.Lists;
 import com.mongodb.client.result.UpdateResult;
 
 @Component
-public class MessageStore extends CommonMongoTemplateAbstract {
+public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageStore.class);
 
@@ -126,7 +126,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setFormatSubType(inboxMessage.getFormatSubType());
 
 		ContactDetailDoc contact = new ContactDetailDoc();
-		//contact.copyFrom(inboxMessage.contact()); TOO MUCH DATA
+		// contact.copyFrom(inboxMessage.contact()); TOO MUCH DATA
 		contact.setPhone(inboxMessage.getFrom());
 		contact.setContactType(ArgUtil.parseAsString(contactType));
 		contact.setChannelType(inboxMessage.contact().getChannelType());

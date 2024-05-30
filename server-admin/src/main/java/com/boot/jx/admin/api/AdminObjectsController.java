@@ -11,14 +11,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.UserActivityLogDoc;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
@@ -32,6 +37,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 public class AdminObjectsController {
+
+	@Autowired
+	private CommonMongoTemplate comonMongoTemplate;
 
 	@Autowired
 	private MessageStore messageStore;
@@ -71,7 +79,7 @@ public class AdminObjectsController {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
 		// System.out.println(q.build().getQuery().toString());
-		return messageStore.find(q);
+		return comonMongoTemplate.find(q);
 	}
 
 	@RequestMapping(value = "/api/objects/logs", method = { RequestMethod.GET })
@@ -87,7 +95,7 @@ public class AdminObjectsController {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
 
-		return ApiResponse.buildResults(messageStore.find(q));
+		return ApiResponse.buildResults(comonMongoTemplate.find(q));
 	}
 
 	@RequestMapping(value = "/api/objects/user_activities", method = { RequestMethod.GET })
@@ -111,7 +119,7 @@ public class AdminObjectsController {
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
-		return ApiResponse.buildResults(messageStore.find(q));
+		return ApiResponse.buildResults(comonMongoTemplate.find(q));
 	}
 
 	@RequestMapping(value = "/api/objects/change_logs", method = { RequestMethod.GET })
@@ -135,7 +143,7 @@ public class AdminObjectsController {
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
-		return ApiResponse.buildResults(messageStore.find(q));
+		return ApiResponse.buildResults(comonMongoTemplate.find(q));
 	}
 
 	@RequestMapping(value = "/api/objects/payload_dump", method = { RequestMethod.GET })
@@ -167,7 +175,7 @@ public class AdminObjectsController {
 
 	@RequestMapping(value = { "/api/objects/messages/{messageQueueType}" }, method = { RequestMethod.GET })
 	@JsonView(PublicJsonProperty.class)
-	public ApiResponse<MessageHold, Object> rejectedMessages(@RequestParam(required = false) String id,
+	public ApiResponse<MessageHold, Object> queuedMessages(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
@@ -177,5 +185,33 @@ public class AdminObjectsController {
 			@RequestParam(required = false) String lane, @PathVariable MESSAGE_QUEUE_TYPE messageQueueType) {
 		return ApiResponse.buildResults(
 				getPaginatedBulk(MessageHold.class, "MESSAGE_" + messageQueueType, pageNo, pageSize, sortBy, sortDir));
+	}
+
+	@RequestMapping(value = { "/api/objects/messages" }, method = { RequestMethod.GET })
+	@JsonView(PublicJsonProperty.class)
+	public ApiResponse<MessageDoc, Object> allMessages(@RequestParam(required = false) String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir,
+			@RequestParam(required = false) String sessionId, @RequestParam(required = false) ContactType contactType,
+			@RequestParam(required = false) String channelType, @RequestParam(required = false) String channelId,
+			@RequestParam(required = false) String domain, @RequestParam(required = false) String lane,
+			@PathVariable MESSAGE_QUEUE_TYPE messageQueueType) {
+
+		if (ArgUtil.is(sessionId)) {
+			ChatSessionDoc chatSessionDoc = comonMongoTemplate.findById(sessionId, ChatSessionDoc.class);
+			if (ArgUtil.is(chatSessionDoc)) {
+				contactType = ContactType.valueOf(chatSessionDoc.getContactType());
+			}
+		}
+
+		if (!ArgUtil.is(contactType)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("contactType").codeKey("INVALID_CONTACT_TYPE")
+					.description("Invalid Contact Type " + contactType));
+		}
+
+		return ApiResponse.buildResults(getPaginatedBulk(MessageDoc.class, MessageStore.getCollectionName(contactType),
+				pageNo, pageSize, sortBy, sortDir));
 	}
 }
