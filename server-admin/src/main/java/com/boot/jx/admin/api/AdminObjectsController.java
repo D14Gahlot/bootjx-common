@@ -195,7 +195,8 @@ public class AdminObjectsController {
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
 			@RequestParam(required = false, defaultValue = "desc") String sortDir,
-			@RequestParam(required = false) String sessionId, @RequestParam(required = false) ContactType contactType,
+			@RequestParam(required = false) String sessionId,
+			@RequestParam(required = false, value = "contact.contactType") ContactType contactType,
 			@RequestParam(required = false) String channelType, @RequestParam(required = false) String channelId,
 			@RequestParam(required = false) String domain, @RequestParam(required = false) String lane) {
 
