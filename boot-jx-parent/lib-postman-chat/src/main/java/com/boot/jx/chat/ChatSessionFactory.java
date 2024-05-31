@@ -55,8 +55,8 @@ public class ChatSessionFactory {
 			ChatContactDoc chatContactDoc = sessionStore.getContact(contactId);
 			if (ArgUtil.is(chatContactDoc)) {
 				String sessionId = chatContactDoc.getSessionId();
-				if(ArgUtil.is(sessionId)){
-					chatSessionDoc = sessionStore.getSession(sessionId);					
+				if (ArgUtil.is(sessionId)) {
+					chatSessionDoc = sessionStore.getSession(sessionId);
 				}
 			}
 		}
@@ -125,6 +125,10 @@ public class ChatSessionFactory {
 			chatContactQuery.updateCreatedStamp();
 			// chatContactDoc = sessionStore.save(chatContactQuery.getDoc());
 			chatContactDoc = sessionStore.save(chatContactQuery);
+		} else if (!ArgUtil.is(chatContactDoc.getChannelType(), sessionMessage.contact().getChannelType())) {
+			ChatContactQuery chatContactQuery = new ChatContactQuery(chatContactDoc);
+			chatContactQuery.update(contact);
+			sessionStore.updateFirst(chatContactQuery);
 		}
 
 		// SESSION FiND BY CONTACT_ID
