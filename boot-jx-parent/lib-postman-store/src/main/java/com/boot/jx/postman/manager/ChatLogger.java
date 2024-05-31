@@ -106,7 +106,11 @@ public class ChatLogger {
 		this.error(inboxMessage, null, e);
 	}
 
-	public void error(LogMessage inboxMessage, Status status, Throwable e) {
+	public void error(LogMessage inboxMessage, String erromessage) {
+		this.error(inboxMessage, null, null, erromessage);
+	}
+
+	public void error(LogMessage inboxMessage, Status status, Throwable e, String message) {
 		MessageDocLogs doc = new MessageDocLogs();
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setMessageId(inboxMessage.getMessageId());
@@ -122,8 +126,12 @@ public class ChatLogger {
 		toLogs(e, doc);
 
 		messageStore.save(doc);
-		inboxMessage.logs().add(e.getMessage());
-		inboxMessage.logs().add("trail:" + doc.getMessageId());
+		inboxMessage.logs().add(message);
+		inboxMessage.logs().add("trail_id:" + doc.getMessageId());
+	}
+
+	public void error(LogMessage inboxMessage, Status status, Throwable e) {
+		this.error(inboxMessage, status, e, e.getMessage());
 	}
 
 	public void error(InBoundEvent inBoundEvent, Throwable e) {
@@ -141,6 +149,10 @@ public class ChatLogger {
 	}
 
 	private void toLogs(Throwable e, MessageDocLogs doc) {
+		if (e == null) {
+			return;
+		}
+
 		doc.logs().add(e.getMessage());
 
 		StackTraceElement[] traces = e.getStackTrace();

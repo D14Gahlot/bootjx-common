@@ -94,8 +94,7 @@ public class ConfigOptionMetaController {
 
 	@RequestMapping(value = "/api/meta/channel_configs/{channelType}", method = { RequestMethod.GET })
 	public ApiResponse<ConfigMeta, Object> channelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType) {
-		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
-				.get(channelType.toString());
+		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.get(channelType.toString());
 		List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
 		return ApiResponse.buildResults(configs);
 	}
@@ -186,14 +185,16 @@ public class ConfigOptionMetaController {
 	private ConfigManagerImpl configManager;
 
 	// PREFS
-	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN })
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN,
+			AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
 		configManager.save(map);
 		return ApiResponse.buildResults(configManager.getSetupConfigs());
 	}
 
-	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN })
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN,
+			AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.PUT })
 	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestParam String key, @RequestParam String value,
 			@RequestParam(defaultValue = "false") boolean shared) {

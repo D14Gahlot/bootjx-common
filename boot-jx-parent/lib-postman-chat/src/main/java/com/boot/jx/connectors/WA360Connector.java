@@ -121,28 +121,30 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		}
 		ChannelConfig channel = getChannelConfig(inboxMessage);
 
-		if (channel.getWa360d().isPromptName()) {
-			if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
-				this.context().session().put("session_init_user_input_type", "name");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your name");
+		if (ArgUtil.is(channel.getWa360d())) {
+			if (channel.getWa360d().isPromptName()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
+					this.context().session().put("session_init_user_input_type", "name");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your name");
+				}
+
 			}
 
-		}
+			if (channel.getWa360d().isPromptEmail()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
+					this.context().session().put("session_init_user_input_type", "email");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your email");
+				}
 
-		if (channel.getWa360d().isPromptEmail()) {
-			if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
-				this.context().session().put("session_init_user_input_type", "email");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your email");
 			}
 
-		}
+			if (channel.getWa360d().isPromptPhone()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
+					this.context().session().put("session_init_user_input_type", "phone");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
+				}
 
-		if (channel.getWa360d().isPromptPhone()) {
-			if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
-				this.context().session().put("session_init_user_input_type", "phone");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
 			}
-
 		}
 
 		return null;
@@ -203,7 +205,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
 			inboxMessage.form().put("reply_payload", reply_payload);
 			if (ArgUtil.is(reply_payload) && reply_payload.startsWith("reply_id:")) {
-				String reply_id  = reply_payload.replaceFirst("reply_id:", "");
+				String reply_id = reply_payload.replaceFirst("reply_id:", "");
 				inboxMessage.form().put("reply_id", reply_id);
 			}
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
