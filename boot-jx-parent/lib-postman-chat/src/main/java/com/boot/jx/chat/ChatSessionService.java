@@ -86,17 +86,12 @@ public class ChatSessionService {
 					ChannelConfig config = connector.getChannelConfig(inboxMessage);
 					ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider
 							.get(inboxMessage.contact().getChannelType());
-					if (ArgUtil.is(config)) {
-						if (ArgUtil.is(plugin)) {
-							AChannelDetails details = plugin.getDetails(config);
-							if (!ArgUtil.is(details)) {
-								logManager.error(inboxMessage, "Channel Details Not Found:" + config.getChannelId());
-							}
-						} else {
-							logManager.error(inboxMessage, "Channel Plugin Not Found:" + config.getChannelId());
-						}
-					} else {
+					if (!ArgUtil.is(config)) {
 						logManager.error(inboxMessage, "Channel Config Not Found:" + config.getChannelId());
+					} else if (!ArgUtil.is(plugin)) {
+						logManager.error(inboxMessage, "Channel Plugin Not Found:" + config.getChannelId());
+					} else if (!ArgUtil.is(plugin.getDetails(config))) {
+						logManager.error(inboxMessage, "Channel Details Not Found:" + config.getChannelId());
 					}
 
 					OutboxMessage reply = connector.initSession(session, inboxMessage);
