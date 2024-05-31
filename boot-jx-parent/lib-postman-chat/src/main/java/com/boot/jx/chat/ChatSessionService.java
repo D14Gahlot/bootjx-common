@@ -12,6 +12,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -24,6 +25,9 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
@@ -77,9 +81,24 @@ public class ChatSessionService {
 		if (!initd) {
 			ConnectorHandler connector = connectorHandlerFactory.get(inboxMessage.contact().type(),
 					inboxMessage.contact().getChannelType());
-
 			if (ArgUtil.is(connector)) {
 				try {
+					ChannelConfig config = connector.getChannelConfig(inboxMessage);
+					ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider
+							.get(inboxMessage.contact().getChannelType());
+					if (ArgUtil.is(config)) {
+						if (ArgUtil.is(plugin)) {
+							AChannelDetails details = plugin.getDetails(config);
+							if (!ArgUtil.is(details)) {
+								logManager.error(inboxMessage, "Channel Details Not Found:" + config.getChannelId());
+							}
+						} else {
+							logManager.error(inboxMessage, "Channel Plugin Not Found:" + config.getChannelId());
+						}
+					} else {
+						logManager.error(inboxMessage, "Channel Config Not Found:" + config.getChannelId());
+					}
+
 					OutboxMessage reply = connector.initSession(session, inboxMessage);
 					if (ArgUtil.is(reply)) {
 						try {
@@ -94,7 +113,7 @@ public class ChatSessionService {
 					}
 				} catch (Exception e) {
 					logManager.error(inboxMessage, e);
-					//e.printStackTrace();
+					// e.printStackTrace();
 				}
 				if (initd) {
 					inboxMessage.session().setInitMessage(true);

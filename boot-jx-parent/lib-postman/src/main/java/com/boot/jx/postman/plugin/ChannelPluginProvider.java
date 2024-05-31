@@ -67,7 +67,8 @@ public class ChannelPluginProvider {
 			// lib.getClass().getAnnotation();
 			List<String> zoom = new ArrayList<String>();
 			if (annotation != null) {
-				//LOGGER.debug("get(ContactType {}, String {})", annotation.contactType(), annotation.channel());
+				// LOGGER.debug("get(ContactType {}, String {})", annotation.contactType(),
+				// annotation.channel());
 				for (ContactType contactType : annotation.contactType()) {
 					for (String channel : annotation.channel()) {
 						zoom.add(String.format("%s_%s", contactType, channel));
@@ -324,8 +325,12 @@ public class ChannelPluginProvider {
 		PLUGIN_MAPPING.put(channelPlugin.getChannelType(), channelPlugin);
 	}
 
-	public ChannelPlugin<? extends AChannelDetails> get(String channelType) {
+	public static ChannelPlugin<? extends AChannelDetails> getOrDefault(String channelType) {
 		return PLUGIN_MAPPING.getOrDefault(channelType, WEB);
+	}
+
+	public static ChannelPlugin<? extends AChannelDetails> get(String channelType) {
+		return PLUGIN_MAPPING.get(channelType);
 	}
 
 	private static final WebPlugin WEB = new WebPlugin();

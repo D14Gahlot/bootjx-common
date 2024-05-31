@@ -16,7 +16,7 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 	public String getChannelType() {
 		return CHANNEL_TYPE.WACFB;
 	}
-
+	
 	@Override
 	public ContactType getContactType() {
 		return ContactType.WHATSAPP;

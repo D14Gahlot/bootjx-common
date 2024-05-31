@@ -225,28 +225,30 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 		ChannelConfig channel = getChannelConfig(inboxMessage);
 
-		if (channel.getWacfb().isPromptName()) {
-			if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
-				this.context().session().put("session_init_user_input_type", "name");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your name");
+		if (ArgUtil.is(channel.getWacfb())) {
+			if (channel.getWacfb().isPromptName()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
+					this.context().session().put("session_init_user_input_type", "name");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your name");
+				}
+
 			}
 
-		}
+			if (channel.getWacfb().isPromptEmail()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
+					this.context().session().put("session_init_user_input_type", "email");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your email");
+				}
 
-		if (channel.getWacfb().isPromptEmail()) {
-			if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
-				this.context().session().put("session_init_user_input_type", "email");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your email");
 			}
 
-		}
+			if (channel.getWacfb().isPromptPhone()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
+					this.context().session().put("session_init_user_input_type", "phone");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
+				}
 
-		if (channel.getWacfb().isPromptPhone()) {
-			if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
-				this.context().session().put("session_init_user_input_type", "phone");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
 			}
-
 		}
 
 		return null;
