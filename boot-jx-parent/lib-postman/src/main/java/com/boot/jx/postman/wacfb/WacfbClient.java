@@ -371,7 +371,7 @@ public class WacfbClient implements ChannelClient {
 									String path = (String) buttonParameter.get("path");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
-									buttonComponent.parameter("payLoad", model.pathEntry(path).asString());
+									buttonComponent.parameter("payload", model.pathEntry(path).asString());
 									components.add(buttonComponent.build().map());
 
 								}
