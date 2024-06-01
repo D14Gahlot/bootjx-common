@@ -61,11 +61,11 @@ public class CustomerProfileService {
 		return cmFieldMgr.fetchCustomerProfileMasterDoc(id);
 
 	}
-
-	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
-		return cmFieldMgr.fetchCustomerContactProfile(id);
-
-	}
+//
+//	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
+//		return cmFieldMgr.fetchCustomerContactProfile(id);
+//
+//	}
 
 	@Deprecated
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {

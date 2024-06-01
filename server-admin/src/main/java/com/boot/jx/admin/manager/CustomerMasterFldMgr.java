@@ -29,6 +29,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
@@ -36,10 +37,16 @@ import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.store.ContactStore;
+import com.boot.jx.rest.RestService;
+import com.boot.model.MapModel;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonUtil;
+import com.boot.utils.MapBuilder;
 import com.boot.utils.UniqueID;
+import com.boot.utils.MapBuilder.BuilderMap;
 
 @Component
 public class CustomerMasterFldMgr {
@@ -57,6 +64,12 @@ public class CustomerMasterFldMgr {
 
 	@Autowired
 	ContactStore contactStore;
+	
+	@Autowired
+	PMEnvironment pmEnvironment;
+	
+	@Autowired
+	private RestService restService;
 
 	public List<CustomerMasterFieldDto> addAndEditMasterfield(CustomerMasterFieldDto reqDto) {
 
@@ -142,6 +155,32 @@ public class CustomerMasterFldMgr {
 			doc.setStatus(ArgUtil.parseAsString(Status.CRTD));
 
 			commonMongoTemplate.save(doc);
+			SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
+			String nodeUrl = globalVars.keyEntry("cp_node_url").asString();
+			System.out.println("isSchedular :"+nodeUrl);
+			
+			
+			/** to call node API **/
+			//MapModel data =new MapModel();
+			HashMap<String, Object> data =new HashMap<>();
+			BuilderMap mapBuilder = MapBuilder.map();
+			mapBuilder.put("id", doc.getId());
+			BuilderMap optionMap = MapBuilder.map();
+			optionMap.put("timezone","Asia/Kolkata");
+			
+			
+			data.put("name","cust_profiles_bulk_upload");
+			data.put("desc","Deduplication and saving the bulk uploaded customer profiles to the database");
+			data.put("data",mapBuilder.toMap());
+			//data.put("options",optionMap.toMap());
+			String urlString ="https://demo.mehery.xyz/chrono/scheduler/api/v1/job/now";
+			
+			 String jsonStr = JsonUtil.toJson(data);
+			LOGGER.info("post data :"+jsonStr);
+			MapModel resp= restService.ajax(nodeUrl).postJson(data).asMapModel();
+			LOGGER.info("JSON UTIL:"+JsonUtil.toJsonPrettyPrint(resp));
+			
+			
 
 			return doc;
 		} catch (Exception e) {
@@ -155,7 +194,6 @@ public class CustomerMasterFldMgr {
 
 		List<JobsResponseDto> dtoLst = new ArrayList<>();
 		JobScheduledDoc cmProfileDoc = null;
-		JobsOutPutDoc jobsOutPutDoc = null;
 		JobsResponseDto dto = null;
 		if (ArgUtil.is(id)) {
 			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
@@ -163,12 +201,6 @@ public class CustomerMasterFldMgr {
 				dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
 				dtoLst.add(dto);
 			}
-//			jobsOutPutDoc =commonMongoTemplate.findByIdString(id, JobsOutPutDoc.class); 
-//			if(ArgUtil.is(jobsOutPutDoc)) {
-//				JobsResponseDto dtoJOutput = EntityDtoUtil.entityToDto(jobsOutPutDoc, new JobsResponseDto());
-//				dto.setOutPut(dtoJOutput.getOutPut());	
-//			}
-
 		} else {
 			List<JobScheduledDoc> lstProfileDocs = commonMongoTemplate.findAll(JobScheduledDoc.class);
 			for (JobScheduledDoc doc : lstProfileDocs) {
@@ -182,26 +214,26 @@ public class CustomerMasterFldMgr {
 
 	/** read customer contacts from s3 bucket -excel **/
 
-	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
-		List<JobsResponseDto> dtoLst = new ArrayList<>();
-		JobScheduledDoc cmProfileDoc = null;
-		String url = null;
-		if (ArgUtil.is(id)) {
-			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
-			if (ArgUtil.is(cmProfileDoc)) {
-				// url = cmProfileDoc.getFileUploadMap().
-				// JobScheduledDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new
-				// JobScheduledDto());
-
-				// dtoLst.add(dto);
-			}
-		}
-
-		System.out.println("url :" + url);
-
-		return dtoLst;
-
-	}
+//	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
+//		List<JobsResponseDto> dtoLst = new ArrayList<>();
+//		JobScheduledDoc cmProfileDoc = null;
+//		String url = null;
+//		if (ArgUtil.is(id)) {
+//			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
+//			if (ArgUtil.is(cmProfileDoc)) {
+//				// url = cmProfileDoc.getFileUploadMap().
+//				JobsResponseDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
+//				dtoLst.add(dto);
+//			}
+//		}else {
+//			List<JobScheduledDoc> lstAllDocs = commonMongoTemplate.findAll(null);
+//		}
+//
+//		System.out.println("url :" + url);
+//
+//		return dtoLst;
+//
+//	}
 
 	@Deprecated
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
