@@ -46,6 +46,7 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.DateUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 
@@ -797,6 +798,10 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		Query query = new Query();
 		Criteria primaryCriteria = new Criteria();//
 		List<Criteria> criterias = new ArrayList<Criteria>();
+		
+		if(fromStamp<=0) {
+			fromStamp =DateUtil.todayStartTime();
+		}
 		
 		primaryCriteria = primaryCriteria.and("assignedAgentStamp").gt(fromStamp).lt(toStamp);
 
