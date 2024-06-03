@@ -1391,14 +1391,7 @@ public class AdminDashBoardManager {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 
 			List<Document> list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
-
-//			List<DBObject> list = new ArrayList<DBObject>();
-//			list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
-//			DBCollection col = mongoTemplate.getCollection(contactType);
-//			Cursor cursor = col.aggregate(list,
-//					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
-
-			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
+		MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
 				Document object = cursor.next();
@@ -1508,9 +1501,6 @@ public class AdminDashBoardManager {
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 			List<Document> list = getAggregationMatchForMsgStatus(lasDayTimeStmp, currentTs);
-//			DBCollection col = mongoTemplate.getCollection(contactType);
-//			Cursor cursor = col.aggregate(list,
-//					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
 
 			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
@@ -1825,6 +1815,9 @@ public class AdminDashBoardManager {
 		int year = cal.get(Calendar.YEAR);
 		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
 		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+		String offset = getTimeZoneFromSetup();
+		monthMinTimeStamp = monthMinTimeStamp+countryTimeZoneOffset(offset);
+		monthMaxTimeStamp = monthMaxTimeStamp+countryTimeZoneOffset(offset);
 
 		List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
 		Query query = new Query();
@@ -1858,7 +1851,7 @@ public class AdminDashBoardManager {
 		String lane = "";
 		if (ArgUtil.is(contactid)) {
 			String[] contactids = contactid.split("_");
-			if (contactids != null && contactids.length > 0) {
+			if (contactids != null && contactids.length > 1) {
 				lane = contactids[1];
 			}
 		}
