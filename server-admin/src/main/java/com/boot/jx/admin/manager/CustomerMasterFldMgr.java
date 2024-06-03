@@ -18,7 +18,9 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
+import com.boot.jx.admin.dto.SearchCriteria;
 import com.boot.jx.admin.dto.SearchCustomerProfileDto;
+import com.boot.jx.admin.dto.SearchQuery;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
@@ -45,8 +47,8 @@ import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
-import com.boot.utils.UniqueID;
 import com.boot.utils.MapBuilder.BuilderMap;
+import com.boot.utils.UniqueID;
 
 @Component
 public class CustomerMasterFldMgr {
@@ -355,10 +357,19 @@ public class CustomerMasterFldMgr {
 	public List<JobsResponseDto> fetchJobsOutPut(String id, String jobid) {
 		List<JobsResponseDto> lstDtos = new ArrayList<>();
 		List<JobsOutPutDoc> lstDocs = new ArrayList<>();
-		JobsOutPutDoc jobsOpDoc = null;
-		if (ArgUtil.is(id) || ArgUtil.is(jobid)) {
+		if (ArgUtil.is(id) && ArgUtil.isEmptyString(jobid)) {
 			Query qryQuery = new Query();
-			Criteria criteria = new Criteria().orOperator(Criteria.where("id").is(id),
+			Criteria criteria = Criteria.where("id").is(id);
+			qryQuery.addCriteria(criteria);
+			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
+		}else if (ArgUtil.is(jobid) && ArgUtil.isEmptyString(id)) {
+			Query qryQuery = new Query();
+			Criteria criteria = Criteria.where("jobid").is(jobid);
+			qryQuery.addCriteria(criteria);
+			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
+		}else if (ArgUtil.is(id) && ArgUtil.is(jobid)) {
+			Query qryQuery = new Query();
+			Criteria criteria = new Criteria().andOperator(Criteria.where("id").is(id),
 					Criteria.where("jobid").is(jobid));
 			qryQuery.addCriteria(criteria);
 
@@ -462,6 +473,59 @@ public class CustomerMasterFldMgr {
 		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
 				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
 		return contactStore.find(qb);
+	}
+
+	/** profile search **/
+	
+	public List<CustomerProfileDoc> getProfileSearch(SearchQuery searchQry) {
+		int limit = searchQry.getPageSize() == 0 ? 25 :searchQry.getPageSize();
+		String sortDir =ArgUtil.parseAsString(searchQry.getSortBy(), "asc");
+		List<SearchCriteria> searchCriterias =searchQry.getSearchCriterias(); 
+		
+		List<Criteria> criterias =new LinkedList<Criteria>();
+		
+		for(SearchCriteria src :searchCriterias) {
+			criterias.add(createCriteria(src.getKey(),src.getOperation(),src.getValue()));
+		}
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(new Criteria().orOperator(criterias.toArray(new Criteria[criterias.size()]))).sortBy(sortDir).limit(limit);
+		return contactStore.find(qb);
+	}
+	
+	private Criteria createCriteria(String key, String operation, Object value) {
+        switch (operation) {
+            case "=":
+            case "EQ":	
+                return Criteria.where(key).is(value);
+            case ">":
+            case "GT":	
+                return Criteria.where(key).gt(value);
+            case "<":
+            case "LT":		
+                return Criteria.where(key).lt(value);
+            case ">=":
+            case "GTE":
+                return Criteria.where(key).gte(value);
+            case "<=":
+            case "LTE":		
+                return Criteria.where(key).lte(value);
+            case "!=":
+            case "NE":	
+                return Criteria.where(key).ne(value);
+            case "STARTS_WITH": // Criteria for name starts with a specific prefix
+            	return Criteria.where(key).regex("^" + value, "i"); // Case-insensitive search
+            case "END_WITH":  // Criteria for name ends with a specific suffix
+            	return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
+            case "ne": // Criteria for field is not empty
+            	return Criteria.where(key).ne("").and(key).ne(null);
+            case "ANY_MATCH":	// Criteria for matching any or all elements
+            	return  Criteria.where(key).in(value);	
+            case "ALL_MATCH":	// Criteria for matching all elements
+            	return  Criteria.where(key).all(value);	
+            default:
+                throw new IllegalArgumentException("Invalid operation: " + operation);
+        }
+    
 	}
 
 }

@@ -40,6 +40,7 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 
 @RestController
@@ -114,7 +115,6 @@ public class AgMainController {
 		query.limit = limit;
 		query.add(ArgUtil.parseAsEnumT(tab, CHAT_ASSIGN_GROUP.class));
 		query.add(ArgUtil.parseAsEnumT(searchStatus, CHAT_STATE.class));
-		// System.out.println("query MRU SEARCH "+JsonUtil.toJsonPrettyPrint(query));
 		return getSessionAssignments(withMessage, status, away, new ArrayList<ChatSessionDTO>(), query);
 	}
 
