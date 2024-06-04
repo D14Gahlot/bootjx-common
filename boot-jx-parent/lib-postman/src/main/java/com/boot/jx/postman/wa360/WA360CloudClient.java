@@ -494,7 +494,7 @@ public class WA360CloudClient implements ChannelClient {
 		if (ArgUtil.is(outboxMessage.getAttachments())) {
 			MapModel intr = MapModel.createInstance();
 			Attachment attachment = outboxMessage.getAttachments().get(0);
-			WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
+			WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
 			// wa360OutBoundMedia.setCaption(ArgUtil.nonEmpty(attachment.getMediaCaption(),
 			// outboxMessage.getSubject()));
 			wa360OutBoundMedia.setLink(attachment.getMediaURL());
