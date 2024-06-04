@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.admin.dto.CustomerProfileRequest;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
@@ -92,5 +93,13 @@ public class AdminCustomerController {
 	public ApiResponse<ChatContactDoc, Object> linkProfile(@RequestParam String contactId) {
 		return ApiResponse.buildResult(contactStore.delinkProfile(contactId));
 	}
+	
+	@RequestMapping(value = "/profile/create", method = { RequestMethod.POST })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<CustomerProfileDoc, Object> createprofile(@RequestBody CustomerProfileDoc req) {
+		return ApiResponse.buildResult(contactStore.createprofile(req));
+	}
+
+
 
 }

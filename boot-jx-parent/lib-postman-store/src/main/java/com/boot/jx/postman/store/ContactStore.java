@@ -1,5 +1,6 @@
 package com.boot.jx.postman.store;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -303,6 +304,72 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			}
 
 		}
+	}
+
+	public CustomerProfileDoc createprofile(CustomerProfileDoc req) {
+		CustomerProfileDoc doc = findById(req.getId(), CustomerProfileDoc.class);
+		if(ArgUtil.is(doc)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field(doc.getCode())
+					.codeKey("ValidPhoneDuplicate").description(doc.getCode() + " already exists"));
+		}else {
+			doc= new CustomerProfileDoc();
+			doc.setName(req.getName());
+			doc.setCode(req.getCode());
+			doc.setRmCode(req.getRmCode());
+			 Set<PBEmail> emails = new HashSet<>();
+			 Set<PBEmail> emailAlt = new HashSet<>();
+			if(req.getEmails()!=null && !req.getEmails().isEmpty()){
+				 Set<PBEmail> reqEmails =req.getEmails();
+				for(PBEmail pbEmail:reqEmails) {
+					emails.add(setEmail(pbEmail));
+				}
+				doc.setEmails(emails);
+			}
+			if(req.getEmailsAlt()!=null && !req.getEmailsAlt().isEmpty()){
+				 Set<PBEmail> reqEmails =req.getEmailsAlt();
+				for(PBEmail pbEmail:reqEmails) {
+					emailAlt.add(setEmail(pbEmail));
+				}
+				doc.setEmailsAlt(emailAlt);
+			}
+			Set<PBPhone> phones = new HashSet<>();
+			Set<PBPhone> phonesAlt = new HashSet<>(); 
+			if(req.getPhones()!=null && !req.getPhones().isEmpty()) {
+				Set<PBPhone> reqPhones =req.getPhones();
+				for(PBPhone phone:reqPhones) {
+					PBPhone pb =parsePhone(phone);
+					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
+					phones.add(pb);
+				}
+				doc.setPhones(phones);
+			}
+			if(req.getPhonesAlt()!=null && !req.getPhonesAlt().isEmpty()) {
+				Set<PBPhone> reqPhones =req.getPhonesAlt();
+				for(PBPhone phone:reqPhones) {
+					PBPhone pb =parsePhone(phone);
+					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
+					phonesAlt.add(pb);
+				}
+				doc.setPhonesAlt(phonesAlt);
+			}
+			doc.setAdditionalInfo(req.getAdditionalInfo());
+			mongoTemplate.save(doc);
+			
+		}
+		
+		
+		
+		return doc;
+	}
+	
+	public PBEmail setEmail(PBEmail pbEmail) {
+		PBEmail pEmail=new PBEmail();
+		pEmail.setUuid(ArgUtil.parseAsString(pbEmail.getUuid(), UniqueID.generateString()));
+		pEmail.setEmail(pbEmail.getEmail());
+		pEmail.setLabel(pbEmail.getLabel());
+		pEmail.setType(pbEmail.getType());
+		return pEmail;
+		
 	}
 
 }
