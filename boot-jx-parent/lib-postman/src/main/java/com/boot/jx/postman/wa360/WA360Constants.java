@@ -3,7 +3,7 @@ package com.boot.jx.postman.wa360;
 import com.boot.model.MapModel;
 import com.boot.utils.JsonPath;
 
-public class WA360Constants2 {
+public class WA360Constants {
 
 	public static class InBoundWrapperPaths {
 
