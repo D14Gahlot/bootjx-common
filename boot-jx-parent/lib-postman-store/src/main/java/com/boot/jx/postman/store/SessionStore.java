@@ -3,6 +3,7 @@ package com.boot.jx.postman.store;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +15,13 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -29,6 +34,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
@@ -40,6 +46,7 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.DateUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.TimeUtils;
 
@@ -56,6 +63,9 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 	@Autowired
 	private PMDomainConfig pmDomainConfig;
+	
+	@Autowired
+	private SessionStore sessionStore;
 
 	public ChatContactDoc getContact(Contactable contactable) {
 		String contactId = PostManUtil.createContactId(contactable);
@@ -741,10 +751,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		}
 		
 		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
-		System.out.println("query2 =="+query2);
 		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
-		System.out.println("messages "+messages.size());
-		
 		LOGGER.debug("query {===}" + query2);
 		return messages;
 		
@@ -775,5 +782,59 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1).skipDBRef();
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}
+	
+	public List<ChatSessionDoc> findByStatusOrQuickTagV2(List<CHAT_STATUS> status, List<QuickTag> tagCategory,
+			long fromStamp, long toStamp) {
+		List<String> statusLst = new ArrayList<>();;
+		if ((status == null || status.isEmpty() || status.contains(null)) && (tagCategory == null
+				|| tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains(""))) {
+			statusLst.add(CHAT_STATUS.OPEN.toString());
+		} else {
+			for (CHAT_STATUS chatSt : status) {
+				statusLst.add(chatSt.toString());
+			}
+		}
+
+		Query query = new Query();
+		Criteria primaryCriteria = new Criteria();//
+		List<Criteria> criterias = new ArrayList<Criteria>();
+		
+		if(fromStamp<=0) {
+			fromStamp =DateUtil.todayStartTime();
+		}
+		
+		primaryCriteria = primaryCriteria.and("assignedAgentStamp").gt(fromStamp).lt(toStamp);
+
+		if (statusLst != null && !statusLst.isEmpty()) {
+			primaryCriteria = primaryCriteria.and("status").in(statusLst);
+		}
+		
+		
+		if (tagCategory!=null && !tagCategory.isEmpty() && tagCategory.size() > 0) {
+			MultiValueMap<String, String> tags = new LinkedMultiValueMap<String, String>();
+			for (QuickTag tag :tagCategory) {
+				tags.add(tag.getCategory(), tag.getId());
+			}
+			for (Entry<String, List<String>> tagEntry : tags.entrySet()) {
+				criterias.add(Criteria.where("tagId").in(tagEntry.getValue()));
+			}
+		}
+		
+		query.addCriteria(primaryCriteria.andOperator(criterias.toArray(new Criteria[criterias.size()])))
+				// Limit
+				.with(new Sort(Direction.DESC, "assignedAgentStamp"));
+		ApiResponseUtil.addLog(query.toString());
+		//query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
+		removeMsgFields(query);
+		LOGGER.debug("query {===}" + query);
+		
+		return sessionStore.find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query)
+				.skipDBRefByNames("lastMsg", "lastInBoundMsg", "lastOutBoundMsg","lastBotReply","lastAgentReply"));
+		
+	
+		//return super.find(query, ChatSessionDoc.class);
+	}
+	
+	
 
 }

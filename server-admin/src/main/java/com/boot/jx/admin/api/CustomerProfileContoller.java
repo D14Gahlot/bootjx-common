@@ -1,9 +1,13 @@
 package com.boot.jx.admin.api;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -14,17 +18,24 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
-import com.boot.jx.admin.dto.SearchCustomerProfileDto;
+import com.boot.jx.admin.dto.SearchQuery;
 import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
-import com.boot.jx.postman.dto.CustomerProfileRequest;
+import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 public class CustomerProfileContoller {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerProfileContoller.class);
+	
+
 
 	@Autowired
 	CustomerProfileService cusProfileService;
@@ -67,21 +78,23 @@ public class CustomerProfileContoller {
 				String.format("%s/profileExcel/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
 				file.getOriginalFilename());
 		JobScheduledDoc jobSch = cusProfileService.uploadFile(url);
+		
+		
 		return ApiResponse.buildResults(jobSch);
 
 	}
 
-	@RequestMapping(value = "/api/fetch/schdelued/jobs/", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/fetch/schdelued/jobs", method = { RequestMethod.GET })
 	public ApiResponse<JobsResponseDto, Object> fetchCustomerProfileMasterDoc(
 			@RequestParam(value = "id", required = false) String id) {
 		return ApiResponse.buildResults(cusProfileService.fetchCustomerProfileMasterDoc(id));
 	}
 
-	@RequestMapping(value = "/api/fetch/customer/contact/profile", method = { RequestMethod.GET })
-	public ApiResponse<JobsResponseDto, Object> fetchCustomerContactProfile(
-			@RequestParam(value = "id", required = true) String id) {
-		return ApiResponse.buildResults(cusProfileService.fetchCustomerContactProfile(id));
-	}
+//	@RequestMapping(value = "/api/fetch/customer/contact/profile", method = { RequestMethod.GET })
+//	public ApiResponse<JobsResponseDto, Object> fetchCustomerContactProfile(
+//			@RequestParam(value = "id", required = true) String id) {
+//		return ApiResponse.buildResults(cusProfileService.fetchCustomerContactProfile(id));
+//	}
 
 //	@RequestMapping(value = "/api/save/customer/upload/contact/details", method = { RequestMethod.POST })
 //	public ApiResponse<CustomerContactDto, Object> fetchCustomerContactDetails(@RequestParam(value = "id", required = true) String id){
@@ -114,15 +127,26 @@ public class CustomerProfileContoller {
 			@RequestParam(value = "id", required = true) String id) {
 		return ApiResponse.buildResults(cusProfileService.saveCustomerProfile(id));
 	}
+//
+//	@RequestMapping(value = "/api/customer/de-duplicate/save", method = { RequestMethod.POST })
+//	public ApiResponse<CustomerProfileDoc, Object> deDeuplicateCheck(@RequestBody CustomerProfileRequest request) {
+//		return ApiResponse.buildResults(cusProfileService.deDeuplicateCheck(request));
+//	}
 
-	@RequestMapping(value = "/api/customer/de-duplicate/save", method = { RequestMethod.POST })
-	public ApiResponse<CustomerProfileDoc, Object> deDeuplicateCheck(@RequestBody CustomerProfileRequest request) {
-		return ApiResponse.buildResults(cusProfileService.deDeuplicateCheck(request));
+//	@RequestMapping(value = "/api/search/customer/profile", method = { RequestMethod.POST })
+//	public ApiResponse<CustomerProfileDoc, Object> fetchCustomeProfile(@RequestBody SearchCustomerProfileDto search) {
+//		return ApiResponse.buildResults(cusProfileService.fetchCustomeProfile(search));
+//	}
+	
+	
+	@RequestMapping(value = "/profile/filter", method = { RequestMethod.POST })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestBody SearchQuery searchQry)  {
+		List<CustomerProfileDoc> docs = cusProfileService.getProfileSearch(searchQry);
+		return ApiResponse.buildResults(docs);
 	}
 
-	@RequestMapping(value = "/api/search/customer/profile", method = { RequestMethod.POST })
-	public ApiResponse<CustomerProfileDoc, Object> fetchCustomeProfile(@RequestBody SearchCustomerProfileDto search) {
-		return ApiResponse.buildResults(cusProfileService.fetchCustomeProfile(search));
-	}
+	
+	
 
 }

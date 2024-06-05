@@ -178,4 +178,20 @@ public class CustomerProfileDoc extends TimeStampDoc
 		return serialVersionUID;
 	}
 
+	public Set<PBPhone> getPhonesAlt() {
+		return phonesAlt;
+	}
+
+	public void setPhonesAlt(Set<PBPhone> phonesAlt) {
+		this.phonesAlt = phonesAlt;
+	}
+
+	public Set<PBEmail> getEmailsAlt() {
+		return emailsAlt;
+	}
+
+	public void setEmailsAlt(Set<PBEmail> emailsAlt) {
+		this.emailsAlt = emailsAlt;
+	}
+
 }

@@ -11,6 +11,7 @@ import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
 import com.boot.jx.admin.dto.SearchCustomerProfileDto;
+import com.boot.jx.admin.dto.SearchQuery;
 import com.boot.jx.admin.manager.CustomerMasterFldMgr;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
@@ -61,11 +62,11 @@ public class CustomerProfileService {
 		return cmFieldMgr.fetchCustomerProfileMasterDoc(id);
 
 	}
-
-	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
-		return cmFieldMgr.fetchCustomerContactProfile(id);
-
-	}
+//
+//	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
+//		return cmFieldMgr.fetchCustomerContactProfile(id);
+//
+//	}
 
 	@Deprecated
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
@@ -103,6 +104,11 @@ public class CustomerProfileService {
 
 	public List<CustomerMasterFieldDto> deleteCustmerMasterFiled(CustomerMasterFieldDto reqDto) {
 		return cmFieldMgr.deleteCustmerMasterFiled(reqDto);
+	}
+
+	public List<CustomerProfileDoc> getProfileSearch(SearchQuery searchQry) {
+		// TODO Auto-generated method stub
+		return cmFieldMgr.getProfileSearch(searchQry);
 	}
 
 }

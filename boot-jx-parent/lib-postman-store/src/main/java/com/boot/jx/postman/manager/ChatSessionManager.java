@@ -169,7 +169,8 @@ public class ChatSessionManager {
 		for (QuickTag tag : tags) {
 			newList.add(tag.getId());
 		}
-		return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
+		//return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
+		return sessionStore.findByStatusOrQuickTagV2(status, tags, fromStamp, toStamp);
 	}
 
 	public List<ChatSessionDoc> searchByV1(List<CHAT_STATUS> status, List<QuickTag> tags, long fromStamp,

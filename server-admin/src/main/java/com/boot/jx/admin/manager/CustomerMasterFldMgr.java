@@ -18,7 +18,9 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
+import com.boot.jx.admin.dto.SearchCriteria;
 import com.boot.jx.admin.dto.SearchCustomerProfileDto;
+import com.boot.jx.admin.dto.SearchQuery;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
@@ -29,6 +31,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
@@ -36,9 +39,15 @@ import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.store.ContactStore;
+import com.boot.jx.rest.RestService;
+import com.boot.model.MapModel;
+import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonUtil;
+import com.boot.utils.MapBuilder;
+import com.boot.utils.MapBuilder.BuilderMap;
 import com.boot.utils.UniqueID;
 
 @Component
@@ -57,6 +66,12 @@ public class CustomerMasterFldMgr {
 
 	@Autowired
 	ContactStore contactStore;
+	
+	@Autowired
+	PMEnvironment pmEnvironment;
+	
+	@Autowired
+	private RestService restService;
 
 	public List<CustomerMasterFieldDto> addAndEditMasterfield(CustomerMasterFieldDto reqDto) {
 
@@ -142,6 +157,32 @@ public class CustomerMasterFldMgr {
 			doc.setStatus(ArgUtil.parseAsString(Status.CRTD));
 
 			commonMongoTemplate.save(doc);
+			SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
+			String nodeUrl = globalVars.keyEntry("cp_node_url").asString();
+			System.out.println("isSchedular :"+nodeUrl);
+			
+			
+			/** to call node API **/
+			//MapModel data =new MapModel();
+			HashMap<String, Object> data =new HashMap<>();
+			BuilderMap mapBuilder = MapBuilder.map();
+			mapBuilder.put("id", doc.getId());
+			BuilderMap optionMap = MapBuilder.map();
+			optionMap.put("timezone","Asia/Kolkata");
+			
+			
+			data.put("name","cust_profiles_bulk_upload");
+			data.put("desc","Deduplication and saving the bulk uploaded customer profiles to the database");
+			data.put("data",mapBuilder.toMap());
+			//data.put("options",optionMap.toMap());
+			String urlString ="https://demo.mehery.xyz/chrono/scheduler/api/v1/job/now";
+			
+			 String jsonStr = JsonUtil.toJson(data);
+			LOGGER.info("post data :"+jsonStr);
+			MapModel resp= restService.ajax(nodeUrl).postJson(data).asMapModel();
+			LOGGER.info("JSON UTIL:"+JsonUtil.toJsonPrettyPrint(resp));
+			
+			
 
 			return doc;
 		} catch (Exception e) {
@@ -155,7 +196,6 @@ public class CustomerMasterFldMgr {
 
 		List<JobsResponseDto> dtoLst = new ArrayList<>();
 		JobScheduledDoc cmProfileDoc = null;
-		JobsOutPutDoc jobsOutPutDoc = null;
 		JobsResponseDto dto = null;
 		if (ArgUtil.is(id)) {
 			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
@@ -163,12 +203,6 @@ public class CustomerMasterFldMgr {
 				dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
 				dtoLst.add(dto);
 			}
-//			jobsOutPutDoc =commonMongoTemplate.findByIdString(id, JobsOutPutDoc.class); 
-//			if(ArgUtil.is(jobsOutPutDoc)) {
-//				JobsResponseDto dtoJOutput = EntityDtoUtil.entityToDto(jobsOutPutDoc, new JobsResponseDto());
-//				dto.setOutPut(dtoJOutput.getOutPut());	
-//			}
-
 		} else {
 			List<JobScheduledDoc> lstProfileDocs = commonMongoTemplate.findAll(JobScheduledDoc.class);
 			for (JobScheduledDoc doc : lstProfileDocs) {
@@ -182,26 +216,26 @@ public class CustomerMasterFldMgr {
 
 	/** read customer contacts from s3 bucket -excel **/
 
-	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
-		List<JobsResponseDto> dtoLst = new ArrayList<>();
-		JobScheduledDoc cmProfileDoc = null;
-		String url = null;
-		if (ArgUtil.is(id)) {
-			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
-			if (ArgUtil.is(cmProfileDoc)) {
-				// url = cmProfileDoc.getFileUploadMap().
-				// JobScheduledDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new
-				// JobScheduledDto());
-
-				// dtoLst.add(dto);
-			}
-		}
-
-		System.out.println("url :" + url);
-
-		return dtoLst;
-
-	}
+//	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
+//		List<JobsResponseDto> dtoLst = new ArrayList<>();
+//		JobScheduledDoc cmProfileDoc = null;
+//		String url = null;
+//		if (ArgUtil.is(id)) {
+//			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
+//			if (ArgUtil.is(cmProfileDoc)) {
+//				// url = cmProfileDoc.getFileUploadMap().
+//				JobsResponseDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
+//				dtoLst.add(dto);
+//			}
+//		}else {
+//			List<JobScheduledDoc> lstAllDocs = commonMongoTemplate.findAll(null);
+//		}
+//
+//		System.out.println("url :" + url);
+//
+//		return dtoLst;
+//
+//	}
 
 	@Deprecated
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
@@ -323,10 +357,19 @@ public class CustomerMasterFldMgr {
 	public List<JobsResponseDto> fetchJobsOutPut(String id, String jobid) {
 		List<JobsResponseDto> lstDtos = new ArrayList<>();
 		List<JobsOutPutDoc> lstDocs = new ArrayList<>();
-		JobsOutPutDoc jobsOpDoc = null;
-		if (ArgUtil.is(id) || ArgUtil.is(jobid)) {
+		if (ArgUtil.is(id) && ArgUtil.isEmptyString(jobid)) {
 			Query qryQuery = new Query();
-			Criteria criteria = new Criteria().orOperator(Criteria.where("id").is(id),
+			Criteria criteria = Criteria.where("id").is(id);
+			qryQuery.addCriteria(criteria);
+			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
+		}else if (ArgUtil.is(jobid) && ArgUtil.isEmptyString(id)) {
+			Query qryQuery = new Query();
+			Criteria criteria = Criteria.where("jobid").is(jobid);
+			qryQuery.addCriteria(criteria);
+			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
+		}else if (ArgUtil.is(id) && ArgUtil.is(jobid)) {
+			Query qryQuery = new Query();
+			Criteria criteria = new Criteria().andOperator(Criteria.where("id").is(id),
 					Criteria.where("jobid").is(jobid));
 			qryQuery.addCriteria(criteria);
 
@@ -430,6 +473,59 @@ public class CustomerMasterFldMgr {
 		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
 				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
 		return contactStore.find(qb);
+	}
+
+	/** profile search **/
+	
+	public List<CustomerProfileDoc> getProfileSearch(SearchQuery searchQry) {
+		int limit = searchQry.getPageSize() == 0 ? 25 :searchQry.getPageSize();
+		String sortDir =ArgUtil.parseAsString(searchQry.getSortBy(), "asc");
+		List<SearchCriteria> searchCriterias =searchQry.getSearchCriterias(); 
+		
+		List<Criteria> criterias =new LinkedList<Criteria>();
+		
+		for(SearchCriteria src :searchCriterias) {
+			criterias.add(createCriteria(src.getKey(),src.getOperation(),src.getValue()));
+		}
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(new Criteria().orOperator(criterias.toArray(new Criteria[criterias.size()]))).sortBy(sortDir).limit(limit);
+		return contactStore.find(qb);
+	}
+	
+	private Criteria createCriteria(String key, String operation, Object value) {
+        switch (operation) {
+            case "=":
+            case "EQ":	
+                return Criteria.where(key).is(value);
+            case ">":
+            case "GT":	
+                return Criteria.where(key).gt(value);
+            case "<":
+            case "LT":		
+                return Criteria.where(key).lt(value);
+            case ">=":
+            case "GTE":
+                return Criteria.where(key).gte(value);
+            case "<=":
+            case "LTE":		
+                return Criteria.where(key).lte(value);
+            case "!=":
+            case "NE":	
+                return Criteria.where(key).ne(value);
+            case "STARTS_WITH": // Criteria for name starts with a specific prefix
+            	return Criteria.where(key).regex("^" + value, "i"); // Case-insensitive search
+            case "END_WITH":  // Criteria for name ends with a specific suffix
+            	return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
+            case "ne": // Criteria for field is not empty
+            	return Criteria.where(key).ne("").and(key).ne(null);
+            case "ANY_MATCH":	// Criteria for matching any or all elements
+            	return  Criteria.where(key).in(value);	
+            case "ALL_MATCH":	// Criteria for matching all elements
+            	return  Criteria.where(key).all(value);	
+            default:
+                throw new IllegalArgumentException("Invalid operation: " + operation);
+        }
+    
 	}
 
 }
