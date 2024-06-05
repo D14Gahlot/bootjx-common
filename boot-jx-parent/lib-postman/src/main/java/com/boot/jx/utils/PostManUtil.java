@@ -237,8 +237,17 @@ public class PostManUtil {
 	}
 
 	public static Contactable parseChannelId(String channelId) {
+		if (!ArgUtil.is(channelId)) {
+			return null;
+		}
+
 		String channelIdDecoded = CHANNEL_ID_DECODED(channelId);
 		String[] channelIds = channelIdDecoded.split(":");
+
+		if (channelIds.length < 2) {
+			return null;
+		}
+
 		Contactable contactMeta = new ContactMeta();
 		contactMeta.setContactType(ArgUtil.parseAsString(PMConstants.CONTACT_TYPE(channelIds[0])));
 		contactMeta.setLane(channelIds[1]);
