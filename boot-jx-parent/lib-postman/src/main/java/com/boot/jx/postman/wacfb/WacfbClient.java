@@ -79,20 +79,25 @@ public class WacfbClient implements ChannelClient {
 		} else {
 			boolean isList = false;
 			boolean isButton = false;
+			boolean isCtaUrl = false;
 			int buttonsCount = 0;
-			String bodyTextAppend = Constants.BLANK;
+			int urlCount = 0;
+			String bodyUrlAppend = Constants.BLANK;
+			String bodyPhoneAppend = Constants.BLANK;
+
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
 			MapModel options = MapModel.from(outboxMessage.options());
 			if (options.containsKey("buttons")) {
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
-						bodyTextAppend = bodyTextAppend
+						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
+						urlCount++;
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
-						bodyTextAppend = bodyTextAppend
+						bodyPhoneAppend = bodyPhoneAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconPhone + " *",
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
@@ -106,9 +111,14 @@ public class WacfbClient implements ChannelClient {
 			}
 
 			isList = options.entry("is_list").asBoolean(isList);
+			isCtaUrl = !isList && !isButton && (urlCount == 1);
 
-			if (ArgUtil.is(bodyTextAppend)) {
-				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyTextAppend);
+			if (ArgUtil.is(bodyPhoneAppend)) {
+				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyPhoneAppend);
+			}
+
+			if (!isCtaUrl && ArgUtil.is(bodyUrlAppend)) {
+				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyUrlAppend);
 			}
 
 			if (isList) {
@@ -161,7 +171,10 @@ public class WacfbClient implements ChannelClient {
 					msgIds.add(getMessageId(resp));
 				}
 			} else if (isButton) {
-				MapModel resp = sendButton(channelConfig, outboxMessage, buttons);
+				MapModel resp = sendButton(channelConfig, outboxMessage, buttons, "button");
+				msgIds.add(getMessageId(resp));
+			} else if (isCtaUrl) {
+				MapModel resp = sendButton(channelConfig, outboxMessage, buttons, "cta_url");
 				msgIds.add(getMessageId(resp));
 			} else {
 				String textMessage = outboxMessage.getMessage();
@@ -500,12 +513,13 @@ public class WacfbClient implements ChannelClient {
 		return send(req, channelConfig);
 	}
 
-	private MapModel sendButton(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons) {
+	private MapModel sendButton(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons,
+			String type) {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
-		req.put(new JsonPath("/interactive/type"), "button");
+		req.put(new JsonPath("/interactive/type"), type);
 
 		if (ArgUtil.is(outboxMessage.getAttachments())) {
 			MapModel intr = MapModel.createInstance();
@@ -543,15 +557,23 @@ public class WacfbClient implements ChannelClient {
 				ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, "menu");
 
-		List<Object> rows = new ArrayList<Object>();
-		for (TmplElement button : buttons) {
-			rows.add(MapModel.createInstance().put("type", "reply")
-					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID, StringUtils.substring(button.getCode(), 256))
-					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
-							StringUtils.substring(button.getLabel(), 20))
-					.toMap());
+		if ("button".equalsIgnoreCase(type)) {
+			List<Object> rows = new ArrayList<Object>();
+			for (TmplElement button : buttons) {
+				rows.add(MapModel.createInstance().put("type", "reply")
+						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
+								StringUtils.substring(button.getCode(), 256))
+						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
+								StringUtils.substring(button.getLabel(), 20))
+						.toMap());
+			}
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
+		} else if ("cta_url".equalsIgnoreCase(type)) {
+			TmplElement button = buttons.get(0);
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS, MapModel.createInstance()
+					.put("display_text", button.getLabel()).put("url", button.getUrl()).toMap());;
 		}
-		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
+
 		return send(req, channelConfig);
 	}
 

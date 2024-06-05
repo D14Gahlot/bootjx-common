@@ -64,6 +64,8 @@ public class WA360Constants {
 		public static final JsonPath INTERACTIVE_ACTION_BUTTON = new JsonPath("interactive/action/button");
 		public static final JsonPath INTERACTIVE_ACTION_BUTTONS = new JsonPath("interactive/action/buttons");
 		public static final JsonPath INTERACTIVE_ACTION_SECTIONS = new JsonPath("interactive/action/sections");
+		public static final JsonPath INTERACTIVE_ACTION_NAME = new JsonPath("interactive/action/name");
+		public static final JsonPath INTERACTIVE_ACTION_PARAMATERS = new JsonPath("interactive/action/parameters");
 
 		public static final JsonPath INTERACTIVE_ACTION_REPLY_ID = new JsonPath("reply/id");
 		public static final JsonPath INTERACTIVE_ACTION_REPLY_TITLE = new JsonPath("reply/title");
