@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.admin.dto.CustomerProfileRequest;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
