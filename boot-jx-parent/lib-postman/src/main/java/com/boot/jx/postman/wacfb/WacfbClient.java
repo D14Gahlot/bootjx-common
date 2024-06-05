@@ -87,6 +87,7 @@ public class WacfbClient implements ChannelClient {
 			String bodyPhoneAppend = Constants.BLANK;
 
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
+			List<TmplElement> noButtons = new ArrayList<TmplElement>();
 			MapModel options = MapModel.from(outboxMessage.options());
 			if (options.containsKey("buttons")) {
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);
@@ -97,6 +98,7 @@ public class WacfbClient implements ChannelClient {
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
 						urlCount++;
+						noButtons.add(b);
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
 						bodyPhoneAppend = bodyPhoneAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconPhone + " *",
@@ -104,6 +106,7 @@ public class WacfbClient implements ChannelClient {
 								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.LOCATION_REQUEST)) {
 						isLocationRequest = true;
+						noButtons.add(b);
 					} else {
 						buttonsCount++;
 						buttons.add(b);
@@ -177,10 +180,10 @@ public class WacfbClient implements ChannelClient {
 				MapModel resp = sendButton(channelConfig, outboxMessage, buttons, "button");
 				msgIds.add(getMessageId(resp));
 			} else if (isCtaUrl) {
-				MapModel resp = sendButton(channelConfig, outboxMessage, buttons, "cta_url");
+				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "cta_url");
 				msgIds.add(getMessageId(resp));
 			} else if (isLocationRequest) {
-				MapModel resp = sendButton(channelConfig, outboxMessage, buttons, "location_request_message");
+				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "location_request_message");
 				msgIds.add(getMessageId(resp));
 			} else {
 				String textMessage = outboxMessage.getMessage();
@@ -559,8 +562,12 @@ public class WacfbClient implements ChannelClient {
 		}
 
 		req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, ArgUtil.nonEmpty(outboxMessage.getMessage(), "---"));
-		req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
-				ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
+
+		String footer = ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK);
+		if (ArgUtil.is(footer)) {
+			req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT, footer);
+		}
+
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, "menu");
 
 		if ("button".equalsIgnoreCase(type)) {
@@ -577,8 +584,9 @@ public class WacfbClient implements ChannelClient {
 		} else if ("cta_url".equalsIgnoreCase(type)) {
 			TmplElement button = buttons.get(0);
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
-			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS, MapModel.createInstance()
-					.put("display_text", button.getLabel()).put("url", button.getUrl()).toMap());
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
+					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
+							.put("url", button.getUrl()).toMap());
 		} else if ("location_request_message".equalsIgnoreCase(type)) {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
 		}
