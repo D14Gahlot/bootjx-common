@@ -169,7 +169,8 @@ public class ChatSessionManager {
 		for (QuickTag tag : tags) {
 			newList.add(tag.getId());
 		}
-		//return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp, toStamp);
+		// return sessionStore.findByStatusOrQuickTag(status, newList, fromStamp,
+		// toStamp);
 		return sessionStore.findByStatusOrQuickTagV2(status, tags, fromStamp, toStamp);
 	}
 
@@ -305,12 +306,13 @@ public class ChatSessionManager {
 
 			criterias.add(teamCriteria);
 		} else if (query.contains(CHAT_ASSIGN_GROUP.ME)) {
-			primaryCriteria = primaryCriteria.and("assignedToDept").is(query.agentDept);
+			// primaryCriteria = primaryCriteria.and("assignedToDept").is(query.agentDept);
 			criterias.add(new Criteria().orOperator(
 					// Assigned to Me
 					Criteria.where("assignedToAgent").is(query.agentCode),
 					// Assigned to None
-					Criteria.where("assignedToAgent").is(null), Criteria.where("assignedToAgent").exists(false)
+					Criteria.where("assignedToDept").is(query.agentDept).and("assignedToAgent").is(null),
+					Criteria.where("assignedToDept").is(query.agentDept).and("assignedToAgent").exists(false)
 			//
 			));
 		}
@@ -327,7 +329,7 @@ public class ChatSessionManager {
 						.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "updated.hour")).limit(limit);
-		//System.out.println(query2.toString());
+		// System.out.println(query2.toString());
 		// if (LOGGER.isDebugEnabled()) {
 		ApiResponseUtil.addLog(query2.toString());
 		// }
