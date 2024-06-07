@@ -314,6 +314,11 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}else {
 			doc= new CustomerProfileDoc();
 			doc.setName(req.getName());
+			if(ArgUtil.is(findProfileByCode(req.getCode()))){
+				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("code").field("code")
+						.codeKey("ValidCodeDuplicate").description(req.getCode() + " already exists"));
+			}
+			
 			doc.setCode(req.getCode());
 			doc.setRmCode(req.getRmCode());
 			 Set<PBEmail> emails = new HashSet<>();
@@ -323,17 +328,20 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				 
 				for(PBEmail pbEmail:reqEmails) {
 					PBEmail pb =new PBEmail();
+					if(ArgUtil.is(findProfileByEmail(pbEmail.getEmail()))){
+						ApiResponseUtil.throwInputException(new ApiFieldError().obzect("email").field("email")
+								.codeKey("ValidEmailDuplicate").description(pbEmail.getEmail() + " already exists"));
+					}
 					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
 					emails.add(pb.update(pbEmail));
-					//emails.add(pb);
-					
 				}
 				doc.setEmails(emails);
 			}
 			if(req.getEmailsAlt()!=null && !req.getEmailsAlt().isEmpty()){
 				 Set<PBEmail> reqEmails =req.getEmailsAlt();
 				for(PBEmail pbEmail:reqEmails) {
-					emailAlt.add(setEmail(pbEmail));
+					PBEmail pbEm=new PBEmail();
+					emailAlt.add(pbEm.update(pbEmail));
 				}
 				doc.setEmailsAlt(emailAlt);
 			}
@@ -342,6 +350,10 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			if(req.getPhones()!=null && !req.getPhones().isEmpty()) {
 				Set<PBPhone> reqPhones =req.getPhones();
 				for(PBPhone phone:reqPhones) {
+					if(ArgUtil.is(findProfileByPhone(phone.getPhone()))){
+						ApiResponseUtil.throwInputException(new ApiFieldError().obzect("phone").field("phone")
+								.codeKey("ValidPhoneDuplicate").description(phone.getPhone() + " already exists"));
+					}
 					PBPhone pb =parsePhone(phone);
 					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
 					phones.add(pb);
@@ -394,16 +406,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		
 		
 		return doc;
-	}
-	
-	public PBEmail setEmail(PBEmail pbEmail) {
-		PBEmail pEmail=new PBEmail();
-		pEmail.setUuid(ArgUtil.parseAsString(pbEmail.getUuid(), UniqueID.generateString()));
-		pEmail.setEmail(pbEmail.getEmail());
-		pEmail.setLabel(pbEmail.getLabel());
-		pEmail.setType(pbEmail.getType());
-		return pEmail;
-		
 	}
 
 }
