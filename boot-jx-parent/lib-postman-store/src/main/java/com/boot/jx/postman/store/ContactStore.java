@@ -320,8 +320,13 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			 Set<PBEmail> emailAlt = new HashSet<>();
 			if(req.getEmails()!=null && !req.getEmails().isEmpty()){
 				 Set<PBEmail> reqEmails =req.getEmails();
+				 
 				for(PBEmail pbEmail:reqEmails) {
-					emails.add(setEmail(pbEmail));
+					PBEmail pb =new PBEmail();
+					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
+					emails.add(pb.update(pbEmail));
+					//emails.add(pb);
+					
 				}
 				doc.setEmails(emails);
 			}
@@ -353,6 +358,35 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				doc.setPhonesAlt(phonesAlt);
 			}
 			doc.setAdditionalInfo(req.getAdditionalInfo());
+			
+			if(req.getAddresses()!=null && !req.getAddresses().isEmpty()) {
+				Set<PBAddress> pAddresses=new HashSet<>();
+				for(PBAddress adre:req.getAddresses()) {
+					PBAddress pa =new PBAddress();
+					pa.setUuid(ArgUtil.parseAsString(adre.getUuid(), UniqueID.generateString()));
+					pa.update(adre);
+					pAddresses.add(pa);
+					
+				}
+				doc.setAddresses(pAddresses);
+				
+			}
+			
+			if(req.getWorks()!=null && !req.getWorks().isEmpty()) {
+				doc.setWorks(req.getWorks());
+			}
+			
+			if(req.getUrls()!=null && !req.getUrls().isEmpty()) {
+				Set<PBWebsite> pws=new HashSet<>();
+				for(PBWebsite ws:req.getUrls()) {
+					PBWebsite pWebsite=new PBWebsite();
+					pWebsite.setUuid(ArgUtil.parseAsString(ws.getUuid(), UniqueID.generateString()));
+					pws.add(pWebsite.update(ws));
+					
+				}
+				doc.setUrls(pws);
+			}
+			
 			mongoTemplate.save(doc);
 			
 		}
