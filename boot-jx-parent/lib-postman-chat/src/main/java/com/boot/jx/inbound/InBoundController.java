@@ -30,7 +30,6 @@ import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.fb.FacebookHookRequest;
@@ -181,6 +180,10 @@ public class InBoundController {
 				newData.put("entry", entry);
 
 				String pageId = pageEntry.getId();
+				if (ArgUtil.is(channelType, CHANNEL_TYPE.WACFB)) {
+					pageId = MapModel.from(pageEntry.getChanges().get(0))
+							.path(FacebookConstants.WABAPaths.DISPLAY_PHONE_NUMBER).asString();
+				}
 
 				List<ChannelConfigDupsDoc> channels = configMaster.getChannelMeta(channelType, pageId);
 				if (ArgUtil.is(channels)) {

@@ -22,6 +22,7 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 	private String sessionId;
 	private Contactable contact;
 
+	private long timestamp;
 	protected long changeStamp;
 	protected long watermarkStamp;
 	private Status status = null;
@@ -32,8 +33,8 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 
 	private MessageSession session;
 	private MessageRouter route;
-	
-	/** TP waba con**/
+
+	/** TP waba con **/
 	private Map<String, Object> tpMeta;
 	private String type;
 	private String templateId;
@@ -282,6 +283,14 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 
 	public void setTemplateCode(String templateCode) {
 		this.templateCode = templateCode;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 
 }

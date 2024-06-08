@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.SimpleDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBName;
@@ -21,7 +22,8 @@ import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 
 @Document(collection = "CUSTOMER_PROFILE")
-public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {
+public class CustomerProfileDoc extends TimeStampDoc
+		implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {
 	private static final long serialVersionUID = 1281605084248923642L;
 
 	@Id
@@ -37,6 +39,8 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 	public Set<PBAddress> addresses;
 	public Set<PBWebsite> urls;
 	public Set<PBWork> works;
+	public Set<PBPhone> phonesAlt;
+	public Set<PBEmail> emailsAlt;
 	public Map<String, Object> additionalInfo = new HashMap<>();
 
 	public String rmCode;
@@ -70,11 +74,25 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 		return this.phones;
 	}
 
+	public Set<PBPhone> phonesAlt() {
+		if (phonesAlt == null) {
+			this.phonesAlt = new TreeSet<PBPhone>();
+		}
+		return this.phonesAlt;
+	}
+
 	public Set<PBEmail> emails() {
 		if (emails == null) {
 			this.emails = new TreeSet<PBEmail>();
 		}
 		return this.emails;
+	}
+
+	public Set<PBEmail> emailsAlt() {
+		if (emailsAlt == null) {
+			this.emailsAlt = new TreeSet<PBEmail>();
+		}
+		return this.emailsAlt;
 	}
 
 	public String getCode() {
@@ -149,13 +167,31 @@ public class CustomerProfileDoc implements Serializable, SimpleDocument, JsonIgn
 		this.works = works;
 	}
 
-	
 	public Set<PBWork> works() {
 		if (works == null) {
 			this.works = new TreeSet<PBWork>();
 		}
 		return this.works;
 	}
-	
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public Set<PBPhone> getPhonesAlt() {
+		return phonesAlt;
+	}
+
+	public void setPhonesAlt(Set<PBPhone> phonesAlt) {
+		this.phonesAlt = phonesAlt;
+	}
+
+	public Set<PBEmail> getEmailsAlt() {
+		return emailsAlt;
+	}
+
+	public void setEmailsAlt(Set<PBEmail> emailsAlt) {
+		this.emailsAlt = emailsAlt;
+	}
 
 }

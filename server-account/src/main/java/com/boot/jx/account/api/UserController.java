@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.AccountAuthService;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
@@ -70,9 +71,10 @@ public class UserController {
 	@ResponseBody
 	@RequestMapping(value = "/pub/login", method = { RequestMethod.POST })
 	public ApiResponse<UserAuthToken, Object> agentLogin(@RequestParam String username, @RequestParam String password,
-			@RequestParam(required = false) String app, @RequestParam String tnt, @RequestParam String domainId,
-			@RequestParam(required = false) String otp, @RequestParam(required = false) String otpNounce,
-			@RequestParam(required = false) String tokenId) throws NoSuchAlgorithmException {
+			@RequestParam(required = false, defaultValue = "sso") String app, @RequestParam String tnt,
+			@RequestParam String domainId, @RequestParam(required = false) String otp,
+			@RequestParam(required = false) String otpNounce, @RequestParam(required = false) String tokenId)
+			throws NoSuchAlgorithmException {
 
 		UserAuthToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
 				app, "LOGIN");
@@ -139,12 +141,19 @@ public class UserController {
 	@RequestMapping(value = "/pub/resetpass/{flow}", method = { RequestMethod.POST })
 	public ApiResponse<?, ?> resetPass(@PathVariable String flow, @RequestParam String username,
 			@RequestParam(required = false) String password, @RequestParam(required = false) String newpassword,
-			@RequestParam(required = false) String app, @RequestParam String tnt, @RequestParam String domainId,
-			@RequestParam(required = false) String otp, @RequestParam(required = false) String otpNounce,
-			@RequestParam(required = false) String tokenId) throws NoSuchAlgorithmException {
+			@RequestParam(required = false, defaultValue = "sso") String app, @RequestParam String tnt,
+			@RequestParam String domainId, @RequestParam(required = false) String otp,
+			@RequestParam(required = false) String otpNounce, @RequestParam(required = false) String tokenId)
+			throws NoSuchAlgorithmException {
+
+		if (ArgUtil.is(tnt) && !ArgUtil.is(tnt, AppContextUtil.getTenant())) {
+			AppContextUtil.clear();
+			AppContextUtil.setTenant(tnt);
+			AppContextUtil.init();
+		}
 
 		if ("FORGOTPASS".equalsIgnoreCase(flow)) {
-			return empAuthService.agentResetPass(username, ArgUtil.is(app, "admin"));
+			return empAuthService.agentResetPass(username, false);
 		}
 
 		UserAuthToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
@@ -156,10 +165,13 @@ public class UserController {
 				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("otp")
 						.codeKey("ValidCredentials").description("Invalid OTP"));
 			}
-			empAuthService.agentSetPass(username, password, newpassword, ArgUtil.is(app, "admin"));
+			empAuthService.agentSetPass(username, password, newpassword, false);
 		} else {
-			empAuthService.sendOTP(loginToken);
+			if (!ArgUtil.is(loginToken.getDomainUserPhone()) || !empAuthService.sendOTP(loginToken)) {
+				empAuthService.agentSetPass(username, password, newpassword, false);
+			}
 		}
+
 		return ApiResponse.buildData(loginToken);
 	}
 

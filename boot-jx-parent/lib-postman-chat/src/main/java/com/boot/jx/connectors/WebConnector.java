@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
@@ -32,6 +31,7 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.WebPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;

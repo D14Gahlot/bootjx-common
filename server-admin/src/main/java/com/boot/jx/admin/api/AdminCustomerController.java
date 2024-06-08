@@ -76,6 +76,7 @@ public class AdminCustomerController {
 	@RequestMapping(value = "/profile", method = { RequestMethod.PATCH })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> modifyProfiles(@RequestBody ModelPatches req) {
+		contactStore.checkDuplicate(req);
 		return ApiResponse.buildResult(contactStore.patchCustomerProfile(req));
 	}
 
@@ -91,5 +92,13 @@ public class AdminCustomerController {
 	public ApiResponse<ChatContactDoc, Object> linkProfile(@RequestParam String contactId) {
 		return ApiResponse.buildResult(contactStore.delinkProfile(contactId));
 	}
+	
+	@RequestMapping(value = "/profile/create", method = { RequestMethod.POST })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<CustomerProfileDoc, Object> createprofile(@RequestBody CustomerProfileDoc req) {
+		return ApiResponse.buildResult(contactStore.createprofile(req));
+	}
+
+
 
 }

@@ -1,5 +1,6 @@
 package com.boot.jx.postman.store;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
 import com.boot.jx.model.ModelPatch.ModelPatches;
@@ -201,7 +204,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	public CustomerProfileDoc patchCustomerProfile(ModelPatches req) {
 		CustomerProfileDoc doc = findById(req.getId(), CustomerProfileDoc.class);
 		SimpleDocQueryBuilder qb = SimpleDocQueryBuilder.doc(doc);
-
 		for (ModelPatch patch : req.getPatches()) {
 			switch (patch.getField()) {
 			case "email":
@@ -211,6 +213,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				break;
 			case "phone":
 			case "phones":
+			case "mobile":
+			case "mobiles":
 				PBPhone phone = parsePhone(patch.value().as(PBPhone.class));
 				qb.setunset("phones", patch(patch.getCommand(), doc.phones(), phone));
 				break;
@@ -234,7 +238,22 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			case "rmCode":
 				qb.setunset("rmCode", patch.value().asString());
 				break;
+			case "emailsAlt":
+				PBEmail emailsAlt = patch.value().as(PBEmail.class);
+				qb.setunset("emailsAlt", patch(patch.getCommand(), doc.emailsAlt(), emailsAlt));
+				break;
+			case "phonesAlt":
+				PBPhone phonesAlt = parsePhone(patch.value().as(PBPhone.class));
+				qb.setunset("phonesAlt", patch(patch.getCommand(), doc.phonesAlt(), phonesAlt));
+				break;
+//			case "additionalInfo": @Rabil :- Need per filed update not all field at once
+//				qb.setunset("additionalInfo", patch.value().asString());
+//				break;
 			default:
+				// TODO:- @Rabil - Check additonal validty in Masters and its type in master,
+				// then based on type of field do conversion below and update instead
+				// using.asString() for all
+				qb.setunset("additionalInfo." + patch.getField(), patch.value().asString());
 				break;
 			}
 			update(qb);
@@ -242,6 +261,115 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 
 		return doc;
+	}
+
+	public CustomerProfileDoc findProfileByCode(String code) {
+		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+				.where(Criteria.where("code").is(code));
+		return findOne(qb);
+	}
+
+	public void checkDuplicate(ModelPatches req) {
+		CustomerProfileDoc cusPfDoc = null;
+
+		for (ModelPatch patch : req.getPatches()) {
+			if (patch.getCommand().equals(ModelPatchCommand.ADD)) {
+				switch (patch.getField()) {
+				case "email":
+				case "emails":
+					PBEmail email = patch.value().as(PBEmail.class);
+					cusPfDoc = findProfileByEmail(email.getEmail());
+					if (ArgUtil.is(cusPfDoc)) {
+						ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField())
+								.codeKey("ValidEmailDuplicate").description(patch.getField() + " already exists"));
+					}
+					break;
+				case "phone":
+				case "phones":
+					PBPhone phone = parsePhone(patch.value().as(PBPhone.class));
+					cusPfDoc = findProfileByPhone(phone.getPhone());
+					if (ArgUtil.is(cusPfDoc)) {
+						ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField())
+								.codeKey("ValidPhoneDuplicate").description(patch.getField() + " already exists"));
+					}
+					break;
+				case "code":
+					cusPfDoc = findProfileByCode(patch.value().asString());
+					if (ArgUtil.is(cusPfDoc)) {
+						ApiResponseUtil.throwInputException(new ApiFieldError().field(patch.getField())
+								.codeKey("ValidCodeDuplicate").description(patch.getField() + " already exists"));
+					}
+					break;
+				}
+			}
+
+		}
+	}
+
+	public CustomerProfileDoc createprofile(CustomerProfileDoc req) {
+		CustomerProfileDoc doc = findById(req.getId(), CustomerProfileDoc.class);
+		if(ArgUtil.is(doc)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field(doc.getCode())
+					.codeKey("ValidPhoneDuplicate").description(doc.getCode() + " already exists"));
+		}else {
+			doc= new CustomerProfileDoc();
+			doc.setName(req.getName());
+			doc.setCode(req.getCode());
+			doc.setRmCode(req.getRmCode());
+			 Set<PBEmail> emails = new HashSet<>();
+			 Set<PBEmail> emailAlt = new HashSet<>();
+			if(req.getEmails()!=null && !req.getEmails().isEmpty()){
+				 Set<PBEmail> reqEmails =req.getEmails();
+				for(PBEmail pbEmail:reqEmails) {
+					emails.add(setEmail(pbEmail));
+				}
+				doc.setEmails(emails);
+			}
+			if(req.getEmailsAlt()!=null && !req.getEmailsAlt().isEmpty()){
+				 Set<PBEmail> reqEmails =req.getEmailsAlt();
+				for(PBEmail pbEmail:reqEmails) {
+					emailAlt.add(setEmail(pbEmail));
+				}
+				doc.setEmailsAlt(emailAlt);
+			}
+			Set<PBPhone> phones = new HashSet<>();
+			Set<PBPhone> phonesAlt = new HashSet<>(); 
+			if(req.getPhones()!=null && !req.getPhones().isEmpty()) {
+				Set<PBPhone> reqPhones =req.getPhones();
+				for(PBPhone phone:reqPhones) {
+					PBPhone pb =parsePhone(phone);
+					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
+					phones.add(pb);
+				}
+				doc.setPhones(phones);
+			}
+			if(req.getPhonesAlt()!=null && !req.getPhonesAlt().isEmpty()) {
+				Set<PBPhone> reqPhones =req.getPhonesAlt();
+				for(PBPhone phone:reqPhones) {
+					PBPhone pb =parsePhone(phone);
+					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
+					phonesAlt.add(pb);
+				}
+				doc.setPhonesAlt(phonesAlt);
+			}
+			doc.setAdditionalInfo(req.getAdditionalInfo());
+			mongoTemplate.save(doc);
+			
+		}
+		
+		
+		
+		return doc;
+	}
+	
+	public PBEmail setEmail(PBEmail pbEmail) {
+		PBEmail pEmail=new PBEmail();
+		pEmail.setUuid(ArgUtil.parseAsString(pbEmail.getUuid(), UniqueID.generateString()));
+		pEmail.setEmail(pbEmail.getEmail());
+		pEmail.setLabel(pbEmail.getLabel());
+		pEmail.setType(pbEmail.getType());
+		return pEmail;
+		
 	}
 
 }

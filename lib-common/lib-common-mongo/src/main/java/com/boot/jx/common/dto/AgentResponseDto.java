@@ -2,11 +2,12 @@ package com.boot.jx.common.dto;
 
 import java.util.List;
 
+import com.boot.jx.common.models.AppAuthModels.AppCommonAuthUserProfile;
 import com.boot.jx.mongo.CommonDocInterfaces.ADocumentDTO;
 import com.boot.jx.mongo.CommonDocInterfaces.ResourceDocument;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumentDTO<T> {
+public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumentDTO<T>, AppCommonAuthUserProfile {
 
 	private static final long serialVersionUID = -5273371227763139845L;
 	@JsonProperty("id")
@@ -180,6 +181,21 @@ public class AgentResponseDto<T extends AgentResponseDto<T>> implements ADocumen
 
 	public void setAppModules(List<String> appModules) {
 		this.appModules = appModules;
+	}
+
+	@Override
+	public String code() {
+		return this.agent_code;
+	}
+
+	@Override
+	public String email() {
+		return this.agent_email;
+	}
+
+	@Override
+	public String name() {
+		return this.agent_name;
 	}
 
 }

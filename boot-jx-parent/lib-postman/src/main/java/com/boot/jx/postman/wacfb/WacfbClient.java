@@ -14,10 +14,13 @@ import org.springframework.web.client.HttpStatusCodeException;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PostManException;
+import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -30,6 +33,7 @@ import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.wa360.WA360CloudOutBoundMedia;
 import com.boot.jx.postman.wa360.WA360Constants;
@@ -46,14 +50,15 @@ import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
 
 @Component
-public class WacfbClient {
+@ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WACFB)
+public class WacfbClient implements ChannelClient {
 
 	@Autowired
 	private RestService restService;
 
 	public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
 		WACFBConfigDetails config = channelConfig.getWacfb();
-		String verifyToken = config.getMasterAppVerifyToken();
+		String verifyToken = ArgUtil.nonEmpty(config.getMasterAppVerifyToken(), config.getVerifyToken());
 		if (token != null && !token.isEmpty() && token.equals(verifyToken)) {
 			return challenge;
 		} else {
@@ -362,13 +367,25 @@ public class WacfbClient {
 						} else if ("QUICK_REPLY".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
+
 									String path = (String) buttonParameter.get("path");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
-									buttonComponent.parameter("payLoad", model.pathEntry(path).asString());
+									buttonComponent.parameter("payload", model.pathEntry(path).asString());
 									components.add(buttonComponent.build().map());
+
 								}
 							}
+						}
+					} else {
+						String buttonType = (String) extTemplateComponentButton.get("type");
+						List<TmplElement> buttons = outboxMessage.optionActionButtons();
+						TmplElement button = CollectionUtil.getArray(buttons, i);
+						if (ArgUtil.is(button) && "QUICK_REPLY".equals(button.getType())
+								&& "QUICK_REPLY".equals(buttonType)) {
+							TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
+							buttonComponent.parameter("payload", "reply_id:" + button.getCode());
+							components.add(buttonComponent.build().map());
 						}
 					}
 				}
@@ -580,41 +597,39 @@ public class WacfbClient {
 		return id;
 	}
 
-	public MapModel fetchContact(String contact, ChannelConfig channelConfig) {
-		try {
-			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/contacts")
-					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
-					.post(MapModel.createInstance().put("blocking", "wait")
-							.put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact).toMap())
-					.asMapModel();
-			return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS).asMapModel();
-		} catch (ApiHttpServerException e) {
-			return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
-					e.getHttpStatus().value());
-		} catch (ApiHttpException e) {
-			return MapModel.from(e.getResponse().getBody());
-		}
-	}
-
+	/*
+	 * public MapModel fetchContact(String contact, ChannelConfig channelConfig) {
+	 * try { MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
+	 * .path(channelConfig.getWacfb().getWabaId()+"/contacts")
+	 * .authBearer(channelConfig.getWacfb().getAccessToken())
+	 * .post(MapModel.createInstance().put("blocking", "wait")
+	 * .put(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS, contact) .toMap())
+	 * .asMapModel(); return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS)
+	 * .asMapModel(); } catch (ApiHttpServerException e) { return
+	 * MapModel.from(e.getResponse().getBody()).put(
+	 * OutBoundWrapperPaths.RESPONSE_ERROR_CODE, e.getHttpStatus().value()); } catch
+	 * (ApiHttpException e) { return MapModel.from(e.getResponse().getBody()); } }
+	 */
 	public MapModel fetchTemplates(ChannelConfig channelConfig) {
-		MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates")
-				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).get().asMapModel();
+		MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
+				.path(channelConfig.getWacfb().getWabaId() + "/message_templates")
+				.authBearer(channelConfig.getWacfb().getAccessToken()).get().asMapModel();
 		return resp;
 	}
 
 	public MapModel deleteTemplates(ChannelConfig channelConfig, String templateName) {
-		MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates/{templateName}")
-				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
-				.pathParam("templateName", templateName).delete().asMapModel();
+		MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
+				.path(channelConfig.getWacfb().getWabaId() + "/message_templates")
+				.authBearer(channelConfig.getWacfb().getAccessToken()).pathParam("name", templateName).delete()
+				.asMapModel();
 		return resp;
 	}
 
 	public MapModel updateTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
-			String templateName = req.getString("name");
-			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates/{templateName}")
-					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
-					.pathParam("templateName", templateName).post(req.toMap()).asMapModel();
+			String templateId = req.getString("id");
+			MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path("/" + templateId)
+					.authBearer(channelConfig.getWacfb().getAccessToken()).post(req.toMap()).asMapModel();
 
 			return resp;
 		} catch (HttpStatusCodeException | ApiHttpException e) {
@@ -628,9 +643,9 @@ public class WacfbClient {
 
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
-			MapModel resp = restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/templates")
-					.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).post(req.toMap())
-					.asMapModel();
+			MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
+					.path(channelConfig.getWacfb().getWabaId() + "/message_templates")
+					.authBearer(channelConfig.getWacfb().getAccessToken()).post(req.toMap()).asMapModel();
 
 			return resp;
 		} catch (HttpStatusCodeException | ApiHttpException e) {
@@ -646,13 +661,12 @@ public class WacfbClient {
 
 		if (url.contains("mid=")) {
 			String mid = url.split("mid=")[1].split("&")[0];
-			url = WA360Constants.MEDIA_CLOUD_URL(mid);
+			url = WA360Constants.META_WA_CLOUD_URL(mid);
 		}
 
 		MapModel resp = restService.ajax(url.replace("/v1/media/", "/"))
-				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey()).acceptJson().get()
-				.asMapModel();
-		return resp.getString("url").replace("https://lookaside.fbsbx.com", WA360Constants.BASE_CLOUD_URL);
+				.authBearer(channelConfig.getWacfb().getAccessToken()).acceptJson().get().asMapModel();
+		return resp.getString("url").replace("https://lookaside.fbsbx.com", WA360Constants.META_WA_CLOUD_URL);
 	}
 
 	/** Call new metod to post msg directly to waba API **/

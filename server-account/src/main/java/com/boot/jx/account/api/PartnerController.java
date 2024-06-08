@@ -40,9 +40,10 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
-import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.dto.UserAuthToken;
+import com.boot.jx.common.models.AppAuthModels;
+import com.boot.jx.common.models.AppAuthModels.ACCESS_RULES;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;
@@ -131,7 +132,7 @@ public class PartnerController {
 
 		if (userSessionBean.hasAdminAccesTo(domain)) {
 			UserAuthToken userLoginToken = empAuthService.createSuperLoginToken("superadmin",
-					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), "admin");
+					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), panel);
 			model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
 			model.addAttribute("DOMAIN_USER_EMAIL", userLoginToken.getDomainUserEmail());
 			model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
@@ -158,8 +159,8 @@ public class PartnerController {
 					new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
 							.description("Email address already in use."));
 		}
-		
-		if(signupContact.getProduct()==null || signupContact.getProduct().isEmpty()) {
+
+		if (signupContact.getProduct() == null || signupContact.getProduct().isEmpty()) {
 			ApiResponseUtil.throwDuplicateInputException("Select at least one product you are interested in.",
 					new ApiFieldError().obzect("signupContact").field("product").codeKey("ValidProduct")
 							.description("Select at least one product you are interested in."));
@@ -269,7 +270,7 @@ public class PartnerController {
 		return ApiResponse.build().message("Domain available");
 	}
 
-	@ApiRequest(rules = ACCESS_RULES.ONLY_DUPERUSER)
+	@ApiRequest(rules = AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER)
 	@ResponseBody
 	@RequestMapping(value = { "/api/users" }, method = { RequestMethod.GET })
 	public ApiResponse<Map<String, Object>, Object> getDomainUsers() {
@@ -368,6 +369,7 @@ public class PartnerController {
 			}
 			domaiNational.get().setCompany(domain.getCompany());
 			domaiNational.get().setSocial(domain.getSocial());
+			domaiNational.get().setServer(domain.getServer());
 			accountStore.save(domaiNational.get());
 			accountStore.save(domainUser);
 			return ApiResponse.build().message("Details updated");

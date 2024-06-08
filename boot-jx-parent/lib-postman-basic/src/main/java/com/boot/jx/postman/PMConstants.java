@@ -78,8 +78,6 @@ public class PMConstants {
 		public static final String TELEGRAM = "tg";
 		public static final String TWITTER = "tw";
 		public static final String FACEBOOK = "fb";
-		public static final String WA_GUPSHUP = "wags";
-		public static final String WA_360D = "wa360";
 		public static final String WEB = "web";
 		public static final String INSTAGRAM = "ig";
 		public static final String EMAIL = "mailto";
@@ -87,10 +85,15 @@ public class PMConstants {
 		public static final String SMS = "sms";
 		public static final String OA = "oa";
 		public static final String FIREBASE = "firebase";
+
+		// WhatsApp Channels
+		public static final String WA_GUPSHUP = "wags";
+		public static final String WA_360D = "wa360";
 		/** WABA cloud via 360d **/
 		public static final String WA_360DC = "wac360";
 		/** WABA cloud via FB **/
 		public static final String WACFB = "wacfb";
+
 	}
 
 	public enum CHANNEL_TYPE_ENUM {
@@ -235,8 +238,12 @@ public class PMConstants {
 				return CHANNEL_TYPE.WA_GUPSHUP;
 			} else if (CHANNEL_TYPE.WA_360DC.equals(channel)) {
 				return CHANNEL_TYPE.WA_360DC;
+			} else if (CHANNEL_TYPE.WA_360D.equals(channel)) {
+				return CHANNEL_TYPE.WA_360D;
+			} else if (CHANNEL_TYPE.WACFB.equals(channel)) {
+				return CHANNEL_TYPE.WACFB;
 			}
-			return CHANNEL_TYPE.WA_360D;
+			return CHANNEL_TYPE.WA_360DC;
 		}
 		return null;
 	}
@@ -341,6 +348,7 @@ public class PMConstants {
 		public static final String POSTMAN_AGENT_2FA_CHANNEL = "postman.agent.2fa.channel";
 		public static final String POSTMAN_CHAT_WEB_CHANNEL = "postman.chat.web.channel";
 		public static final String POSTMAN_CHAT_WEB_QUEUE = "postman.chat.web.queue.enabled";
+		public static final String POSTMAN_AGENT_TAB_LEVEL = "postman.agent.tab.level";
 	}
 
 	public static class ParamKeys {

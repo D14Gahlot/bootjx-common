@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
@@ -32,6 +31,7 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.InstagramPlugin;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -266,6 +266,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		String csid = m.getSender().get("id");
 		report.contact().setCsid(csid);
 		report.setChangeStamp(m.getTimestamp());
+		//System.out.println("FacebookMessaging======" + JsonUtil.toJson(m));
 		if (ArgUtil.is(m.getRead())) {
 			report.setChangeStamp(m.getReadWatermark());
 			report.setStatus(Status.READ);
@@ -303,7 +304,8 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		pageEntry.getMessaging().forEach(m -> {
 			if ((ArgUtil.is(m.getMessage()) && (m.getMessage().isIs_deleted())) // Message is deleted
 					|| ArgUtil.is(m.getRead()) // or Message is Read
-			) {
+					//|| ArgUtil.is(m.getPostBack()) // Postback
+					|| ArgUtil.is(m.getReaction())) {
 				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
 			} else if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {
 				InboxMessage inboxMessage = toInboxMessage(m, channelConfig);

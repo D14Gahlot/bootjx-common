@@ -237,13 +237,45 @@ public class PostManUtil {
 	}
 
 	public static Contactable parseChannelId(String channelId) {
+		if (!ArgUtil.is(channelId)) {
+			return null;
+		}
+
 		String channelIdDecoded = CHANNEL_ID_DECODED(channelId);
 		String[] channelIds = channelIdDecoded.split(":");
+
+		if (channelIds.length < 2) {
+			return null;
+		}
+
 		Contactable contactMeta = new ContactMeta();
 		contactMeta.setContactType(ArgUtil.parseAsString(PMConstants.CONTACT_TYPE(channelIds[0])));
 		contactMeta.setLane(channelIds[1]);
 		contactMeta.setChannelType(channelIds[0]);
 		return contactMeta;
+	}
+
+	public static String CHANNEL_TYPE_FALLBACK(String channel) {
+		if (ArgUtil.not(channel)) {
+			return null;
+		}
+		switch (channel) {
+		case CHANNEL_TYPE.WA_360D:
+			return CHANNEL_TYPE.WA_360DC;
+		case CHANNEL_TYPE.WA_360DC:
+			return CHANNEL_TYPE.WACFB;
+		case CHANNEL_TYPE.WA_GUPSHUP:
+			return CHANNEL_TYPE.WACFB;
+		default:
+			return null;
+		}
+	}
+
+	public static String CHANNEL_ID_FALLBACK(String channelId) {
+		Contactable c = PostManUtil.parseChannelId(channelId);
+		String channelType = CHANNEL_TYPE_FALLBACK(c.getChannelType());
+		c.setChannelType(channelType);
+		return PostManUtil.CHANNEL_ID(c);
 	}
 
 	public static String UNIQUE_API_KEY() {

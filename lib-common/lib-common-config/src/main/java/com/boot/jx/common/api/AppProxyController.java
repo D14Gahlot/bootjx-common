@@ -1,4 +1,4 @@
-package com.boot.jx.agent.api;
+package com.boot.jx.common.api;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -18,16 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.agent.AgentSessionBean;
-import com.boot.jx.http.ApiRequest;
+import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.http.ProxyService;
-import com.boot.jx.http.RequestType;
 import com.boot.model.MapModel;
 
 import io.swagger.annotations.ApiOperation;
 
 @Controller
-public class AgentProxyController {
+public class AppProxyController {
 
 	// private final RestTemplate restTemplate;
 	@Autowired
@@ -36,8 +34,8 @@ public class AgentProxyController {
 	@Value("${mry.nexus.url}")
 	private String nexusUrl;
 
-	@Autowired
-	private AgentSessionBean agentSession;
+	@Autowired(required = false)
+	private AppAuthModels.AppCommonAuthUser appCommonAuthUser;
 
 	@CrossOrigin(origins = "*")
 	// @ApiRequest(type = RequestType.NO_TRACK_PING)
@@ -51,8 +49,8 @@ public class AgentProxyController {
 		// URL url = new URL(domain);
 
 		Map<String, String> addHeaders = new HashMap<String, String>();
-		addHeaders.put("x-agent-code", agentSession.getAgentCode());
-		addHeaders.put("x-agent-user", agentSession.getAuthUser());
+		addHeaders.put("x-agent-code", appCommonAuthUser.getProfile().code());
+		addHeaders.put("x-agent-user", appCommonAuthUser.getAuthUser());
 		addHeaders.put("tnt", AppContextUtil.getTenant());
 
 		return MapModel.fromSafe(
@@ -71,8 +69,8 @@ public class AgentProxyController {
 		// URL url = new URL(domain);
 
 		Map<String, String> addHeaders = new HashMap<String, String>();
-		addHeaders.put("x-agent-code", agentSession.getAgentCode());
-		addHeaders.put("x-agent-user", agentSession.getAuthUser());
+		addHeaders.put("x-agent-code", appCommonAuthUser.getProfile().code());
+		addHeaders.put("x-agent-user", appCommonAuthUser.getAuthUser());
 		addHeaders.put("tnt", AppContextUtil.getTenant());
 
 		return MapModel.fromSafe(

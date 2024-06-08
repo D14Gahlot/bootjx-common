@@ -27,6 +27,10 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 	public static final String COLLECTION_REJECTED = "MESSAGE_REJECTED";
 	public static final String COLLECTION_QUEUED = "MESSAGE_QUEUED";
 
+	public enum MESSAGE_QUEUE_TYPE {
+		HOLD, ORIGINAL, REJECTED, QUEUED
+	}
+
 	@Id
 	private String tempId;
 

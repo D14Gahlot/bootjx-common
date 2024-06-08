@@ -28,6 +28,8 @@ import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.common.dto.DepartmentResponseAuthDto;
+import com.boot.jx.common.models.AppAuthModels.AppCommonAuthUserProfile;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
@@ -42,6 +44,8 @@ import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.channel.PushClient;
+import com.boot.jx.postman.channel.PushClient.To;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -54,8 +58,6 @@ import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
-import com.boot.jx.postman.others.PushClient;
-import com.boot.jx.postman.others.PushClient.To;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
@@ -334,7 +336,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		// Push Notification
 		OutboxMessage notify = new OutboxMessage()
-				.message(ArgUtil.is(chatSessionDoc.getLastMsg()) ? chatSessionDoc.getLastMsg().getMessage()
+				.message(ArgUtil.is(chatSessionDoc.lastMsg()) ? chatSessionDoc.lastMsg().getText()
 						: chatSessionDoc.getContactName());
 		notify.contact().setCsid(To.dept(params.getAssignToDeptCode()));
 		pushClient.send(notify);
@@ -487,13 +489,14 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	private void beforeSend(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.hsm().getCode())) {
-			AgentResponseAuthDto p = ArgUtil.is(agentSession) ? agentSession.getProfile() : null;
-			if (ArgUtil.is(p)
-					&& ArgUtil.is(agentSession.getProfile().getAgent_code(), chatSessionDoc.getAssignedToAgent())) {
-				OutboxMessage.AGENT_NAME.save(outboxMessage.model(), agentSession.getProfile().getAgent_name());
-				OutboxMessage.AGENT_CODE.save(outboxMessage.model(), agentSession.getProfile().getAgent_code());
-				OutboxMessage.TEAM_NAME.save(outboxMessage.model(), agentSession.getProfile().getDept().getDept_name());
-				OutboxMessage.TEAM_CODE.save(outboxMessage.model(), agentSession.getProfile().getDept().getDept_code());
+			AppCommonAuthUserProfile profile = ArgUtil.is(agentSession) ? agentSession.getProfile() : null;
+			if (ArgUtil.is(profile)
+					&& ArgUtil.is(agentSession.getProfile().code(), chatSessionDoc.getAssignedToAgent())) {
+				DepartmentResponseAuthDto dept = ((AgentResponseAuthDto) profile).getDept();
+				OutboxMessage.AGENT_NAME.save(outboxMessage.model(), profile.name());
+				OutboxMessage.AGENT_CODE.save(outboxMessage.model(), profile.code());
+				OutboxMessage.TEAM_NAME.save(outboxMessage.model(), dept.getDept_name());
+				OutboxMessage.TEAM_CODE.save(outboxMessage.model(), dept.getDept_code());
 			} else {
 				if (ArgUtil.is(chatSessionDoc.getAssignedToAgent())) {
 					AgentDoc agent = agentStore.findByCode(chatSessionDoc.getAssignedToAgent());

@@ -20,7 +20,6 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.doc.MessageDocAbstract;
-import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
@@ -107,7 +106,11 @@ public class ChatLogger {
 		this.error(inboxMessage, null, e);
 	}
 
-	public void error(LogMessage inboxMessage, Status status, Throwable e) {
+	public void error(LogMessage inboxMessage, String erromessage) {
+		this.error(inboxMessage, null, null, erromessage);
+	}
+
+	public void error(LogMessage inboxMessage, Status status, Throwable e, String message) {
 		MessageDocLogs doc = new MessageDocLogs();
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setMessageId(inboxMessage.getMessageId());
@@ -123,8 +126,12 @@ public class ChatLogger {
 		toLogs(e, doc);
 
 		messageStore.save(doc);
-		inboxMessage.logs().add(e.getMessage());
-		inboxMessage.logs().add("trail:" + doc.getMessageId());
+		inboxMessage.logs().add(message);
+		inboxMessage.logs().add("trail_id:" + doc.getMessageId());
+	}
+
+	public void error(LogMessage inboxMessage, Status status, Throwable e) {
+		this.error(inboxMessage, status, e, e.getMessage());
 	}
 
 	public void error(InBoundEvent inBoundEvent, Throwable e) {
@@ -142,6 +149,10 @@ public class ChatLogger {
 	}
 
 	private void toLogs(Throwable e, MessageDocLogs doc) {
+		if (e == null) {
+			return;
+		}
+
 		doc.logs().add(e.getMessage());
 
 		StackTraceElement[] traces = e.getStackTrace();
@@ -165,7 +176,7 @@ public class ChatLogger {
 
 	}
 
-	public void error(Throwable e) {
+	public void error(String message, Throwable e) {
 		if (ArgUtil.is(messageContext.getMessage())) {
 			this.error(messageContext.getMessage(), e);
 		} else if (ArgUtil.is(messageContext.getInBoundEvent())) {
@@ -175,9 +186,14 @@ public class ChatLogger {
 			doc.setType("E");
 			doc.setTimestamp(System.currentTimeMillis());
 			doc.setTraceId(AppContextUtil.getTraceId());
-			doc.setMessage(e.getMessage());
+			doc.setMessage(message);
+			toLogs(e, doc);
 			messageStore.save(doc);
 		}
+	}
+
+	public void error(Throwable e) {
+		this.error(e.getMessage(), e);
 	}
 
 	private void log(MessageDocAbstract doc, String message, Object[] debugMessage) {

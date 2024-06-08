@@ -20,13 +20,14 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
-import com.boot.jx.common.config.AppCommonAuthFilter.ACCESS_RULES;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ClientAppConfigConstants;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.common.models.AppAuthModels;
+import com.boot.jx.common.models.AppAuthModels.ACCESS_RULES;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.model.CommonFile;
@@ -93,8 +94,7 @@ public class ConfigOptionMetaController {
 
 	@RequestMapping(value = "/api/meta/channel_configs/{channelType}", method = { RequestMethod.GET })
 	public ApiResponse<ConfigMeta, Object> channelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType) {
-		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
-				.get(channelType.toString());
+		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.get(channelType.toString());
 		List<ConfigMeta> configs = plugin.listConfigMeta(pmEnvironment);
 		return ApiResponse.buildResults(configs);
 	}
@@ -185,14 +185,16 @@ public class ConfigOptionMetaController {
 	private ConfigManagerImpl configManager;
 
 	// PREFS
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN,
+			AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestBody PMConfigurationObject map) {
 		configManager.save(map);
 		return ApiResponse.buildResults(configManager.getSetupConfigs());
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN, ACCESS_RULES.ONLY_DOMAIN_ADMIN })
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN,
+			AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.PUT })
 	public ApiResponse<Map<String, Object>, Object> setConfig(@RequestParam String key, @RequestParam String value,
 			@RequestParam(defaultValue = "false") boolean shared) {
@@ -212,7 +214,7 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(configManager.getConfigs(key));
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN })
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_DUPERUSER_FOR_MASTER_DOMAIN })
 	@RequestMapping(value = "/api/config", method = { RequestMethod.DELETE })
 	public ApiResponse<Map<String, Object>, Object> deleteConfig(@RequestParam(required = false) String key) {
 		configManager.deleteAdminConfigs(key);
@@ -259,14 +261,14 @@ public class ConfigOptionMetaController {
 	 * Features
 	 ************/
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestBody FeaturesConfigDoc map) {
 		configManager.saveFeature(map);
 		return ApiResponse.buildResults(configManager.getFeature());
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.PUT })
 	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestParam FEATURES_KEY key,
 			@RequestParam String value, @RequestParam(defaultValue = "false") boolean shared) {
@@ -277,7 +279,7 @@ public class ConfigOptionMetaController {
 		return setFeature(map);
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature/{key}", method = { RequestMethod.POST })
 	public ApiResponse<Map<String, Object>, Object> setFeature(@PathVariable("key") FEATURES_KEY key,
 			@RequestBody FeaturesConfigDoc map) {
@@ -294,7 +296,7 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(configManager.getFeature(key));
 	}
 
-	@ApiRequest(rules = { ACCESS_RULES.ONLY_SUPERDEV })
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.DELETE })
 	public ApiResponse<Map<String, Object>, Object> deleteFeature(@RequestParam(required = false) FEATURES_KEY key) {
 		configManager.deletePerm(key);

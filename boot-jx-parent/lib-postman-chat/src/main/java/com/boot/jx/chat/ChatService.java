@@ -29,7 +29,6 @@ import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 
 @Component
 public class ChatService {

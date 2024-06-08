@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.email.EmailReplyParser;
 import com.boot.jx.exception.AmxApiException;
@@ -41,12 +40,13 @@ import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
-import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.EmailPlugin;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -202,7 +202,7 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 
 			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
 				if (ArgUtil.is(chatSession)) {
-					MessageDoc lastMsg = chatSession.getLastMsg();
+					ChatMessageDTO lastMsg = chatSession.lastMsg();
 					if (ArgUtil.is(lastMsg)) {
 						outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
 					}

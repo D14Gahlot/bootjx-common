@@ -14,6 +14,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.model.SafeKeyHashMap;
@@ -67,7 +68,18 @@ public interface PMConfiguration extends Serializable {
 			if (!ArgUtil.is(channelId)) {
 				return null;
 			}
-			return channels().get(channelId);
+			ChannelConfig channel = channels().get(channelId);
+			if (ArgUtil.is(channel)) {
+				return channel;
+			}
+
+			channelId = PostManUtil.CHANNEL_ID_FALLBACK(channelId);
+			channel = channels().get(channelId);
+			if (ArgUtil.is(channel)) {
+				return channel;
+			}
+
+			return null;
 		}
 
 		public PMConfiguration channels(ChannelConfig channel) {

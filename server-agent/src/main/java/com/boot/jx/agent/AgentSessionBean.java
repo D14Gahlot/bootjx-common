@@ -9,8 +9,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.common.config.AppCommonAuthFilter.AppCommonAuthUser;
-import com.boot.jx.common.dto.AgentResponseAuthDto;
+import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.postman.PMConstants;
 import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
@@ -18,7 +17,8 @@ import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AgentSessionBean extends AppCommonAuthUser implements Serializable, JsonIgnoreUnknown, JsonIgnoreNull {
+public class AgentSessionBean extends AppAuthModels.AppCommonAuthUser
+		implements Serializable, JsonIgnoreUnknown, JsonIgnoreNull {
 
 	private static final long serialVersionUID = 5850744656958653564L;
 	private String agentCode;
@@ -36,8 +36,6 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable,
 	private boolean isDirty;
 
 	private Map<String, Object> stamps;
-
-	private AgentResponseAuthDto profile;
 
 	public String getAgentCode() {
 		return agentCode;
@@ -90,14 +88,6 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable,
 		this.agentDept = agentDept;
 	}
 
-	public AgentResponseAuthDto getProfile() {
-		return profile;
-	}
-
-	public void setProfile(AgentResponseAuthDto profile) {
-		this.profile = profile;
-	}
-
 	public long getLastSyncStamp() {
 		return lastSyncStamp;
 	}
@@ -122,8 +112,8 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable,
 	public String getAuthUser() {
 		if (ArgUtil.is(this.agentCode)) {
 			return this.agentCode;
-		} else if (ArgUtil.is(this.profile)) {
-			return this.profile.getAgent_code();
+		} else if (ArgUtil.is(this.getProfile())) {
+			return this.getProfile().code();
 		}
 		return ArgUtil.anyOf(AppContextUtil.getActorId(), PMConstants.DEFAULT.NO_USER);
 	}
@@ -144,7 +134,7 @@ public class AgentSessionBean extends AppCommonAuthUser implements Serializable,
 	}
 
 	public Object getUserSharedProfile() {
-		return profile;
+		return this.getProfile();
 	}
 
 }

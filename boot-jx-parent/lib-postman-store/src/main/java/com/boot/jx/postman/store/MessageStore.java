@@ -46,7 +46,7 @@ import com.google.common.collect.Lists;
 import com.mongodb.client.result.UpdateResult;
 
 @Component
-public class MessageStore extends CommonMongoTemplateAbstract {
+public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageStore.class);
 
@@ -126,8 +126,10 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 		doc.setFormatSubType(inboxMessage.getFormatSubType());
 
 		ContactDetailDoc contact = new ContactDetailDoc();
+		// contact.copyFrom(inboxMessage.contact()); TOO MUCH DATA
 		contact.setPhone(inboxMessage.getFrom());
 		contact.setContactType(ArgUtil.parseAsString(contactType));
+		contact.setChannelType(inboxMessage.contact().getChannelType());
 		doc.setContact(contact);
 
 		updateMessageDoc(inboxMessage, doc);
@@ -450,8 +452,10 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 
 		// UPdate Template Details
 		messageReport.setType(m.getType());
-		messageReport.setTemplateId(m.getHsm().getId());
-		messageReport.setTemplateCode(m.getHsm().getCode());
+		if (ArgUtil.is(m.getHsm())) {
+			messageReport.setTemplateId(m.getHsm().getId());
+			messageReport.setTemplateCode(m.getHsm().getCode());
+		}
 	}
 
 	public void insert(List<MessageDoc> messages, ContactType contactType) {
@@ -579,7 +583,7 @@ public class MessageStore extends CommonMongoTemplateAbstract {
 				/**
 				 * @deperecated
 				 */
-				//sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
+				// sessionDoc.setSessionExpiryStamp(ccwExpiryLong);
 				chatSessionQuery.set("sessionExpiryStamp", ccwExpiryLong);
 
 				// in Millis

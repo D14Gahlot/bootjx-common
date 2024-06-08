@@ -26,6 +26,8 @@ import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
+import com.boot.jx.postman.channel.ChannelClientFactory;
+import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -84,6 +86,14 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
+
+	@Autowired
+	protected ChannelClientFactory clientFactory;
+
+	@Override
+	public ChannelClient getClient(ChannelConfig channelConfig) {
+		return this.clientFactory.get(channelConfig);
+	}
 
 	@Override
 	public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage,
@@ -309,7 +319,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
 				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
 
-		File fileb =Urly.parse(attachment.getMediaURL()).toFile();
+		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
 
 		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
 				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));

@@ -134,6 +134,9 @@ public class ChannelSetupController {
 		if (ArgUtil.is(contactType)) {
 			q.search("contactType", ArgUtil.parseAsString(contactType));
 		}
+
+		q.search("server", ArgUtil.parseAsString(pmCommonConfig.getServiceServer()));
+
 		channels = commonMongoTemplate.find(q);
 
 		model.addAttribute("channels", channels);

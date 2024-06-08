@@ -236,8 +236,7 @@ public class ConfigManagerImpl implements ConfigManager {
 			if (!ArgUtil.is(channelConfig)) {
 				return null;
 			}
-			ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING
-					.get(channelConfig.getChannelType());
+			ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.get(channelConfig.getChannelType());
 			plugin.updatePluginSpecs(channelConfig);
 			if (!channelConfig.isReadOnly()) {
 				if (plugin.isWebhookManual()) {
@@ -264,7 +263,7 @@ public class ConfigManagerImpl implements ConfigManager {
 	@Override
 	public ChannelConfig saveChannelConfig(String channelType, Map<String, Object> data) {
 		MapModel map = MapModel.from(data);
-		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.PLUGIN_MAPPING.get(channelType);
+		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.get(channelType);
 		String channelId = map.getString("channelId");
 		String lane = map.getString("lane");
 		boolean isAutoCreated = map.entry("isAutoCreated").asBoolean(Boolean.FALSE);
@@ -317,7 +316,8 @@ public class ConfigManagerImpl implements ConfigManager {
 	public List<Map<String, Object>> getFeature() {
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		for (ConfigMeta meta : ConfigConstants.PERMS_CONFIG_LIST) {
-			list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.featureEntry(meta.getKey())).toMap());
+			list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.featureEntry(meta.getKey()))
+					.toMap());
 		}
 		return list;
 	}

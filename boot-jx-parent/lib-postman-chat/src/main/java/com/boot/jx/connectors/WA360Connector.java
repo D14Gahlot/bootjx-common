@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
@@ -48,6 +46,7 @@ import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.pbook.PBWork;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.WA360Plugin;
 import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -122,28 +121,30 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		}
 		ChannelConfig channel = getChannelConfig(inboxMessage);
 
-		if (channel.getWa360d().isPromptName()) {
-			if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
-				this.context().session().put("session_init_user_input_type", "name");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your name");
+		if (ArgUtil.is(channel.getWa360d())) {
+			if (channel.getWa360d().isPromptName()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
+					this.context().session().put("session_init_user_input_type", "name");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your name");
+				}
+
 			}
 
-		}
+			if (channel.getWa360d().isPromptEmail()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
+					this.context().session().put("session_init_user_input_type", "email");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your email");
+				}
 
-		if (channel.getWa360d().isPromptEmail()) {
-			if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
-				this.context().session().put("session_init_user_input_type", "email");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your email");
 			}
 
-		}
+			if (channel.getWa360d().isPromptPhone()) {
+				if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
+					this.context().session().put("session_init_user_input_type", "phone");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
+				}
 
-		if (channel.getWa360d().isPromptPhone()) {
-			if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
-				this.context().session().put("session_init_user_input_type", "phone");
-				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
 			}
-
 		}
 
 		return null;
@@ -201,8 +202,12 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
-			inboxMessage.form().put("reply_payload", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString());
-
+			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
+			inboxMessage.form().put("reply_payload", reply_payload);
+			if (ArgUtil.is(reply_payload) && reply_payload.startsWith("reply_id:")) {
+				String reply_id = reply_payload.replaceFirst("reply_id:", "");
+				inboxMessage.form().put("reply_id", reply_id);
+			}
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("image".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.IMAGE);
@@ -409,11 +414,9 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
 		MessageReport report = this.createMessageReport(channelConfig);
 		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
-		LOGGER.info("1.toMessageReport csid :" + csid);
 		if (!ArgUtil.is(csid)) {
 			csid = requestMap.getString("recipient_id");
 		}
-		LOGGER.info("2.toMessageReport csid :" + csid);
 		report.contact().setCsid(csid);
 		report.setChangeStamp(requestMap.getLong("timestamp", 0L) * 1000);
 		report.setMessageIdExt(requestMap.getString("id"));

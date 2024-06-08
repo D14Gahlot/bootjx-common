@@ -9,7 +9,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.logger.LoggerService;
@@ -23,6 +22,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.WebPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;

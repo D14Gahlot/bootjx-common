@@ -3,7 +3,6 @@ package com.boot.jx.connectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorMapping;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMConfiguration;
 import com.boot.jx.postman.client.PostManClient;
@@ -22,6 +21,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.WAMessage.Channel;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.WAGupShupPlugin;
 import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.utils.PostManUtil;

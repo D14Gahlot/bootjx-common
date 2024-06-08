@@ -135,13 +135,8 @@ public class AgChatSessionController {
 		// Session Stuff Logging >
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			outboxMessage.route().setQueueCode(sessionDoc.getAssignedToQueue());
-			LOGGER.info("sendSessionMessage { 1.sessionDoc }"+JsonUtil.toJson(sessionDoc));
-			LOGGER.info("sendSessionMessage { 1.outboxMessage }"+JsonUtil.toJson(outboxMessage));
-			
 			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 			
-			LOGGER.info("sendSessionMessage { 2.messageDto }"+JsonUtil.toJson(messageDto));
-
 			// Evaluate if required
 			messageDto.setName(agentSession.getAgentCode());
 			// messageDto.setType(outboxMessage.getType());

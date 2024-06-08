@@ -1,6 +1,8 @@
 package com.boot.jx.postman.plugin;
 
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
+import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
@@ -259,4 +261,24 @@ public class ChannelConfig extends AChannelConfig {
 		this.isAutoCreated = isAutoCreated;
 	}
 
+	public AChannelDetails details() {
+		switch (getChannelType()) {
+		case CHANNEL_TYPE.WACFB:
+			return this.getWacfb();
+		case CHANNEL_TYPE.WA_360DC:
+			return this.getWa360dc();
+		case CHANNEL_TYPE.WA_360D:
+			return this.getWa360d();
+		case CHANNEL_TYPE.WEB:
+			return this.getWeb();
+		case CHANNEL_TYPE.FACEBOOK:
+			return this.getFacebook();
+		case CHANNEL_TYPE.TWITTER:
+			return this.getTwitter();
+		case CHANNEL_TYPE.TELEGRAM:
+			return this.getTelegram();
+		default:
+			return null;
+		}
+	}
 }

@@ -1164,7 +1164,7 @@ public class AdminDashBoardManager {
 				dto.setDomain(tnt);
 				dto.setLane(getLane(doc.getContactId()));
 				String id = getSummaryWithChannelId(dto);
-				if (ArgUtil.is(id)) {
+				if (ArgUtil.is(id) && ArgUtil.is(dto.getType())) {
 					dto.setId(id);
 					Date date = new Date(timeStamp);
 					SimpleDateFormat sdfH = new SimpleDateFormat(DateUtil.DEFAULT_DATE_TIME_FORMAT);
@@ -1193,37 +1193,6 @@ public class AdminDashBoardManager {
 
 		Map<Object, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
-//		for (Map.Entry<String, Map<Object, Long>> keyValue : hourWiseCountMap.entrySet()) {
-//			Map<Object, Long> hoCntMapAll = new HashMap<>();
-//			String key = keyValue.getKey();
-//			if (ArgUtil.is(key)) {
-//				for (String channel : channelLst) {
-//					if (!key.contains(channel)) {
-//						hourWiseCount.put(tnt + "_" + channel, hourCntMap);
-//					}
-//				}
-//				Map<Object, Long> hoCntMap = hourWiseCountMap.get(key);
-//
-//				for (Map.Entry<Object, Long> keyValueCount : hourCntMap.entrySet()) {
-//					Object keydt = keyValueCount.getKey();
-//					if (ArgUtil.is(keydt)) {
-//						Long count = keyValueCount.getValue();
-//						if (hoCntMap.containsKey(keydt)) {
-//							hoCntMapAll.put(keydt, hoCntMap.get(keydt));
-//						} else {
-//							hoCntMapAll.put(keydt, count);
-//						}
-//					}
-//				}
-//
-//				hourWiseCount.put(key, hoCntMapAll);
-//			}
-//		}
-//		if (hourWiseCount == null || hourWiseCount.isEmpty()) {
-//			for (String channel : channelLst) {
-//				hourWiseCount.put(tnt + "_" + channel, hourCntMap);
-//			}
-//		}
 
 		hourWiseCount = MapUtils.getHourdefaultValue(hourWiseCountMap, channelLst, hourCntMap, tnt);
 
@@ -1299,7 +1268,7 @@ public class AdminDashBoardManager {
 				dto.setLane(getLane(doc.getContactId()));
 				String id = getSummaryId(dto);
 				dto.setId(id);
-				if (ArgUtil.is(dto.getId())) {
+				if (ArgUtil.is(dto.getId()) && ArgUtil.is(dto.getType())) {
 					lstSummDto.add(dto);
 				}
 				String channelid = getSummaryWithChannelId(dto);
@@ -1422,21 +1391,14 @@ public class AdminDashBoardManager {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 
 			List<Document> list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
-
-//			List<DBObject> list = new ArrayList<DBObject>();
-//			list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
-//			DBCollection col = mongoTemplate.getCollection(contactType);
-//			Cursor cursor = col.aggregate(list,
-//					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
-
-			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
+		MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
 				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
 					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
-					if (ArgUtil.is(type)) {
+					if (ArgUtil.is(type) && ArgUtil.is(type)){
 						Map<String, Object> mapValue = JsonUtil.fromJsonToMap(type);
 						long count = ArgUtil.parseAsLong(object.get("count"), 0L);
 						contactDto.setType(type);
@@ -1539,9 +1501,6 @@ public class AdminDashBoardManager {
 		for (String contactType : lst) {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 			List<Document> list = getAggregationMatchForMsgStatus(lasDayTimeStmp, currentTs);
-//			DBCollection col = mongoTemplate.getCollection(contactType);
-//			Cursor cursor = col.aggregate(list,
-//					AggregationOptions.builder().allowDiskUse(true).outputMode(OutputMode.CURSOR).build());
 
 			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
@@ -1800,7 +1759,7 @@ public class AdminDashBoardManager {
 				dto.setDomain(tnt);
 				String id = getSummaryId(dto);
 				dto.setId(id);
-				if (ArgUtil.is(dto.getId())) {
+				if (ArgUtil.is(dto.getId()) && ArgUtil.is(dto.getType())) {
 					lstSummDto.add(dto);
 				}
 
@@ -1856,6 +1815,9 @@ public class AdminDashBoardManager {
 		int year = cal.get(Calendar.YEAR);
 		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
 		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+		String offset = getTimeZoneFromSetup();
+		monthMinTimeStamp = monthMinTimeStamp+countryTimeZoneOffset(offset);
+		monthMaxTimeStamp = monthMaxTimeStamp+countryTimeZoneOffset(offset);
 
 		List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
 		Query query = new Query();
@@ -1889,7 +1851,7 @@ public class AdminDashBoardManager {
 		String lane = "";
 		if (ArgUtil.is(contactid)) {
 			String[] contactids = contactid.split("_");
-			if (contactids != null && contactids.length > 0) {
+			if (contactids != null && contactids.length > 1) {
 				lane = contactids[1];
 			}
 		}
@@ -2067,7 +2029,7 @@ public class AdminDashBoardManager {
 				dto.setDomain(tnt);
 				String id = getSummaryWithChannelId(dto);
 				dto.setId(id);
-				if (ArgUtil.is(dto.getId())) {
+				if (ArgUtil.is(dto.getId()) && ArgUtil.is(dto.getUniqueContactId())) {
 					lstSummDto.add(dto);
 				}
 			}

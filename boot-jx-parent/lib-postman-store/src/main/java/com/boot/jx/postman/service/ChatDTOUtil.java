@@ -18,6 +18,7 @@ import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.ContactMeta;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -168,7 +169,7 @@ public class ChatDTOUtil {
 		return messageDtos;
 	}
 
-	public static MessageDoc latestMessage(MessageDoc messageDoc1, MessageDoc messageDoc2) {
+	public static <T extends IMessageId> T latestMessage(T messageDoc1, T messageDoc2) {
 		if (!ArgUtil.is(messageDoc1)) {
 			return messageDoc2;
 		}
@@ -215,14 +216,14 @@ public class ChatDTOUtil {
 		Map<String, ChatMessageDTO> msg = chatSessionDto.msg();
 
 		if (!msg.containsKey("lastInBoundMsg")) {
-			chatSessionDto.msg().put("lastInBoundMsg", getChatMessageDTO(chatSessionDoc.getLastInBoundMsg()));
+			chatSessionDto.msg().put("lastInBoundMsg", chatSessionDoc.lastInBoundMsg());
 		}
 		if (!msg.containsKey("lastOutBoundMsg")) {
-			chatSessionDto.msg().put("lastOutBoundMsg", getChatMessageDTO(chatSessionDoc.getLastOutBoundMsg()));
+			chatSessionDto.msg().put("lastOutBoundMsg", chatSessionDoc.lastOutBoundMsg());
 		}
 		if (!msg.containsKey("lastMsg")) {
-			chatSessionDto.msg().put("lastMsg", getChatMessageDTO(latestMessage(chatSessionDoc.getLastMsg(),
-					latestMessage(chatSessionDoc.getLastInBoundMsg(), chatSessionDoc.getLastOutBoundMsg()))
+			chatSessionDto.msg().put("lastMsg", latestMessage(chatSessionDoc.lastMsg(),
+					latestMessage(chatSessionDoc.lastInBoundMsg(), chatSessionDoc.lastOutBoundMsg())
 			// Only Last Inoboud
 			// ArgUtil.nonEmpty(chatSessionDoc.getLastOutBoundMsg(),chatSessionDoc.getLastMsg()))
 			));

@@ -12,7 +12,6 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampDoc;
@@ -137,14 +136,14 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	private Map<String, Object> feedback;
 
 	// MessageStats
-	@DBRef
-	private MessageDoc lastInBoundMsg;
-
-	@DBRef
-	private MessageDoc lastOutBoundMsg;
+//	@DBRef
+//	private MessageDoc lastInBoundMsg;
+//
+//	@DBRef
+//	private MessageDoc lastOutBoundMsg;
 
 	// @DBRef
-	private MessageDoc lastMsg;
+//	private MessageDoc lastMsg;
 
 	/**
 	 * Should not add anything at this level
@@ -392,29 +391,29 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 		return String.format("[sessionId:%s]", this.sessionId);
 	}
 
-	public MessageDoc getLastInBoundMsg() {
-		return lastInBoundMsg;
-	}
+//	public MessageDoc getLastInBoundMsg() {
+//		return lastInBoundMsg;
+//	}
+//
+//	public void setLastInBoundMsg(MessageDoc lastInBoundMsg) {
+//		this.lastInBoundMsg = lastInBoundMsg;
+//	}
+//
+//	public MessageDoc getLastOutBoundMsg() {
+//		return lastOutBoundMsg;
+//	}
+//
+//	public void setLastOutBoundMsg(MessageDoc lastOutBoundMsg) {
+//		this.lastOutBoundMsg = lastOutBoundMsg;
+//	}
 
-	public void setLastInBoundMsg(MessageDoc lastInBoundMsg) {
-		this.lastInBoundMsg = lastInBoundMsg;
-	}
-
-	public MessageDoc getLastOutBoundMsg() {
-		return lastOutBoundMsg;
-	}
-
-	public void setLastOutBoundMsg(MessageDoc lastOutBoundMsg) {
-		this.lastOutBoundMsg = lastOutBoundMsg;
-	}
-
-	public MessageDoc getLastMsg() {
-		return lastMsg;
-	}
-
-	public void setLastMsg(MessageDoc lastMsg) {
-		this.lastMsg = lastMsg;
-	}
+//	public MessageDoc getLastMsg() {
+//		return lastMsg;
+//	}
+//
+//	public void setLastMsg(MessageDoc lastMsg) {
+//		this.lastMsg = lastMsg;
+//	}
 
 	/**
 	 * @deprecated Use {@link UpdatedTimeStampSupport#getUpdated())}
@@ -613,7 +612,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	public ChatMessageDTO lastMsg() {
 		return this.msg().get("lastMsg");
 	}
-	
+
 	public ChatMessageDTO lastOutBoundMsg() {
 		return this.msg().get("lastOutBoundMsg");
 	}
@@ -624,34 +623,23 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	public void refreshStamps() {
 		if (!ArgUtil.is(this.lastOutGoingStamp)) {
-			if (this.lastOutBoundMsg != null && PostManUtil.isOutBound(lastOutBoundMsg.getType())) {
-				this.lastOutGoingStamp = lastOutBoundMsg.getTimestamp();
-			} else if (this.lastMsg != null && PostManUtil.isOutBound(lastMsg.getType())) {
+			ChatMessageDTO lastOutBoundMsg = this.lastOutBoundMsg();
+			ChatMessageDTO lastMsg = this.lastMsg();
+			if (lastOutBoundMsg != null && PostManUtil.isOutBound(lastOutBoundMsg.getType())) {
+				this.lastOutGoingStamp = lastOutBoundMsg().getTimestamp();
+			} else if (lastMsg != null && PostManUtil.isOutBound(lastMsg.getType())) {
 				this.lastOutGoingStamp = lastMsg.getTimestamp();
-			} else if (this.msg != null && this.msg.containsKey("lastOutBoundMsg")) {
-				ChatMessageDTO m = this.msg.get("lastOutBoundMsg");
-				this.lastOutGoingStamp = m.getTimestamp();
-			} else if (this.msg != null && this.msg.containsKey("lastMsg")) {
-				ChatMessageDTO m = this.msg.get("lastMsg");
-				if (PostManUtil.isOutBound(m.getType())) {
-					this.lastOutGoingStamp = m.getTimestamp();
-				}
 			}
 		}
 
 		if (!ArgUtil.is(this.lastInComingStamp)) {
-			if (this.lastInBoundMsg != null && PostManUtil.isInBound(lastInBoundMsg.getType())) {
-				this.lastInComingStamp = this.lastInBoundMsg.getTimestamp();
-			} else if (this.lastMsg != null && PostManUtil.isInBound(lastMsg.getType())) {
+			ChatMessageDTO lastInBoundMsg = this.lastInBoundMsg();
+			ChatMessageDTO lastMsg = this.lastMsg();
+
+			if (lastInBoundMsg != null && PostManUtil.isInBound(lastInBoundMsg.getType())) {
+				this.lastInComingStamp = lastInBoundMsg.getTimestamp();
+			} else if (lastMsg != null && PostManUtil.isInBound(lastMsg.getType())) {
 				this.lastInComingStamp = lastMsg.getTimestamp();
-			} else if (this.msg != null && this.msg.containsKey("lastInBoundMsg")) {
-				ChatMessageDTO m = this.msg.get("lastInBoundMsg");
-				this.lastInComingStamp = m.getTimestamp();
-			} else if (this.msg != null && this.msg.containsKey("lastMsg")) {
-				ChatMessageDTO m = this.msg.get("lastMsg");
-				if (PostManUtil.isInBound(m.getType())) {
-					this.lastInComingStamp = m.getTimestamp();
-				}
 			}
 		}
 	}

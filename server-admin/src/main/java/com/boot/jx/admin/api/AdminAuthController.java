@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +25,7 @@ import com.boot.jx.admin.AdminAuthProvider;
 import com.boot.jx.admin.AdminSessionBean;
 import com.boot.jx.admin.AdminSessionService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.ApiRequest;
@@ -64,6 +66,19 @@ public class AdminAuthController {
 
 	@Autowired
 	public StarterDocKit starterDocKit;
+
+	private boolean isPanelActive() {
+		return pmEnvironment.keyEntry("mry.domain.active").asBoolean()
+				&& pmEnvironment.featureEntry(ConfigConstants.FEATURES_KEY.APP_MODULE_ADMIN).asBoolean(true);
+	}
+
+	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
+	@RequestMapping(value = { "/app/unauthorized", "/app/unauthorized/**" },
+			method = { RequestMethod.POST, RequestMethod.GET })
+	public String unauthorized(Model model) {
+		model.addAllAttributes(appCommonConfig.appAttributes());
+		return "app-unauthorized";
+	}
 
 	public AgentResponseAuthDto loginFromXToken(HttpServletRequest request, HttpServletResponse response,
 			String xRemSession) throws NoSuchAlgorithmException {
@@ -108,13 +123,19 @@ public class AdminAuthController {
 	}
 
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
-	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/" },
+	@RequestMapping(value = { "/pub/**", "/app/**", "/auth/**", "/",
+			// Sub Apps
+			"/_{subapp}", "/_{subapp}/", "/_{subapp}/*", "/_{subapp}/**" },
 			method = { RequestMethod.GET, RequestMethod.POST })
 	public String home(Model model, HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(required = false) String domainName, @RequestParam(required = false) String domainId,
 			@RequestParam(required = false) String domainUser, @RequestParam(required = false) String domainUserEmail,
-			@RequestParam(required = false) String domainToken, @RequestParam(required = false) String domainTokenValid)
-			throws NoSuchAlgorithmException {
+			@RequestParam(required = false) String domainToken, @RequestParam(required = false) String domainTokenValid,
+			@PathVariable(required = false) String subapp) throws NoSuchAlgorithmException {
+
+		if (!isPanelActive()) {
+			return unauthorized(model);
+		}
 
 		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
@@ -167,6 +188,12 @@ public class AdminAuthController {
 			model.addAttribute("APP_USER", "");
 			model.addAttribute("APP_USER_ROLE", "['GUEST']");
 		}
+
+		if (ArgUtil.is(subapp)) {
+			model.addAttribute("APP", subapp);
+		} else {
+			model.addAttribute("APP", "admin");
+		}
 		return "app-admin";
 	}
 
@@ -179,6 +206,11 @@ public class AdminAuthController {
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })
 	@RequestMapping(value = { "/auth/login", "/auth/resetpass" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String login(Model model, HttpServletRequest request, HttpServletResponse httpServletResponse) {
+
+		if (!isPanelActive()) {
+			return unauthorized(model);
+		}
+
 		model.addAllAttributes(appCommonConfig.appAttributes());
 
 		String page = ArgUtil.parseAsString(commonHttpRequest.get("page"), "login");

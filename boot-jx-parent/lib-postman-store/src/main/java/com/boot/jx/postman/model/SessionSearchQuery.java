@@ -41,6 +41,9 @@ public class SessionSearchQuery {
 	public long toStamp;
 	public int limit;
 
+	public String agentCode;
+	public String agentDept;
+
 	public TreeSet<CHAT_ASSIGN_GROUP> tabs() {
 		if (tabs == null) {
 			this.tabs = new TreeSet<CHAT_ASSIGN_GROUP>();
@@ -94,6 +97,24 @@ public class SessionSearchQuery {
 		return this.tabs().contains(tab);
 	}
 
+	public boolean containsAll(CHAT_ASSIGN_GROUP... tabs) {
+		for (CHAT_ASSIGN_GROUP tab : tabs) {
+			if (!this.tabs().contains(tab)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean containsAny(CHAT_ASSIGN_GROUP... tabs) {
+		for (CHAT_ASSIGN_GROUP tab : tabs) {
+			if (this.contains(tab)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public boolean contains(CHAT_STATE state) {
 		return this.states().contains(state);
 	}
@@ -113,6 +134,15 @@ public class SessionSearchQuery {
 
 	public boolean contains(CHAT_MODE mode) {
 		return this.modes().contains(mode);
+	}
+
+	public boolean containsAny(CHAT_MODE... modes) {
+		for (CHAT_MODE mode : modes) {
+			if (this.contains(mode)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean contains(ContactType contactType) {
