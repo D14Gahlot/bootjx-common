@@ -478,17 +478,38 @@ public class CustomerMasterFldMgr {
 	
 	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
 		int limit = searchQry.getPageSize() == 0 ? 25 :searchQry.getPageSize();
-		String sortDir =ArgUtil.parseAsString(searchQry.getSortBy(), "asc");
-		List<ProfileSearchCriteria> searchCriterias =searchQry.getSearchCriterias(); 
+		String sortDir =ArgUtil.parseAsString(searchQry.getSortBy(), "desc");
+		List<List<ProfileSearchCriteria>> searchCriterias =searchQry.getSearchCriterias(); 
 		
-		List<Criteria> criterias =new LinkedList<Criteria>();
+		List<Criteria> orCriterias =new LinkedList<Criteria>();
 		
-		for(ProfileSearchCriteria src :searchCriterias) {
-			criterias.add(createCriteria(src.getKey(),src.getOperation(),src.getValue()));
+		for(List<ProfileSearchCriteria> srcLst :searchCriterias) {
+			List<Criteria> andCriteriaList = new ArrayList<>();
+			for(ProfileSearchCriteria src:srcLst) {
+				switch(src.getKey()) {
+				case "phone":
+				case "phones":
+				case "mobile":
+				case "mobiles":
+					PBPhone ph = contactStore.parsePhone(new PBPhone().phone(src.getValue().toString()));
+					andCriteriaList.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
+							.and("countryCallingCode").is(ph.countryCallingCode)));
+				break;
+				case "email":
+				case "emails":
+					andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
+				 break;
+				 default:
+					 andCriteriaList.add(createCriteria(src.getKey(),src.getOperation(),src.getValue()));
+				}
+				
+			}
+			orCriterias.add(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])));
 		}
 		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
-				.where(new Criteria().orOperator(criterias.toArray(new Criteria[criterias.size()]))).sortBy(sortDir).limit(limit);
-		return contactStore.find(qb);
+				.where(new Criteria().orOperator(orCriterias.toArray(new Criteria[orCriterias.size()]))).sortBy(sortDir).limit(limit);
+		LOGGER.info("QB {} "+JsonUtil.toJson(qb));
+		return contactStore.find(qb); 
 	}
 	
 	private Criteria createCriteria(String key, String operation, Object value) {

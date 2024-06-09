@@ -6,18 +6,13 @@ import java.util.List;
 public class ProfileSearchQuery {
 
 	
-	List<ProfileSearchCriteria> searchCriterias = new ArrayList<>();
+	List<List<ProfileSearchCriteria>> searchCriterias = new ArrayList<>();
 	
 	int pageNo;
 	int pageSize;
 	String sortBy;
 	String sortDir;
-	public List<ProfileSearchCriteria> getSearchCriterias() {
-		return searchCriterias;
-	}
-	public void setSearchCriterias(List<ProfileSearchCriteria> searchCriterias) {
-		this.searchCriterias = searchCriterias;
-	}
+	
 	public int getPageNo() {
 		return pageNo;
 	}
@@ -41,6 +36,12 @@ public class ProfileSearchQuery {
 	}
 	public void setSortDir(String sortDir) {
 		this.sortDir = sortDir;
+	}
+	public List<List<ProfileSearchCriteria>> getSearchCriterias() {
+		return searchCriterias;
+	}
+	public void setSearchCriterias(List<List<ProfileSearchCriteria>> searchCriterias) {
+		this.searchCriterias = searchCriterias;
 	}
 	
 
