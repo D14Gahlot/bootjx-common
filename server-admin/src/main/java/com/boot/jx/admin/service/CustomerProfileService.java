@@ -11,7 +11,7 @@ import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
 import com.boot.jx.admin.dto.SearchCustomerProfileDto;
-import com.boot.jx.admin.dto.SearchQuery;
+import com.boot.jx.admin.dto.ProfileSearchQuery;
 import com.boot.jx.admin.manager.CustomerMasterFldMgr;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
@@ -106,7 +106,7 @@ public class CustomerProfileService {
 		return cmFieldMgr.deleteCustmerMasterFiled(reqDto);
 	}
 
-	public List<CustomerProfileDoc> getProfileSearch(SearchQuery searchQry) {
+	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
 		// TODO Auto-generated method stub
 		return cmFieldMgr.getProfileSearch(searchQry);
 	}

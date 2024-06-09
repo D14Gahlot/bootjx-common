@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
-import com.boot.jx.admin.dto.SearchQuery;
+import com.boot.jx.admin.dto.ProfileSearchQuery;
 import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
@@ -141,7 +141,7 @@ public class CustomerProfileContoller {
 	
 	@RequestMapping(value = "/profile/filter", method = { RequestMethod.POST })
 	@JsonView(PMEnvironment.PublicProperty.class)
-	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestBody SearchQuery searchQry)  {
+	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestBody ProfileSearchQuery searchQry)  {
 		List<CustomerProfileDoc> docs = cusProfileService.getProfileSearch(searchQry);
 		return ApiResponse.buildResults(docs);
 	}

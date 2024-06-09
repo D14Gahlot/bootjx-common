@@ -3,6 +3,7 @@ package com.boot.jx.postman.store;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
 import com.boot.jx.model.ModelPatch.ModelPatches;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.SimpleDocQueryBuilder;
@@ -238,14 +240,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			case "rmCode":
 				qb.setunset("rmCode", patch.value().asString());
 				break;
-			case "emailsAlt":
-				PBEmail emailsAlt = patch.value().as(PBEmail.class);
-				qb.setunset("emailsAlt", patch(patch.getCommand(), doc.emailsAlt(), emailsAlt));
-				break;
-			case "phonesAlt":
-				PBPhone phonesAlt = parsePhone(patch.value().as(PBPhone.class));
-				qb.setunset("phonesAlt", patch(patch.getCommand(), doc.phonesAlt(), phonesAlt));
-				break;
 //			case "additionalInfo": @Rabil :- Need per filed update not all field at once
 //				qb.setunset("additionalInfo", patch.value().asString());
 //				break;
@@ -306,6 +300,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public CustomerProfileDoc createprofile(CustomerProfileDoc req) {
 		CustomerProfileDoc doc = findById(req.getId(), CustomerProfileDoc.class);
 		if(ArgUtil.is(doc)) {
@@ -322,7 +317,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			doc.setCode(req.getCode());
 			doc.setRmCode(req.getRmCode());
 			 Set<PBEmail> emails = new HashSet<>();
-			 Set<PBEmail> emailAlt = new HashSet<>();
 			if(req.getEmails()!=null && !req.getEmails().isEmpty()){
 				 Set<PBEmail> reqEmails =req.getEmails();
 				 
@@ -337,16 +331,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				}
 				doc.setEmails(emails);
 			}
-			if(req.getEmailsAlt()!=null && !req.getEmailsAlt().isEmpty()){
-				 Set<PBEmail> reqEmails =req.getEmailsAlt();
-				for(PBEmail pbEmail:reqEmails) {
-					PBEmail pbEm=new PBEmail();
-					emailAlt.add(pbEm.update(pbEmail));
-				}
-				doc.setEmailsAlt(emailAlt);
-			}
 			Set<PBPhone> phones = new HashSet<>();
-			Set<PBPhone> phonesAlt = new HashSet<>(); 
 			if(req.getPhones()!=null && !req.getPhones().isEmpty()) {
 				Set<PBPhone> reqPhones =req.getPhones();
 				for(PBPhone phone:reqPhones) {
@@ -360,17 +345,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				}
 				doc.setPhones(phones);
 			}
-			if(req.getPhonesAlt()!=null && !req.getPhonesAlt().isEmpty()) {
-				Set<PBPhone> reqPhones =req.getPhonesAlt();
-				for(PBPhone phone:reqPhones) {
-					PBPhone pb =parsePhone(phone);
-					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
-					phonesAlt.add(pb);
-				}
-				doc.setPhonesAlt(phonesAlt);
-			}
-			doc.setAdditionalInfo(req.getAdditionalInfo());
-			
 			if(req.getAddresses()!=null && !req.getAddresses().isEmpty()) {
 				Set<PBAddress> pAddresses=new HashSet<>();
 				for(PBAddress adre:req.getAddresses()) {
@@ -399,6 +373,54 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				doc.setUrls(pws);
 			}
 			
+			Map<String,Object> addInfo=req.getAdditionalInfo();
+			if(addInfo!=null && !addInfo.isEmpty()) {
+				 /** Retrieve all the key-value pairs from the map **/
+		        Set<Map.Entry<String, Object>> entries = addInfo.entrySet();
+		        for (Map.Entry<String, Object> entry : entries) {
+		            LOGGER.info("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+		            switch (entry.getKey()) {
+		           /* case "emails":
+		            case "alt_emails":
+		            	List<PBEmail> reqEmails =(List<PBEmail>)entry.getValue();
+		            	 Set<PBEmail> emailAlt = new HashSet<>();
+		 				for(PBEmail pbEmail:reqEmails) {
+		 					PBEmail pbEm=new PBEmail();
+		 					emailAlt.add(pbEm.update(pbEmail));
+		 				}
+		 				addInfo.put(entry.getKey(),emailAlt);	
+		 			  break;
+		            case "phones":
+		            case "alt_phone":
+		            	Set<PBPhone> reqPhones =(Set<PBPhone>)entry.getValue();
+		            	 Set<PBPhone> phoneAlt = new HashSet<>();
+		 				for(PBPhone pbPhone:reqPhones) {
+		 					PBPhone pb =parsePhone(pbPhone);
+							pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
+							phoneAlt.add(pb);
+		 				}
+		 				addInfo.put(entry.getKey(),phoneAlt);	
+		 			  break;*/
+		            case "title":
+		            case "Title": 
+		            	addInfo.put(entry.getKey(), entry.getValue());
+		            break;	
+		            case "gender":
+		            case "Gender": 
+		            	addInfo.put(entry.getKey(), entry.getValue());
+		            break;
+		            case "dob":
+		            case "DOB": 
+		            	addInfo.put(entry.getKey(), entry.getValue());
+		            break;
+		            default:
+		            	addInfo.put(entry.getKey(), entry.getValue());
+		            }
+		        }
+		        
+			}
+			doc.setAdditionalInfo(addInfo);
+			doc.setCreated(TimeStampIndex.now());
 			mongoTemplate.save(doc);
 			
 		}

@@ -2,9 +2,12 @@ package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -39,8 +42,6 @@ public class CustomerProfileDoc extends TimeStampDoc
 	public Set<PBAddress> addresses;
 	public Set<PBWebsite> urls;
 	public Set<PBWork> works;
-	public Set<PBPhone> phonesAlt;
-	public Set<PBEmail> emailsAlt;
 	public Map<String, Object> additionalInfo = new HashMap<>();
 
 	public String rmCode;
@@ -74,27 +75,7 @@ public class CustomerProfileDoc extends TimeStampDoc
 		return this.phones;
 	}
 
-	public Set<PBPhone> phonesAlt() {
-		if (phonesAlt == null) {
-			this.phonesAlt = new TreeSet<PBPhone>();
-		}
-		return this.phonesAlt;
-	}
-
-	public Set<PBEmail> emails() {
-		if (emails == null) {
-			this.emails = new TreeSet<PBEmail>();
-		}
-		return this.emails;
-	}
-
-	public Set<PBEmail> emailsAlt() {
-		if (emailsAlt == null) {
-			this.emailsAlt = new TreeSet<PBEmail>();
-		}
-		return this.emailsAlt;
-	}
-
+	
 	public String getCode() {
 		return code;
 	}
@@ -156,7 +137,7 @@ public class CustomerProfileDoc extends TimeStampDoc
 	}
 
 	public void setAdditionalInfo(Map<String, Object> additionalInfo) {
-		this.additionalInfo = additionalInfo;
+				 this.additionalInfo = additionalInfo;
 	}
 
 	public Set<PBWork> getWorks() {
@@ -173,25 +154,77 @@ public class CustomerProfileDoc extends TimeStampDoc
 		}
 		return this.works;
 	}
+	
+	public Set<PBEmail> emails() {
+		if (emails == null) {
+			this.emails = new TreeSet<PBEmail>();
+		}
+		return this.emails;
+	}
+
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
 
-	public Set<PBPhone> getPhonesAlt() {
-		return phonesAlt;
-	}
+	
+	public Map<String, Object> additionalInfo(){
+		if(additionalInfo==null) {
+			this.additionalInfo = new HashMap<>();
+			additionalInfo.put("title","");
+			additionalInfo.put("DOB","");
+			
+			AdditionalProfilDto gender=new AdditionalProfilDto();
+			gender.setObject("Gender");
+			gender.setIsPredefined(true);
+			additionalInfo.put("gender","");
+			
+			 AdditionalProfilDto phonesAltDto = new AdditionalProfilDto();
+			 Set<PBPhone> alt_phones=new HashSet<>();
+			 phonesAltDto.setObject(alt_phones);
+			 phonesAltDto.setIsPredefined(true);
+			 additionalInfo.put("alt_phones", alt_phones);
+			
+			 AdditionalProfilDto emailsAltDto = new AdditionalProfilDto();
+			 Set<PBEmail> alt_emails=new HashSet<>();
+			 emailsAltDto.setObject(alt_emails);
+			 emailsAltDto.setIsPredefined(true);
+			 additionalInfo.put("alt_emails", alt_emails);
 
-	public void setPhonesAlt(Set<PBPhone> phonesAlt) {
-		this.phonesAlt = phonesAlt;
+			
+		}
+		return this.additionalInfo;
 	}
+	
+	
+	@PostConstruct
+	public void init() {
+		//public Map<String, Object> additionalInfo(){
+			if(additionalInfo==null) {
+				this.additionalInfo = new HashMap<>();
+				additionalInfo.put("title","");
+				additionalInfo.put("DOB","");
+				
+				AdditionalProfilDto gender=new AdditionalProfilDto();
+				gender.setObject("Gender");
+				gender.setIsPredefined(true);
+				additionalInfo.put("gender","");
+				
+				 AdditionalProfilDto phonesAltDto = new AdditionalProfilDto();
+				 Set<PBPhone> alt_phones=new HashSet<>();
+				 phonesAltDto.setObject(alt_phones);
+				 phonesAltDto.setIsPredefined(true);
+				 additionalInfo.put("alt_phones", alt_phones);
+				
+				 AdditionalProfilDto emailsAltDto = new AdditionalProfilDto();
+				 Set<PBEmail> alt_emails=new HashSet<>();
+				 emailsAltDto.setObject(alt_emails);
+				 emailsAltDto.setIsPredefined(true);
+				 additionalInfo.put("alt_emails", alt_emails);
 
-	public Set<PBEmail> getEmailsAlt() {
-		return emailsAlt;
-	}
-
-	public void setEmailsAlt(Set<PBEmail> emailsAlt) {
-		this.emailsAlt = emailsAlt;
+				
+			}
+			//return this.additionalInfo;
 	}
 
 }

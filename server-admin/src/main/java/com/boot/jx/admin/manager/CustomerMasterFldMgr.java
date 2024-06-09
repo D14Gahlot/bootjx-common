@@ -18,9 +18,9 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
-import com.boot.jx.admin.dto.SearchCriteria;
+import com.boot.jx.admin.dto.ProfileSearchCriteria;
 import com.boot.jx.admin.dto.SearchCustomerProfileDto;
-import com.boot.jx.admin.dto.SearchQuery;
+import com.boot.jx.admin.dto.ProfileSearchQuery;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
@@ -89,6 +89,8 @@ public class CustomerMasterFldMgr {
 				cmFieldDoc.setFieldType(
 						reqDto.getFieldType() == null ? cmFieldDoc.getFieldType() : reqDto.getFieldType());
 				cmFieldDoc.setIsactive(ArgUtil.parseAsString(reqDto.getIsactive(), Constants.YES));
+				cmFieldDoc.setAdditionalInfo(reqDto.getAdditionalInfo());
+				cmFieldDoc.setRequired(reqDto.getIsRequired());
 				commonMongoTemplate.save(cmFieldDoc);
 			}
 		} else {
@@ -97,6 +99,8 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc.setFieldDesc(reqDto.getFieldDesc());
 			cmFieldDoc.setFieldType(reqDto.getFieldType());
 			cmFieldDoc.setIsactive(ArgUtil.parseAsString(reqDto.getIsactive(), Constants.YES));
+			cmFieldDoc.setRequired(reqDto.getIsRequired());
+			cmFieldDoc.setAdditionalInfo(reqDto.getAdditionalInfo());
 			commonMongoTemplate.save(cmFieldDoc);
 		}
 
@@ -159,7 +163,7 @@ public class CustomerMasterFldMgr {
 			commonMongoTemplate.save(doc);
 			SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
 			String nodeUrl = globalVars.keyEntry("cp_node_url").asString();
-			System.out.println("isSchedular :"+nodeUrl);
+			LOGGER.info("isSchedular :"+nodeUrl);
 			
 			
 			/** to call node API **/
@@ -167,15 +171,10 @@ public class CustomerMasterFldMgr {
 			HashMap<String, Object> data =new HashMap<>();
 			BuilderMap mapBuilder = MapBuilder.map();
 			mapBuilder.put("id", doc.getId());
-			BuilderMap optionMap = MapBuilder.map();
-			optionMap.put("timezone","Asia/Kolkata");
-			
 			
 			data.put("name","cust_profiles_bulk_upload");
 			data.put("desc","Deduplication and saving the bulk uploaded customer profiles to the database");
 			data.put("data",mapBuilder.toMap());
-			//data.put("options",optionMap.toMap());
-			String urlString ="https://demo.mehery.xyz/chrono/scheduler/api/v1/job/now";
 			
 			 String jsonStr = JsonUtil.toJson(data);
 			LOGGER.info("post data :"+jsonStr);
@@ -477,14 +476,14 @@ public class CustomerMasterFldMgr {
 
 	/** profile search **/
 	
-	public List<CustomerProfileDoc> getProfileSearch(SearchQuery searchQry) {
+	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
 		int limit = searchQry.getPageSize() == 0 ? 25 :searchQry.getPageSize();
 		String sortDir =ArgUtil.parseAsString(searchQry.getSortBy(), "asc");
-		List<SearchCriteria> searchCriterias =searchQry.getSearchCriterias(); 
+		List<ProfileSearchCriteria> searchCriterias =searchQry.getSearchCriterias(); 
 		
 		List<Criteria> criterias =new LinkedList<Criteria>();
 		
-		for(SearchCriteria src :searchCriterias) {
+		for(ProfileSearchCriteria src :searchCriterias) {
 			criterias.add(createCriteria(src.getKey(),src.getOperation(),src.getValue()));
 		}
 		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)

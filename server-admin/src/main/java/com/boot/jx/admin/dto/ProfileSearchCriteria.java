@@ -1,11 +1,11 @@
 package com.boot.jx.admin.dto;
 
-public class SearchCriteria {
+public class ProfileSearchCriteria {
 	private String key;
     private String operation;
     private Object value;
     
-    public SearchCriteria(String key, String operation, Object value) {
+    public ProfileSearchCriteria(String key, String operation, Object value) {
         this.key = key;
         this.operation = operation;
         this.value = value;
