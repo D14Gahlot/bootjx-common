@@ -804,6 +804,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		}
 		
 		primaryCriteria = primaryCriteria.and("assignedAgentStamp").gt(fromStamp).lt(toStamp);
+		criterias.add(primaryCriteria);
 
 		if (statusLst != null && !statusLst.isEmpty()) {
 			primaryCriteria = primaryCriteria.and("status").in(statusLst);
