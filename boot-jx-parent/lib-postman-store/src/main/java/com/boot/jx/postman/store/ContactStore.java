@@ -387,6 +387,17 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		            switch (entry.getKey()) {
 		           case "emails":
 		            case "alt_emails":
+		            	List<Object> emailtList=(List<Object>)entry.getValue();
+		            	Set<PBEmail> pbEmails =new TreeSet<PBEmail>();
+		            	for(Object obj:emailtList) {
+		            		Map<String, Object> pMap=JsonUtil.toJsonMap(obj);
+		            		for(Map.Entry<String, Object> eMapmail : pMap.entrySet()) {
+		            			System.out.println("Key:"+eMapmail.getKey()+"\t Value :"+eMapmail.getValue());
+		            		// PBEmail pbEmail=new PBEmail();
+		            		// pbEmail.setEmail(eMapmail.);
+		            		}
+		            		
+		            	}
 		 				addInfo.put(entry.getKey(),entry.getValue());	
 		 			  break;
 		            case "phones":
@@ -397,7 +408,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		            		Map<String, Object> pMap=JsonUtil.toJsonMap(obj);
 		            		PBPhone ph = parsePhone(new PBPhone().phone(pMap.get("phone").toString()));
 		            		ph.setUuid(ArgUtil.parseAsString(ph.getUuid(), UniqueID.generateString()));
-		            		pbPhones.add(ph);
+		            		if(ArgUtil.is(ph))
+		            		 pbPhones.add(ph);
 		            	}
 		 				addInfo.put(entry.getKey(),pbPhones);	
 		 			  break;

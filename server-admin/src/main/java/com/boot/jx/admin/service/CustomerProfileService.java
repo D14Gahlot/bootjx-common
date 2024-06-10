@@ -10,15 +10,15 @@ import org.springframework.stereotype.Service;
 import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
-import com.boot.jx.admin.dto.SearchCustomerProfileDto;
 import com.boot.jx.admin.dto.ProfileSearchQuery;
+import com.boot.jx.admin.dto.SearchCustomerProfileDto;
 import com.boot.jx.admin.manager.CustomerMasterFldMgr;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.config.CustomerMasterFieldDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.utils.ArgUtil;
 

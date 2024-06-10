@@ -24,7 +24,6 @@ import com.boot.jx.admin.dto.ProfileSearchQuery;
 import com.boot.jx.admin.dto.SearchCustomerProfileDto;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.common.doc.JobsOutPutDoc;
 import com.boot.jx.model.CommonFile;
@@ -33,8 +32,8 @@ import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.CustomerContactProfileDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.config.CustomerMasterFieldDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.pbook.PBEmail;
@@ -90,8 +89,9 @@ public class CustomerMasterFldMgr {
 				cmFieldDoc.setFieldType(
 						reqDto.getFieldType() == null ? cmFieldDoc.getFieldType() : reqDto.getFieldType());
 				cmFieldDoc.setIsactive(ArgUtil.parseAsString(reqDto.getIsactive(), Constants.YES));
-				cmFieldDoc.setAdditionalInfo(reqDto.getAdditionalInfo());
+				
 				cmFieldDoc.setRequired(reqDto.getIsRequired());
+				cmFieldDoc.setPredefined(reqDto.isPredefined());
 				commonMongoTemplate.save(cmFieldDoc);
 			}
 		} else {
@@ -100,8 +100,8 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc.setFieldDesc(reqDto.getFieldDesc());
 			cmFieldDoc.setFieldType(reqDto.getFieldType());
 			cmFieldDoc.setIsactive(ArgUtil.parseAsString(reqDto.getIsactive(), Constants.YES));
-			cmFieldDoc.setRequired(reqDto.getIsRequired());
-			cmFieldDoc.setAdditionalInfo(reqDto.getAdditionalInfo());
+			cmFieldDoc.setRequired(ArgUtil.parseAsBoolean(reqDto.getIsRequired(), Constants.DEFAULT_BOOLEAN));
+			cmFieldDoc.setPredefined(ArgUtil.parseAsBoolean(reqDto.isPredefined(),Constants.DEFAULT_BOOLEAN));
 			commonMongoTemplate.save(cmFieldDoc);
 		}
 
@@ -115,14 +115,12 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc = commonMongoTemplate.findByIdString(id, CustomerMasterFieldDoc.class);
 			if (ArgUtil.is(cmFieldDoc)) {
 				CustomerMasterFieldDto dto = EntityDtoUtil.entityToDto(cmFieldDoc, new CustomerMasterFieldDto());
-				dto.setAdditionalInfo(createDefaultMap());
 				dtoLst.add(dto);
 			}
 		} else {
 			List<CustomerMasterFieldDoc> lstGropDocs = commonMongoTemplate.findAll(CustomerMasterFieldDoc.class);
 			for (CustomerMasterFieldDoc doc : lstGropDocs) {
 				CustomerMasterFieldDto dto = EntityDtoUtil.entityToDto(doc, new CustomerMasterFieldDto());
-				dto.setAdditionalInfo(createDefaultMap());
 				if (ArgUtil.is(dto.getIsactive()) && !dto.getIsactive().equalsIgnoreCase(Constants.DELETED_SOFT))
 					dtoLst.add(dto);
 			}
@@ -148,6 +146,7 @@ public class CustomerMasterFldMgr {
 		return mstDoc;
 	}
 
+	@SuppressWarnings("unchecked")
 	public JobScheduledDoc uploadFile(CommonFile comfile) {
 		JobScheduledDoc doc = new JobScheduledDoc();
 		Map<String, List<Object>> input = new HashMap<>();
@@ -183,9 +182,21 @@ public class CustomerMasterFldMgr {
 			LOGGER.info("post data :"+jsonStr);
 			MapModel resp= restService.ajax(nodeUrl).postJson(data).asMapModel();
 			LOGGER.info("JSON UTIL:"+JsonUtil.toJsonPrettyPrint(resp));
-			
-			
-
+			if(resp!=null && resp.get("data")!=null) {
+				 Map<String, Object> dataMap = (Map<String, Object>)resp.get("data");
+		         Map<String, Object> innerDataMap = (Map<String, Object>)dataMap.get("data");
+		         if(innerDataMap!=null && ArgUtil.is(innerDataMap)) {
+		         String instanceId = ArgUtil.parseAsString(innerDataMap.get("instanceId"), Constants.BLANK);
+		         if(ArgUtil.is(doc.getId()) && ArgUtil.is(instanceId)) {
+		        	 MongoQueryBuilder<JobScheduledDoc> builder = MongoQueryBuilder
+		 					.collection(JobScheduledDoc.class).whereId(doc.getId());
+		 			builder.set("instanceId", instanceId);
+		 			commonMongoTemplate.upsert(builder);
+		 			doc.setInstanceId(instanceId);
+		         }
+		         }
+		         
+			}
 			return doc;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -268,7 +279,7 @@ public class CustomerMasterFldMgr {
 					e.printStackTrace();
 				}
 
-				saveCustomerContactProfile(id, maps);
+				//saveCustomerContactProfile(id, maps);
 				// saveCustomerProfileMaster(id, lstCusProMap);
 				dtoLst.add(dto);
 			}
@@ -302,17 +313,7 @@ public class CustomerMasterFldMgr {
 		return docs;
 	}
 
-	@Deprecated
-	public void saveCustomerContactProfile(String id, List<Map<String, Object>> maps) {
-		if (ArgUtil.is(id) && maps != null && !maps.isEmpty()) {
-			CustomerContactProfileDoc cusprdoc = new CustomerContactProfileDoc();
-			cusprdoc.setContactIdRef(id);
-			cusprdoc.setContactmap(maps);
-			commonMongoTemplate.save(cusprdoc);
 
-		}
-
-	}
 
 	public List<CustomerProfileDoc> fetchCustomerContactInfo(String refId, String customerId, String phoneno,
 			String emailid) {
@@ -503,7 +504,7 @@ public class CustomerMasterFldMgr {
 					andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
 				 break;
 				 default:
-					 andCriteriaList.add(createCriteria(src.getKey(),src.getOperation(),src.getValue()));
+					 andCriteriaList.add(createCriteria(src.getKey(),src.getOperator(),src.getValue()));
 				}
 				
 			}

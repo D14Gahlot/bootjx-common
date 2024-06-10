@@ -1,26 +1,30 @@
-package com.boot.jx.admin.dto;
+package com.boot.jx.postman.doc.config;
 
 import java.util.Date;
 
-public class CustomerMasterFieldDto {
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
+
+@Document(collection = "MASTER_CUSTOMER_FIELD")
+@TypeAlias("CustomerMasterFieldDoc")
+public class CustomerMasterFieldDoc extends TimeStampDoc {
+
+	@Id
 	private String id;
 	private String fieldLabel;
+	@Indexed(unique = true)
 	private String fieldCode;
 	private String fieldDesc;
 	private String fieldType;
 	private String isactive;
+	private Date createdDate;
+	private Date modifiedDate;
 	private boolean isRequired;
 	private boolean isPredefined;
-	private Date createdDate;
-	private Long createdStamp;
-	private String createBy;
-	private Date modifiedDate;
-	private Long modifiedStamp;
-	private String modifiedBy;
-	
-	
-	
 	public String getId() {
 		return id;
 	}
@@ -63,50 +67,23 @@ public class CustomerMasterFieldDto {
 	public void setCreatedDate(Date createdDate) {
 		this.createdDate = createdDate;
 	}
-	public Long getCreatedStamp() {
-		return createdStamp;
-	}
-	public void setCreatedStamp(Long createdStamp) {
-		this.createdStamp = createdStamp;
-	}
-	public String getCreateBy() {
-		return createBy;
-	}
-	public void setCreateBy(String createBy) {
-		this.createBy = createBy;
-	}
 	public Date getModifiedDate() {
 		return modifiedDate;
 	}
 	public void setModifiedDate(Date modifiedDate) {
 		this.modifiedDate = modifiedDate;
 	}
-	public Long getModifiedStamp() {
-		return modifiedStamp;
-	}
-	public void setModifiedStamp(Long modifiedStamp) {
-		this.modifiedStamp = modifiedStamp;
-	}
-	public String getModifiedBy() {
-		return modifiedBy;
-	}
-	public void setModifiedBy(String modifiedBy) {
-		this.modifiedBy = modifiedBy;
-	}
-	public boolean getIsRequired() {
+	public boolean isRequired() {
 		return isRequired;
 	}
-	public void setIsRequired(boolean isRequired) {
+	public void setRequired(boolean isRequired) {
 		this.isRequired = isRequired;
 	}
-	
 	public boolean isPredefined() {
 		return isPredefined;
 	}
 	public void setPredefined(boolean isPredefined) {
 		this.isPredefined = isPredefined;
 	}
-	public void setRequired(boolean isRequired) {
-		this.isRequired = isRequired;
-	}
+	
 }

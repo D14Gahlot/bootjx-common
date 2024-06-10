@@ -5,18 +5,24 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
+import com.boot.jx.postman.doc.config.CustomerMasterFieldDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 
 @Component
 public class StarterDocKit {
@@ -25,6 +31,9 @@ public class StarterDocKit {
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
+	
+	@Autowired
+    CommonMongoTemplate commonMongoTemplate;
 
 	private QuickMedia createTemplateReply(String name, String title, String category, String content, String url) {
 		QuickMedia temp5 = mongoTemplate.findById(name, QuickMedia.class);
@@ -62,6 +71,22 @@ public class StarterDocKit {
 			}
 		}
 	}
+	
+	private void createPredefinedMstField(CustomerMasterFieldDoc cusMasterFld) {
+		Query qryQuery = new Query();
+		Criteria criteria = Criteria.where("fieldCode").is(cusMasterFld.getFieldCode());
+		qryQuery.addCriteria(criteria);
+		CustomerMasterFieldDoc app = mongoTemplate.findOne(qryQuery, CustomerMasterFieldDoc.class);
+		if (ArgUtil.isEmpty(app)) {
+			try {
+				commonMongoTemplate.save(cusMasterFld);
+			} catch (Exception e) {
+				LOGGER.error("createClientAppErrror:" + cusMasterFld.getFieldCode(), e);
+			}
+		}
+	}
+	
+	
 
 	@PostConstruct
 	public void init() {
@@ -112,6 +137,69 @@ public class StarterDocKit {
 		feedbackApp.setKeyVersion("v4");
 		feedbackApp.setShared(true);
 		createClientApp(feedbackApp);
+		
+		/** pre-defined master flds**/
+		CustomerMasterFieldDoc titelMstDoc= new CustomerMasterFieldDoc();
+		titelMstDoc.setFieldCode("title");
+		titelMstDoc.setFieldLabel("Title");
+		titelMstDoc.setFieldType("String");
+		titelMstDoc.setFieldDesc("Title");
+		titelMstDoc.setIsactive(Constants.YES);
+		titelMstDoc.setPredefined(true);
+		titelMstDoc.setRequired(false);
+		titelMstDoc.setCreated(TimeStampIndex.now());
+		createPredefinedMstField(titelMstDoc);
+		
+		
+		CustomerMasterFieldDoc dobMstDoc= new CustomerMasterFieldDoc();
+		dobMstDoc.setFieldCode("dob");
+		dobMstDoc.setFieldLabel("Date of Birth");
+		dobMstDoc.setFieldType("timestamp");
+		dobMstDoc.setFieldDesc("Date of Birth");
+		dobMstDoc.setIsactive(Constants.YES);
+		dobMstDoc.setPredefined(true);
+		dobMstDoc.setRequired(false);
+		dobMstDoc.setCreated(TimeStampIndex.now());
+		createPredefinedMstField(dobMstDoc);
+		
+		CustomerMasterFieldDoc genderMstDoc= new CustomerMasterFieldDoc();
+		genderMstDoc.setFieldCode("gender");
+		genderMstDoc.setFieldLabel("Gender");
+		genderMstDoc.setFieldType("string");
+		genderMstDoc.setFieldDesc("Gender");
+		genderMstDoc.setIsactive(Constants.YES);
+		genderMstDoc.setPredefined(true);
+		genderMstDoc.setRequired(false);
+		genderMstDoc.setCreated(TimeStampIndex.now());
+		createPredefinedMstField(genderMstDoc);
+		
+		CustomerMasterFieldDoc altPhoneMstDoc= new CustomerMasterFieldDoc();
+		altPhoneMstDoc.setFieldCode("alt_phones");
+		altPhoneMstDoc.setFieldLabel("Alternate Phone number");
+		altPhoneMstDoc.setFieldType("string");
+		altPhoneMstDoc.setFieldDesc("Alternate Phone number");
+		altPhoneMstDoc.setIsactive(Constants.YES);
+		altPhoneMstDoc.setPredefined(true);
+		altPhoneMstDoc.setRequired(false);
+		altPhoneMstDoc.setCreated(TimeStampIndex.now());
+		createPredefinedMstField(altPhoneMstDoc);
+		
+		CustomerMasterFieldDoc altEmailMstDoc= new CustomerMasterFieldDoc();
+		altEmailMstDoc.setFieldCode("alt_emails");
+		altEmailMstDoc.setFieldLabel("Alternate email id");
+		altEmailMstDoc.setFieldType("string");
+		altEmailMstDoc.setFieldDesc("Alternate email id");
+		altEmailMstDoc.setIsactive(Constants.YES);
+		altEmailMstDoc.setPredefined(true);
+		altEmailMstDoc.setRequired(false);
+		altEmailMstDoc.setCreated(TimeStampIndex.now());
+		createPredefinedMstField(altEmailMstDoc);
+		
+		
+		
+		
+		
+		
 	}
 
 	private void createDefaultTemplats() {
