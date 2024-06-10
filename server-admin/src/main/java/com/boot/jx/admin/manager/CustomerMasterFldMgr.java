@@ -2,6 +2,7 @@ package com.boot.jx.admin.manager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +20,8 @@ import com.boot.jx.admin.dto.CustomerContactDto;
 import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
 import com.boot.jx.admin.dto.ProfileSearchCriteria;
-import com.boot.jx.admin.dto.SearchCustomerProfileDto;
 import com.boot.jx.admin.dto.ProfileSearchQuery;
+import com.boot.jx.admin.dto.SearchCustomerProfileDto;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.CustomerMasterFieldDoc;
@@ -114,12 +115,14 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc = commonMongoTemplate.findByIdString(id, CustomerMasterFieldDoc.class);
 			if (ArgUtil.is(cmFieldDoc)) {
 				CustomerMasterFieldDto dto = EntityDtoUtil.entityToDto(cmFieldDoc, new CustomerMasterFieldDto());
+				dto.setAdditionalInfo(createDefaultMap());
 				dtoLst.add(dto);
 			}
 		} else {
 			List<CustomerMasterFieldDoc> lstGropDocs = commonMongoTemplate.findAll(CustomerMasterFieldDoc.class);
 			for (CustomerMasterFieldDoc doc : lstGropDocs) {
 				CustomerMasterFieldDto dto = EntityDtoUtil.entityToDto(doc, new CustomerMasterFieldDto());
+				dto.setAdditionalInfo(createDefaultMap());
 				if (ArgUtil.is(dto.getIsactive()) && !dto.getIsactive().equalsIgnoreCase(Constants.DELETED_SOFT))
 					dtoLst.add(dto);
 			}
@@ -546,6 +549,19 @@ public class CustomerMasterFldMgr {
                 throw new IllegalArgumentException("Invalid operation: " + operation);
         }
     
+	}
+	
+	
+	public Map<String,Object> createDefaultMap(){
+		Map<String, Object> additionalInfo = new HashMap<>();
+		additionalInfo.put("Title",null);
+		additionalInfo.put("DOB",null);
+		additionalInfo.put("Gender","");
+	    Set<PBPhone> alt_phones=new HashSet<>();
+	    additionalInfo.put("alt_phones", alt_phones);
+	    Set<PBEmail> alt_emails=new HashSet<>();
+	    additionalInfo.put("alt_emails", alt_emails);
+		return additionalInfo;
 	}
 
 }

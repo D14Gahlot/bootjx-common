@@ -1,11 +1,14 @@
 package com.boot.jx.postman.store;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.kms.model.AlgorithmSpec;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.model.ModelPatch;
@@ -38,6 +42,7 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -380,27 +385,22 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		        for (Map.Entry<String, Object> entry : entries) {
 		            LOGGER.info("Key: " + entry.getKey() + ", Value: " + entry.getValue());
 		            switch (entry.getKey()) {
-		           /* case "emails":
+		           case "emails":
 		            case "alt_emails":
-		            	List<PBEmail> reqEmails =(List<PBEmail>)entry.getValue();
-		            	 Set<PBEmail> emailAlt = new HashSet<>();
-		 				for(PBEmail pbEmail:reqEmails) {
-		 					PBEmail pbEm=new PBEmail();
-		 					emailAlt.add(pbEm.update(pbEmail));
-		 				}
-		 				addInfo.put(entry.getKey(),emailAlt);	
+		 				addInfo.put(entry.getKey(),entry.getValue());	
 		 			  break;
 		            case "phones":
-		            case "alt_phone":
-		            	Set<PBPhone> reqPhones =(Set<PBPhone>)entry.getValue();
-		            	 Set<PBPhone> phoneAlt = new HashSet<>();
-		 				for(PBPhone pbPhone:reqPhones) {
-		 					PBPhone pb =parsePhone(pbPhone);
-							pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
-							phoneAlt.add(pb);
-		 				}
-		 				addInfo.put(entry.getKey(),phoneAlt);	
-		 			  break;*/
+		            case "alt_phones":
+		            	List<Object> phoneLstList=(List<Object>)entry.getValue();
+		            	Set<PBPhone> pbPhones =new TreeSet<PBPhone>();
+		            	for(Object obj:phoneLstList) {
+		            		Map<String, Object> pMap=JsonUtil.toJsonMap(obj);
+		            		PBPhone ph = parsePhone(new PBPhone().phone(pMap.get("phone").toString()));
+		            		ph.setUuid(ArgUtil.parseAsString(ph.getUuid(), UniqueID.generateString()));
+		            		pbPhones.add(ph);
+		            	}
+		 				addInfo.put(entry.getKey(),pbPhones);	
+		 			  break;
 		            case "title":
 		            case "Title": 
 		            	addInfo.put(entry.getKey(), entry.getValue());

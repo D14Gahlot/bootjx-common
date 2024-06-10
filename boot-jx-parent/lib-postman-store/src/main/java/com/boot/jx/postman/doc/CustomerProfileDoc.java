@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -168,63 +166,5 @@ public class CustomerProfileDoc extends TimeStampDoc
 	}
 
 	
-	public Map<String, Object> additionalInfo(){
-		if(additionalInfo==null) {
-			this.additionalInfo = new HashMap<>();
-			additionalInfo.put("title","");
-			additionalInfo.put("DOB","");
-			
-			AdditionalProfilDto gender=new AdditionalProfilDto();
-			gender.setObject("Gender");
-			gender.setIsPredefined(true);
-			additionalInfo.put("gender","");
-			
-			 AdditionalProfilDto phonesAltDto = new AdditionalProfilDto();
-			 Set<PBPhone> alt_phones=new HashSet<>();
-			 phonesAltDto.setObject(alt_phones);
-			 phonesAltDto.setIsPredefined(true);
-			 additionalInfo.put("alt_phones", alt_phones);
-			
-			 AdditionalProfilDto emailsAltDto = new AdditionalProfilDto();
-			 Set<PBEmail> alt_emails=new HashSet<>();
-			 emailsAltDto.setObject(alt_emails);
-			 emailsAltDto.setIsPredefined(true);
-			 additionalInfo.put("alt_emails", alt_emails);
-
-			
-		}
-		return this.additionalInfo;
-	}
-	
-	
-	@PostConstruct
-	public void init() {
-		//public Map<String, Object> additionalInfo(){
-			if(additionalInfo==null) {
-				this.additionalInfo = new HashMap<>();
-				additionalInfo.put("title","");
-				additionalInfo.put("DOB","");
-				
-				AdditionalProfilDto gender=new AdditionalProfilDto();
-				gender.setObject("Gender");
-				gender.setIsPredefined(true);
-				additionalInfo.put("gender","");
-				
-				 AdditionalProfilDto phonesAltDto = new AdditionalProfilDto();
-				 Set<PBPhone> alt_phones=new HashSet<>();
-				 phonesAltDto.setObject(alt_phones);
-				 phonesAltDto.setIsPredefined(true);
-				 additionalInfo.put("alt_phones", alt_phones);
-				
-				 AdditionalProfilDto emailsAltDto = new AdditionalProfilDto();
-				 Set<PBEmail> alt_emails=new HashSet<>();
-				 emailsAltDto.setObject(alt_emails);
-				 emailsAltDto.setIsPredefined(true);
-				 additionalInfo.put("alt_emails", alt_emails);
-
-				
-			}
-			//return this.additionalInfo;
-	}
 
 }
