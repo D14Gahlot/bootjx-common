@@ -73,6 +73,19 @@ public class StarterDocKit {
 	}
 	
 	private void createPredefinedMstField(CustomerMasterFieldDoc cusMasterFld) {
+		
+		
+		CustomerMasterFieldDoc titelMstDoc= new CustomerMasterFieldDoc();
+		titelMstDoc.setFieldCode("title");
+		titelMstDoc.setFieldLabel("Title");
+		titelMstDoc.setFieldType("String");
+		titelMstDoc.setFieldDesc("Title");
+		titelMstDoc.setIsactive(Constants.YES);
+		titelMstDoc.setPredefined(true);
+		titelMstDoc.setRequired(false);
+		titelMstDoc.setCreated(TimeStampIndex.now());
+		createPredefinedMstField(titelMstDoc);
+		
 		Query qryQuery = new Query();
 		Criteria criteria = Criteria.where("fieldCode").is(cusMasterFld.getFieldCode());
 		qryQuery.addCriteria(criteria);
