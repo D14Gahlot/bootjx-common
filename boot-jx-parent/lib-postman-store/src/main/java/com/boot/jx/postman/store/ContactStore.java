@@ -1,7 +1,5 @@
 package com.boot.jx.postman.store;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +15,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.kms.model.AlgorithmSpec;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.model.ModelPatch;
@@ -27,11 +24,13 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.SimpleDocQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBEmail;
@@ -42,6 +41,7 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -60,6 +60,9 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 	@Autowired
 	protected PMEnvironment environment;
+	
+	@Autowired
+	CommonMongoTemplate cMongoTemplate;
 
 	public PBPhone parsePhone(PBPhone pbPhone) {
 		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
@@ -245,14 +248,14 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			case "rmCode":
 				qb.setunset("rmCode", patch.value().asString());
 				break;
-//			case "additionalInfo": @Rabil :- Need per filed update not all field at once
-//				qb.setunset("additionalInfo", patch.value().asString());
-//				break;
 			default:
-				// TODO:- @Rabil - Check additonal validty in Masters and its type in master,
+				// TODO:-  Check additonal validty in Masters and its type in master,
 				// then based on type of field do conversion below and update instead
 				// using.asString() for all
-				qb.setunset("additionalInfo." + patch.getField(), patch.value().asString());
+				Object objType=checkFieldType(patch.getField(), patch.value());
+				if(ArgUtil.is(objType)) {
+					qb.setunset("additionalInfo." + patch.getField(),objType);
+				}
 				break;
 			}
 			update(qb);
@@ -380,25 +383,33 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			
 			Map<String,Object> addInfo=req.getAdditionalInfo();
 			if(addInfo!=null && !addInfo.isEmpty()) {
+				
 				 /** Retrieve all the key-value pairs from the map **/
 		        Set<Map.Entry<String, Object>> entries = addInfo.entrySet();
 		        for (Map.Entry<String, Object> entry : entries) {
 		            LOGGER.info("Key: " + entry.getKey() + ", Value: " + entry.getValue());
-		            switch (entry.getKey()) {
+		           switch (entry.getKey()) {
 		           case "emails":
 		            case "alt_emails":
 		            	List<Object> emailtList=(List<Object>)entry.getValue();
 		            	Set<PBEmail> pbEmails =new TreeSet<PBEmail>();
 		            	for(Object obj:emailtList) {
 		            		Map<String, Object> pMap=JsonUtil.toJsonMap(obj);
+		            		PBEmail pbEmail=new PBEmail();
 		            		for(Map.Entry<String, Object> eMapmail : pMap.entrySet()) {
-		            			System.out.println("Key:"+eMapmail.getKey()+"\t Value :"+eMapmail.getValue());
-		            		// PBEmail pbEmail=new PBEmail();
-		            		// pbEmail.setEmail(eMapmail.);
+		            		 if(eMapmail.getKey().contains("email")) {
+		            			 pbEmail.setEmail(ArgUtil.parseAsString(eMapmail.getValue(), Constants.BLANK));
+		            		 }else if(eMapmail.getKey().contains("label")) {
+		            			 pbEmail.setLabel(ArgUtil.parseAsString(eMapmail.getValue(), Constants.BLANK));
+		            		 }else if(eMapmail.getKey().contains("type")) {
+		            			 pbEmail.setType(ArgUtil.parseAsString(eMapmail.getValue(), Constants.BLANK));
+		            		 }
 		            		}
+		            		 pbEmail.setUuid(UniqueID.generateString());
+		            		 pbEmails.add(pbEmail);
 		            		
 		            	}
-		 				addInfo.put(entry.getKey(),entry.getValue());	
+		 				addInfo.put(entry.getKey(),pbEmails);	
 		 			  break;
 		            case "phones":
 		            case "alt_phones":
@@ -436,10 +447,24 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			mongoTemplate.save(doc);
 			
 		}
-		
-		
-		
 		return doc;
 	}
 
+	public Object checkFieldType(String code,Object value) {
+		Object objType=null;
+		if (ArgUtil.is(code) && ArgUtil.is(value)) {
+			Query qryQuery=new Query();
+			qryQuery.addCriteria(Criteria.where("code").is(code).and("active").is(true));
+			List<CustomerFieldMasterDoc> cmFieldDoc = cMongoTemplate.find(qryQuery, CustomerFieldMasterDoc.class);
+			if(cmFieldDoc!=null && !cmFieldDoc.isEmpty()) {
+				Object fldType=cmFieldDoc.get(0).getType();
+				if(ArgUtil.is(fldType)) {
+					objType =ArgUtil.parseAsT(fldType,new String(),false);
+				}
+			}
+		return objType;
+		}
+		return objType;
+	}
+	
 }

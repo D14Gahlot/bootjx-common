@@ -36,6 +36,7 @@ import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.pbook.PBEmail;
+import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.rest.RestService;
@@ -499,6 +500,10 @@ public class CustomerMasterFldMgr {
 				case "emails":
 					andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
 					break;
+				case "name":
+				case "name.formattedName":	
+					andCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
+					break;
 				default:
 					andCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
 				}
@@ -539,10 +544,12 @@ public class CustomerMasterFldMgr {
 			return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
 		case "ne": // Criteria for field is not empty
 			return Criteria.where(key).ne("").and(key).ne(null);
-		case "ANY_MATCH": // Criteria for matching any or all elements
-			return Criteria.where(key).in(value);
+		case "IN": // Criteria for matching any or all elements
+			 return Criteria.where(key).in(value);
 		case "ALL_MATCH": // Criteria for matching all elements
 			return Criteria.where(key).all(value);
+		case "ANY_MATCH":
+			return Criteria.where(key).regex(".*"+value+".*","i"); // Case-insensitive search
 		default:
 			throw new IllegalArgumentException("Invalid operation: " + operation);
 		}
