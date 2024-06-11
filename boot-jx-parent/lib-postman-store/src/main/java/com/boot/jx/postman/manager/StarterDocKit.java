@@ -82,11 +82,11 @@ public class StarterDocKit {
 	private void createPredefinedMstField(String code, String titleAndDesc, String type) {
 
 		Query qryQuery = new Query();
-		Criteria criteria = Criteria.where("fieldCode").is(code);
+		Criteria criteria = Criteria.where("code").is(code);
 		qryQuery.addCriteria(criteria);
 		CustomerMasterFieldDoc fiedMaster = commonMongoTemplate.findOne(qryQuery, CustomerMasterFieldDoc.class);
 
-		if (ArgUtil.isEmpty(fiedMaster)) {
+		if (!ArgUtil.is(fiedMaster)) {
 			fiedMaster = new CustomerMasterFieldDoc();
 			fiedMaster.setCode(code);
 			fiedMaster.setLabel(titleAndDesc);
@@ -98,7 +98,7 @@ public class StarterDocKit {
 			fiedMaster.setCreated(TimeStampIndex.now());
 		}
 
-		if (ArgUtil.isEmpty(fiedMaster)) {
+		if (ArgUtil.is(fiedMaster)) {
 			try {
 				commonMongoTemplate.save(fiedMaster);
 			} catch (Exception e) {
@@ -110,7 +110,7 @@ public class StarterDocKit {
 
 	private void createPredefinedMstField() {
 		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.customer.field.master");
-		String predefiend_customer_filed_version = "v1";
+		String predefiend_customer_filed_version = "v1.3";
 		if (!version.is(predefiend_customer_filed_version)) {
 			createPredefinedMstField("title", "Title", "string");
 			createPredefinedMstField("dob", "Date of Birth", "timestamp");
