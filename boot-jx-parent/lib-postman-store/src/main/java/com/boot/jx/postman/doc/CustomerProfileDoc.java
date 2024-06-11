@@ -2,6 +2,7 @@ package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -39,8 +40,6 @@ public class CustomerProfileDoc extends TimeStampDoc
 	public Set<PBAddress> addresses;
 	public Set<PBWebsite> urls;
 	public Set<PBWork> works;
-	public Set<PBPhone> phonesAlt;
-	public Set<PBEmail> emailsAlt;
 	public Map<String, Object> additionalInfo = new HashMap<>();
 
 	public String rmCode;
@@ -74,27 +73,7 @@ public class CustomerProfileDoc extends TimeStampDoc
 		return this.phones;
 	}
 
-	public Set<PBPhone> phonesAlt() {
-		if (phonesAlt == null) {
-			this.phonesAlt = new TreeSet<PBPhone>();
-		}
-		return this.phonesAlt;
-	}
-
-	public Set<PBEmail> emails() {
-		if (emails == null) {
-			this.emails = new TreeSet<PBEmail>();
-		}
-		return this.emails;
-	}
-
-	public Set<PBEmail> emailsAlt() {
-		if (emailsAlt == null) {
-			this.emailsAlt = new TreeSet<PBEmail>();
-		}
-		return this.emailsAlt;
-	}
-
+	
 	public String getCode() {
 		return code;
 	}
@@ -156,7 +135,7 @@ public class CustomerProfileDoc extends TimeStampDoc
 	}
 
 	public void setAdditionalInfo(Map<String, Object> additionalInfo) {
-		this.additionalInfo = additionalInfo;
+				 this.additionalInfo = additionalInfo;
 	}
 
 	public Set<PBWork> getWorks() {
@@ -173,25 +152,19 @@ public class CustomerProfileDoc extends TimeStampDoc
 		}
 		return this.works;
 	}
+	
+	public Set<PBEmail> emails() {
+		if (emails == null) {
+			this.emails = new TreeSet<PBEmail>();
+		}
+		return this.emails;
+	}
+
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
 
-	public Set<PBPhone> getPhonesAlt() {
-		return phonesAlt;
-	}
-
-	public void setPhonesAlt(Set<PBPhone> phonesAlt) {
-		this.phonesAlt = phonesAlt;
-	}
-
-	public Set<PBEmail> getEmailsAlt() {
-		return emailsAlt;
-	}
-
-	public void setEmailsAlt(Set<PBEmail> emailsAlt) {
-		this.emailsAlt = emailsAlt;
-	}
+	
 
 }

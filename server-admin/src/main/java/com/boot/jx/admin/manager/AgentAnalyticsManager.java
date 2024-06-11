@@ -15,7 +15,6 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -50,7 +49,6 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
-import com.boot.utils.StringUtils;
 
 @Component
 public class AgentAnalyticsManager {

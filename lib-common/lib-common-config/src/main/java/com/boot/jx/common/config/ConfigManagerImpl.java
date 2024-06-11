@@ -160,6 +160,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		this.refresh();
 	}
 
+	@Override
 	public void save(PMConfigurationObject config) {
 		PMConfigurationDoc doc = configStore.findById(AppContextUtil.getTenant(), PMConfigurationDoc.class);
 

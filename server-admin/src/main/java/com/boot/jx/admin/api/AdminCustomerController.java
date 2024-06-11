@@ -31,8 +31,8 @@ public class AdminCustomerController {
 	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
-			@RequestParam(required = false) String sortBy,
-			@RequestParam(required = false, defaultValue = "asc") String sortDir,
+			@RequestParam(required = false ,defaultValue="created") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir,
 			@RequestParam(required = false) String contactId,
 
 			@RequestParam(required = false, value = "search.name") String searchName,

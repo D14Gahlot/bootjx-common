@@ -8,17 +8,16 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.admin.dto.CustomerContactDto;
-import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
+import com.boot.jx.admin.dto.ProfileSearchQuery;
 import com.boot.jx.admin.dto.SearchCustomerProfileDto;
-import com.boot.jx.admin.dto.SearchQuery;
 import com.boot.jx.admin.manager.CustomerMasterFldMgr;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.doc.CustomerMasterFieldDoc;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.utils.ArgUtil;
 
@@ -31,20 +30,20 @@ public class CustomerProfileService {
 	@Autowired
 	CustomerMasterFldMgr cmFieldMgr;
 
-	public List<CustomerMasterFieldDto> addEditCustomerMastFields(CustomerMasterFieldDto req) {
-		List<CustomerMasterFieldDto> lstCmfields = cmFieldMgr.addAndEditMasterfield(req);
+	public List<CustomerFieldMasterDoc> addEditCustomerMastFields(CustomerFieldMasterDoc req) {
+		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.addAndEditMasterfield(req);
 		return lstCmfields;
 	}
 
-	public List<CustomerMasterFieldDto> fetchCustomerMstFields(String id) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMstFields(String id) {
 
-		List<CustomerMasterFieldDto> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id);
+		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id);
 		return lstCmfields;
 	}
 
-	public void checkDupFieldCode(CustomerMasterFieldDto req) {
+	public void checkDupFieldCode(CustomerFieldMasterDoc req) {
 		if (ArgUtil.is(req.getId())) {
-			CustomerMasterFieldDoc groupDoc = cmFieldMgr.toCheckDupFieldCode(req.getFieldCode());
+			CustomerFieldMasterDoc groupDoc = cmFieldMgr.toCheckDupFieldCode(req.getCode());
 			if (ArgUtil.is(groupDoc)) {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidNameDuplicate")
 						.description("Field code already exists"));
@@ -102,11 +101,11 @@ public class CustomerProfileService {
 		return cmFieldMgr.fetchCustomeProfile(search);
 	}
 
-	public List<CustomerMasterFieldDto> deleteCustmerMasterFiled(CustomerMasterFieldDto reqDto) {
+	public List<CustomerFieldMasterDoc> deleteCustmerMasterFiled(CustomerFieldMasterDoc reqDto) {
 		return cmFieldMgr.deleteCustmerMasterFiled(reqDto);
 	}
 
-	public List<CustomerProfileDoc> getProfileSearch(SearchQuery searchQry) {
+	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
 		// TODO Auto-generated method stub
 		return cmFieldMgr.getProfileSearch(searchQry);
 	}
