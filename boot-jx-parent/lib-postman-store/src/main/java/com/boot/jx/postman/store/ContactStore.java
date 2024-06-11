@@ -1,7 +1,5 @@
 package com.boot.jx.postman.store;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +15,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.kms.model.AlgorithmSpec;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.model.ModelPatch;

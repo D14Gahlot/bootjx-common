@@ -4,8 +4,6 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.FileHandler;
-import java.util.logging.SimpleFormatter;
 
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RedissonClient;
@@ -26,7 +24,6 @@ import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 import com.boot.utils.UniqueID;
 

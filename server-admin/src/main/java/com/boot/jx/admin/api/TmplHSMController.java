@@ -17,7 +17,6 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.manager.ThirdPartyTemplateManager;

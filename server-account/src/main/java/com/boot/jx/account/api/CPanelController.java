@@ -23,7 +23,6 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.models.AppAuthModels;
-import com.boot.jx.common.models.AppAuthModels.ACCESS_RULES;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;

@@ -23,7 +23,6 @@ import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.cdn.BootJxConfigService;
 
 import gui.ava.html.image.generator.HtmlImageGenerator;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @Controller
