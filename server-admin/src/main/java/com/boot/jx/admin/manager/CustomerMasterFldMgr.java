@@ -100,13 +100,16 @@ public class CustomerMasterFldMgr {
 			commonMongoTemplate.save(cmFieldDoc);
 		}
 
-		return fetchCustomerMasfields(cmFieldDoc.getId());
+		return fetchCustomerMasfields(cmFieldDoc.getId(),true);
 	}
 
-	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id,boolean active) {
 		List<CustomerFieldMasterDoc> dtoLst = new ArrayList<>();
 		CustomerFieldMasterDoc cmFieldDoc = null;
+		Query qryQuery=new Query();
+		
 		if (ArgUtil.is(id)) {
+			qryQuery.addCriteria(Criteria.where("id").is(id).and("active").is(active));
 			cmFieldDoc = commonMongoTemplate.findByIdString(id, CustomerFieldMasterDoc.class);
 			if (ArgUtil.is(cmFieldDoc)) {
 				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(cmFieldDoc, new CustomerFieldMasterDoc());
@@ -116,7 +119,7 @@ public class CustomerMasterFldMgr {
 			List<CustomerFieldMasterDoc> lstGropDocs = commonMongoTemplate.findAll(CustomerFieldMasterDoc.class);
 			for (CustomerFieldMasterDoc doc : lstGropDocs) {
 				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(doc, new CustomerFieldMasterDoc());
-				if (dto.isActive()) {
+				if (dto.isActive()==active) {
 					dtoLst.add(dto);
 				}
 			}
@@ -132,7 +135,7 @@ public class CustomerMasterFldMgr {
 			builder.set("active", reqDto.isActive());
 			commonMongoTemplate.upsert(builder);
 		}
-		return fetchCustomerMasfields(null);
+		return fetchCustomerMasfields(null,true);
 	}
 
 	public CustomerFieldMasterDoc toCheckDupFieldCode(String fieldCode) {
@@ -546,16 +549,6 @@ public class CustomerMasterFldMgr {
 
 	}
 
-	public Map<String, Object> createDefaultMap() {
-		Map<String, Object> additionalInfo = new HashMap<>();
-		additionalInfo.put("Title", null);
-		additionalInfo.put("DOB", null);
-		additionalInfo.put("Gender", "");
-		Set<PBPhone> alt_phones = new HashSet<>();
-		additionalInfo.put("alt_phones", alt_phones);
-		Set<PBEmail> alt_emails = new HashSet<>();
-		additionalInfo.put("alt_emails", alt_emails);
-		return additionalInfo;
-	}
+	
 
 }
