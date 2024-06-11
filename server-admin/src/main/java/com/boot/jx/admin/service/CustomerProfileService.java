@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.admin.dto.CustomerContactDto;
-import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
 import com.boot.jx.admin.dto.ProfileSearchQuery;
 import com.boot.jx.admin.dto.SearchCustomerProfileDto;
