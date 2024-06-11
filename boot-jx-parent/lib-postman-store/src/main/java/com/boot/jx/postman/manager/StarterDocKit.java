@@ -21,7 +21,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
-import com.boot.jx.postman.doc.config.CustomerMasterFieldDoc;
+import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
@@ -84,10 +84,10 @@ public class StarterDocKit {
 		Query qryQuery = new Query();
 		Criteria criteria = Criteria.where("code").is(code);
 		qryQuery.addCriteria(criteria);
-		CustomerMasterFieldDoc fiedMaster = commonMongoTemplate.findOne(qryQuery, CustomerMasterFieldDoc.class);
+		CustomerFieldMasterDoc fiedMaster = commonMongoTemplate.findOne(qryQuery, CustomerFieldMasterDoc.class);
 
 		if (!ArgUtil.is(fiedMaster)) {
-			fiedMaster = new CustomerMasterFieldDoc();
+			fiedMaster = new CustomerFieldMasterDoc();
 			fiedMaster.setCode(code);
 			fiedMaster.setLabel(titleAndDesc);
 			fiedMaster.setType(type);

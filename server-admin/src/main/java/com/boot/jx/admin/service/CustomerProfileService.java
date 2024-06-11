@@ -18,7 +18,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
-import com.boot.jx.postman.doc.config.CustomerMasterFieldDoc;
+import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.utils.ArgUtil;
 
@@ -31,20 +31,20 @@ public class CustomerProfileService {
 	@Autowired
 	CustomerMasterFldMgr cmFieldMgr;
 
-	public List<CustomerMasterFieldDoc> addEditCustomerMastFields(CustomerMasterFieldDoc req) {
-		List<CustomerMasterFieldDoc> lstCmfields = cmFieldMgr.addAndEditMasterfield(req);
+	public List<CustomerFieldMasterDoc> addEditCustomerMastFields(CustomerFieldMasterDoc req) {
+		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.addAndEditMasterfield(req);
 		return lstCmfields;
 	}
 
-	public List<CustomerMasterFieldDoc> fetchCustomerMstFields(String id) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMstFields(String id) {
 
-		List<CustomerMasterFieldDoc> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id);
+		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id);
 		return lstCmfields;
 	}
 
-	public void checkDupFieldCode(CustomerMasterFieldDoc req) {
+	public void checkDupFieldCode(CustomerFieldMasterDoc req) {
 		if (ArgUtil.is(req.getId())) {
-			CustomerMasterFieldDoc groupDoc = cmFieldMgr.toCheckDupFieldCode(req.getCode());
+			CustomerFieldMasterDoc groupDoc = cmFieldMgr.toCheckDupFieldCode(req.getCode());
 			if (ArgUtil.is(groupDoc)) {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidNameDuplicate")
 						.description("Field code already exists"));
@@ -102,7 +102,7 @@ public class CustomerProfileService {
 		return cmFieldMgr.fetchCustomeProfile(search);
 	}
 
-	public List<CustomerMasterFieldDoc> deleteCustmerMasterFiled(CustomerMasterFieldDoc reqDto) {
+	public List<CustomerFieldMasterDoc> deleteCustmerMasterFiled(CustomerFieldMasterDoc reqDto) {
 		return cmFieldMgr.deleteCustmerMasterFiled(reqDto);
 	}
 

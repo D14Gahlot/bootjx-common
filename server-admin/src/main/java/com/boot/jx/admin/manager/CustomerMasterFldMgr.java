@@ -32,7 +32,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
-import com.boot.jx.postman.doc.config.CustomerMasterFieldDoc;
+import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.pbook.PBEmail;
@@ -72,11 +72,11 @@ public class CustomerMasterFldMgr {
 	@Autowired
 	private RestService restService;
 
-	public List<CustomerMasterFieldDoc> addAndEditMasterfield(CustomerMasterFieldDoc reqDto) {
+	public List<CustomerFieldMasterDoc> addAndEditMasterfield(CustomerFieldMasterDoc reqDto) {
 
-		CustomerMasterFieldDoc cmFieldDoc = new CustomerMasterFieldDoc();
+		CustomerFieldMasterDoc cmFieldDoc = new CustomerFieldMasterDoc();
 		if (ArgUtil.is(reqDto.getId())) {
-			cmFieldDoc = commonMongoTemplate.findByIdString(reqDto.getId(), CustomerMasterFieldDoc.class);
+			cmFieldDoc = commonMongoTemplate.findByIdString(reqDto.getId(), CustomerFieldMasterDoc.class);
 			if (ArgUtil.is(cmFieldDoc)) {
 				cmFieldDoc.setId(cmFieldDoc.getId());
 				cmFieldDoc.setCode(reqDto.getCode() == null ? cmFieldDoc.getCode() : reqDto.getCode());
@@ -103,19 +103,19 @@ public class CustomerMasterFldMgr {
 		return fetchCustomerMasfields(cmFieldDoc.getId());
 	}
 
-	public List<CustomerMasterFieldDoc> fetchCustomerMasfields(String id) {
-		List<CustomerMasterFieldDoc> dtoLst = new ArrayList<>();
-		CustomerMasterFieldDoc cmFieldDoc = null;
+	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id) {
+		List<CustomerFieldMasterDoc> dtoLst = new ArrayList<>();
+		CustomerFieldMasterDoc cmFieldDoc = null;
 		if (ArgUtil.is(id)) {
-			cmFieldDoc = commonMongoTemplate.findByIdString(id, CustomerMasterFieldDoc.class);
+			cmFieldDoc = commonMongoTemplate.findByIdString(id, CustomerFieldMasterDoc.class);
 			if (ArgUtil.is(cmFieldDoc)) {
-				CustomerMasterFieldDoc dto = EntityDtoUtil.entityToDto(cmFieldDoc, new CustomerMasterFieldDoc());
+				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(cmFieldDoc, new CustomerFieldMasterDoc());
 				dtoLst.add(dto);
 			}
 		} else {
-			List<CustomerMasterFieldDoc> lstGropDocs = commonMongoTemplate.findAll(CustomerMasterFieldDoc.class);
-			for (CustomerMasterFieldDoc doc : lstGropDocs) {
-				CustomerMasterFieldDoc dto = EntityDtoUtil.entityToDto(doc, new CustomerMasterFieldDoc());
+			List<CustomerFieldMasterDoc> lstGropDocs = commonMongoTemplate.findAll(CustomerFieldMasterDoc.class);
+			for (CustomerFieldMasterDoc doc : lstGropDocs) {
+				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(doc, new CustomerFieldMasterDoc());
 				if (dto.isActive()) {
 					dtoLst.add(dto);
 				}
@@ -125,20 +125,20 @@ public class CustomerMasterFldMgr {
 		return dtoLst;
 	}
 
-	public List<CustomerMasterFieldDoc> deleteCustmerMasterFiled(CustomerMasterFieldDoc reqDto) {
+	public List<CustomerFieldMasterDoc> deleteCustmerMasterFiled(CustomerFieldMasterDoc reqDto) {
 		if (ArgUtil.is(reqDto.getId())) {
-			MongoQueryBuilder<CustomerMasterFieldDoc> builder = MongoQueryBuilder
-					.collection(CustomerMasterFieldDoc.class).whereId(reqDto.getId());
+			MongoQueryBuilder<CustomerFieldMasterDoc> builder = MongoQueryBuilder
+					.collection(CustomerFieldMasterDoc.class).whereId(reqDto.getId());
 			builder.set("active", reqDto.isActive());
 			commonMongoTemplate.upsert(builder);
 		}
 		return fetchCustomerMasfields(null);
 	}
 
-	public CustomerMasterFieldDoc toCheckDupFieldCode(String fieldCode) {
+	public CustomerFieldMasterDoc toCheckDupFieldCode(String fieldCode) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("code").is(fieldCode).and("active").is(true));
-		CustomerMasterFieldDoc mstDoc = commonMongoTemplate.findOne(query, CustomerMasterFieldDoc.class);
+		CustomerFieldMasterDoc mstDoc = commonMongoTemplate.findOne(query, CustomerFieldMasterDoc.class);
 		return mstDoc;
 	}
 

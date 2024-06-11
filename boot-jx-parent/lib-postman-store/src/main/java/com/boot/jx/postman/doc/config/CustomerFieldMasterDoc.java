@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 
 @Document(collection = "MASTER_CUSTOMER_FIELD")
-@TypeAlias("CustomerMasterField")
-public class CustomerMasterFieldDoc extends TimeStampDoc {
+@TypeAlias("CustomerFieldMaster")
+public class CustomerFieldMasterDoc extends TimeStampDoc {
 
 	@Id
 	private String id;

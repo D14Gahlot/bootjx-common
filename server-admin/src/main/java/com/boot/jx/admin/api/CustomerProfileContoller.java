@@ -24,7 +24,7 @@ import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
-import com.boot.jx.postman.doc.config.CustomerMasterFieldDoc;
+import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
@@ -36,8 +36,8 @@ public class CustomerProfileContoller {
 	CustomerProfileService cusProfileService;
 
 	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.POST })
-	public ApiResponse<CustomerMasterFieldDoc, Object> createUpdateCusMasFields(
-			@RequestBody CustomerMasterFieldDoc reqDto) {
+	public ApiResponse<CustomerFieldMasterDoc, Object> createUpdateCusMasFields(
+			@RequestBody CustomerFieldMasterDoc reqDto) {
 		if (StringUtils.isBlank(reqDto.getId())) {
 			cusProfileService.checkDupFieldCode(reqDto);
 		}
@@ -45,7 +45,7 @@ public class CustomerProfileContoller {
 	}
 
 	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.PATCH })
-	public ApiResponse<CustomerMasterFieldDoc, Object> updateCusMasFields(@RequestBody CustomerMasterFieldDoc reqDto) {
+	public ApiResponse<CustomerFieldMasterDoc, Object> updateCusMasFields(@RequestBody CustomerFieldMasterDoc reqDto) {
 		if (StringUtils.isBlank(reqDto.getId())) {
 			cusProfileService.checkDupFieldCode(reqDto);
 		}
@@ -53,12 +53,12 @@ public class CustomerProfileContoller {
 	}
 
 	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.DELETE })
-	public ApiResponse<CustomerMasterFieldDoc, Object> deleteCusMasFields(@RequestBody CustomerMasterFieldDoc reqDto) {
+	public ApiResponse<CustomerFieldMasterDoc, Object> deleteCusMasFields(@RequestBody CustomerFieldMasterDoc reqDto) {
 		return ApiResponse.buildResults(cusProfileService.deleteCustmerMasterFiled(reqDto));
 	}
 
 	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.GET })
-	public ApiResponse<CustomerMasterFieldDoc, Object> fetchCusMasFields(
+	public ApiResponse<CustomerFieldMasterDoc, Object> fetchCusMasFields(
 			@RequestParam(value = "id", required = false) String id) {
 		return ApiResponse.buildResults(cusProfileService.fetchCustomerMstFields(id));
 	}
