@@ -775,14 +775,6 @@ public class AdminMsgController {
 		}
 		return lst;
 	}
-	@PutMapping("/pub/update/channelId")
-	public String updateChannelId(@RequestParam String oldChannelId,
-			@RequestParam String newChannelId) {
-		Query query = new Query(Criteria.where("channel").is(oldChannelId));
-		Update update = new Update().set("channel", newChannelId);
-
-		mongoTemplate.updateMulti(query, update, ChatSessionDoc.class);
-		return "Channel ID updated successfully.";
-	}
+	
 
 }
