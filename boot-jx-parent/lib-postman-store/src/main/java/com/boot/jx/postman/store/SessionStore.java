@@ -53,8 +53,7 @@ import com.boot.utils.TimeUtils;
 @Component
 public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(SessionStore.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SessionStore.class);
 
 	@Autowired
 	public PMClientConfig pmClientConfig;
@@ -70,15 +69,13 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 	public ChatContactDoc getContact(Contactable contactable) {
 		String contactId = PostManUtil.createContactId(contactable);
-		ChatContactDoc chatContactDoc = super.findById(contactId,
-				ChatContactDoc.class);
+		ChatContactDoc chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 		return chatContactDoc;
 	}
 
 	public ChatContactDoc getContact(IMessage inboxMessage) {
 		String contactId = PostManUtil.createContactId(inboxMessage);
-		ChatContactDoc chatContactDoc = super.findById(contactId,
-				ChatContactDoc.class);
+		ChatContactDoc chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 		return chatContactDoc;
 	}
 
@@ -95,34 +92,26 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		return super.findById(sessionId, ChatSessionDoc.class);
 	}
 
-	public ChatSessionDoc getSessionPrimeByTicketHash(String contactId,
-			String ticketHash) {
-		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
-				.where(Criteria.where("contactId").is(contactId)
-						.and("ticketHash").is(ticketHash).and("primary")
-						.is(true));
+	public ChatSessionDoc getSessionPrimeByTicketHash(String contactId, String ticketHash) {
+		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class).where(
+				Criteria.where("contactId").is(contactId).and("ticketHash").is(ticketHash).and("primary").is(true));
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}
 
 	public boolean isSessionValid(ChatSessionDoc chatSessionDoc) {
-		if ((ArgUtil.isEmpty(chatSessionDoc) || !chatSessionDoc.isActive())
-				|| chatSessionDoc.isExpired()) {
+		if ((ArgUtil.isEmpty(chatSessionDoc) || !chatSessionDoc.isActive()) || chatSessionDoc.isExpired()) {
 			return false;
 		}
 
 		chatSessionDoc.refreshStamps();
 
 		if (!ArgUtil.isEmptyValue(chatSessionDoc.getLastInComingStamp())
-				&& (chatSessionDoc.getLastResponseStamp() > chatSessionDoc
-						.getLastInComingStamp())) {
-			return !TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(),
-					pmClientConfig.getChatSessionTimeout());
+				&& (chatSessionDoc.getLastResponseStamp() > chatSessionDoc.getLastInComingStamp())) {
+			return !TimeUtils.isExpired(chatSessionDoc.getLastInComingStamp(), pmClientConfig.getChatSessionTimeout());
 		}
 
 		if (ArgUtil.is(chatSessionDoc.getUpdated())) {
-			return !TimeUtils.isExpired(chatSessionDoc.getUpdated().getStamp(),
-					pmClientConfig.getChatSessionTimeout());
+			return !TimeUtils.isExpired(chatSessionDoc.getUpdated().getStamp(), pmClientConfig.getChatSessionTimeout());
 		}
 
 		return true;
@@ -139,12 +128,12 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	/**
 	 * 
 	 * This method will take messages and returns session, session sbhould be
-	 * created if there is not present session against this message or return if
-	 * its there, this method should return null only in case there is nothing
-	 * can be done for message.
+	 * created if there is not present session against this message or return if its
+	 * there, this method should return null only in case there is nothing can be
+	 * done for message.
 	 * 
-	 * Additionally this message is responsible for updating ContactDoc and
-	 * Session doc for stamps and entry points
+	 * Additionally this message is responsible for updating ContactDoc and Session
+	 * doc for stamps and entry points
 	 * 
 	 * @param sessionMessage
 	 * @return
@@ -156,8 +145,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 	@Deprecated
 	public ChatSessionDoc createSessionOld(SessionMessage sessionMessage) {
-		Contactable contact = PostManUtil
-				.getContactMeta(sessionMessage.contact());
+		Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
 
 		String sessionId = sessionMessage.getSessionId();
 		String contactId = contact.getContactId();
@@ -182,8 +170,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			if (!isSessionValid(chatSessionDoc)) {
 				// Session Found but invalid
 				contactId = chatSessionDoc.getContactId();
-				chatContactDoc = super.findById(contactId,
-						ChatContactDoc.class);
+				chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 				contact.copyFrom(chatContactDoc);
 			}
 
@@ -192,8 +179,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		// Find Out Chat Session
 		if (ArgUtil.isEmpty(chatSessionDoc)) {
 			if (ArgUtil.isEmpty(sessionId)) {
-				chatContactDoc = super.findById(contactId,
-						ChatContactDoc.class);
+				chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 				if (ArgUtil.is(chatContactDoc)) {
 					sessionId = chatContactDoc.getSessionId();
 				}
@@ -203,8 +189,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			}
 		}
 
-		ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc)
-				? new ChatContactQuery(chatContactDoc)
+		ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
 				: new ChatContactQuery(contactId);
 
 		if (!isSessionValid(chatSessionDoc)) {
@@ -212,17 +197,14 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			closeAllPreviousSessions(contactId);
 
 			if (!ArgUtil.is(chatContactDoc)) {
-				chatContactDoc = super.findById(contactId,
-						ChatContactDoc.class);
+				chatContactDoc = super.findById(contactId, ChatContactDoc.class);
 			}
 
 			// SESSION CREATION
 			chatSessionDoc = new ChatSessionDoc();
 			chatSessionDoc.setContactId(contactId);
-			chatSessionDoc
-					.setContactType(sessionMessage.contact().getContactType());
-			chatSessionDoc
-					.setChannel(sessionMessage.contact().getChannelType());
+			chatSessionDoc.setContactType(sessionMessage.contact().getContactType());
+			chatSessionDoc.setChannel(sessionMessage.contact().getChannelType());
 			chatSessionDoc.setLane(sessionMessage.contact().getLane());
 
 			// SESSION UPDATE
@@ -251,20 +233,17 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			}
 		} else {
 			// SESSION UPDATE
-			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(
-					chatSessionDoc);
+			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
 			chatSessionDocQuery.setActive(true);
 			if (!ArgUtil.is(chatSessionDoc.getContactName())) {
-				chatSessionDocQuery
-						.setContactName(chatSessionDoc.getContactName());
+				chatSessionDocQuery.setContactName(chatSessionDoc.getContactName());
 			}
 			updateFirst(chatSessionDocQuery);
 		}
 		return chatSessionDoc;
 	}
 
-	public SessionInfo updateMessageFromSession(ChatSessionDoc chatSessionDoc,
-			SessionInfo iMessage) {
+	public SessionInfo updateMessageFromSession(ChatSessionDoc chatSessionDoc, SessionInfo iMessage) {
 		if (ArgUtil.isEmpty(iMessage.contact().getName())) {
 			iMessage.contact().setName(chatSessionDoc.contact().getName());
 		}
@@ -280,8 +259,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		iMessage.session().setResolved(chatSessionDoc.isResolved());
 		iMessage.session().setRoutingId(chatSessionDoc.getRoutingId());
 
-		iMessage.session()
-				.setSessionStamp(chatSessionDoc.getUpdated().getStamp());
+		iMessage.session().setSessionStamp(chatSessionDoc.getUpdated().getStamp());
 
 		// Router
 		iMessage.route().setRouterId(chatSessionDoc.getRoutingId());
@@ -290,8 +268,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	}
 
 	@Deprecated
-	public ChatSessionDoc linkSession(ChatSessionDoc chatSessionDoc,
-			IMessage iMessage) {
+	public ChatSessionDoc linkSession(ChatSessionDoc chatSessionDoc, IMessage iMessage) {
 		if (!ArgUtil.is(chatSessionDoc)) {
 			return null;
 		}
@@ -299,14 +276,11 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		if (PostManUtil.isInBound(iMessage)) {
 			chatSessionDoc.setLastInComingStamp(iMessage.getTimestamp());
 			// Query Update for Session
-			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(
-					chatSessionDoc);
-			chatSessionDocQuery.setLastInComingStamp(
-					chatSessionDoc.getLastInComingStamp());
+			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
+			chatSessionDocQuery.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
 
 			if (ArgUtil.isEmptyValue(chatSessionDoc.getFirstInComingStamp())) {
-				chatSessionDocQuery
-						.setFirstInComingStamp(iMessage.getTimestamp());
+				chatSessionDocQuery.setFirstInComingStamp(iMessage.getTimestamp());
 			}
 
 			// Assign Queue
@@ -314,8 +288,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 				String defaultQueue = iMessage.route().getQueueCode();
 				if (!ArgUtil.is(defaultQueue)) {
-					defaultQueue = pmDomainConfig
-							.getDefaultInboundQueue(iMessage.contact());
+					defaultQueue = pmDomainConfig.getDefaultInboundQueue(iMessage.contact());
 				}
 				if (ArgUtil.is(defaultQueue)) {
 					chatSessionDocQuery.setQueue(defaultQueue);
@@ -325,8 +298,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			updateFirst(chatSessionDocQuery);
 
 			// Query Update for Contact
-			ChatContactQuery chatContactQuery = new ChatContactQuery(
-					chatSessionDoc.getContactId());
+			ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
 			chatContactQuery.setLastInBoundStamp(iMessage.getTimestamp());
 			chatContactQuery.update(iMessage.contact());
 			updateFirst(chatContactQuery);
@@ -350,8 +322,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		inboxMessage.contact().copyFrom(contact);
 		inboxMessage.contact().setContactType(contact.getContactType());
 		inboxMessage.contact().setChannelType(contact.getChannelType());
-		inboxMessage.contact().setLane(
-				ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
+		inboxMessage.contact().setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
 		inboxMessage.setFrom(contact.getCsid());
 		inboxMessage.setFromName(contact.getName());
 		inboxMessage.setSessionId(contact.getSessionId());
@@ -365,8 +336,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		return inboxMessage;
 	}
 
-	public boolean inactiveAllPreviousSessions(String contactId,
-			String ticketHash) {
+	public boolean inactiveAllPreviousSessions(String contactId, String ticketHash) {
 
 		Criteria contactQ = Criteria.where("contactId").is(contactId);
 
@@ -382,8 +352,8 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 				Criteria.where("active").is(true),
 				// or primary
 				Criteria.where("primary").is(true)));
-		Update update = new Update().set("active", false).set("primary", false)
-				.set("closeSessionStamp", System.currentTimeMillis());
+		Update update = new Update().set("active", false).set("primary", false).set("closeSessionStamp",
+				System.currentTimeMillis());
 		super.updateMulti(query2, update, ChatSessionDoc.class);
 		return true;
 	}
@@ -395,8 +365,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 	public List<ChatSessionDoc> findChatSessionDocByAgent(String agentCode) {
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("assignedToAgent").is(agentCode)
-				.and("active").is(true));
+		query2.addCriteria(Criteria.where("assignedToAgent").is(agentCode).and("active").is(true));
 		return super.find(query2, ChatSessionDoc.class);
 	}
 
@@ -407,62 +376,47 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	public void expireChatSession() {
 		Calendar cal = Calendar.getInstance();
 		int offsetOur = (int) ((cal.getTimeInMillis() / 3600)
-				% (TimeUtils.toHours(pmClientConfig.getChatSessionTimeout())
-						/ 2));
+				% (TimeUtils.toHours(pmClientConfig.getChatSessionTimeout()) / 2));
 		if (offsetOur == 0) {
-			cal.add(Calendar.HOUR, -1 * (int) TimeUtils
-					.toHours(pmClientConfig.getChatSessionTimeout()));
-			MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder
-					.collection(ChatSessionDoc.class)
-					.where(Criteria.where("active").is(true)
-							.and("lastInComingStamp").lt(cal.getTimeInMillis())
-							.andOperator(new Criteria().orOperator(
-									Criteria.where("resolved").exists(false),
+			cal.add(Calendar.HOUR, -1 * (int) TimeUtils.toHours(pmClientConfig.getChatSessionTimeout()));
+			MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
+					.where(Criteria.where("active").is(true).and("lastInComingStamp").lt(cal.getTimeInMillis())
+							.andOperator(new Criteria().orOperator(Criteria.where("resolved").exists(false),
 									Criteria.where("resolved").is(false))))
-					.set("expired", true).set("active", false)
-					.set("closeSessionStamp", System.currentTimeMillis());
-			super.updateFirst(cmqb.getQuery(), cmqb.getUpdate(),
-					ChatSessionDoc.class);
+					.set("expired", true).set("active", false).set("closeSessionStamp", System.currentTimeMillis());
+			super.updateFirst(cmqb.getQuery(), cmqb.getUpdate(), ChatSessionDoc.class);
 		}
 	}
 
-	public List<ChatSessionDoc> findSimilarChatSessionForContactId(
-			String contactId, Long fromStamp, Long toStamp) {
+	public List<ChatSessionDoc> findSimilarChatSessionForContactId(String contactId, Long fromStamp, Long toStamp) {
 		ChatContactDoc contact = getContact(contactId);
 
 		List<ChatContactDoc> contacts = null;
-		if (ArgUtil.is(contact)
-				&& !ArgUtil.areEmpty(contact.getPhone(), contact.getEmail())) {
+		if (ArgUtil.is(contact) && !ArgUtil.areEmpty(contact.getPhone(), contact.getEmail())) {
 			Query query1 = new Query();
 			List<Criteria> orExpression = new ArrayList<Criteria>();
 			if (ArgUtil.is(contact.getPhone())) {
-				orExpression
-						.add(Criteria.where("phone").is(contact.getPhone()));
+				orExpression.add(Criteria.where("phone").is(contact.getPhone()));
 			}
 			if (ArgUtil.is(contact.getEmail())) {
-				orExpression
-						.add(Criteria.where("email").is(contact.getEmail()));
+				orExpression.add(Criteria.where("email").is(contact.getEmail()));
 			}
 			if (ArgUtil.is(contact.getProfileId())) {
-				orExpression.add(
-						Criteria.where("profileId").is(contact.getProfileId()));
+				orExpression.add(Criteria.where("profileId").is(contact.getProfileId()));
 			}
-			query1.addCriteria(new Criteria().orOperator(
-					orExpression.toArray(new Criteria[orExpression.size()])));
+			query1.addCriteria(new Criteria().orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 			contacts = super.find(query1, ChatContactDoc.class);
 		}
 
 		Calendar timeout = Calendar.getInstance();
-		timeout.setTimeInMillis(timeout.getTimeInMillis()
-				- DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 30);
+		timeout.setTimeInMillis(timeout.getTimeInMillis() - DEFAULT_VALUES.POSTMAN_AGENT_TAB_HISTORY_PERIOD * 30);
 
 		Query query2 = new Query();
 		List<Criteria> orExpression = new ArrayList<Criteria>();
 
 		if (ArgUtil.is(contacts)) {
 			for (ChatContactDoc chatContactDoc : contacts) {
-				orExpression.add(Criteria.where("contactId")
-						.is(chatContactDoc.getContactId()));
+				orExpression.add(Criteria.where("contactId").is(chatContactDoc.getContactId()));
 			}
 		} else {
 			orExpression.add(Criteria.where("contactId").is(contactId));
@@ -480,39 +434,32 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			tymCriteria.gte(timeout.getTimeInMillis());
 		}
 
-		query2.addCriteria(tymCriteria.orOperator(
-				orExpression.toArray(new Criteria[orExpression.size()])));
+		query2.addCriteria(tymCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
 		// LOGGER.info(query2.toString());
 		removeMsgFields(query2);
 		return super.find(query2, ChatSessionDoc.class);
 	}
 
 	private void removeMsgFields(Query query2) {
-		query2.fields().exclude("lastInBoundMsg").exclude("lastBotReply")
-				.exclude("lastAgentReply").exclude("lastOutBoundMsg")
-				.exclude("lastMsg");
+		query2.fields().exclude("lastInBoundMsg").exclude("lastBotReply").exclude("lastAgentReply")
+				.exclude("lastOutBoundMsg").exclude("lastMsg");
 	}
 
-	public List<ChatSessionDoc> findActiveChatSessionForContactId(
-			String contactId) {
+	public List<ChatSessionDoc> findActiveChatSessionForContactId(String contactId) {
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("contactId").is(contactId)
-				.and("active").is(true));
+		query2.addCriteria(Criteria.where("contactId").is(contactId).and("active").is(true));
 		return super.find(query2, ChatSessionDoc.class);
 	}
 
 	public ChatSessionDoc saveSession(ChatSessionDoc chatSessionDoc) {
 		try {
-			if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp())
-					|| chatSessionDoc.getStartSessionStamp() == 0L) {
+			if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
 				chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
 			}
 			super.save(chatSessionDoc);
 		} catch (Exception e) {
-			ChatSessionDoc chatSessionDoc2 = super.findById(
-					chatSessionDoc.getSessionId(), ChatSessionDoc.class);
-			LOGGER.error(chatSessionDoc.getVersion() + " ~ "
-					+ chatSessionDoc2.getVersion(), e);
+			ChatSessionDoc chatSessionDoc2 = super.findById(chatSessionDoc.getSessionId(), ChatSessionDoc.class);
+			LOGGER.error(chatSessionDoc.getVersion() + " ~ " + chatSessionDoc2.getVersion(), e);
 			if (chatSessionDoc.getVersion() == null) {
 				// chatSessionDoc.setVersion(0);
 				super.save(chatSessionDoc);
@@ -531,28 +478,22 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		chatSessionDoc.setInitd(true);
 		chatSessionDoc.setContactName(contactDoc.getName());
 
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.whereId(chatSessionDoc.getSessionId());
 		builder.set("initd", chatSessionDoc.isInitd());
-		builder.set("contactName", ArgUtil.nonEmpty(
-				chatSessionDoc.getContactName(), contactDoc.getName()));
-		super.updateFirst(builder.getQuery(), builder.getUpdate(),
-				ChatSessionDoc.class);
+		builder.set("contactName", ArgUtil.nonEmpty(chatSessionDoc.getContactName(), contactDoc.getName()));
+		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;
 	}
 
-	public ChatSessionDoc changeStatus(ChatSessionDoc chatSessionDoc,
-			PMConstants.CHAT_STATUS status) {
+	public ChatSessionDoc changeStatus(ChatSessionDoc chatSessionDoc, PMConstants.CHAT_STATUS status) {
 		// Old Way of Doing it
 		chatSessionDoc.setStatus(status.toString());
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.whereId(chatSessionDoc.getSessionId());
 		builder.set("status", status.toString());
-		super.updateFirst(builder.getQuery(), builder.getUpdate(),
-				ChatSessionDoc.class);
+		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
 
@@ -561,17 +502,13 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		chatSessionDoc.setResolveSessionStamp(System.currentTimeMillis());
 		chatSessionDoc.setResolved(true);
 
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.whereId(chatSessionDoc.getSessionId());
-		builder.set("resolveSessionStamp",
-				chatSessionDoc.getResolveSessionStamp());
+		builder.set("resolveSessionStamp", chatSessionDoc.getResolveSessionStamp());
 		builder.set("resolved", chatSessionDoc.isResolved());
 		builder.set("status", PMConstants.CHAT_STATUS.RESOLVED);
-		builder.set("summary.assignedToAtResolve",
-				chatSessionDoc.getAssignedToAgent());
-		super.updateFirst(builder.getQuery(), builder.getUpdate(),
-				ChatSessionDoc.class);
+		builder.set("summary.assignedToAtResolve", chatSessionDoc.getAssignedToAgent());
+		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
 
@@ -579,59 +516,47 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		chatSessionDoc.setCloseSessionStamp(System.currentTimeMillis());
 		chatSessionDoc.setActive(false);
 
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.whereId(chatSessionDoc.getSessionId());
 		builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
 		builder.set("active", chatSessionDoc.isActive());
 		builder.set("status", PMConstants.CHAT_STATUS.CLOSED);
-		builder.set("summary.assignedToAtClose",
-				chatSessionDoc.getAssignedToAgent());
-		super.updateFirst(builder.getQuery(), builder.getUpdate(),
-				ChatSessionDoc.class);
+		builder.set("summary.assignedToAtClose", chatSessionDoc.getAssignedToAgent());
+		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;
 	}
 
 	public ChatSessionDoc deleteSession(ChatSessionDoc chatSessionDoc) {
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
-				.where(QueryCriteria.whereId(chatSessionDoc.getSessionId())
-						.and("channel").is("IMPORT"));
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
+				.where(QueryCriteria.whereId(chatSessionDoc.getSessionId()).and("channel").is("IMPORT"));
 		super.remove(builder.getQuery(), ChatSessionDoc.class);
 
-		MongoQueryBuilder<ChatSessionDoc> builder2 = MongoQueryBuilder
-				.collection(ChatSessionDoc.class).where(QueryCriteria
-						.where("sessionId").is(chatSessionDoc.getSessionId()));
-		super.remove(builder2.getQuery(), MessageDoc.class, MessageStore
-				.getCollectionName(chatSessionDoc.getContactType()));
+		MongoQueryBuilder<ChatSessionDoc> builder2 = MongoQueryBuilder.collection(ChatSessionDoc.class)
+				.where(QueryCriteria.where("sessionId").is(chatSessionDoc.getSessionId()));
+		super.remove(builder2.getQuery(), MessageDoc.class,
+				MessageStore.getCollectionName(chatSessionDoc.getContactType()));
 		return chatSessionDoc;
 	}
 
-	public ChatSessionDoc botScore(ChatSessionDoc chatSessionDoc,
-			Integer botScore) {
+	public ChatSessionDoc botScore(ChatSessionDoc chatSessionDoc, Integer botScore) {
 		chatSessionDoc.setBotScore(botScore);
 
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.whereId(chatSessionDoc.getSessionId());
 		builder.set("botScore", chatSessionDoc.getBotScore());
-		super.updateFirst(builder.getQuery(), builder.getUpdate(),
-				ChatSessionDoc.class);
+		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;
 	}
 
-	public ChatSessionDoc agentScore(ChatSessionDoc chatSessionDoc,
-			Integer agentScore) {
+	public ChatSessionDoc agentScore(ChatSessionDoc chatSessionDoc, Integer agentScore) {
 		chatSessionDoc.setAgentScore(agentScore);
 
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.whereId(chatSessionDoc.getSessionId());
 		builder.set("agentScore", chatSessionDoc.getAgentScore());
-		super.updateFirst(builder.getQuery(), builder.getUpdate(),
-				ChatSessionDoc.class);
+		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;
 	}
@@ -642,8 +567,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	}
 
 	public ChatUserProfileDoc save(ChatUserProfileDTO profile) {
-		ChatUserProfileDoc doc = EntityDtoUtil.dtoToEntity(profile,
-				new ChatUserProfileDoc());
+		ChatUserProfileDoc doc = EntityDtoUtil.dtoToEntity(profile, new ChatUserProfileDoc());
 		doc.setId(profile.getProfileId());
 		return save(doc);
 	}
@@ -653,17 +577,14 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			chatSessionDoc.setFistResponseStamp(System.currentTimeMillis());
 		}
 		chatSessionDoc.setLastResponseStamp(System.currentTimeMillis());
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.whereId(chatSessionDoc.getSessionId());
 		builder.set("fistResponseStamp", chatSessionDoc.getFistResponseStamp());
 		builder.set("lastResponseStamp", chatSessionDoc.getLastResponseStamp());
-		super.updateFirst(builder.getQuery(), builder.getUpdate(),
-				ChatSessionDoc.class);
+		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 	}
 
-	public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept,
-			String agentCode) {
+	public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
 			chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
@@ -674,19 +595,16 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		chatSessionDoc.setAssignedToAgent(agentCode);
 		// chatSessionDoc.setAssignedToQueue(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 		if (chatSessionDoc.getAgentSessionStamp() == 0L) {
-			chatSessionDoc.setAgentSessionStamp(
-					chatSessionDoc.getAssignedAgentStamp());
+			chatSessionDoc.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
 		}
 
-		ChatSessionQuery builder = new ChatSessionQuery(
-				chatSessionDoc.getSessionId());
+		ChatSessionQuery builder = new ChatSessionQuery(chatSessionDoc.getSessionId());
 		// builder.set("mode", chatSessionDoc.getMode());
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
 		builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
-		builder.set("assignedAgentStamp",
-				chatSessionDoc.getAssignedAgentStamp());
+		builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
 		builder.set("agentSessionStamp", chatSessionDoc.getAgentSessionStamp());
 		updateFirst(builder);
 	}
@@ -700,25 +618,20 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		chatSessionDoc.setMode(PMConstants.CHAT_MODE.BOT.toString());
 		chatSessionDoc.setAssignedToBot(botName);
 
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.whereId(chatSessionDoc.getSessionId());
 		builder.set("mode", chatSessionDoc.getMode());
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
-		super.updateFirst(builder.getQuery(), builder.getUpdate(),
-				ChatSessionDoc.class);
+		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
 	}
 
-	public ChatSessionDoc updateQuickTags(ChatSessionDoc chatSessionDoc,
-			List<String> tagIds) {
+	public ChatSessionDoc updateQuickTags(ChatSessionDoc chatSessionDoc, List<String> tagIds) {
 		chatSessionDoc.setTagId(tagIds);
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.whereId(chatSessionDoc.getSessionId());
 		builder.set("tagId", tagIds);
-		super.updateFirst(builder.getQuery(), builder.getUpdate(),
-				ChatSessionDoc.class);
+		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 		return chatSessionDoc;
 	}
 
@@ -759,13 +672,11 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	 * @param toStamp
 	 * @return
 	 */
-	public List<ChatSessionDoc> findByStatusOrQuickTag(List<CHAT_STATUS> status,
-			List<String> tagCategory, long fromStamp, long toStamp) {
+	public List<ChatSessionDoc> findByStatusOrQuickTag(List<CHAT_STATUS> status, List<String> tagCategory,
+			long fromStamp, long toStamp) {
 		List<String> statusLst = new ArrayList<>();;
-		if ((status == null || status.isEmpty() || status.contains(null))
-				&& (tagCategory == null || tagCategory.isEmpty()
-						|| tagCategory.contains(null)
-								&& tagCategory.contains(""))) {
+		if ((status == null || status.isEmpty() || status.contains(null)) && (tagCategory == null
+				|| tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains(""))) {
 			// status = new ArrayList<>();
 			// status.add(CHAT_STATUS.OPEN);
 			statusLst.add(CHAT_STATUS.OPEN.toString());
@@ -777,14 +688,12 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 		Query query = new Query();
 
-		query.addCriteria(
-				Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
+		query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
 
 		if (statusLst != null && !statusLst.isEmpty()) {
 			query.addCriteria(Criteria.where("status").in(statusLst));
 		}
-		if (tagCategory != null && !tagCategory.isEmpty()
-				&& !tagCategory.contains(null) && !tagCategory.contains("")) {
+		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
 			query.addCriteria(Criteria.where("tagId").in(tagCategory));
 		}
 		query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
@@ -793,14 +702,11 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		return super.find(query, ChatSessionDoc.class);
 	}
 
-	public List<ChatSessionDoc> findByStatusOrQuickTagV1(
-			List<CHAT_STATUS> status, List<String> tagCategory,
+	public List<ChatSessionDoc> findByStatusOrQuickTagV1(List<CHAT_STATUS> status, List<String> tagCategory,
 			long startStampLong, long endStampLong) {
 		List<String> statusLst = new ArrayList<>();;
-		if ((status == null || status.isEmpty() || status.contains(null))
-				&& (tagCategory == null || tagCategory.isEmpty()
-						|| tagCategory.contains(null)
-								&& tagCategory.contains(""))) {
+		if ((status == null || status.isEmpty() || status.contains(null)) && (tagCategory == null
+				|| tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains(""))) {
 			// statusLst.add(CHAT_STATUS.OPEN.toString()); for all status
 		} else {
 			for (CHAT_STATUS chatSt : status) {
@@ -813,29 +719,22 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		Query query2 = new Query();
 
 		Criteria dateCriteria = new Criteria().orOperator(
-				new Criteria().andOperator(
-						Criteria.where("startSessionStamp").gt(startStampLong),
+				new Criteria().andOperator(Criteria.where("startSessionStamp").gt(startStampLong),
 						Criteria.where("startSessionStamp").lt(endStampLong)),
-				new Criteria().andOperator(
-						Criteria.where("closeSessionStamp").gt(startStampLong),
+				new Criteria().andOperator(Criteria.where("closeSessionStamp").gt(startStampLong),
 						Criteria.where("closeSessionStamp").lt(endStampLong)),
 
-				new Criteria().andOperator(
-						Criteria.where("assignedDeptStamp").gt(startStampLong),
+				new Criteria().andOperator(Criteria.where("assignedDeptStamp").gt(startStampLong),
 						Criteria.where("assignedDeptStamp").lt(endStampLong)),
-				new Criteria().andOperator(
-						Criteria.where("assignedAgentStamp").gt(startStampLong),
+				new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(startStampLong),
 						Criteria.where("assignedAgentStamp").lt(endStampLong)),
 
-				new Criteria().andOperator(
-						Criteria.where("fistResponseStamp").gt(startStampLong),
+				new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(startStampLong),
 						Criteria.where("fistResponseStamp").lt(endStampLong)),
-				new Criteria().andOperator(
-						Criteria.where("lastResponseStamp").gt(startStampLong),
+				new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(startStampLong),
 						Criteria.where("lastResponseStamp").lt(endStampLong)),
 
-				new Criteria().andOperator(
-						Criteria.where("lastInComingStamp").gt(startStampLong),
+				new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(startStampLong),
 						Criteria.where("lastInComingStamp").lt(endStampLong)));
 
 		criteria.andOperator(dateCriteria);
@@ -843,29 +742,23 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		if (statusLst != null && !statusLst.isEmpty()) {
 			query2.addCriteria(Criteria.where("status").in(statusLst));
 		}
-		if (tagCategory != null && !tagCategory.isEmpty()
-				&& !tagCategory.contains(null) && !tagCategory.contains("")) {
+		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
 			query2.addCriteria(Criteria.where("tagId").in(tagCategory));
 		}
 
-		query2 = query2.addCriteria(criteria)
-				.with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
-		List<ChatSessionDoc> messages = mongoTemplate.find(query2,
-				ChatSessionDoc.class);
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
+		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
 		LOGGER.debug("query {===}" + query2);
 		return messages;
 
 	}
 
 	public String getLastAssignedAgent(Contactable contact) {
-		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
-				.where(Criteria.where("contactId").is(contact.getContactId())
-						.and("assignedToAgent").exists(true).and("mode")
-						.is(CHAT_MODE.AGENT));
+		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
+				.where(Criteria.where("contactId").is(contact.getContactId()).and("assignedToAgent").exists(true)
+						.and("mode").is(CHAT_MODE.AGENT));
 		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skipDBRef();
-		ChatSessionDoc lastSession = super.findOne(cmqb.getQuery(),
-				ChatSessionDoc.class);
+		ChatSessionDoc lastSession = super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 		if (ArgUtil.is(lastSession)) {
 			return lastSession.getAssignedToAgent();
 		}
@@ -873,33 +766,24 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	}
 
 	public ChatSessionDoc getPreviousSession(Contactable contact) {
-		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
+		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.where(Criteria.where("contactId").is(contact.getContactId()));
-		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1)
-				.skipDBRef();
+		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1).skipDBRef();
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}
 
-	public ChatSessionDoc getPreviousSession(Contactable contact,
-			long timestamp) {
-		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder
-				.collection(ChatSessionDoc.class)
-				.where(Criteria.where("contactId").is(contact.getContactId())
-						.and("startSessionStamp").lt(timestamp));
-		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1)
-				.skipDBRef();
+	public ChatSessionDoc getPreviousSession(Contactable contact, long timestamp) {
+		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
+				.where(Criteria.where("contactId").is(contact.getContactId()).and("startSessionStamp").lt(timestamp));
+		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1).skipDBRef();
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}
 
-	public List<ChatSessionDoc> findByStatusOrQuickTagV2(
-			List<CHAT_STATUS> status, List<QuickTag> tagCategory,
+	public List<ChatSessionDoc> findByStatusOrQuickTagV2(List<CHAT_STATUS> status, List<QuickTag> tagCategory,
 			long fromStamp, long toStamp) {
 		List<String> statusLst = new ArrayList<>();;
-		if ((status == null || status.isEmpty() || status.contains(null))
-				&& (tagCategory == null || tagCategory.isEmpty()
-						|| tagCategory.contains(null)
-								&& tagCategory.contains(""))) {
+		if ((status == null || status.isEmpty() || status.contains(null)) && (tagCategory == null
+				|| tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains(""))) {
 			statusLst.add(CHAT_STATUS.OPEN.toString());
 		} else {
 			for (CHAT_STATUS chatSt : status) {
@@ -915,17 +799,14 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			fromStamp = DateUtil.todayStartTime();
 		}
 
-		primaryCriteria = primaryCriteria.and("assignedAgentStamp")
-				.gt(fromStamp).lt(toStamp);
+		primaryCriteria = primaryCriteria.and("assignedAgentStamp").gt(fromStamp).lt(toStamp);
 		criterias.add(primaryCriteria);
-		
 
 		if (statusLst != null && !statusLst.isEmpty()) {
 			primaryCriteria = primaryCriteria.and("status").in(statusLst);
 		}
 
-		if (tagCategory != null && !tagCategory.isEmpty()
-				&& tagCategory.size() > 0) {
+		if (tagCategory != null && !tagCategory.isEmpty() && tagCategory.size() > 0) {
 			MultiValueMap<String, String> tags = new LinkedMultiValueMap<String, String>();
 			for (QuickTag tag : tagCategory) {
 				tags.add(tag.getCategory(), tag.getId());
@@ -935,8 +816,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			}
 		}
 
-		query.addCriteria(primaryCriteria
-				.andOperator(criterias.toArray(new Criteria[criterias.size()])))
+		query.addCriteria(primaryCriteria.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "assignedAgentStamp"));
 		ApiResponseUtil.addLog(query.toString());
@@ -946,10 +826,8 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		LOGGER.debug("query {===}" + query);
 		System.out.println("query {===}" + query);
 
-		return sessionStore.find(CommonMongoQueryBuilder
-				.collection(ChatSessionDoc.class).query(query)
-				.skipDBRefByNames("lastMsg", "lastInBoundMsg",
-						"lastOutBoundMsg", "lastBotReply", "lastAgentReply"));
+		return sessionStore.find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query)
+				.skipDBRefByNames("lastMsg", "lastInBoundMsg", "lastOutBoundMsg", "lastBotReply", "lastAgentReply"));
 
 		// return super.find(query, ChatSessionDoc.class);
 	}
