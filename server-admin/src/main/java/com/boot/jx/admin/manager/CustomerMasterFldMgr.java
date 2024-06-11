@@ -17,7 +17,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.admin.dto.CustomerContactDto;
-import com.boot.jx.admin.dto.CustomerMasterFieldDto;
 import com.boot.jx.admin.dto.JobsResponseDto;
 import com.boot.jx.admin.dto.ProfileSearchCriteria;
 import com.boot.jx.admin.dto.ProfileSearchQuery;
@@ -66,74 +65,71 @@ public class CustomerMasterFldMgr {
 
 	@Autowired
 	ContactStore contactStore;
-	
+
 	@Autowired
 	PMEnvironment pmEnvironment;
-	
+
 	@Autowired
 	private RestService restService;
 
-	public List<CustomerMasterFieldDto> addAndEditMasterfield(CustomerMasterFieldDto reqDto) {
+	public List<CustomerMasterFieldDoc> addAndEditMasterfield(CustomerMasterFieldDoc reqDto) {
 
 		CustomerMasterFieldDoc cmFieldDoc = new CustomerMasterFieldDoc();
 		if (ArgUtil.is(reqDto.getId())) {
 			cmFieldDoc = commonMongoTemplate.findByIdString(reqDto.getId(), CustomerMasterFieldDoc.class);
 			if (ArgUtil.is(cmFieldDoc)) {
 				cmFieldDoc.setId(cmFieldDoc.getId());
-				cmFieldDoc.setFieldCode(
-						reqDto.getFieldCode() == null ? cmFieldDoc.getFieldCode() : reqDto.getFieldCode());
-				cmFieldDoc.setFieldLabel(
-						reqDto.getFieldLabel() == null ? cmFieldDoc.getFieldLabel() : reqDto.getFieldLabel());
-				cmFieldDoc.setFieldDesc(
-						reqDto.getFieldDesc() == null ? cmFieldDoc.getFieldDesc() : reqDto.getFieldDesc());
-				cmFieldDoc.setFieldType(
-						reqDto.getFieldType() == null ? cmFieldDoc.getFieldType() : reqDto.getFieldType());
-				cmFieldDoc.setIsactive(ArgUtil.parseAsString(reqDto.getIsactive(), Constants.YES));
-				
-				cmFieldDoc.setRequired(reqDto.getIsRequired());
+				cmFieldDoc.setCode(reqDto.getCode() == null ? cmFieldDoc.getCode() : reqDto.getCode());
+				cmFieldDoc.setLabel(reqDto.getLabel() == null ? cmFieldDoc.getLabel() : reqDto.getLabel());
+				cmFieldDoc.setDesc(reqDto.getDesc() == null ? cmFieldDoc.getDesc() : reqDto.getDesc());
+				cmFieldDoc.setType(reqDto.getType() == null ? cmFieldDoc.getType() : reqDto.getType());
+				cmFieldDoc.setActive(reqDto.isActive());
+
+				cmFieldDoc.setRequired(reqDto.isRequired());
 				cmFieldDoc.setPredefined(reqDto.isPredefined());
 				commonMongoTemplate.save(cmFieldDoc);
 			}
 		} else {
-			cmFieldDoc.setFieldCode(reqDto.getFieldCode());
-			cmFieldDoc.setFieldLabel(reqDto.getFieldLabel());
-			cmFieldDoc.setFieldDesc(reqDto.getFieldDesc());
-			cmFieldDoc.setFieldType(reqDto.getFieldType());
-			cmFieldDoc.setIsactive(ArgUtil.parseAsString(reqDto.getIsactive(), Constants.YES));
-			cmFieldDoc.setRequired(ArgUtil.parseAsBoolean(reqDto.getIsRequired(), Constants.DEFAULT_BOOLEAN));
-			cmFieldDoc.setPredefined(ArgUtil.parseAsBoolean(reqDto.isPredefined(),Constants.DEFAULT_BOOLEAN));
+			cmFieldDoc.setCode(reqDto.getCode());
+			cmFieldDoc.setLabel(reqDto.getLabel());
+			cmFieldDoc.setDesc(reqDto.getDesc());
+			cmFieldDoc.setType(reqDto.getType());
+			cmFieldDoc.setActive(reqDto.isActive());
+			cmFieldDoc.setRequired(reqDto.isRequired());
+			cmFieldDoc.setPredefined(reqDto.isPredefined());
 			commonMongoTemplate.save(cmFieldDoc);
 		}
 
 		return fetchCustomerMasfields(cmFieldDoc.getId());
 	}
 
-	public List<CustomerMasterFieldDto> fetchCustomerMasfields(String id) {
-		List<CustomerMasterFieldDto> dtoLst = new ArrayList<>();
+	public List<CustomerMasterFieldDoc> fetchCustomerMasfields(String id) {
+		List<CustomerMasterFieldDoc> dtoLst = new ArrayList<>();
 		CustomerMasterFieldDoc cmFieldDoc = null;
 		if (ArgUtil.is(id)) {
 			cmFieldDoc = commonMongoTemplate.findByIdString(id, CustomerMasterFieldDoc.class);
 			if (ArgUtil.is(cmFieldDoc)) {
-				CustomerMasterFieldDto dto = EntityDtoUtil.entityToDto(cmFieldDoc, new CustomerMasterFieldDto());
+				CustomerMasterFieldDoc dto = EntityDtoUtil.entityToDto(cmFieldDoc, new CustomerMasterFieldDoc());
 				dtoLst.add(dto);
 			}
 		} else {
 			List<CustomerMasterFieldDoc> lstGropDocs = commonMongoTemplate.findAll(CustomerMasterFieldDoc.class);
 			for (CustomerMasterFieldDoc doc : lstGropDocs) {
-				CustomerMasterFieldDto dto = EntityDtoUtil.entityToDto(doc, new CustomerMasterFieldDto());
-				if (ArgUtil.is(dto.getIsactive()) && !dto.getIsactive().equalsIgnoreCase(Constants.DELETED_SOFT))
+				CustomerMasterFieldDoc dto = EntityDtoUtil.entityToDto(doc, new CustomerMasterFieldDoc());
+				if (dto.isActive()) {
 					dtoLst.add(dto);
+				}
 			}
 		}
 
 		return dtoLst;
 	}
 
-	public List<CustomerMasterFieldDto> deleteCustmerMasterFiled(CustomerMasterFieldDto reqDto) {
+	public List<CustomerMasterFieldDoc> deleteCustmerMasterFiled(CustomerMasterFieldDoc reqDto) {
 		if (ArgUtil.is(reqDto.getId())) {
 			MongoQueryBuilder<CustomerMasterFieldDoc> builder = MongoQueryBuilder
 					.collection(CustomerMasterFieldDoc.class).whereId(reqDto.getId());
-			builder.set("isactive", ArgUtil.parseAsString(reqDto.getIsactive(), Constants.DELETED_SOFT));
+			builder.set("active", reqDto.isActive());
 			commonMongoTemplate.upsert(builder);
 		}
 		return fetchCustomerMasfields(null);
@@ -141,7 +137,7 @@ public class CustomerMasterFldMgr {
 
 	public CustomerMasterFieldDoc toCheckDupFieldCode(String fieldCode) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("fieldCode").is(fieldCode).and("active").is(Constants.YES));
+		query.addCriteria(Criteria.where("code").is(fieldCode).and("active").is(true));
 		CustomerMasterFieldDoc mstDoc = commonMongoTemplate.findOne(query, CustomerMasterFieldDoc.class);
 		return mstDoc;
 	}
@@ -165,37 +161,36 @@ public class CustomerMasterFldMgr {
 			commonMongoTemplate.save(doc);
 			SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
 			String nodeUrl = globalVars.keyEntry("cp_node_url").asString();
-			LOGGER.info("isSchedular :"+nodeUrl);
-			
-			
+			LOGGER.info("isSchedular :" + nodeUrl);
+
 			/** to call node API **/
-			//MapModel data =new MapModel();
-			HashMap<String, Object> data =new HashMap<>();
+			// MapModel data =new MapModel();
+			HashMap<String, Object> data = new HashMap<>();
 			BuilderMap mapBuilder = MapBuilder.map();
 			mapBuilder.put("id", doc.getId());
-			
-			data.put("name","cust_profiles_bulk_upload");
-			data.put("desc","Deduplication and saving the bulk uploaded customer profiles to the database");
-			data.put("data",mapBuilder.toMap());
-			
-			 String jsonStr = JsonUtil.toJson(data);
-			LOGGER.info("post data :"+jsonStr);
-			MapModel resp= restService.ajax(nodeUrl).postJson(data).asMapModel();
-			LOGGER.info("JSON UTIL:"+JsonUtil.toJsonPrettyPrint(resp));
-			if(resp!=null && resp.get("data")!=null) {
-				 Map<String, Object> dataMap = (Map<String, Object>)resp.get("data");
-		         Map<String, Object> innerDataMap = (Map<String, Object>)dataMap.get("data");
-		         if(innerDataMap!=null && ArgUtil.is(innerDataMap)) {
-		         String instanceId = ArgUtil.parseAsString(innerDataMap.get("instanceId"), Constants.BLANK);
-		         if(ArgUtil.is(doc.getId()) && ArgUtil.is(instanceId)) {
-		        	 MongoQueryBuilder<JobScheduledDoc> builder = MongoQueryBuilder
-		 					.collection(JobScheduledDoc.class).whereId(doc.getId());
-		 			builder.set("instanceId", instanceId);
-		 			commonMongoTemplate.upsert(builder);
-		 			doc.setInstanceId(instanceId);
-		         }
-		         }
-		         
+
+			data.put("name", "cust_profiles_bulk_upload");
+			data.put("desc", "Deduplication and saving the bulk uploaded customer profiles to the database");
+			data.put("data", mapBuilder.toMap());
+
+			String jsonStr = JsonUtil.toJson(data);
+			LOGGER.info("post data :" + jsonStr);
+			MapModel resp = restService.ajax(nodeUrl).postJson(data).asMapModel();
+			LOGGER.info("JSON UTIL:" + JsonUtil.toJsonPrettyPrint(resp));
+			if (resp != null && resp.get("data") != null) {
+				Map<String, Object> dataMap = (Map<String, Object>) resp.get("data");
+				Map<String, Object> innerDataMap = (Map<String, Object>) dataMap.get("data");
+				if (innerDataMap != null && ArgUtil.is(innerDataMap)) {
+					String instanceId = ArgUtil.parseAsString(innerDataMap.get("instanceId"), Constants.BLANK);
+					if (ArgUtil.is(doc.getId()) && ArgUtil.is(instanceId)) {
+						MongoQueryBuilder<JobScheduledDoc> builder = MongoQueryBuilder.collection(JobScheduledDoc.class)
+								.whereId(doc.getId());
+						builder.set("instanceId", instanceId);
+						commonMongoTemplate.upsert(builder);
+						doc.setInstanceId(instanceId);
+					}
+				}
+
 			}
 			return doc;
 		} catch (Exception e) {
@@ -279,7 +274,7 @@ public class CustomerMasterFldMgr {
 					e.printStackTrace();
 				}
 
-				//saveCustomerContactProfile(id, maps);
+				// saveCustomerContactProfile(id, maps);
 				// saveCustomerProfileMaster(id, lstCusProMap);
 				dtoLst.add(dto);
 			}
@@ -312,8 +307,6 @@ public class CustomerMasterFldMgr {
 
 		return docs;
 	}
-
-
 
 	public List<CustomerProfileDoc> fetchCustomerContactInfo(String refId, String customerId, String phoneno,
 			String emailid) {
@@ -365,12 +358,12 @@ public class CustomerMasterFldMgr {
 			Criteria criteria = Criteria.where("id").is(id);
 			qryQuery.addCriteria(criteria);
 			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
-		}else if (ArgUtil.is(jobid) && ArgUtil.isEmptyString(id)) {
+		} else if (ArgUtil.is(jobid) && ArgUtil.isEmptyString(id)) {
 			Query qryQuery = new Query();
 			Criteria criteria = Criteria.where("jobid").is(jobid);
 			qryQuery.addCriteria(criteria);
 			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
-		}else if (ArgUtil.is(id) && ArgUtil.is(jobid)) {
+		} else if (ArgUtil.is(id) && ArgUtil.is(jobid)) {
 			Query qryQuery = new Query();
 			Criteria criteria = new Criteria().andOperator(Criteria.where("id").is(id),
 					Criteria.where("jobid").is(jobid));
@@ -479,89 +472,89 @@ public class CustomerMasterFldMgr {
 	}
 
 	/** profile search **/
-	
+
 	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
-		int limit = searchQry.getPageSize() == 0 ? 25 :searchQry.getPageSize();
-		String sortDir =ArgUtil.parseAsString(searchQry.getSortBy(), "desc");
-		List<List<ProfileSearchCriteria>> searchCriterias =searchQry.getSearchCriterias(); 
-		
-		List<Criteria> orCriterias =new LinkedList<Criteria>();
-		
-		for(List<ProfileSearchCriteria> srcLst :searchCriterias) {
+		int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
+		String sortDir = ArgUtil.parseAsString(searchQry.getSortBy(), "desc");
+		List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
+
+		List<Criteria> orCriterias = new LinkedList<Criteria>();
+
+		for (List<ProfileSearchCriteria> srcLst : searchCriterias) {
 			List<Criteria> andCriteriaList = new ArrayList<>();
-			for(ProfileSearchCriteria src:srcLst) {
-				switch(src.getKey()) {
+			for (ProfileSearchCriteria src : srcLst) {
+				switch (src.getKey()) {
 				case "phone":
 				case "phones":
 				case "mobile":
 				case "mobiles":
 					PBPhone ph = contactStore.parsePhone(new PBPhone().phone(src.getValue().toString()));
-					andCriteriaList.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
-							.and("countryCallingCode").is(ph.countryCallingCode)));
-				break;
+					andCriteriaList.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber")
+							.is(ph.nationalNumber).and("countryCallingCode").is(ph.countryCallingCode)));
+					break;
 				case "email":
 				case "emails":
 					andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
-				 break;
-				 default:
-					 andCriteriaList.add(createCriteria(src.getKey(),src.getOperator(),src.getValue()));
+					break;
+				default:
+					andCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
 				}
-				
+
 			}
 			orCriterias.add(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])));
 		}
 		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
-				.where(new Criteria().orOperator(orCriterias.toArray(new Criteria[orCriterias.size()]))).sortBy(sortDir).limit(limit);
-		LOGGER.info("QB {} "+JsonUtil.toJson(qb));
-		return contactStore.find(qb); 
+				.where(new Criteria().orOperator(orCriterias.toArray(new Criteria[orCriterias.size()]))).sortBy(sortDir)
+				.limit(limit);
+		LOGGER.info("QB {} " + JsonUtil.toJson(qb));
+		return contactStore.find(qb);
 	}
-	
+
 	private Criteria createCriteria(String key, String operation, Object value) {
-        switch (operation) {
-            case "=":
-            case "EQ":	
-                return Criteria.where(key).is(value);
-            case ">":
-            case "GT":	
-                return Criteria.where(key).gt(value);
-            case "<":
-            case "LT":		
-                return Criteria.where(key).lt(value);
-            case ">=":
-            case "GTE":
-                return Criteria.where(key).gte(value);
-            case "<=":
-            case "LTE":		
-                return Criteria.where(key).lte(value);
-            case "!=":
-            case "NE":	
-                return Criteria.where(key).ne(value);
-            case "STARTS_WITH": // Criteria for name starts with a specific prefix
-            	return Criteria.where(key).regex("^" + value, "i"); // Case-insensitive search
-            case "END_WITH":  // Criteria for name ends with a specific suffix
-            	return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
-            case "ne": // Criteria for field is not empty
-            	return Criteria.where(key).ne("").and(key).ne(null);
-            case "ANY_MATCH":	// Criteria for matching any or all elements
-            	return  Criteria.where(key).in(value);	
-            case "ALL_MATCH":	// Criteria for matching all elements
-            	return  Criteria.where(key).all(value);	
-            default:
-                throw new IllegalArgumentException("Invalid operation: " + operation);
-        }
-    
+		switch (operation) {
+		case "=":
+		case "EQ":
+			return Criteria.where(key).is(value);
+		case ">":
+		case "GT":
+			return Criteria.where(key).gt(value);
+		case "<":
+		case "LT":
+			return Criteria.where(key).lt(value);
+		case ">=":
+		case "GTE":
+			return Criteria.where(key).gte(value);
+		case "<=":
+		case "LTE":
+			return Criteria.where(key).lte(value);
+		case "!=":
+		case "NE":
+			return Criteria.where(key).ne(value);
+		case "STARTS_WITH": // Criteria for name starts with a specific prefix
+			return Criteria.where(key).regex("^" + value, "i"); // Case-insensitive search
+		case "END_WITH": // Criteria for name ends with a specific suffix
+			return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
+		case "ne": // Criteria for field is not empty
+			return Criteria.where(key).ne("").and(key).ne(null);
+		case "ANY_MATCH": // Criteria for matching any or all elements
+			return Criteria.where(key).in(value);
+		case "ALL_MATCH": // Criteria for matching all elements
+			return Criteria.where(key).all(value);
+		default:
+			throw new IllegalArgumentException("Invalid operation: " + operation);
+		}
+
 	}
-	
-	
-	public Map<String,Object> createDefaultMap(){
+
+	public Map<String, Object> createDefaultMap() {
 		Map<String, Object> additionalInfo = new HashMap<>();
-		additionalInfo.put("Title",null);
-		additionalInfo.put("DOB",null);
-		additionalInfo.put("Gender","");
-	    Set<PBPhone> alt_phones=new HashSet<>();
-	    additionalInfo.put("alt_phones", alt_phones);
-	    Set<PBEmail> alt_emails=new HashSet<>();
-	    additionalInfo.put("alt_emails", alt_emails);
+		additionalInfo.put("Title", null);
+		additionalInfo.put("DOB", null);
+		additionalInfo.put("Gender", "");
+		Set<PBPhone> alt_phones = new HashSet<>();
+		additionalInfo.put("alt_phones", alt_phones);
+		Set<PBEmail> alt_emails = new HashSet<>();
+		additionalInfo.put("alt_emails", alt_emails);
 		return additionalInfo;
 	}
 

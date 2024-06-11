@@ -31,20 +31,20 @@ public class CustomerProfileService {
 	@Autowired
 	CustomerMasterFldMgr cmFieldMgr;
 
-	public List<CustomerMasterFieldDto> addEditCustomerMastFields(CustomerMasterFieldDto req) {
-		List<CustomerMasterFieldDto> lstCmfields = cmFieldMgr.addAndEditMasterfield(req);
+	public List<CustomerMasterFieldDoc> addEditCustomerMastFields(CustomerMasterFieldDoc req) {
+		List<CustomerMasterFieldDoc> lstCmfields = cmFieldMgr.addAndEditMasterfield(req);
 		return lstCmfields;
 	}
 
-	public List<CustomerMasterFieldDto> fetchCustomerMstFields(String id) {
+	public List<CustomerMasterFieldDoc> fetchCustomerMstFields(String id) {
 
-		List<CustomerMasterFieldDto> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id);
+		List<CustomerMasterFieldDoc> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id);
 		return lstCmfields;
 	}
 
-	public void checkDupFieldCode(CustomerMasterFieldDto req) {
+	public void checkDupFieldCode(CustomerMasterFieldDoc req) {
 		if (ArgUtil.is(req.getId())) {
-			CustomerMasterFieldDoc groupDoc = cmFieldMgr.toCheckDupFieldCode(req.getFieldCode());
+			CustomerMasterFieldDoc groupDoc = cmFieldMgr.toCheckDupFieldCode(req.getCode());
 			if (ArgUtil.is(groupDoc)) {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidNameDuplicate")
 						.description("Field code already exists"));
@@ -102,7 +102,7 @@ public class CustomerProfileService {
 		return cmFieldMgr.fetchCustomeProfile(search);
 	}
 
-	public List<CustomerMasterFieldDto> deleteCustmerMasterFiled(CustomerMasterFieldDto reqDto) {
+	public List<CustomerMasterFieldDoc> deleteCustmerMasterFiled(CustomerMasterFieldDoc reqDto) {
 		return cmFieldMgr.deleteCustmerMasterFiled(reqDto);
 	}
 

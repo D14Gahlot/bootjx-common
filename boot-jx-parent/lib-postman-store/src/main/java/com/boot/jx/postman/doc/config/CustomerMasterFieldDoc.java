@@ -14,19 +14,19 @@ public class CustomerMasterFieldDoc extends TimeStampDoc {
 	@Id
 	private String id;
 
-	private String fieldLabel;
+	private String label;
 
 	@Indexed(unique = true)
-	private String fieldCode;
+	private String code;
 
-	private String fieldDesc;
+	private String desc;
 
-	private String fieldType;
+	private String type;
 
-	private String isactive;
+	private boolean active;
 
-	private boolean isRequired;
-	private boolean isPredefined;
+	private boolean required;
+	private boolean predefined;
 
 	public String getId() {
 		return id;
@@ -36,60 +36,60 @@ public class CustomerMasterFieldDoc extends TimeStampDoc {
 		this.id = id;
 	}
 
-	public String getFieldLabel() {
-		return fieldLabel;
+	public boolean isActive() {
+		return active;
 	}
 
-	public void setFieldLabel(String fieldLabel) {
-		this.fieldLabel = fieldLabel;
-	}
-
-	public String getFieldCode() {
-		return fieldCode;
-	}
-
-	public void setFieldCode(String fieldCode) {
-		this.fieldCode = fieldCode;
-	}
-
-	public String getFieldDesc() {
-		return fieldDesc;
-	}
-
-	public void setFieldDesc(String fieldDesc) {
-		this.fieldDesc = fieldDesc;
-	}
-
-	public String getFieldType() {
-		return fieldType;
-	}
-
-	public void setFieldType(String fieldType) {
-		this.fieldType = fieldType;
-	}
-
-	public String getIsactive() {
-		return isactive;
-	}
-
-	public void setIsactive(String isactive) {
-		this.isactive = isactive;
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	public boolean isRequired() {
-		return isRequired;
+		return required;
 	}
 
-	public void setRequired(boolean isRequired) {
-		this.isRequired = isRequired;
+	public void setRequired(boolean required) {
+		this.required = required;
 	}
 
 	public boolean isPredefined() {
-		return isPredefined;
+		return predefined;
 	}
 
-	public void setPredefined(boolean isPredefined) {
-		this.isPredefined = isPredefined;
+	public void setPredefined(boolean predefined) {
+		this.predefined = predefined;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 }
