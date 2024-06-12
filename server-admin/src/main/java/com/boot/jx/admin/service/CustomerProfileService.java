@@ -35,9 +35,9 @@ public class CustomerProfileService {
 		return lstCmfields;
 	}
 
-	public List<CustomerFieldMasterDoc> fetchCustomerMstFields(String id) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMstFields(String id,boolean active) {
 
-		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id);
+		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id,active);
 		return lstCmfields;
 	}
 

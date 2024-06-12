@@ -25,6 +25,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.common.doc.JobsOutPutDoc;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
@@ -36,6 +37,7 @@ import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.pbook.PBEmail;
+import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.rest.RestService;
@@ -71,6 +73,9 @@ public class CustomerMasterFldMgr {
 
 	@Autowired
 	private RestService restService;
+	
+	@Autowired(required = false)
+	protected AuditDetailProvider auditDetailProvider;
 
 	public List<CustomerFieldMasterDoc> addAndEditMasterfield(CustomerFieldMasterDoc reqDto) {
 
@@ -97,16 +102,20 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc.setActive(reqDto.isActive());
 			cmFieldDoc.setRequired(reqDto.isRequired());
 			cmFieldDoc.setPredefined(reqDto.isPredefined());
+			cmFieldDoc.setCreated(TimeStampIndex.now());
 			commonMongoTemplate.save(cmFieldDoc);
 		}
 
-		return fetchCustomerMasfields(cmFieldDoc.getId());
+		return fetchCustomerMasfields(cmFieldDoc.getId(),true);
 	}
 
-	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id,boolean active) {
 		List<CustomerFieldMasterDoc> dtoLst = new ArrayList<>();
 		CustomerFieldMasterDoc cmFieldDoc = null;
+		Query qryQuery=new Query();
+		
 		if (ArgUtil.is(id)) {
+			qryQuery.addCriteria(Criteria.where("id").is(id).and("active").is(active));
 			cmFieldDoc = commonMongoTemplate.findByIdString(id, CustomerFieldMasterDoc.class);
 			if (ArgUtil.is(cmFieldDoc)) {
 				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(cmFieldDoc, new CustomerFieldMasterDoc());
@@ -116,7 +125,7 @@ public class CustomerMasterFldMgr {
 			List<CustomerFieldMasterDoc> lstGropDocs = commonMongoTemplate.findAll(CustomerFieldMasterDoc.class);
 			for (CustomerFieldMasterDoc doc : lstGropDocs) {
 				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(doc, new CustomerFieldMasterDoc());
-				if (dto.isActive()) {
+				if (dto.isActive()==active) {
 					dtoLst.add(dto);
 				}
 			}
@@ -132,7 +141,7 @@ public class CustomerMasterFldMgr {
 			builder.set("active", reqDto.isActive());
 			commonMongoTemplate.upsert(builder);
 		}
-		return fetchCustomerMasfields(null);
+		return fetchCustomerMasfields(null,true);
 	}
 
 	public CustomerFieldMasterDoc toCheckDupFieldCode(String fieldCode) {
@@ -496,6 +505,10 @@ public class CustomerMasterFldMgr {
 				case "emails":
 					andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
 					break;
+				case "name":
+				case "name.formattedName":	
+					andCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
+					break;
 				default:
 					andCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
 				}
@@ -536,26 +549,18 @@ public class CustomerMasterFldMgr {
 			return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
 		case "ne": // Criteria for field is not empty
 			return Criteria.where(key).ne("").and(key).ne(null);
-		case "ANY_MATCH": // Criteria for matching any or all elements
-			return Criteria.where(key).in(value);
+		case "IN": // Criteria for matching any or all elements
+			 return Criteria.where(key).in(value);
 		case "ALL_MATCH": // Criteria for matching all elements
 			return Criteria.where(key).all(value);
+		case "ANY_MATCH":
+			return Criteria.where(key).regex(".*"+value+".*","i"); // Case-insensitive search
 		default:
 			throw new IllegalArgumentException("Invalid operation: " + operation);
 		}
 
 	}
 
-	public Map<String, Object> createDefaultMap() {
-		Map<String, Object> additionalInfo = new HashMap<>();
-		additionalInfo.put("Title", null);
-		additionalInfo.put("DOB", null);
-		additionalInfo.put("Gender", "");
-		Set<PBPhone> alt_phones = new HashSet<>();
-		additionalInfo.put("alt_phones", alt_phones);
-		Set<PBEmail> alt_emails = new HashSet<>();
-		additionalInfo.put("alt_emails", alt_emails);
-		return additionalInfo;
-	}
+	
 
 }
