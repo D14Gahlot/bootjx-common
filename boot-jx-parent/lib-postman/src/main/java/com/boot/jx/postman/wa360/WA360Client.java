@@ -568,10 +568,10 @@ public class WA360Client implements ChannelClient {
 
 	private String getMessageId(MapModel resp) {
 		String id = resp.entry(OutBoundWrapperPaths.RESPONSE_MSG_ID).asString();
-		String errorCode = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_CODE).asString();
+		String errorCode = resp.entry(OutBoundWrapperPaths.RESPONSE_ERRORS_CODE).asString();
 		if (ArgUtil.is(errorCode) || !ArgUtil.is(id)) {
-			String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_TITLE).asString();
-			String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_DETAILS).asString();
+			String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERRORS_TITLE).asString();
+			String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERRORS_DETAILS).asString();
 
 			ApiFieldError error = new ApiFieldError();
 			error.code(errorCode);
@@ -600,7 +600,7 @@ public class WA360Client implements ChannelClient {
 					.asMapModel();
 			return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS).asMapModel();
 		} catch (ApiHttpServerException e) {
-			return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
+			return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERRORS_CODE,
 					e.getHttpStatus().value());
 		} catch (ApiHttpException e) {
 			return MapModel.from(e.getResponse().getBody());
