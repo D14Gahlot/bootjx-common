@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,24 +25,29 @@ import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.RequestType;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMConstants.CHAT_ASSIGN_GROUP;
 import com.boot.jx.postman.PMConstants.CHAT_STATE;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.PMConstants.DEFAULT;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.SessionSearchQuery;
 import com.boot.jx.postman.service.ChatDTOUtil;
+import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 public class AgMainController {
@@ -63,6 +69,9 @@ public class AgMainController {
 
 	@Autowired
 	private ChatSessionFactory chatSessionFactory;
+	
+	@Autowired
+	ContactStore contactStore;
 
 	private ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionAssignments(boolean withMessage, Boolean status,
 			Boolean away, List<ChatSessionDTO> chatSessionDtos, SessionSearchQuery query) {
@@ -240,5 +249,37 @@ public class AgMainController {
 		return ApiResponse.buildResults(chatSessionDtos,
 				MapBuilder.map().put("isOnline", agentSession.isOnline()).build());
 	}
+	
+	@RequestMapping(value = "/api/customer/profile", method = { RequestMethod.GET })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestParam(required = false) String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false ,defaultValue="created") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir,
+			@RequestParam(required = false) String contactId,
+
+			@RequestParam(required = false, value = "search.name") String searchName,
+			@RequestParam(required = false, value = "search.code") String searchCode,
+			@RequestParam(required = false, value = "search.phones") String searchPhone,
+			@RequestParam(required = false, value = "search.emails") String searchEmail) {
+		if (ArgUtil.is(contactId)) {
+			return ApiResponse.buildResults(contactStore.findProfileByContactId(contactId));
+		}
+		MongoQueryBuilder<CustomerProfileDoc> q = MongoQueryBuilder.collection(CustomerProfileDoc.class).page(pageNo,
+				pageSize);
+		if (ArgUtil.is(id)) {
+			q = q.whereId(id);
+		}
+
+		q.search("name.formattedName", searchName).search("code", searchCode).search("emails.email", searchEmail)
+				.search("phones.phone", searchPhone);
+
+		if (ArgUtil.is(sortBy)) {
+			q = q.sortBy(sortBy, Direction.fromString(sortDir));
+		}
+		return ApiResponse.buildResults(contactStore.find(q));
+	}
+
 
 }
