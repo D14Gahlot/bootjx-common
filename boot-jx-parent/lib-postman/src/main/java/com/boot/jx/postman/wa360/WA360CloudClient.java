@@ -560,26 +560,65 @@ public class WA360CloudClient implements ChannelClient {
 	private String getMessageId(MapModel resp) {
 		String id = resp.entry(OutBoundWrapperPaths.RESPONSE_MSG_ID).asString();
 		String errorCode = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_CODE).asString();
-		if (ArgUtil.is(errorCode) || !ArgUtil.is(id)) {
-			String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_TITLE).asString();
-			String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_DETAILS).asString();
-
-			ApiFieldError error = new ApiFieldError();
-			error.code(errorCode);
-			error.codeKey(errorTitle);
-			error.setDescription(String.format("%s : %s / %s / %s ", id, errorCode, errorTitle, errorDetails));
-			if ("1006".equals(errorCode)) {
-				error.setDescriptionKey("File or resource not found");
-				if ("unknown contact".equals(errorDetails)) {
-					error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
-				}
-			} else if ("471".equals(errorCode)) {
-				error.setDescriptionKey("File or resource not found");
-				error.code(PostManException.ErrorCode.MESSAGE_LIMIT_EXCEEDED);
+		String errorCodeLegacy = resp.entry(OutBoundWrapperPaths.RESPONSE_ERRORS_CODE).asString();
+		if (ArgUtil.is(errorCode) || ArgUtil.is(errorCodeLegacy) || !ArgUtil.is(id)) {
+			if (ArgUtil.is(errorCodeLegacy)) {
+				return getMessageIdLegacy(resp, id, errorCodeLegacy);
+			} else {
+				return getMessageIdCloud(resp, id, errorCode);
 			}
-			ApiResponseUtil.throwException(error);
 		}
 		return id;
+	}
+
+	private String getMessageIdCloud(MapModel resp, String messageId, String errorCode) {
+		String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_MSG).asString();
+		String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_DETAILS).asString();
+
+		ApiFieldError error = new ApiFieldError();
+		error.code(errorCode);
+		error.codeKey(errorTitle);
+
+		if (!ArgUtil.is(errorDetails)) {
+			error.setDescriptionKey(resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_USER_TITLE).asString());
+			errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_USER_MSG).asString();
+		}
+
+		error.setDescription(String.format("%s : %s / %s / %s ", messageId, errorCode, errorTitle, errorDetails));
+		if ("1006".equals(errorCode) || "131026".equals(errorCode)) {
+			error.setDescriptionKey("File or resource not found");
+			if ("unknown contact".equals(errorDetails)) {
+				error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
+			}
+		} else if ("471".equals(errorCode)) {
+			error.setDescriptionKey("File or resource not found");
+			error.code(PostManException.ErrorCode.MESSAGE_LIMIT_EXCEEDED);
+		}
+		error.setBody(resp.get("errors"));
+		ApiResponseUtil.throwException(error);
+		return messageId;
+	}
+
+	private String getMessageIdLegacy(MapModel resp, String messageId, String errorCode) {
+		String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERRORS_TITLE).asString();
+		String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERRORS_DETAILS).asString();
+
+		ApiFieldError error = new ApiFieldError();
+		error.code(errorCode);
+		error.codeKey(errorTitle);
+		error.setDescription(String.format("%s : %s / %s / %s ", messageId, errorCode, errorTitle, errorDetails));
+		if ("1006".equals(errorCode)) {
+			error.setDescriptionKey("File or resource not found");
+			if ("unknown contact".equals(errorDetails)) {
+				error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
+			}
+		} else if ("471".equals(errorCode)) {
+			error.setDescriptionKey("File or resource not found");
+			error.code(PostManException.ErrorCode.MESSAGE_LIMIT_EXCEEDED);
+		}
+		error.setBody(resp.get("errors"));
+		ApiResponseUtil.throwException(error);
+		return messageId;
 	}
 
 	public MapModel fetchContact(String contact, ChannelConfig channelConfig) {
@@ -591,7 +630,7 @@ public class WA360CloudClient implements ChannelClient {
 					.asMapModel();
 			return resp.path(OutBoundWrapperPaths.FETCH_CONTACTS_DETAILS).asMapModel();
 		} catch (ApiHttpServerException e) {
-			return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERROR_CODE,
+			return MapModel.from(e.getResponse().getBody()).put(OutBoundWrapperPaths.RESPONSE_ERRORS_CODE,
 					e.getHttpStatus().value());
 		} catch (ApiHttpException e) {
 			return MapModel.from(e.getResponse().getBody());
