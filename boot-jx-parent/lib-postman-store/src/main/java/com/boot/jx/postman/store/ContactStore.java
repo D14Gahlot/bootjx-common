@@ -1,5 +1,6 @@
 package com.boot.jx.postman.store;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
 import com.boot.jx.model.ModelPatch.ModelPatches;
@@ -63,6 +65,9 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	
 	@Autowired
 	CommonMongoTemplate cMongoTemplate;
+	
+	@Autowired(required = false)
+	protected AuditDetailProvider auditDetailProvider;
 
 	public PBPhone parsePhone(PBPhone pbPhone) {
 		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
@@ -248,13 +253,25 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			case "rmCode":
 				qb.setunset("rmCode", patch.value().asString());
 				break;
+				
+			case "additionalInfo.alt_phones":
+			case "alt_phones":
+				PBPhone alt_phone = parsePhone(patch.value().as(PBPhone.class));
+				qb.setunset("additionalInfo.alt_phones", patch(patch.getCommand(), doc.phones(), alt_phone));
+				break;
+			case "additionalInfo.alt_emails":
+			case "alt_emails":
+				PBEmail alt_email =patch.value().as(PBEmail.class);
+				qb.setunset("additionalInfo.alt_emails", patch(patch.getCommand(), doc.emails, alt_email));
+				break;	
+				
 			default:
 				// TODO:-  Check additonal validty in Masters and its type in master,
 				// then based on type of field do conversion below and update instead
 				// using.asString() for all
 				Object objType=checkFieldType(patch.getField(), patch.value());
 				if(ArgUtil.is(objType)) {
-					qb.setunset("additionalInfo." + patch.getField(),objType);
+					qb.setunset(patch.getField(),objType);
 				}
 				break;
 			}
@@ -316,7 +333,17 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					.codeKey("ValidPhoneDuplicate").description(doc.getCode() + " already exists"));
 		}else {
 			doc= new CustomerProfileDoc();
-			doc.setName(req.getName());
+			
+			if(ArgUtil.is(req.getName())) {
+				PBName pbName=new PBName();
+				pbName.setFirstName(req.getName().getFirstName());
+				pbName.setLastName(req.getName().getLastName());
+				pbName.setMiddleName(req.getName().getMiddleName());
+				pbName.fix();
+				doc.setName(pbName);
+			}
+			
+			
 			if(ArgUtil.is(findProfileByCode(req.getCode()))){
 				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("code").field("code")
 						.codeKey("ValidCodeDuplicate").description(req.getCode() + " already exists"));
@@ -380,10 +407,9 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				}
 				doc.setUrls(pws);
 			}
-			
-			Map<String,Object> addInfo=req.getAdditionalInfo();
-			if(addInfo!=null && !addInfo.isEmpty()) {
-				
+			Map<String,Object> addInfoMap=new HashMap<String,Object>();
+			if(req.getAdditionalInfo()!=null && !req.getAdditionalInfo().isEmpty()) {
+				Map<String,Object> addInfo=req.getAdditionalInfo();
 				 /** Retrieve all the key-value pairs from the map **/
 		        Set<Map.Entry<String, Object>> entries = addInfo.entrySet();
 		        for (Map.Entry<String, Object> entry : entries) {
@@ -409,7 +435,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		            		 pbEmails.add(pbEmail);
 		            		
 		            	}
-		 				addInfo.put(entry.getKey(),pbEmails);	
+		            	addInfoMap.put(entry.getKey(),pbEmails);	
 		 			  break;
 		            case "phones":
 		            case "alt_phones":
@@ -422,28 +448,34 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		            		if(ArgUtil.is(ph))
 		            		 pbPhones.add(ph);
 		            	}
-		 				addInfo.put(entry.getKey(),pbPhones);	
+		            	addInfoMap.put(entry.getKey(),pbPhones);	
 		 			  break;
 		            case "title":
 		            case "Title": 
-		            	addInfo.put(entry.getKey(), entry.getValue());
+		            	addInfoMap.put(entry.getKey(), entry.getValue());
 		            break;	
 		            case "gender":
 		            case "Gender": 
-		            	addInfo.put(entry.getKey(), entry.getValue());
+		            	addInfoMap.put(entry.getKey(), entry.getValue());
 		            break;
 		            case "dob":
 		            case "DOB": 
-		            	addInfo.put(entry.getKey(), entry.getValue());
+		            	addInfoMap.put(entry.getKey(), entry.getValue());
 		            break;
 		            default:
-		            	addInfo.put(entry.getKey(), entry.getValue());
+		            	Object object=checkFieldType(entry.getKey(),entry.getValue());
+		            	if(ArgUtil.isEmpty(object)){
+		            		LOGGER.info("Json Util else  :"+JsonUtil.toJson(object)+"\t key-value :"+entry.getKey()+"-"+JsonUtil.toJson(entry.getValue()));
+		            	}else {
+		            		addInfoMap.put(entry.getKey(), entry.getValue());
+		            	}
 		            }
 		        }
 		        
 			}
-			doc.setAdditionalInfo(addInfo);
-			doc.setCreated(TimeStampIndex.now());
+			doc.setAdditionalInfo(addInfoMap);
+			
+			doc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			mongoTemplate.save(doc);
 			
 		}

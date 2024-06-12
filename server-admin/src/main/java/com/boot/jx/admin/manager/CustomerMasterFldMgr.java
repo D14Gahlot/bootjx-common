@@ -25,6 +25,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.common.doc.JobsOutPutDoc;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
@@ -72,6 +73,9 @@ public class CustomerMasterFldMgr {
 
 	@Autowired
 	private RestService restService;
+	
+	@Autowired(required = false)
+	protected AuditDetailProvider auditDetailProvider;
 
 	public List<CustomerFieldMasterDoc> addAndEditMasterfield(CustomerFieldMasterDoc reqDto) {
 
@@ -98,6 +102,7 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc.setActive(reqDto.isActive());
 			cmFieldDoc.setRequired(reqDto.isRequired());
 			cmFieldDoc.setPredefined(reqDto.isPredefined());
+			cmFieldDoc.setCreated(TimeStampIndex.now());
 			commonMongoTemplate.save(cmFieldDoc);
 		}
 
