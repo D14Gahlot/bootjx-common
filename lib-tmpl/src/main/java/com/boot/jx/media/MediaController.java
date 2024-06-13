@@ -43,7 +43,6 @@ public class MediaController {
 	private BootJxConfigService bootJxConfigService;
 
 	@ResponseBody
-
 	@RequestMapping(value = "/media/text/to/image", method = { RequestMethod.POST })
 	public ResponseEntity<byte[]> html2ImagePost(
 
@@ -67,6 +66,7 @@ public class MediaController {
 		return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
 	}
 
+	@ResponseBody
 	@RequestMapping(value = "/media/text/to/image", method = { RequestMethod.GET })
 	public ResponseEntity<byte[]> html2ImageGet(@ApiParam @RequestParam String encodedHtml)
 			throws FileNotFoundException, IOException {
@@ -74,6 +74,7 @@ public class MediaController {
 		return this.html2ImagePost(html);
 	}
 
+	@ResponseBody
 	@RequestMapping(value = "/media/text/to/image/{encodedHtml}", method = { RequestMethod.GET })
 	public ResponseEntity<byte[]> html2ImageURL(@ApiParam @PathVariable String encodedHtml)
 			throws FileNotFoundException, IOException {
