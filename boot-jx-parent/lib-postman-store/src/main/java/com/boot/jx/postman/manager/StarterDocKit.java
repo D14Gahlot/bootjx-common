@@ -5,16 +5,23 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
+import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
@@ -26,8 +33,17 @@ public class StarterDocKit {
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
+	@Autowired
+	private CommonMongoTemplate commonMongoTemplate;
+
+	@Autowired
+	private PMEnvironment pmEnvironment;
+
+	@Autowired(required = false)
+	private ConfigManager configManager;
+
 	private QuickMedia createTemplateReply(String name, String title, String category, String content, String url) {
-		QuickMedia temp5 = mongoTemplate.findById(name, QuickMedia.class);
+		QuickMedia temp5 = commonMongoTemplate.findById(name, QuickMedia.class);
 		if (ArgUtil.isEmpty(temp5)) {
 			temp5 = new QuickMedia();
 		}
@@ -42,7 +58,7 @@ public class StarterDocKit {
 	}
 
 	private QuickReply createQuickReply(String id, String title, String category) {
-		QuickReply temp5 = mongoTemplate.findById(id, QuickReply.class);
+		QuickReply temp5 = commonMongoTemplate.findById(id, QuickReply.class);
 		if (ArgUtil.isEmpty(temp5)) {
 			temp5 = new QuickReply();
 		}
@@ -53,14 +69,120 @@ public class StarterDocKit {
 	}
 
 	private void createClientApp(ClientAppConfigDoc clientAppConfig) {
-		ClientAppConfigDoc app = mongoTemplate.findById(clientAppConfig.getId(), ClientAppConfigDoc.class);
+		ClientAppConfigDoc app = commonMongoTemplate.findById(clientAppConfig.getId(), ClientAppConfigDoc.class);
 		if (ArgUtil.isEmpty(app) || !ArgUtil.areEqual(app.getKeyVersion(), clientAppConfig.getKeyVersion())) {
 			try {
-				mongoTemplate.save(clientAppConfig);
+				commonMongoTemplate.save(clientAppConfig);
 			} catch (Exception e) {
 				LOGGER.error("createClientAppErrror:" + clientAppConfig.getKeyName(), e);
 			}
 		}
+	}
+
+	private void createPredefinedMstField(String code, String titleAndDesc, String type) {
+
+		Query qryQuery = new Query();
+		Criteria criteria = Criteria.where("code").is(code);
+		qryQuery.addCriteria(criteria);
+		CustomerFieldMasterDoc fiedMaster = commonMongoTemplate.findOne(qryQuery, CustomerFieldMasterDoc.class);
+
+		if (!ArgUtil.is(fiedMaster)) {
+			fiedMaster = new CustomerFieldMasterDoc();
+			fiedMaster.setCode(code);
+			fiedMaster.setLabel(titleAndDesc);
+			fiedMaster.setType(type);
+			fiedMaster.setDesc(titleAndDesc);
+			fiedMaster.setActive(true);
+			fiedMaster.setPredefined(true);
+			fiedMaster.setRequired(false);
+			fiedMaster.setCreated(TimeStampIndex.now());
+		}
+
+		if (ArgUtil.is(fiedMaster)) {
+			try {
+				commonMongoTemplate.save(fiedMaster);
+			} catch (Exception e) {
+				LOGGER.error("createCustomerMasterFieldErrror:" + code, e);
+			}
+		}
+
+	}
+
+	private void createPredefinedMstField() {
+		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.customer.field.master");
+		String predefiend_customer_filed_version = "v1.3";
+		if (!version.is(predefiend_customer_filed_version)) {
+			createPredefinedMstField("title", "Title", "string");
+			createPredefinedMstField("dob", "Date of Birth", "timestamp");
+			createPredefinedMstField("gender", "Gender", "string");
+			createPredefinedMstField("alt_phones", "Alternate Phone number", "string");
+			createPredefinedMstField("alt_emails", "Alternate email id", "string");
+			version.setValue(predefiend_customer_filed_version);
+			configManager.save(version);
+		}
+	}
+
+	/**
+	 * Required to create index
+	 * 
+	 * @param contactType
+	 */
+	private void createMessageIndex() {
+		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.message.index");
+		String predefiend_customer_filed_version = "v1";
+		if (!version.is(predefiend_customer_filed_version)) {
+
+			for (ContactType contactType : ContactType.values()) {
+				MessageDoc wa = MessageDoc.instance(contactType);
+				mongoTemplate.save(wa);
+				mongoTemplate.remove(wa);
+			}
+
+			version.setValue(predefiend_customer_filed_version);
+			configManager.save(version);
+		}
+	}
+
+	private void createDefaultTemplats() {
+		commonMongoTemplate.save(createTemplateReply("GIRL_AND_BIKE", "Girl and bike", "Gallery1", "See this Nice Pic",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688334/samples/bike.jpg"));
+
+		commonMongoTemplate.save(createTemplateReply("OFFICE_N_WORK", "Office & Work", "Gallery1", "Work environment",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688339/samples/imagecon-group.jpg"));
+
+		commonMongoTemplate.save(createTemplateReply("KITTEN_PLAYING", "Kitten Playing", "Animals", "Happy Kitten",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688341/samples/animals/kitten-playing.gif"));
+
+		commonMongoTemplate.save(createTemplateReply("THREE_DOGS", "Three Dogs", "Animals", "Gang of Dogs",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688335/samples/animals/three-dogs.jpg"));
+
+		commonMongoTemplate.save(createTemplateReply("REINDEER", "Reindeer", "Animals", "In Snow",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688331/samples/animals/reindeer.jpg"));
+
+		commonMongoTemplate.save(createTemplateReply("CAT", "Cat", "Animals", "Bad Cat",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688330/samples/animals/cat.jpg"));
+
+		commonMongoTemplate.save(createTemplateReply("ACCESSORIES BAG", "Accessories Bag", "Ecommerce", "Cool bag",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688338/samples/ecommerce/accessories-bag.jpg"));
+
+		commonMongoTemplate.save(createTemplateReply("LEATHER BAG GRAY", "Leather Bag Gray", "Ecommerce", "Formal bag",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688338/samples/ecommerce/leather-bag-gray.jpg"));
+
+		commonMongoTemplate.save(createTemplateReply("SHOES", "Shoes", "Ecommerce", "Purple Shoes",
+				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688333/samples/ecommerce/shoes.png"));
+
+		// Quick Replies
+		commonMongoTemplate.save(createQuickReply("0", "Hello", "greeting"));
+		commonMongoTemplate.save(createQuickReply("1", "Very Good Morning", "greeting-morning"));
+		commonMongoTemplate.save(createQuickReply("2", "Very Good After Noon", "greeting-afternoon"));
+		commonMongoTemplate.save(createQuickReply("3", "Very Good Evening", "greeting-evening"));
+		commonMongoTemplate.save(createQuickReply("4", "Nice talking too.", "conversation-complete"));
+		commonMongoTemplate.save(createQuickReply("5", "You're welcome.", "conversation-complete"));
+	}
+
+	public void domain() {
+		createMessageIndex();
+		createPredefinedMstField();
 	}
 
 	@PostConstruct
@@ -112,57 +234,6 @@ public class StarterDocKit {
 		feedbackApp.setKeyVersion("v4");
 		feedbackApp.setShared(true);
 		createClientApp(feedbackApp);
-	}
-
-	private void createDefaultTemplats() {
-		mongoTemplate.save(createTemplateReply("GIRL_AND_BIKE", "Girl and bike", "Gallery1", "See this Nice Pic",
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688334/samples/bike.jpg"));
-
-		mongoTemplate.save(createTemplateReply("OFFICE_N_WORK", "Office & Work", "Gallery1", "Work environment",
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688339/samples/imagecon-group.jpg"));
-
-		mongoTemplate.save(createTemplateReply("KITTEN_PLAYING", "Kitten Playing", "Animals", "Happy Kitten",
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688341/samples/animals/kitten-playing.gif"));
-
-		mongoTemplate.save(createTemplateReply("THREE_DOGS", "Three Dogs", "Animals", "Gang of Dogs",
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688335/samples/animals/three-dogs.jpg"));
-
-		mongoTemplate.save(createTemplateReply("REINDEER", "Reindeer", "Animals", "In Snow",
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688331/samples/animals/reindeer.jpg"));
-
-		mongoTemplate.save(createTemplateReply("CAT", "Cat", "Animals", "Bad Cat",
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688330/samples/animals/cat.jpg"));
-
-		mongoTemplate.save(createTemplateReply("ACCESSORIES BAG", "Accessories Bag", "Ecommerce", "Cool bag",
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688338/samples/ecommerce/accessories-bag.jpg"));
-
-		mongoTemplate.save(createTemplateReply("LEATHER BAG GRAY", "Leather Bag Gray", "Ecommerce", "Formal bag",
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688338/samples/ecommerce/leather-bag-gray.jpg"));
-
-		mongoTemplate.save(createTemplateReply("SHOES", "Shoes", "Ecommerce", "Purple Shoes",
-				"https://res.cloudinary.com/www-mehery-com/image/upload/v1611688333/samples/ecommerce/shoes.png"));
-
-		// Quick Replies
-		mongoTemplate.save(createQuickReply("0", "Hello", "greeting"));
-		mongoTemplate.save(createQuickReply("1", "Very Good Morning", "greeting-morning"));
-		mongoTemplate.save(createQuickReply("2", "Very Good After Noon", "greeting-afternoon"));
-		mongoTemplate.save(createQuickReply("3", "Very Good Evening", "greeting-evening"));
-		mongoTemplate.save(createQuickReply("4", "Nice talking too.", "conversation-complete"));
-		mongoTemplate.save(createQuickReply("5", "You're welcome.", "conversation-complete"));
-	}
-
-	public void domain() {
-		/**
-		 * Required to create index
-		 * 
-		 * @param contactType
-		 */
-		for (ContactType contactType : ContactType.values()) {
-			MessageDoc wa = MessageDoc.instance(contactType);
-			mongoTemplate.save(wa);
-			mongoTemplate.remove(wa);
-		}
 
 	}
-
 }

@@ -8,7 +8,6 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.common.models.AppAuthModels;
-import com.boot.jx.common.models.AppAuthModels.AppCommonAuthUser;
 import com.boot.jx.contak.doc.ContakMembershipDoc;
 import com.boot.jx.contak.doc.ContakUserDoc;
 import com.boot.jx.postman.PMConstants;

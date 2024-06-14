@@ -17,7 +17,6 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.models.AppAuthModels;
-import com.boot.jx.common.models.AppAuthModels.AppCommonAuthUser;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;

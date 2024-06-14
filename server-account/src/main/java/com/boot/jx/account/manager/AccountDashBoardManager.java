@@ -976,11 +976,26 @@ public class AccountDashBoardManager {
 		List<Document> list = new ArrayList<Document>();
 		// Match condtion
 		list.add(Aggregation.match(new Criteria("type").is("O")).toDocument(Aggregation.DEFAULT_CONTEXT));
-		// list.add(Aggregation.match(new Criteria("meta").is(metaQry))
-		// .toDocument(Aggregation.DEFAULT_CONTEXT));
+		
 		list.add(Aggregation.match(new Criteria("meta.composeType").is("N")).toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM")).toDocument(Aggregation.DEFAULT_CONTEXT));
 
+		
+//		Criteria composeTypeCriteria = new Criteria().orOperator(
+//			    Criteria.where("meta.composeType").is("N"),
+//			    Criteria.where("meta.composeType").is("R")
+//			);
+//		list.add(Aggregation.match(composeTypeCriteria).toDocument(Aggregation.DEFAULT_CONTEXT));
+//			
+//		Criteria sendTypeCriteria = new Criteria().orOperator(
+//			    Criteria.where("meta.sendType").is("PM"),
+//			    Criteria.where("meta.sendType").is("SM")
+//			);
+//
+//			
+//		list.add(Aggregation.match(sendTypeCriteria).toDocument(Aggregation.DEFAULT_CONTEXT));
+		
+		
 		list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
 				.toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));

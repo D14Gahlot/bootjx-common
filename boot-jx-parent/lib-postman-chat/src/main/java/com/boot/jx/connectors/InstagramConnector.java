@@ -82,6 +82,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 				channel.getInstagram().setHandler(channel.getInstagram().getPageId());
 				channel.getInstagram().setType("page");
 				channel.getInstagram().setMasterAppId(setup.getInstagram().getMasterAppId());
+				channel.getInstagram().setMasterAppConfigId(setup.getInstagram().getMasterAppConfigId());
 				channel.setName(pagemap.keyEntry("name").asString());
 				channels.add(channel);
 			});

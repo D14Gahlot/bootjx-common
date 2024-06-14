@@ -136,6 +136,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channel.getWacfb().setVerifyToken(setup.getWacfb().getMasterAppVerifyToken());
 				channel.getWacfb().setWabaId(assignedWaBaId);
 				channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
+				channel.getWacfb().setMasterAppConfigId(setup.getWacfb().getMasterAppConfigId());
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
 				channels.add(channel);
 
@@ -172,6 +173,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 					// channel.getWacfb().setVerificationPin(verificationPin);
 					channel.getWacfb().setWabaId(assignedWaBaIdFinal);
 					channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
+					channel.getWacfb().setMasterAppConfigId(setup.getWacfb().getMasterAppConfigId());
 					channel.setName(phoneMap.keyEntry("verified_name").asString());
 					channels.add(channel);
 				});

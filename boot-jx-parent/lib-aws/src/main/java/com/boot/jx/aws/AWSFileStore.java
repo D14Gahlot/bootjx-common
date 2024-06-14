@@ -21,7 +21,6 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileAbstract;
 import com.boot.jx.model.CommonFileStream;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
 
 @Component
@@ -36,7 +35,7 @@ public class AWSFileStore {
 			PutObjectResult x = amazonS3.putObject(path, fileName, inputStream, objectMetadata);
 			// amazonS3.uploadPart(null)
 			// amazonS3.put
-			//System.out.println(JsonUtil.toJson(x));
+			// System.out.println(JsonUtil.toJson(x));
 		} catch (AmazonServiceException e) {
 			throw new IllegalStateException("Failed to upload the file", e);
 		}
@@ -123,7 +122,7 @@ public class AWSFileStore {
 			throws FileNotFoundException, IOException {
 
 		MultipartFile srcMultipartFile = new CommonFileStream().url(srcFile.getUrl()).headers(srcFile.getHeaders())
-				.format(dstFile.getFileFormat()).name(dstFile.getName()).toMultipartFile(srcFile.toInputStream());
+				.format(dstFile.getFileFormat()).name(dstFile.getName()).toMultipartFile(srcFile);
 
 		return commitFile(awsConfig.getS3B2(), awsConfig.getS3B2Name(), dstFile, srcMultipartFile);
 	}
@@ -132,7 +131,7 @@ public class AWSFileStore {
 			throws FileNotFoundException, IOException {
 
 		MultipartFile srcMultipartFile = new CommonFileStream().url(srcFile.getUrl()).headers(srcFile.getHeaders())
-				.format(dstFile.getFileFormat()).name(dstFile.getName()).toMultipartFile(srcFile.toInputStream());
+				.format(dstFile.getFileFormat()).name(dstFile.getName()).toMultipartFile(srcFile);
 
 		return commitFile(awsConfig.getS3B2(), awsConfig.getS3B2Name(), dstFile, srcMultipartFile);
 	}

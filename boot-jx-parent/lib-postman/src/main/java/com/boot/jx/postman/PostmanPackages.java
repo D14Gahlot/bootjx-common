@@ -1,5 +1,7 @@
 package com.boot.jx.postman;
 
+import java.io.IOException;
+
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonTemplateMeta;
@@ -23,6 +25,10 @@ public class PostmanPackages {
 
 	public static interface MessageClient {
 		public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage);
+	}
+
+	public static interface Text2Media {
+		public String toImage(String text) throws IOException;
 	}
 
 }

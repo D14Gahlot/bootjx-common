@@ -20,7 +20,6 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.context.request.RequestContextListener;
 
 import com.boot.jx.app.CommonAppLauncher;
-import com.boot.jx.common.models.AppAuthModels.AppCommonAuthUser;
 
 /**
  * The Class WebApplication.

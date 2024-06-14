@@ -27,7 +27,6 @@ import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.models.AppAuthModels;
-import com.boot.jx.common.models.AppAuthModels.ACCESS_RULES;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.model.CommonFile;

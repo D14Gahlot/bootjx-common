@@ -95,6 +95,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 				channel.getFacebook().setHandler(channel.getFacebook().getPageId());
 				channel.getFacebook().setType("page");
 				channel.getFacebook().setMasterAppId(setup.getFacebook().getMasterAppId());
+				channel.getFacebook().setMasterAppConfigId(setup.getFacebook().getMasterAppConfigId());
 				channel.setName(pagemap.keyEntry("name").asString());
 				channels.add(channel);
 			});

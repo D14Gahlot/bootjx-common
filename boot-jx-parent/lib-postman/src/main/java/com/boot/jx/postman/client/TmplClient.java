@@ -17,6 +17,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
+import com.boot.jx.postman.PostmanPackages.Text2Media;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PostManFile;
@@ -43,6 +44,9 @@ public class TmplClient {
 
 	@Autowired(required = false)
 	private ICommonTmplPackage iCommonTmplPackage;
+
+	@Autowired
+	protected Text2Media text2Media;
 
 	public ApiResponse<CommonFile, Object> process(CommonFile file, ContactType contactType) throws PostManException {
 		if (ArgUtil.is(iCommonTmplPackage)) {
@@ -108,11 +112,26 @@ public class TmplClient {
 		if (ArgUtil.is(defaultAttachment) && outboxMessage.attachments().size() == 0) {
 			outboxMessage.attachments().add(defaultAttachment);
 		}
-		
+
 		Attachment backgroundVoice = optionsModel.keyEntry("bg_voice").as(Attachment.class);
-		//TODO:-@lalit to review
-		if (ArgUtil.is(backgroundVoice)&& outboxMessage.getContact().type().equals(ContactType.WEBSITE)){
+		// TODO:-@lalit to review
+		if (ArgUtil.is(backgroundVoice) && outboxMessage.getContact().type().equals(ContactType.WEBSITE)) {
 			outboxMessage.attachments().add(backgroundVoice);
+		}
+
+		if (ArgUtil.is(outboxMessage.attachments())) {
+			try {
+				for (Attachment attach : outboxMessage.getAttachments()) {
+					if (ArgUtil.is(attach.getMediaTemplate())) {
+						String attachFileStr = process(attach.getMediaTemplate(), outboxMessage.getModel());
+						attach.setMediaTemplate(attachFileStr);
+						attach.setMediaURL(text2Media.toImage(attachFileStr));
+					}
+				}
+			} catch (Exception e) {
+				outboxMessage.logs().add("MediaTemplateException : " + e.getMessage());
+				LOGGER.error("MediaTemplateException", e);
+			}
 		}
 
 		outboxMessage.options().putAll(options);

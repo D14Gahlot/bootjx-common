@@ -21,7 +21,6 @@ import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.EventCountSummary;
-import com.boot.jx.postman.doc.ChatSessionDoc;
 
 @RestController
 public class AdminDashBoardContoller {
