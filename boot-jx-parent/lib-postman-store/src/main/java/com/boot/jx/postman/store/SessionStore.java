@@ -63,7 +63,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 	@Autowired
 	private PMDomainConfig pmDomainConfig;
-	
+
 	@Autowired
 	private SessionStore sessionStore;
 
@@ -246,9 +246,9 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		if (ArgUtil.isEmpty(iMessage.contact().getName())) {
 			iMessage.contact().setName(chatSessionDoc.contact().getName());
 		}
-		//needs to be verified
+		// needs to be verified
 		iMessage.contact().copyFrom(chatSessionDoc.contact());
-		
+
 		iMessage.contact().setContactId(chatSessionDoc.getContactId());
 		iMessage.setSessionId(chatSessionDoc.getSessionId());
 		iMessage.session().setQueue(chatSessionDoc.getAssignedToQueue());
@@ -700,26 +700,23 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		LOGGER.debug("query {===}" + query);
 		return super.find(query, ChatSessionDoc.class);
 	}
-	
-	
-	
+
 	public List<ChatSessionDoc> findByStatusOrQuickTagV1(List<CHAT_STATUS> status, List<String> tagCategory,
 			long startStampLong, long endStampLong) {
 		List<String> statusLst = new ArrayList<>();;
 		if ((status == null || status.isEmpty() || status.contains(null)) && (tagCategory == null
 				|| tagCategory.isEmpty() || tagCategory.contains(null) && tagCategory.contains(""))) {
-			//statusLst.add(CHAT_STATUS.OPEN.toString()); for all status
+			// statusLst.add(CHAT_STATUS.OPEN.toString()); for all status
 		} else {
 			for (CHAT_STATUS chatSt : status) {
 				statusLst.add(chatSt.toString());
 			}
 		}
-		
+
 		Criteria criteria = new Criteria();
 
 		Query query2 = new Query();
-		
-		
+
 		Criteria dateCriteria = new Criteria().orOperator(
 				new Criteria().andOperator(Criteria.where("startSessionStamp").gt(startStampLong),
 						Criteria.where("startSessionStamp").lt(endStampLong)),
@@ -740,8 +737,6 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 						Criteria.where("lastInComingStamp").lt(endStampLong)));
 
 		criteria.andOperator(dateCriteria);
-		
-		
 
 		if (statusLst != null && !statusLst.isEmpty()) {
 			query2.addCriteria(Criteria.where("status").in(statusLst));
@@ -749,12 +744,12 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
 			query2.addCriteria(Criteria.where("tagId").in(tagCategory));
 		}
-		
-		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));	
+
+		query2 = query2.addCriteria(criteria).with(new Sort(Sort.Direction.DESC, "startSessionStamp"));
 		List<ChatSessionDoc> messages = mongoTemplate.find(query2, ChatSessionDoc.class);
 		LOGGER.debug("query {===}" + query2);
 		return messages;
-		
+
 	}
 
 	public String getLastAssignedAgent(Contactable contact) {
@@ -782,7 +777,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1).skipDBRef();
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}
-	
+
 	public List<ChatSessionDoc> findByStatusOrQuickTagV2(List<CHAT_STATUS> status, List<QuickTag> tagCategory,
 			long fromStamp, long toStamp) {
 		List<String> statusLst = new ArrayList<>();;
@@ -798,45 +793,40 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		Query query = new Query();
 		Criteria primaryCriteria = new Criteria();//
 		List<Criteria> criterias = new ArrayList<Criteria>();
-		
-		if(fromStamp<=0) {
-			fromStamp =DateUtil.todayStartTime();
+
+		if (fromStamp <= 0) {
+			fromStamp = DateUtil.todayStartTime();
 		}
-		
+
 		primaryCriteria = primaryCriteria.and("assignedAgentStamp").gt(fromStamp).lt(toStamp);
 		criterias.add(primaryCriteria);
-		
 
 		if (statusLst != null && !statusLst.isEmpty()) {
 			primaryCriteria = primaryCriteria.and("status").in(statusLst);
 		}
-		
-		
-		if (tagCategory!=null && !tagCategory.isEmpty() && tagCategory.size() > 0) {
+
+		if (tagCategory != null && !tagCategory.isEmpty() && tagCategory.size() > 0) {
 			MultiValueMap<String, String> tags = new LinkedMultiValueMap<String, String>();
-			for (QuickTag tag :tagCategory) {
+			for (QuickTag tag : tagCategory) {
 				tags.add(tag.getCategory(), tag.getId());
 			}
 			for (Entry<String, List<String>> tagEntry : tags.entrySet()) {
 				criterias.add(Criteria.where("tagId").in(tagEntry.getValue()));
 			}
 		}
-		
+
 		query.addCriteria(primaryCriteria.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
 				.with(new Sort(Direction.DESC, "assignedAgentStamp"));
 		ApiResponseUtil.addLog(query.toString());
-		//query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
+		// query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
 		removeMsgFields(query);
 		LOGGER.debug("query {===}" + query);
-		
+
 		return sessionStore.find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query)
-				.skipDBRefByNames("lastMsg", "lastInBoundMsg", "lastOutBoundMsg","lastBotReply","lastAgentReply"));
-		
-	
-		//return super.find(query, ChatSessionDoc.class);
+				.skipDBRefByNames("lastMsg", "lastInBoundMsg", "lastOutBoundMsg", "lastBotReply", "lastAgentReply"));
+
+		// return super.find(query, ChatSessionDoc.class);
 	}
-	
-	
 
 }
