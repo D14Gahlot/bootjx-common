@@ -31,6 +31,8 @@ public class ChannelConfigDupsDoc implements Serializable {
 	@Indexed
 	private String channelId;
 
+	private String name;
+
 	@JsonView(PMEnvironment.ProtectedProperty.class)
 	protected String channelKey;
 
@@ -146,6 +148,14 @@ public class ChannelConfigDupsDoc implements Serializable {
 
 	public void setAutoCreated(boolean isAutoCreated) {
 		this.isAutoCreated = isAutoCreated;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }
