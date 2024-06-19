@@ -7,12 +7,14 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.model.TimeModels.TimeStampSupportedModel;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "DUPS_CONFIG_CHANNEL")
 @TypeAlias("ChannelConfigDups")
-public class ChannelConfigDupsDoc implements Serializable {
+public class ChannelConfigDupsDoc extends TimeStampSupportedModel implements Serializable {
 
 	private static final long serialVersionUID = -6368905475787041196L;
 
