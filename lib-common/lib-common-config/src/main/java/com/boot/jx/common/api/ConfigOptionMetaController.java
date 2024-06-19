@@ -87,8 +87,8 @@ public class ConfigOptionMetaController {
 	}
 
 	@RequestMapping(value = "/api/meta/channel_types", method = { RequestMethod.GET })
-	public ApiResponse<AChannelDetails, Object> channel() {
-		return ApiResponse.buildResults(new ArrayList<AChannelDetails>(ChannelPluginProvider.DETAILS_MAPPING.values()));
+	public ApiResponse<Object, Object> channel() {
+		return ApiResponse.buildResults(new ArrayList<Object>(ChannelPluginProvider.PLUGIN_MAPPING.values()));
 	}
 
 	@RequestMapping(value = "/api/meta/channel_configs/{channelType}", method = { RequestMethod.GET })
