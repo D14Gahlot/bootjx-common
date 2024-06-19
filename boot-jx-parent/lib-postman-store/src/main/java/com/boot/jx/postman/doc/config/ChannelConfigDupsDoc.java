@@ -29,6 +29,9 @@ public class ChannelConfigDupsDoc implements Serializable {
 	private String channelType;
 
 	@Indexed
+	private Object contactType;
+
+	@Indexed
 	private String channelId;
 
 	private String name;
@@ -156,6 +159,14 @@ public class ChannelConfigDupsDoc implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Object getContactType() {
+		return contactType;
+	}
+
+	public void setContactType(Object contactType) {
+		this.contactType = contactType;
 	}
 
 }
