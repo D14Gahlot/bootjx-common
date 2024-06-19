@@ -155,8 +155,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 		if (ArgUtil.isEmpty(contactId)) {
 			if (ArgUtil.isEmpty(sessionId)) {
-				// If these conact & session are not present there is nothing we
-				// can do about
+				// If these conact & session are not present there is nothing we can do about
 				// this message
 				return null;
 			}
@@ -820,11 +819,9 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 				// Limit
 				.with(new Sort(Direction.DESC, "assignedAgentStamp"));
 		ApiResponseUtil.addLog(query.toString());
-		// query.with(new Sort(new Order(Direction.DESC,
-		// "assignedAgentStamp")));
+		// query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
 		removeMsgFields(query);
 		LOGGER.debug("query {===}" + query);
-		System.out.println("query {===}" + query);
 
 		return sessionStore.find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query)
 				.skipDBRefByNames("lastMsg", "lastInBoundMsg", "lastOutBoundMsg", "lastBotReply", "lastAgentReply"));
