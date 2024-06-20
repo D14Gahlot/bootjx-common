@@ -47,6 +47,7 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
+import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
 import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
@@ -79,6 +80,11 @@ public class ConfigOptionMetaController {
 	@RequestMapping(value = "/api/meta/message_content_types", method = { RequestMethod.GET })
 	public ApiResponse<HSMContentType, Object> messageContentType() {
 		return ApiResponse.buildResults(HSMContentType.values());
+	}
+
+	@RequestMapping(value = "/api/meta/message_queue_types", method = { RequestMethod.GET })
+	public ApiResponse<MESSAGE_QUEUE_TYPE, Object> messageQueueType() {
+		return ApiResponse.buildResults(MESSAGE_QUEUE_TYPE.values());
 	}
 
 	@RequestMapping(value = "/api/meta/langs", method = { RequestMethod.GET })
