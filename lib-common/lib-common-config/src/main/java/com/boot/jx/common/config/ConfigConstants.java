@@ -351,6 +351,10 @@ public class ConfigConstants {
 		APP_MODULE_ADMIN(new ConfigMeta("Admin Module", "feature.app.module.admin").optionsOnOff().group(APP_MODULES)),
 		APP_MODULE_SOCIAL(
 				new ConfigMeta("Social Module", "feature.app.module.social").optionsOnOff().group(APP_MODULES)),
+
+		MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
+				.group(APP_MODULES)),
+
 		// Ends here
 		;
 

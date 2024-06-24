@@ -44,9 +44,9 @@ public class MediaController {
 
 	@ResponseBody
 	@RequestMapping(value = "/media/text/to/image", method = { RequestMethod.POST })
-	public ResponseEntity<byte[]> html2ImagePost(
-
-			@ApiParam @RequestParam String text) throws FileNotFoundException, IOException {
+	public ResponseEntity<byte[]> html2ImagePost(@ApiParam @RequestParam String text,
+			@RequestParam(defaultValue = "background-color:white;width:400px") String style)
+			throws FileNotFoundException, IOException {
 
 		File file = File.createTempFile("tmp", ".png");
 //		Converter.convertHTML("<h1>Convert HTML to Image in Java</h1>", ".", new ImageSaveOptions(ImageFormat.Jpeg),
@@ -59,7 +59,7 @@ public class MediaController {
 				return editor;
 			}
 		};
-		imageGenerator.loadHtml("<div style='width:400px;min-height:400px;'>" + text + "</div>");
+		imageGenerator.loadHtml("<div style='" + style + "'>" + text + "</div>");
 		imageGenerator.saveAsImage(file);
 
 		byte[] image = Files.readAllBytes(file.toPath());
@@ -68,17 +68,17 @@ public class MediaController {
 
 	@ResponseBody
 	@RequestMapping(value = "/media/text/to/image", method = { RequestMethod.GET })
-	public ResponseEntity<byte[]> html2ImageGet(@ApiParam @RequestParam String encodedHtml)
+	public ResponseEntity<byte[]> html2ImageGet(@ApiParam @RequestParam String encodedHtml, @RequestParam String style)
 			throws FileNotFoundException, IOException {
 		String html = CryptoUtil.getEncoder().message(encodedHtml).decodeBase64().toString();
-		return this.html2ImagePost(html);
+		return this.html2ImagePost(html, style);
 	}
 
 	@ResponseBody
 	@RequestMapping(value = "/media/text/to/image/{encodedHtml}", method = { RequestMethod.GET })
-	public ResponseEntity<byte[]> html2ImageURL(@ApiParam @PathVariable String encodedHtml)
+	public ResponseEntity<byte[]> html2ImageURL(@ApiParam @PathVariable String encodedHtml, @RequestParam String style)
 			throws FileNotFoundException, IOException {
-		return this.html2ImageGet(encodedHtml);
+		return this.html2ImageGet(encodedHtml, style);
 	}
 
 }
