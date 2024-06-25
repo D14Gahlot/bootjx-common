@@ -28,6 +28,7 @@ import com.boot.jx.postman.doc.QuickSkill;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.store.QuickStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.StringUtils;
 
 @RestController
 public class TmplQuickController {
@@ -134,7 +135,7 @@ public class TmplQuickController {
 		if (ArgUtil.isEmpty(url) && ArgUtil.is(file)) {
 			CommonFile commonfile = fileStore.upload1(file,
 					String.format("%s/quickmedia/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
-					file.getOriginalFilename());
+					StringUtils.slugify(file.getOriginalFilename()));
 			fileType = commonfile.getFileType();
 			fileFormat = commonfile.getFileFormat();
 			url = commonfile.getUrl();
