@@ -31,7 +31,7 @@ public class PostmanPackages {
 
 		public String toImage(String text) throws IOException;
 
-		String toImage(String text, String textId) throws IOException;
+		public String toImage(String text, String style, String textId) throws IOException;
 	}
 
 }

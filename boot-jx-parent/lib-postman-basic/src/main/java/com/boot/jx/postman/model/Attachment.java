@@ -189,4 +189,12 @@ public class Attachment implements Serializable {
 		this.id = id;
 	}
 
+	public String getMediaTemplateStyle() {
+		return mediaTemplateStyle;
+	}
+
+	public void setMediaTemplateStyle(String mediaTemplateStyle) {
+		this.mediaTemplateStyle = mediaTemplateStyle;
+	}
+
 }

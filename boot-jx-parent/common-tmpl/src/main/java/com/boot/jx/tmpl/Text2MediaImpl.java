@@ -16,6 +16,7 @@ import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PostmanPackages.Text2Media;
 import com.boot.jx.postman.client.PMFileStoreClient;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 
 import gui.ava.html.image.generator.HtmlImageGenerator;
@@ -27,7 +28,7 @@ public class Text2MediaImpl implements Text2Media {
 	private PMFileStoreClient pmFileStoreClient;
 
 	@Override
-	public String toImage(String text, String textId) throws IOException {
+	public String toImage(String text, String style, String textId) throws IOException {
 
 		String md5 = CryptoUtil.getEncoder().message(text).md5().toString();
 
@@ -40,7 +41,8 @@ public class Text2MediaImpl implements Text2Media {
 			}
 		};
 
-		imageGenerator.loadHtml("<div style='" + DEFAULT_VALUES.MEDIA_TEMPLATE_STYLE + "'>" + text + "</div>");
+		imageGenerator.loadHtml(
+				"<div style='" + ArgUtil.nonEmpty(style, DEFAULT_VALUES.MEDIA_TEMPLATE_STYLE) + "'>" + text + "</div>");
 		imageGenerator.saveAsImage(file);
 
 		byte[] image = Files.readAllBytes(file.toPath());
@@ -58,7 +60,7 @@ public class Text2MediaImpl implements Text2Media {
 
 	@Override
 	public String toImage(String text) throws IOException {
-		return toImage(text, AppContextUtil.getSessionIdFromTraceId());
+		return toImage(text, DEFAULT_VALUES.MEDIA_TEMPLATE_STYLE, AppContextUtil.getSessionIdFromTraceId());
 	}
 
 }
