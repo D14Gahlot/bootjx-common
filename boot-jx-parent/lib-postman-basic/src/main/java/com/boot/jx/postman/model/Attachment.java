@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.apache.commons.io.FilenameUtils;
 
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -13,6 +14,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Attachment implements Serializable {
 	private static final long serialVersionUID = 6420347322076291226L;
+
+	@ApiMockModelProperty(example = "23m234233232323", value = "Unique Attachment Id")
+	String id;
 
 	@ApiMockModelProperty(example = "IMAGE", value = "Media Type",
 			allowableValues = "IMAGE,DOCUMENT,TEXT,PDF,VIDEO,URL,AUDIO")
@@ -38,6 +42,9 @@ public class Attachment implements Serializable {
 
 	@ApiMockModelProperty(example = "Hi <b>John</b>, this is your <i>image</i>", value = "Media Template")
 	String mediaTemplate;
+
+	@ApiMockModelProperty(example = DEFAULT_VALUES.MEDIA_TEMPLATE_STYLE, value = "Media Template Wrapper")
+	String mediaTemplateStyle;
 
 	@ApiMockModelProperty(example = "Transaction Receipt", value = "Media Caption")
 	String mediaCaption;
@@ -172,6 +179,14 @@ public class Attachment implements Serializable {
 
 	public void setMediaTemplate(String mediaTemplate) {
 		this.mediaTemplate = mediaTemplate;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

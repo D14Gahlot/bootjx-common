@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.cdn.BootJxConfigService;
+import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.CryptoUtil.Encoder;
 
 import gui.ava.html.image.generator.HtmlImageGenerator;
 import io.swagger.annotations.ApiParam;
@@ -45,7 +45,7 @@ public class MediaController {
 	@ResponseBody
 	@RequestMapping(value = "/media/text/to/image", method = { RequestMethod.POST })
 	public ResponseEntity<byte[]> html2ImagePost(@ApiParam @RequestParam String text,
-			@RequestParam(defaultValue = "background-color:white;width:400px") String style)
+			@RequestParam(defaultValue = DEFAULT_VALUES.MEDIA_TEMPLATE_STYLE) String style)
 			throws FileNotFoundException, IOException {
 
 		File file = File.createTempFile("tmp", ".png");

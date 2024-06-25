@@ -13,6 +13,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
+import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PostmanPackages.Text2Media;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.utils.CryptoUtil;
@@ -26,7 +27,7 @@ public class Text2MediaImpl implements Text2Media {
 	private PMFileStoreClient pmFileStoreClient;
 
 	@Override
-	public String toImage(String text) throws IOException {
+	public String toImage(String text, String textId) throws IOException {
 
 		String md5 = CryptoUtil.getEncoder().message(text).md5().toString();
 
@@ -39,7 +40,7 @@ public class Text2MediaImpl implements Text2Media {
 			}
 		};
 
-		imageGenerator.loadHtml("<div style='width:400px;min-height:400px;'>" + text + "</div>");
+		imageGenerator.loadHtml("<div style='" + DEFAULT_VALUES.MEDIA_TEMPLATE_STYLE + "'>" + text + "</div>");
 		imageGenerator.saveAsImage(file);
 
 		byte[] image = Files.readAllBytes(file.toPath());
@@ -51,9 +52,13 @@ public class Text2MediaImpl implements Text2Media {
 		// System.out.println("--" + AppContextUtil.getTraceId());
 		// System.out.println("--" + AppContextUtil.getSessionIdFromTraceId());
 
-		CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile, AppContextUtil.getSessionIdFromTraceId(),
-				md5);
+		CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile, textId, md5);
 		return dstFile.getUrl();
+	}
+
+	@Override
+	public String toImage(String text) throws IOException {
+		return toImage(text, AppContextUtil.getSessionIdFromTraceId());
 	}
 
 }

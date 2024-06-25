@@ -85,6 +85,7 @@ public class PMConstants {
 		public static final String SMS = "sms";
 		public static final String OA = "oa";
 		public static final String FIREBASE = "firebase";
+		public static final String OUTLOOK = "outlook";
 
 		// WhatsApp Channels
 		public static final String WA_GUPSHUP = "wags";
@@ -97,7 +98,7 @@ public class PMConstants {
 	}
 
 	public enum CHANNEL_TYPE_ENUM {
-		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase, wacfb
+		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase, wacfb, outlook
 	}
 
 	public static enum CHAT_STATUS {
@@ -289,6 +290,7 @@ public class PMConstants {
 	public static class DEFAULT_VALUES {
 		public static final long POSTMAN_AGENT_TAB_HISTORY_PERIOD = TimeUtils.toMillis("1d");
 		public static final long POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX = TimeUtils.toMillis("30d");
+		public static final String MEDIA_TEMPLATE_STYLE = "background-color:white;width:400px";
 	}
 
 	public final class PostManUrls {

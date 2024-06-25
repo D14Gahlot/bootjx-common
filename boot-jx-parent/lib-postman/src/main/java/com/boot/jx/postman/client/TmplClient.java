@@ -124,8 +124,8 @@ public class TmplClient {
 				for (Attachment attach : outboxMessage.getAttachments()) {
 					if (ArgUtil.is(attach.getMediaTemplate())) {
 						String attachFileStr = process(attach.getMediaTemplate(), outboxMessage.getModel());
-						attach.setMediaTemplate(attachFileStr);
-						attach.setMediaURL(text2Media.toImage(attachFileStr));
+						// attach.setMediaTemplate(attachFileStr);
+						attach.setMediaURL(text2Media.toImage(attachFileStr, attach.getId()));
 					}
 				}
 			} catch (Exception e) {

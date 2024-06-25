@@ -28,7 +28,10 @@ public class PostmanPackages {
 	}
 
 	public static interface Text2Media {
+
 		public String toImage(String text) throws IOException;
+
+		String toImage(String text, String textId) throws IOException;
 	}
 
 }
