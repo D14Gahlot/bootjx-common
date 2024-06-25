@@ -135,7 +135,7 @@ public class TmplQuickController {
 		if (ArgUtil.isEmpty(url) && ArgUtil.is(file)) {
 			CommonFile commonfile = fileStore.upload1(file,
 					String.format("%s/quickmedia/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
-					StringUtils.slugify(file.getOriginalFilename()));
+					file.getOriginalFilename());
 			fileType = commonfile.getFileType();
 			fileFormat = commonfile.getFileFormat();
 			url = commonfile.getUrl();

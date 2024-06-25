@@ -49,7 +49,7 @@ public class AWSFileStore {
 		}
 
 		// Save Image in S3 and then save Todo in the database
-		String fileNameNow = String.format("%s", fileName);
+		String fileNameNow = StringUtils.slugify(String.format("%s", fileName));
 
 		pathFolder = StringUtils.trim(pathFolder, '/');
 
