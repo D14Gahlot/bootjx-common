@@ -191,8 +191,9 @@ public class TmplHSMController {
 		auditDetailProvider.auditCreate(newVersion);
 		mongoTemplate.save(newVersion);
 
+		OutboxMessage outboxMessage = null;
 		if (ArgUtil.is(tmplattachment) && ArgUtil.is(tmplattachment.getMediaTemplate())) {
-			OutboxMessage outboxMessage = new OutboxMessage();
+			outboxMessage = new OutboxMessage();
 			outboxMessage.setModel(JsonUtil.deepCopy(newVersion.getModel()));
 			CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
 			hsmTemp.setId(newVersion.getId());
@@ -210,6 +211,6 @@ public class TmplHSMController {
 		}
 
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class)).data(newVersion)
-				.message("HSM Template " + (updated ? "updated" : "created"));
+				.message("HSM Template " + (updated ? "updated" : "created")).meta(outboxMessage);
 	}
 }
