@@ -9,7 +9,10 @@ import com.boot.utils.UniqueID;
 public class AuthStateManager implements Serializable {
 	private static final long serialVersionUID = -8304930738022690453L;
 
-	public static class AuthState {
+	public static class AuthState implements Serializable {
+
+		private static final long serialVersionUID = -6534068662179480068L;
+
 		private String csrfToken;
 		private String nonce;
 		private String redirectUrl;
