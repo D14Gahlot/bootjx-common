@@ -79,10 +79,6 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 	public static class OutlookConfigDetails extends OutlookMasterConfigDetails {
 
 		private static final long serialVersionUID = -2397678752642150000L;
-		@ConfigMetaProperty(path = "pageId", title = "Page Id", createonly = true)
-		private String pageId;
-		@ConfigMetaProperty(path = "type", title = "Type", hidden = true)
-		private String type;
 		@ConfigMetaProperty(path = "email", title = "Email")
 		private String email;
 
@@ -95,22 +91,6 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 		@ConfigMetaProperty(path = "appSecret", title = "App Secret", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String appSecret;
-
-		public String getPageId() {
-			return pageId;
-		}
-
-		public void setPageId(String pageId) {
-			this.pageId = pageId;
-		}
-
-		public String getType() {
-			return type;
-		}
-
-		public void setType(String type) {
-			this.type = type;
-		}
 
 		public String getAccessToken() {
 			return accessToken;
@@ -138,7 +118,7 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 
 		@Override
 		public String getLane() {
-			return this.pageId;
+			return this.email;
 		}
 
 		public String getEmail() {

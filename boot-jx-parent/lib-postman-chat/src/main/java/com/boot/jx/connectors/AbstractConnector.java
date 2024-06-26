@@ -40,6 +40,7 @@ import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.AuthStateManager;
+import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
@@ -92,9 +93,6 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 
 	@Autowired
 	protected ChannelClientFactory clientFactory;
-
-	@Autowired(required = false)
-	protected AuthStateManager authStateManager;
 
 	@Override
 	public ChannelClient getClient(ChannelConfig channelConfig) {

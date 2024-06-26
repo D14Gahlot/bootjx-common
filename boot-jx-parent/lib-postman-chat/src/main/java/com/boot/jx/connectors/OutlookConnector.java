@@ -27,7 +27,6 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
-import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.OutlookPlugin;
 import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
 import com.boot.jx.rest.RestService;
@@ -53,12 +52,11 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 	private AppConfig appConfig;
 
 	@Override
-	public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp)
+	public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp, AuthState state)
 			throws URISyntaxException, MalformedURLException {
-		String redirectUri = String.format("%s%s/ext/setup/channel/callback/outlook", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
-				environment.keyEntry("mry.prop.service.server").asString());
+		String redirectUri = String.format("%s%s/ext/setup/channel/callback/outlook", commonHttpRequest.getServerHost(),
+				appConfig.getAppPrefix(), environment.keyEntry("mry.prop.service.server").asString());
 		/// &state=fooobar&scope=r_liteprofile%20r_emailaddress%20w_member_social
-		AuthState state = authStateManager.createState();
 		state.setRedirectUrl(redirectUri);
 
 		return Urly.parse(AUTHORIZE_URL).queryParam("response_type", "code") //
@@ -71,11 +69,11 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	}
 
-	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
+			AuthState state) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		try {
 
-			AuthState state = authStateManager.createState();
 			MapModel resp = MapModel.from(channelConfigTemp.getResp());
 			MapModel tokenResponse = restService.ajax(AUTHORIZE_TOKEN)//
 					.field("grant_type", "authorization_code")//
@@ -97,8 +95,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			channel.setOutlook(new OutlookConfigDetails());
 			channel.getOutlook().setAccessToken(accessToken);
 			channel.getOutlook().setEmail(profileResponse.keyEntry("mail").orKeyEntry("userPrincipalName").asString());
-			channel.getOutlook().setType("page");
-			channel.getOutlook().setMasterClientId(setup.getFacebook().getMasterAppId());
+			channel.getOutlook().setMasterClientId(setup.getOutlook().getMasterClientId());
 			channel.setName(profileResponse.keyEntry("displayName").asString());
 			channels.add(channel);
 		} catch (ApiHttpException e) {

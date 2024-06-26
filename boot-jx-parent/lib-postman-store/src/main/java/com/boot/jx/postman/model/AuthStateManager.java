@@ -2,6 +2,7 @@ package com.boot.jx.postman.model;
 
 import java.io.Serializable;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.Random;
 import com.boot.utils.UniqueID;
@@ -17,6 +18,7 @@ public class AuthStateManager implements Serializable {
 		private String nonce;
 		private String redirectUrl;
 		private long timestamp;
+		private String domain;
 
 		public String getCsrfToken() {
 			return csrfToken;
@@ -35,7 +37,7 @@ public class AuthStateManager implements Serializable {
 		}
 
 		public String toString() {
-			return MapModel.createInstance().put("csrfToken", getCsrfToken()).put("nonce", nonce)
+			return MapModel.createInstance().put("csrfToken", getCsrfToken()).put("nonce", nonce).put("domain", domain)
 					.put("redirectUrl", redirectUrl).encoder().encrypt().tokenize(10).encodeBase64().toString();
 		}
 
@@ -58,6 +60,14 @@ public class AuthStateManager implements Serializable {
 
 		public void setTimestamp(long timestamp) {
 			this.timestamp = timestamp;
+		}
+
+		public String getDomain() {
+			return domain;
+		}
+
+		public void setDomain(String domain) {
+			this.domain = domain;
 		}
 
 	}
@@ -84,6 +94,7 @@ public class AuthStateManager implements Serializable {
 		state.setTimestamp(System.currentTimeMillis());
 		state.setNonce(UniqueID.generateString62());
 		state.setCsrfToken(getCsrfToken());
+		state.setDomain(AppContextUtil.getTenant());
 		return state;
 	}
 

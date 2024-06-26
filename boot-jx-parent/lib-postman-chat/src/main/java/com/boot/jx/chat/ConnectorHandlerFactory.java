@@ -30,6 +30,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -236,15 +237,15 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 		void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException;
 
-		default List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc resp) {
+		default List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc resp, AuthState state) {
 			LOGGER.error("Channel onRegister NOT FOUND ");
 			return null;
 		}
 
 		public ChannelClient getClient(ChannelConfig channelConfig);
 
-		default public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp)
-				throws URISyntaxException, MalformedURLException {
+		default public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
+				AuthState state) throws URISyntaxException, MalformedURLException {
 			return Constants.BLANK;
 		}
 

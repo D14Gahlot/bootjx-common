@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.cdn.BootJxConfigService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
@@ -34,6 +35,8 @@ import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.manager.ConfigManager;
+import com.boot.jx.postman.model.AuthStateManager;
+import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel;
@@ -74,6 +77,9 @@ public class ChannelSetupController {
 
 	@Autowired
 	private PMCommonConfig pmCommonConfig;
+
+	@Autowired(required = false)
+	private AuthStateManager authStateManager;
 
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel", method = { RequestMethod.GET, RequestMethod.POST })
@@ -152,7 +158,9 @@ public class ChannelSetupController {
 			model.addAttribute("selectedChannelConfigId", channel.getId());
 			ConnectorHandler connector = connectorHandlerFactory.get(channel.getContactType(),
 					channel.getChannelType());
-			model.addAttribute("AUTH_URL", connector.createAuthUrl(channel, null));
+			AuthState state = authStateManager.createState();
+			state.setDomain(domainName);
+			model.addAttribute("AUTH_URL", connector.createAuthUrl(channel, null, state));
 		}
 		return "app-setup-channel";
 
@@ -178,8 +186,13 @@ public class ChannelSetupController {
 
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel/callback/outlook", method = { RequestMethod.GET, RequestMethod.POST })
-	public String setupChannelCallbackOutlook(@RequestParam(required = false) String code, Model model)
+	public String setupChannelCallbackOutlook(@RequestParam(required = false) String code, Model model,
+			@RequestParam(required = false) String state)
 			throws FileNotFoundException, IOException, URISyntaxException {
+		AuthState authState = authStateManager.fromState(state);
+		if (ArgUtil.is(authState) && ArgUtil.is(authState.getDomain())) {
+			AppContextUtil.set("domain", authState.getDomain());
+		}
 		model.addAttribute("response", MapModel.createInstance().put(JsonPath.at("authResponse.code"), code).toJson());
 		return this.setupChannel(CHANNEL_TYPE_ENUM.outlook, UniqueID.generateString62(), ContactType.EMAIL,
 				Constants.BLANK, model);
@@ -194,7 +207,6 @@ public class ChannelSetupController {
 				commonHttpRequest.getSubDomain());
 		MapModel returnVal = MapModel.createInstance();
 		ChannelConfig master = pmEnvironment.local().channel(masterChannelId);
-
 		// ChannelConfigSetupDoc setup = commonMongoTemplate.findById(channelConfigId,
 		// ChannelConfigSetupDoc.class);
 		if (ArgUtil.is(master)) {
@@ -207,7 +219,7 @@ public class ChannelSetupController {
 			returnVal.put("id", respDoc.getId());
 			ConnectorHandler connector = connectorHandlerFactory.get(master.getContactType(), master.getChannelType());
 			if (ArgUtil.is(connector)) {
-				List<ChannelConfig> channels = connector.onRegister(master, respDoc);
+				List<ChannelConfig> channels = connector.onRegister(master, respDoc, authStateManager.getState());
 				if (ArgUtil.is(channels)) {
 					for (ChannelConfig channel : channels) {
 						channel.setContactType(master.getContactType());

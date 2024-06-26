@@ -20,6 +20,7 @@ public interface ConfigManager {
 	/**
 	 * This mehthod will add channel for specidfied domain, in asyn manner
 	 * 
+	 * @param authState
 	 * @param config
 	 * @param domain
 	 */
