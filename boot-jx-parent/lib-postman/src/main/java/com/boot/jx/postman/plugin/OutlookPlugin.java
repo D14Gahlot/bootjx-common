@@ -83,8 +83,8 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 		private String pageId;
 		@ConfigMetaProperty(path = "type", title = "Type", hidden = true)
 		private String type;
-		@ConfigMetaProperty(path = "handler", title = "Handler")
-		private String handler;
+		@ConfigMetaProperty(path = "email", title = "Email")
+		private String email;
 
 		@ConfigMetaProperty(path = "accessToken", title = "Access Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
@@ -141,12 +141,12 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 			return this.pageId;
 		}
 
-		public String getHandler() {
-			return handler;
+		public String getEmail() {
+			return email;
 		}
 
-		public void setHandler(String handler) {
-			this.handler = handler;
+		public void setEmail(String email) {
+			this.email = email;
 		}
 
 	}
@@ -154,8 +154,8 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 	@Override
 	public String getDefaultName(ChannelConfig config) {
 		if (!ArgUtil.is(config.getName())) {
-			if (ArgUtil.is(config.getOutlook().getHandler())) {
-				return config.getOutlook().getHandler();
+			if (ArgUtil.is(config.getOutlook().getEmail())) {
+				return config.getOutlook().getEmail();
 			}
 			return String.format("Outlook %s", config.getLane());
 		}

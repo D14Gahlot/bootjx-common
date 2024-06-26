@@ -2,6 +2,8 @@ package com.boot.jx.chat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -46,6 +48,7 @@ import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -239,6 +242,12 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 		}
 
 		public ChannelClient getClient(ChannelConfig channelConfig);
+
+		default public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp)
+				throws URISyntaxException, MalformedURLException {
+			return Constants.BLANK;
+		}
+
 	}
 
 	public ConnectorHandlerFactory(List<ConnectorHandler> libs) {

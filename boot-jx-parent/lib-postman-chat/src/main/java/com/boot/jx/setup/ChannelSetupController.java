@@ -2,6 +2,7 @@ package com.boot.jx.setup;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -79,7 +80,7 @@ public class ChannelSetupController {
 	public String setupChannel(@RequestParam(required = false) CHANNEL_TYPE_ENUM channelType,
 			@RequestParam(required = false) String postKey, @RequestParam(required = false) ContactType contactType,
 			@RequestParam(required = false) String masterChannelId, Model model)
-			throws FileNotFoundException, IOException {
+			throws FileNotFoundException, IOException, URISyntaxException {
 
 		String domainName = ArgUtil.nonEmpty(commonHttpRequest.get("domain"), commonHttpRequest.getRequestParam("tnt"),
 				commonHttpRequest.getSubDomain());
@@ -144,9 +145,14 @@ public class ChannelSetupController {
 		boolean channelSelected = (channels.size() == 1);
 		model.addAttribute("channelSelected", channelSelected);
 		model.addAttribute("selectedChannelConfigId", Constants.BLANK);
+		model.addAttribute("AUTH_URL", Constants.BLANK);
 		if (channelSelected) {
-			model.addAttribute("selectedChannel", channels.get(0));
-			model.addAttribute("selectedChannelConfigId", channels.get(0).getId());
+			ChannelConfigDoc channel = channels.get(0);
+			model.addAttribute("selectedChannel", channel);
+			model.addAttribute("selectedChannelConfigId", channel.getId());
+			ConnectorHandler connector = connectorHandlerFactory.get(channel.getContactType(),
+					channel.getChannelType());
+			model.addAttribute("AUTH_URL", connector.createAuthUrl(channel, null));
 		}
 		return "app-setup-channel";
 
@@ -155,7 +161,7 @@ public class ChannelSetupController {
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel/callback/fb", method = { RequestMethod.GET, RequestMethod.POST })
 	public String setupChannelCallback(@RequestParam(required = false) String code, Model model)
-			throws FileNotFoundException, IOException {
+			throws FileNotFoundException, IOException, URISyntaxException {
 		model.addAttribute("response", MapModel.createInstance().put(JsonPath.at("authResponse.code"), code).toJson());
 		return this.setupChannel(CHANNEL_TYPE_ENUM.fb, UniqueID.generateString62(), ContactType.FACEBOOK,
 				Constants.BLANK, model);
@@ -164,7 +170,7 @@ public class ChannelSetupController {
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel/callback/ig", method = { RequestMethod.GET, RequestMethod.POST })
 	public String setupChannelCallbackIg(@RequestParam(required = false) String code, Model model)
-			throws FileNotFoundException, IOException {
+			throws FileNotFoundException, IOException, URISyntaxException {
 		model.addAttribute("response", MapModel.createInstance().put(JsonPath.at("authResponse.code"), code).toJson());
 		return this.setupChannel(CHANNEL_TYPE_ENUM.ig, UniqueID.generateString62(), ContactType.INSTAGRAM,
 				Constants.BLANK, model);
@@ -173,7 +179,7 @@ public class ChannelSetupController {
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel/callback/outlook", method = { RequestMethod.GET, RequestMethod.POST })
 	public String setupChannelCallbackOutlook(@RequestParam(required = false) String code, Model model)
-			throws FileNotFoundException, IOException {
+			throws FileNotFoundException, IOException, URISyntaxException {
 		model.addAttribute("response", MapModel.createInstance().put(JsonPath.at("authResponse.code"), code).toJson());
 		return this.setupChannel(CHANNEL_TYPE_ENUM.outlook, UniqueID.generateString62(), ContactType.EMAIL,
 				Constants.BLANK, model);
