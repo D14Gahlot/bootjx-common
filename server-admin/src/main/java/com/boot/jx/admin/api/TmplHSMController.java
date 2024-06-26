@@ -172,10 +172,12 @@ public class TmplHSMController {
 	@RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.POST })
 	public ApiResponse<HSMTemplateDoc, Object> createPushTemplates(@RequestBody HSMTemplateDoc newVersion) {
 
+		boolean updated = false;
 		if (ArgUtil.is(newVersion.getId())) {
 			HSMTemplateDoc oldVersion = mongoTemplate.findById(newVersion.getId(), HSMTemplateDoc.class);
 			if (ArgUtil.is(oldVersion)) {
 				mongoTemplate.archive(oldVersion);
+				updated = true;
 			}
 		}
 
@@ -208,6 +210,6 @@ public class TmplHSMController {
 		}
 
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class)).data(newVersion)
-				.message("QuickReply created");
+				.message("HSM Template " + (updated ? "updated" : "created"));
 	}
 }
