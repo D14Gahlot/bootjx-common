@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -32,6 +33,8 @@ public class PostmanPackages {
 		public String toImage(String text) throws IOException;
 
 		public String toImage(String text, String style, String textId) throws IOException;
+
+		public CommonFileStream toImageFile(String text, String style) throws IOException;
 	}
 
 }

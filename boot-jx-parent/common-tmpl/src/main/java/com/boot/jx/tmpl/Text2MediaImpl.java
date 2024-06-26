@@ -28,10 +28,7 @@ public class Text2MediaImpl implements Text2Media {
 	private PMFileStoreClient pmFileStoreClient;
 
 	@Override
-	public String toImage(String text, String style, String textId) throws IOException {
-
-		String md5 = CryptoUtil.getEncoder().message(text).md5().toString();
-
+	public CommonFileStream toImageFile(String text, String style) throws IOException {
 		File file = File.createTempFile("tmp", ".png");
 		HtmlImageGenerator imageGenerator = new HtmlImageGenerator() {
 			protected JEditorPane createJEditorPane() {
@@ -40,16 +37,22 @@ public class Text2MediaImpl implements Text2Media {
 				return editor;
 			}
 		};
-
 		imageGenerator.loadHtml(
 				"<div style='" + ArgUtil.nonEmpty(style, DEFAULT_VALUES.MEDIA_TEMPLATE_STYLE) + "'>" + text + "</div>");
 		imageGenerator.saveAsImage(file);
-
 		byte[] image = Files.readAllBytes(file.toPath());
-
 		CommonFileStream srcFile = new CommonFileStream().body(image)
 				// .fileType(attachment.getMediaType())
 				.format(FileFormat.PNG).name(file.getName());
+		return srcFile;
+	}
+
+	@Override
+	public String toImage(String text, String style, String textId) throws IOException {
+
+		String md5 = CryptoUtil.getEncoder().message(text).md5().toString();
+
+		CommonFileStream srcFile = toImageFile(text, style);
 
 		// System.out.println("--" + AppContextUtil.getTraceId());
 		// System.out.println("--" + AppContextUtil.getSessionIdFromTraceId());

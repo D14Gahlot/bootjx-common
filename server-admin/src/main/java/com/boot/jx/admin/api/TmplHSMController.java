@@ -183,8 +183,10 @@ public class TmplHSMController {
 
 		MapModel tmplOptions = MapModel.from(newVersion.options());
 		Attachment tmplattachment = tmplOptions.keyEntry("attachment").as(Attachment.class);
-		if (ArgUtil.is(tmplattachment) && !ArgUtil.is(tmplattachment.getId())) {
-			tmplattachment.setId(UniqueID.generateString62());
+		if (ArgUtil.is(tmplattachment)) {
+			if (!ArgUtil.is(tmplattachment.getId())) {
+				tmplattachment.setId(UniqueID.generateString62());
+			}
 			tmplOptions.keyEntry("attachment").save(tmplattachment);
 		}
 

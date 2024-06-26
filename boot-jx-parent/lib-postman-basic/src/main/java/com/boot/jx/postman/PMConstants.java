@@ -290,7 +290,7 @@ public class PMConstants {
 	public static class DEFAULT_VALUES {
 		public static final long POSTMAN_AGENT_TAB_HISTORY_PERIOD = TimeUtils.toMillis("1d");
 		public static final long POSTMAN_AGENT_TAB_HISTORY_PERIOD_MAX = TimeUtils.toMillis("30d");
-		public static final String MEDIA_TEMPLATE_STYLE = "background-color:white;width:400px";
+		public static final String MEDIA_TEMPLATE_STYLE = "background-color:white;width:400px;min-height:200px";
 	}
 
 	public final class PostManUrls {

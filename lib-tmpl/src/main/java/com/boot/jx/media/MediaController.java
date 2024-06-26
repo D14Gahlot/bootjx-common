@@ -1,11 +1,7 @@
 package com.boot.jx.media;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-
-import javax.swing.JEditorPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +15,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.boot.jx.AppConfig;
-import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.cdn.BootJxConfigService;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
+import com.boot.jx.postman.PostmanPackages.Text2Media;
 import com.boot.utils.CryptoUtil;
 
-import gui.ava.html.image.generator.HtmlImageGenerator;
 import io.swagger.annotations.ApiParam;
 
 @Controller
@@ -34,36 +28,15 @@ public class MediaController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaController.class);
 
 	@Autowired
-	private AppConfig appConfig;
-
-	@Autowired(required = false)
-	private AppCommonConfig appCommonConfig;
-
-	@Autowired(required = false)
-	private BootJxConfigService bootJxConfigService;
+	protected Text2Media text2Media;
 
 	@ResponseBody
 	@RequestMapping(value = "/media/text/to/image", method = { RequestMethod.POST })
 	public ResponseEntity<byte[]> html2ImagePost(@ApiParam @RequestParam String text,
 			@RequestParam(defaultValue = DEFAULT_VALUES.MEDIA_TEMPLATE_STYLE) String style)
 			throws FileNotFoundException, IOException {
-
-		File file = File.createTempFile("tmp", ".png");
-//		Converter.convertHTML("<h1>Convert HTML to Image in Java</h1>", ".", new ImageSaveOptions(ImageFormat.Jpeg),
-//				file.getAbsolutePath());
-
-		HtmlImageGenerator imageGenerator = new HtmlImageGenerator() {
-			protected JEditorPane createJEditorPane() {
-				JEditorPane editor = super.createJEditorPane();
-				editor.setOpaque(false); // The solution
-				return editor;
-			}
-		};
-		imageGenerator.loadHtml("<div style='" + style + "'>" + text + "</div>");
-		imageGenerator.saveAsImage(file);
-
-		byte[] image = Files.readAllBytes(file.toPath());
-		return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
+		CommonFileStream srcFile = text2Media.toImageFile(text, style);
+		return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(srcFile.getBody());
 	}
 
 	@ResponseBody
