@@ -201,6 +201,7 @@ public class TmplHSMController {
 			for (Attachment attachment : outboxMessage.getAttachments()) {
 				if (ArgUtil.is(attachment.getMediaTemplate()) && tmplattachment.getId().equals(attachment.getId())) {
 					tmplattachment.setMediaURL(attachment.getMediaURL());
+					tmplOptions.keyEntry("attachment").save(tmplattachment);
 				}
 			}
 			mongoTemplate.save(newVersion);

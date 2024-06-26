@@ -117,9 +117,9 @@
 							channelType : '[[${selectedChannel.channelType}]]',
 							contactType : '[[${selectedChannel.contactType}]]',
 							title : '[[${selectedChannel.outlook.masterAppTitle}]]',
-							masterAppId : '[[${selectedChannel.outlook.masterClientId}]]',
-							masterAppConfigId : '[[${selectedChannel.outlook.masterTenantId}]]',
-							AUTH_URL : '[[${AUTH_URL}]]',
+							masterClientId : '[[${selectedChannel.outlook.masterClientId}]]',
+							masterTenantId : '[[${selectedChannel.outlook.masterTenantId}]]',
+							AUTH_URL : '[(${AUTH_URL})]',
 							response : wrapObj( [(${response})] )
 						}
 					});
@@ -243,26 +243,6 @@
 					<span th:case="'outlook'" th:remove="tag">
 						<script>
 						  function launchWhatsAppSignup() {
-						    FB.login(function (response) {
-								if(window.channel_setup_listner){
-									window.channel_setup_listner({
-										channelType : '[[${selectedChannel.channelType}]]',
-										masterChannelId : '[[${selectedChannel.id}]]',
-										response : response
-									})
-								} else {
-									console.log("channel_setup_listner:response",response)
-								}
-						    }, {
-							  //display : 'dialog',
-						      config_id: '[[${selectedChannel.instagram.masterAppConfigId}]]', // configuration ID obtained in the previous step goes here
-						      response_type: 'code',     // must be set to 'code' for System User access token
-						      override_default_response_type: true,
-						      extras: {
-								 //"sessionInfoVersion": 2,  //  Receive Session Logging Info
-						        setup: {"channel":"IG_API_ONBOARDING"}
-						      }
-						    });
 						  }
 						</script>
 					</span>	

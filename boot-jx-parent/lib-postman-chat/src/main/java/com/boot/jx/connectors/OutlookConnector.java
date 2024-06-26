@@ -55,7 +55,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 	@Override
 	public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp)
 			throws URISyntaxException, MalformedURLException {
-		String redirectUri = String.format("%s%s", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
+		String redirectUri = String.format("%s%s/ext/setup/channel/callback/outlook", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
 				environment.keyEntry("mry.prop.service.server").asString());
 		/// &state=fooobar&scope=r_liteprofile%20r_emailaddress%20w_member_social
 		AuthState state = authStateManager.createState();
