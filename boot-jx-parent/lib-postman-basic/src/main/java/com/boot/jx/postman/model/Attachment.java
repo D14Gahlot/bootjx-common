@@ -16,7 +16,7 @@ public class Attachment implements Serializable {
 	private static final long serialVersionUID = 6420347322076291226L;
 
 	@ApiMockModelProperty(example = "23m234233232323", value = "Unique Attachment Id")
-	String id;
+	String attachmentId;
 
 	@ApiMockModelProperty(example = "IMAGE", value = "Media Type",
 			allowableValues = "IMAGE,DOCUMENT,TEXT,PDF,VIDEO,URL,AUDIO")
@@ -181,12 +181,12 @@ public class Attachment implements Serializable {
 		this.mediaTemplate = mediaTemplate;
 	}
 
-	public String getId() {
-		return id;
+	public String getAttachmentId() {
+		return attachmentId;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setAttachmentId(String id) {
+		this.attachmentId = id;
 	}
 
 	public String getMediaTemplateStyle() {

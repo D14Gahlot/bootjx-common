@@ -184,8 +184,8 @@ public class TmplHSMController {
 		MapModel tmplOptions = MapModel.from(newVersion.options());
 		Attachment tmplattachment = tmplOptions.keyEntry("attachment").as(Attachment.class);
 		if (ArgUtil.is(tmplattachment)) {
-			if (!ArgUtil.is(tmplattachment.getId())) {
-				tmplattachment.setId(UniqueID.generateString62());
+			if (!ArgUtil.is(tmplattachment.getAttachmentId())) {
+				tmplattachment.setAttachmentId(UniqueID.generateString62());
 			}
 			tmplOptions.keyEntry("attachment").save(tmplattachment);
 		}
@@ -204,7 +204,7 @@ public class TmplHSMController {
 			tmplClient.process(outboxMessage);
 
 			for (Attachment attachment : outboxMessage.getAttachments()) {
-				if (ArgUtil.is(attachment.getMediaTemplate()) && tmplattachment.getId().equals(attachment.getId())) {
+				if (ArgUtil.is(attachment.getMediaTemplate()) && tmplattachment.getAttachmentId().equals(attachment.getAttachmentId())) {
 					tmplattachment.setMediaURL(attachment.getMediaURL());
 					tmplOptions.keyEntry("attachment").save(tmplattachment);
 				}
