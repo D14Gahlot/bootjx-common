@@ -85,6 +85,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			channelConfigTemp.log("oauth2/v2.0/token", tokenResponse.toMap());
 
 			String accessToken = tokenResponse.keyEntry("access_token").asString();
+			String refreshToken = tokenResponse.keyEntry("refresh_token").asString();
 
 			MapModel profileResponse = restService.ajax("https://graph.microsoft.com/v1.0/me")
 					.header("Authorization", "Bearer " + accessToken).get().asMapModel();
@@ -94,6 +95,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			ChannelConfig channel = new ChannelConfig();
 			channel.setOutlook(new OutlookConfigDetails());
 			channel.getOutlook().setAccessToken(accessToken);
+			channel.getOutlook().setRefreshToken(refreshToken);
 			channel.getOutlook().setEmail(profileResponse.keyEntry("mail").orKeyEntry("userPrincipalName").asString());
 			channel.getOutlook().setMasterClientId(setup.getOutlook().getMasterClientId());
 			channel.setName(profileResponse.keyEntry("displayName").asString());

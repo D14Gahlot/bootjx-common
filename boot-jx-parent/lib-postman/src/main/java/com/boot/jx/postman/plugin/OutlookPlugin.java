@@ -85,12 +85,9 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 		@ConfigMetaProperty(path = "accessToken", title = "Access Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
 		private String accessToken;
-		@ConfigMetaProperty(path = "verifyToken", title = "Verify Token", writeonly = true)
+		@ConfigMetaProperty(path = "refreshToken", title = "Refresh Token", writeonly = true)
 		@JsonView(PMEnvironment.ProtectedProperty.class)
-		private String verifyToken;
-		@ConfigMetaProperty(path = "appSecret", title = "App Secret", writeonly = true)
-		@JsonView(PMEnvironment.ProtectedProperty.class)
-		private String appSecret;
+		private String refreshToken;
 
 		public String getAccessToken() {
 			return accessToken;
@@ -98,22 +95,6 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 
 		public void setAccessToken(String accessToken) {
 			this.accessToken = accessToken;
-		}
-
-		public String getVerifyToken() {
-			return verifyToken;
-		}
-
-		public void setVerifyToken(String verifyToken) {
-			this.verifyToken = verifyToken;
-		}
-
-		public String getAppSecret() {
-			return appSecret;
-		}
-
-		public void setAppSecret(String appSecret) {
-			this.appSecret = appSecret;
 		}
 
 		@Override
@@ -127,6 +108,14 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 
 		public void setEmail(String email) {
 			this.email = email;
+		}
+
+		public String getRefreshToken() {
+			return refreshToken;
+		}
+
+		public void setRefreshToken(String refreshToken) {
+			this.refreshToken = refreshToken;
 		}
 
 	}
