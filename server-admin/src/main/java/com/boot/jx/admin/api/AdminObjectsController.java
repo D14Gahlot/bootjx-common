@@ -29,7 +29,6 @@ import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
-import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.store.MessageStore;
