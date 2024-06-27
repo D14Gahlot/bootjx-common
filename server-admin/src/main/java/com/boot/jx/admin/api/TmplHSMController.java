@@ -198,6 +198,8 @@ public class TmplHSMController {
 		mongoTemplate.save(newVersion);
 
 		OutboxMessage outboxMessage = null;
+		tmplOptions = MapModel.from(newVersion.options());
+		tmplattachment = tmplOptions.keyEntry("attachment").as(Attachment.class);
 		if (ArgUtil.is(tmplattachment) && ArgUtil.is(tmplattachment.getMediaTemplate())) {
 			outboxMessage = new OutboxMessage();
 			outboxMessage.setModel(JsonUtil.deepCopy(newVersion.getModel()));
