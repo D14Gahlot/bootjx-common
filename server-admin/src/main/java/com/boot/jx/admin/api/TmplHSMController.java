@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -188,6 +189,7 @@ public class TmplHSMController {
 				tmplattachment.setAttachmentId(UniqueID.generateString62());
 			}
 			tmplOptions.keyEntry("attachment").save(tmplattachment);
+			ApiResponseUtil.addLog("1a."+tmplattachment.getAttachmentId());
 		}
 
 		auditDetailProvider.auditCreate(newVersion);
@@ -208,6 +210,7 @@ public class TmplHSMController {
 					tmplattachment.setMediaURL(attachment.getMediaURL());
 					tmplOptions.keyEntry("attachment").save(tmplattachment);
 				}
+				ApiResponseUtil.addLog("1b."+tmplattachment.getAttachmentId());
 			}
 			mongoTemplate.save(newVersion);
 		}

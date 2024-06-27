@@ -13,6 +13,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManException;
@@ -111,6 +112,7 @@ public class TmplClient {
 		Attachment defaultAttachment = optionsModel.keyEntry("attachment").as(Attachment.class);
 		if (ArgUtil.is(defaultAttachment) && outboxMessage.attachments().size() == 0) {
 			outboxMessage.attachments().add(defaultAttachment);
+			ApiResponseUtil.addLog("2a." + defaultAttachment.getAttachmentId());
 		}
 
 		Attachment backgroundVoice = optionsModel.keyEntry("bg_voice").as(Attachment.class);
@@ -122,12 +124,15 @@ public class TmplClient {
 		if (ArgUtil.is(outboxMessage.attachments())) {
 			try {
 				for (Attachment attach : outboxMessage.getAttachments()) {
+					ApiResponseUtil.addLog("2b." + defaultAttachment.getAttachmentId());
 					if (ArgUtil.is(attach.getMediaTemplate())) {
 						String attachFileStr = process(attach.getMediaTemplate(), outboxMessage.getModel());
 						// attach.setMediaTemplate(attachFileStr);
-						attach.setMediaURL(
-								text2Media.toImage(attachFileStr, attach.getMediaTemplateStyle(), attach.getAttachmentId()));
+						attach.setMediaURL(text2Media.toImage(attachFileStr, attach.getMediaTemplateStyle(),
+								attach.getAttachmentId()));
+						ApiResponseUtil.addLog("2c." + defaultAttachment.getAttachmentId());
 					}
+					ApiResponseUtil.addLog("2d." + defaultAttachment.getAttachmentId());
 				}
 			} catch (Exception e) {
 				outboxMessage.logs().add("MediaTemplateException : " + e.getMessage());
