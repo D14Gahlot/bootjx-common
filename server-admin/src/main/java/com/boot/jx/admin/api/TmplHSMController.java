@@ -1,5 +1,6 @@
 package com.boot.jx.admin.api;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.logger.AuditDetailProvider;
-import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.TmplClient;
@@ -24,13 +23,10 @@ import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.manager.ThirdPartyTemplateManager;
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
-import com.boot.utils.JsonUtil;
-import com.boot.utils.UniqueID;
 
 @RestController
 public class TmplHSMController {
@@ -171,7 +167,8 @@ public class TmplHSMController {
 	protected TmplClient tmplClient;
 
 	@RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.POST })
-	public ApiResponse<HSMTemplateDoc, Object> createPushTemplates(@RequestBody HSMTemplateDoc newVersion) {
+	public ApiResponse<HSMTemplateDoc, Object> createPushTemplates(@RequestBody HSMTemplateDoc newVersion)
+			throws IOException {
 
 		boolean updated = false;
 		if (ArgUtil.is(newVersion.getId())) {
@@ -186,41 +183,22 @@ public class TmplHSMController {
 		Attachment tmplattachment = tmplOptions.keyEntry("attachment").as(Attachment.class);
 		if (ArgUtil.is(tmplattachment)) {
 			if (!ArgUtil.is(tmplattachment.getAttachmentId())) {
-				tmplattachment.setAttachmentId(UniqueID.generateString62());
-				ApiResponseUtil.addLog("1a."+tmplattachment.getAttachmentId());
+				tmplattachment.setAttachmentId(ArgUtil.parseAsString(System.currentTimeMillis()));
 			}
 			tmplOptions.keyEntry("attachment").save(tmplattachment);
 			newVersion.setOptions(tmplOptions.toMap());
-			ApiResponseUtil.addLog("1b."+tmplattachment.getAttachmentId());
+
+			if (ArgUtil.is(tmplattachment.getMediaTemplate())) {
+				String attachFileStr = tmplClient.toImage(tmplattachment, newVersion.getModel());
+				tmplattachment.setMediaURL(attachFileStr);
+
+			}
 		}
 
 		auditDetailProvider.auditCreate(newVersion);
 		mongoTemplate.save(newVersion);
 
-		OutboxMessage outboxMessage = null;
-		tmplOptions = MapModel.from(newVersion.options());
-		tmplattachment = tmplOptions.keyEntry("attachment").as(Attachment.class);
-		if (ArgUtil.is(tmplattachment) && ArgUtil.is(tmplattachment.getMediaTemplate())) {
-			outboxMessage = new OutboxMessage();
-			outboxMessage.setModel(JsonUtil.deepCopy(newVersion.getModel()));
-			CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
-			hsmTemp.setId(newVersion.getId());
-			hsmTemp.setCode(newVersion.getCode());
-			outboxMessage.setHsm(hsmTemp);
-			ApiResponseUtil.addLog("1c."+tmplattachment.getAttachmentId());
-			tmplClient.process(outboxMessage);
-
-			for (Attachment attachment : outboxMessage.getAttachments()) {
-				if (ArgUtil.is(attachment.getMediaTemplate()) && tmplattachment.getAttachmentId().equals(attachment.getAttachmentId())) {
-					tmplattachment.setMediaURL(attachment.getMediaURL());
-					tmplOptions.keyEntry("attachment").save(tmplattachment);
-				}
-				ApiResponseUtil.addLog("1d."+tmplattachment.getAttachmentId());
-			}
-			mongoTemplate.save(newVersion);
-		}
-
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class)).data(newVersion)
-				.message("HSM Template " + (updated ? "updated" : "created")).meta(outboxMessage);
+				.message("HSM Template " + (updated ? "updated" : "created"));
 	}
 }

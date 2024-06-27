@@ -1,5 +1,6 @@
 package com.boot.jx.postman.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +113,6 @@ public class TmplClient {
 		Attachment defaultAttachment = optionsModel.keyEntry("attachment").as(Attachment.class);
 		if (ArgUtil.is(defaultAttachment) && outboxMessage.attachments().size() == 0) {
 			outboxMessage.attachments().add(defaultAttachment);
-			ApiResponseUtil.addLog("2a." + defaultAttachment.getAttachmentId());
 		}
 
 		Attachment backgroundVoice = optionsModel.keyEntry("bg_voice").as(Attachment.class);
@@ -124,15 +124,9 @@ public class TmplClient {
 		if (ArgUtil.is(outboxMessage.attachments())) {
 			try {
 				for (Attachment attach : outboxMessage.getAttachments()) {
-					ApiResponseUtil.addLog("2b." + defaultAttachment.getAttachmentId());
 					if (ArgUtil.is(attach.getMediaTemplate())) {
-						String attachFileStr = process(attach.getMediaTemplate(), outboxMessage.getModel());
-						// attach.setMediaTemplate(attachFileStr);
-						attach.setMediaURL(text2Media.toImage(attachFileStr, attach.getMediaTemplateStyle(),
-								attach.getAttachmentId()));
-						ApiResponseUtil.addLog("2c." + defaultAttachment.getAttachmentId());
+						attach.setMediaURL(toImage(attach, outboxMessage.getModel()));
 					}
-					ApiResponseUtil.addLog("2d." + defaultAttachment.getAttachmentId());
 				}
 			} catch (Exception e) {
 				outboxMessage.logs().add("MediaTemplateException : " + e.getMessage());
@@ -149,6 +143,11 @@ public class TmplClient {
 			return iCommonTmplPackage.process(template, model);
 		}
 		return template;
+	}
+
+	public String toImage(Attachment attach, Object model) throws IOException {
+		String attachFileStr = process(attach.getMediaTemplate(), model);
+		return text2Media.toImage(attachFileStr, attach.getMediaTemplateStyle(), attach.getAttachmentId());
 	}
 
 }
