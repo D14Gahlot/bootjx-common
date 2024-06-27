@@ -896,7 +896,7 @@ public class WacfbClient implements ChannelClient {
 
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 		try {
-			// String FILE_URL=req.getString("url");
+
 			String FILE_URL = null;
 			List<Map<String, Object>> components = (List<Map<String, Object>>) req
 					.get("components");
@@ -906,15 +906,12 @@ public class WacfbClient implements ChannelClient {
 							.get("example");
 					List<String> headerHandle = (List<String>) example
 							.get("header_handle");
-					FILE_URL = headerHandle.get(0); // Assuming there's always
-													// at least one element
-					System.out.println(FILE_URL);
+					FILE_URL = headerHandle.get(0);
 				}
 			}
 
 			String fileName = FILE_URL.substring(FILE_URL.lastIndexOf("/") + 1);
 			byte[] fileData = downloadFile(FILE_URL);
-
 			int fileLength = fileData.length;
 			String fileType = determineFileType(FILE_URL);
 			String UPLOAD_URL = "https://graph.facebook.com/v19.0/"
@@ -931,17 +928,10 @@ public class WacfbClient implements ChannelClient {
 				if ("HEADER".equals(component.get("type"))) {
 					Map<String, Object> example = (Map<String, Object>) component
 							.get("example");
-					// List<String> headerHandle = (List<String>)
-					// example.get("header_handle");
-					example.put("header_handle", finalResponse);// Assuming
-																// there's
-																// always at
-																// least one
-																// element
-					// System.out.println(FILE_URL);
+					example.put("header_handle", finalResponse);
 				}
 			}
-			// req.put("header_handle", finalResponse);
+
 			MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
 					.path(channelConfig.getWacfb().getWabaId()
 							+ "/message_templates")
