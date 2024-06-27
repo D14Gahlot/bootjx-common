@@ -191,7 +191,6 @@ public class TmplHSMController {
 			if (ArgUtil.is(tmplattachment.getMediaTemplate())) {
 				String attachFileStr = tmplClient.toImage(tmplattachment, newVersion.getModel());
 				tmplattachment.setMediaURL(attachFileStr);
-
 			}
 		}
 
