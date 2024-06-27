@@ -187,9 +187,11 @@ public class TmplHSMController {
 		if (ArgUtil.is(tmplattachment)) {
 			if (!ArgUtil.is(tmplattachment.getAttachmentId())) {
 				tmplattachment.setAttachmentId(UniqueID.generateString62());
+				ApiResponseUtil.addLog("1a."+tmplattachment.getAttachmentId());
 			}
 			tmplOptions.keyEntry("attachment").save(tmplattachment);
-			ApiResponseUtil.addLog("1a."+tmplattachment.getAttachmentId());
+			newVersion.setOptions(tmplOptions.toMap());
+			ApiResponseUtil.addLog("1b."+tmplattachment.getAttachmentId());
 		}
 
 		auditDetailProvider.auditCreate(newVersion);
@@ -203,6 +205,7 @@ public class TmplHSMController {
 			hsmTemp.setId(newVersion.getId());
 			hsmTemp.setCode(newVersion.getCode());
 			outboxMessage.setHsm(hsmTemp);
+			ApiResponseUtil.addLog("1c."+tmplattachment.getAttachmentId());
 			tmplClient.process(outboxMessage);
 
 			for (Attachment attachment : outboxMessage.getAttachments()) {
@@ -210,7 +213,7 @@ public class TmplHSMController {
 					tmplattachment.setMediaURL(attachment.getMediaURL());
 					tmplOptions.keyEntry("attachment").save(tmplattachment);
 				}
-				ApiResponseUtil.addLog("1b."+tmplattachment.getAttachmentId());
+				ApiResponseUtil.addLog("1d."+tmplattachment.getAttachmentId());
 			}
 			mongoTemplate.save(newVersion);
 		}
