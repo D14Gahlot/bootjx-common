@@ -895,13 +895,21 @@ public class WacfbClient implements ChannelClient {
 	}
 
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
+
 		try {
 
 			String FILE_URL = null;
+			boolean media = false;
+
 			List<Map<String, Object>> components = (List<Map<String, Object>>) req
 					.get("components");
 			for (Map<String, Object> component : components) {
 				if ("HEADER".equals(component.get("type"))) {
+					if (component.get("format").equals("IMAGE")
+							|| component.get("format").equals("DOCUMENT")
+							|| component.get("format").equals("VIDEO")) {
+						media = true;
+					}
 					Map<String, Object> example = (Map<String, Object>) component
 							.get("example");
 					List<String> headerHandle = (List<String>) example
@@ -909,29 +917,31 @@ public class WacfbClient implements ChannelClient {
 					FILE_URL = headerHandle.get(0);
 				}
 			}
+			if (media) {
+				String fileName = FILE_URL
+						.substring(FILE_URL.lastIndexOf("/") + 1);
+				byte[] fileData = downloadFile(FILE_URL);
+				int fileLength = fileData.length;
+				String fileType = determineFileType(FILE_URL);
+				String UPLOAD_URL = "https://graph.facebook.com/v19.0/"
+						+ channelConfig.getWacfb().getMasterAppId()
+						+ "/uploads";
+				String uploadResponse = firstApiCall(fileData, fileName,
+						fileType, fileLength, UPLOAD_URL, channelConfig);
+				String id = extractIdFromResponse(uploadResponse);
+				String finalResponse = secondApiCall(id, fileData, fileName,
+						fileType, channelConfig);
 
-			String fileName = FILE_URL.substring(FILE_URL.lastIndexOf("/") + 1);
-			byte[] fileData = downloadFile(FILE_URL);
-			int fileLength = fileData.length;
-			String fileType = determineFileType(FILE_URL);
-			String UPLOAD_URL = "https://graph.facebook.com/v19.0/"
-					+ channelConfig.getWacfb().getMasterAppId() + "/uploads";
-			String uploadResponse = firstApiCall(fileData, fileName, fileType,
-					fileLength, UPLOAD_URL, channelConfig);
-			String id = extractIdFromResponse(uploadResponse);
-			String finalResponse = secondApiCall(id, fileData, fileName,
-					fileType, channelConfig);
-
-			List<Map<String, Object>> components1 = (List<Map<String, Object>>) req
-					.get("components");
-			for (Map<String, Object> component : components1) {
-				if ("HEADER".equals(component.get("type"))) {
-					Map<String, Object> example = (Map<String, Object>) component
-							.get("example");
-					example.put("header_handle", finalResponse);
+				List<Map<String, Object>> components1 = (List<Map<String, Object>>) req
+						.get("components");
+				for (Map<String, Object> component : components1) {
+					if ("HEADER".equals(component.get("type"))) {
+						Map<String, Object> example = (Map<String, Object>) component
+								.get("example");
+						example.put("header_handle", finalResponse);
+					}
 				}
 			}
-
 			MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
 					.path(channelConfig.getWacfb().getWabaId()
 							+ "/message_templates")
