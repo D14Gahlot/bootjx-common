@@ -31,6 +31,7 @@ import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 
@@ -87,7 +88,8 @@ public class ChatSessionService {
 					ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider
 							.get(inboxMessage.contact().getChannelType());
 					if (!ArgUtil.is(config)) {
-						logManager.error(inboxMessage, "Channel Config Not Found:" + config.getChannelId());
+						String channelId = PostManUtil.CHANNEL_ID(inboxMessage.contact());
+						logManager.error(inboxMessage, "Channel Config Not Found:" + channelId);
 					} else if (!ArgUtil.is(plugin)) {
 						logManager.error(inboxMessage, "Channel Plugin Not Found:" + config.getChannelId());
 					} else if (!ArgUtil.is(plugin.getDetails(config))) {
