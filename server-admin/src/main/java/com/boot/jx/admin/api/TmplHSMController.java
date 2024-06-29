@@ -1,8 +1,13 @@
 package com.boot.jx.admin.api;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,10 +18,13 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.manager.ThirdPartyTemplateManager;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 
@@ -131,6 +139,16 @@ public class TmplHSMController {
 		return new ApiResponse<HSMTemplate3rdParty, Object>().data(temp);
 	}
 
+	@PutMapping("/api/tmpl/hsm/waba_migrate")
+	public ApiResponse<HSMTemplate3rdParty, Object> MigrateTemplate(@RequestParam String oldChannelId,
+			@RequestParam String newChannelId) {
+		Query query = new Query(Criteria.where("channelId").is(oldChannelId));
+		Update update = new Update().set("channelId", newChannelId);
+
+		mongoTemplate.updateMulti(query, update, HSMTemplate3rdParty.class);
+		return new ApiResponse<HSMTemplate3rdParty, Object>().message("Template Migrated");
+	}
+
 	// HSMTemplate
 	@RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.GET })
 	public ApiResponse<HSMTemplateDoc, Object> listPushTemplates() {
@@ -145,18 +163,41 @@ public class TmplHSMController {
 				.message("PushTemplate deleted");
 	}
 
-	@RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.POST })
-	public ApiResponse<HSMTemplateDoc, Object> createPushTemplates(@RequestBody HSMTemplateDoc newVersion) {
+	@Autowired
+	protected TmplClient tmplClient;
 
+	@RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.POST })
+	public ApiResponse<HSMTemplateDoc, Object> createPushTemplates(@RequestBody HSMTemplateDoc newVersion)
+			throws IOException {
+
+		boolean updated = false;
 		if (ArgUtil.is(newVersion.getId())) {
 			HSMTemplateDoc oldVersion = mongoTemplate.findById(newVersion.getId(), HSMTemplateDoc.class);
 			if (ArgUtil.is(oldVersion)) {
 				mongoTemplate.archive(oldVersion);
+				updated = true;
 			}
 		}
+
+		MapModel tmplOptions = MapModel.from(newVersion.options());
+		Attachment tmplattachment = tmplOptions.keyEntry("attachment").as(Attachment.class);
+		if (ArgUtil.is(tmplattachment)) {
+			if (!ArgUtil.is(tmplattachment.getAttachmentId())) {
+				tmplattachment.setAttachmentId(ArgUtil.parseAsString(System.currentTimeMillis()));
+			}
+			tmplOptions.keyEntry("attachment").save(tmplattachment);
+			newVersion.setOptions(tmplOptions.toMap());
+
+			if (ArgUtil.is(tmplattachment.getMediaTemplate())) {
+				String attachFileStr = tmplClient.toImage(tmplattachment, newVersion.getModel());
+				tmplattachment.setMediaURL(attachFileStr);
+			}
+		}
+
 		auditDetailProvider.auditCreate(newVersion);
 		mongoTemplate.save(newVersion);
+
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class)).data(newVersion)
-				.message("QuickReply created");
+				.message("HSM Template " + (updated ? "updated" : "created"));
 	}
 }

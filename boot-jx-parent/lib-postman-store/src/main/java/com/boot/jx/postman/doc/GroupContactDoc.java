@@ -1,9 +1,7 @@
 package com.boot.jx.postman.doc;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
-import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;

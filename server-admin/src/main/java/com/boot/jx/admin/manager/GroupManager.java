@@ -10,16 +10,13 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
-import com.boot.jx.common.doc.AgentDoc;
-import com.boot.jx.common.doc.DepartmentDoc;
+
 import com.boot.jx.common.doc.GroupDoc;
 import com.boot.jx.common.dto.GroupReqDto;
 import com.boot.jx.common.dto.GroupSessionDto;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;

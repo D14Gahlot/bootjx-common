@@ -106,7 +106,6 @@ public class PBPhone implements Serializable, Comparable<PBPhone>, JsonIgnoreUnk
 			return false;
 		PBPhone that = (PBPhone) o;
 		return new EqualsBuilder().
-		// if deriving: appendSuper(super.equals(obj)).
 				append(this.countryCallingCode, that.countryCallingCode)
 				.append(this.nationalNumber, that.nationalNumber).append(this.ext, that.ext).isEquals();
 	}

@@ -20,7 +20,6 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.contak.doc.ContakTemplateDoc;
 import com.boot.jx.contak.dto.CompanyDoc;
-import com.boot.jx.contak.dto.ContakModels.ContakActor;
 import com.boot.jx.contak.dto.ContakModels.ContakInboundTrigger;
 import com.boot.jx.contak.manager.ContakApiContext;
 import com.boot.jx.contak.manager.ContakApiContext.AUTH_RULES;

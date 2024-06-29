@@ -64,14 +64,23 @@ public class WA360Constants {
 		public static final JsonPath INTERACTIVE_ACTION_BUTTON = new JsonPath("interactive/action/button");
 		public static final JsonPath INTERACTIVE_ACTION_BUTTONS = new JsonPath("interactive/action/buttons");
 		public static final JsonPath INTERACTIVE_ACTION_SECTIONS = new JsonPath("interactive/action/sections");
+		public static final JsonPath INTERACTIVE_ACTION_NAME = new JsonPath("interactive/action/name");
+		public static final JsonPath INTERACTIVE_ACTION_PARAMATERS = new JsonPath("interactive/action/parameters");
 
 		public static final JsonPath INTERACTIVE_ACTION_REPLY_ID = new JsonPath("reply/id");
 		public static final JsonPath INTERACTIVE_ACTION_REPLY_TITLE = new JsonPath("reply/title");
 
 		public static final JsonPath RESPONSE_MSG_ID = new JsonPath("messages/[0]/id");
-		public static final JsonPath RESPONSE_ERROR_CODE = new JsonPath("errors/[0]/code");
-		public static final JsonPath RESPONSE_ERROR_TITLE = new JsonPath("errors/[0]/title");
-		public static final JsonPath RESPONSE_ERROR_DETAILS = new JsonPath("errors/[0]/details");
+		public static final JsonPath RESPONSE_ERRORS_CODE = new JsonPath("errors/[0]/code");
+		public static final JsonPath RESPONSE_ERRORS_TITLE = new JsonPath("errors/[0]/title");
+		public static final JsonPath RESPONSE_ERRORS_DETAILS = new JsonPath("errors/[0]/details");
+
+		public static final JsonPath RESPONSE_ERROR_CODE = new JsonPath("error/code");
+		public static final JsonPath RESPONSE_ERROR_MSG = new JsonPath("error/message");
+		public static final JsonPath RESPONSE_ERROR_DETAILS = new JsonPath("error/error_data/details");
+		public static final JsonPath RESPONSE_ERROR_USER_TITLE = new JsonPath("error/error_user_title");
+		public static final JsonPath RESPONSE_ERROR_USER_MSG = new JsonPath("error/error_user_msg");
+		public static final JsonPath RESPONSE_ERROR_TRACE_ID = new JsonPath("error/fbtrace_id");
 
 		public static final JsonPath TEMPLATE_NAMESPACE = new JsonPath("template/namespace");
 		public static final JsonPath TEMPLATE_LANGUAGE_POLICY = new JsonPath("template/language/policy");

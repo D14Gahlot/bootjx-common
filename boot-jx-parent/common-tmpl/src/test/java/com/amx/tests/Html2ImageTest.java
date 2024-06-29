@@ -1,9 +1,6 @@
 package com.amx.tests;
 
-import java.io.File;
-
 import org.junit.Test;
-
 
 import com.boot.jx.tmpl.CommonTmpPackageImpl;
 

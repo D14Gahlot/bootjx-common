@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.account.doc.BusinessUserDoc;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.common.models.AppAuthModels;
-import com.boot.jx.common.models.AppAuthModels.AppCommonAuthUser;
 import com.boot.jx.postman.PMConstants;
 import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;

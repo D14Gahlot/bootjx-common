@@ -8,6 +8,7 @@ import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.plugin.OAPlugin.OAConfigDetails;
+import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
 import com.boot.jx.postman.plugin.SMSPlugin.SMSConfigDetails;
 import com.boot.jx.postman.plugin.TelegramPlugin.TelegramConfigDetails;
 import com.boot.jx.postman.plugin.TwilioSMSPlugin.TwilioConfigDetails;
@@ -37,6 +38,7 @@ public class ChannelConfig extends AChannelConfig {
 	private WA360CloudConfigDetails wa360dc;
 	private WACFBConfigDetails wacfb;
 	private OAConfigDetails oa;
+	private OutlookConfigDetails outlook;
 
 	private boolean isAutoCreated;
 	private boolean isMaster;
@@ -280,5 +282,13 @@ public class ChannelConfig extends AChannelConfig {
 		default:
 			return null;
 		}
+	}
+
+	public OutlookConfigDetails getOutlook() {
+		return outlook;
+	}
+
+	public void setOutlook(OutlookConfigDetails outlook) {
+		this.outlook = outlook;
 	}
 }

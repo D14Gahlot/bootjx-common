@@ -79,23 +79,34 @@ public class WacfbClient implements ChannelClient {
 		} else {
 			boolean isList = false;
 			boolean isButton = false;
+			boolean isCtaUrl = false;
+			boolean isLocationRequest = false;
 			int buttonsCount = 0;
-			String bodyTextAppend = Constants.BLANK;
+			int urlCount = 0;
+			String bodyUrlAppend = Constants.BLANK;
+			String bodyPhoneAppend = Constants.BLANK;
+
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
+			List<TmplElement> noButtons = new ArrayList<TmplElement>();
 			MapModel options = MapModel.from(outboxMessage.options());
 			if (options.containsKey("buttons")) {
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
-						bodyTextAppend = bodyTextAppend
+						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
+						urlCount++;
+						noButtons.add(b);
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
-						bodyTextAppend = bodyTextAppend
+						bodyPhoneAppend = bodyPhoneAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconPhone + " *",
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
+					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.LOCATION_REQUEST)) {
+						isLocationRequest = true;
+						noButtons.add(b);
 					} else {
 						buttonsCount++;
 						buttons.add(b);
@@ -106,9 +117,14 @@ public class WacfbClient implements ChannelClient {
 			}
 
 			isList = options.entry("is_list").asBoolean(isList);
+			isCtaUrl = !isList && !isButton && (urlCount == 1);
 
-			if (ArgUtil.is(bodyTextAppend)) {
-				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyTextAppend);
+			if (ArgUtil.is(bodyPhoneAppend)) {
+				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyPhoneAppend);
+			}
+
+			if (!isCtaUrl && ArgUtil.is(bodyUrlAppend)) {
+				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyUrlAppend);
 			}
 
 			if (isList) {
@@ -161,7 +177,13 @@ public class WacfbClient implements ChannelClient {
 					msgIds.add(getMessageId(resp));
 				}
 			} else if (isButton) {
-				MapModel resp = sendButton(channelConfig, outboxMessage, buttons);
+				MapModel resp = sendButton(channelConfig, outboxMessage, buttons, "button");
+				msgIds.add(getMessageId(resp));
+			} else if (isCtaUrl) {
+				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "cta_url");
+				msgIds.add(getMessageId(resp));
+			} else if (isLocationRequest) {
+				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "location_request_message");
 				msgIds.add(getMessageId(resp));
 			} else {
 				String textMessage = outboxMessage.getMessage();
@@ -500,12 +522,13 @@ public class WacfbClient implements ChannelClient {
 		return send(req, channelConfig);
 	}
 
-	private MapModel sendButton(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons) {
+	private MapModel sendButton(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons,
+			String type) {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "interactive");
-		req.put(new JsonPath("/interactive/type"), "button");
+		req.put(new JsonPath("/interactive/type"), type);
 
 		if (ArgUtil.is(outboxMessage.getAttachments())) {
 			MapModel intr = MapModel.createInstance();
@@ -539,19 +562,35 @@ public class WacfbClient implements ChannelClient {
 		}
 
 		req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, ArgUtil.nonEmpty(outboxMessage.getMessage(), "---"));
-		req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
-				ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
+
+		String footer = ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK);
+		if (ArgUtil.is(footer)) {
+			req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT, footer);
+		}
+
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, "menu");
 
-		List<Object> rows = new ArrayList<Object>();
-		for (TmplElement button : buttons) {
-			rows.add(MapModel.createInstance().put("type", "reply")
-					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID, StringUtils.substring(button.getCode(), 256))
-					.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
-							StringUtils.substring(button.getLabel(), 20))
-					.toMap());
+		if ("button".equalsIgnoreCase(type)) {
+			List<Object> rows = new ArrayList<Object>();
+			for (TmplElement button : buttons) {
+				rows.add(MapModel.createInstance().put("type", "reply")
+						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
+								StringUtils.substring(button.getCode(), 256))
+						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
+								StringUtils.substring(button.getLabel(), 20))
+						.toMap());
+			}
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
+		} else if ("cta_url".equalsIgnoreCase(type)) {
+			TmplElement button = buttons.get(0);
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
+					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
+							.put("url", button.getUrl()).toMap());
+		} else if ("location_request_message".equalsIgnoreCase(type)) {
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
 		}
-		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
+
 		return send(req, channelConfig);
 	}
 
@@ -575,26 +614,65 @@ public class WacfbClient implements ChannelClient {
 	private String getMessageId(MapModel resp) {
 		String id = resp.entry(OutBoundWrapperPaths.RESPONSE_MSG_ID).asString();
 		String errorCode = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_CODE).asString();
-		if (ArgUtil.is(errorCode) || !ArgUtil.is(id)) {
-			String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_TITLE).asString();
-			String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_DETAILS).asString();
-
-			ApiFieldError error = new ApiFieldError();
-			error.code(errorCode);
-			error.codeKey(errorTitle);
-			error.setDescription(String.format("%s : %s / %s / %s ", id, errorCode, errorTitle, errorDetails));
-			if ("1006".equals(errorCode)) {
-				error.setDescriptionKey("File or resource not found");
-				if ("unknown contact".equals(errorDetails)) {
-					error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
-				}
-			} else if ("471".equals(errorCode)) {
-				error.setDescriptionKey("File or resource not found");
-				error.code(PostManException.ErrorCode.MESSAGE_LIMIT_EXCEEDED);
+		String errorCodeLegacy = resp.entry(OutBoundWrapperPaths.RESPONSE_ERRORS_CODE).asString();
+		if (ArgUtil.is(errorCode) || ArgUtil.is(errorCodeLegacy) || !ArgUtil.is(id)) {
+			if (ArgUtil.is(errorCodeLegacy)) {
+				return getMessageIdLegacy(resp, id, errorCodeLegacy);
+			} else {
+				return getMessageIdCloud(resp, id, errorCode);
 			}
-			ApiResponseUtil.throwException(error);
 		}
 		return id;
+	}
+
+	private String getMessageIdCloud(MapModel resp, String messageId, String errorCode) {
+		String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_MSG).asString();
+		String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_DETAILS).asString();
+
+		ApiFieldError error = new ApiFieldError();
+		error.code(errorCode);
+		error.codeKey(errorTitle);
+
+		if (!ArgUtil.is(errorDetails)) {
+			error.setDescriptionKey(resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_USER_TITLE).asString());
+			errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_USER_MSG).asString();
+		}
+
+		error.setDescription(String.format("%s : %s / %s / %s ", messageId, errorCode, errorTitle, errorDetails));
+		if ("1006".equals(errorCode) || "131026".equals(errorCode)) {
+			error.setDescriptionKey("File or resource not found");
+			if ("unknown contact".equals(errorDetails)) {
+				error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
+			}
+		} else if ("471".equals(errorCode)) {
+			error.setDescriptionKey("File or resource not found");
+			error.code(PostManException.ErrorCode.MESSAGE_LIMIT_EXCEEDED);
+		}
+		error.setBody(resp.get("errors"));
+		ApiResponseUtil.throwException(error);
+		return messageId;
+	}
+
+	private String getMessageIdLegacy(MapModel resp, String messageId, String errorCode) {
+		String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERRORS_TITLE).asString();
+		String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERRORS_DETAILS).asString();
+
+		ApiFieldError error = new ApiFieldError();
+		error.code(errorCode);
+		error.codeKey(errorTitle);
+		error.setDescription(String.format("%s : %s / %s / %s ", messageId, errorCode, errorTitle, errorDetails));
+		if ("1006".equals(errorCode)) {
+			error.setDescriptionKey("File or resource not found");
+			if ("unknown contact".equals(errorDetails)) {
+				error.field("to").code(PostManException.ErrorCode.CONTACT_NOTFOUND);
+			}
+		} else if ("471".equals(errorCode)) {
+			error.setDescriptionKey("File or resource not found");
+			error.code(PostManException.ErrorCode.MESSAGE_LIMIT_EXCEEDED);
+		}
+		error.setBody(resp.get("errors"));
+		ApiResponseUtil.throwException(error);
+		return messageId;
 	}
 
 	/*

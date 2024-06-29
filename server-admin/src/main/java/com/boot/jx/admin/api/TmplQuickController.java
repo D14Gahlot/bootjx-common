@@ -27,9 +27,7 @@ import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.QuickSkill;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.store.QuickStore;
-import com.boot.jx.postman.store.QuickStore.QuickGalleryItem;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.EntityDtoUtil;
 
 @RestController
 public class TmplQuickController {

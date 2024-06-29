@@ -22,6 +22,7 @@ public class JobScheduledDoc extends TimeStampDoc {
 	private String isactive;
 	public String status;
 	public TimeStampIndex time;
+	private String instanceId;
 
 	public String getId() {
 		return id;
@@ -69,6 +70,14 @@ public class JobScheduledDoc extends TimeStampDoc {
 
 	public void setInput(Map<String, List<Object>> input) {
 		this.input = input;
+	}
+
+	public String getInstanceId() {
+		return instanceId;
+	}
+
+	public void setInstanceId(String instanceId) {
+		this.instanceId = instanceId;
 	}
 
 }

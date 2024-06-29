@@ -14,6 +14,8 @@ public class TmplElement implements Serializable {
 		public static final String QUICK_REPLY = "QUICK_REPLY";
 		public static final String URL = "URL";
 		public static final String PHONE_NUMBER = "PHONE_NUMBER";
+		public static final String LOCATION_REQUEST = "LOCATION_REQUEST";
+
 	}
 
 	@ApiMockModelProperty(example = "occupation", value = "key to be used programmatically", required = false)
@@ -23,7 +25,7 @@ public class TmplElement implements Serializable {
 	private String label;
 
 	@ApiMockModelProperty(example = "QUICK_REPLY", value = "Display Text",
-			allowableValues = "QUICK_REPLY,URL,PHONE_NUMBER", required = false)
+			allowableValues = "QUICK_REPLY,URL,PHONE_NUMBER,LOCATION_REQUEST", required = false)
 	private String type;
 
 	@ApiMockModelProperty(example = "What occupation you have", value = "Description of of element", required = false)

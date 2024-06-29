@@ -1,10 +1,13 @@
 package com.boot.jx.postman.store;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,17 +18,21 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
 import com.boot.jx.model.ModelPatch.ModelPatches;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.SimpleDocQueryBuilder;
+import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBEmail;
@@ -36,6 +43,8 @@ import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -53,6 +62,12 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 	@Autowired
 	protected PMEnvironment environment;
+	
+	@Autowired
+	CommonMongoTemplate cMongoTemplate;
+	
+	@Autowired(required = false)
+	protected AuditDetailProvider auditDetailProvider;
 
 	public PBPhone parsePhone(PBPhone pbPhone) {
 		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
@@ -238,22 +253,26 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			case "rmCode":
 				qb.setunset("rmCode", patch.value().asString());
 				break;
-			case "emailsAlt":
-				PBEmail emailsAlt = patch.value().as(PBEmail.class);
-				qb.setunset("emailsAlt", patch(patch.getCommand(), doc.emailsAlt(), emailsAlt));
+				
+			case "additionalInfo.alt_phones":
+			case "alt_phones":
+				PBPhone alt_phone = parsePhone(patch.value().as(PBPhone.class));
+				qb.setunset("additionalInfo.alt_phones", patch(patch.getCommand(), doc.phones(), alt_phone));
 				break;
-			case "phonesAlt":
-				PBPhone phonesAlt = parsePhone(patch.value().as(PBPhone.class));
-				qb.setunset("phonesAlt", patch(patch.getCommand(), doc.phonesAlt(), phonesAlt));
-				break;
-//			case "additionalInfo": @Rabil :- Need per filed update not all field at once
-//				qb.setunset("additionalInfo", patch.value().asString());
-//				break;
+			case "additionalInfo.alt_emails":
+			case "alt_emails":
+				PBEmail alt_email =patch.value().as(PBEmail.class);
+				qb.setunset("additionalInfo.alt_emails", patch(patch.getCommand(), doc.emails, alt_email));
+				break;	
+				
 			default:
-				// TODO:- @Rabil - Check additonal validty in Masters and its type in master,
+				// TODO:-  Check additonal validty in Masters and its type in master,
 				// then based on type of field do conversion below and update instead
 				// using.asString() for all
-				qb.setunset("additionalInfo." + patch.getField(), patch.value().asString());
+				Object objType=checkFieldType(patch.getField(), patch.value());
+				if(ArgUtil.is(objType)) {
+					qb.setunset(patch.getField(),objType);
+				}
 				break;
 			}
 			update(qb);
@@ -306,6 +325,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public CustomerProfileDoc createprofile(CustomerProfileDoc req) {
 		CustomerProfileDoc doc = findById(req.getId(), CustomerProfileDoc.class);
 		if(ArgUtil.is(doc)) {
@@ -313,63 +333,170 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					.codeKey("ValidPhoneDuplicate").description(doc.getCode() + " already exists"));
 		}else {
 			doc= new CustomerProfileDoc();
-			doc.setName(req.getName());
+			
+			if(ArgUtil.is(req.getName())) {
+				PBName pbName=new PBName();
+				pbName.setFirstName(req.getName().getFirstName());
+				pbName.setLastName(req.getName().getLastName());
+				pbName.setMiddleName(req.getName().getMiddleName());
+				pbName.fix();
+				doc.setName(pbName);
+			}
+			
+			
+			if(ArgUtil.is(findProfileByCode(req.getCode()))){
+				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("code").field("code")
+						.codeKey("ValidCodeDuplicate").description(req.getCode() + " already exists"));
+			}
+			
 			doc.setCode(req.getCode());
 			doc.setRmCode(req.getRmCode());
 			 Set<PBEmail> emails = new HashSet<>();
-			 Set<PBEmail> emailAlt = new HashSet<>();
 			if(req.getEmails()!=null && !req.getEmails().isEmpty()){
 				 Set<PBEmail> reqEmails =req.getEmails();
+				 
 				for(PBEmail pbEmail:reqEmails) {
-					emails.add(setEmail(pbEmail));
+					PBEmail pb =new PBEmail();
+					if(ArgUtil.is(findProfileByEmail(pbEmail.getEmail()))){
+						ApiResponseUtil.throwInputException(new ApiFieldError().obzect("email").field("email")
+								.codeKey("ValidEmailDuplicate").description(pbEmail.getEmail() + " already exists"));
+					}
+					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
+					emails.add(pb.update(pbEmail));
 				}
 				doc.setEmails(emails);
 			}
-			if(req.getEmailsAlt()!=null && !req.getEmailsAlt().isEmpty()){
-				 Set<PBEmail> reqEmails =req.getEmailsAlt();
-				for(PBEmail pbEmail:reqEmails) {
-					emailAlt.add(setEmail(pbEmail));
-				}
-				doc.setEmailsAlt(emailAlt);
-			}
 			Set<PBPhone> phones = new HashSet<>();
-			Set<PBPhone> phonesAlt = new HashSet<>(); 
 			if(req.getPhones()!=null && !req.getPhones().isEmpty()) {
 				Set<PBPhone> reqPhones =req.getPhones();
 				for(PBPhone phone:reqPhones) {
+					if(ArgUtil.is(findProfileByPhone(phone.getPhone()))){
+						ApiResponseUtil.throwInputException(new ApiFieldError().obzect("phone").field("phone")
+								.codeKey("ValidPhoneDuplicate").description(phone.getPhone() + " already exists"));
+					}
 					PBPhone pb =parsePhone(phone);
 					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
 					phones.add(pb);
 				}
 				doc.setPhones(phones);
 			}
-			if(req.getPhonesAlt()!=null && !req.getPhonesAlt().isEmpty()) {
-				Set<PBPhone> reqPhones =req.getPhonesAlt();
-				for(PBPhone phone:reqPhones) {
-					PBPhone pb =parsePhone(phone);
-					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
-					phonesAlt.add(pb);
+			if(req.getAddresses()!=null && !req.getAddresses().isEmpty()) {
+				Set<PBAddress> pAddresses=new HashSet<>();
+				for(PBAddress adre:req.getAddresses()) {
+					PBAddress pa =new PBAddress();
+					pa.setUuid(ArgUtil.parseAsString(adre.getUuid(), UniqueID.generateString()));
+					pa.update(adre);
+					pAddresses.add(pa);
+					
 				}
-				doc.setPhonesAlt(phonesAlt);
+				doc.setAddresses(pAddresses);
+				
 			}
-			doc.setAdditionalInfo(req.getAdditionalInfo());
+			
+			if(req.getWorks()!=null && !req.getWorks().isEmpty()) {
+				doc.setWorks(req.getWorks());
+			}
+			
+			if(req.getUrls()!=null && !req.getUrls().isEmpty()) {
+				Set<PBWebsite> pws=new HashSet<>();
+				for(PBWebsite ws:req.getUrls()) {
+					PBWebsite pWebsite=new PBWebsite();
+					pWebsite.setUuid(ArgUtil.parseAsString(ws.getUuid(), UniqueID.generateString()));
+					pws.add(pWebsite.update(ws));
+					
+				}
+				doc.setUrls(pws);
+			}
+			Map<String,Object> addInfoMap=new HashMap<String,Object>();
+			if(req.getAdditionalInfo()!=null && !req.getAdditionalInfo().isEmpty()) {
+				Map<String,Object> addInfo=req.getAdditionalInfo();
+				 /** Retrieve all the key-value pairs from the map **/
+		        Set<Map.Entry<String, Object>> entries = addInfo.entrySet();
+		        for (Map.Entry<String, Object> entry : entries) {
+		            LOGGER.info("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+		           switch (entry.getKey()) {
+		           case "emails":
+		            case "alt_emails":
+		            	List<Object> emailtList=(List<Object>)entry.getValue();
+		            	Set<PBEmail> pbEmails =new TreeSet<PBEmail>();
+		            	for(Object obj:emailtList) {
+		            		Map<String, Object> pMap=JsonUtil.toJsonMap(obj);
+		            		PBEmail pbEmail=new PBEmail();
+		            		for(Map.Entry<String, Object> eMapmail : pMap.entrySet()) {
+		            		 if(eMapmail.getKey().contains("email")) {
+		            			 pbEmail.setEmail(ArgUtil.parseAsString(eMapmail.getValue(), Constants.BLANK));
+		            		 }else if(eMapmail.getKey().contains("label")) {
+		            			 pbEmail.setLabel(ArgUtil.parseAsString(eMapmail.getValue(), Constants.BLANK));
+		            		 }else if(eMapmail.getKey().contains("type")) {
+		            			 pbEmail.setType(ArgUtil.parseAsString(eMapmail.getValue(), Constants.BLANK));
+		            		 }
+		            		}
+		            		 pbEmail.setUuid(UniqueID.generateString());
+		            		 pbEmails.add(pbEmail);
+		            		
+		            	}
+		            	addInfoMap.put(entry.getKey(),pbEmails);	
+		 			  break;
+		            case "phones":
+		            case "alt_phones":
+		            	List<Object> phoneLstList=(List<Object>)entry.getValue();
+		            	Set<PBPhone> pbPhones =new TreeSet<PBPhone>();
+		            	for(Object obj:phoneLstList) {
+		            		Map<String, Object> pMap=JsonUtil.toJsonMap(obj);
+		            		PBPhone ph = parsePhone(new PBPhone().phone(pMap.get("phone").toString()));
+		            		ph.setUuid(ArgUtil.parseAsString(ph.getUuid(), UniqueID.generateString()));
+		            		if(ArgUtil.is(ph))
+		            		 pbPhones.add(ph);
+		            	}
+		            	addInfoMap.put(entry.getKey(),pbPhones);	
+		 			  break;
+		            case "title":
+		            case "Title": 
+		            	addInfoMap.put(entry.getKey(), entry.getValue());
+		            break;	
+		            case "gender":
+		            case "Gender": 
+		            	addInfoMap.put(entry.getKey(), entry.getValue());
+		            break;
+		            case "dob":
+		            case "DOB": 
+		            	addInfoMap.put(entry.getKey(), entry.getValue());
+		            break;
+		            default:
+		            	Object object=checkFieldType(entry.getKey(),entry.getValue());
+		            	if(ArgUtil.isEmpty(object)){
+		            		LOGGER.info("Json Util else  :"+JsonUtil.toJson(object)+"\t key-value :"+entry.getKey()+"-"+JsonUtil.toJson(entry.getValue()));
+		            	}else {
+		            		addInfoMap.put(entry.getKey(), entry.getValue());
+		            	}
+		            }
+		        }
+		        
+			}
+			doc.setAdditionalInfo(addInfoMap);
+			
+			doc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			mongoTemplate.save(doc);
 			
 		}
-		
-		
-		
 		return doc;
 	}
-	
-	public PBEmail setEmail(PBEmail pbEmail) {
-		PBEmail pEmail=new PBEmail();
-		pEmail.setUuid(ArgUtil.parseAsString(pbEmail.getUuid(), UniqueID.generateString()));
-		pEmail.setEmail(pbEmail.getEmail());
-		pEmail.setLabel(pbEmail.getLabel());
-		pEmail.setType(pbEmail.getType());
-		return pEmail;
-		
-	}
 
+	public Object checkFieldType(String code,Object value) {
+		Object objType=null;
+		if (ArgUtil.is(code) && ArgUtil.is(value)) {
+			Query qryQuery=new Query();
+			qryQuery.addCriteria(Criteria.where("code").is(code).and("active").is(true));
+			List<CustomerFieldMasterDoc> cmFieldDoc = cMongoTemplate.find(qryQuery, CustomerFieldMasterDoc.class);
+			if(cmFieldDoc!=null && !cmFieldDoc.isEmpty()) {
+				Object fldType=cmFieldDoc.get(0).getType();
+				if(ArgUtil.is(fldType)) {
+					objType =ArgUtil.parseAsT(fldType,new String(),false);
+				}
+			}
+		return objType;
+		}
+		return objType;
+	}
+	
 }

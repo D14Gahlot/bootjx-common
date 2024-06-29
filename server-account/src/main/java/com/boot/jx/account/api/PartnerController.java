@@ -43,7 +43,6 @@ import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.dto.UserAuthToken;
 import com.boot.jx.common.models.AppAuthModels;
-import com.boot.jx.common.models.AppAuthModels.ACCESS_RULES;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.http.CommonHttpRequest;

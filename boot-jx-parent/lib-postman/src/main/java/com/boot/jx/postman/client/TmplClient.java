@@ -1,5 +1,6 @@
 package com.boot.jx.postman.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,10 +14,12 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
+import com.boot.jx.postman.PostmanPackages.Text2Media;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PostManFile;
@@ -43,6 +46,9 @@ public class TmplClient {
 
 	@Autowired(required = false)
 	private ICommonTmplPackage iCommonTmplPackage;
+
+	@Autowired
+	protected Text2Media text2Media;
 
 	public ApiResponse<CommonFile, Object> process(CommonFile file, ContactType contactType) throws PostManException {
 		if (ArgUtil.is(iCommonTmplPackage)) {
@@ -108,11 +114,24 @@ public class TmplClient {
 		if (ArgUtil.is(defaultAttachment) && outboxMessage.attachments().size() == 0) {
 			outboxMessage.attachments().add(defaultAttachment);
 		}
-		
+
 		Attachment backgroundVoice = optionsModel.keyEntry("bg_voice").as(Attachment.class);
-		//TODO:-@lalit to review
-		if (ArgUtil.is(backgroundVoice)&& outboxMessage.getContact().type().equals(ContactType.WEBSITE)){
+		// TODO:-@lalit to review
+		if (ArgUtil.is(backgroundVoice) && outboxMessage.getContact().type().equals(ContactType.WEBSITE)) {
 			outboxMessage.attachments().add(backgroundVoice);
+		}
+
+		if (ArgUtil.is(outboxMessage.attachments())) {
+			try {
+				for (Attachment attach : outboxMessage.getAttachments()) {
+					if (ArgUtil.is(attach.getMediaTemplate())) {
+						attach.setMediaURL(toImage(attach, outboxMessage.getModel()));
+					}
+				}
+			} catch (Exception e) {
+				outboxMessage.logs().add("MediaTemplateException : " + e.getMessage());
+				LOGGER.error("MediaTemplateException", e);
+			}
 		}
 
 		outboxMessage.options().putAll(options);
@@ -124,6 +143,11 @@ public class TmplClient {
 			return iCommonTmplPackage.process(template, model);
 		}
 		return template;
+	}
+
+	public String toImage(Attachment attach, Object model) throws IOException {
+		String attachFileStr = process(attach.getMediaTemplate(), model);
+		return text2Media.toImage(attachFileStr, attach.getMediaTemplateStyle(), attach.getAttachmentId());
 	}
 
 }

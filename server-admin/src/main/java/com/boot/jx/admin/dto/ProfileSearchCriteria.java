@@ -1,13 +1,13 @@
 package com.boot.jx.admin.dto;
 
-public class SearchCriteria {
+public class ProfileSearchCriteria {
 	private String key;
-    private String operation;
+    private String operator;
     private Object value;
     
-    public SearchCriteria(String key, String operation, Object value) {
+    public ProfileSearchCriteria(String key, String operator, Object value) {
         this.key = key;
-        this.operation = operation;
+        this.operator = operator;
         this.value = value;
     }
 
@@ -19,13 +19,7 @@ public class SearchCriteria {
 		this.key = key;
 	}
 
-	public String getOperation() {
-		return operation;
-	}
-
-	public void setOperation(String operation) {
-		this.operation = operation;
-	}
+	
 
 	public Object getValue() {
 		return value;
@@ -33,6 +27,14 @@ public class SearchCriteria {
 
 	public void setValue(Object value) {
 		this.value = value;
+	}
+
+	public String getOperator() {
+		return operator;
+	}
+
+	public void setOperator(String operator) {
+		this.operator = operator;
 	}
 
 }

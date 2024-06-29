@@ -3,20 +3,16 @@ package com.boot.jx.admin.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchQuery {
+public class ProfileSearchQuery {
 
-	List<SearchCriteria> searchCriterias = new ArrayList<>();
+	
+	List<List<ProfileSearchCriteria>> searchCriterias = new ArrayList<>();
 	
 	int pageNo;
 	int pageSize;
 	String sortBy;
 	String sortDir;
-	public List<SearchCriteria> getSearchCriterias() {
-		return searchCriterias;
-	}
-	public void setSearchCriterias(List<SearchCriteria> searchCriterias) {
-		this.searchCriterias = searchCriterias;
-	}
+	
 	public int getPageNo() {
 		return pageNo;
 	}
@@ -40,6 +36,12 @@ public class SearchQuery {
 	}
 	public void setSortDir(String sortDir) {
 		this.sortDir = sortDir;
+	}
+	public List<List<ProfileSearchCriteria>> getSearchCriterias() {
+		return searchCriterias;
+	}
+	public void setSearchCriterias(List<List<ProfileSearchCriteria>> searchCriterias) {
+		this.searchCriterias = searchCriterias;
 	}
 	
 
