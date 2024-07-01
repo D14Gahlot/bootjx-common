@@ -455,7 +455,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 			WacfbInboundMedia media = map.entry(path).as(WacfbInboundMedia.class);
 
-			String mediaUrl = wacfbClient.getMediaUrl(channelConfig, WA360Constants.MEDIA_CLOUD_URL(media.getId()));
+			String mediaUrl = wacfbClient.getMediaUrl(channelConfig, WA360Constants.META_WA_CLOUD_URL(media.getId()));
 
 			CommonFileStream srcFile = new CommonFileStream().url(mediaUrl).fileType(fileType)
 					.format(FileFormat.from(media.getMimeType())).authBearer(channelConfig.getWacfb().getAccessToken())
@@ -474,11 +474,14 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	@Override
 	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
 			throws FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+		String mediaUrl = wacfbClient.getMediaUrl(channelConfig, attachment.getMediaSrc());
+
+		CommonFileStream srcFile = new CommonFileStream().url(mediaUrl)
 				// .fileType(attachment.getMediaType())
 				.format(FileFormat.from(attachment.getMediaMimeType()))
-				.authBearer(channelConfig.getWacfb().getAccessToken())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption(),
+						attachment.getMediaMimeType(), "File"));
 
 		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
 
