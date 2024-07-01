@@ -77,15 +77,11 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WACFB)
-public class WacfbConnector
-		extends
-			AbstractConnector<WACFBConfigDetails, WacfbPlugin> {
+public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbPlugin> {
 
-	public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil
-			.getInstance();
+	public static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(WacfbConnector.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WacfbConnector.class);
 	@Autowired
 	private RestService restService;
 
@@ -102,103 +98,72 @@ public class WacfbConnector
 	private CommonMongoTemplate commonMongoTemplate;
 
 	@Override
-	public List<ChannelConfig> onRegister(ChannelConfig setup,
-			ChannelConfigTempDoc channelConfigTemp, AuthState state) {
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
+			AuthState state) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		try {
 			MapModel resp = MapModel.from(channelConfigTemp.getResp());
 
-			MapModel accessToken = restService
-					.ajax(WA360Constants.META_WA_CLOUD_URL)
-					.path("oauth/access_token")
+			MapModel accessToken = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path("oauth/access_token")
 					.field("client_id", setup.getWacfb().getMasterAppId())
-					.field("client_secret",
-							setup.getWacfb().getMasterAppSecret())
-					.field("code",
-							resp.pathEntry("authResponse.code").asString())
-					.submit().asMapModel();
+					.field("client_secret", setup.getWacfb().getMasterAppSecret())
+					.field("code", resp.pathEntry("authResponse.code").asString()).submit().asMapModel();
 
 			channelConfigTemp.log("oauth/access_token", accessToken.toMap());
 
-			String userAccessToken = accessToken.keyEntry("access_token")
-					.asString();
+			String userAccessToken = accessToken.keyEntry("access_token").asString();
 			String assignedWaBaId = resp.pathEntry("_.waba_id").asString();
-			String phoneNumberId = resp.pathEntry("_.phone_number_id")
-					.asString();
+			String phoneNumberId = resp.pathEntry("_.phone_number_id").asString();
 
 			if (!ArgUtil.is(assignedWaBaId)) {
-				MapModel debugToken = restService
-						.ajax(WA360Constants.META_WA_CLOUD_URL)
-						.path("debug_token")
+				MapModel debugToken = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path("debug_token")
 						.queryParam("input_token", userAccessToken)
-						.authBearer(setup.getWacfb().getMasterAppId() + "|"
-								+ setup.getWacfb().getMasterAppSecret())
+						.authBearer(setup.getWacfb().getMasterAppId() + "|" + setup.getWacfb().getMasterAppSecret())
 						.get().asMapModel();
 				channelConfigTemp.log("/debug_token", debugToken.toMap());
-				assignedWaBaId = debugToken
-						.pathEntry("/data/granular_scopes/[0]/target_ids/[0]")
-						.asString();
+				assignedWaBaId = debugToken.pathEntry("/data/granular_scopes/[0]/target_ids/[0]").asString();
 			}
 
 			String verificationPin = Random.randomNumeric(6);
 
 			if (ArgUtil.is(phoneNumberId)) {
-				MapModel phoneMap = restService
-						.ajax(WA360Constants.META_WA_CLOUD_URL)
-						.path(phoneNumberId).authBearer(userAccessToken).get()
-						.asMapModel();
+				MapModel phoneMap = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
+						.authBearer(userAccessToken).get().asMapModel();
 				channelConfigTemp.log("/phone_number_by_id", phoneMap.toMap());
 
 				ChannelConfig channel = new ChannelConfig();
 				channel.setWacfb(new WACFBConfigDetails());
 				channel.getWacfb().setAccessToken(userAccessToken);
-				channel.getWacfb().setNumber(PhoneUtil.phone(
-						phoneMap.keyEntry("display_phone_number").asString()));
-				channel.getWacfb()
-						.setPhoneNumberId(phoneMap.keyEntry("id").asString());
+				channel.getWacfb().setNumber(PhoneUtil.phone(phoneMap.keyEntry("display_phone_number").asString()));
+				channel.getWacfb().setPhoneNumberId(phoneMap.keyEntry("id").asString());
 				channel.getWacfb().setVerificationPin(verificationPin);
-				channel.getWacfb().setVerifyToken(
-						setup.getWacfb().getMasterAppVerifyToken());
+				channel.getWacfb().setVerifyToken(setup.getWacfb().getMasterAppVerifyToken());
 				channel.getWacfb().setWabaId(assignedWaBaId);
-				channel.getWacfb()
-						.setMasterAppId(setup.getWacfb().getMasterAppId());
-				channel.getWacfb().setMasterAppConfigId(
-						setup.getWacfb().getMasterAppConfigId());
+				channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
+				channel.getWacfb().setMasterAppConfigId(setup.getWacfb().getMasterAppConfigId());
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
 				channels.add(channel);
 
-				MapModel subscribeResp = restService
-						.ajax(WA360Constants.META_WA_CLOUD_URL)
-						.path(assignedWaBaId).path("/subscribed_apps")
-						.authBearer(setup.getWacfb().getMasterSUAccessToken())
-						.post().asMapModel();
-
-				channelConfigTemp.log("/subscribed_apps",
-						subscribeResp.toMap());
-
-				MapModel setPinResp = restService
-						.ajax(WA360Constants.META_WA_CLOUD_URL)
-						.path(phoneNumberId).authBearer(userAccessToken)
-						.postJson(MapModel.createInstance()
-								.put("pin", verificationPin).toMap())
+				MapModel subscribeResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
+						.path("/subscribed_apps").authBearer(setup.getWacfb().getMasterSUAccessToken()).post()
 						.asMapModel();
+
+				channelConfigTemp.log("/subscribed_apps", subscribeResp.toMap());
+
+				MapModel setPinResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
+						.authBearer(userAccessToken)
+						.postJson(MapModel.createInstance().put("pin", verificationPin).toMap()).asMapModel();
 				channelConfigTemp.log("/setPin", setPinResp.toMap());
 
-				MapModel registerResp = restService
-						.ajax(WA360Constants.META_WA_CLOUD_URL)
-						.path(phoneNumberId).path("/register")
-						.authBearer(userAccessToken)
-						.postJson(MapModel.createInstance()
-								.put("pin", verificationPin)
-								.put("messaging_product", "whatsapp").toMap())
+				MapModel registerResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
+						.path("/register").authBearer(userAccessToken).postJson(MapModel.createInstance()
+								.put("pin", verificationPin).put("messaging_product", "whatsapp").toMap())
 						.asMapModel();
 				channelConfigTemp.log("/register", registerResp.toMap());
 
 			} else {
-				MapModel phoneNumbers = restService
-						.ajax(WA360Constants.META_WA_CLOUD_URL)
-						.path(assignedWaBaId).path("/phone_numbers")
-						.authBearer(userAccessToken).get().asMapModel();
+				MapModel phoneNumbers = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
+						.path("/phone_numbers").authBearer(userAccessToken).get().asMapModel();
 				channelConfigTemp.log("/phone_numbers", phoneNumbers.toMap());
 				final String assignedWaBaIdFinal = assignedWaBaId;
 
@@ -207,25 +172,19 @@ public class WacfbConnector
 					ChannelConfig channel = new ChannelConfig();
 					channel.setWacfb(new WACFBConfigDetails());
 					channel.getWacfb().setAccessToken(userAccessToken);
-					channel.getWacfb().setNumber(PhoneUtil.phone(phoneMap
-							.keyEntry("display_phone_number").asString()));
-					channel.getWacfb().setPhoneNumberId(
-							phoneMap.keyEntry("id").asString());
+					channel.getWacfb().setNumber(PhoneUtil.phone(phoneMap.keyEntry("display_phone_number").asString()));
+					channel.getWacfb().setPhoneNumberId(phoneMap.keyEntry("id").asString());
 					// channel.getWacfb().setVerificationPin(verificationPin);
 					channel.getWacfb().setWabaId(assignedWaBaIdFinal);
-					channel.getWacfb()
-							.setMasterAppId(setup.getWacfb().getMasterAppId());
-					channel.getWacfb().setMasterAppConfigId(
-							setup.getWacfb().getMasterAppConfigId());
-					channel.setName(
-							phoneMap.keyEntry("verified_name").asString());
+					channel.getWacfb().setMasterAppId(setup.getWacfb().getMasterAppId());
+					channel.getWacfb().setMasterAppConfigId(setup.getWacfb().getMasterAppConfigId());
+					channel.setName(phoneMap.keyEntry("verified_name").asString());
 					channels.add(channel);
 				});
 			}
 
 		} catch (ApiHttpException e) {
-			channelConfigTemp.log("exception",
-					MapModel.from(e.getResponse().getBody()).toMap());
+			channelConfigTemp.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
 		}
 		commonMongoTemplate.save(channelConfigTemp);
 		return channels;
@@ -250,8 +209,7 @@ public class WacfbConnector
 		// }
 	}
 
-	public OutboxMessage initSession(ChatSessionDoc session,
-			InboxMessage inboxMessage) {
+	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChatContactQuery contactQuery = messageContext.contact();
 		ChatContactDoc chatContactDoc = contactQuery.getDoc();
 		if (chatContactDoc.getPhone() == null) {
@@ -260,8 +218,7 @@ public class WacfbConnector
 		if (chatContactDoc.getPhoneVerified() == null) {
 			contactQuery.setPhoneVerified(true);
 		}
-		String user_input_type = this.context().session()
-				.getEntry("session_init_user_input_type").asString();
+		String user_input_type = this.context().session().getEntry("session_init_user_input_type").asString();
 		if (ArgUtil.is(user_input_type)) {
 			if (user_input_type.equals("name")) {
 				contactQuery.setInfoName(inboxMessage.getMessage());
@@ -279,30 +236,24 @@ public class WacfbConnector
 		if (ArgUtil.is(channel.getWacfb())) {
 			if (channel.getWacfb().isPromptName()) {
 				if (ArgUtil.isEmpty(chatContactDoc.info().getName())) {
-					this.context().session().put("session_init_user_input_type",
-							"name");
-					return (OutboxMessage) inboxMessage
-							.replyMessage("Please enter your name");
+					this.context().session().put("session_init_user_input_type", "name");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your name");
 				}
 
 			}
 
 			if (channel.getWacfb().isPromptEmail()) {
 				if (ArgUtil.isEmpty(chatContactDoc.info().getEmail())) {
-					this.context().session().put("session_init_user_input_type",
-							"email");
-					return (OutboxMessage) inboxMessage
-							.replyMessage("Please enter your email");
+					this.context().session().put("session_init_user_input_type", "email");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your email");
 				}
 
 			}
 
 			if (channel.getWacfb().isPromptPhone()) {
 				if (ArgUtil.isEmpty(chatContactDoc.info().getPhone())) {
-					this.context().session().put("session_init_user_input_type",
-							"phone");
-					return (OutboxMessage) inboxMessage
-							.replyMessage("Please enter your phone");
+					this.context().session().put("session_init_user_input_type", "phone");
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
 				}
 
 			}
@@ -316,17 +267,14 @@ public class WacfbConnector
 		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
 	}
 
-	public InboxMessage toInboxMessage(ChannelConfig channelConfig,
-			MapModel map) {
+	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {
 
 		// Create Default Message from Channel
 		InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
 
 		// Set Contact info
-		String contactNumber = map.entry(InBoundWrapperPaths.CONTACT_NUMBER)
-				.asString();
-		String contactName = map.entry(InBoundWrapperPaths.CONTACT_NAME)
-				.asString();
+		String contactNumber = map.entry(InBoundWrapperPaths.CONTACT_NUMBER).asString();
+		String contactName = map.entry(InBoundWrapperPaths.CONTACT_NAME).asString();
 
 		inboxMessage.contact().setCsid(contactNumber);
 		inboxMessage.contact().setName(contactName);
@@ -338,108 +286,78 @@ public class WacfbConnector
 		inboxMessage.to().add(channelConfig.getLane());
 
 		// Extract Message Details
-		inboxMessage.setMessageIdExt(
-				map.entry(InBoundWrapperPaths.MESSAGE_ID).asString());
+		inboxMessage.setMessageIdExt(map.entry(InBoundWrapperPaths.MESSAGE_ID).asString());
 
-		String messageType = map.entry(InBoundWrapperPaths.MESSAGE_TYPE)
-				.asString();
+		String messageType = map.entry(InBoundWrapperPaths.MESSAGE_TYPE).asString();
 
 		if ("text".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
-			inboxMessage.setMessage(
-					map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
+			inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
 		} else if ("interactive".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
-			String interactiveType = map
-					.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
+			String interactiveType = map.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
 			String replyId = null;
 			if ("button_reply".equals(interactiveType)) {
-				replyId = map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_ID)
-						.asString();
+				replyId = map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_ID).asString();
 				inboxMessage.form().put("reply_id", replyId);
 				inboxMessage.form().put("reply_title",
-						map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_REPLY)
-								.asString());
-				inboxMessage.setMessage(ArgUtil.parseAsString(
-						inboxMessage.form().get("reply_title"),
-						Constants.BLANK));
+						map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_REPLY).asString());
+				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 			} else if ("list_reply".equals(interactiveType)) {
-				replyId = map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_ID)
-						.asString();
+				replyId = map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_ID).asString();
 				inboxMessage.form().put("reply_id", replyId);
 				inboxMessage.form().put("reply_title",
-						map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_REPLY)
-								.asString());
-				inboxMessage.form().put("reply_desc",
-						map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_DESC)
-								.asString());
+						map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_REPLY).asString());
+				inboxMessage.form().put("reply_desc", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_DESC).asString());
 			}
 
-			inboxMessage.setMessage(ArgUtil.parseAsString(
-					inboxMessage.form().get("reply_title"), Constants.BLANK));
+			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
-			inboxMessage.form().put("reply_title", map
-					.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
+			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
 
-			String reply_payload = map
-					.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD)
-					.asString();
+			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
 			inboxMessage.form().put("reply_payload", reply_payload);
-			if (ArgUtil.is(reply_payload)
-					&& reply_payload.startsWith("reply_id:")) {
+			if (ArgUtil.is(reply_payload) && reply_payload.startsWith("reply_id:")) {
 				String reply_id = reply_payload.replaceFirst("reply_id:", "");
 				inboxMessage.form().put("reply_id", reply_id);
 			}
 
-			inboxMessage.setMessage(ArgUtil.parseAsString(
-					inboxMessage.form().get("reply_title"), Constants.BLANK));
+			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("image".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.IMAGE);
-			formatMedia(inboxMessage, map, channelConfig,
-					InBoundWrapperPaths.IMAGE, FileType.IMAGE);
+			formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.IMAGE, FileType.IMAGE);
 		} else if ("document".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.DOCUMENT);
-			formatMedia(inboxMessage, map, channelConfig,
-					InBoundWrapperPaths.DOCUMENT, FileType.DOCUMENT);
+			formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.DOCUMENT, FileType.DOCUMENT);
 		} else if ("audio".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.AUDIO);
-			formatMedia(inboxMessage, map, channelConfig,
-					InBoundWrapperPaths.AUDIO, FileType.AUDIO);
+			formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.AUDIO, FileType.AUDIO);
 		} else if ("voice".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.VOICE);
-			formatMedia(inboxMessage, map, channelConfig,
-					InBoundWrapperPaths.VOICE, FileType.AUDIO);
+			formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.VOICE, FileType.AUDIO);
 		} else if ("video".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.VIDEO);
-			formatMedia(inboxMessage, map, channelConfig,
-					InBoundWrapperPaths.VIDEO, FileType.VIDEO);
+			formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.VIDEO, FileType.VIDEO);
 		} else if ("sticker".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.STICKER);
-			formatMedia(inboxMessage, map, channelConfig,
-					InBoundWrapperPaths.STICKER, FileType.IMAGE);
+			formatMedia(inboxMessage, map, channelConfig, InBoundWrapperPaths.STICKER, FileType.IMAGE);
 		} else if ("contacts".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.CONTACTS);
 			extractContacts(map, inboxMessage);
 		} else if ("location".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.LOCATION);
 			PBLocation pbLocation = new PBLocation();
-			pbLocation.setName(
-					map.pathEntry("messages/[0]/location/name").asString());
-			pbLocation.setAddress(
-					map.pathEntry("messages/[0]/location/address").asString());
-			pbLocation.setLatitude(
-					map.pathEntry("messages/[0]/location/latitude").asString());
-			pbLocation.setLongitude(map
-					.pathEntry("messages/[0]/location/longitude").asString());
-			pbLocation.setUrl(
-					map.pathEntry("messages/[0]/location/url").asString());
+			pbLocation.setName(map.pathEntry("messages/[0]/location/name").asString());
+			pbLocation.setAddress(map.pathEntry("messages/[0]/location/address").asString());
+			pbLocation.setLatitude(map.pathEntry("messages/[0]/location/latitude").asString());
+			pbLocation.setLongitude(map.pathEntry("messages/[0]/location/longitude").asString());
+			pbLocation.setUrl(map.pathEntry("messages/[0]/location/url").asString());
 			inboxMessage.vccards().add(new PBVCard().locations(pbLocation));
 		}
 
 		inboxMessage.setFormatSubType(messageType);
 
-		String replyIdExt = map.entry(InBoundWrapperPaths.CONTEXT_ID)
-				.asString();
+		String replyIdExt = map.entry(InBoundWrapperPaths.CONTEXT_ID).asString();
 		if (ArgUtil.is(replyIdExt)) {
 			inboxMessage.setReplyIdExt(replyIdExt);
 		}
@@ -450,22 +368,18 @@ public class WacfbConnector
 	}
 
 	private void extractContacts(MapModel map, InboxMessage inboxMessage) {
-		List<Map<String, Object>> cards = map.entry(InBoundWrapperPaths.VCARDS)
-				.asListOfMap();
+		List<Map<String, Object>> cards = map.entry(InBoundWrapperPaths.VCARDS).asListOfMap();
 		for (Map<String, Object> card : cards) {
 			MapModel cardMap = MapModel.from(card);
 
 			PBVCard pbContact = new PBVCard();
 			PBName pbName = new PBName();
-			pbName.setFirstName(
-					cardMap.pathEntry("/name/first_name").asString());
+			pbName.setFirstName(cardMap.pathEntry("/name/first_name").asString());
 			pbName.setLastName(cardMap.pathEntry("/name/last_name").asString());
-			pbName.setFormattedName(
-					cardMap.pathEntry("/name/formatted_name").asString());
+			pbName.setFormattedName(cardMap.pathEntry("/name/formatted_name").asString());
 			pbContact.setName(pbName);
 
-			List<Map<String, String>> phones = cardMap.keyEntry("phones")
-					.asListOfMapT();
+			List<Map<String, String>> phones = cardMap.keyEntry("phones").asListOfMapT();
 			for (Map<String, String> phone : phones) {
 				PBPhone pbPhone = new PBPhone();
 				pbPhone.setType(phone.get("type"));
@@ -474,8 +388,7 @@ public class WacfbConnector
 				pbContact.phones().add(pbPhone);
 			}
 
-			List<Map<String, String>> addresses = cardMap.keyEntry("addresses")
-					.asListOfMapT();
+			List<Map<String, String>> addresses = cardMap.keyEntry("addresses").asListOfMapT();
 			for (Map<String, String> address : addresses) {
 				PBAddress pbAddress = new PBAddress();
 				pbAddress.setType(address.get("type"));
@@ -488,8 +401,7 @@ public class WacfbConnector
 				pbContact.addresses().add(pbAddress);
 			}
 
-			List<Map<String, String>> emails = cardMap.keyEntry("emails")
-					.asListOfMapT();
+			List<Map<String, String>> emails = cardMap.keyEntry("emails").asListOfMapT();
 			for (Map<String, String> email : emails) {
 				PBEmail pbEmail = new PBEmail();
 				pbEmail.setType(email.get("type"));
@@ -497,8 +409,7 @@ public class WacfbConnector
 				pbContact.emails().add(pbEmail);
 			}
 
-			List<Map<String, String>> ims = cardMap.keyEntry("ims")
-					.asListOfMapT();
+			List<Map<String, String>> ims = cardMap.keyEntry("ims").asListOfMapT();
 			for (Map<String, String> im : ims) {
 				PBSocial pbSocial = new PBSocial();
 				pbSocial.setService(im.get("service"));
@@ -506,8 +417,7 @@ public class WacfbConnector
 				pbContact.ims().add(pbSocial);
 			}
 
-			List<Map<String, String>> urls = cardMap.keyEntry("urls")
-					.asListOfMapT();
+			List<Map<String, String>> urls = cardMap.keyEntry("urls").asListOfMapT();
 			for (Map<String, String> url : urls) {
 				PBWebsite pnWebsite = new PBWebsite();
 				pnWebsite.setUrl(url.get("url"));
@@ -519,8 +429,7 @@ public class WacfbConnector
 			MapPathEntry workDepartment = cardMap.pathEntry("/org/department");
 			MapPathEntry workTitle = cardMap.pathEntry("/org/title");
 
-			if (workCompany.exists() || workDepartment.exists()
-					|| workTitle.exists()) {
+			if (workCompany.exists() || workDepartment.exists() || workTitle.exists()) {
 				PBWork pbWork = new PBWork();
 				pbWork.setCompany(workCompany.asString());
 				pbWork.setDepartment(workDepartment.asString());
@@ -540,30 +449,22 @@ public class WacfbConnector
 		}
 	}
 
-	private void formatMedia(InboxMessage inboxMessage, MapModel map,
-			ChannelConfig channelConfig, JsonPath path, FileType fileType) {
+	private void formatMedia(InboxMessage inboxMessage, MapModel map, ChannelConfig channelConfig, JsonPath path,
+			FileType fileType) {
 		try {
 
-			WacfbInboundMedia media = map.entry(path)
-					.as(WacfbInboundMedia.class);
+			WacfbInboundMedia media = map.entry(path).as(WacfbInboundMedia.class);
 
-			String mediaUrl = wacfbClient.getMediaUrl(channelConfig,
-					WA360Constants.MEDIA_CLOUD_URL(media.getId()));
+			String mediaUrl = wacfbClient.getMediaUrl(channelConfig, WA360Constants.MEDIA_CLOUD_URL(media.getId()));
 
-			CommonFileStream srcFile = new CommonFileStream().url(mediaUrl)
-					.fileType(fileType)
-					.format(FileFormat.from(media.getMimeType()))
-					.authBearer(channelConfig.getWacfb().getAccessToken())
-					.name(ArgUtil.nonEmpty(media.getFilename(),
-							media.getCaption()));
+			CommonFileStream srcFile = new CommonFileStream().url(mediaUrl).fileType(fileType)
+					.format(FileFormat.from(media.getMimeType())).authBearer(channelConfig.getWacfb().getAccessToken())
+					.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
-			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(
-					srcFile, PostManUtil.createContactId(inboxMessage),
-					inboxMessage.getMessageIdExt());
-			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl())
-					.mediaType(dstFile.getFileType()).mediaSrc(srcFile.getUrl())
-					.mediaCaption(media.getCaption())
-					.mediaName(media.getFilename())
+			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
+					PostManUtil.createContactId(inboxMessage), inboxMessage.getMessageIdExt());
+			inboxMessage.attachment(new Attachment().mediaURL(dstFile.getUrl()).mediaType(dstFile.getFileType())
+					.mediaSrc(srcFile.getUrl()).mediaCaption(media.getCaption()).mediaName(media.getFilename())
 					.mediaMimeType(media.getMimeType()));
 		} catch (IOException e) {
 			logManager.error(inboxMessage, e);
@@ -573,45 +474,38 @@ public class WacfbConnector
 	@Deprecated
 	public CommonFile reloadMedia(Attachment attachment)
 			throws MalformedURLException, FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream()
-				.url(attachment.getMediaSrc())
+		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
 				// .fileType(attachment.getMediaType())
 				.format(FileFormat.from(attachment.getMediaMimeType()))
 				// .header(WA360Constants.D360_API_KEY,
 				// channelConfig.getWa360d().getApiKey())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(),
-						attachment.getMediaCaption()));
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
 
 		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
 
-		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL())
-				.path(fileb.getParent()).fileType(ArgUtil.parseAsEnumT(
-						attachment.getMediaType(), FileType.class));
+		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
 		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
 	}
 
 	@Override
-	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg,
-			Attachment attachment) throws FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream()
-				.url(attachment.getMediaSrc())
+	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
+			throws FileNotFoundException, IOException {
+		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
 				// .fileType(attachment.getMediaType())
 				.format(FileFormat.from(attachment.getMediaMimeType()))
 				.authBearer(channelConfig.getWacfb().getAccessToken())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(),
-						attachment.getMediaCaption()));
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
 
 		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
 
-		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL())
-				.path(fileb.getParent()).fileType(ArgUtil.parseAsEnumT(
-						attachment.getMediaType(), FileType.class));
+		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
+				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
 		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
 	}
 
 	@Override
-	public void onSend(ChannelConfig channelConfig,
-			ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
 			template(channelConfig, chatContactDoc, outboxMessage); // TODO:-
 																	// This is
@@ -622,8 +516,7 @@ public class WacfbConnector
 			// generic
 
 			boolean isValidContact = true;
-			if (outboxMessage.messageMetaWrapper()
-					.composeTypeIs(MESSAGE_COMPOSE_TYPE.SEND_CODE)) {
+			if (outboxMessage.messageMetaWrapper().composeTypeIs(MESSAGE_COMPOSE_TYPE.SEND_CODE)) {
 				isValidContact = optin(channelConfig, chatContactDoc);
 			}
 			if (isValidContact) {
@@ -631,8 +524,7 @@ public class WacfbConnector
 				outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 
 			} else {
-				outboxMessage.logs().add(String.format("Invalid Contact for %s",
-						chatContactDoc));
+				outboxMessage.logs().add(String.format("Invalid Contact for %s", chatContactDoc));
 				outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
 			}
 
@@ -643,12 +535,9 @@ public class WacfbConnector
 		}
 	}
 
-	private MessageReport toMessageReport(ChannelConfig channelConfig,
-			MapModel requestMap) {
+	private MessageReport toMessageReport(ChannelConfig channelConfig, MapModel requestMap) {
 		MessageReport report = this.createMessageReport(channelConfig);
-		String csid = requestMap
-				.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT)
-				.asString();
+		String csid = requestMap.path(WA360Constants.InBoundWrapperPaths.STATUS_RECIPIENT).asString();
 		if (!ArgUtil.is(csid)) {
 			csid = requestMap.getString("recipient_id");
 		}
@@ -669,8 +558,7 @@ public class WacfbConnector
 		} else if ("failed".equals(status)) {
 			report.setStatus(Status.FAILD);
 
-			String errorCode = requestMap.pathEntry("errors/[0]/code")
-					.asString();
+			String errorCode = requestMap.pathEntry("errors/[0]/code").asString();
 			if (ArgUtil.areEqual(errorCode, "470")) {
 				report.setStatus(Status.CCWIN);
 			} else if (ArgUtil.areEqual(errorCode, "471")) {
@@ -689,49 +577,36 @@ public class WacfbConnector
 	}
 
 	@Override
-	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig,
-			MapModel requestMap, MessageBoxEvent messageBoxEvent) {
+	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
+			MessageBoxEvent messageBoxEvent) {
 		LOGGER.info("IN message {DR}" + requestMap);
 
-		List<Map<String, Object>> changes = requestMap
-				.path(FacebookConstants.WABAPaths.CHANGES).asListOfMap();
+		List<Map<String, Object>> changes = requestMap.path(FacebookConstants.WABAPaths.CHANGES).asListOfMap();
 
 		changes.forEach(change -> {
-			MapModel changeMap = MapModel.from(change).keyEntry("value")
-					.asMapModel();
+			MapModel changeMap = MapModel.from(change).keyEntry("value").asMapModel();
 
 			if (changeMap.containsKey("messages")) {
-				messageBoxEvent.addInboxMessage(
-						toInboxMessage(channelConfig, changeMap));
+				messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, changeMap));
 			} else if (changeMap.containsKey("statuses")) {
-				List<Map<String, Object>> statusMaps = changeMap
-						.keyEntry("statuses").asListOfMap();
+				List<Map<String, Object>> statusMaps = changeMap.keyEntry("statuses").asListOfMap();
 				for (Map<String, Object> statusMap : statusMaps) {
 					MapModel statusModel = MapModel.from(statusMap);
-					MessageReport reprt = toMessageReport(channelConfig,
-							statusModel);
+					MessageReport reprt = toMessageReport(channelConfig, statusModel);
 					messageBoxEvent.addMessageReport(reprt);
 					if (Status.SENTX.equals(reprt.getStatus())) {
-						Map<String, Object> conversation = statusModel
-								.keyEntry("conversation").asMap();
+						Map<String, Object> conversation = statusModel.keyEntry("conversation").asMap();
 						if (ArgUtil.is(conversation)) {
-							String id = String.format("%s_%s",
-									channelConfig.getChannelId(),
-									conversation.get("id"));
-							WABAConversationQuery query = new WABAConversationQuery(
-									id);
+							String id = String.format("%s_%s", channelConfig.getChannelId(), conversation.get("id"));
+							WABAConversationQuery query = new WABAConversationQuery(id);
 							query.setContact(reprt.contact());
 							query.setConversation(conversation);
-							query.setPricing(
-									statusModel.keyEntry("pricing").asMap());
-							query.set("meta.to_country",
-									getCountryCode(reprt.contact().getCsid()));
+							query.setPricing(statusModel.keyEntry("pricing").asMap());
+							query.set("meta.to_country", getCountryCode(reprt.contact().getCsid()));
 							commonMongoTemplate.upsert(query);
-							reprt.setTpMeta(MapModel.createInstance()
-									.put("ccwExpiry",
-											conversation.get(
-													"expiration_timestamp"))
-									.put("wabaConvesationId", id).toMap());
+							reprt.setTpMeta(
+									MapModel.createInstance().put("ccwExpiry", conversation.get("expiration_timestamp"))
+											.put("wabaConvesationId", id).toMap());
 
 						}
 					}
@@ -742,13 +617,11 @@ public class WacfbConnector
 	}
 
 	public String getCountryCode(String phone) {
-		String defaultRegion = environment.keyEntry("postman.phonebook.region")
-				.asString("IN");
+		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
 		PhoneNumber phoneNumber;
 		try {
 			phoneNumber = PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion);
-			return PHONE_NUMBER_UTIL
-					.getRegionCodeForCountryCode(phoneNumber.getCountryCode());
+			return PHONE_NUMBER_UTIL.getRegionCodeForCountryCode(phoneNumber.getCountryCode());
 		} catch (NumberParseException e) {
 			return defaultRegion;
 		}
@@ -761,21 +634,20 @@ public class WacfbConnector
 	 * 
 	 * if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) { String
 	 * defaultRegion =
-	 * environment.keyEntry("postman.phonebook.region").asString("IN"); String
-	 * phone = chatContactDoc.getPhone(); try { phone = phone.replace(" ",
+	 * environment.keyEntry("postman.phonebook.region").asString("IN"); String phone
+	 * = chatContactDoc.getPhone(); try { phone = phone.replace(" ",
 	 * "").replaceAll("^[\\+0\\s]+(?!$)", "").trim(); PhoneNumber phoneNumber =
 	 * PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion); phone =
 	 * String.format("+%s%s", phoneNumber.getCountryCode(),
-	 * phoneNumber.getNationalNumber()); } catch (NumberParseException e) {
-	 * phone = String.format("+%s", phone); }
+	 * phoneNumber.getNationalNumber()); } catch (NumberParseException e) { phone =
+	 * String.format("+%s", phone); }
 	 * 
 	 * MapModel resp = waClient.fetchContact(phone, channelConfig); String waId
 	 * =resp.getString("wa_id"); String input = null;// resp.getString("input");
 	 * String status = "valid";// resp.getString("status");
 	 * 
 	 * if ("valid".equals(status)) { ChatContactQuery chatContactQuery = new
-	 * ChatContactQuery(chatContactDoc);
-	 * chatContactQuery.updateLastOptInStamp();
+	 * ChatContactQuery(chatContactDoc); chatContactQuery.updateLastOptInStamp();
 	 * commonMongoTemplate.updateFirst(chatContactQuery); return true; } }
 	 * 
 	 * //return ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp()); return
