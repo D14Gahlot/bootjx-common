@@ -21,6 +21,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.MapEntry;
+import com.boot.model.TimeModels.TimeStampSupportedModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils.TimePeriod;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -90,7 +91,7 @@ public class PMEnvironment {
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static abstract class AChannelDetails implements ChannelDetails {
+	public static abstract class AChannelDetails extends TimeStampSupportedModel implements ChannelDetails {
 		private static final long serialVersionUID = -5531902306230415784L;
 	}
 
@@ -482,7 +483,7 @@ public class PMEnvironment {
 		PMConfigurationObject getAgentHistoryCount();
 
 		String getDefaultInboundQueue(Contactable contact, CHAT_MODE mode);
-		
+
 		PMConfigurationObject getAgentChatDisable();
 
 	}

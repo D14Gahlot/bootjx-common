@@ -27,6 +27,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
+import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
@@ -174,6 +175,20 @@ public class AdminObjectsController {
 			@RequestParam(required = false) String lane) {
 		return ApiResponse.buildResults(
 				getPaginatedBulk(ChannelConfigTempDoc.class, "TEMP_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
+	}
+
+	@RequestMapping(value = { "/api/objects/archive/channel" }, method = { RequestMethod.GET })
+	@JsonView(PublicJsonProperty.class)
+	public ApiResponse<ChannelConfigDupsDoc, Object> channelArchive(@RequestParam(required = false) String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir,
+			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
+			@RequestParam(required = false) String channelId, @RequestParam(required = false) String domain,
+			@RequestParam(required = false) String lane) {
+		return ApiResponse.buildResults(
+				getPaginatedBulk(ChannelConfigDupsDoc.class, "DUPS_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
 	}
 
 	@RequestMapping(value = { "/api/objects/messages/{messageQueueType}" }, method = { RequestMethod.GET })

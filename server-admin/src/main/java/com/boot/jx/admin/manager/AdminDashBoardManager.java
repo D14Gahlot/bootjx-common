@@ -275,8 +275,7 @@ public class AdminDashBoardManager {
 		// subtract a day
 		// and take the minimum time a day can have
 		ZonedDateTime todayStartTime = ZonedDateTime.now().minusDays(0).with(LocalTime.MIN);
-		// use the same datetime to create the end of the day using the maximum
-		// time for
+		// use the same datetime to create the end of the day using the maximum time for
 		ZonedDateTime endToday = todayStartTime.with(LocalTime.MAX);
 		long longTodayStartTime = todayStartTime.toInstant().toEpochMilli();
 		long longTodayendTime = endToday.toInstant().toEpochMilli();
@@ -335,8 +334,7 @@ public class AdminDashBoardManager {
 		// subtract a day
 		// and take the minimum time a day can have
 		ZonedDateTime todayStartTime = ZonedDateTime.now().minusDays(1).with(LocalTime.MIN);
-		// use the same datetime to create the end of the day using the maximum
-		// time for
+		// use the same datetime to create the end of the day using the maximum time for
 		ZonedDateTime endToday = todayStartTime.with(LocalTime.MAX);
 		long longTodayStartTime = todayStartTime.toInstant().toEpochMilli();
 		long longTodayendTime = endToday.toInstant().toEpochMilli();
@@ -396,8 +394,7 @@ public class AdminDashBoardManager {
 		// subtract a day
 		// and take the minimum time a day can have
 		ZonedDateTime todayDate = ZonedDateTime.now().minusDays(0).with(LocalTime.MIN);
-		// use the same datetime to create the end of the day using the maximum
-		// time for
+		// use the same datetime to create the end of the day using the maximum time for
 		// a day
 		ZonedDateTime endToday = todayDate.with(LocalTime.MAX);
 
@@ -459,8 +456,7 @@ public class AdminDashBoardManager {
 		Object contactType = requestDto.getContactType();
 
 		ZonedDateTime todayDate = ZonedDateTime.now().minusDays(0).with(LocalTime.MIN);
-		// use the same datetime to create the end of the day using the maximum
-		// time for
+		// use the same datetime to create the end of the day using the maximum time for
 		// a day
 		ZonedDateTime endToday = todayDate.with(LocalTime.MAX);
 
@@ -524,8 +520,7 @@ public class AdminDashBoardManager {
 		Object contactType = requestDto.getContactType();
 
 		ZonedDateTime todayDate = ZonedDateTime.now().minusDays(0).with(LocalTime.MIN);
-		// use the same datetime to create the end of the day using the maximum
-		// time for
+		// use the same datetime to create the end of the day using the maximum time for
 		// a day
 		ZonedDateTime endToday = todayDate.with(LocalTime.MAX);
 
@@ -587,8 +582,7 @@ public class AdminDashBoardManager {
 		long dateRange2 = requestDto.getDateReange2();
 
 		ZonedDateTime todayDate = ZonedDateTime.now().minusDays(0).with(LocalTime.MIN);
-		// use the same datetime to create the end of the day using the maximum
-		// time for
+		// use the same datetime to create the end of the day using the maximum time for
 		// a day
 		ZonedDateTime endToday = todayDate.with(LocalTime.MAX);
 
@@ -739,8 +733,7 @@ public class AdminDashBoardManager {
 		// System.out.println("Today Date :" + todayDt + "\t quaterStartDt :" +
 		// quaterStartDt + "\t quaerEndDt :" + quaerEndDt);
 		long daysBetween = ChronoUnit.DAYS.between(quaterStartDt, todayDt);
-		// System.out.println("No of days between quater startdate and today
-		// date :" +
+		// System.out.println("No of days between quater startdate and today date :" +
 		// daysBetween);
 
 		ZonedDateTime startToday = ZonedDateTime.now().minusDays(daysBetween).with(LocalTime.MIN);
@@ -776,8 +769,7 @@ public class AdminDashBoardManager {
 		if (mapLst != null && ArgUtil.is(mapLst) && !mapLst.isEmpty()) {
 			Object maxEntryKey = Collections.max(mapLst.entrySet(), Map.Entry.comparingByValue()).getKey();
 			Integer maxEntryKeyValue = mapLst.get(maxEntryKey);
-			// System.out.println("Peak Load Date Time and Value:"+maxEntryKey
-			// +"-
+			// System.out.println("Peak Load Date Time and Value:"+maxEntryKey +"-
 			// "+maxEntryKeyValue);
 			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm");
 			try {
@@ -882,8 +874,7 @@ public class AdminDashBoardManager {
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
-			// String ddMMyyyyFormat = new
-			// SimpleDateFormat("dd-MM-yyyy").format(date);
+			// String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
 			String ddMMyyyyFormat = new SimpleDateFormat("d").format(date);
 			dateWiseList.add(ddMMyyyyFormat);
 			dateWiseLongList.add(Long.parseLong(ddMMyyyyFormat));
@@ -894,8 +885,7 @@ public class AdminDashBoardManager {
 		Set<Object> dateWiseCount = new HashSet<Object>(dateWiseLongList);
 		for (Object key : dateWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWiseLongList, key));
-			// System.out.println(key + ": " +
-			// Collections.frequency(dateWiseList, key));
+			// System.out.println(key + ": " + Collections.frequency(dateWiseList, key));
 		}
 
 		return mapLst;
@@ -964,8 +954,7 @@ public class AdminDashBoardManager {
 		Set<Object> dateWiseCount = new HashSet<Object>(weekWiseList);
 		for (Object key : dateWiseCount) {
 			mapLst.put(key, Collections.frequency(weekWiseList, key));
-			// System.out.println(key + ": " +
-			// Collections.frequency(weekWiseList, key));
+			// System.out.println(key + ": " + Collections.frequency(weekWiseList, key));
 		}
 
 		return mapLst;
@@ -1023,8 +1012,7 @@ public class AdminDashBoardManager {
 				if (msgTagDoc != null && msgTagDoc.getTags() != null) {
 					TagDocument tagDocument = msgTagDoc.getTags();
 
-					// Aggregate all TagsType wise by meergin this tagDocument
-					// to allTagDocument
+					// Aggregate all TagsType wise by meergin this tagDocument to allTagDocument
 					allTagDocument.categories().addAll(tagDocument.categories());
 					allTagDocument.cities().addAll(tagDocument.cities());
 					allTagDocument.langs().addAll(tagDocument.langs());
@@ -1073,8 +1061,7 @@ public class AdminDashBoardManager {
 			tagKeyValye.setTag(key.toString());
 			tagKeyValye.setCount(Collections.frequency(toalTagLst, key));
 			tagKeyValyeLst.add(tagKeyValye);
-			// LOGGER.info("{ +++++++++ }"+key + ": " +
-			// Collections.frequency(toalTagLst,
+			// LOGGER.info("{ +++++++++ }"+key + ": " + Collections.frequency(toalTagLst,
 			// key));
 		}
 	}
@@ -1106,8 +1093,7 @@ public class AdminDashBoardManager {
 
 				}
 				// Printing the details
-				// LOGGER.info(" =========================
-				// {====}Property="+propertyName+",
+				// LOGGER.info(" ========================= {====}Property="+propertyName+",
 				// Type="+propType+", Value="+propValue);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1442,8 +1428,7 @@ public class AdminDashBoardManager {
 				.collect(Collectors.groupingBy(DateWiseHourCountDto::getMsgType,
 						Collectors.groupingBy(DateWiseHourCountDto::getHourStamp, Collectors.counting())));
 		/// ** default hour
-		// Map<String, Long> hourCntMap = getHourRange(currentTs,
-		/// lasthrTimeStmp);
+		// Map<String, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
 		Map<Object, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
@@ -1634,22 +1619,21 @@ public class AdminDashBoardManager {
 		List<Document> list = new ArrayList<Document>();
 		// Match condtion
 		list.add(Aggregation.match(new Criteria("type").is("O")).toDocument(Aggregation.DEFAULT_CONTEXT));
-		// list.add(Aggregation.match(new Criteria("meta").is(metaQry))
-		// .toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.composeType").is("N")).toDocument(Aggregation.DEFAULT_CONTEXT));
+		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM")).toDocument(Aggregation.DEFAULT_CONTEXT));
 
-		// list.add(Aggregation.match(new
-		// Criteria("meta.composeType").is("N")).toDocument(Aggregation.DEFAULT_CONTEXT));
-		// list.add(Aggregation.match(new
-		// Criteria("meta.sendType").is("PM")).toDocument(Aggregation.DEFAULT_CONTEXT));
+//		Criteria composeTypeCriteria = new Criteria().orOperator(
+//			    Criteria.where("meta.composeType").is("N"),
+//			    Criteria.where("meta.composeType").is("R")
+//			);
+//		list.add(Aggregation.match(composeTypeCriteria).toDocument(Aggregation.DEFAULT_CONTEXT));
+//			
+//		Criteria sendTypeCriteria = new Criteria().orOperator(
+//			    Criteria.where("meta.sendType").is("PM"),
+//			    Criteria.where("meta.sendType").is("SM")
+//			);
 
-		Criteria composeTypeCriteria = new Criteria().orOperator(Criteria.where("meta.composeType").is("N"),
-				Criteria.where("meta.composeType").is("R"));
-		list.add(Aggregation.match(composeTypeCriteria).toDocument(Aggregation.DEFAULT_CONTEXT));
-
-		Criteria sendTypeCriteria = new Criteria().orOperator(Criteria.where("meta.sendType").is("PM"),
-				Criteria.where("meta.sendType").is("SM"));
-
-		list.add(Aggregation.match(sendTypeCriteria).toDocument(Aggregation.DEFAULT_CONTEXT));
+		// list.add(Aggregation.match(sendTypeCriteria).toDocument(Aggregation.DEFAULT_CONTEXT));
 
 		list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
 				.toDocument(Aggregation.DEFAULT_CONTEXT));
@@ -2061,21 +2045,12 @@ public class AdminDashBoardManager {
 			}
 		}
 
-		Set<SummaryDocDto> uniqueStudentSet = lstSummDto.stream() // get stream
-																	// for
-																	// original
-																	// list
-				.collect(Collectors.toCollection(// distinct elements stored
-													// into new SET
-						() -> new TreeSet<>(Comparator.comparing(SummaryDocDto::getUniqueContactId)))); // Id
-																										// comparison
+		Set<SummaryDocDto> uniqueStudentSet = lstSummDto.stream() // get stream for original list
+				.collect(Collectors.toCollection(// distinct elements stored into new SET
+						() -> new TreeSet<>(Comparator.comparing(SummaryDocDto::getUniqueContactId)))); // Id comparison
 
-		List<SummaryDocDto> uniqueList = uniqueStudentSet.stream() // get stream
-																	// for
-																	// unique
-																	// SET
-				.sorted(Comparator.comparing(SummaryDocDto::getDate)) // rank
-																		// comparing
+		List<SummaryDocDto> uniqueList = uniqueStudentSet.stream() // get stream for unique SET
+				.sorted(Comparator.comparing(SummaryDocDto::getDate)) // rank comparing
 				.collect(Collectors.toList()); // elements stored to new list
 
 		Map<String, Map<String, Long>> datwWiseCount = uniqueList.stream().collect(Collectors.groupingBy(
@@ -2225,8 +2200,7 @@ public class AdminDashBoardManager {
 
 	public Map<Object, Map<Object, Long>> removeSandBoxNumber(Map<Object, Map<Object, Long>> hourWiseCount) {
 		if (hourWiseCount != null && !hourWiseCount.isEmpty()) {
-			// Remove entries with keys containing "wa_" and no characters after
-			// "wa_"
+			// Remove entries with keys containing "wa_" and no characters after "wa_"
 			Iterator<Map.Entry<Object, Map<Object, Long>>> iterator = hourWiseCount.entrySet().iterator();
 			while (iterator.hasNext()) {
 				Map.Entry<Object, Map<Object, Long>> entry = iterator.next();

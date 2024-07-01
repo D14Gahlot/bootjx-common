@@ -59,8 +59,9 @@ public class CustomerProfileContoller {
 
 	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.GET })
 	public ApiResponse<CustomerFieldMasterDoc, Object> fetchCusMasFields(
-			@RequestParam(value = "id", required = false) String id) {
-		return ApiResponse.buildResults(cusProfileService.fetchCustomerMstFields(id));
+			@RequestParam(value = "id", required = false) String id,
+			@RequestParam(value = "active", required = false,defaultValue = "true") boolean active) {
+		return ApiResponse.buildResults(cusProfileService.fetchCustomerMstFields(id,active));
 	}
 
 	@Autowired

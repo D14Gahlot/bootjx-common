@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
+import com.boot.jx.postman.model.AuthStateManager;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 
 public class AppAuthModels {
@@ -26,7 +27,7 @@ public class AppAuthModels {
 
 	}
 
-	public static abstract class AppCommonAuthUser implements AppAuthUser, Serializable {
+	public static abstract class AppCommonAuthUser extends AuthStateManager implements AppAuthUser, Serializable {
 
 		private static final long serialVersionUID = 5305577408399630086L;
 		private Set<String> role;

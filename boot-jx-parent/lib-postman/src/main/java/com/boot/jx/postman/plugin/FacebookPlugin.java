@@ -25,7 +25,7 @@ public class FacebookPlugin implements DefaultChannelPlugin<FacebookConfigDetail
 	public static abstract class MetaMasterConfigDetails extends AChannelDetails {
 		private static final long serialVersionUID = -2174315212703629204L;
 		@ConfigMetaProperty(path = "masterAppTitle", title = "masterAppTitle", createonly = true, hidden = true,
-				readonly = true, desc = "masterAppId")
+				readonly = true, desc = "masterAppTitle")
 		private String masterAppTitle;
 
 		@ConfigMetaProperty(path = "masterAppId", title = "masterAppId", createonly = true, hidden = true,

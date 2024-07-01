@@ -33,6 +33,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -95,7 +96,9 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
-	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
+	@Override
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
+			AuthState state) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		try {
 			MapModel resp = MapModel.from(channelConfigTemp.getResp());
