@@ -471,23 +471,6 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 	}
 
-	@Deprecated
-	public CommonFile reloadMedia(Attachment attachment)
-			throws MalformedURLException, FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
-				// .fileType(attachment.getMediaType())
-				.format(FileFormat.from(attachment.getMediaMimeType()))
-				// .header(WA360Constants.D360_API_KEY,
-				// channelConfig.getWa360d().getApiKey())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
-
-		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
-
-		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
-				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
-		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
-	}
-
 	@Override
 	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
 			throws FileNotFoundException, IOException {

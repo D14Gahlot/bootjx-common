@@ -3,7 +3,6 @@ package com.boot.jx.connectors;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -352,22 +351,6 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 		} catch (IOException e) {
 			logManager.error(inboxMessage, e);
 		}
-	}
-
-	@Deprecated
-	public CommonFile reloadMedia(Attachment attachment)
-			throws MalformedURLException, FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
-				// .fileType(attachment.getMediaType())
-				.format(FileFormat.from(attachment.getMediaMimeType()))
-				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
-
-		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
-
-		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
-				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
-		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
 	}
 
 	@Override
