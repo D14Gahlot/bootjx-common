@@ -507,13 +507,8 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
-			template(channelConfig, chatContactDoc, outboxMessage); // TODO:-
-																	// This is
-																	// common
-																	// for all
-																	// connector,
-																	// make it
-			// generic
+			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
+																	// generic
 
 			boolean isValidContact = true;
 			if (outboxMessage.messageMetaWrapper().composeTypeIs(MESSAGE_COMPOSE_TYPE.SEND_CODE)) {
