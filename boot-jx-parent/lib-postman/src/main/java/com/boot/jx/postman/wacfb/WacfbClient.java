@@ -872,8 +872,10 @@ public class WacfbClient implements ChannelClient {
 		}
 
 		MapModel resp = restService.ajax(url.replace("/v1/media/", "/"))
-				.authBearer(channelConfig.getWacfb().getAccessToken()).acceptJson().get().asMapModel();
-		return resp.getString("url").replace("https://lookaside.fbsbx.com", WA360Constants.META_WA_CLOUD_URL);
+				.authBearer(channelConfig.getWacfb().getAccessToken())
+				.queryParam("phone_number_id", channelConfig.getWacfb().getPhoneNumberId())
+				.acceptJson().get().asMapModel();
+		return resp.getString("url");//.replace("https://lookaside.fbsbx.com", WA360Constants.META_WA_CLOUD_URL);
 	}
 
 	/** Call new metod to post msg directly to waba API **/

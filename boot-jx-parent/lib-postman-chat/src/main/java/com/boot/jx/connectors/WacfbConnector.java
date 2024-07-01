@@ -456,6 +456,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			WacfbInboundMedia media = map.entry(path).as(WacfbInboundMedia.class);
 
 			String mediaUrl = wacfbClient.getMediaUrl(channelConfig, WA360Constants.META_WA_CLOUD_URL(media.getId()));
+			//System.out.println("mediaUrl " + mediaUrl);
 
 			CommonFileStream srcFile = new CommonFileStream().url(mediaUrl).fileType(fileType)
 					.format(FileFormat.from(media.getMimeType())).authBearer(channelConfig.getWacfb().getAccessToken())
