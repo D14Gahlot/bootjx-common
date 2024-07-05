@@ -716,10 +716,11 @@ public class AdminMsgController {
 					outboxMsg.setGroupId(groupId);
 					outboxMsg.setCampaignTitle(groupTitle);
 					outboxMsg.setMessage(otBoxMsg.getMessage());
+					
 					outboxMsg.setAttachments(otBoxMsg.getAttachments());
 					outboxMsg.setContact(otBoxMsg.getContact());
 					outboxMsg.setTo(Arrays.asList(dto.getPhone()));
-					outboxMsg.setHsm(hsmTemp);
+					outboxMsg.setHsm(otBoxMsg.getHsm());
 					outboxMsg.setGroupName(groupName);
 					listOfOutboxMsg.add(outboxMsg);
 				} // end of listOfOutboxMsgs
