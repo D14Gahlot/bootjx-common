@@ -327,7 +327,7 @@ public class ChatSessionManager {
 
 		int limit = Math.min(query.limit == 0 ? 50 : query.limit, pmDomainConfig.getAgentHistoryCount().asInteger(150));
 		if (ArgUtil.isEqual(appConfig.getAppType(), "ADMIN")) {
-			limit = Math.min(query.limit == 0 ? 100 : query.limit, 10000);
+			limit = Math.min(query.limit == 0 ? 100 : query.limit, 50000);
 		}
 
 		query2.addCriteria(
