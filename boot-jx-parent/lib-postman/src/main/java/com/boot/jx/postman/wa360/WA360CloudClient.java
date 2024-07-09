@@ -78,7 +78,7 @@ public class WA360CloudClient implements ChannelClient {
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
-						bodyTextAppend = bodyTextAppend
+						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
@@ -563,9 +563,10 @@ public class WA360CloudClient implements ChannelClient {
 		} else if ("cta_url".equalsIgnoreCase(type)) {
 			TmplElement button = buttons.get(0);
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
-			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS, MapModel.createInstance()
-					.put("display_text", StringUtils.substring(ArgUtil.nonEmpty(button.getLabel(), "Visit"), 20))
-					.put("url", button.getUrl()).toMap());
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
+					MapModel.createInstance()
+							.put("display_text", StringUtils.ellipsis(ArgUtil.nonEmpty(button.getLabel(), "Visit"), 20))
+							.put("url", button.getUrl()).toMap());
 		} else if ("location_request_message".equalsIgnoreCase(type)) {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
 		}
