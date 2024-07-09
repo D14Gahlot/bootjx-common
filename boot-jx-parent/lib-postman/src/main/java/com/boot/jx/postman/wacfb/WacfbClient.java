@@ -585,7 +585,8 @@ public class WacfbClient implements ChannelClient {
 			TmplElement button = buttons.get(0);
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
-					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
+					MapModel.createInstance()
+							.put("display_text", StringUtils.ellipsis(ArgUtil.nonEmpty(button.getLabel(), "Visit"), 20))
 							.put("url", button.getUrl()).toMap());
 		} else if ("location_request_message".equalsIgnoreCase(type)) {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
