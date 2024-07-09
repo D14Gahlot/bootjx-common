@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.common.config.ConfigManagerImpl;
+import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
@@ -42,6 +43,13 @@ public class ConfigController {
 	public ApiResponse<ChannelConfig, Object> saveChannelConfig(@PathVariable CHANNEL_TYPE_ENUM channelType,
 			@RequestBody Map<String, Object> data) {
 		return ApiResponse.buildResults(configManager.saveChannelConfig(channelType.toString(), data));
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/api/config/channel", method = { RequestMethod.PATCH })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ChannelConfig, Object> modifyChannelConfig(@RequestBody ModelPatches req) {
+		return ApiResponse.buildResults(configManager.patchChannelConfig(req));
 	}
 
 	@ResponseBody
