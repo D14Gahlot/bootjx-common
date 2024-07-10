@@ -2,6 +2,8 @@ package com.boot.jx.chat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -46,6 +49,7 @@ import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -233,12 +237,18 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 		void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException;
 
-		default List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc resp) {
+		default List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc resp, AuthState state) {
 			LOGGER.error("Channel onRegister NOT FOUND ");
 			return null;
 		}
 
 		public ChannelClient getClient(ChannelConfig channelConfig);
+
+		default public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
+				AuthState state) throws URISyntaxException, MalformedURLException {
+			return Constants.BLANK;
+		}
+
 	}
 
 	public ConnectorHandlerFactory(List<ConnectorHandler> libs) {

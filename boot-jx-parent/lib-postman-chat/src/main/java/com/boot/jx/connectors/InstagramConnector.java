@@ -24,6 +24,7 @@ import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.InstagramClient;
 import com.boot.jx.postman.fb.InstagramUserProfile;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
@@ -50,7 +51,9 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	@Autowired
 	private RestService restService;
 
-	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
+	@Override
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
+			AuthState state) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		try {
 
@@ -267,7 +270,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		String csid = m.getSender().get("id");
 		report.contact().setCsid(csid);
 		report.setChangeStamp(m.getTimestamp());
-		//System.out.println("FacebookMessaging======" + JsonUtil.toJson(m));
+		// System.out.println("FacebookMessaging======" + JsonUtil.toJson(m));
 		if (ArgUtil.is(m.getRead())) {
 			report.setChangeStamp(m.getReadWatermark());
 			report.setStatus(Status.READ);
@@ -305,7 +308,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		pageEntry.getMessaging().forEach(m -> {
 			if ((ArgUtil.is(m.getMessage()) && (m.getMessage().isIs_deleted())) // Message is deleted
 					|| ArgUtil.is(m.getRead()) // or Message is Read
-					//|| ArgUtil.is(m.getPostBack()) // Postback
+			// || ArgUtil.is(m.getPostBack()) // Postback
 					|| ArgUtil.is(m.getReaction())) {
 				messageBoxEvent.addMessageReport(toMessageReport(m, channelConfig));
 			} else if (ArgUtil.is(m.getMessage()) || ArgUtil.is(m.getPostBack())) {

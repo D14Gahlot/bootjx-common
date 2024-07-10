@@ -24,6 +24,7 @@ import com.boot.jx.postman.fb.FacebookMessaging;
 import com.boot.jx.postman.fb.FacebookUserProfile;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
@@ -56,7 +57,9 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	@Autowired
 	private RestService restService;
 
-	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp) {
+	@Override
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
+			AuthState state) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		try {
 
@@ -220,7 +223,7 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 		}
 
 		inboxMessage.setOriginalMessage(m);
-		
+
 		return inboxMessage;
 	}
 

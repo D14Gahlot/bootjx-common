@@ -150,7 +150,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 					return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone");
 				}
 			}
-		} 
+		}
 
 		return null;
 	}
@@ -382,22 +382,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
 				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
 		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
-	}
-
-	@Deprecated
-	public CommonFile reloadMedia(Attachment attachment)
-			throws MalformedURLException, FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
-				// .fileType(attachment.getMediaType())
-				.format(FileFormat.from(attachment.getMediaMimeType()))
-				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
-
-		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
-
-		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
-				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
-		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
 	}
 
 	/*

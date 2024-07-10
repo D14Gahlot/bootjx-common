@@ -27,7 +27,6 @@ import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.models.AppAuthModels;
-import com.boot.jx.common.models.AppAuthModels.ACCESS_RULES;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.model.CommonFile;
@@ -48,6 +47,7 @@ import com.boot.jx.postman.doc.HSMContentType;
 import com.boot.jx.postman.doc.HSMLanguage;
 import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
+import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
 import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
@@ -82,14 +82,19 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(HSMContentType.values());
 	}
 
+	@RequestMapping(value = "/api/meta/message_queue_types", method = { RequestMethod.GET })
+	public ApiResponse<MESSAGE_QUEUE_TYPE, Object> messageQueueType() {
+		return ApiResponse.buildResults(MESSAGE_QUEUE_TYPE.values());
+	}
+
 	@RequestMapping(value = "/api/meta/langs", method = { RequestMethod.GET })
 	public ApiResponse<HSMLanguage, Object> languages() {
 		return ApiResponse.buildResults(HSMLanguage.values());
 	}
 
 	@RequestMapping(value = "/api/meta/channel_types", method = { RequestMethod.GET })
-	public ApiResponse<AChannelDetails, Object> channel() {
-		return ApiResponse.buildResults(new ArrayList<AChannelDetails>(ChannelPluginProvider.DETAILS_MAPPING.values()));
+	public ApiResponse<Object, Object> channel() {
+		return ApiResponse.buildResults(new ArrayList<Object>(ChannelPluginProvider.PLUGIN_MAPPING.values()));
 	}
 
 	@RequestMapping(value = "/api/meta/channel_configs/{channelType}", method = { RequestMethod.GET })

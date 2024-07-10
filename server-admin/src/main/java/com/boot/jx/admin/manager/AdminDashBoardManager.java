@@ -1193,11 +1193,10 @@ public class AdminDashBoardManager {
 
 		Map<Object, Long> hourCntMap = getHourRange(currentTs, lasthrTimeStmp);
 
-
 		hourWiseCount = MapUtils.getHourdefaultValue(hourWiseCountMap, channelLst, hourCntMap, tnt);
 
 		hourWiseCount = sortMap(hourWiseCount);
-		hourWiseCount =removeSandBoxNumber(hourWiseCount);
+		hourWiseCount = removeSandBoxNumber(hourWiseCount);
 
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 		dto.setTenant(tnt);
@@ -1549,7 +1548,6 @@ public class AdminDashBoardManager {
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 
 		dateWiseSummary = sortMap(dateWiseSummary);
-		
 		dto.setTenant(tnt);
 		dto.setMap(map);
 		dto.setMonth(monthYear);
@@ -1623,8 +1621,6 @@ public class AdminDashBoardManager {
 		list.add(Aggregation.match(new Criteria("meta.composeType").is("N")).toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(Aggregation.match(new Criteria("meta.sendType").is("PM")).toDocument(Aggregation.DEFAULT_CONTEXT));
 
-		
-		
 //		Criteria composeTypeCriteria = new Criteria().orOperator(
 //			    Criteria.where("meta.composeType").is("N"),
 //			    Criteria.where("meta.composeType").is("R")
@@ -1635,9 +1631,9 @@ public class AdminDashBoardManager {
 //			    Criteria.where("meta.sendType").is("PM"),
 //			    Criteria.where("meta.sendType").is("SM")
 //			);
-//
-//		list.add(Aggregation.match(sendTypeCriteria).toDocument(Aggregation.DEFAULT_CONTEXT));
-		
+
+		// list.add(Aggregation.match(sendTypeCriteria).toDocument(Aggregation.DEFAULT_CONTEXT));
+
 		list.add(Aggregation.match(new Criteria("timestamp").gt(lasthrTimeStmp).lt(currentTs))
 				.toDocument(Aggregation.DEFAULT_CONTEXT));
 		list.add(Aggregation.group("stamps").count().as("count").toDocument(Aggregation.DEFAULT_CONTEXT));

@@ -21,6 +21,7 @@
 			domain : '[[${domain}]]',
 			PROP_SERVICE_SERVER : '[[${PROP_SERVICE_SERVER}]]'
 		});
+		function wrapObj(d){return d}
 	</script>
 <span th:switch="${channelSelected}" th:remove="tag">
 	<span th:case="true" th:remove="tag">
@@ -53,7 +54,6 @@
 					
 			<span th:case="'fb'" th:remove="tag">
 				<script>
-					function cb(d){return d}
 					window.CONST.extend({
 						channelConfig : {
 							id : '[[${selectedChannel.id}]]',
@@ -63,7 +63,7 @@
 							title : '[[${selectedChannel.facebook.masterAppTitle}]]',
 							masterAppId : '[[${selectedChannel.facebook.masterAppId}]]',
 							masterAppConfigId : '[[${selectedChannel.facebook.masterAppConfigId}]]',
-							response : cb( [(${response})] )
+							response : wrapObj( [(${response})] )
 						}
 					});
 				  window.fbAsyncInit = function() {
@@ -82,7 +82,6 @@
 		
 			<span th:case="'ig'" th:remove="tag">
 				<script>
-					function cb(d){return d}
 					window.CONST.extend({
 						channelConfig : {
 							id : '[[${selectedChannel.id}]]',
@@ -92,7 +91,7 @@
 							title : '[[${selectedChannel.instagram.masterAppTitle}]]',
 							masterAppId : '[[${selectedChannel.instagram.masterAppId}]]',
 							masterAppConfigId : '[[${selectedChannel.instagram.masterAppConfigId}]]',
-							response : cb( [(${response})] )
+							response : wrapObj( [(${response})] )
 						}
 					});
 				  window.fbAsyncInit = function() {
@@ -109,6 +108,23 @@
 				</script>
 			</span>	
 			
+			<span th:case="'outlook'" th:remove="tag">
+				<script>
+					window.CONST.extend({
+						channelConfig : {
+							id : '[[${selectedChannel.id}]]',
+							masterChannelId :  '[[${selectedChannel.id}]]',
+							channelType : '[[${selectedChannel.channelType}]]',
+							contactType : '[[${selectedChannel.contactType}]]',
+							title : '[[${selectedChannel.outlook.masterAppTitle}]]',
+							masterClientId : '[[${selectedChannel.outlook.masterClientId}]]',
+							masterTenantId : '[[${selectedChannel.outlook.masterTenantId}]]',
+							AUTH_URL : '[(${AUTH_URL})]',
+							response : wrapObj( [(${response})] )
+						}
+					});
+				</script>
+			</span>	
 					
 		</span>	
 	</span>
@@ -224,7 +240,14 @@
 						  }
 						</script>
 					</span>
-							
+					<span th:case="'outlook'" th:remove="tag">
+						<script>
+						  function launchWhatsAppSignup() {
+						  }
+						</script>
+					</span>	
+					
+					
 				</span>	
 		</span>
 	</span>

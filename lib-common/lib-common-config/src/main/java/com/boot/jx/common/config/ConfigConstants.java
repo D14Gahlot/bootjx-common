@@ -338,6 +338,14 @@ public class ConfigConstants {
 						.group(CHANNELS)),
 		CHANNEL_AUTOCONFIGURE_TWITTER(new ConfigMeta("AutoConfigure Twitter", "feature.channel.autoconfigure.twitter")
 				.optionsOnOff().group(CHANNELS)),
+		CHANNEL_AUTOCONFIGURE_OUTLOOK(new ConfigMeta("AutoConfigure Outlook", "feature.channel.autoconfigure.outlook")
+				.optionsOnOff().group(CHANNELS)),
+
+		CHANNEL_BROADCAST_TELEGRAM(new ConfigMeta("AutoConfigure Telegram", "feature.channel.broadcast.telegram")
+				.optionsOnOff().group(CHANNELS).defaultFalse()),
+		CHANNEL_BROADCAST_WHATSAPP(new ConfigMeta("Boradcast WhatsApp", "feature.channel.broadcast.whatsapp")
+				.optionsOnOff().group(CHANNELS).defaultTrue()),
+
 		BOT_FLOW_BUILDER(new ConfigMeta("Bot Flow Builder", "feature.bot.flow.builder").optionsOnOff().group(BOT)),
 		APP_MODULE_CALENDAR(
 				new ConfigMeta("Calendar Module", "feature.app.module.calandar").optionsOnOff().group(APP_MODULES)),
@@ -345,6 +353,10 @@ public class ConfigConstants {
 		APP_MODULE_ADMIN(new ConfigMeta("Admin Module", "feature.app.module.admin").optionsOnOff().group(APP_MODULES)),
 		APP_MODULE_SOCIAL(
 				new ConfigMeta("Social Module", "feature.app.module.social").optionsOnOff().group(APP_MODULES)),
+
+		MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
+				.group(APP_MODULES)),
+
 		// Ends here
 		;
 
