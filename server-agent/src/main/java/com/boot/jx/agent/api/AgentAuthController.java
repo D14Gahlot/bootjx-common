@@ -115,7 +115,7 @@ public class AgentAuthController {
 
 		if (ArgUtil.is(domainToken)) {
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
-					domainId, domainToken, false);
+					domainId, domainToken);
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
@@ -151,7 +151,7 @@ public class AgentAuthController {
 
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
-					domainId, domainToken, false);
+					domainId, domainToken);
 
 			if (ArgUtil.is(agent)) {
 				sessionService.login(request, agent, domainToken);
@@ -209,7 +209,7 @@ public class AgentAuthController {
 		ApiResponse<Object, AgentResponseAuthDto> resp = new ApiResponse<Object, AgentResponseAuthDto>();
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
-					domainId, domainToken, false);
+					domainId, domainToken);
 			if (ArgUtil.is(agent)) {
 				resp.meta(agent);
 				resp.data(MapModel.createInstance().put("subscriptions", MapModel.createInstance() //
@@ -245,7 +245,7 @@ public class AgentAuthController {
 		String jxSessionId = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 
 		if ("login".equals(action)) {
-			ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password, false);
+			ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password);
 			if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 				AgentResponseAuthDto agent = x.getMeta();
 				if (ArgUtil.is(agent)) {
@@ -266,7 +266,7 @@ public class AgentAuthController {
 			MapModel map = MapModel
 					.from(CryptoUtil.getEncoder().message(jxSessionId).decrypt().decodeBase64().toObzect(Map.class));
 			ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(map.getString("username"),
-					map.getString("password"), false);
+					map.getString("password"));
 			if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 				AgentResponseAuthDto agent = x.getMeta();
 				if (ArgUtil.is(agent)) {
@@ -346,7 +346,7 @@ public class AgentAuthController {
 						message = "Please enter valid password";
 					} else if (confirmpassword.equals(newpassword)) {
 						ApiResponse<Map<String, Object>, String> x = authService.agentSetPass(username, token,
-								newpassword, false);
+								newpassword);
 						if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 							status = "SUCCESS";
 							message = "Password has been reset successfully";
@@ -388,7 +388,7 @@ public class AgentAuthController {
 	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
 			@RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
 		username = ArgUtil.parseAsString(username, Constants.BLANK);
-		ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password, false);
+		ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password);
 		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 			AgentResponseAuthDto agent = x.getMeta();
