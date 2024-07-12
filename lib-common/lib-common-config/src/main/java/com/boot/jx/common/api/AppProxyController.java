@@ -45,9 +45,10 @@ public class AppProxyController {
 	private Map<String, String> addHeaders(Map<String, String> headers) {
 		if (ArgUtil.is(appCommonAuthUser)) {
 			if (ArgUtil.is(appCommonAuthUser.getProfile())) {
+				headers.put("x-agent-code", appCommonAuthUser.getProfile().code());
+			} else {
 				LOGGER.warn("appCommonAuthUser.getProfile() is null");
 			}
-			headers.put("x-agent-code", appCommonAuthUser.getProfile().code());
 			headers.put("x-agent-user", appCommonAuthUser.getAuthUser());
 		} else {
 			LOGGER.warn("appCommonAuthUser is null");
