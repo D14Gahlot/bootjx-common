@@ -2,6 +2,7 @@ package com.boot.jx.postman.manager;
 
 import java.util.Map;
 
+import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -17,6 +18,8 @@ public interface ConfigManager {
 
 	ChannelConfig saveChannelConfig(String channelType, Map<String, Object> data);
 
+	ChannelConfig patchChannelConfig(ModelPatches req);
+
 	/**
 	 * This mehthod will add channel for specidfied domain, in asyn manner
 	 * 
@@ -27,4 +30,5 @@ public interface ConfigManager {
 	void saveForDomain(ChannelConfig config, String domain);
 
 	void save(PMConfigurationObject config);
+
 }

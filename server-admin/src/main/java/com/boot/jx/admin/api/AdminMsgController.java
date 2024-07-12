@@ -713,9 +713,12 @@ public class AdminMsgController {
 					CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
 					hsmTemp.setId(hsmId);
 					hsmTemp.setCode(hsmTemplateCode);
+					hsmTemp.setData(otBoxMsg.getHsm().data());
+					
 					outboxMsg.setGroupId(groupId);
 					outboxMsg.setCampaignTitle(groupTitle);
 					outboxMsg.setMessage(otBoxMsg.getMessage());
+					
 					outboxMsg.setAttachments(otBoxMsg.getAttachments());
 					outboxMsg.setContact(otBoxMsg.getContact());
 					outboxMsg.setTo(Arrays.asList(dto.getPhone()));

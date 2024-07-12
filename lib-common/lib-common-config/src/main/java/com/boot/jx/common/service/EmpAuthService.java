@@ -84,12 +84,11 @@ public class EmpAuthService {
 	@Autowired
 	private OAClient oaClient;
 
-	private AgentDoc validateAgent(String username, String email, String passsword, boolean admin)
-			throws NoSuchAlgorithmException {
+	private AgentDoc validateAgent(String username, String email, String passsword) throws NoSuchAlgorithmException {
 		if (ArgUtil.isEmpty(passsword)) {
 			return null;
 		}
-		AgentDoc agent = getAgentByCodeAndStatus(username, email, "Y", admin);
+		AgentDoc agent = getAgentByCodeAndStatus(username, email, "Y");
 		String passwordMd5 = CryptoUtil.getMD5Hash(passsword);
 		String passwordSHA1 = CryptoUtil.getSHA1Hash(passsword);
 		String passwordSHA256 = CryptoUtil.getSHA2Hash(passsword);
@@ -107,9 +106,8 @@ public class EmpAuthService {
 		return agent;
 	}
 
-	public AgentResponseAuthDto loginAgent(String username, String passsword, boolean admin)
-			throws NoSuchAlgorithmException {
-		AgentDoc agent = validateAgent(username, username, passsword, admin);
+	public AgentResponseAuthDto loginAgent(String username, String passsword) throws NoSuchAlgorithmException {
+		AgentDoc agent = validateAgent(username, username, passsword);
 		if (ArgUtil.is(agent)) {
 			fixAppModules(agent);
 			DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
@@ -120,17 +118,17 @@ public class EmpAuthService {
 
 	public AgentResponseAuthDto loginByDomainToken(UserAuthToken userAuthToken) throws NoSuchAlgorithmException {
 		return loginByDomainToken(userAuthToken.getDomainUser(), userAuthToken.getDomainUserEmail(),
-				userAuthToken.getDomainName(), userAuthToken.getDomainId(), userAuthToken.getDomainToken(), false);
+				userAuthToken.getDomainName(), userAuthToken.getDomainId(), userAuthToken.getDomainToken());
 	}
 
 	public AgentResponseAuthDto loginByDomainToken(String username, String userEmail, String domainName,
-			String domainId, String domainToken, boolean adminPanel) throws NoSuchAlgorithmException {
+			String domainId, String domainToken) throws NoSuchAlgorithmException {
 		if (!ArgUtil.areEqual(AppContextUtil.getTenant(), domainName)) {
 			LOGGER.info("DOMAIN MISMATCH {}<>{}", AppContextUtil.getTenant(), domainName);
 			return null;
 		}
 
-		AgentDoc agent = getAgentByCodeAndStatus(username, userEmail, "Y", adminPanel);
+		AgentDoc agent = getAgentByCodeAndStatus(username, userEmail, "Y");
 		if (!ArgUtil.is(agent)) {
 			LOGGER.info("NO USER FOUND {}", username);
 			return null;
@@ -161,7 +159,7 @@ public class EmpAuthService {
 	}
 
 	public boolean resetPassword(String username, boolean admin) throws NoSuchAlgorithmException {
-		AgentDoc agent = getAgentByCodeAndStatus(username, username, "Y", admin);
+		AgentDoc agent = getAgentByCodeAndStatus(username, username, "Y");
 		if (!ArgUtil.is(agent)) {
 			return false;
 		}
@@ -186,7 +184,7 @@ public class EmpAuthService {
 		return true;
 	}
 
-	private AgentDoc getAgentByCodeAndStatus(String username, String email, String status, boolean admin) {
+	private AgentDoc getAgentByCodeAndStatus(String username, String email, String status) {
 		if (ArgUtil.areEqual(superAdminUser, username)) {
 			AgentDoc agentLocal = new AgentDoc();
 			agentLocal.setAgent_code(username);
@@ -206,18 +204,17 @@ public class EmpAuthService {
 		query2.addCriteria(Criteria.where("isactive").is(status).orOperator(Criteria.where("agent_code").is(username),
 				Criteria.where("agent_code").regex("^" + username + "$", "i"), Criteria.where("agent_email").is(email),
 				Criteria.where("agent_email").regex("^" + email + "$", "i")));
-		//System.out.println("" + query2.toString());
+		// System.out.println("" + query2.toString());
 		AgentDoc agent = CollectionUtil.getOne(mongoTemplate.find(query2, AgentDoc.class));
 
-		if (admin && ArgUtil.is(agent)) {
-			return agent.isAdmin() ? agent : null;
-		}
+//		if (admin && ArgUtil.is(agent)) {
+//			return agent.isAdmin() ? agent : null;
+//		}
 		return agent;
 	}
 
-	public boolean setPassword(String username, String passsword, String newpasssword, boolean admin)
-			throws NoSuchAlgorithmException {
-		AgentDoc agent = validateAgent(username, username, passsword, admin);
+	public boolean setPassword(String username, String passsword, String newpasssword) throws NoSuchAlgorithmException {
+		AgentDoc agent = validateAgent(username, username, passsword);
 		if (!ArgUtil.is(agent)) {
 			return false;
 		}
@@ -244,11 +241,11 @@ public class EmpAuthService {
 		return x;
 	}
 
-	public ApiResponse<Map<String, Object>, String> agentSetPass(String username, String password, String newpassword,
-			boolean admin) throws NoSuchAlgorithmException {
+	public ApiResponse<Map<String, Object>, String> agentSetPass(String username, String password, String newpassword)
+			throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
-		if (setPassword(username, password, newpassword, admin)) {
+		if (setPassword(username, password, newpassword)) {
 			x.setStatusKey("SUCCESS");
 		} else {
 			x.data().put("success", false);
@@ -259,9 +256,9 @@ public class EmpAuthService {
 		return x;
 	}
 
-	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> empLogin(String username, String password,
-			boolean admin) throws NoSuchAlgorithmException {
-		AgentResponseAuthDto agent = loginAgent(username, password, admin);
+	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> empLogin(String username, String password)
+			throws NoSuchAlgorithmException {
+		AgentResponseAuthDto agent = loginAgent(username, password);
 		if (ArgUtil.is(agent)) {
 			return ApiResponse.buildData(MapBuilder.map().put("success", true).toMap(), agent).statusKey("SUCCESS");
 		} else {
@@ -273,7 +270,7 @@ public class EmpAuthService {
 	public UserAuthToken createAgentLoginToken(String username, String email, String password, String domainName,
 			String domainId, String app, String event) throws NoSuchAlgorithmException {
 		UserAuthToken userLoginToken = new UserAuthToken();
-		AgentDoc agent = validateAgent(username, email, password, "admin".equals(app));
+		AgentDoc agent = validateAgent(username, email, password);
 		if (ArgUtil.is(agent)) {
 			HashBuilder builder = getHashBuilder(agent.getAgent_code(), agent.getAgent_email(), domainName, domainId,
 					agent.getAuthKey());

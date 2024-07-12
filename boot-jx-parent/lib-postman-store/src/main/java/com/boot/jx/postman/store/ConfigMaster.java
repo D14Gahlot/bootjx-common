@@ -77,7 +77,9 @@ public class ConfigMaster extends CommonMongoTemplateAbstract<ConfigMaster> {
 		List<ChannelConfigDupsDoc> channels = channelList.getIfPresent(channelId);
 		if (!ArgUtil.is(channels) || channels.size() < 1) {
 			channels = configStore.find(MQB.collection(ChannelConfigDupsDoc.class).where(Criteria.where("lane").is(lane)
-					.and("isDisabled").is(false).and("isDeleted").is(false).and("channelType").is(channelType)));
+					.and("isDisabled").is(false).and("isDeleted").is(false).and("channelType").is(channelType)
+					.and("domain").ne("nodomain")
+					));
 			if (ArgUtil.is(channels)) {
 				channelList.put(channelId, channels);
 			}

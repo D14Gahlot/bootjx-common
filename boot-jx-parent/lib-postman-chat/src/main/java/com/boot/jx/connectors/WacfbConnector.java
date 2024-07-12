@@ -57,6 +57,7 @@ import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.jx.postman.wa360.WA360Constants;
+import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wacfb.WacfbClient;
 import com.boot.jx.postman.wacfb.WacfbInboundMedia;
@@ -88,7 +89,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	private PMFileStoreClient pmFileStoreClient;
 
 	@Autowired
-	private WacfbClient waClient;
+	private WacfbClient wacfbClient;
 
 	@Autowired
 	private PMClientConfig pmClientConfig;
@@ -191,19 +192,21 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
-//		String webhookUrl = null;
-//		try {
-//			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-//			MapModel webhook = MapModel.createInstance().put("override_callback_uri", webhookUrl).put("verify_token",
-//					channelConfig.getWacfb().getVerifyToken());
-//
-//			restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
-//					.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
-//					.postJson(webhook.toMap()).asMapModel();
-//
-//		} catch (Exception e) {
-//			logManager.error("While Setting " + webhookUrl, e);
-//		}
+		// String webhookUrl = null;
+		// try {
+		// webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+		// MapModel webhook =
+		// MapModel.createInstance().put("override_callback_uri",
+		// webhookUrl).put("verify_token",
+		// channelConfig.getWacfb().getVerifyToken());
+		//
+		// restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
+		// .path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
+		// .postJson(webhook.toMap()).asMapModel();
+		//
+		// } catch (Exception e) {
+		// logManager.error("While Setting " + webhookUrl, e);
+		// }
 	}
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
@@ -449,10 +452,14 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	private void formatMedia(InboxMessage inboxMessage, MapModel map, ChannelConfig channelConfig, JsonPath path,
 			FileType fileType) {
 		try {
+
 			WacfbInboundMedia media = map.entry(path).as(WacfbInboundMedia.class);
-			CommonFileStream srcFile = new CommonFileStream().url(WA360Constants.MEDIA_URL(media.getId()))
-					.fileType(fileType).format(FileFormat.from(media.getMimeType()))
-					.authBearer(channelConfig.getWacfb().getAccessToken())
+
+			String mediaUrl = wacfbClient.getMediaUrl(channelConfig, WA360Constants.META_WA_CLOUD_URL(media.getId()));
+			//System.out.println("mediaUrl " + mediaUrl);
+
+			CommonFileStream srcFile = new CommonFileStream().url(mediaUrl).fileType(fileType)
+					.format(FileFormat.from(media.getMimeType())).authBearer(channelConfig.getWacfb().getAccessToken())
 					.name(ArgUtil.nonEmpty(media.getFilename(), media.getCaption()));
 
 			CommonFile dstFile = pmFileStoreClient.uploadSessionFileAsync(srcFile,
@@ -465,30 +472,17 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 	}
 
-	@Deprecated
-	public CommonFile reloadMedia(Attachment attachment)
-			throws MalformedURLException, FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
-				// .fileType(attachment.getMediaType())
-				.format(FileFormat.from(attachment.getMediaMimeType()))
-				// .header(WA360Constants.D360_API_KEY, channelConfig.getWa360d().getApiKey())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
-
-		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
-
-		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
-				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
-		return pmFileStoreClient.commitSessionFile(srcFile, dstFile);
-	}
-
 	@Override
 	public CommonFile reloadMedia(ChannelConfig channelConfig, MessageDoc msg, Attachment attachment)
 			throws FileNotFoundException, IOException {
-		CommonFileStream srcFile = new CommonFileStream().url(attachment.getMediaSrc())
+		String mediaUrl = wacfbClient.getMediaUrl(channelConfig, attachment.getMediaSrc());
+
+		CommonFileStream srcFile = new CommonFileStream().url(mediaUrl)
 				// .fileType(attachment.getMediaType())
 				.format(FileFormat.from(attachment.getMediaMimeType()))
-				.authBearer(channelConfig.getWacfb().getAccessToken())
-				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption()));
+				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
+				.name(ArgUtil.nonEmpty(attachment.getMediaName(), attachment.getMediaCaption(),
+						attachment.getMediaMimeType(), "File"));
 
 		File fileb = Urly.parse(attachment.getMediaURL()).toFile();
 
@@ -501,15 +495,16 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
 			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
-			// generic
+																	// generic
 
 			boolean isValidContact = true;
 			if (outboxMessage.messageMetaWrapper().composeTypeIs(MESSAGE_COMPOSE_TYPE.SEND_CODE)) {
 				isValidContact = optin(channelConfig, chatContactDoc);
 			}
 			if (isValidContact) {
-				waClient.send(channelConfig, outboxMessage);
+				wacfbClient.send(channelConfig, outboxMessage);
 				outboxMessage.updateStatus(OutboxMessage.Status.SENT);
+
 			} else {
 				outboxMessage.logs().add(String.format("Invalid Contact for %s", chatContactDoc));
 				outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
@@ -614,33 +609,31 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 	}
 
-	@Override
-	public boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
-
-		if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
-			String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
-			String phone = chatContactDoc.getPhone();
-			try {
-				phone = phone.replace(" ", "").replaceAll("^[\\+0\\s]+(?!$)", "").trim();
-				PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion);
-				phone = String.format("+%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-			} catch (NumberParseException e) {
-				phone = String.format("+%s", phone);
-			}
-
-			/*
-			 * MapModel resp = waClient.fetchContact(phone, channelConfig); String waId =
-			 * resp.getString("wa_id");
-			 * 
-			 * String input = resp.getString("input"); String status =
-			 * resp.getString("status");
-			 * 
-			 * if ("valid".equals(status)) { ChatContactQuery chatContactQuery = new
-			 * ChatContactQuery(chatContactDoc); chatContactQuery.updateLastOptInStamp();
-			 * commonMongoTemplate.updateFirst(chatContactQuery); return true; //}
-			 */
-		}
-		return !ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp());
-	}
+	// @Override
+	/*
+	 * public boolean optin(ChannelConfig channelConfig, ChatContactDoc
+	 * chatContactDoc) {
+	 * 
+	 * if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) { String
+	 * defaultRegion =
+	 * environment.keyEntry("postman.phonebook.region").asString("IN"); String phone
+	 * = chatContactDoc.getPhone(); try { phone = phone.replace(" ",
+	 * "").replaceAll("^[\\+0\\s]+(?!$)", "").trim(); PhoneNumber phoneNumber =
+	 * PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion); phone =
+	 * String.format("+%s%s", phoneNumber.getCountryCode(),
+	 * phoneNumber.getNationalNumber()); } catch (NumberParseException e) { phone =
+	 * String.format("+%s", phone); }
+	 * 
+	 * MapModel resp = waClient.fetchContact(phone, channelConfig); String waId
+	 * =resp.getString("wa_id"); String input = null;// resp.getString("input");
+	 * String status = "valid";// resp.getString("status");
+	 * 
+	 * if ("valid".equals(status)) { ChatContactQuery chatContactQuery = new
+	 * ChatContactQuery(chatContactDoc); chatContactQuery.updateLastOptInStamp();
+	 * commonMongoTemplate.updateFirst(chatContactQuery); return true; } }
+	 * 
+	 * //return ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp()); return
+	 * true; }
+	 */
 
 }

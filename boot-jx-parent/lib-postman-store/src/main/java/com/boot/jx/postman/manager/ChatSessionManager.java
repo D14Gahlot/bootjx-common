@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.dict.ContactType;
@@ -73,6 +74,9 @@ public class ChatSessionManager {
 
 	@Autowired
 	public MessageContext messageContext;
+
+	@Autowired
+	public AppConfig appConfig;
 
 	public InBoundEvent updateStatus(ChatSessionDoc session, PMConstants.CHAT_STATUS status) {
 		if (!ArgUtil.is(status)) {
@@ -322,6 +326,10 @@ public class ChatSessionManager {
 		}
 
 		int limit = Math.min(query.limit == 0 ? 50 : query.limit, pmDomainConfig.getAgentHistoryCount().asInteger(150));
+		if (ArgUtil.isEqual(appConfig.getAppType(), "ADMIN")) {
+			limit = Math.min(query.limit == 0 ? 100 : query.limit, 50000);
+		}
+
 		query2.addCriteria(
 				// Only Agent Chats
 				primaryCriteria

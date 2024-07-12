@@ -165,10 +165,10 @@ public class UserController {
 				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("otp")
 						.codeKey("ValidCredentials").description("Invalid OTP"));
 			}
-			empAuthService.agentSetPass(username, password, newpassword, false);
+			empAuthService.agentSetPass(username, password, newpassword);
 		} else {
 			if (!ArgUtil.is(loginToken.getDomainUserPhone()) || !empAuthService.sendOTP(loginToken)) {
-				empAuthService.agentSetPass(username, password, newpassword, false);
+				empAuthService.agentSetPass(username, password, newpassword);
 			}
 		}
 
