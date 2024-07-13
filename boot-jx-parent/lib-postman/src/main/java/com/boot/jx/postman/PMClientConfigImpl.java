@@ -83,7 +83,7 @@ public class PMClientConfigImpl implements PMClientConfig {
 	}
 
 	@Override
-	public String getWebhookBase(ChannelConfig channelConfig) {
+	public String getWebhookBase(ChannelConfig channelConfig, String appPrefix) {
 		String webhookUrl = channelConfig.getWebhookUrl();
 		if (!ArgUtil.is(webhookUrl)) {
 			String publicUrl = PMContextUtil.publicUrl();
@@ -93,17 +93,18 @@ public class PMClientConfigImpl implements PMClientConfig {
 				webhookUrl = String.format("%s%s", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
 						environment.keyEntry("mry.prop.service.server").asString());
 			} else {
-				webhookUrl = String.format("https://%s.%s/postman", AppContextUtil.getTenant(),
-						environment.keyEntry("mry.prop.service.server").asString());
+				webhookUrl = String.format("https://%s.%s/%s", AppContextUtil.getTenant(),
+						environment.keyEntry("mry.prop.service.server").asString(),
+						ArgUtil.nonEmpty(appPrefix, "postman"));
 			}
 		}
 		return webhookUrl;
 	}
 
 	@Override
-	public String getWebhookUrl(ChannelConfig channelConfig) {
+	public String getWebhookUrl(ChannelConfig channelConfig, String appPrefix) {
 		PMConfigurationModel config = environment.local();
-		String webhookEndPoint = getWebhookBase(channelConfig);
+		String webhookEndPoint = getWebhookBase(channelConfig, appPrefix);
 		String webhookPath = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig);
 		try {
 			URLBuilder url = URLBuilder.parse(webhookEndPoint).path(webhookPath);

@@ -490,13 +490,13 @@ public class PMEnvironment {
 
 	public interface PMClientConfig {
 
-		String getWebhookBase(ChannelConfig channelConfig);
+		String getWebhookBase(ChannelConfig channelConfig, String appPrefix);
 
 		String getChatSessionTimeout();
 
 		TimePeriod getAgentSessionTimeout();
 
-		String getWebhookUrl(ChannelConfig channelConfig);
+		String getWebhookUrl(ChannelConfig channelConfig, String appPrefix);
 
 		boolean isLocalDummyBotEnabled();
 

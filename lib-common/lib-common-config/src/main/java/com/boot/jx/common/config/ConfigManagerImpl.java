@@ -247,7 +247,7 @@ public class ConfigManagerImpl implements ConfigManager {
 				if (plugin.isWebhookManual()) {
 					PMConfigurationModel config = pmEnvironment.local();
 					if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
-						channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig));
+						channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig, null));
 						channelConfig.setCallbackPath(
 								PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
 					}
@@ -262,7 +262,10 @@ public class ConfigManagerImpl implements ConfigManager {
 	public void save(ChannelConfig config) {
 		pmEnvironment.addChannel(config);
 		this.refresh(ChannelConfigDoc.DOCUMENT_NAME, config.getChannelId());
-		connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
+		config = connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
+		if (ArgUtil.is(config) && ArgUtil.is(config.getMeta())) {
+			pmEnvironment.addChannel(config);
+		}
 	}
 
 	@Override
