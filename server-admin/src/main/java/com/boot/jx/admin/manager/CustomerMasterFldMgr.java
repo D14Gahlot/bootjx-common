@@ -373,7 +373,7 @@ public class CustomerMasterFldMgr {
 		} else if (ArgUtil.is(id) && ArgUtil.is(jobid)) {
 			Query qryQuery = new Query();
 			Criteria criteria = new Criteria().andOperator(Criteria.where("id").is(id),
-					Criteria.where("jobid").is(jobid));
+					Criteria.where("jobId").is(jobid));
 			qryQuery.addCriteria(criteria);
 
 			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
