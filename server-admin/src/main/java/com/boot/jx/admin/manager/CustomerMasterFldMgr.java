@@ -346,7 +346,7 @@ public class CustomerMasterFldMgr {
 	public List<JobsResponseDto> saveJobsOutPut(String id, Map<String, List<Object>> maps) {
 		if (ArgUtil.is(maps)) {
 			JobsOutPutDoc jobsOpDoc = new JobsOutPutDoc();
-			jobsOpDoc.setJobid(id);
+			jobsOpDoc.setJobId(id);
 			jobsOpDoc.setOutput(jobsOpDoc.getOutput());
 			jobsOpDoc.setIsactive(Constants.YES);
 			jobsOpDoc.setJobtype("customer_profile_bulk_output");
@@ -367,7 +367,7 @@ public class CustomerMasterFldMgr {
 			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
 		} else if (ArgUtil.is(jobid) && ArgUtil.isEmptyString(id)) {
 			Query qryQuery = new Query();
-			Criteria criteria = Criteria.where("jobid").is(jobid);
+			Criteria criteria = Criteria.where("jobId").is(jobid);
 			qryQuery.addCriteria(criteria);
 			lstDocs = commonMongoTemplate.find(qryQuery, JobsOutPutDoc.class);
 		} else if (ArgUtil.is(id) && ArgUtil.is(jobid)) {
