@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -20,12 +21,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.http.ProxyService;
+import com.boot.jx.logger.LoggerService;
 import com.boot.model.MapModel;
+import com.boot.utils.ArgUtil;
 
 import io.swagger.annotations.ApiOperation;
 
 @Controller
 public class AppProxyController {
+
+	private static final Logger LOGGER = LoggerService.getLogger(AppProxyController.class);
 
 	// private final RestTemplate restTemplate;
 	@Autowired
@@ -36,6 +41,21 @@ public class AppProxyController {
 
 	@Autowired(required = false)
 	private AppAuthModels.AppCommonAuthUser appCommonAuthUser;
+
+	private Map<String, String> addHeaders(Map<String, String> headers) {
+		if (ArgUtil.is(appCommonAuthUser)) {
+			if (ArgUtil.is(appCommonAuthUser.getProfile())) {
+				headers.put("x-agent-code", appCommonAuthUser.getProfile().code());
+			} else {
+				LOGGER.warn("appCommonAuthUser.getProfile() is null");
+			}
+			headers.put("x-agent-user", appCommonAuthUser.getAuthUser());
+		} else {
+			LOGGER.warn("appCommonAuthUser is null");
+		}
+		headers.put("tnt", AppContextUtil.getTenant());
+		return headers;
+	}
 
 	@CrossOrigin(origins = "*")
 	// @ApiRequest(type = RequestType.NO_TRACK_PING)
@@ -48,13 +68,10 @@ public class AppProxyController {
 		// CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
 		// URL url = new URL(domain);
 
-		Map<String, String> addHeaders = new HashMap<String, String>();
-		addHeaders.put("x-agent-code", appCommonAuthUser.getProfile().code());
-		addHeaders.put("x-agent-user", appCommonAuthUser.getAuthUser());
-		addHeaders.put("tnt", AppContextUtil.getTenant());
+		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
 
-		return MapModel.fromSafe(
-				service.forwardRequestNoRetry("/nexus/", nexusUrl, body, addHeaders, request, response).getBody());
+		return MapModel.fromSafe(service
+				.forwardRequestNoRetry("/nexus/", nexusUrl, body, additioalHeaders, request, response).getBody());
 	}
 
 	@CrossOrigin(origins = "*")
@@ -68,13 +85,10 @@ public class AppProxyController {
 		// CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
 		// URL url = new URL(domain);
 
-		Map<String, String> addHeaders = new HashMap<String, String>();
-		addHeaders.put("x-agent-code", appCommonAuthUser.getProfile().code());
-		addHeaders.put("x-agent-user", appCommonAuthUser.getAuthUser());
-		addHeaders.put("tnt", AppContextUtil.getTenant());
+		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
 
-		return MapModel.fromSafe(
-				service.forwardRequestNoRetry("/pub/nexus/", nexusUrl, body, addHeaders, request, response).getBody());
+		return MapModel.fromSafe(service
+				.forwardRequestNoRetry("/pub/nexus/", nexusUrl, body, additioalHeaders, request, response).getBody());
 	}
 
 }

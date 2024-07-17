@@ -110,8 +110,8 @@ public class AdminAuthController {
 
 		if (ArgUtil.is(domainToken)) {
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
-					domainId, domainToken, true);
-			if (ArgUtil.is(agent)) {
+					domainId, domainToken);
+			if (ArgUtil.is(agent) && agent.isAdmin()) {
 				sessionService.login(request, agent, domainToken);
 				commonHttpRequest.setCookie("JXSESSIONID", xRemSession);
 				response.setHeader("Location", appConfig.getAppPrefix() + "/app/home");
@@ -140,9 +140,9 @@ public class AdminAuthController {
 		String xRemSession = ArgUtil.parseAsString(commonHttpRequest.get("JXSESSIONID"), Constants.BLANK);
 		if (ArgUtil.is(domainName) && ArgUtil.is(domainId) && ArgUtil.is(domainToken)) {
 			AgentResponseAuthDto agent = authService.loginByDomainToken(domainUser, domainUserEmail, domainName,
-					domainId, domainToken, true);
+					domainId, domainToken);
 
-			if (ArgUtil.is(agent)) {
+			if (ArgUtil.is(agent) && agent.isAdmin()) {
 				sessionService.login(request, agent, domainToken);
 				xRemSession = CryptoUtil.getEncoder()
 						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainUserEmail", domainUserEmail)
@@ -243,7 +243,7 @@ public class AdminAuthController {
 						message = "Please enter valid password";
 					} else if (confirmpassword.equals(newpassword)) {
 						ApiResponse<Map<String, Object>, String> x = authService.agentSetPass(username, token,
-								newpassword, true);
+								newpassword);
 						if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
 							status = "SUCCESS";
 							message = "Password has been reset successfully";
@@ -302,8 +302,9 @@ public class AdminAuthController {
 	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> login(@RequestParam String username,
 			@RequestParam String password, HttpServletRequest request) throws NoSuchAlgorithmException {
 		username = ArgUtil.parseAsString(username, Constants.BLANK);
-		ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password, true);
-		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false)) {
+		ApiResponse<Map<String, Object>, AgentResponseAuthDto> x = authService.empLogin(username, password);
+		if (ArgUtil.parseAsBoolean(x.getData().get("success"), false) && ArgUtil.is(x.getMeta())
+				&& x.getMeta().isAdmin()) {
 			x.redirectUrl(appConfig.getAppPrefix() + "/app/home");
 			sessionService.login(request, x.getMeta(), password);
 			x.setStatusKey("SUCCESS");
@@ -328,7 +329,7 @@ public class AdminAuthController {
 	public ApiResponse<Map<String, Object>, AgentResponseAuthDto> agentLogin(@RequestParam String username,
 			@RequestParam String password, @RequestParam(required = false) boolean admin)
 			throws NoSuchAlgorithmException {
-		return authService.empLogin(username, password, admin);
+		return authService.empLogin(username, password);
 	}
 
 	@Deprecated
@@ -345,6 +346,6 @@ public class AdminAuthController {
 	public ApiResponse<Map<String, Object>, String> agentSetPass(@RequestParam String username,
 			@RequestParam String password, @RequestParam String newpassword,
 			@RequestParam(required = false) boolean admin) throws NoSuchAlgorithmException {
-		return authService.agentSetPass(username, password, newpassword, admin);
+		return authService.agentSetPass(username, password, newpassword);
 	}
 }

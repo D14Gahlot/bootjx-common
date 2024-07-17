@@ -123,7 +123,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	}
 
 	public void registerWebhook(ChannelConfig channelConfig) {
-		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null);
 		this.registerWebhook(channelConfig, webhookUrl);
 	}
 

@@ -3,6 +3,7 @@ package com.boot.jx.connectors;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,9 @@ import com.boot.jx.postman.plugin.OutlookPlugin;
 import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.DateUtil;
+import com.boot.utils.TimeUtils.TimePeriod;
 import com.boot.utils.Urly;
 
 @Component
@@ -39,6 +43,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	private static Logger LOGGER = LoggerService.getLogger(OutlookConnector.class);
 	private static final String AUTHORITY = "https://login.microsoftonline.com";
+	private static final String GRAPH_API = "https://graph.microsoft.com";
 	private static final String AUTHORIZE_URL = AUTHORITY + "/common/oauth2/v2.0/authorize";
 	private static final String AUTHORIZE_TOKEN = AUTHORITY + "/common/oauth2/v2.0/token";
 
@@ -63,7 +68,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 				.queryParam("client_id", setup.getOutlook().getMasterClientId()) //
 				.queryParam("redirect_uri", redirectUri).queryParam("state", state.toString()) // State
 				.queryParam("nonce", state.getNonce()) //
-				.queryParam("scope", "offline_access user.read mail.read mail.send") //
+				.queryParam("scope", "offline_access user.read mail.read mail.send Mail.ReadWrite") //
 				.queryParam("response_mode", "form_post") //
 				.getURL();
 
@@ -99,12 +104,56 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			channel.getOutlook().setEmail(profileResponse.keyEntry("mail").orKeyEntry("userPrincipalName").asString());
 			channel.getOutlook().setMasterClientId(setup.getOutlook().getMasterClientId());
 			channel.setName(profileResponse.keyEntry("displayName").asString());
+
 			channels.add(channel);
 		} catch (ApiHttpException e) {
 			channelConfigTemp.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
 		}
 		commonMongoTemplate.save(channelConfigTemp);
 		return channels;
+	}
+
+	@Override
+	public void onChannelUpdate(ChannelConfig channelConfig) {
+		Map<String, Object> meta = channelConfig.getMeta();
+		if (!ArgUtil.is(channelConfig.getMeta())) {
+			meta = new HashMap<String, Object>();
+		}
+		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, "nexus");
+
+		try {
+			MapModel inbox = restService.ajax(GRAPH_API).path("/v1.0/subscriptions")
+					.authBearer(channelConfig.getOutlook().getAccessToken())
+					.postJson(MapModel.createInstance().put("changeType", "created").put("notificationUrl", webhookUrl)
+							.put("lifecycleNotificationUrl", webhookUrl)
+							.put("resource", "/me/mailFolders('inbox')/messages")
+							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1week")))
+							.put("clientState", channelConfig.getOutlook().getMasterClientId())
+							.put("latestSupportedTlsVersion", "v1_2").toMap())
+					.asMapModel();
+
+			if (inbox.containsKey("data")) {
+				meta.put("inbox_subscription", inbox.keyEntry("data").value());
+			}
+
+			MapModel sentItems = restService.ajax(GRAPH_API).path("/v1.0/subscriptions")
+					.authBearer(channelConfig.getOutlook().getAccessToken())
+					.postJson(MapModel.createInstance().put("changeType", "created").put("notificationUrl", webhookUrl)
+							.put("lifecycleNotificationUrl", webhookUrl)
+							.put("resource", "/me/mailFolders('SentItems')/messages")
+							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1week")))
+							.put("clientState", channelConfig.getOutlook().getMasterClientId())
+							.put("latestSupportedTlsVersion", "v1_2").toMap())
+					.asMapModel();
+
+			if (sentItems.containsKey("data")) {
+				meta.put("sent_subscription", sentItems.keyEntry("data").value());
+			}
+		} catch (Exception e) {
+			LOGGER.error("onChannelUpdate", e);
+		}
+
+		channelConfig.setMeta(meta);
 	}
 
 	@Override
