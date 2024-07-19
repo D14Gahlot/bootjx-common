@@ -148,7 +148,14 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 					LOGGER.debug("CHAT_RM_STICKY : Profile Not Found");
 				}
 			} else {
-				LOGGER.debug("CHAT_RM_STICKY : Profile Link Missing");
+				if (!ArgUtil.is(c)) {
+					LOGGER.debug("CHAT_RM_STICKY : Contact is Missing {}", params.contact().getCsid());
+				} else if (!ArgUtil.is(c.profile())) {
+					LOGGER.debug("CHAT_RM_STICKY : Profile Link Missing");
+				} else if (!ArgUtil.is(c.profile().getId())) {
+					LOGGER.debug("CHAT_RM_STICKY : Profile Id Missing {} {} {}", c.profile().getId(),
+							c.profile().getProfileId(), c.profile().getCode());
+				}
 			}
 			if (ArgUtil.is(rmCode)) {
 				LOGGER.debug("CHAT_RM_STICKY : lastAgent found {}", rmCode);
