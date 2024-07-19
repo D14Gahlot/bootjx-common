@@ -69,6 +69,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
@@ -2211,5 +2212,26 @@ public class AdminDashBoardManager {
 		}
 		return hourWiseCount;
 	}
+	//api for counting mediaTemp
+	public List<HSMTemplateDoc> getMediaTemplateCount(long timestamp ) {
+		// List<MessageDoc> msgDocLst =null;
+		String tnt = AppContextUtil.getTenant();
+		Date dateTi = new Date(timestamp);
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+		String offset = getTimeZoneFromSetup();
+		monthMinTimeStamp = monthMinTimeStamp + countryTimeZoneOffset(offset);
+		monthMaxTimeStamp = monthMaxTimeStamp + countryTimeZoneOffset(offset);
+		 Criteria criteria = Criteria.where("createdStamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp).and("options.attachment.mediaTemplate").exists(true);
+		 Query query = new Query(criteria);
+		List<HSMTemplateDoc> hsmDocLst = mongoTemplate.find(query, HSMTemplateDoc.class);
+		return hsmDocLst;
+	}
+
 
 }
