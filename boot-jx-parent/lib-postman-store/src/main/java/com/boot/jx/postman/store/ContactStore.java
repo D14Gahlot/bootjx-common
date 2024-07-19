@@ -1,5 +1,6 @@
 package com.boot.jx.postman.store;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -256,7 +257,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				
 			case "additionalInfo.alt_phones":
 			case "alt_phones":
-				PBPhone alt_phone = parsePhone(patch.value().as(PBPhone.class));
+				PBPhone ph = parsePhone(new PBPhone().phone(patch.getValue().toString()));
+				PBPhone alt_phone = parsePhone(ph);//patch.value().as(PBPhone.class));
 				qb.setunset("additionalInfo.alt_phones", patch(patch.getCommand(), doc.phones(), alt_phone));
 				break;
 			case "additionalInfo.alt_emails":
@@ -269,9 +271,9 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				// TODO:-  Check additonal validty in Masters and its type in master,
 				// then based on type of field do conversion below and update instead
 				// using.asString() for all
-				Object objType=checkFieldType(patch.getField(), patch.value());
+				Object objType=checkFieldType(getFileName(patch.getField()), patch.value());
 				if(ArgUtil.is(objType)) {
-					qb.setunset(patch.getField(),objType);
+					qb.setunset(patch.getField(), ArgUtil.parseAsString(patch.getValue(),Constants.BLANK));
 				}
 				break;
 			}
@@ -339,6 +341,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				pbName.setFirstName(req.getName().getFirstName());
 				pbName.setLastName(req.getName().getLastName());
 				pbName.setMiddleName(req.getName().getMiddleName());
+				pbName.setFormattedName(req.getName().getFormattedName());
 				pbName.fix();
 				doc.setName(pbName);
 			}
@@ -463,7 +466,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		            	addInfoMap.put(entry.getKey(), entry.getValue());
 		            break;
 		            default:
-		            	Object object=checkFieldType(entry.getKey(),entry.getValue());
+		            	Object object=checkFieldType(getFileName(entry.getKey()),entry.getValue());
 		            	if(ArgUtil.isEmpty(object)){
 		            		LOGGER.info("Json Util else  :"+JsonUtil.toJson(object)+"\t key-value :"+entry.getKey()+"-"+JsonUtil.toJson(entry.getValue()));
 		            	}else {
@@ -497,6 +500,14 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		return objType;
 		}
 		return objType;
+	}
+	
+	private String getFileName(String additionalInfo) {
+		  String fldCode = Arrays.stream(additionalInfo.split("\\."))
+                  .skip(1)
+                  .findFirst()
+                  .orElse("No value after dot");
+		  return fldCode;
 	}
 	
 }
