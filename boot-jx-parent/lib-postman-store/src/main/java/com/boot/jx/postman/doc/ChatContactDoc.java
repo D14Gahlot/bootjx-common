@@ -12,9 +12,9 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
-import com.boot.jx.postman.dto.ChatUserProfileDTO;
-import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatInfoDTO;
-import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserDTO;
+import com.boot.jx.postman.dto.ChatProfileDTO;
+import com.boot.jx.postman.dto.ChatProfileDTO.ChatInfoDTO;
+import com.boot.jx.postman.dto.ChatProfileDTO.ChatUserDTO;
 import com.boot.jx.postman.dto.ContactPrefsDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -72,7 +72,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 	private String profilePic;
 	@Indexed
 	private List<String> labelId;
-	private ChatUserProfileDTO profile;
+	private ChatProfileDTO profile;
 	private ContactPrefsDTO prefs;
 	private Map<String, Object> store;
 
@@ -197,11 +197,11 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 		this.labelId = labelId;
 	}
 
-	public ChatUserProfileDTO getProfile() {
+	public ChatProfileDTO getProfile() {
 		return profile;
 	}
 
-	public void setProfile(ChatUserProfileDTO profile) {
+	public void setProfile(ChatProfileDTO profile) {
 		this.profile = profile;
 	}
 
@@ -353,9 +353,9 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 		return user;
 	}
 
-	public ChatUserProfileDTO profile() {
+	public ChatProfileDTO profile() {
 		if (this.profile == null) {
-			this.profile = new ChatUserProfileDTO();
+			this.profile = new ChatProfileDTO();
 		}
 		return profile;
 	}
