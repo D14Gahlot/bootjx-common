@@ -211,7 +211,9 @@ public class ChatSessionService {
 
 	public InBoundEvent routeSession(ChatSessionDoc session) {
 		String defaultQueue = pmDomainConfig.getDefaultInboundQueue(session.contact());
-		return routeSession(session, new PMArgs().assignToQueueCode(defaultQueue));
+		return routeSession(session, new PMArgs().assignToQueueCode(defaultQueue)
+				//Added Contact Info as it is missing later 
+				.contact(session.contact()));
 	}
 
 	public InBoundEvent routeSession(String sessionId, PMArgs pmArgs) {

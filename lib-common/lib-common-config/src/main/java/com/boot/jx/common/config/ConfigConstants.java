@@ -154,21 +154,25 @@ public class ConfigConstants {
 						.group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED(new ConfigMeta("Auto Assign Session", "postman.agent.chat.reassignment.auto")
-				.desc("Session gets auto-assigned to sender agent").optionsOnOff().group(GROUP_AGENT)),
+				.superKey("postman.agent.chat").desc("Session gets auto-assigned to sender agent").optionsOnOff()
+				.group(GROUP_AGENT)),
 
-		POSTMAN_AGENT_CHAT_ASSIGNMENT(new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment")
-				.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL,
-						PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
-				.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN).group(GROUP_AGENT)),
+		POSTMAN_AGENT_CHAT_ASSIGNMENT(
+				new ConfigMeta("Agent Assignment", "postman.agent.chat.assignment").superKey("postman.agent.chat")
+						.optionValues(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN, PMConstants.ASSIGNMENT_RULE.MANUAL,
+								PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT)
+						.defaultValue(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN).group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_CHAT_STICKY_RMAGENT(new ConfigMeta("Agent Assignment RM", "postman.agent.chat.sticky.rmagent")
+				.superKey("postman.agent.chat")
 				.optionValues(PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE, PMConstants.CHAT_SESSION_STICKY.STRICT)
 				.defaultValue(PMConstants.CHAT_SESSION_STICKY.STRICT).group(GROUP_AGENT)),
 
-		POSTMAN_AGENT_CHAT_STICKYSESSION(new ConfigMeta("Sticky Session", "postman.agent.chat.stickysession")
-				.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
-						PMConstants.CHAT_SESSION_STICKY.STRICT)
-				.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
+		POSTMAN_AGENT_CHAT_STICKYSESSION(
+				new ConfigMeta("Sticky Session", "postman.agent.chat.stickysession").superKey("postman.agent.chat")
+						.optionValues(PMConstants.CHAT_SESSION_STICKY.NONE, PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE,
+								PMConstants.CHAT_SESSION_STICKY.STRICT)
+						.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(GROUP_AGENT)),
 
 		POSTMAN_AGENT_HEADER(new ConfigMeta("Header of Message Sent by agent", "postman.agent.chat.header")
 				.desc("Use {{agent}} for agent name").group(GROUP_AGENT)),
