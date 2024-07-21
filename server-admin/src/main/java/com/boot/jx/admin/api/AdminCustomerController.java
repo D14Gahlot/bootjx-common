@@ -28,7 +28,7 @@ public class AdminCustomerController {
 	// CustomerProfile
 	@RequestMapping(value = "/profile", method = { RequestMethod.GET })
 	@JsonView(PMEnvironment.PublicProperty.class)
-	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestParam(required = false) String id,
+	public ApiResponse<CustomerProfileDoc, ChatContactDoc> getProfiles(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false, defaultValue = "created") String sortBy,
@@ -40,7 +40,8 @@ public class AdminCustomerController {
 			@RequestParam(required = false, value = "search.phones") String searchPhone,
 			@RequestParam(required = false, value = "search.emails") String searchEmail) {
 		if (ArgUtil.is(contactId)) {
-			return ApiResponse.buildResults(contactStore.findProfileByContactId(contactId));
+			return ApiResponse.buildResults(contactStore.findProfileByContactId(contactId),
+					contactStore.findById(contactId, ChatContactDoc.class));
 		}
 		MongoQueryBuilder<CustomerProfileDoc> q = MongoQueryBuilder.collection(CustomerProfileDoc.class).page(pageNo,
 				pageSize);
@@ -54,7 +55,7 @@ public class AdminCustomerController {
 		if (ArgUtil.is(sortBy)) {
 			q = q.sortBy(sortBy, Direction.fromString(sortDir));
 		}
-		return ApiResponse.buildResults(contactStore.find(q));
+		return ApiResponse.buildResults(contactStore.find(q), null);
 	}
 
 	@RequestMapping(value = "/profile", method = { RequestMethod.POST })

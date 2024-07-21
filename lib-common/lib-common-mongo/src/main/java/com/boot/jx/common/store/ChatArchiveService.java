@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.ChatUserProfileDoc;
+import com.boot.jx.postman.doc.ChatProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
-import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.dto.ChatProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
@@ -40,15 +40,15 @@ public class ChatArchiveService {
 		ContactDTO dto = ChatDTOUtil.getContactDTO(contact);
 		if (ArgUtil.is(contact)) {
 			if (ArgUtil.is(contact.getProfileId())) {
-				ChatUserProfileDoc profileDoc = mongoTemplate.findById(contact.getProfileId(),
-						ChatUserProfileDoc.class);
-				ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
+				ChatProfileDoc profileDoc = mongoTemplate.findById(contact.getProfileId(),
+						ChatProfileDoc.class);
+				ChatProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
 				dto.setProfile(profileDTO);
 			} else if (ArgUtil.is(contact.getPhone())) {
 				Query query = new Query();
 				query.addCriteria(Criteria.where("mobile").is(contact.getPhone()));
-				ChatUserProfileDoc profileDoc = mongoTemplate.findOne(query, ChatUserProfileDoc.class);
-				ChatUserProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
+				ChatProfileDoc profileDoc = mongoTemplate.findOne(query, ChatProfileDoc.class);
+				ChatProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
 				dto.setProfile(profileDTO);
 			}
 		}

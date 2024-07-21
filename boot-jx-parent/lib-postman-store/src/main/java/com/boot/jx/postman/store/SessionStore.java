@@ -31,11 +31,11 @@ import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.ChatUserProfileDoc;
+import com.boot.jx.postman.doc.ChatProfileDoc;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickTag;
-import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.dto.ChatProfileDTO;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
@@ -560,13 +560,13 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		return chatSessionDoc;
 	}
 
-	public ChatUserProfileDoc save(ChatUserProfileDoc doc) {
+	public ChatProfileDoc save(ChatProfileDoc doc) {
 		super.save(doc);
 		return doc;
 	}
 
-	public ChatUserProfileDoc save(ChatUserProfileDTO profile) {
-		ChatUserProfileDoc doc = EntityDtoUtil.dtoToEntity(profile, new ChatUserProfileDoc());
+	public ChatProfileDoc save(ChatProfileDTO profile) {
+		ChatProfileDoc doc = EntityDtoUtil.dtoToEntity(profile, new ChatProfileDoc());
 		doc.setId(profile.getProfileId());
 		return save(doc);
 	}

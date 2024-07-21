@@ -344,7 +344,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				pbName.setFirstName(req.getName().getFirstName());
 				pbName.setLastName(req.getName().getLastName());
 				pbName.setMiddleName(req.getName().getMiddleName());
-				pbName.setFormattedName(req.getName().getFormattedName());
 				pbName.fix();
 				doc.setName(pbName);
 			}
@@ -469,7 +468,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		            	addInfoMap.put(entry.getKey(), entry.getValue());
 		            break;
 		            default:
-		            	Object object=checkFieldType(getFileName(entry.getKey()),entry.getValue());
+		            	Object object=checkFieldType(entry.getKey(),entry.getValue());
 		            	if(ArgUtil.isEmpty(object)){
 		            		LOGGER.info("Json Util else  :"+JsonUtil.toJson(object)+"\t key-value :"+entry.getKey()+"-"+JsonUtil.toJson(entry.getValue()));
 		            	}else {
@@ -507,9 +506,9 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	
 	private String getFileName(String additionalInfo) {
 		  String fldCode = Arrays.stream(additionalInfo.split("\\."))
-                  .skip(1)
-                  .findFirst()
-                  .orElse("No value after dot");
+                .skip(1)
+                .findFirst()
+                .orElse(additionalInfo);
 		  return fldCode;
 	}
 	
