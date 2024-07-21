@@ -257,8 +257,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				
 			case "additionalInfo.alt_phones":
 			case "alt_phones":
-				PBPhone ph = parsePhone(new PBPhone().phone(patch.getValue().toString()));
-				PBPhone alt_phone = parsePhone(ph);//patch.value().as(PBPhone.class));
+				PBPhone alt_phone = parsePhone(patch.value().as(PBPhone.class));
 				qb.setunset("additionalInfo.alt_phones", patch(patch.getCommand(), doc.phones(), alt_phone));
 				break;
 			case "additionalInfo.alt_emails":
@@ -273,7 +272,11 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				// using.asString() for all
 				Object objType=checkFieldType(getFileName(patch.getField()), patch.value());
 				if(ArgUtil.is(objType)) {
-					qb.setunset(patch.getField(), ArgUtil.parseAsString(patch.getValue(),Constants.BLANK));
+					if(patch.getCommand().equals(ModelPatchCommand.REMOVE)) {
+						qb.setunset(patch.getField(),ArgUtil.parseAsT(Constants.BLANK,objType,false));
+					}else {
+						qb.setunset(patch.getField(),ArgUtil.parseAsT(patch.getValue(),objType,false));
+					}
 				}
 				break;
 			}

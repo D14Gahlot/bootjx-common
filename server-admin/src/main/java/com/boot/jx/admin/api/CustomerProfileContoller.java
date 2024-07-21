@@ -53,7 +53,13 @@ public class CustomerProfileContoller {
 	}
 
 	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.DELETE })
-	public ApiResponse<CustomerFieldMasterDoc, Object> deleteCusMasFields(@RequestBody CustomerFieldMasterDoc reqDto) {
+	public ApiResponse<CustomerFieldMasterDoc, Object> deleteCusMasFields(
+			@RequestParam(value = "id", required = true) String id,
+			@RequestParam(value = "active", required = false) String active){
+			//@Request CustomerFieldMasterDoc reqDto) {
+	CustomerFieldMasterDoc reqDto= new CustomerFieldMasterDoc();
+	reqDto.setId(id);
+	reqDto.setActive(false);
 		return ApiResponse.buildResults(cusProfileService.deleteCustmerMasterFiled(reqDto));
 	}
 
