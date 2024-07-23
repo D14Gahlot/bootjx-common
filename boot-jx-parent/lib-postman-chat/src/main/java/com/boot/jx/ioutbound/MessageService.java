@@ -232,6 +232,9 @@ public class MessageService {
 			if (ArgUtil.is(message.getOptions().buttons)) {
 				outboxMessage.option("buttons", message.getOptions().buttons);
 			}
+			if (ArgUtil.is(message.getOptions().buttonDisplayScheme)) {
+				outboxMessage.option("is_list", "list".equalsIgnoreCase(message.getOptions().buttonDisplayScheme));
+			}
 		}
 
 		return send(channel, message.getToContact(), outboxMessage);
