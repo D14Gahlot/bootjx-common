@@ -176,12 +176,16 @@ public class PMConstants {
 
 		public static final String SEND_CODE = "N";
 		public static final String REPLY_CODE = "R";
+		
 
 	}
 
 	public static class MESSAGE_SEND_TYPE {
 		public static final String PUSH_MESSAGE = "PM";
 		public static final String SESSION_MESSAGE = "SM";
+	}
+	public static class MEDIATEMPLATE{
+		public static final String MEDIA_TEMPLATE="mediaTemplate";
 	}
 
 	public final class MESSAGE_SENDER_TYPE {

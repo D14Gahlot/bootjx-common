@@ -20,7 +20,8 @@ public class MessageMetaWrapper extends MapModel {
 		this.put("isPush", isPush);
 		return this;
 	}
-
+   
+	
 	/**
 	 * Value can differ from channel to channel
 	 * 
@@ -31,6 +32,14 @@ public class MessageMetaWrapper extends MapModel {
 		this.put("sendType", sendType);
 		return this;
 	}
+	 //method mediatemplecount(String )
+		public MessageMetaWrapper mediaTemplate(String mediaTemplate) {
+			this.put("ismediaTemplate", mediaTemplate);
+			return this;
+		}
+		public String MediaType() {
+			return this.getString("mediaTemplate");
+		}
 
 	public MessageMetaWrapper composeType(String composeType) {
 		this.put("composeType", composeType);
