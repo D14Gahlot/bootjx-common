@@ -14,6 +14,8 @@ public class TmplElement implements Serializable {
 		public static final String QUICK_REPLY = "QUICK_REPLY";
 		public static final String URL = "URL";
 		public static final String PHONE_NUMBER = "PHONE_NUMBER";
+		public static final String FLOW = "FLOW";
+
 		public static final String LOCATION_REQUEST = "LOCATION_REQUEST";
 
 	}
@@ -36,6 +38,54 @@ public class TmplElement implements Serializable {
 
 	@ApiMockModelProperty(example = "+91 9988776655", value = "If type is set to PHONE_NUMBER", required = false)
 	private String phone;
+	
+	private String flow;
+	public String getFlow() {
+		return flow;
+	}
+
+	public void setFlow(String flow) {
+		this.flow = flow;
+	}
+
+	public String getFlow_id() {
+		return flow_id;
+	}
+
+	public void setFlow_id(String flow_id) {
+		this.flow_id = flow_id;
+	}
+
+	public String getFlow_action() {
+		return flow_action;
+	}
+
+	public void setFlow_action(String flow_action) {
+		this.flow_action = flow_action;
+	}
+
+	public String getNavigate_screen() {
+		return navigate_screen;
+	}
+
+	public void setNavigate_screen(String navigate_screen) {
+		this.navigate_screen = navigate_screen;
+	}
+
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
+
+	private String flow_id;
+	private String flow_action;
+	private String navigate_screen;
+	private String text;
+
+
 
 	public String getCode() {
 		return code;

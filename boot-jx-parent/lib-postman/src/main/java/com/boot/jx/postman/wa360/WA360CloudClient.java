@@ -67,6 +67,7 @@ public class WA360CloudClient implements ChannelClient {
 			boolean isButton = false;
 			boolean isCtaUrl = false;
 			boolean isLocationRequest = false;
+			boolean isFlow=false;
 			int buttonsCount = 0;
 			int urlCount = 0;
 			String bodyTextAppend = Constants.BLANK;
@@ -91,7 +92,18 @@ public class WA360CloudClient implements ChannelClient {
 								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
 						isLocationRequest = true;
 						noButtons.add(b);
-					} else {
+					}else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.FLOW))
+					{
+						  bodyTextAppend = bodyTextAppend
+						            + StringUtils.wrap("\n", StringUtils.trim(b.getFlow_action()), "*")
+						            + StringUtils.wrap("\n", b.getFlow_id(), "*")
+						            + StringUtils.wrap("\n", b.getNavigate_screen(), "\n")
+						            + StringUtils.wrap(" _", b.getText(), "_\n");
+						        urlCount++;
+						urlCount++;
+						noButtons.add(b);
+					}
+					else {
 						buttonsCount++;
 						buttons.add(b);
 					}
@@ -168,7 +180,8 @@ public class WA360CloudClient implements ChannelClient {
 			} else if (isLocationRequest) {
 				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "location_request_message");
 				msgIds.add(getMessageId(resp));
-			} else {
+			}
+			else {
 				String textMessage = outboxMessage.getMessage();
 				textMessage = checkAndSendMedia(channelConfig, outboxMessage, msgIds, textMessage);
 
@@ -547,16 +560,23 @@ public class WA360CloudClient implements ChannelClient {
 		req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
 				ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, "menu");
-
+//type will button only or flow-need to check
 		if ("button".equalsIgnoreCase(type)) {
 			List<Object> rows = new ArrayList<Object>();
 			for (TmplElement button : buttons) {
+				if("flow".equalsIgnoreCase(button.getType()))
+				{
+					rows.add(MapModel.createInstance().put("type", "reply").put("flow_action",button.getFlow_action()).put("flow_id",button.getFlow_id()).put("navigate_screen",button.getNavigate_screen()).put("text",button.getText())
+					.toMap());
+				}
+				else {
 				rows.add(MapModel.createInstance().put("type", "reply")
 						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
 								StringUtils.substring(button.getCode(), 256))
 						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
 								StringUtils.substring(button.getLabel(), 20))
-						.toMap());
+						.toMap());}
+				
 			}
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
 		} else if ("cta_url".equalsIgnoreCase(type)) {
@@ -565,7 +585,14 @@ public class WA360CloudClient implements ChannelClient {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
 					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
 							.put("url", button.getUrl()).toMap());
-		} else if ("location_request_message".equalsIgnoreCase(type)) {
+		}  else if ("flow".equalsIgnoreCase(type)) {
+			TmplElement button = buttons.get(0);
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "flow");
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
+					MapModel.createInstance().put("flow_action",button.getFlow_action()).put("flow_id",button.getFlow_id()).put("navigate_screen",button.getNavigate_screen()).put("text",button.getText())
+							.toMap());
+		} 
+		else if ("location_request_message".equalsIgnoreCase(type)) {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
 		}
 
