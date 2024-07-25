@@ -43,6 +43,7 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 	private Map<String, Object> meta;
 	private Map<String, Object> options;
 	private Map<String, Object> replyTo;
+	protected Map<String, Object> input;
 	private MessageRouter route;
 	private Map<String, Long> stamps;
 	public List<Object> logs;
@@ -267,5 +268,13 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 
 	public void setLogs(List<Object> logs) {
 		this.logs = logs;
+	}
+
+	public Map<String, Object> getInput() {
+		return input;
+	}
+
+	public void setInput(Map<String, Object> input) {
+		this.input = input;
 	}
 }

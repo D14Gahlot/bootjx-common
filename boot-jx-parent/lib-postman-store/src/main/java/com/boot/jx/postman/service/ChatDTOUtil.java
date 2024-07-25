@@ -110,6 +110,7 @@ public class ChatDTOUtil {
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
+		messageDto.setInput(messageDoc.getForm());
 		if (ArgUtil.is(messageDoc.getOptions())) {
 			messageDto.setOptions(messageDoc.getOptions());
 		} else {
