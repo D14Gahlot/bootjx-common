@@ -68,6 +68,7 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.PhoneUtil;
 import com.boot.utils.Random;
 import com.boot.utils.Urly;
@@ -330,6 +331,14 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_REPLY).asString());
 				inboxMessage.form().put("reply_desc", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_DESC).asString());
+			} else if ("nfm_reply".equals(interactiveType)) {
+				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
+						.asString();
+				// replyJsonMap.put("response_json", responseJsonString);
+				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
+				inboxMessage.form().put("reply_json", replyJsonMap);
+				inboxMessage.form().put("reply_title",
+						map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY).asString());
 			}
 
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
