@@ -149,10 +149,8 @@ public class ThirdPartyTemplateManager {
 		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate
 				.findById(thirdPartyTemplateId, HSMTemplate3rdParty.class);
 		String hsmTemplateIdOld = thirdPartyTemplate.getHsmTemplateId();
-		Map<String,Object>hsmTemplate=thirdPartyTemplate.getTemplate();
 		thirdPartyTemplate.setHsmTemplateId(hsmTemplateId);
 		
-		thirdPartyTemplate.setTemplate(hsmTemplate);
 		commonMongoTemplate.save(thirdPartyTemplate);
 
 		this.linkRefresh(thirdPartyTemplate, hsmTemplateIdOld, null);
@@ -171,7 +169,7 @@ public class ThirdPartyTemplateManager {
 			HSMTemplateDoc hsmTemplateDoc = commonMongoTemplate
 					.findById(hsmTemplateId, HSMTemplateDoc.class);
 			if (ArgUtil.is(hsmTemplateDoc)) {
-				hsmTemplateDoc.setOptions(thirdPartyTemplate.getTemplate());
+			
 				hsmTemplateDoc.approved(thirdPartyTemplate.getChannelId(),
 						thirdPartyTemplate.getHsmTemplateId(), status);
 				commonMongoTemplate.save(hsmTemplateDoc);

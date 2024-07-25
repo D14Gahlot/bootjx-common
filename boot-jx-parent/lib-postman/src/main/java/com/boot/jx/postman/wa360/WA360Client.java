@@ -83,11 +83,6 @@ public class WA360Client implements ChannelClient {
 								+ " *", StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getUrl() + "\n"
 								+ StringUtils.wrap(" _", b.getDesc(), "_\n");
-					}if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.FLOW)) {
-						bodyTextAppend = bodyTextAppend + StringUtils.wrap("\n"
-								+ " *", StringUtils.trim(b.getLabel()), "*")
-								+ "\n" + b.getUrl() + "\n"
-								+ StringUtils.wrap(" _", b.getDesc(), "_\n");
 					}
 					else if (ArgUtil.areEqual(b.getType(),
 							TmplElement.TYPES.PHONE_NUMBER)) {

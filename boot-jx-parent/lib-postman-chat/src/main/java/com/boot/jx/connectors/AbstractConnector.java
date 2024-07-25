@@ -236,7 +236,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
 								.is(channelConfig.getChannelId())));
-				LOGGER.info(JsonUtil.toJson(temps));
+				LOGGER.debug(JsonUtil.toJson(temps));
 			}
 
 			if (ArgUtil.is(temps)) {
