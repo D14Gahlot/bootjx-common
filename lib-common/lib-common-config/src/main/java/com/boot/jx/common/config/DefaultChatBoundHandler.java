@@ -31,6 +31,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.FormReply;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageReport;
@@ -56,6 +57,7 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 
 public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
@@ -235,6 +237,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		msg.timestamp = inboxMessage.getTimestamp();
 		msg.tags = inboxMessage.getTags();
 		msg.input = inboxMessage.form();
+
+		msg.form = JsonUtil.toObject(inboxMessage.form(), FormReply.class);
 
 		if (ArgUtil.is(inboxMessage.getAttachments())) {
 			Attachment atth = inboxMessage.attachments().get(0);
