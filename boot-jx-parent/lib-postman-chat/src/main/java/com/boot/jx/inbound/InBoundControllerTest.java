@@ -106,7 +106,7 @@ public class InBoundControllerTest {
 		}
 
 		if (ArgUtil.is(bootJxConfigService)) {
-			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnAEntry("dev")
+			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnEntry("dev")
 					.preventUpgradeInsecureRequest().map());
 		}
 
