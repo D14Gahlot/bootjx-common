@@ -1,5 +1,6 @@
 package com.boot.jx.postman.store;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -269,9 +270,13 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				// TODO:-  Check additonal validty in Masters and its type in master,
 				// then based on type of field do conversion below and update instead
 				// using.asString() for all
-				Object objType=checkFieldType(patch.getField(), patch.value());
+				Object objType=checkFieldType(getFileName(patch.getField()), patch.value());
 				if(ArgUtil.is(objType)) {
-					qb.setunset(patch.getField(),objType);
+					if(patch.getCommand().equals(ModelPatchCommand.REMOVE)) {
+						qb.setunset(patch.getField(),ArgUtil.parseAsT(Constants.BLANK,objType,false));
+					}else {
+						qb.setunset(patch.getField(),ArgUtil.parseAsT(patch.getValue(),objType,false));
+					}
 				}
 				break;
 			}
@@ -497,6 +502,14 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		return objType;
 		}
 		return objType;
+	}
+	
+	private String getFileName(String additionalInfo) {
+		  String fldCode = Arrays.stream(additionalInfo.split("\\."))
+                .skip(1)
+                .findFirst()
+                .orElse(additionalInfo);
+		  return fldCode;
 	}
 	
 }

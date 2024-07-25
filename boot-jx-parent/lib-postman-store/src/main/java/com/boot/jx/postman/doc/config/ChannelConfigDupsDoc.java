@@ -1,13 +1,13 @@
 package com.boot.jx.postman.doc.config;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.model.TimeModels.TimeStampSupportedModel;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -50,6 +50,8 @@ public class ChannelConfigDupsDoc extends TimeStampSupportedModel implements Ser
 	@Indexed
 	private boolean isDeleted;
 	private String server;
+
+	private Map<String, Object> meta;
 
 	public String getId() {
 		return id;
@@ -169,6 +171,14 @@ public class ChannelConfigDupsDoc extends TimeStampSupportedModel implements Ser
 
 	public void setContactType(Object contactType) {
 		this.contactType = contactType;
+	}
+
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
 	}
 
 }

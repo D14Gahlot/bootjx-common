@@ -135,20 +135,31 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		// Relationship Manager Agent Sticky Logic
 		String rmStickyLogic = environment.local().keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_STICKY_RMAGENT)
 				.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
-		String rmAgent = null;
+		String rmCode = null;
 
 		LOGGER.debug("CHAT_RM_STICKY : {}", rmStickyLogic);
 		if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(rmStickyLogic)) {
 			ChatContactDoc c = sessionStore.getContact(params.contact());
-			if (ArgUtil.is(c) && ArgUtil.is(c.profile().getId())) {
+			if (ArgUtil.is(c) && ArgUtil.is(c.profile()) && ArgUtil.is(c.profile().getId())) {
 				CustomerProfileDoc profile = sessionStore.findById(c.profile().getId(), CustomerProfileDoc.class);
 				if (profile != null && ArgUtil.is(profile.rmCode)) {
-					rmAgent = profile.rmCode;
+					rmCode = profile.rmCode;
+				} else {
+					LOGGER.debug("CHAT_RM_STICKY : Profile Not Found");
+				}
+			} else {
+				if (!ArgUtil.is(c)) {
+					LOGGER.debug("CHAT_RM_STICKY : Contact is Missing {}", params.contact().getCsid());
+				} else if (!ArgUtil.is(c.profile())) {
+					LOGGER.debug("CHAT_RM_STICKY : Profile Link Missing");
+				} else if (!ArgUtil.is(c.profile().getId())) {
+					LOGGER.debug("CHAT_RM_STICKY : Profile Id Missing {} {} {}", c.profile().getId(),
+							c.profile().getProfileId(), c.profile().getCode());
 				}
 			}
-			if (ArgUtil.is(rmAgent)) {
-				LOGGER.debug("CHAT_RM_STICKY : lastAgent found {}", rmAgent);
-				AgentSessionDoc agent = sessionStore.findById(rmAgent, AgentSessionDoc.class);
+			if (ArgUtil.is(rmCode)) {
+				LOGGER.debug("CHAT_RM_STICKY : lastAgent found {}", rmCode);
+				AgentSessionDoc agent = sessionStore.findById(rmCode, AgentSessionDoc.class);
 				if (ArgUtil.is(agent)) {
 					LOGGER.debug("CHAT_RM_STICKY : has session {}", agent);
 					if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(rmStickyLogic)) {
@@ -163,7 +174,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 						}
 					}
 				}
-
+			} else {
+				LOGGER.debug("CHAT_RM_STICKY : rmCode Not Set");
 			}
 
 		}

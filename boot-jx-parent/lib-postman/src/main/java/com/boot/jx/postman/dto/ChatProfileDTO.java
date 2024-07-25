@@ -8,7 +8,7 @@ import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatUserProfileDTO implements Serializable {
+public class ChatProfileDTO implements Serializable {
 
 	private static final long serialVersionUID = 3000520290601093027L;
 
@@ -230,7 +230,7 @@ public class ChatUserProfileDTO implements Serializable {
 
 	List<CustomerLabel> labels;
 
-	public ChatUserProfileDTO label(String key, String value, String name) {
+	public ChatProfileDTO label(String key, String value, String name) {
 		if (this.labels == null) {
 			this.labels = new ArrayList<CustomerLabel>();
 		}
@@ -244,7 +244,7 @@ public class ChatUserProfileDTO implements Serializable {
 		return this;
 	}
 
-	public ChatUserProfileDTO label(CustomerLabel label) {
+	public ChatProfileDTO label(CustomerLabel label) {
 		if (this.labels == null) {
 			this.labels = new ArrayList<CustomerLabel>();
 		}

@@ -22,7 +22,7 @@ public class JobsOutPutDoc extends TimeStampDoc {
 	private String isactive;
 	public String status;
 	public TimeStampIndex time;
-	public String jobid;
+	public String jobId;
 
 	public String getId() {
 		return id;
@@ -64,20 +64,21 @@ public class JobsOutPutDoc extends TimeStampDoc {
 		this.time = time;
 	}
 
-	public String getJobid() {
-		return jobid;
-	}
-
-	public void setJobid(String jobid) {
-		this.jobid = jobid;
-	}
-
+	
 	public Map<String, List<Object>> getOutput() {
 		return output;
 	}
 
 	public void setOutput(Map<String, List<Object>> output) {
 		this.output = output;
+	}
+
+	public String getJobId() {
+		return jobId;
+	}
+
+	public void setJobId(String jobId) {
+		this.jobId = jobId;
 	}
 
 }

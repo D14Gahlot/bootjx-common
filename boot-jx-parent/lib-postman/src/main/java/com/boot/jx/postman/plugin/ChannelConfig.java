@@ -1,5 +1,7 @@
 package com.boot.jx.postman.plugin;
 
+import java.util.Map;
+
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
@@ -47,6 +49,8 @@ public class ChannelConfig extends AChannelConfig {
 	private boolean isPushFreeTextAllowed;
 	private boolean isPushToNewContactAllowed;
 	private boolean isWebhookManual;
+
+	private Map<String, Object> meta;
 
 	private Object error;
 
@@ -290,5 +294,13 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setOutlook(OutlookConfigDetails outlook) {
 		this.outlook = outlook;
+	}
+
+	public Map<String, Object> getMeta() {
+		return meta;
+	}
+
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
 	}
 }

@@ -4,11 +4,11 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.boot.jx.postman.dto.ChatUserProfileDTO;
+import com.boot.jx.postman.dto.ChatProfileDTO;
 
 @Document(collection = "CHAT_PROFILE")
 @TypeAlias("ChatUserProfile")
-public class ChatUserProfileDoc extends ChatUserProfileDTO {
+public class ChatProfileDoc extends ChatProfileDTO {
 
 	private static final long serialVersionUID = -7243968513050670522L;
 

@@ -10,8 +10,8 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PostManException;
-import com.boot.jx.postman.dto.ChatUserProfileDTO;
-import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
+import com.boot.jx.postman.dto.ChatProfileDTO;
+import com.boot.jx.postman.dto.ChatProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -97,10 +97,10 @@ public class ChatClient {
 				.post(MapModel.createInstance().put("event", event).put("pmArgs", pmArgs).toMap()).asNone();
 	}
 
-	public ChatUserProfileDTO fetchContactDetails(ChatUserProfileRequest chatUserProfileRequest) {
+	public ChatProfileDTO fetchContactDetails(ChatUserProfileRequest chatUserProfileRequest) {
 		if (ArgUtil.is(chatClientConfig.getContactDetailsUrl())) {
 			return restService.ajax(chatClientConfig.getContactDetailsUrl()).post(chatUserProfileRequest)
-					.as(new ParameterizedTypeReference<ChatUserProfileDTO>() {
+					.as(new ParameterizedTypeReference<ChatProfileDTO>() {
 					});
 		} else {
 			return null;

@@ -11,9 +11,9 @@ public class JobsResponseDto extends TimeStampDoc {
 
 	private String id;
 	private String jobtype;
-	private String jobid;
+	private String jobId;
 	Map<String, List<Object>> input = new HashMap<String, List<Object>>();
-	Map<String, List<Object>> outPut = new HashMap<String, List<Object>>();
+	Map<String, List<Object>> output = new HashMap<String, List<Object>>();
 	private String isactive;
 	private Long createdStamp;
 	private String createBy;
@@ -84,20 +84,23 @@ public class JobsResponseDto extends TimeStampDoc {
 		return input;
 	}
 
-	public Map<String, List<Object>> getOutPut() {
-		return outPut;
+	
+
+	public String getJobId() {
+		return jobId;
 	}
 
-	public void setOutPut(Map<String, List<Object>> outPut) {
-		this.outPut = outPut;
+	public void setJobId(String jobId) {
+		this.jobId = jobId;
 	}
 
-	public String getJobid() {
-		return jobid;
+	public Map<String, List<Object>> getOutput() {
+		return output;
 	}
 
-	public void setJobid(String jobid) {
-		this.jobid = jobid;
+	public void setOutput(Map<String, List<Object>> output) {
+		this.output = output;
 	}
 
+	
 }

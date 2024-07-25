@@ -17,8 +17,8 @@ import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.dto.ChatUserProfileDTO;
-import com.boot.jx.postman.dto.ChatUserProfileDTO.ChatUserProfileRequest;
+import com.boot.jx.postman.dto.ChatProfileDTO;
+import com.boot.jx.postman.dto.ChatProfileDTO.ChatUserProfileRequest;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.manager.ChatSessionManager;
 import com.boot.jx.postman.model.InboxMessage;
@@ -185,7 +185,7 @@ public class ChatSessionService {
 			chatUserProfileRequest.setContactType(contact.getContactType());
 			chatUserProfileRequest.setLane(contact.getLane());
 			chatUserProfileRequest.setProfileId(contact.getProfileId());
-			ChatUserProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
+			ChatProfileDTO profile = chatClient.fetchContactDetails(chatUserProfileRequest);
 
 			contact = sessionStore.getContact(inboxMessage);
 			if (ArgUtil.is(profile.getProfileId())) {
@@ -211,7 +211,9 @@ public class ChatSessionService {
 
 	public InBoundEvent routeSession(ChatSessionDoc session) {
 		String defaultQueue = pmDomainConfig.getDefaultInboundQueue(session.contact());
-		return routeSession(session, new PMArgs().assignToQueueCode(defaultQueue));
+		return routeSession(session, new PMArgs().assignToQueueCode(defaultQueue)
+				//Added Contact Info as it is missing later 
+				.contact(session.contact()));
 	}
 
 	public InBoundEvent routeSession(String sessionId, PMArgs pmArgs) {

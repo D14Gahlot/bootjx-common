@@ -598,7 +598,8 @@ public class WacfbClient implements ChannelClient {
 			TmplElement button = buttons.get(0);
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
-					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
+					MapModel.createInstance()
+							.put("display_text", StringUtils.ellipsis(ArgUtil.nonEmpty(button.getLabel(), "Visit"), 20))
 							.put("url", button.getUrl()).toMap());
 		} else if ("location_request_message".equalsIgnoreCase(type)) {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
@@ -871,9 +872,9 @@ public class WacfbClient implements ChannelClient {
 
 		MapModel resp = restService.ajax(url.replace("/v1/media/", "/"))
 				.authBearer(channelConfig.getWacfb().getAccessToken())
-				.queryParam("phone_number_id", channelConfig.getWacfb().getPhoneNumberId())
-				.acceptJson().get().asMapModel();
-		return resp.getString("url");//.replace("https://lookaside.fbsbx.com", WA360Constants.META_WA_CLOUD_URL);
+				.queryParam("phone_number_id", channelConfig.getWacfb().getPhoneNumberId()).acceptJson().get()
+				.asMapModel();
+		return resp.getString("url");// .replace("https://lookaside.fbsbx.com", WA360Constants.META_WA_CLOUD_URL);
 	}
 
 	/** Call new metod to post msg directly to waba API **/

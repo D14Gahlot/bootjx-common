@@ -74,12 +74,12 @@ public class WA360CloudClient implements ChannelClient {
 			String bodyUrlAppend = Constants.BLANK;
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
 			List<TmplElement> noButtons = new ArrayList<TmplElement>();
-            MapModel options = MapModel.from(outboxMessage.options());
+			MapModel options = MapModel.from(outboxMessage.options());
 			if (options.containsKey("buttons")) {
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
-						bodyTextAppend = bodyTextAppend
+						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
@@ -518,7 +518,8 @@ public class WA360CloudClient implements ChannelClient {
 		return send(req, channelConfig);
 	}
 
-	private MapModel sendButton(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons,String type) {
+	private MapModel sendButton(ChannelConfig channelConfig, OutboxMessage outboxMessage, List<TmplElement> buttons,
+			String type) {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
@@ -583,7 +584,8 @@ public class WA360CloudClient implements ChannelClient {
 			TmplElement button = buttons.get(0);
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
-					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
+					MapModel.createInstance()
+							.put("display_text", StringUtils.ellipsis(ArgUtil.nonEmpty(button.getLabel(), "Visit"), 20))
 							.put("url", button.getUrl()).toMap());
 		}  else if ("flow".equalsIgnoreCase(type)) {
 			TmplElement button = buttons.get(0);

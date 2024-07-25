@@ -21,6 +21,9 @@ import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+import com.boot.jx.model.ModelPatch;
+import com.boot.jx.model.ModelPatch.ModelPatchCommand;
+import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
@@ -43,6 +46,7 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
@@ -243,7 +247,7 @@ public class ConfigManagerImpl implements ConfigManager {
 				if (plugin.isWebhookManual()) {
 					PMConfigurationModel config = pmEnvironment.local();
 					if (!ArgUtil.is(channelConfig.getWebhookUrl())) {
-						channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig));
+						channelConfig.setWebhookUrl(pmClientConfig.getWebhookBase(channelConfig, null));
 						channelConfig.setCallbackPath(
 								PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig));
 					}
@@ -258,7 +262,10 @@ public class ConfigManagerImpl implements ConfigManager {
 	public void save(ChannelConfig config) {
 		pmEnvironment.addChannel(config);
 		this.refresh(ChannelConfigDoc.DOCUMENT_NAME, config.getChannelId());
-		connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
+		config = connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
+		if (ArgUtil.is(config) && ArgUtil.is(config.getMeta())) {
+			pmEnvironment.addChannel(config);
+		}
 	}
 
 	@Override
@@ -282,6 +289,21 @@ public class ConfigManagerImpl implements ConfigManager {
 
 		}
 		return getChannelConfig(channelId);
+	}
+
+	@Override
+	public ChannelConfig patchChannelConfig(ModelPatches req) {
+		String channelId = req.getId();
+		ChannelConfigDoc config = configStore.findById(channelId, ChannelConfigDoc.class);
+		MapModel map = MapModel.from(JsonUtil.toMap(config));
+		for (ModelPatch patch : req.getPatches()) {
+			if (ModelPatchCommand.SET.equals(patch.getCommand())) {
+				map.put(JsonPath.at(patch.getField()), patch.getValue());
+			} else if (ModelPatchCommand.REMOVE.equals(patch.getCommand())) {
+				map.remove(JsonPath.at(patch.getField()));
+			}
+		}
+		return saveChannelConfig(config.getChannelType(), map.map());
 	}
 
 	@Override
