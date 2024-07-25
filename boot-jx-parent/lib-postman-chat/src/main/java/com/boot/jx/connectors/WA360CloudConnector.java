@@ -196,25 +196,22 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				inboxMessage.form().put("reply_id", replyId);
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_REPLY).asString());
-				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 			} else if ("list_reply".equals(interactiveType)) {
 				replyId = map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_ID).asString();
 				inboxMessage.form().put("reply_id", replyId);
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_REPLY).asString());
 				inboxMessage.form().put("reply_desc", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_DESC).asString());
+			} else if ("nfm_reply".equals(interactiveType)) {
+				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
+						.asString();
+				// replyJsonMap.put("response_json", responseJsonString);
+				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
+				inboxMessage.form().put("reply_json", replyJsonMap);
+				inboxMessage.form().put("reply_title",
+						map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY).asString());
 			}
-			else if("nfm_reply".equals(interactiveType)){
-			    Map<String, Object> replyJsonMap = new HashMap<>();
-			    String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON).asString();
-			    replyJsonMap.put("response_json", responseJsonString);
-			    inboxMessage.form().put("reply_json", replyJsonMap);
-			    String body=map.entry(InBoundWrapperPaths.INTERACTIVE_nfm_reply_body).asString();
-			    inboxMessage.form().put("body", body);
-			    inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("body"), Constants.BLANK));
-
-			}
-
+			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
 			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();

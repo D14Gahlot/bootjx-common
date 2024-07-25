@@ -21,10 +21,8 @@ public class WA360Constants {
 		public static final JsonPath INTERACTIVE_BUTTON_REPLY = new JsonPath(
 				"messages/[0]/interactive/button_reply/title");
 		public static final JsonPath INTERACTIVE_BUTTON_ID = new JsonPath("messages/[0]/interactive/button_reply/id");
-		public static final String INTERACTIVE_NFM_REPLY_RESPONSE_JSON = ("messages[0]/interactive/nfm_reply/response_json");
-		public static final String INTERACTIVE_nfm_reply_body = ("messages/[0]/interactive/nfm_resply/body");
-
-
+		public static final String INTERACTIVE_NFM_REPLY_RESPONSE_JSON = ("messages/[0]/interactive/nfm_reply/response_json");
+		public static final String INTERACTIVE_NFM_REPLY_BODY = ("messages/[0]/interactive/nfm_resply/body");
 
 		public static final JsonPath SIMPLE_BUTTON_REPLY = new JsonPath("messages/[0]/button/text");
 		public static final JsonPath SIMPLE_BUTTON_PAYLOAD = new JsonPath("messages/[0]/button/payload");
