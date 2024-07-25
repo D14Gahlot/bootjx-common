@@ -1,5 +1,6 @@
 package com.boot.jx.postman.manager;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -167,9 +168,12 @@ public class ThirdPartyTemplateManager {
 		if (ArgUtil.is(hsmTemplateId)) {
 			
 			HSMTemplateDoc hsmTemplateDoc = commonMongoTemplate
-					.findById(hsmTemplateId, HSMTemplateDoc.class);
+					.findById(hsmTemplateId, HSMTemplateDoc.class); 
 			if (ArgUtil.is(hsmTemplateDoc)) {
-			
+				Map<String, Object> options = new HashMap<>();
+				options.put("waba", thirdPartyTemplate.getTemplate());
+				hsmTemplateDoc.setOptions(options);
+
 				hsmTemplateDoc.approved(thirdPartyTemplate.getChannelId(),
 						thirdPartyTemplate.getHsmTemplateId(), status);
 				commonMongoTemplate.save(hsmTemplateDoc);

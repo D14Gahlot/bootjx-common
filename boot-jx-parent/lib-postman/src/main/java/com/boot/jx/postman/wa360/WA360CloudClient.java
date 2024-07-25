@@ -502,7 +502,8 @@ public class WA360CloudClient implements ChannelClient {
 						outboxMessage.getContact().getContactType())
 				.put("to", outboxMessage.contact().getCsid())
 				.put("type", "interactive");
-
+		 Map<String, Object> options = outboxMessage.getOptions();
+		Map<String, Object> waba = (Map<String, Object>) options.get("waba");
 		List<Map<String, Object>> components = (List<Map<String, Object>>) outboxMessage
 				.options().get("components");
 		MapModel interactive = MapModel.createInstance().put("type", "flow");;
@@ -537,7 +538,6 @@ public class WA360CloudClient implements ChannelClient {
 		}
 
 		req.put("interactive", interactive.toMap());
-
 		return send(req, channelConfig);
 	}
 
