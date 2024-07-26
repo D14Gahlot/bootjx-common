@@ -57,15 +57,11 @@ public class WA360CloudClient implements ChannelClient {
 	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		StringJoiner msgIds = new StringJoiner(",");
 
-		if (ArgUtil.is(outboxMessage.getTemplateExt())) {
-			MapModel resp = sendTemplate(channelConfig, outboxMessage);
-			msgIds.add(getMessageId(resp));
-//		} else if (ArgUtil.is(outboxMessage.getOptions())) {
-//			MapModel resp = sendFlow(channelConfig, outboxMessage);
-//			msgIds.add(getMessageId(resp));
-
-		} else if (ArgUtil.is(outboxMessage.getRawMessageFormat())) { /** for Moengage **/
+		if (ArgUtil.is(outboxMessage.getRawMessageFormat())) { /** for Moengage **/
 			MapModel resp = sendTemplateRaw(channelConfig, outboxMessage);
+			msgIds.add(getMessageId(resp));
+		} else if (ArgUtil.is(outboxMessage.getTemplateExt())) {
+			MapModel resp = sendTemplate(channelConfig, outboxMessage);
 			msgIds.add(getMessageId(resp));
 		} else {
 			boolean isList = false;
