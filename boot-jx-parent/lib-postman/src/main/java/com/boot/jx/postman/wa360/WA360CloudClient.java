@@ -71,8 +71,9 @@ public class WA360CloudClient implements ChannelClient {
 			boolean isFlow = false;
 			int buttonsCount = 0;
 			int urlCount = 0;
-			String bodyTextAppend = Constants.BLANK;
 			String bodyUrlAppend = Constants.BLANK;
+			String bodyPhoneAppend = Constants.BLANK;
+
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
 			List<TmplElement> noButtons = new ArrayList<TmplElement>();
 			MapModel options = MapModel.from(outboxMessage.options());
@@ -84,14 +85,14 @@ public class WA360CloudClient implements ChannelClient {
 
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
-						bodyTextAppend = bodyTextAppend
+						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
 						urlCount++;
 						noButtons.add(b);
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
-						bodyTextAppend = bodyTextAppend
+						bodyPhoneAppend = bodyPhoneAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconPhone + " *",
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
@@ -113,9 +114,10 @@ public class WA360CloudClient implements ChannelClient {
 			isList = options.entry("is_list").asBoolean(isList);
 			isCtaUrl = !isList && !isButton && (urlCount == 1);
 
-			if (ArgUtil.is(bodyTextAppend)) {
-				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyTextAppend);
+			if (ArgUtil.is(bodyPhoneAppend)) {
+				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyPhoneAppend);
 			}
+
 			if (!isCtaUrl && ArgUtil.is(bodyUrlAppend)) {
 				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyUrlAppend);
 			}
@@ -352,6 +354,7 @@ public class WA360CloudClient implements ChannelClient {
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());
+
 					}
 				}
 
@@ -370,58 +373,55 @@ public class WA360CloudClient implements ChannelClient {
 						.keyEntry("buttons").asListOfMap();
 				List<List<Map<String, Object>>> buttonsParametersVars = varMap.entry("buttons").asListListOfMap();
 
-				if (extTemplateComponentButtons.size() > 0) {
-					for (int i = 0; i < extTemplateComponentButtons.size(); i++) {
-						Map<String, Object> extTemplateComponentButton = extTemplateComponentButtons.get(i);
-						List<Map<String, Object>> buttonParameterVar = CollectionUtil.getArray(buttonsParametersVars,
-								i);
-						if (ArgUtil.is(buttonParameterVar)) {
-							String buttonType = (String) extTemplateComponentButton.get("type");
-							if ("URL".equals(buttonType)) {
-								for (Map<String, Object> buttonParameter : buttonParameterVar) {
-									if (buttonParameter.containsKey("path")) {
-										String path = (String) buttonParameter.get("path");
-										TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
-										buttonComponent.parameter("text", model.pathEntry(path).asString());
-										components.add(buttonComponent.build().map());
-									}
-								}
-							} else if ("QUICK_REPLY".equals(buttonType)) {
-								for (Map<String, Object> buttonParameter : buttonParameterVar) {
-									if (buttonParameter.containsKey("path")) {
-										String path = (String) buttonParameter.get("path");
-										TmplComponent buttonComponent = TmplComponent.createInstance()
-												.button("quick_reply", i);
-										buttonComponent.parameter("payload", model.pathEntry(path).asString());
-										components.add(buttonComponent.build().map());
-									}
-								}
-							} else if ("FLOW".equals(buttonType)) {
-								for (Map<String, Object> buttonParameter : buttonParameterVar) {
-									if (buttonParameter.containsKey("path")) {
-										String path = (String) buttonParameter.get("path");
-										TmplComponent buttonComponent = TmplComponent.createInstance().button("flow",
-												i);
-										buttonComponent.parameter("action", MapModel.createInstance());
-										components.add(buttonComponent.build().map());
-									}
+				for (int i = 0; i < extTemplateComponentButtons.size(); i++) {
+					Map<String, Object> extTemplateComponentButton = extTemplateComponentButtons.get(i);
+					List<Map<String, Object>> buttonParameterVar = CollectionUtil.getArray(buttonsParametersVars, i);
+					if (ArgUtil.is(buttonParameterVar)) {
+						String buttonType = (String) extTemplateComponentButton.get("type");
+						if ("URL".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+									String path = (String) buttonParameter.get("path");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
+									buttonComponent.parameter("text", model.pathEntry(path).asString());
+									components.add(buttonComponent.build().map());
 								}
 							}
-						} else {
-							String buttonType = (String) extTemplateComponentButton.get("type");
-							List<TmplElement> buttons = outboxMessage.optionActionButtons();
-							TmplElement button = CollectionUtil.getArray(buttons, i);
-							if (ArgUtil.is(button) && "QUICK_REPLY".equals(button.getType())
-									&& "QUICK_REPLY".equals(buttonType)) {
-								TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
-								buttonComponent.parameter("payload", "reply_id:" + button.getCode());
-								components.add(buttonComponent.build().map());
-							} else if ("FLOW".equals(buttonType)) {
-								TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
-								buttonComponent.parameter("action",
-										MapModel.createInstance().put("flow_token", outboxMessage.getMessageId()));
-								components.add(buttonComponent.build().map());
+						} else if ("QUICK_REPLY".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+
+									String path = (String) buttonParameter.get("path");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
+											i);
+									buttonComponent.parameter("payload", model.pathEntry(path).asString());
+									components.add(buttonComponent.build().map());
+								}
 							}
+						} else if ("FLOW".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+									String path = (String) buttonParameter.get("path");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
+									buttonComponent.parameter("action", MapModel.createInstance());
+									components.add(buttonComponent.build().map());
+								}
+							}
+						}
+					} else {
+						String buttonType = (String) extTemplateComponentButton.get("type");
+						List<TmplElement> buttons = outboxMessage.optionActionButtons();
+						TmplElement button = CollectionUtil.getArray(buttons, i);
+						if (ArgUtil.is(button) && "QUICK_REPLY".equals(button.getType())
+								&& "QUICK_REPLY".equals(buttonType)) {
+							TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
+							buttonComponent.parameter("payload", "reply_id:" + button.getCode());
+							components.add(buttonComponent.build().map());
+						} else if ("FLOW".equals(buttonType)) {
+							TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
+							buttonComponent.parameter("action",
+									MapModel.createInstance().put("flow_token", outboxMessage.getMessageId()));
+							components.add(buttonComponent.build().map());
 						}
 					}
 				}
@@ -461,42 +461,6 @@ public class WA360CloudClient implements ChannelClient {
 			options.put("buttons", allbuttons);
 		}
 		return options;
-	}
-
-	private MapModel sendFlow(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-		MapModel req = MapModel.createInstance().put("recipient_type", "individual")
-				.put("messaging_product", outboxMessage.getContact().getContactType())
-				.put("to", outboxMessage.contact().getCsid()).put("type", "interactive");
-		Map<String, Object> options = outboxMessage.getOptions();
-		Map<String, Object> waba = (Map<String, Object>) options.get("waba");
-		List<Map<String, Object>> components = (List<Map<String, Object>>) outboxMessage.options().get("components");
-		MapModel interactive = MapModel.createInstance().put("type", "flow");;
-
-		for (Map<String, Object> component : components) {
-			String type = (String) component.get("type");
-			if ("BODY".equalsIgnoreCase(type)) {
-				interactive.put("body", MapModel.createInstance().put("text", component.get("text")).toMap());
-			} else if ("BUTTONS".equalsIgnoreCase(type)) {
-				List<Map<String, Object>> buttons = (List<Map<String, Object>>) component.get("buttons");
-				for (Map<String, Object> button : buttons) {
-					interactive.put("action",
-							MapModel.createInstance().put("name", "flow")
-									.put("parameters", MapModel.createInstance().put("flow_message_version", "3")
-											.put("flow_token", "AQAAAAACS5FpgQ_cAAAAAD0QI3s.")
-											.put("flow_id", button.get("flow_id")).put("flow_cta", button.get("text"))
-											.put("flow_action_payload",
-													MapModel.createInstance()
-															.put("screen", button.get("navigate_screen"))
-
-															.toMap())
-											.toMap())
-									.toMap());
-				}
-			}
-		}
-
-		req.put("interactive", interactive.toMap());
-		return send(req, channelConfig);
 	}
 
 	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
@@ -647,7 +611,9 @@ public class WA360CloudClient implements ChannelClient {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
 					ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
 		}
+
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, "menu");
+
 		if ("button".equalsIgnoreCase(type)) {
 			List<Object> rows = new ArrayList<Object>();
 			for (TmplElement button : buttons) {
