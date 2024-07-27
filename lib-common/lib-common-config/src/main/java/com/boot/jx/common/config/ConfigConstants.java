@@ -248,6 +248,10 @@ public class ConfigConstants {
 								new ConfigOption(200).label("200 Chats"))
 						.defaultValue(100).group(GROUP_AGENT).hidden()),
 
+		AGENT_MESSAGE_HELPER(new ConfigMeta("ChatGPT based helper for Agent outbound", "agent.message.helper")
+				.desc("Agents will can see take chatGPT help to draft mssage before sending it ").optionsOnOff()
+				.group(GROUP_AGENT)),
+
 		POSTMAN_PHONEBOOK_REGION(new ConfigMeta("Default ISD Country", "postman.phonebook.region")
 				.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions().toArray()).defaultValue("IN")),
 
