@@ -170,10 +170,9 @@ public class ThirdPartyTemplateManager {
 			HSMTemplateDoc hsmTemplateDoc = commonMongoTemplate
 					.findById(hsmTemplateId, HSMTemplateDoc.class); 
 			if (ArgUtil.is(hsmTemplateDoc)) {
-				Map<String, Object> options = new HashMap<>();
-				options.put("waba", thirdPartyTemplate.getTemplate());
-				hsmTemplateDoc.setOptions(options);
-
+					hsmTemplateDoc.options().put("waba",thirdPartyTemplate.getTemplate());
+				
+				
 				hsmTemplateDoc.approved(thirdPartyTemplate.getChannelId(),
 						thirdPartyTemplate.getHsmTemplateId(), status);
 				commonMongoTemplate.save(hsmTemplateDoc);
