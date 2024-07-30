@@ -394,7 +394,7 @@ public class WA360Client implements ChannelClient {
 
 	private WA360OutBoundMedia createMedia(String mediaType, Attachment attachment) {
 		WA360OutBoundMedia wa360OutBoundMedia = new WA360OutBoundMedia();
-		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
+		wa360OutBoundMedia.setCaption(attachment.getMediaName());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
 		wa360OutBoundMedia.setFilename(attachment.getMediaName());
 		if (mediaType.equalsIgnoreCase("image")) {
