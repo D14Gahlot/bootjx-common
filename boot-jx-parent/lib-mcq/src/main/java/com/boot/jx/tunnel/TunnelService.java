@@ -17,7 +17,9 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
 import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
+import com.boot.jx.tunnel.ITunnelDefs.TunnelFilter;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelQueue;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -28,6 +30,9 @@ public class TunnelService implements ITunnelService {
 
 	@Autowired(required = false)
 	RedissonClient redisson;
+
+	@Autowired(required = false)
+	TunnelFilter tunnelFilter;
 
 	/**
 	 * For broadcast purpose, it will send event to all the listeners which are
@@ -117,6 +122,27 @@ public class TunnelService implements ITunnelService {
 		task(topic, messagePayload);
 	}
 
+	@Override
+	public <T> long taskPublish(String topic, T messagePayload, AppContext context) {
+		if (redisson == null) {
+			return 0L;
+		}
+		TunnelMessage<T> message = new TunnelMessage<T>(messagePayload, context);
+		message.setTopic(topic);
+
+		RQueue<TunnelMessage<T>> queue = redisson.getQueue(TunnelEventXchange.TASK_WORKER.getQueue(topic));
+		RTopic taskWorkerTopic = redisson.getTopic(TunnelEventXchange.TASK_WORKER.getTopic(topic));
+		RTopic taskListnerPublisher = redisson.getTopic(TunnelEventXchange.TASK_LISTNER.getTopic(topic));
+
+		AuditServiceClient.trackStatic(
+				new RequestTrackEvent(RequestTrackEvent.Type.PUB_OUT, TunnelEventXchange.TASK_WORKER, message));
+		debugEvent(message);
+
+		queue.add(message);
+		taskListnerPublisher.publish(message);
+		return taskWorkerTopic.publish(message.getId());
+	}
+
 	/**
 	 * To assign a job to one of the worker, subscriber to this can be of two types
 	 * : TASK_WORKER & TASK_LISTNER
@@ -135,24 +161,15 @@ public class TunnelService implements ITunnelService {
 	 */
 	@Override
 	public <T> long task(String topic, T messagePayload) {
-		if (redisson == null) {
-			return 0L;
-		}
 		AppContext context = AppContextUtil.getContext();
-		TunnelMessage<T> message = new TunnelMessage<T>(messagePayload, context);
-		message.setTopic(topic);
-
-		RQueue<TunnelMessage<T>> queue = redisson.getQueue(TunnelEventXchange.TASK_WORKER.getQueue(topic));
-		RTopic taskWorkerTopic = redisson.getTopic(TunnelEventXchange.TASK_WORKER.getTopic(topic));
-		RTopic taskListnerPublisher = redisson.getTopic(TunnelEventXchange.TASK_LISTNER.getTopic(topic));
-
-		AuditServiceClient.trackStatic(
-				new RequestTrackEvent(RequestTrackEvent.Type.PUB_OUT, TunnelEventXchange.TASK_WORKER, message));
-		debugEvent(message);
-
-		queue.add(message);
-		taskListnerPublisher.publish(message);
-		return taskWorkerTopic.publish(message.getId());
+		boolean isPublish = true;
+		if (ArgUtil.is(tunnelFilter)) {
+			isPublish = tunnelFilter.beforeTaskPublish(topic, messagePayload, context);
+		}
+		if (isPublish) {
+			return this.taskPublish(topic, messagePayload, context);
+		}
+		return 0L;
 	}
 
 	public static <T> void debugEvent(TunnelMessage<T> message) {
