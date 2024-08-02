@@ -26,6 +26,14 @@ public class App { // Noncompliant
 
 	private static Logger LOGGER = LoggerFactory.getLogger(App.class);
 
+	public static void main(String[] args) {
+		TunnelMessage<Object> t = new TunnelMessage<Object>(new HashMap<String, Object>());
+		t.setAppType("POSTMAN");
+		t.setContext(new AppContext());
+		t.setTopic("SHARED_CACHE_CLEAR");
+		System.out.println(JsonUtil.toJson(t));
+	}
+
 	/**
 	 * This is just a test method
 	 * 
@@ -34,7 +42,7 @@ public class App { // Noncompliant
 	 * @throws URISyntaxException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static void main(String[] args)
+	public static void main2(String[] args)
 			throws MalformedURLException, URISyntaxException, UnsupportedEncodingException {
 		AppContext context = AppContextUtil.getContext();
 
@@ -55,15 +63,13 @@ public class App { // Noncompliant
 		e.setPriority("string");
 		e.setText("string");
 
-		TunnelMessage<DBEvent> message = new TunnelMessage<DBEvent>(
-				e, context);
+		TunnelMessage<DBEvent> message = new TunnelMessage<DBEvent>(e, context);
 		message.setTopic("DATAUPD_CUSTOMER");
 
 		String messageJson = JsonUtil.toJson(message);
 		LOGGER.info("J====== {}", messageJson);
-		TunnelMessage<DBEvent> message2 = JsonUtil.fromJson(messageJson,
-				new TypeReference<TunnelMessage<DBEvent>>() {
-				});
+		TunnelMessage<DBEvent> message2 = JsonUtil.fromJson(messageJson, new TypeReference<TunnelMessage<DBEvent>>() {
+		});
 		LOGGER.info("J====== {}", JsonUtil.toJson(message2));
 
 		FSTConfiguration conf = FSTConfiguration.createJsonConfiguration();
