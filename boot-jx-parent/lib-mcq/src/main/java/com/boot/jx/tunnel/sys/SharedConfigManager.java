@@ -15,7 +15,7 @@ import com.boot.jx.tunnel.TunnelEventXchange;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.utils.JsonUtil;
 
-@TunnelEventMapping(topic = SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, scheme = TunnelEventXchange.SHOUT_LISTNER,
+@TunnelEventMapping(topic = TunnelConstants.Events.SHARED_CONFIG_UPDATE, scheme = TunnelEventXchange.SHOUT_LISTNER,
 		integrity = false)
 public class SharedConfigManager implements ITunnelSubscriber<DBEvent> {
 
@@ -41,16 +41,16 @@ public class SharedConfigManager implements ITunnelSubscriber<DBEvent> {
 	public void clear(AppSharedConfigChange change) {
 		DBEvent e = new DBEvent();
 		e.setData(JsonUtil.toStringMap(change));
-		e.setEventCode(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE);
+		e.setEventCode(TunnelConstants.Events.SHARED_CONFIG_UPDATE);
 		appConfigPackage.clear(change);
-		tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, e);
+		tunnelService.shout(TunnelConstants.Events.SHARED_CONFIG_UPDATE, e);
 	}
 
 	public void clear() {
 		DBEvent e = new DBEvent();
-		e.setEventCode(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE);
+		e.setEventCode(TunnelConstants.Events.SHARED_CONFIG_UPDATE);
 		appConfigPackage.clear(new AppSharedConfigChange());
-		tunnelService.shout(SysTunnelEventsDict.Names.SHARED_CONFIG_UPDATE, e);
+		tunnelService.shout(TunnelConstants.Events.SHARED_CONFIG_UPDATE, e);
 	}
 
 }

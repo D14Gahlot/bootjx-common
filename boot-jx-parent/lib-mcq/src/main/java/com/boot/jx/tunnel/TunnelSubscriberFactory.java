@@ -2,8 +2,11 @@ package com.boot.jx.tunnel;
 
 import java.lang.annotation.Annotation;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import org.redisson.api.RMapCache;
 import org.redisson.api.RQueue;
@@ -23,7 +26,7 @@ import com.boot.jx.AppParam;
 import com.boot.jx.cache.MCQIndicator;
 import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
-import com.boot.jx.tunnel.ITunnelDefs.TunnelFilter;
+import com.boot.jx.tunnel.sys.TunnelFilterManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -41,6 +44,10 @@ public class TunnelSubscriberFactory {
 	public static final int RECURSION_MAX_DEPTH = 20;
 
 	private AppConfig appConfig;
+	private TunnelFilterManager tunnelFilter;
+	@Autowired
+	private TunnelService tunnelService;
+	private List<String> eventTopics;
 
 	public static <A extends Annotation> A getAnnotationProxyReady(Class<?> clazz, Class<A> annotationClass) {
 		final A annotation = clazz.getAnnotation(annotationClass);
@@ -54,7 +61,7 @@ public class TunnelSubscriberFactory {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TunnelSubscriberFactory(List<ITunnelSubscriber> listeners,
 			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal,
-			@Autowired(required = false) TunnelFilter tunnelFilter
+			@Autowired TunnelFilterManager tunnelFilterLocal, @Autowired TunnelService tunnelServiceLocal
 	/**
 	 * This is important as params should be loaded before we can subscribe to with
 	 * ENV events
@@ -62,7 +69,8 @@ public class TunnelSubscriberFactory {
 	// , @Autowired AppParam loadAppParams
 	) {
 		appConfig = appConfigLocal;
-
+		tunnelFilter = tunnelFilterLocal;
+		this.tunnelService = tunnelServiceLocal;
 		if (appConfig == null) {
 			LOGGER.error("App COnfig is Undefiend");
 		}
@@ -71,6 +79,8 @@ public class TunnelSubscriberFactory {
 		if (redisson == null) {
 			LOGGER.warn("Redisson Not avaiable for {} Listeners", listeners.size());
 		} else {
+			this.eventTopics = new ArrayList<String>();
+
 			for (ITunnelSubscriber listener : listeners) {
 				if (listener == null) {
 					LOGGER.error("NULL LISTENR IN LIST");
@@ -105,13 +115,18 @@ public class TunnelSubscriberFactory {
 				} else {
 					this.addShoutListener(eventTopic, redisson, listener, integrity, c.getClass().getName());
 				}
-			}
-			if (ArgUtil.is(tunnelFilter)) {
-				tunnelFilter.postSubscriptions(listeners);
+				eventTopics.add(eventTopic);
 			}
 
 		}
 
+	}
+
+	@PostConstruct
+	public void init() {
+		LOGGER.info("TunnelSubscriberFactory init");
+		tunnelFilter.postSubscriptions(eventTopics);
+		tunnelFilter.onServiceInit();
 	}
 
 	public static class WrapperML<M> implements MessageListener<TunnelMessage<M>> {

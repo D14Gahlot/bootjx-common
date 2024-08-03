@@ -6,10 +6,10 @@ import org.slf4j.LoggerFactory;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
 import com.boot.jx.tunnel.ITunnelSubscriber;
 import com.boot.jx.tunnel.TunnelEventMapping;
-import com.boot.jx.tunnel.sys.SysTunnelEventsDict;
+import com.boot.jx.tunnel.sys.TunnelConstants;
 import com.boot.utils.JsonUtil;
 
-@TunnelEventMapping(topic = SysTunnelEventsDict.Names.TEST_TOPIC)
+@TunnelEventMapping(topic = TunnelConstants.Events.TEST_TOPIC)
 public class RedisSampleSubscriber implements ITunnelSubscriber<RedisSampleData> {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());

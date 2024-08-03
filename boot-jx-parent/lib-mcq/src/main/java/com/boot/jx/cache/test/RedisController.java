@@ -22,7 +22,7 @@ import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.TunnelMessage;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
-import com.boot.jx.tunnel.sys.SysTunnelEventsDict;
+import com.boot.jx.tunnel.sys.TunnelConstants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
@@ -59,7 +59,7 @@ public class RedisController {
 
 	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.POST)
 	public long cacheTestPost(@RequestBody RedisSampleData status) {
-		return tunnelService.shout(SysTunnelEventsDict.Names.TEST_TOPIC, status);
+		return tunnelService.shout(TunnelConstants.Events.TEST_TOPIC, status);
 	}
 
 	@RequestMapping(value = "/pub/tunnel/task", method = RequestMethod.POST)

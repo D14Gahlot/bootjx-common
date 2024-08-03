@@ -2,6 +2,8 @@ package com.boot.jx.tunnel;
 
 import java.io.UnsupportedEncodingException;
 
+import javax.annotation.PostConstruct;
+
 import org.nustaq.serialization.FSTConfiguration;
 import org.redisson.api.RQueue;
 import org.redisson.api.RTopic;
@@ -17,9 +19,8 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
 import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
-import com.boot.jx.tunnel.ITunnelDefs.TunnelFilter;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelQueue;
-import com.boot.utils.ArgUtil;
+import com.boot.jx.tunnel.sys.TunnelFilterManager;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -31,8 +32,13 @@ public class TunnelService implements ITunnelService {
 	@Autowired(required = false)
 	RedissonClient redisson;
 
-	@Autowired(required = false)
-	TunnelFilter tunnelFilter;
+	@Autowired
+	private TunnelFilterManager tunnelFilter;
+
+	@PostConstruct
+	public void init() {
+		LOGGER.info("TunnelService init");
+	}
 
 	/**
 	 * For broadcast purpose, it will send event to all the listeners which are
@@ -64,11 +70,6 @@ public class TunnelService implements ITunnelService {
 		AuditServiceClient.trackStatic(
 				new RequestTrackEvent(RequestTrackEvent.Type.PUB_OUT, TunnelEventXchange.SHOUT_LISTNER, message));
 		return topicQueue.publish(message);
-	}
-
-	@Override
-	public <T> long shout(ITunnelEventsDict topic, T messagePayload) {
-		return this.shout(topic.name(), messagePayload);
 	}
 
 	/**
@@ -162,13 +163,11 @@ public class TunnelService implements ITunnelService {
 	@Override
 	public <T> long task(String topic, T messagePayload) {
 		AppContext context = AppContextUtil.getContext();
-		boolean isPublish = true;
-		if (ArgUtil.is(tunnelFilter)) {
-			isPublish = tunnelFilter.beforeTaskPublish(topic, messagePayload, context);
-		}
+		boolean isPublish = tunnelFilter.beforeTaskPublish(topic, messagePayload, context);
 		if (isPublish) {
 			return this.taskPublish(topic, messagePayload, context);
 		}
+		tunnelFilter.afterTaskPublish(topic, messagePayload, context);
 		return 0L;
 	}
 
