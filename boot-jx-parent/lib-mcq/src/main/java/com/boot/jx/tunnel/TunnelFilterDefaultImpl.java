@@ -59,4 +59,9 @@ public class TunnelFilterDefaultImpl implements TunnelFilter {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public ChronoTask schedule(ChronoTask chronoTask) {
+		return chronoTask;
+	}
 }

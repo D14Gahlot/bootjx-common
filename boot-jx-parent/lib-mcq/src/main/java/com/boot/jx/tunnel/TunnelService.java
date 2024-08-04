@@ -21,6 +21,7 @@ import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelQueue;
 import com.boot.jx.tunnel.sys.TunnelFilterManager;
+import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -162,12 +163,20 @@ public class TunnelService implements ITunnelService {
 	 */
 	@Override
 	public <T> long task(String topic, T messagePayload) {
-		AppContext context = AppContextUtil.getContext();
-		boolean isPublish = tunnelFilter.beforeTaskPublish(topic, messagePayload, context);
-		if (isPublish) {
-			return this.taskPublish(topic, messagePayload, context);
+		if (messagePayload instanceof ChronoTask) {
+			ChronoTask chronoTask = (ChronoTask) messagePayload;
+			if (!ArgUtil.is(chronoTask.getTopic())) {
+				chronoTask.setTopic(topic);
+			}
+			tunnelFilter.schedule(chronoTask);
+		} else {
+			AppContext context = AppContextUtil.getContext();
+			boolean isPublish = tunnelFilter.beforeTaskPublish(topic, messagePayload, context);
+			if (isPublish) {
+				return this.taskPublish(topic, messagePayload, context);
+			}
+			tunnelFilter.afterTaskPublish(topic, messagePayload, context);
 		}
-		tunnelFilter.afterTaskPublish(topic, messagePayload, context);
 		return 0L;
 	}
 
@@ -202,6 +211,11 @@ public class TunnelService implements ITunnelService {
 	 */
 	@Override
 	public <E extends ITunnelEvent> long task(E event) {
+		return this.task(event.getClass().getName(), event);
+	}
+
+	@Override
+	public <E extends ChronoTask> long schedule(E event) {
 		return this.task(event.getClass().getName(), event);
 	}
 

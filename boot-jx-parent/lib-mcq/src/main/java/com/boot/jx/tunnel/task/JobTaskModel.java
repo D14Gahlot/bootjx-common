@@ -211,5 +211,4 @@ public abstract class JobTaskModel<T> implements Serializable {
 	public void setVersion(Long version) {
 		this.version = version;
 	}
-
 }

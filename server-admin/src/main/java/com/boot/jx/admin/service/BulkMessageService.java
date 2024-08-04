@@ -42,6 +42,8 @@ import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.tunnel.ChronoTask;
+import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.task.BatchJobExecuter;
 import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
@@ -69,6 +71,32 @@ public class BulkMessageService extends BatchJobExecuter {
 	@Autowired
 	private PMEnvironment enviroment;
 
+	@Autowired
+	private TunnelService tunnelService;
+
+	/** adding + sign in a phone if not there **/
+	public static final String PLUS_SIGN = "+";
+
+	private static String getPhoneWithPlus(String phoneNo) {
+		if (ArgUtil.is(phoneNo)) {
+			if (!phoneNo.startsWith(PLUS_SIGN)) {
+				phoneNo = PLUS_SIGN.concat(phoneNo);
+			}
+		}
+		return phoneNo;
+	}
+
+	public void registerJob(BatchJob job, ChronoTask scheduler) {
+		scheduler = ArgUtil.nonEmpty(scheduler, ChronoTask.task());
+		tunnelService.task(
+				// Create Scheduled Task with scheduler params
+				ChronoTask.task("BulkMessageTask").startAt(scheduler.getStartAt()).endAt(scheduler.getEndAt())
+						.repeat(scheduler.isRepeat()).interval(scheduler.getInterval())
+						.executionCount(scheduler.getExecutionCount()).data(
+								// Pass BatchJob to ScheduledTask
+								job));
+	}
+
 	public BulkSessionDoc send(OutboxMessage bulkMessage) throws NumberParseException {
 
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
@@ -76,7 +104,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		ChannelConfig channelConfig = enviroment.config().channel(channelId);
 		HSMTemplateDoc templateDoc = mongoTemplate.findById(bulkMessage.templateId(), HSMTemplateDoc.class);
 		CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
-		if(ArgUtil.is(templateDoc) && !ArgUtil.is(bulkMessage.getHsm().getCode())) {
+		if (ArgUtil.is(templateDoc) && !ArgUtil.is(bulkMessage.getHsm().getCode())) {
 			hsmTemp.setId(bulkMessage.templateId());
 			hsmTemp.setCode(templateDoc.getCode());
 			hsmTemp.setData(bulkMessage.getHsm().getData());
@@ -127,20 +155,32 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setStatus("CREATED");
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
-		registerJob(JobTaskModel.newBatchJob()
-				// Set Unique Job Id
-				.jobId(session.getBulkSessionId())
-				// Contact Type for each message
-				.data("contactType", session.getContactType())
-				// Channel for each message
-				.data("channelType", channelConfig.getChannelType())
-				// Lane for each message
-				.data("lane", session.getLane()));
+
+		ChronoTask scheduler = ArgUtil.nonEmpty(bulkMessage.getScheduler(), ChronoTask.task());
+
+		tunnelService.task(
+				// Create Scheduled Task
+				ChronoTask.task().startAt(scheduler.getStartAt()).endAt(scheduler.getEndAt())
+						.repeat(scheduler.isRepeat()).interval(scheduler.getInterval())
+						.executionCount(scheduler.getExecutionCount()).data(
+								// Create batch Job to pass
+								JobTaskModel.newBatchJob()
+										// Set Unique Job Id
+										.jobId(session.getBulkSessionId())
+										// Contact Type for each message
+										.data("contactType", session.getContactType())
+										// Channel for each message
+										.data("channelType", channelConfig.getChannelType())
+										// Lane for each message
+										.data("lane", session.getLane())
+
+						));
 
 		return session;
 	}
 
-	public BulkSessionDoc sendMultiple(List<OutboxMessage> bulkMessages) throws NumberParseException {
+	public BulkSessionDoc sendMultiple(List<OutboxMessage> bulkMessages, ChronoTask scheduler)
+			throws NumberParseException {
 
 		OutboxMessage bulkMessage = bulkMessages.get(0);
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
@@ -198,12 +238,13 @@ public class BulkMessageService extends BatchJobExecuter {
 				// Channel for each message
 				.data("channelType", channelConfig.getChannelType())
 				// Lane for each message
-				.data("lane", session.getLane()));
+				.data("lane", session.getLane()), scheduler);
 
 		return session;
 	}
 
-	public BulkSessionDoc sendToGroup(List<OutboxMessage> bulkMessages) throws NumberParseException {
+	public BulkSessionDoc sendToGroup(List<OutboxMessage> bulkMessages, ChronoTask scheduler)
+			throws NumberParseException {
 
 		OutboxMessage bulkMessage = bulkMessages.get(0);
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
@@ -263,7 +304,7 @@ public class BulkMessageService extends BatchJobExecuter {
 				// Channel for each message
 				.data("channelType", channelConfig.getChannelType())
 				// Lane for each message
-				.data("lane", session.getLane()));
+				.data("lane", session.getLane()), scheduler);
 
 		return session;
 	}
@@ -389,8 +430,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		QA list = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
 				QA.project("statuss", QA.objectToArray("stamps")), Aggregation.unwind("statuss"),
-				Aggregation.group("statuss.k").count().as("count"));
-		;
+				Aggregation.group("statuss.k").count().as("count"));;
 
 		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 //				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
@@ -467,25 +507,12 @@ public class BulkMessageService extends BatchJobExecuter {
 						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
 			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
 			for (CSVRecord csvRecord : csvRecords) {
-				//System.out.println("id :" + csvRecord.get("contacts"));
+				// System.out.println("id :" + csvRecord.get("contacts"));
 			}
 
 		} catch (Exception e) {
 			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
 		}
 	}
-	
-	
 
-	/** adding + sign in a phone if not there **/
-	public static final String PLUS_SIGN="+";
-	private  static String getPhoneWithPlus(String phoneNo) {
-		if (ArgUtil.is(phoneNo)) {
-			if (!phoneNo.startsWith(PLUS_SIGN)) {
-				phoneNo =PLUS_SIGN.concat(phoneNo);
-			}
-		}
-		return phoneNo;
-	}
-	
 }

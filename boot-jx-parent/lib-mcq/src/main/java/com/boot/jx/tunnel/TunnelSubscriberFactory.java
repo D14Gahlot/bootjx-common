@@ -45,8 +45,6 @@ public class TunnelSubscriberFactory {
 
 	private AppConfig appConfig;
 	private TunnelFilterManager tunnelFilter;
-	@Autowired
-	private TunnelService tunnelService;
 	private List<String> eventTopics;
 
 	public static <A extends Annotation> A getAnnotationProxyReady(Class<?> clazz, Class<A> annotationClass) {
@@ -61,7 +59,7 @@ public class TunnelSubscriberFactory {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TunnelSubscriberFactory(List<ITunnelSubscriber> listeners,
 			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal,
-			@Autowired TunnelFilterManager tunnelFilterLocal, @Autowired TunnelService tunnelServiceLocal
+			@Autowired TunnelFilterManager tunnelFilterLocal
 	/**
 	 * This is important as params should be loaded before we can subscribe to with
 	 * ENV events
@@ -70,7 +68,6 @@ public class TunnelSubscriberFactory {
 	) {
 		appConfig = appConfigLocal;
 		tunnelFilter = tunnelFilterLocal;
-		this.tunnelService = tunnelServiceLocal;
 		if (appConfig == null) {
 			LOGGER.error("App COnfig is Undefiend");
 		}
