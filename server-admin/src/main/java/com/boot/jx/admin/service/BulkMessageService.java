@@ -92,7 +92,7 @@ public class BulkMessageService extends BatchJobExecuter {
 				// Create Scheduled Task with scheduler params
 				ChronoTask.task("BulkMessageTask").startAt(scheduler.getStartAt()).endAt(scheduler.getEndAt())
 						.repeat(scheduler.isRepeat()).interval(scheduler.getInterval())
-						.executionCount(scheduler.getExecutionCount()).data(
+						.repeatCount(scheduler.getRepeatCount()).data(
 								// Pass BatchJob to ScheduledTask
 								job));
 	}
@@ -162,7 +162,7 @@ public class BulkMessageService extends BatchJobExecuter {
 				// Create Scheduled Task
 				ChronoTask.task().startAt(scheduler.getStartAt()).endAt(scheduler.getEndAt())
 						.repeat(scheduler.isRepeat()).interval(scheduler.getInterval())
-						.executionCount(scheduler.getExecutionCount()).data(
+						.repeatCount(scheduler.getRepeatCount()).data(
 								// Create batch Job to pass
 								JobTaskModel.newBatchJob()
 										// Set Unique Job Id
