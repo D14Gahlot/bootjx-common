@@ -88,7 +88,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	public void registerJob(BatchJob job, ChronoTask scheduler) {
 		scheduler = ArgUtil.nonEmpty(scheduler, ChronoTask.task());
-		tunnelService.task(
+		tunnelService.schedule(
 				// Create Scheduled Task with scheduler params
 				ChronoTask.task("BulkMessageTask").startAt(scheduler.getStartAt()).endAt(scheduler.getEndAt())
 						.repeat(scheduler.isRepeat()).interval(scheduler.getInterval())

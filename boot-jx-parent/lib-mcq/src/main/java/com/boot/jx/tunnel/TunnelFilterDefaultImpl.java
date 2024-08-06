@@ -1,6 +1,8 @@
 package com.boot.jx.tunnel;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -15,6 +17,10 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppContext;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelFilter;
+import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
+import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 
 @Service
 @ConditionalOnProperty(name = "bootjx.tunnel.filter", havingValue = "default")
@@ -22,14 +28,19 @@ public class TunnelFilterDefaultImpl implements TunnelFilter {
 
 	private Logger LOGGER = LoggerFactory.getLogger(TunnelFilterDefaultImpl.class);
 
+	Map<String, String> myTopics = null;
+
 	@Value("${bootjx.tunnel.cross.url}")
 	private String crossUrl;
 
-	@Autowired
-	RestService restService;
+	@Value("${bootjx.tunnel.scheduler}")
+	private String scheduler;
 
 	@Autowired
-	AppConfig appConfig;
+	private RestService restService;
+
+	@Autowired
+	private AppConfig appConfig;
 
 	@Override
 	public boolean postSubscriptions(List<String> topics) {
@@ -51,17 +62,31 @@ public class TunnelFilterDefaultImpl implements TunnelFilter {
 
 	@Override
 	public <T> void afterTaskPublic(String topic, T messagePayload, AppContext context) {
-
+		if (myTopics.containsKey(topic) && ArgUtil.is(crossUrl)) {
+			TunnelMessage<Object> t = new TunnelMessage<Object>(new HashMap<String, Object>());
+			t.setAppType(appConfig.getAppType());
+			t.setContext(context);
+			t.setTopic(topic);
+			t.setData(messagePayload);
+			restService.ajax(crossUrl).postJson(t).asNone();
+		}
 	}
 
 	@Override
 	public void onMasterUpdate(TunnelEvent message) {
-		// TODO Auto-generated method stub
-
+		LOGGER.info("======onMasterUpdate==={}", JsonUtil.toJson(message));
+		this.myTopics = null;
 	}
 
 	@Override
 	public ChronoTask schedule(ChronoTask chronoTask) {
+		if (ArgUtil.is(scheduler)) {
+			MapModel resp = restService.ajax(scheduler).postJson(chronoTask).asMapModel();
+			MapPathEntry id = resp.keyEntry("id");
+			if (id.exists()) {
+				chronoTask.setTaskId(id.asString());
+			}
+		}
 		return chronoTask;
 	}
 }
