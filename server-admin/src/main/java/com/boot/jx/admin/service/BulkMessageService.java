@@ -158,23 +158,18 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		ChronoTask scheduler = ArgUtil.nonEmpty(bulkMessage.getScheduler(), ChronoTask.task());
 
-		tunnelService.task(
-				// Create Scheduled Task
-				ChronoTask.task().startAt(scheduler.getStartAt()).endAt(scheduler.getEndAt())
-						.repeat(scheduler.isRepeat()).interval(scheduler.getInterval())
-						.repeatCount(scheduler.getRepeatCount()).data(
-								// Create batch Job to pass
-								JobTaskModel.newBatchJob()
-										// Set Unique Job Id
-										.jobId(session.getBulkSessionId())
-										// Contact Type for each message
-										.data("contactType", session.getContactType())
-										// Channel for each message
-										.data("channelType", channelConfig.getChannelType())
-										// Lane for each message
-										.data("lane", session.getLane())
+		registerJob(// Create batch Job to pass
+				JobTaskModel.newBatchJob()
+						// Set Unique Job Id
+						.jobId(session.getBulkSessionId())
+						// Contact Type for each message
+						.data("contactType", session.getContactType())
+						// Channel for each message
+						.data("channelType", channelConfig.getChannelType())
+						// Lane for each message
+						.data("lane", session.getLane())
 
-						));
+				, scheduler);
 
 		return session;
 	}
