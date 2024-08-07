@@ -52,7 +52,7 @@ public class AppCommonAdvice extends AmxAdvice {
 		if (matcher.isMatch(DUPLICATE_FIELD)) {
 			newError.setField(matcher.group(1));
 			newError.setDescriptionKey("DUPLICATE_KEY");
-			newError.setDescription(HttpUtils.sanitze("Duplicate Key: "+newError.getField()));
+			newError.setDescription(HttpUtils.sanitze("Duplicate Key: " + newError.getField()));
 		}
 		errors.add(newError);
 		return badRequest(exception, errors, request, response, ApiStatusCodes.PARAM_DUPLICATE);
