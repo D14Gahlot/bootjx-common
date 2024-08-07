@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContext;
-import com.boot.jx.tunnel.ChronoTask;
+import com.boot.jx.tunnel.ChronoScheduler;
 import com.boot.jx.tunnel.CommonTunnelEvent;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelFilter;
 import com.boot.jx.tunnel.TunnelService;
@@ -83,7 +83,7 @@ public class TunnelFilterManager {
 		// CommonTunnelEvent());
 	}
 
-	public ChronoTask schedule(ChronoTask chronoTask) {
+	public ChronoScheduler schedule(ChronoScheduler chronoTask) {
 		return tunnelFilter.schedule(chronoTask);
 	}
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
@@ -68,6 +69,9 @@ public class RedisController {
 		if (propagate) {
 			return tunnelService.task(event.getTopic(), event.getData());
 		} else {
+			if(event.getContext() == null){
+				event.setContext(AppContextUtil.getContext());
+			}
 			return tunnelService.taskPublish(event.getTopic(), event.getData(), event.getContext());
 		}
 	}

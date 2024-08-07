@@ -10,7 +10,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
-import com.boot.jx.tunnel.ChronoTask;
+import com.boot.jx.tunnel.ChronoScheduler;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,7 +35,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private String groupId;
 	private String campaignTitle;
 	private String groupName;
-	private ChronoTask scheduler;
+	private ChronoScheduler scheduler;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -192,11 +192,11 @@ public class OutboxMessage extends Message<OutboxMessage>
 		this.campaignTitle = campaignTitle;
 	}
 
-	public ChronoTask getScheduler() {
+	public ChronoScheduler getScheduler() {
 		return scheduler;
 	}
 
-	public void setScheduler(ChronoTask scheduler) {
+	public void setScheduler(ChronoScheduler scheduler) {
 		this.scheduler = scheduler;
 	}
 

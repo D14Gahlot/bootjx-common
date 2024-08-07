@@ -19,9 +19,12 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
 import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
+import com.boot.jx.tunnel.ChronoScheduler.ChronoTaskEvent;
+import com.boot.jx.tunnel.ITunnelDefs.ITunnelEvent;
+import com.boot.jx.tunnel.ITunnelDefs.Schedulable;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelQueue;
 import com.boot.jx.tunnel.sys.TunnelFilterManager;
-import com.boot.utils.ArgUtil;
+import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -163,11 +166,11 @@ public class TunnelService implements ITunnelService {
 	 */
 	@Override
 	public <T> long task(String topic, T messagePayload) {
-		if (messagePayload instanceof ChronoTask) {
-			ChronoTask chronoTask = (ChronoTask) messagePayload;
-			if (!ArgUtil.is(chronoTask.getTopic())) {
-				chronoTask.setTopic(topic);
-			}
+		if (messagePayload instanceof Schedulable) {
+			Schedulable scheduledTask = (Schedulable) messagePayload;
+			ChronoTaskEvent chronoTask = EntityDtoUtil.copyProperties(ChronoScheduler.task(topic),
+					scheduledTask.getScheduler());
+			chronoTask.data(messagePayload);
 			tunnelFilter.schedule(chronoTask);
 		} else {
 			AppContext context = AppContextUtil.getContext();
@@ -215,7 +218,7 @@ public class TunnelService implements ITunnelService {
 	}
 
 	@Override
-	public <E extends ChronoTask> long schedule(E event) {
+	public <S extends Schedulable> long schedule(S event) {
 		return this.task(event.getClass().getName(), event);
 	}
 

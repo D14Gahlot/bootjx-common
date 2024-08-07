@@ -79,7 +79,7 @@ public class TunnelFilterDefaultImpl implements TunnelFilter {
 	}
 
 	@Override
-	public ChronoTask schedule(ChronoTask chronoTask) {
+	public ChronoScheduler schedule(ChronoScheduler chronoTask) {
 		if (ArgUtil.is(scheduler)) {
 			MapModel resp = restService.ajax(scheduler).postJson(chronoTask).asMapModel();
 			MapPathEntry id = resp.keyEntry("id");

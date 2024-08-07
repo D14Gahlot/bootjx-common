@@ -42,7 +42,7 @@ import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.MessageStore;
-import com.boot.jx.tunnel.ChronoTask;
+import com.boot.jx.tunnel.ChronoScheduler;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.task.BatchJobExecuter;
 import com.boot.jx.tunnel.task.JobTaskModel;
@@ -86,15 +86,10 @@ public class BulkMessageService extends BatchJobExecuter {
 		return phoneNo;
 	}
 
-	public void registerJob(BatchJob job, ChronoTask scheduler) {
-		scheduler = ArgUtil.nonEmpty(scheduler, ChronoTask.task());
-		tunnelService.schedule(
-				// Create Scheduled Task with scheduler params
-				ChronoTask.task("BulkMessageTask").startAt(scheduler.getStartAt()).endAt(scheduler.getEndAt())
-						.repeat(scheduler.isRepeat()).interval(scheduler.getInterval())
-						.repeatCount(scheduler.getRepeatCount()).data(
-								// Pass BatchJob to ScheduledTask
-								job));
+	public void registerJob(BatchJob job, ChronoScheduler scheduler) {
+		scheduler = ArgUtil.nonEmpty(scheduler, ChronoScheduler.task());
+		scheduler.setTopic("BulkMessageTask");
+		tunnelService.schedule(job.scheduler(scheduler));
 	}
 
 	public BulkSessionDoc send(OutboxMessage bulkMessage) throws NumberParseException {
@@ -156,7 +151,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
 
-		ChronoTask scheduler = ArgUtil.nonEmpty(bulkMessage.getScheduler(), ChronoTask.task());
+		ChronoScheduler scheduler = ArgUtil.nonEmpty(bulkMessage.getScheduler(), ChronoScheduler.task());
 
 		registerJob(// Create batch Job to pass
 				JobTaskModel.newBatchJob()
@@ -174,7 +169,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		return session;
 	}
 
-	public BulkSessionDoc sendMultiple(List<OutboxMessage> bulkMessages, ChronoTask scheduler)
+	public BulkSessionDoc sendMultiple(List<OutboxMessage> bulkMessages, ChronoScheduler scheduler)
 			throws NumberParseException {
 
 		OutboxMessage bulkMessage = bulkMessages.get(0);
@@ -238,7 +233,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		return session;
 	}
 
-	public BulkSessionDoc sendToGroup(List<OutboxMessage> bulkMessages, ChronoTask scheduler)
+	public BulkSessionDoc sendToGroup(List<OutboxMessage> bulkMessages, ChronoScheduler scheduler)
 			throws NumberParseException {
 
 		OutboxMessage bulkMessage = bulkMessages.get(0);
