@@ -92,7 +92,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		tunnelService.schedule(job.scheduler(scheduler));
 	}
 
-	public BulkSessionDoc send(OutboxMessage bulkMessage) throws NumberParseException {
+	public BulkSessionDoc send(OutboxMessage bulkMessage, ChronoScheduler scheduler) throws NumberParseException {
 
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
 
@@ -115,7 +115,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
-		session.setScheduler(bulkMessage.getScheduler());
+		session.setScheduler(scheduler);
 
 		auditDetailProvider.auditCreate(session);
 
@@ -152,8 +152,6 @@ public class BulkMessageService extends BatchJobExecuter {
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
 
-		ChronoScheduler scheduler = ArgUtil.nonEmpty(bulkMessage.getScheduler(), ChronoScheduler.task());
-
 		registerJob(// Create batch Job to pass
 				JobTaskModel.newBatchJob()
 						// Set Unique Job Id
@@ -186,7 +184,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
 		session.setCampaignTitle(bulkMessage.getCampaignTitle());
-		session.setScheduler(bulkMessage.getScheduler());
+		session.setScheduler(scheduler);
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
@@ -253,7 +251,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setGroupId(bulkMessage.getGroupId());
 		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		session.setGroupName(bulkMessage.getGroupName());
-		session.setScheduler(bulkMessage.getScheduler());
+		session.setScheduler(scheduler);
 
 		auditDetailProvider.auditCreate(session);
 

@@ -397,7 +397,8 @@ public class AdminMsgController {
 			}
 
 		} else {
-			return ApiResponse.buildResult(bulkMessageService.send(bulkMessage)).message("Bulk Message Job Created");
+			return ApiResponse.buildResult(bulkMessageService.send(bulkMessage, bulkMessage.getScheduler()))
+					.message("Bulk Message Job Created");
 		}
 	}
 
