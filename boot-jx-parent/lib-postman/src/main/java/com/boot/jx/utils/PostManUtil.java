@@ -236,6 +236,10 @@ public class PostManUtil {
 		return CHANNEL_ID(contactable.getContactType(), contactable.getChannelType(), contactable.getLane());
 	}
 
+	public static String CHANNEL_ID(ChannelConfig channel) {
+		return CHANNEL_ID(ArgUtil.parseAsString(channel.getContactType()), channel.getChannelType(), channel.getLane());
+	}
+
 	public static Contactable parseChannelId(String channelId) {
 		if (!ArgUtil.is(channelId)) {
 			return null;
