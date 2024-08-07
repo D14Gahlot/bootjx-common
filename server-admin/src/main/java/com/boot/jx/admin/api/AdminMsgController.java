@@ -653,6 +653,7 @@ public class AdminMsgController {
 			sDoc.setGroupId(ArgUtil.parseAsString(doc.getGroupId(), Constants.BLANK));
 			sDoc.setGroupName(ArgUtil.parseAsString(doc.getGroupName(), Constants.BLANK));
 			sDoc.setStatus(doc.getStatus());
+			sDoc.setScheduler(doc.getScheduler());
 
 			lst.add(sDoc);
 		}
