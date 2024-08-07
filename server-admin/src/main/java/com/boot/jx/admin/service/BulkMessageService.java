@@ -115,6 +115,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
+		session.setScheduler(bulkMessage.getScheduler());
 
 		auditDetailProvider.auditCreate(session);
 
@@ -185,6 +186,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setChannelId(channelId);
 		session.setBulkSessionId(UniqueID.generateString62());
 		session.setCampaignTitle(bulkMessage.getCampaignTitle());
+		session.setScheduler(bulkMessage.getScheduler());
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
@@ -251,6 +253,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setGroupId(bulkMessage.getGroupId());
 		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		session.setGroupName(bulkMessage.getGroupName());
+		session.setScheduler(bulkMessage.getScheduler());
 
 		auditDetailProvider.auditCreate(session);
 
