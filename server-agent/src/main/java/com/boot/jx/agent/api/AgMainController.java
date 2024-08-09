@@ -71,7 +71,6 @@ public class AgMainController {
 	
 	@Autowired
 	ContactStore contactStore;
-	
 
 	private ApiResponse<ChatSessionDTO, AgentSessionDoc> getSessionAssignments(boolean withMessage, Boolean status,
 			Boolean away, List<ChatSessionDTO> chatSessionDtos, SessionSearchQuery query) {

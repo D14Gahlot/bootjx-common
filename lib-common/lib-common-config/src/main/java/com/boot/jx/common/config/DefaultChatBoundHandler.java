@@ -31,6 +31,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.FormReply;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageReport;
@@ -56,6 +57,7 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 
 public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
@@ -155,8 +157,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 				// INTERNAL AGENT HANDLING
 				if (CHAT_MODE.AGENT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getAgentUrl())) {
-					LOGGER.debug("Forwarding InboxMessage to internal Agent ");
-					chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+					String agentUrl = ArgUtil.nonEmpty(defaultClient.getWebhook(), pmCommonConfig.getAgentUrl());
+					LOGGER.debug("Forwarding InboxMessage to internal Agent " + agentUrl);
+					chatClient.forward(agentUrl + PATH.INBOUND_FRWRD, inboxMessage);
 					return;
 				}
 
@@ -234,6 +237,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		msg.timestamp = inboxMessage.getTimestamp();
 		msg.tags = inboxMessage.getTags();
 		msg.input = inboxMessage.form();
+
+		msg.form = JsonUtil.toObject(inboxMessage.form(), FormReply.class);
 
 		if (ArgUtil.is(inboxMessage.getAttachments())) {
 			Attachment atth = inboxMessage.attachments().get(0);
@@ -371,7 +376,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					sendEventWebhook(event, targetAppQueue);
 					return;
 				} else if (appType.is(CHAT_MODE.AGENT)) {
-					chatClient.sessionEvent(pmCommonConfig.getAgentUrl(), event, pmArgs);
+					String agentUrl = ArgUtil.nonEmpty(targetAppQueue.getWebhook(), pmCommonConfig.getAgentUrl());
+					chatClient.sessionEvent(agentUrl, event, pmArgs);
 				} else if (appType.is(CHAT_MODE.BOT)) {
 					chatClient.sessionEvent(pmCommonConfig.getBotUrl(), event, pmArgs);
 				}

@@ -1,5 +1,6 @@
 package com.boot.jx.postman.manager;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +46,6 @@ public class ThirdPartyTemplateManager {
               resp.put("waba_templates", value);
           }
 		List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);//null
-
 		MongoQueryBuilder<HSMTemplate3rdParty> cmqb = MongoQueryBuilder
 				.collection(HSMTemplate3rdParty.class)
 				.where(Criteria.where("channelId")
@@ -151,6 +151,7 @@ public class ThirdPartyTemplateManager {
 				.findById(thirdPartyTemplateId, HSMTemplate3rdParty.class);
 		String hsmTemplateIdOld = thirdPartyTemplate.getHsmTemplateId();
 		thirdPartyTemplate.setHsmTemplateId(hsmTemplateId);
+		
 		commonMongoTemplate.save(thirdPartyTemplate);
 
 		this.linkRefresh(thirdPartyTemplate, hsmTemplateIdOld, null);
@@ -165,9 +166,13 @@ public class ThirdPartyTemplateManager {
 			HSMTemplate3rdParty thirdPartyTemplate, String hsmTemplateId,
 			String status) {
 		if (ArgUtil.is(hsmTemplateId)) {
+			
 			HSMTemplateDoc hsmTemplateDoc = commonMongoTemplate
-					.findById(hsmTemplateId, HSMTemplateDoc.class);
+					.findById(hsmTemplateId, HSMTemplateDoc.class); 
 			if (ArgUtil.is(hsmTemplateDoc)) {
+					hsmTemplateDoc.options().put("waba",thirdPartyTemplate.getTemplate());
+				
+				
 				hsmTemplateDoc.approved(thirdPartyTemplate.getChannelId(),
 						thirdPartyTemplate.getHsmTemplateId(), status);
 				commonMongoTemplate.save(hsmTemplateDoc);

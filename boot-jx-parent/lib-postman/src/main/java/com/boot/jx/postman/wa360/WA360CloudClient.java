@@ -38,6 +38,7 @@ import com.boot.jx.postman.wa360.WA360Constants.OutBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360Constants.TmplComponent;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
@@ -56,26 +57,32 @@ public class WA360CloudClient implements ChannelClient {
 	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		StringJoiner msgIds = new StringJoiner(",");
 
-		if (ArgUtil.is(outboxMessage.getTemplateExt())) {
-			MapModel resp = sendTemplate(channelConfig, outboxMessage);
-			msgIds.add(getMessageId(resp));
-		} else if (ArgUtil.is(outboxMessage.getRawMessageFormat())) { /** for Moengage **/
+		if (ArgUtil.is(outboxMessage.getRawMessageFormat())) { /** for Moengage **/
 			MapModel resp = sendTemplateRaw(channelConfig, outboxMessage);
+			msgIds.add(getMessageId(resp));
+		} else if (ArgUtil.is(outboxMessage.getTemplateExt())) {
+			MapModel resp = sendTemplate(channelConfig, outboxMessage);
 			msgIds.add(getMessageId(resp));
 		} else {
 			boolean isList = false;
 			boolean isButton = false;
 			boolean isCtaUrl = false;
 			boolean isLocationRequest = false;
+			boolean isFlow = false;
 			int buttonsCount = 0;
 			int urlCount = 0;
-			String bodyTextAppend = Constants.BLANK;
 			String bodyUrlAppend = Constants.BLANK;
+			String bodyPhoneAppend = Constants.BLANK;
+
 			List<TmplElement> buttons = new ArrayList<TmplElement>();
 			List<TmplElement> noButtons = new ArrayList<TmplElement>();
 			MapModel options = MapModel.from(outboxMessage.options());
+			checkFlowButton(options);
+
 			if (options.containsKey("buttons")) {
+
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);
+
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
 						bodyUrlAppend = bodyUrlAppend
@@ -85,11 +92,15 @@ public class WA360CloudClient implements ChannelClient {
 						urlCount++;
 						noButtons.add(b);
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
-						bodyTextAppend = bodyTextAppend
+						bodyPhoneAppend = bodyPhoneAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconPhone + " *",
 										StringUtils.trim(b.getLabel()), "*")
 								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
+					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.LOCATION_REQUEST)) {
 						isLocationRequest = true;
+						noButtons.add(b);
+					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.FLOW)) {
+						isFlow = true;
 						noButtons.add(b);
 					} else {
 						buttonsCount++;
@@ -103,9 +114,10 @@ public class WA360CloudClient implements ChannelClient {
 			isList = options.entry("is_list").asBoolean(isList);
 			isCtaUrl = !isList && !isButton && (urlCount == 1);
 
-			if (ArgUtil.is(bodyTextAppend)) {
-				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyTextAppend);
+			if (ArgUtil.is(bodyPhoneAppend)) {
+				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyPhoneAppend);
 			}
+
 			if (!isCtaUrl && ArgUtil.is(bodyUrlAppend)) {
 				outboxMessage.setMessage(outboxMessage.getMessage() + "\n" + bodyUrlAppend);
 			}
@@ -168,6 +180,9 @@ public class WA360CloudClient implements ChannelClient {
 			} else if (isLocationRequest) {
 				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "location_request_message");
 				msgIds.add(getMessageId(resp));
+			} else if (isFlow) {
+				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "flow");
+				msgIds.add(getMessageId(resp));
 			} else {
 				String textMessage = outboxMessage.getMessage();
 				textMessage = checkAndSendMedia(channelConfig, outboxMessage, msgIds, textMessage);
@@ -189,10 +204,11 @@ public class WA360CloudClient implements ChannelClient {
 		if (ArgUtil.is(outboxMessage.getAttachments())) {
 			for (Attachment attachment : outboxMessage.getAttachments()) {
 				if (ArgUtil.is(textMessage) && ArgUtil.isEqual(attachment.getMediaType(), FileType.IMAGE.toString(),
-						FileType.VIDEO.toString(), FileType.DOCUMENT.toString())) {
+						FileType.VIDEO.toString(),FileType.DOCUMENT.toString())){
 					attachment.setMediaCaption(textMessage);
 					textMessage = null;
 				}
+				
 				MapModel resp = sendMedia(channelConfig, outboxMessage, attachment);
 				msgIds.add(getMessageId(resp));
 			}
@@ -335,10 +351,11 @@ public class WA360CloudClient implements ChannelClient {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 					media.setCaption(null);
-					media.setFilename(null);
+					//media.setFilename(null);
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());
+
 					}
 				}
 
@@ -374,10 +391,20 @@ public class WA360CloudClient implements ChannelClient {
 						} else if ("QUICK_REPLY".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
+
 									String path = (String) buttonParameter.get("path");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
 									buttonComponent.parameter("payload", model.pathEntry(path).asString());
+									components.add(buttonComponent.build().map());
+								}
+							}
+						} else if ("FLOW".equals(buttonType)) {
+							for (Map<String, Object> buttonParameter : buttonParameterVar) {
+								if (buttonParameter.containsKey("path")) {
+									String path = (String) buttonParameter.get("path");
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
+									buttonComponent.parameter("action", MapModel.createInstance());
 									components.add(buttonComponent.build().map());
 								}
 							}
@@ -391,9 +418,15 @@ public class WA360CloudClient implements ChannelClient {
 							TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
 							buttonComponent.parameter("payload", "reply_id:" + button.getCode());
 							components.add(buttonComponent.build().map());
+						} else if ("FLOW".equals(buttonType)) {
+							TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
+							buttonComponent.parameter("action",
+									MapModel.createInstance().put("flow_token", outboxMessage.getMessageId()));
+							components.add(buttonComponent.build().map());
 						}
 					}
 				}
+
 			}
 
 		}
@@ -402,13 +435,42 @@ public class WA360CloudClient implements ChannelClient {
 		return send(req, channelConfig);
 	}
 
+	private MapModel checkFlowButton(MapModel options) {
+		MapPathEntry extTemplateComponents = options.pathEntry("waba/components");
+		if (extTemplateComponents.exists()) {
+			List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);
+			for (Map<String, Object> extTemplateComponent : extTemplateComponents.asListOfMap()) {
+				String extTemplateComponentType = (String) extTemplateComponent.get("type");
+				if ("BUTTONS".equals(extTemplateComponentType)) {
+					List<Map<String, Object>> extTemplateComponentButtons = MapModel.from(extTemplateComponent)
+							.keyEntry("buttons").asListOfMap();
+					for (Map<String, Object> extTemplateComponentButton : extTemplateComponentButtons) {
+						String buttonType = (String) extTemplateComponentButton.get("type");
+						if ("FLOW".equals(buttonType)) {
+							TmplElement flowButton = new TmplElement();
+							flowButton.setType(TmplElement.TYPES.FLOW);
+							flowButton.setUid(ArgUtil.parseAsString(extTemplateComponentButton.get("flow_id")));
+							flowButton.setAction((String) extTemplateComponentButton.get("flow_action"));
+							flowButton.setCode((String) extTemplateComponentButton.get("navigate_screen"));
+							flowButton.setLabel((String) extTemplateComponentButton.get("text"));
+							allbuttons.add(flowButton);
+						}
+					}
+
+				}
+			}
+			options.put("buttons", allbuttons);
+		}
+		return options;
+	}
+
 	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
-		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
-		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		wa360OutBoundMedia.setFilename(attachment.getMediaName());
-		if (mediaType.equalsIgnoreCase("image")) {
-			wa360OutBoundMedia.setFilename(null);
+				wa360OutBoundMedia.setFilename(attachment.getMediaName());
+				wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
+		        wa360OutBoundMedia.setLink(attachment.getMediaURL());
+		        if (mediaType.equalsIgnoreCase("image")) {
+			         wa360OutBoundMedia.setFilename(null);
 		}
 		return wa360OutBoundMedia;
 	}
@@ -545,8 +607,12 @@ public class WA360CloudClient implements ChannelClient {
 		}
 
 		req.put(OutBoundWrapperPaths.INTERACTIVE_BODY_TEXT, ArgUtil.nonEmpty(outboxMessage.getMessage(), "---"));
-		req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
-				ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
+
+		if (ArgUtil.is(outboxMessage.getFooter())) {
+			req.put(OutBoundWrapperPaths.INTERACTIVE_FOOTER_TEXT,
+					ArgUtil.parseAsString(outboxMessage.getFooter(), Constants.BLANK));
+		}
+
 		req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTON, "menu");
 
 		if ("button".equalsIgnoreCase(type)) {
@@ -563,12 +629,22 @@ public class WA360CloudClient implements ChannelClient {
 		} else if ("cta_url".equalsIgnoreCase(type)) {
 			TmplElement button = buttons.get(0);
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
+
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
-					MapModel.createInstance()
-							.put("display_text", StringUtils.ellipsis(ArgUtil.nonEmpty(button.getLabel(), "Visit"), 20))
+					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
 							.put("url", button.getUrl()).toMap());
 		} else if ("location_request_message".equalsIgnoreCase(type)) {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
+		} else if ("flow".equalsIgnoreCase(type)) {
+			TmplElement button = buttons.get(0);
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "flow");
+
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS, MapModel.createInstance()
+					.put("flow_message_version", "3").put("flow_token", outboxMessage.getMessageId())
+					.put("flow_id", button.getUid()).put("flow_cta", button.getLabel())
+					.put("flow_action", StringUtils.toLowerCase(button.getAction().toLowerCase()))
+					.put("flow_action_payload", MapModel.createInstance().put("screen", button.getCode()).toMap())
+					.toMap());
 		}
 
 		return send(req, channelConfig);

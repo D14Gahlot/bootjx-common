@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.cdn.BootJxConfigService.BootJxConfigProvider;
 import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.models.AppAuthModels;
@@ -37,7 +38,7 @@ import com.boot.utils.UniqueID;
 
 @Component
 @PropertySource("classpath:application-common.properties")
-public class PMCommonConfigImpl implements PMCommonConfig {
+public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommonConfig {
 
 	private static final Logger LOGGER = LoggerService.getLogger(PMCommonConfigImpl.class);
 
@@ -91,6 +92,10 @@ public class PMCommonConfigImpl implements PMCommonConfig {
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
+
+	public String cdnUrl(String cdnUrl) {
+		return pmEnvironment.keyEntry("mry.cdn.url").asString(cdnUrl);
+	}
 
 	public String getCdnServer() {
 

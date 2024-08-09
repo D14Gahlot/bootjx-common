@@ -106,7 +106,7 @@ public class InBoundControllerTest {
 		}
 
 		if (ArgUtil.is(bootJxConfigService)) {
-			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnAEntry("dev")
+			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnEntry("dev")
 					.preventUpgradeInsecureRequest().map());
 		}
 
@@ -137,7 +137,7 @@ public class InBoundControllerTest {
 			channelDto = pmEnvironment.config().channel(channelId);
 		}
 
-		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
+		String webhook_url = pmClientConfig.getWebhookUrl(channelDto, null);
 		String webhook_path = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelDto);
 		return ApiResponse.buildResult(MapModel.createInstance().put("webhook_url", webhook_url)
 				.put("webhook_path", webhook_path).put("webhook_context", appConfig.getAppPrefix()));
@@ -163,7 +163,7 @@ public class InBoundControllerTest {
 		if (ArgUtil.is(endpoint)) {
 			PMContextUtil.publicUrl(String.format("%s%s", endpoint, context));
 		}
-		String webhook_url = pmClientConfig.getWebhookUrl(channelDto);
+		String webhook_url = pmClientConfig.getWebhookUrl(channelDto, null);
 		String webhook_path = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelDto);
 		connectorHandlerFactory.onChannelUpdate(channelDto);
 		return ApiResponse.buildResult(MapModel.createInstance().put("channelId", channelId)

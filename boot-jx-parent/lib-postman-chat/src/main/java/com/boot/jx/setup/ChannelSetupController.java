@@ -101,7 +101,7 @@ public class ChannelSetupController {
 			model.addAllAttributes(appCommonConfig.appAttributes());
 		}
 		if (ArgUtil.is(bootJxConfigService)) {
-			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnAEntry("dev")
+			model.addAllAttributes(bootJxConfigService.bootJxAttributesModel().cdnApp("test").cdnEntry("dev")
 					.preventUpgradeInsecureRequest().map());
 		}
 		model.addAttribute("APP_USER", "");

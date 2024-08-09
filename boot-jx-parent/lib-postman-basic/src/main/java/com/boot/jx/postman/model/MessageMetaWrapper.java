@@ -32,6 +32,16 @@ public class MessageMetaWrapper extends MapModel {
 		return this;
 	}
 
+	// method mediatemplecount(String )
+	public MessageMetaWrapper mediaTemplate(String mediaTemplate) {
+		this.put("ismediaTemplate", mediaTemplate);
+		return this;
+	}
+
+	public String MediaType() {
+		return this.getString("mediaTemplate");
+	}
+
 	public MessageMetaWrapper composeType(String composeType) {
 		this.put("composeType", composeType);
 		return this;

@@ -134,6 +134,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract<ConfigStore> {
 		masterDoc.setName(configDoc.getName());
 		masterDoc.setDomain(domain);
 		masterDoc.setContactType(configDoc.getContactType());
+		masterDoc.setMeta(configDoc.getMeta());
 		AppContextUtil.clear();
 		AppContextUtil.setTenant(Tenants.getDefault());
 		AppContextUtil.init();

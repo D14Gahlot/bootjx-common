@@ -21,6 +21,7 @@ import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.EventCountSummary;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 
 @RestController
 public class AdminDashBoardContoller {
@@ -116,8 +117,17 @@ public class AdminDashBoardContoller {
 	@RequestMapping(value = { "/admin/monthwise-summary/waba" }, method = { RequestMethod.GET })
 	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
 		List<WabaSummaryDocDto> summary = adminDbMgr.wabaSummary(timestamp);
+		
 		return ApiResponse.buildResults(summary);
 	}
+	@ResponseBody
+	@RequestMapping(value = { "/admin/monthwise-summary/waba/media-template" }, method = { RequestMethod.GET })
+	public ApiResponse<HSMTemplateDoc, Object> getMonthWiseWabaMediaTemplateSummary(long timestamp) {
+		List<HSMTemplateDoc>summary=adminDbMgr.getMediaTemplateCount(timestamp);
+		return ApiResponse.buildResults(summary);
+	}
+
+	
 
 	@ResponseBody
 	@RequestMapping(value = { "/admin/non-whatsup-msg-summary" }, method = { RequestMethod.GET })

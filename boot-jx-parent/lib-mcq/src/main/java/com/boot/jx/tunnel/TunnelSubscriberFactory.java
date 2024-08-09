@@ -23,6 +23,7 @@ import com.boot.jx.AppParam;
 import com.boot.jx.cache.MCQIndicator;
 import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
+import com.boot.jx.tunnel.ITunnelDefs.TunnelFilter;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
 
@@ -52,7 +53,8 @@ public class TunnelSubscriberFactory {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TunnelSubscriberFactory(List<ITunnelSubscriber> listeners,
-			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal
+			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal,
+			@Autowired(required = false) TunnelFilter tunnelFilter
 	/**
 	 * This is important as params should be loaded before we can subscribe to with
 	 * ENV events
@@ -104,6 +106,10 @@ public class TunnelSubscriberFactory {
 					this.addShoutListener(eventTopic, redisson, listener, integrity, c.getClass().getName());
 				}
 			}
+			if (ArgUtil.is(tunnelFilter)) {
+				tunnelFilter.postSubscriptions(listeners);
+			}
+
 		}
 
 	}

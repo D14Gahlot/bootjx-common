@@ -286,15 +286,16 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 	 * 
 	 * @param channelType
 	 * @param lane
+	 * @return TODO
 	 */
-	public void onChannelUpdate(String channelType, String lane) {
+	public ChannelConfig onChannelUpdate(String channelType, String lane) {
 		String channelId = PostManUtil.CHANNEL_ID(channelType, lane);
 		PMConfiguration config = environment.local();
 		ChannelConfig channelConfig = config.channel(channelId);
-		onChannelUpdate(channelConfig);
+		return onChannelUpdate(channelConfig);
 	}
 
-	public void onChannelUpdate(ChannelConfig channelConfig) {
+	public ChannelConfig onChannelUpdate(ChannelConfig channelConfig) {
 		if (ArgUtil.is(channelConfig)) {
 			ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
 			if (ArgUtil.is(connector)) {
@@ -305,6 +306,7 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 				}
 			}
 		}
+		return channelConfig;
 	}
 
 	/**

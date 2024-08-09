@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +96,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig) {
-		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
+		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null);
 		LOGGER.info("WA360CloudConnector onChannelUpdate :" + webhookUrl);
 		restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/webhook")
 				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
@@ -195,15 +196,21 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				inboxMessage.form().put("reply_id", replyId);
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_REPLY).asString());
-				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 			} else if ("list_reply".equals(interactiveType)) {
 				replyId = map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_ID).asString();
 				inboxMessage.form().put("reply_id", replyId);
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_REPLY).asString());
 				inboxMessage.form().put("reply_desc", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_DESC).asString());
+			} else if ("nfm_reply".equals(interactiveType)) {
+				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
+						.asString();
+				// replyJsonMap.put("response_json", responseJsonString);
+				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
+				inboxMessage.form().put("reply_json", replyJsonMap);
+				inboxMessage.form().put("reply_title",
+						map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY).asString());
 			}
-
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());

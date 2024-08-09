@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.boot.jx.postman.model.FormReply;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -46,6 +47,9 @@ public class InBoundMsg {
 	public List<InBoundMsgMedia> attachments;
 
 	public CommonMsgLocation location;
+
+	@ApiMockModelProperty(value = "Form (Button/List/Flows) selections by user")
+	public FormReply form = new FormReply();
 
 	@ApiMockModelProperty(hidden = true)
 	public Map<String, Object> input = new HashMap<String, Object>();

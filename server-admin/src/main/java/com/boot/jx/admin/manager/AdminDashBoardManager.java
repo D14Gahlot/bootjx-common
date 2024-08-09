@@ -69,6 +69,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
@@ -1295,7 +1296,7 @@ public class AdminDashBoardManager {
 		dayWiseMap = MapUtils.defaultValue(dayWiseCountMap, channelLst, dateRanMap, tnt);
 
 		dayWiseMap = sortMap(dayWiseMap);
-		dayWiseMap = removeSandBoxNumber(dayWiseMap);
+		dayWiseMap =removeSandBoxNumber(dayWiseMap);
 
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
 
@@ -1390,14 +1391,14 @@ public class AdminDashBoardManager {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 
 			List<Document> list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
-			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
+		MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
 				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
 					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
-					if (ArgUtil.is(type) && ArgUtil.is(type)) {
+					if (ArgUtil.is(type) && ArgUtil.is(type)){
 						Map<String, Object> mapValue = JsonUtil.fromJsonToMap(type);
 						long count = ArgUtil.parseAsLong(object.get("count"), 0L);
 						contactDto.setType(type);
@@ -1548,7 +1549,6 @@ public class AdminDashBoardManager {
 		ContactTypeSummaryDto dto = new ContactTypeSummaryDto();
 
 		dateWiseSummary = sortMap(dateWiseSummary);
-
 		dto.setTenant(tnt);
 		dto.setMap(map);
 		dto.setMonth(monthYear);
@@ -1826,8 +1826,8 @@ public class AdminDashBoardManager {
 		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
 		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
 		String offset = getTimeZoneFromSetup();
-		monthMinTimeStamp = monthMinTimeStamp + countryTimeZoneOffset(offset);
-		monthMaxTimeStamp = monthMaxTimeStamp + countryTimeZoneOffset(offset);
+		monthMinTimeStamp = monthMinTimeStamp+countryTimeZoneOffset(offset);
+		monthMaxTimeStamp = monthMaxTimeStamp+countryTimeZoneOffset(offset);
 
 		List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
 		Query query = new Query();
@@ -2101,8 +2101,8 @@ public class AdminDashBoardManager {
 		query.fields().include("form.reply_title").include("contactId").include("contact.contactType")
 				.include("timestamp");
 	}
-
-	/** customer session count with channel summary **/
+	
+	/** customer session count with  channel summary **/
 	public ContactTypeSummaryDto getCustomerSessionCountSummary(String dateRange1, String dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
@@ -2113,8 +2113,8 @@ public class AdminDashBoardManager {
 
 		String offset = getTimeZoneFromSetup();
 
-		LOGGER.info("ADMIN getCustomerSessionCountSummary {}" + offset + "\t dateRange1:" + dateRange1
-				+ "\t dateRange2 :" + dateRange2);
+		LOGGER.info("ADMIN getCustomerSessionCountSummary {}" + offset + "\t dateRange1:" + dateRange1 + "\t dateRange2 :"
+				+ dateRange2);
 
 		long offsetts = countryTimeZoneOffset(offset);
 		String zone = DateUtil.getTimeZone(offset);
@@ -2144,38 +2144,40 @@ public class AdminDashBoardManager {
 		List<SummaryDocDto> lstSummDto = new ArrayList<>();
 		List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
 
-		Query query = new Query();
-		query.addCriteria(Criteria.where("startSessionStamp").gt(lasDayTimeStmp).lt(currentTs));
-		query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
-		query.fields().include("startSessionStamp").include("contactType").include("channel").include("contact");
-		List<ChatSessionDoc> msgDocLst = mongoTemplate.find(query, ChatSessionDoc.class);
-		for (ChatSessionDoc doc : msgDocLst) {
-			SummaryDocDto dto = new SummaryDocDto();
-			DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
-			String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getStartSessionStamp(),
-					DateUtil.YYYYMMDD_DATE_FORMAT);
-			dto.setDate(yyyyMMdd);
-			dto.setType(doc.contact().getContactType());
-			dto.setChannel(doc.contact().getContactType());
-			//// --dto.setMeta(doc.getMeta());
-			dto.setDomain(tnt);
-			dto.setLane(getLane(doc.contact().getContactId()));
-			String id = getSummaryId(dto);
-			dto.setId(id);
-			if (ArgUtil.is(dto.getId())) {
-				lstSummDto.add(dto);
-			}
-			String channelid = getSummaryWithChannelId(dto);
-			if (ArgUtil.is(channelid)) {
-				daySummDto.setDate(yyyyMMdd);
-				daySummDto.setChannel(channelid);
-				if (daySummDto != null) {
-					hourCntLst.add(daySummDto);
+		
+			Query query = new Query();
+			query.addCriteria(Criteria.where("startSessionStamp").gt(lasDayTimeStmp).lt(currentTs));
+			query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
+			query.fields().include("startSessionStamp").include("contactType").include("channel").include("contact");
+			List<ChatSessionDoc> msgDocLst = mongoTemplate.find(query, ChatSessionDoc.class);
+			for (ChatSessionDoc doc : msgDocLst) {
+				SummaryDocDto dto = new SummaryDocDto();
+				DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
+				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getStartSessionStamp(),
+						DateUtil.YYYYMMDD_DATE_FORMAT);
+				dto.setDate(yyyyMMdd);
+				dto.setType(doc.contact().getContactType());
+				dto.setChannel(doc.contact().getContactType());
+				////--dto.setMeta(doc.getMeta());
+				dto.setDomain(tnt);
+				dto.setLane(getLane(doc.contact().getContactId()));
+				String id = getSummaryId(dto);
+				dto.setId(id);
+				if (ArgUtil.is(dto.getId())) {
+					lstSummDto.add(dto);
 				}
+				String channelid = getSummaryWithChannelId(dto);
+				if (ArgUtil.is(channelid)) {
+					daySummDto.setDate(yyyyMMdd);
+					daySummDto.setChannel(channelid);
+					if (daySummDto != null) {
+						hourCntLst.add(daySummDto);
+					}
+				}
+
 			}
 
-		}
-
+		
 		Map<Object, Long> summaryMap = new HashMap<>();
 
 		/** day wise count **/
@@ -2198,18 +2200,41 @@ public class AdminDashBoardManager {
 		return dto;
 	}
 
+
 	public Map<Object, Map<Object, Long>> removeSandBoxNumber(Map<Object, Map<Object, Long>> hourWiseCount) {
-		if (hourWiseCount != null && !hourWiseCount.isEmpty()) {
-			// Remove entries with keys containing "wa_" and no characters after "wa_"
-			Iterator<Map.Entry<Object, Map<Object, Long>>> iterator = hourWiseCount.entrySet().iterator();
-			while (iterator.hasNext()) {
-				Map.Entry<Object, Map<Object, Long>> entry = iterator.next();
-				if (entry.getKey().toString().matches(".*wa_\\b")) {
-					iterator.remove();
-				}
-			}
+		if (hourWiseCount!=null && !hourWiseCount.isEmpty()) {
+		// Remove entries with keys containing "wa_" and no characters after "wa_"
+        Iterator<Map.Entry<Object, Map<Object, Long>>> iterator = hourWiseCount.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Object, Map<Object, Long>> entry = iterator.next();
+            if (entry.getKey().toString().matches(".*wa_\\b")) {
+                iterator.remove();
+            }
+        }
 		}
-		return hourWiseCount;
+       return hourWiseCount;
 	}
+	//api for counting mediaTemp
+	public List<HSMTemplateDoc> getMediaTemplateCount(long timestamp ) {
+		// List<MessageDoc> msgDocLst =null;
+		String tnt = AppContextUtil.getTenant();
+		Date dateTi = new Date(timestamp);
+		String monthYear = new SimpleDateFormat(DateUtil.MMM_YYYY_FORMAT).format(dateTi);
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
+		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
+		String offset = getTimeZoneFromSetup();
+		monthMinTimeStamp = monthMinTimeStamp + countryTimeZoneOffset(offset);
+		monthMaxTimeStamp = monthMaxTimeStamp + countryTimeZoneOffset(offset);
+		 Criteria criteria = Criteria.where("createdStamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp).and("options.attachment.mediaTemplate").exists(true);
+		 Query query = new Query(criteria);
+		List<HSMTemplateDoc> hsmDocLst = mongoTemplate.find(query, HSMTemplateDoc.class);
+		return hsmDocLst;
+	}
+
+
 
 }

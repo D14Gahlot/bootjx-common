@@ -1,3 +1,4 @@
+
 package com.boot.jx.postman.dto;
 
 import java.io.Serializable;
@@ -43,6 +44,7 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 	private Map<String, Object> meta;
 	private Map<String, Object> options;
 	private Map<String, Object> replyTo;
+	protected Map<String, Object> form;
 	private MessageRouter route;
 	private Map<String, Long> stamps;
 	public List<Object> logs;
@@ -267,5 +269,13 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 
 	public void setLogs(List<Object> logs) {
 		this.logs = logs;
+	}
+
+	public Map<String, Object> getForm() {
+		return form;
+	}
+
+	public void setForm(Map<String, Object> form) {
+		this.form = form;
 	}
 }

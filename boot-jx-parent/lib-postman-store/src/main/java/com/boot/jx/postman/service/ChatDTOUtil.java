@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.doc.ChatContactDoc;
+import com.boot.jx.postman.doc.ChatProfileDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.ChatUserProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.dto.ChatProfileDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
-import com.boot.jx.postman.dto.ChatUserProfileDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
@@ -27,8 +27,8 @@ import com.boot.utils.NumberUtil;
 
 public class ChatDTOUtil {
 
-	public static ChatUserProfileDTO getProfileDTO(ChatUserProfileDoc profileDoc) {
-		ChatUserProfileDTO dto = EntityDtoUtil.entityToDto(profileDoc, new ChatUserProfileDTO());
+	public static ChatProfileDTO getProfileDTO(ChatProfileDoc profileDoc) {
+		ChatProfileDTO dto = EntityDtoUtil.entityToDto(profileDoc, new ChatProfileDTO());
 		return dto;
 	}
 
@@ -110,6 +110,7 @@ public class ChatDTOUtil {
 		messageDto.setStatus(messageDoc.getStatus());
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
+		messageDto.setForm(messageDoc.getForm());
 		if (ArgUtil.is(messageDoc.getOptions())) {
 			messageDto.setOptions(messageDoc.getOptions());
 		} else {

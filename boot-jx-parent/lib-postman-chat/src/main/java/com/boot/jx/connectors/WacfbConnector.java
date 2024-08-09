@@ -3,7 +3,6 @@ package com.boot.jx.connectors;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +56,6 @@ import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.WABAConversationQuery;
 import com.boot.jx.postman.wa360.WA360Constants;
-import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wacfb.WacfbClient;
 import com.boot.jx.postman.wacfb.WacfbInboundMedia;
@@ -68,6 +66,7 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonPath;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.PhoneUtil;
 import com.boot.utils.Random;
 import com.boot.utils.Urly;
@@ -124,7 +123,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				assignedWaBaId = debugToken.pathEntry("/data/granular_scopes/[0]/target_ids/[0]").asString();
 			}
 
-			String verificationPin = Random.randomNumeric(6);
+			String verificationPin = ArgUtil.nonEmpty(setup.getWacfb().getVerificationPin(), Random.randomNumeric(6));
 
 			if (ArgUtil.is(phoneNumberId)) {
 				MapModel phoneMap = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
@@ -150,16 +149,37 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 				channelConfigTemp.log("/subscribed_apps", subscribeResp.toMap());
 
-				MapModel setPinResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
-						.authBearer(userAccessToken)
-						.postJson(MapModel.createInstance().put("pin", verificationPin).toMap()).asMapModel();
-				channelConfigTemp.log("/setPin", setPinResp.toMap());
+				boolean isRegistered = false;
+				boolean isPinSet = false;
+				try {
+					MapModel setPinResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
+							.authBearer(userAccessToken)
+							.postJson(MapModel.createInstance().put("pin", verificationPin).toMap()).asMapModel();
+					channelConfigTemp.log("/setPin", setPinResp.toMap());
+					isPinSet = true;
+				} catch (ApiHttpException e) {
+					channelConfigTemp.log("/setPin", MapModel.from(e.getResponse().getBody()).toMap());
+					MapModel registerResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
+							.path("/register").authBearer(userAccessToken).postJson(MapModel.createInstance()
+									.put("pin", verificationPin).put("messaging_product", "whatsapp").toMap())
+							.asMapModel();
+					isRegistered = true;
+					channelConfigTemp.log("/register", registerResp.toMap());
+				}
 
-				MapModel registerResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
-						.path("/register").authBearer(userAccessToken).postJson(MapModel.createInstance()
-								.put("pin", verificationPin).put("messaging_product", "whatsapp").toMap())
-						.asMapModel();
-				channelConfigTemp.log("/register", registerResp.toMap());
+				if (!isRegistered) {
+					MapModel registerResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
+							.path("/register").authBearer(userAccessToken).postJson(MapModel.createInstance()
+									.put("pin", verificationPin).put("messaging_product", "whatsapp").toMap())
+							.asMapModel();
+					channelConfigTemp.log("/register", registerResp.toMap());
+				}
+				if (!isPinSet) {
+					MapModel setPinResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
+							.authBearer(userAccessToken)
+							.postJson(MapModel.createInstance().put("pin", verificationPin).toMap()).asMapModel();
+					channelConfigTemp.log("/setPin", setPinResp.toMap());
+				}
 
 			} else {
 				MapModel phoneNumbers = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
@@ -302,26 +322,31 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				inboxMessage.form().put("reply_id", replyId);
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_BUTTON_REPLY).asString());
-				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 			} else if ("list_reply".equals(interactiveType)) {
 				replyId = map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_ID).asString();
 				inboxMessage.form().put("reply_id", replyId);
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_REPLY).asString());
 				inboxMessage.form().put("reply_desc", map.entry(InBoundWrapperPaths.INTERACTIVE_LIST_DESC).asString());
+			} else if ("nfm_reply".equals(interactiveType)) {
+				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
+						.asString();
+				// replyJsonMap.put("response_json", responseJsonString);
+				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
+				inboxMessage.form().put("reply_json", replyJsonMap);
+				inboxMessage.form().put("reply_title",
+						map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY).asString());
 			}
 
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
-
 			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
 			inboxMessage.form().put("reply_payload", reply_payload);
 			if (ArgUtil.is(reply_payload) && reply_payload.startsWith("reply_id:")) {
 				String reply_id = reply_payload.replaceFirst("reply_id:", "");
 				inboxMessage.form().put("reply_id", reply_id);
 			}
-
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("image".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.IMAGE);
@@ -456,7 +481,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			WacfbInboundMedia media = map.entry(path).as(WacfbInboundMedia.class);
 
 			String mediaUrl = wacfbClient.getMediaUrl(channelConfig, WA360Constants.META_WA_CLOUD_URL(media.getId()));
-			//System.out.println("mediaUrl " + mediaUrl);
+			// System.out.println("mediaUrl " + mediaUrl);
 
 			CommonFileStream srcFile = new CommonFileStream().url(mediaUrl).fileType(fileType)
 					.format(FileFormat.from(media.getMimeType())).authBearer(channelConfig.getWacfb().getAccessToken())

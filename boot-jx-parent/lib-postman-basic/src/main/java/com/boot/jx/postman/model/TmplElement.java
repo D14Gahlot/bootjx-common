@@ -14,7 +14,9 @@ public class TmplElement implements Serializable {
 		public static final String QUICK_REPLY = "QUICK_REPLY";
 		public static final String URL = "URL";
 		public static final String PHONE_NUMBER = "PHONE_NUMBER";
+
 		public static final String LOCATION_REQUEST = "LOCATION_REQUEST";
+		public static final String FLOW = "FLOW";
 
 	}
 
@@ -36,6 +38,12 @@ public class TmplElement implements Serializable {
 
 	@ApiMockModelProperty(example = "+91 9988776655", value = "If type is set to PHONE_NUMBER", required = false)
 	private String phone;
+
+	@ApiMockModelProperty(example = "NAVIGATE", value = "Required in case of WA Flows", required = false)
+	private String action;
+
+	@ApiMockModelProperty(example = "806799978207096", value = "Any UniqeId to be used", required = false)
+	private String uid;
 
 	public String getCode() {
 		return code;
@@ -125,6 +133,22 @@ public class TmplElement implements Serializable {
 
 	public static List<TmplElement> list() {
 		return new ArrayList<TmplElement>();
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	public String getUid() {
+		return uid;
+	}
+
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
 }
