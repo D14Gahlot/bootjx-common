@@ -649,7 +649,7 @@ public class WA360CloudClient implements ChannelClient {
 
 		return send(req, channelConfig);
 	}
-
+     
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
 
 		try {
@@ -902,6 +902,12 @@ public class WA360CloudClient implements ChannelClient {
 
 		// req.put(OutBoundWrapperPaths.TEMPLATE_COMPONENTS, components.list());
 		return send(req, channelConfig);
+	}
+
+	@Override
+	public MapModel listOfFlows(ChannelConfig channelConfig) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

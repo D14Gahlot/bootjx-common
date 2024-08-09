@@ -12,6 +12,7 @@ import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.channel.ChannelClientFactory;
 import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
+import com.boot.jx.postman.doc.Flows;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -66,6 +67,7 @@ public class ThirdPartyTemplateManager {
 		}
 	}
 
+	
 	private HSMTemplate3rdParty toHSM3rdParty(ChannelConfig channelConfig,
 			WA360Template wa360Template) {
 		String id = String.format("%s/%s/%s", channelConfig.getChannelId(),
@@ -189,5 +191,15 @@ public class ThirdPartyTemplateManager {
 		commonMongoTemplate.save(thirdPartyTemplate);
 		return thirdPartyTemplate;
 	}
+	public void getListFlows(ChannelConfig channelConfig)
+	{
+		ChannelClient channelClient =clientFactory.get(channelConfig);
+		MapModel resp=channelClient.listOfFlows(channelConfig);
+		Map<String, Object> responseMap = resp.toMap();
+		Flows flowData = new Flows();
+        flowData.setData(responseMap);
+        commonMongoTemplate.save(flowData);
+	}
+	
 
 }
