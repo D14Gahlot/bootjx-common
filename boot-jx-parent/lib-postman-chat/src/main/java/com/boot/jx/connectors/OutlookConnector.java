@@ -197,13 +197,13 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		return null;
 	}
 
-	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MessageTempInbound msg)
+	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MessageTempInbound inbound)
 			throws NoSuchAlgorithmException {
 
 		// Create Default Message from Channel
 		InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
 
-		MapModel m = MapModel.from(msg.getData());
+		MapModel m = MapModel.from(inbound.getData());
 
 		// Set Contact info
 		MapPathEntry from = m.entry("from");
@@ -234,8 +234,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			inboxMessage.session().setTicketHash(subject);
 		}
 
-		List<Attachment> attachments = m.entry("attachments").asList(Attachment.class);
-		inboxMessage.setAttachments(attachments);
+		inboxMessage.setAttachments(inbound.getAttachments());
 
 		return inboxMessage;
 	}
