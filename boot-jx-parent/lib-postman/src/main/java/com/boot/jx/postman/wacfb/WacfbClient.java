@@ -804,7 +804,7 @@ public class WacfbClient implements ChannelClient {
 		}
 	}
    public MapModel listOfFlows(ChannelConfig channelConfig)
-   {
+   { try {
 	   MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
 	            .path(channelConfig.getWacfb().getWabaId() + "/flows")
 	            .authBearer(channelConfig.getWacfb().getAccessToken())
@@ -814,9 +814,12 @@ public class WacfbClient implements ChannelClient {
 	 
 
        
-	   return resp;
+	   return resp;}
+   catch (Exception e) {
+       System.err.println("Unexpected error: " + e.getMessage());
+       throw e;
    }
-   
+   }
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 
 		try {

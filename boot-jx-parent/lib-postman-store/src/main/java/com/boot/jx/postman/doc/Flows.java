@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = Flows.COLLECTION_NAME)
@@ -16,13 +17,55 @@ public class Flows implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<String, Object> data;
+    @Id
+    @Indexed(unique = true)
+    private String id;
 
-	public Map<String, Object> getData() {
-		return data;
-	}
+    private String name;
+    private String status;
+    private List<String> categories;
+    private List<String> validationErrors;
 
-	public void setData(Map<String, Object> data) {
-		this.data = data;
-	}
+    // Getters and Setters
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public List<String> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
+    }
+
+    public List<String> getValidationErrors() {
+        return validationErrors;
+    }
+
+    public void setValidationErrors(List<String> validationErrors) {
+        this.validationErrors = validationErrors;
+    }
+
 }
