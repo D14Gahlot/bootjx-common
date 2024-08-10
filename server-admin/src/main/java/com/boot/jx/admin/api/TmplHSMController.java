@@ -19,9 +19,9 @@ import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.TmplClient;
-import com.boot.jx.postman.doc.Flows;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
+import com.boot.jx.postman.doc.tpo.WABAFlows;
 import com.boot.jx.postman.manager.ThirdPartyTemplateManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -203,12 +203,12 @@ public class TmplHSMController {
 	}
 	// Flows
 		@RequestMapping(value = "pub/api/flows", method = { RequestMethod.GET })
-		public ApiResponse<Flows, Object> listFlows(@RequestParam String channelId) {
+		public ApiResponse<WABAFlows, Object> listFlows(@RequestParam String channelId) {
 			ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 			thirdPartyTmplManager.getListFlows(channelConfig);
 			
 
-			return ApiResponse.buildResults(mongoTemplate.findAll(Flows.class));
+			return ApiResponse.buildResults(mongoTemplate.findAll(WABAFlows.class));
 		}
 
 }

@@ -59,9 +59,6 @@ import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
-
-
 @Component
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WACFB)
 public class WacfbClient implements ChannelClient {
@@ -69,8 +66,6 @@ public class WacfbClient implements ChannelClient {
 	@Autowired
 	private RestService restService;
 
-
-	
 	public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
 		WACFBConfigDetails config = channelConfig.getWacfb();
 		String verifyToken = ArgUtil.nonEmpty(config.getMasterAppVerifyToken(), config.getVerifyToken());
@@ -378,7 +373,7 @@ public class WacfbClient implements ChannelClient {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 					media.setCaption(null);
-					//media.setFilename(null);
+					// media.setFilename(null);
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());
@@ -803,23 +798,21 @@ public class WacfbClient implements ChannelClient {
 			throw e;
 		}
 	}
-   public MapModel listOfFlows(ChannelConfig channelConfig)
-   { try {
-	   MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
-	            .path(channelConfig.getWacfb().getWabaId() + "/flows")
-	            .authBearer(channelConfig.getWacfb().getAccessToken())
-	            .header("Content-Type", "application/json")
-	            .get()
-	            .asMapModel();
-	 
 
-       
-	   return resp;}
-   catch (Exception e) {
-       System.err.println("Unexpected error: " + e.getMessage());
-       throw e;
-   }
-   }
+	public MapModel listOfFlows(ChannelConfig channelConfig) {
+		try {
+			MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
+					.path(channelConfig.getWacfb().getWabaId() + "/flows")
+					.authBearer(channelConfig.getWacfb().getAccessToken()).header("Content-Type", "application/json")
+					.get().asMapModel();
+
+			return resp;
+		} catch (Exception e) {
+			System.err.println("Unexpected error: " + e.getMessage());
+			throw e;
+		}
+	}
+
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 
 		try {
@@ -1057,5 +1050,4 @@ public class WacfbClient implements ChannelClient {
 		return send(req, channelConfig);
 	}
 
-	
 }
