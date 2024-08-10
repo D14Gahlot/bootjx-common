@@ -204,9 +204,15 @@ public class TmplHSMController {
 
 	// Flows
 	@RequestMapping(value = "/api/tmpl/hsm/waba_flows", method = { RequestMethod.GET })
-	public ApiResponse<WABAFlows, Object> listFlows(@RequestParam String channelId) {
+	public ApiResponse<WABAFlows, Object> listFlows(@RequestParam String channelId,
+			@RequestParam(required = false, defaultValue = "false") boolean sync) {
 		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-		thirdPartyTmplManager.refreshWabaFlows(channelConfig);
+		if (!ArgUtil.is(channelConfig)) {
+			return ApiResponse.build();
+		}
+		if (sync) {
+			thirdPartyTmplManager.refreshWabaFlows(channelConfig);
+		}
 		return ApiResponse.buildResults(mongoTemplate.findAll(WABAFlows.class));
 	}
 
