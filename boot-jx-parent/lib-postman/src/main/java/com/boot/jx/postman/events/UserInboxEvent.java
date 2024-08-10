@@ -6,7 +6,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.TGMessage;
 import com.boot.jx.postman.model.WAMessage;
-import com.boot.jx.tunnel.ITunnelEvent;
+import com.boot.jx.tunnel.ITunnelDefs.ITunnelEvent;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

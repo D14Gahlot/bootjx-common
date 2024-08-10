@@ -1,5 +1,6 @@
 package com.boot.jx.cache.test;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,16 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
 import com.boot.jx.tunnel.ITunnelDefs.ITaskLimiter;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
+import com.boot.jx.tunnel.TunnelMessage;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
-import com.boot.jx.tunnel.sys.SysTunnelEventsDict;
+import com.boot.jx.tunnel.sys.TunnelConstants;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 
@@ -56,7 +60,20 @@ public class RedisController {
 
 	@RequestMapping(value = "/pub/redis/test", method = RequestMethod.POST)
 	public long cacheTestPost(@RequestBody RedisSampleData status) {
-		return tunnelService.shout(SysTunnelEventsDict.Names.TEST_TOPIC, status);
+		return tunnelService.shout(TunnelConstants.Events.TEST_TOPIC, status);
+	}
+
+	@RequestMapping(value = "/pub/tunnel/task", method = RequestMethod.POST)
+	public long taskPublish(@RequestBody TunnelMessage<Object> event,
+			@RequestParam(value = "propagate", defaultValue = "false") boolean propagate) throws IOException {
+		if (propagate) {
+			return tunnelService.task(event.getTopic(), event.getData());
+		} else {
+			if(event.getContext() == null){
+				event.setContext(AppContextUtil.getContext());
+			}
+			return tunnelService.taskPublish(event.getTopic(), event.getData(), event.getContext());
+		}
 	}
 
 	@RequestMapping(value = "/pub/redis/test/task/limiter", method = RequestMethod.POST)

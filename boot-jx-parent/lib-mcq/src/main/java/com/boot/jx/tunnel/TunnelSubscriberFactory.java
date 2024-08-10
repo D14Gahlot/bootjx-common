@@ -1,9 +1,16 @@
 package com.boot.jx.tunnel;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import org.redisson.api.RMapCache;
 import org.redisson.api.RQueue;
@@ -23,7 +30,9 @@ import com.boot.jx.AppParam;
 import com.boot.jx.cache.MCQIndicator;
 import com.boot.jx.logger.client.AuditServiceClient;
 import com.boot.jx.logger.events.RequestTrackEvent;
+import com.boot.jx.tunnel.sys.TunnelFilterManager;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -40,6 +49,8 @@ public class TunnelSubscriberFactory {
 	public static final int RECURSION_MAX_DEPTH = 20;
 
 	private AppConfig appConfig;
+	private TunnelFilterManager tunnelFilter;
+	private List<String> eventTopics;
 
 	public static <A extends Annotation> A getAnnotationProxyReady(Class<?> clazz, Class<A> annotationClass) {
 		final A annotation = clazz.getAnnotation(annotationClass);
@@ -52,7 +63,8 @@ public class TunnelSubscriberFactory {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TunnelSubscriberFactory(List<ITunnelSubscriber> listeners,
-			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal
+			@Autowired(required = false) RedissonClient redisson, @Autowired(required = true) AppConfig appConfigLocal,
+			@Autowired TunnelFilterManager tunnelFilterLocal
 	/**
 	 * This is important as params should be loaded before we can subscribe to with
 	 * ENV events
@@ -60,7 +72,7 @@ public class TunnelSubscriberFactory {
 	// , @Autowired AppParam loadAppParams
 	) {
 		appConfig = appConfigLocal;
-
+		tunnelFilter = tunnelFilterLocal;
 		if (appConfig == null) {
 			LOGGER.error("App COnfig is Undefiend");
 		}
@@ -69,6 +81,8 @@ public class TunnelSubscriberFactory {
 		if (redisson == null) {
 			LOGGER.warn("Redisson Not avaiable for {} Listeners", listeners.size());
 		} else {
+			this.eventTopics = new ArrayList<String>();
+
 			for (ITunnelSubscriber listener : listeners) {
 				if (listener == null) {
 					LOGGER.error("NULL LISTENR IN LIST");
@@ -89,23 +103,46 @@ public class TunnelSubscriberFactory {
 					eventTopic = listenerTarget.getTopic();
 				}
 
+				Class<?> eventType = null;
+				Method[] m = c.getDeclaredMethods();
+				for (Method method : m) {
+					Parameter[] paramaters = method.getParameters();
+					if (ArgUtil.is(method.getName(), "onListen", "onMessage") && paramaters.length == 2
+							&& ArgUtil.is(paramaters[0].getParameterizedType().getTypeName(), "java.lang.String")) {
+						Parameter paramater = paramaters[1];
+						if (eventType == null || ArgUtil.is(eventType.getTypeName(), "java.lang.Object")) {
+							eventType = (Class<?>) paramater.getParameterizedType();
+						}
+
+					}
+				}
+
 				boolean integrity = tunnelEvent.integrity();
 				TunnelEventXchange scheme = tunnelEvent.scheme();
 				if (scheme == TunnelEventXchange.TASK_WORKER) {
-					this.addTaskWorker(eventTopic, redisson, listener, integrity, c.getClass().getName());
+					this.addTaskWorker(eventTopic, redisson, listener, integrity, c.getName(), eventType);
 				} else if (scheme == TunnelEventXchange.TASK_LISTNER) {
 					this.addTaskListner(eventTopic, redisson, listener, TunnelEventXchange.TASK_LISTNER, integrity,
-							c.getClass().getName());
+							c.getName(), eventType);
 				} else if (scheme == TunnelEventXchange.AUDIT) {
-					this.addAuditListener(eventTopic, redisson, listener, integrity, c.getClass().getName());
+					this.addAuditListener(eventTopic, redisson, listener, integrity, c.getName(), eventType);
 				} else if (scheme == TunnelEventXchange.SEND_LISTNER) {
-					this.addQueuedListener(eventTopic, redisson, listener, integrity, c.getClass().getName());
+					this.addQueuedListener(eventTopic, redisson, listener, integrity, c.getName(), eventType);
 				} else {
-					this.addShoutListener(eventTopic, redisson, listener, integrity, c.getClass().getName());
+					this.addShoutListener(eventTopic, redisson, listener, integrity, c.getName(), eventType);
 				}
+				eventTopics.add(eventTopic);
 			}
+
 		}
 
+	}
+
+	@PostConstruct
+	public void init() {
+		LOGGER.info("TunnelSubscriberFactory init");
+		tunnelFilter.postSubscriptions(eventTopics);
+		tunnelFilter.onServiceInit();
 	}
 
 	public static class WrapperML<M> implements MessageListener<TunnelMessage<M>> {
@@ -155,7 +192,7 @@ public class TunnelSubscriberFactory {
 	}
 
 	public <M> void addShoutListener(String topic, RedissonClient redisson, ITunnelSubscriber<M> listener,
-			boolean integrity, String listentName) {
+			boolean integrity, String listentName, Class<?> eventType) {
 		RTopic topicQueue = redisson.getTopic(TunnelEventXchange.SHOUT_LISTNER.getTopic(topic));
 		LOGGER.info("Subscription on Topic : {}",
 				MCQIndicator.messageSubscribed(TunnelEventXchange.SHOUT_LISTNER.getTopic(topic)));
@@ -201,7 +238,7 @@ public class TunnelSubscriberFactory {
 	}
 
 	public <M> void addQueuedListener(String topicName, RedissonClient redisson, ITunnelSubscriber<M> listener,
-			boolean integrity, String listenrName) {
+			boolean integrity, String listenrName, Class<?> eventType) {
 		RTopic eventTopic = redisson.getTopic(TunnelEventXchange.SEND_LISTNER.getTopic(topicName));
 		LOGGER.info("Subscription on Topic : {}",
 				MCQIndicator.messageSubscribed(TunnelEventXchange.SEND_LISTNER.getTopic(topicName)));
@@ -255,7 +292,7 @@ public class TunnelSubscriberFactory {
 	}
 
 	public <M> void addTaskListner(String topic, RedissonClient redisson, ITunnelSubscriber<M> listener,
-			TunnelEventXchange exchange, boolean integrity, String listentName) {
+			TunnelEventXchange exchange, boolean integrity, String listentName, Class<?> eventType) {
 		RTopic taskListnerTopic = redisson.getTopic(TunnelEventXchange.TASK_LISTNER.getTopic(topic));
 		LOGGER.info("Subscription on Topic : {}",
 				MCQIndicator.messageSubscribed(TunnelEventXchange.TASK_LISTNER.getTopic(topic)));
@@ -306,6 +343,7 @@ public class TunnelSubscriberFactory {
 
 			}
 
+			@SuppressWarnings("unchecked")
 			private void doTask(String channel, TunnelMessage<M> msg) {
 				if (msg == null) {
 					return;
@@ -321,7 +359,13 @@ public class TunnelSubscriberFactory {
 						if (ArgUtil.isEmpty(msg.getData())) {
 							LOGGER.warn("NULL Event Rcvd for EVENT " + channel + " : ");
 						} else {
-							this.subscriber.onMessage(channel, msg.getData());
+
+							if (msg.getData() instanceof Map) {
+								this.subscriber.onMessage(channel, (M) JsonUtil.parse(msg.getData(), eventType));
+							} else {
+								this.subscriber.onMessage(channel, msg.getData());
+							}
+
 							MCQIndicator.messageProcessed(channel);
 						}
 					} catch (Exception e) {
@@ -335,7 +379,7 @@ public class TunnelSubscriberFactory {
 	}
 
 	public <M> void addTaskWorker(String topic, RedissonClient redisson, ITunnelSubscriber<M> listener,
-			boolean integrity, String listentName) {
+			boolean integrity, String listentName, Class<?> eventType) {
 		RTopic topicQueue = redisson.getTopic(TunnelEventXchange.TASK_WORKER.getTopic(topic));
 		LOGGER.info("Subscription on Topic : {}",
 				MCQIndicator.messageSubscribed(TunnelEventXchange.TASK_WORKER.getTopic(topic)));
@@ -356,6 +400,7 @@ public class TunnelSubscriberFactory {
 				onMessage(channel, topicMessageQueue, msgId, 0);
 			}
 
+			@SuppressWarnings("unchecked")
 			private void onMessage(String channel, RQueue<TunnelMessage<M>> topicMessageQueue, String msgId,
 					int counter) {
 
@@ -374,7 +419,11 @@ public class TunnelSubscriberFactory {
 						if (ArgUtil.isEmpty(msg.getData())) {
 							LOGGER.warn("NULL Event Rcvd for EVENT " + channel + " : ");
 						} else {
-							listener.onMessage(channel, msg.getData());
+							if (msg.getData() instanceof Map) {
+								listener.onMessage(channel, (M) JsonUtil.parse(msg.getData(), eventType));
+							} else {
+								listener.onMessage(channel, msg.getData());
+							}
 							MCQIndicator.messageProcessed(channel);
 						}
 					} catch (Exception e) {
@@ -392,7 +441,7 @@ public class TunnelSubscriberFactory {
 	}
 
 	public <M> void addAuditListener(String topic, RedissonClient redisson, ITunnelSubscriber<M> listener,
-			boolean integrity, String listentName) {
+			boolean integrity, String listentName, Type eventType) {
 		RTopic topicQueue = redisson.getTopic(TunnelEventXchange.AUDIT.getTopic(topic));
 		LOGGER.info("Subscription on Topic : {}",
 				MCQIndicator.messageSubscribed(TunnelEventXchange.AUDIT.getTopic(topic)));

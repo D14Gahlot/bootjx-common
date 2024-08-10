@@ -84,6 +84,7 @@ public interface PMConfiguration extends Serializable {
 
 		public PMConfiguration channels(ChannelConfig channel) {
 			this.channels().put(channel.getChannelId(), channel);
+			this.channels().put(PostManUtil.CHANNEL_ID(channel), channel);
 			return this;
 		}
 

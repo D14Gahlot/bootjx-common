@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.tunnel.ChronoScheduler;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
 
@@ -41,12 +42,12 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	private Map<String, Long> stats;
 	private Long completedStamp;
-	
-	/** group key**/
+
+	/** group key **/
 	private String groupId;
 	private String campaignTitle;
 	private String groupName;
-	
+	private ChronoScheduler scheduler;
 
 	private BatchJob job;
 
@@ -201,8 +202,6 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 		this.groupId = groupId;
 	}
 
-	
-
 	public String getGroupName() {
 		return groupName;
 	}
@@ -217,6 +216,14 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	public void setCampaignTitle(String campaignTitle) {
 		this.campaignTitle = campaignTitle;
+	}
+
+	public ChronoScheduler getScheduler() {
+		return scheduler;
+	}
+
+	public void setScheduler(ChronoScheduler scheduler) {
+		this.scheduler = scheduler;
 	}
 
 }
