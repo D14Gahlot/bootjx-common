@@ -1,15 +1,10 @@
 package com.boot.jx.postman.manager;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
@@ -170,26 +165,22 @@ public class ThirdPartyTemplateManager {
 		return thirdPartyTemplate;
 	}
 
-	public void getListFlows(ChannelConfig channelConfig) {
+	public void refreshWabaFlows(ChannelConfig channelConfig) {
 		ChannelClient channelClient = clientFactory.get(channelConfig);
-
 		MapModel resp = channelClient.listOfFlows(channelConfig);
-		Map<String, Object> responseMap = resp.toMap();
-		List<Map<String, Object>> flows = (List<Map<String, Object>>) responseMap.get("data");
+		List<Map<String, Object>> flows = resp.entry("data").asListOfMap();
+
 		for (Map<String, Object> flowData : flows) {
 			String flowId = (String) flowData.get("id");
-
-			if (!commonMongoTemplate.exists(Query.query(Criteria.where("id").is(flowId)), WABAFlows.class)) {
-				WABAFlows flow = new WABAFlows();
-				flow.setId(flowId);
-				flow.setName((String) flowData.get("name"));
-				flow.setStatus((String) flowData.get("status"));
-				flow.setCategories((List<String>) flowData.get("categories"));
-				flow.setValidationErrors((List<String>) flowData.get("validation_errors"));
-
-				commonMongoTemplate.save(flow);
+			String id = String.format("%s/%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
+			WABAFlows flowDoc = commonMongoTemplate.findById(id, WABAFlows.class);
+			if (!ArgUtil.is(flowDoc)) {
+				flowDoc = new WABAFlows();
 			}
-
+			flowDoc.setId(id);
+			flowDoc.setFlowId(id);
+			flowDoc.setMeta(flowData);
+			commonMongoTemplate.save(flowDoc);
 		}
 
 	}

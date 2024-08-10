@@ -84,6 +84,7 @@ public class TmplHSMController {
 		return new ApiResponse<HSMTemplate3rdParty, Object>()
 				.results(thirdPartyTmplManager.getTemplates(channelConfig, templateCode));
 	}
+
 	@RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.POST })
 	public ApiResponse<HSMTemplate3rdParty, Object> createWabaTemplates(@RequestBody HSMTemplate3rdParty extTemplate) {
 		ChannelConfig channelConfig = pmEnvironment.local().channel(extTemplate.getChannelId());
@@ -144,18 +145,17 @@ public class TmplHSMController {
 			@RequestParam String newChannelId) {
 		Query query = new Query(Criteria.where("channelId").is(oldChannelId));
 		Update update = new Update().set("channelId", newChannelId);
-         
+
 		mongoTemplate.updateMulti(query, update, HSMTemplate3rdParty.class);
 		return new ApiResponse<HSMTemplate3rdParty, Object>().message("Template Migrated");
 	}
-	
 
 	// HSMTemplate
 	@RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.GET })
 	public ApiResponse<HSMTemplateDoc, Object> listPushTemplates() {
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class));
 	}
-    
+
 	@RequestMapping(value = "/api/tmpl/hsm", method = { RequestMethod.DELETE })
 	public ApiResponse<HSMTemplateDoc, Object> deletePushTemplates(@RequestParam String id) {
 		HSMTemplateDoc qr = mongoTemplate.findById(id, HSMTemplateDoc.class);
@@ -201,14 +201,13 @@ public class TmplHSMController {
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class)).data(newVersion)
 				.message("HSM Template " + (updated ? "updated" : "created"));
 	}
-	// Flows
-		@RequestMapping(value = "pub/api/flows", method = { RequestMethod.GET })
-		public ApiResponse<WABAFlows, Object> listFlows(@RequestParam String channelId) {
-			ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-			thirdPartyTmplManager.getListFlows(channelConfig);
-			
 
-			return ApiResponse.buildResults(mongoTemplate.findAll(WABAFlows.class));
-		}
+	// Flows
+	@RequestMapping(value = "/api/tmpl/hsm/waba_flows", method = { RequestMethod.GET })
+	public ApiResponse<WABAFlows, Object> listFlows(@RequestParam String channelId) {
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		thirdPartyTmplManager.refreshWabaFlows(channelConfig);
+		return ApiResponse.buildResults(mongoTemplate.findAll(WABAFlows.class));
+	}
 
 }

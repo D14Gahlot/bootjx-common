@@ -20,10 +20,12 @@ public class WABAFlows implements Serializable {
 	@Id
 	private String id;
 
-	private String name;
-	private String status;
-	private List<String> categories;
-	private List<String> validationErrors;
+	private String wabaId;
+	private String flowId;
+
+	private Map<String, Object> meta;
+	private Map<String, Object> details;
+	private Map<String, Object> json;
 
 	// Getters and Setters
 
@@ -35,36 +37,44 @@ public class WABAFlows implements Serializable {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getWabaId() {
+		return wabaId;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setWabaId(String wabaId) {
+		this.wabaId = wabaId;
 	}
 
-	public String getStatus() {
-		return status;
+	public String getFlowId() {
+		return flowId;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void setFlowId(String flowId) {
+		this.flowId = flowId;
 	}
 
-	public List<String> getCategories() {
-		return categories;
+	public Map<String, Object> getMeta() {
+		return meta;
 	}
 
-	public void setCategories(List<String> categories) {
-		this.categories = categories;
+	public void setMeta(Map<String, Object> meta) {
+		this.meta = meta;
 	}
 
-	public List<String> getValidationErrors() {
-		return validationErrors;
+	public Map<String, Object> getDetails() {
+		return details;
 	}
 
-	public void setValidationErrors(List<String> validationErrors) {
-		this.validationErrors = validationErrors;
+	public void setDetails(Map<String, Object> details) {
+		this.details = details;
+	}
+
+	public Map<String, Object> getJson() {
+		return json;
+	}
+
+	public void setJson(Map<String, Object> json) {
+		this.json = json;
 	}
 
 }

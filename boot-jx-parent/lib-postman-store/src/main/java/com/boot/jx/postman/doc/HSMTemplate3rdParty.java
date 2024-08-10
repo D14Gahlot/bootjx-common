@@ -126,7 +126,7 @@ public class HSMTemplate3rdParty implements Serializable, AuditCreateEntity, Bas
 	public void setCode(String code) {
 		this.code = code;
 	}
-	
+
 	public String getCategory() {
 		return category;
 	}
