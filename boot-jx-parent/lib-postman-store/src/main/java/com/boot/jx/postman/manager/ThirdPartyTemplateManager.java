@@ -216,26 +216,19 @@ public class ThirdPartyTemplateManager {
 		            ObjectMapper objectMapper = new ObjectMapper();
 		            Map<String, Object> jsonResponse = objectMapper.readValue(jsonResponseString, new TypeReference<Map<String, Object>>() {});
 
-
-		            List<Map<String, Object>> screens = (List<Map<String, Object>>) jsonResponse.get("screens");
-
-		            if (screens != null && !screens.isEmpty()) {
-		                String screenId = (String) screens.get(0).get("id");
-
 		                String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 		    			WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
 
 		                if (flow != null) {
-		                    Map<String, Object> details = flow.getDetails();
-		                    if (details == null) {
-		                        details = new HashMap<>();
-		                        flow.setDetails(details);
-		                    }
-		                    details.put("screen_id", screenId);
-		                    commonMongoTemplate.save(flow);
+		                	if(jsonResponse!=null)
+		                	{
+		                		flow.setJson(jsonResponse);
+		                	}
+		                   
+		                	commonMongoTemplate.save(flow);
 		                }
 		            }
-		        }
+		        
 	      }catch(Exception e)
 	      {
 	    	  System.out.print(e);
