@@ -812,6 +812,21 @@ public class WacfbClient implements ChannelClient {
 			throw e;
 		}
 	}
+	public MapModel flowsAssets(String flowId,ChannelConfig channelConfig)
+	{
+		try {
+			MapModel resp=restService.ajax(WA360Constants.META_WA_CLOUD_URL)
+	                .path(flowId + "/assets")
+	                .authBearer(channelConfig.getWacfb().getAccessToken())
+	                .header("Content-Type", "application/json")
+	                .get().asMapModel();
+			return resp;
+		}
+		catch (Exception e) {
+			System.err.println("Unexpected error: " + e.getMessage());
+			throw e;
+		}
+	}
 
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 
