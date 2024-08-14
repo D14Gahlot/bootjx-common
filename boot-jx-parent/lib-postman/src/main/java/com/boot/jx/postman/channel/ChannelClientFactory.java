@@ -24,6 +24,8 @@ public class ChannelClientFactory extends ChannelBasedFactory<ChannelClient> {
 		MapModel createTemplates(ChannelConfig channelConfig, MapModel from);
 
 		MapModel fetchTemplates(ChannelConfig channelConfig);
+		
+		MapModel listOfFlows(ChannelConfig channelConfig);
 	}
 
 	@Override

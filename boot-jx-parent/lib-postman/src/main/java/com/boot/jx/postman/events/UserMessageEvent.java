@@ -1,7 +1,7 @@
 package com.boot.jx.postman.events;
 
 import com.boot.jx.postman.model.Message;
-import com.boot.jx.tunnel.ITunnelEvent;
+import com.boot.jx.tunnel.ITunnelDefs.ITunnelEvent;
 
 public class UserMessageEvent extends Message<UserMessageEvent> implements ITunnelEvent {
 

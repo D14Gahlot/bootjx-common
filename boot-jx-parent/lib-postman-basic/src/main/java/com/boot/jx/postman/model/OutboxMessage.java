@@ -10,6 +10,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
+import com.boot.jx.tunnel.ChronoScheduler;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -26,15 +27,15 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private MessagePrompt prompt;
 	private List<Object> logs;
 	private List<Object> trace;
-	/** csv refernce key**/
+	/** csv refernce key **/
 	private String referenceKey;
 	/** **/
-	private Map<String,Object> rawMessageFormat;
-	/** group key**/
+	private Map<String, Object> rawMessageFormat;
+	/** group key **/
 	private String groupId;
 	private String campaignTitle;
 	private String groupName;
-	
+	private ChronoScheduler scheduler;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -158,7 +159,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 	public void setReferenceKey(String referenceKey) {
 		this.referenceKey = referenceKey;
 	}
-	
+
 	public Map<String, Object> getRawMessageFormat() {
 		return rawMessageFormat;
 	}
@@ -175,8 +176,6 @@ public class OutboxMessage extends Message<OutboxMessage>
 		this.groupId = groupId;
 	}
 
-	
-
 	public String getGroupName() {
 		return groupName;
 	}
@@ -191,6 +190,14 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public void setCampaignTitle(String campaignTitle) {
 		this.campaignTitle = campaignTitle;
+	}
+
+	public ChronoScheduler getScheduler() {
+		return scheduler;
+	}
+
+	public void setScheduler(ChronoScheduler scheduler) {
+		this.scheduler = scheduler;
 	}
 
 }

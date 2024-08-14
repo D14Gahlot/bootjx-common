@@ -373,7 +373,7 @@ public class WacfbClient implements ChannelClient {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 					media.setCaption(null);
-					//media.setFilename(null);
+					// media.setFilename(null);
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());
@@ -490,7 +490,6 @@ public class WacfbClient implements ChannelClient {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
 		wa360OutBoundMedia.setCaption(attachment.getMediaName());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		wa360OutBoundMedia.setFilename(attachment.getMediaName());
 		if (mediaType.equalsIgnoreCase("image")) {
 			wa360OutBoundMedia.setFilename(null);
 		}
@@ -800,6 +799,20 @@ public class WacfbClient implements ChannelClient {
 		}
 	}
 
+	public MapModel listOfFlows(ChannelConfig channelConfig) {
+		try {
+			MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL)
+					.path(channelConfig.getWacfb().getWabaId() + "/flows")
+					.authBearer(channelConfig.getWacfb().getAccessToken()).header("Content-Type", "application/json")
+					.get().asMapModel();
+
+			return resp;
+		} catch (Exception e) {
+			System.err.println("Unexpected error: " + e.getMessage());
+			throw e;
+		}
+	}
+
 	public MapModel createTemplates(ChannelConfig channelConfig, MapModel req) {
 
 		try {
@@ -1036,4 +1049,5 @@ public class WacfbClient implements ChannelClient {
 		// req.put(OutBoundWrapperPaths.TEMPLATE_COMPONENTS, components.list());
 		return send(req, channelConfig);
 	}
+
 }

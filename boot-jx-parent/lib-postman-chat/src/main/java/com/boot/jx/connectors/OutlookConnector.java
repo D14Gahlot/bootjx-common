@@ -2,27 +2,41 @@ package com.boot.jx.connectors;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.activation.DataSource;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+
+import org.apache.commons.mail.util.MimeMessageParser;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.ModelMap;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.email.EmailReplyParser;
 import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.MessageTempInbound;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
+import com.boot.jx.postman.model.ext.InBoundMsg;
+import com.boot.jx.postman.model.ext.InBoundWrapper;
+import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -31,9 +45,14 @@ import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.OutlookPlugin;
 import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.DateUtil;
+import com.boot.utils.StringUtils;
 import com.boot.utils.TimeUtils.TimePeriod;
 import com.boot.utils.Urly;
 
@@ -178,15 +197,65 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		return null;
 	}
 
-	public InboxMessage toInboxMessage(ChannelConfig channelConfig, Map<String, Object> dataMap) {
+	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MessageTempInbound inbound)
+			throws NoSuchAlgorithmException {
+
+		// Create Default Message from Channel
 		InboxMessage inboxMessage = this.createInboxMessage(channelConfig);
+
+		MapModel m = MapModel.from(inbound.getData());
+
+		// Set Contact info
+		MapPathEntry from = m.entry("from");
+		if (!ArgUtil.is(from.exists())) {
+			return null;
+		}
+
+		inboxMessage.contact().setEmail(from.pathEntry("emailAddress.address").asString());
+		inboxMessage.contact().setCsid(inboxMessage.contact().getEmail());
+		inboxMessage.contact().setName(from.pathEntry("emailAddress.name").asString());
+
+		// Set Additional info
+		inboxMessage.setFrom(inboxMessage.contact().getEmail());
+		inboxMessage.setFromName(inboxMessage.contact().getName());
+		inboxMessage.to().add(channelConfig.getLane());
+
+		// Extract Message Details
+		inboxMessage.setMessageIdExt(m.keyEntry("id").asString());
+		// inboxMessage.setReplyIdExt(CollectionUtil.first(msg.getMimeMessage().getHeader("In-Reply-To")));
+		inboxMessage.setSubject(m.keyEntry("subject").asString());
+		inboxMessage.setMessage(EmailReplyParser.parseReply(m.keyEntry("body.content").asString()));
+
+		if (ArgUtil.is(inboxMessage.getSubject())) {
+			String subject = StringUtils
+					.normalizeSpace(inboxMessage.getSubject().replaceFirst(EmailConnector.SUBJECT_CLEANER_STR, ""));
+			String conatctid = PostManUtil.CONTACT_ID(inboxMessage.contact());
+			subject = CryptoUtil.getMD5Hash(conatctid + "-" + StringUtils.trim(subject));
+			inboxMessage.session().setTicketHash(subject);
+		}
+
+		inboxMessage.setAttachments(inbound.getAttachments());
+
 		return inboxMessage;
 	}
 
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
-		return messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, requestMap.toMap()));
+
+		InBoundWrapper inbound = requestMap.as(InBoundWrapper.class);
+
+		if (ArgUtil.is(inbound.messages)) {
+			for (InBoundMsg message : inbound.messages) {
+				try {
+					MessageTempInbound msg = commonMongoTemplate.findById(message.messageId, MessageTempInbound.class);
+					messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, msg));
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return messageBoxEvent;
 	}
 
 }

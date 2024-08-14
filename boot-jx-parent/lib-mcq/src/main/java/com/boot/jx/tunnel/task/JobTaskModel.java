@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.tunnel.ChronoScheduler;
+import com.boot.jx.tunnel.ITunnelDefs.Schedulable;
 import com.boot.model.MapModel;
 
-public abstract class JobTaskModel<T> implements Serializable {
+public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 
 	public JobTaskModel() {
 		super();
@@ -24,6 +26,7 @@ public abstract class JobTaskModel<T> implements Serializable {
 	private String jobId;
 	private String batchId;
 	private Long version;
+	private ChronoScheduler scheduler;
 
 	public String getBatchId() {
 		return batchId;
@@ -75,6 +78,12 @@ public abstract class JobTaskModel<T> implements Serializable {
 	@SuppressWarnings("unchecked")
 	public T data(String key, Object value) {
 		this.data().put(key, value);
+		return (T) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T scheduler(ChronoScheduler scheduler) {
+		this.scheduler = scheduler;
 		return (T) this;
 	}
 
@@ -212,4 +221,11 @@ public abstract class JobTaskModel<T> implements Serializable {
 		this.version = version;
 	}
 
+	public ChronoScheduler getScheduler() {
+		return scheduler;
+	}
+
+	public void setScheduler(ChronoScheduler scheduler) {
+		this.scheduler = scheduler;
+	}
 }

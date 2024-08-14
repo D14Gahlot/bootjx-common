@@ -21,6 +21,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.TmplClient;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
+import com.boot.jx.postman.doc.tpo.WABAFlows;
 import com.boot.jx.postman.manager.ThirdPartyTemplateManager;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -200,4 +201,19 @@ public class TmplHSMController {
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class)).data(newVersion)
 				.message("HSM Template " + (updated ? "updated" : "created"));
 	}
+
+	// Flows
+	@RequestMapping(value = "/api/tmpl/hsm/waba_flows", method = { RequestMethod.GET })
+	public ApiResponse<WABAFlows, Object> listFlows(@RequestParam String channelId,
+			@RequestParam(required = false, defaultValue = "false") boolean sync) {
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		if (!ArgUtil.is(channelConfig)) {
+			return ApiResponse.build();
+		}
+		if (sync) {
+			thirdPartyTmplManager.refreshWabaFlows(channelConfig);
+		}
+		return ApiResponse.buildResults(mongoTemplate.findAll(WABAFlows.class));
+	}
+
 }

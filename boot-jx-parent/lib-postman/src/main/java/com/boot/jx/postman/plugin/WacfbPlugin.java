@@ -16,7 +16,7 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 	public String getChannelType() {
 		return CHANNEL_TYPE.WACFB;
 	}
-	
+
 	@Override
 	public ContactType getContactType() {
 		return ContactType.WHATSAPP;
@@ -51,6 +51,9 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 		@ConfigMetaProperty(path = "wabaId", title = "WaBa Id", desc = "Enter Your WaBa Id", optional = true)
 		private String wabaId;
+
+		@ConfigMetaProperty(path = "bmId", title = "BM Id", desc = "Enter Your Business Manager Id", optional = true)
+		private String bmId;
 
 		@ConfigMetaProperty(path = "promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
@@ -139,6 +142,14 @@ public class WacfbPlugin implements DefaultChannelPlugin<com.boot.jx.postman.plu
 
 		public void setVerifyToken(String verifyToken) {
 			this.verifyToken = verifyToken;
+		}
+
+		public String getBmId() {
+			return bmId;
+		}
+
+		public void setBmId(String bmId) {
+			this.bmId = bmId;
 		}
 
 	}

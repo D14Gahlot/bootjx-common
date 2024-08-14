@@ -1,6 +1,5 @@
 package com.boot.jx.postman.manager;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import com.boot.jx.postman.channel.ChannelClientFactory;
 import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
+import com.boot.jx.postman.doc.tpo.WABAFlows;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Template;
@@ -39,39 +39,31 @@ public class ThirdPartyTemplateManager {
 
 		ChannelClient channelClient = clientFactory.get(channelConfig);
 
-          resp =channelClient.fetchTemplates(channelConfig);
-          if (resp.containsKey("data")) {
-              Object value = resp.get("data");
-              resp.remove("data");
-              resp.put("waba_templates", value);
-          }
-		List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);//null
-		MongoQueryBuilder<HSMTemplate3rdParty> cmqb = MongoQueryBuilder
-				.collection(HSMTemplate3rdParty.class)
-				.where(Criteria.where("channelId")
-						.is(channelConfig.getChannelId()))
-				.set("template.status", "deleted");
+		resp = channelClient.fetchTemplates(channelConfig);
+		if (resp.containsKey("data")) {
+			Object value = resp.get("data");
+			resp.remove("data");
+			resp.put("waba_templates", value);
+		}
+		List<WA360Template> wabaTemplates = resp.keyEntry("waba_templates").asList(WA360Template.class);// null
+		MongoQueryBuilder<HSMTemplate3rdParty> cmqb = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+				.where(Criteria.where("channelId").is(channelConfig.getChannelId())).set("template.status", "deleted");
 
 		commonMongoTemplate.update(cmqb);
 
 		for (WA360Template wa360Template : wabaTemplates) {
-			HSMTemplate3rdParty thirdPartyTemplate = toHSM3rdParty(
-					channelConfig, wa360Template);
+			HSMTemplate3rdParty thirdPartyTemplate = toHSM3rdParty(channelConfig, wa360Template);
 			commonMongoTemplate.save(thirdPartyTemplate);
-			linkRefresh(thirdPartyTemplate,
-					thirdPartyTemplate.getHsmTemplateId(),
-					ArgUtil.parseAsString(
-							thirdPartyTemplate.getTemplate().get("status"),
-							Constants.BLANK));
+			linkRefresh(thirdPartyTemplate, thirdPartyTemplate.getHsmTemplateId(),
+					ArgUtil.parseAsString(thirdPartyTemplate.getTemplate().get("status"), Constants.BLANK));
 		}
 	}
 
-	private HSMTemplate3rdParty toHSM3rdParty(ChannelConfig channelConfig,
-			WA360Template wa360Template) {
-		String id = String.format("%s/%s/%s", channelConfig.getChannelId(),
-				wa360Template.getName(), wa360Template.getLanguage());
-		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate
-				.findById(id, HSMTemplate3rdParty.class);// coming null
+	private HSMTemplate3rdParty toHSM3rdParty(ChannelConfig channelConfig, WA360Template wa360Template) {
+		String id = String.format("%s/%s/%s", channelConfig.getChannelId(), wa360Template.getName(),
+				wa360Template.getLanguage());
+		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(id, HSMTemplate3rdParty.class);// coming
+																												// null
 		if (!ArgUtil.is(thirdPartyTemplate)) {
 			thirdPartyTemplate = new HSMTemplate3rdParty();
 			thirdPartyTemplate.setId(id);
@@ -82,43 +74,35 @@ public class ThirdPartyTemplateManager {
 		thirdPartyTemplate.setLang(wa360Template.getLanguage());
 
 		// thirdPartyTemplate.setCategory(wa360Template.getCategory());
-		thirdPartyTemplate.setContactType(
-				ArgUtil.parseAsString(channelConfig.getContactType()));
+		thirdPartyTemplate.setContactType(ArgUtil.parseAsString(channelConfig.getContactType()));
 		thirdPartyTemplate.setChannelType(channelConfig.getChannelType());
 
 		thirdPartyTemplate.setTemplate(JsonUtil.toMap(wa360Template));
 		return thirdPartyTemplate;
 	}
 
-	public HSMTemplate3rdParty createhWA360Templates(
-			ChannelConfig channelConfig,
+	public HSMTemplate3rdParty createhWA360Templates(ChannelConfig channelConfig,
 			Map<String, Object> templateStructure) {
-		String status = ArgUtil.parseAsString(templateStructure.get("status"),
-				Constants.BLANK);
+		String status = ArgUtil.parseAsString(templateStructure.get("status"), Constants.BLANK);
 		MapModel resp = null;
 
 		ChannelClient channelClient = clientFactory.get(channelConfig);
-		if ("approved".equalsIgnoreCase(status)
-				|| "rejected".equalsIgnoreCase(status)
+		if ("approved".equalsIgnoreCase(status) || "rejected".equalsIgnoreCase(status)
 				|| "paused".equalsIgnoreCase(status)) {
-			resp = channelClient.updateTemplates(channelConfig,
-					MapModel.from(templateStructure));
+			resp = channelClient.updateTemplates(channelConfig, MapModel.from(templateStructure));
 		} else {
-			resp = channelClient.createTemplates(channelConfig,
-					MapModel.from(templateStructure));
+			resp = channelClient.createTemplates(channelConfig, MapModel.from(templateStructure));
 			resp.put("language", templateStructure.get("language"));
 			resp.put("name", templateStructure.get("name"));
 			resp.put("status", templateStructure.get("status"));
-			resp.put("rejected_reason",templateStructure.get("rejected_reason"));
+			resp.put("rejected_reason", templateStructure.get("rejected_reason"));
 
 		}
 		return toHSM3rdParty(channelConfig, resp.as(WA360Template.class));
 	}
 
-	public HSMTemplate3rdParty deleteWA360Templates(ChannelConfig channelConfig,
-			HSMTemplate3rdParty temp) {
-		WA360Template x = JsonUtil.toObject(temp.getTemplate(),
-				WA360Template.class);
+	public HSMTemplate3rdParty deleteWA360Templates(ChannelConfig channelConfig, HSMTemplate3rdParty temp) {
+		WA360Template x = JsonUtil.toObject(temp.getTemplate(), WA360Template.class);
 		if (ArgUtil.is(x)) {
 			if (!"deleted".equalsIgnoreCase(x.getStatus())) {
 				wa360Client.deleteTemplates(channelConfig, x.getName());
@@ -128,11 +112,9 @@ public class ThirdPartyTemplateManager {
 		return temp;
 	}
 
-	public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig,
-			String code) {
-		MongoQueryBuilder<HSMTemplate3rdParty> q = MongoQueryBuilder
-				.collection(HSMTemplate3rdParty.class).where(Criteria
-						.where("channelId").is(channelConfig.getChannelId()));
+	public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig, String code) {
+		MongoQueryBuilder<HSMTemplate3rdParty> q = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+				.where(Criteria.where("channelId").is(channelConfig.getChannelId()));
 
 		if (ArgUtil.is(code)) {
 			q.where("code", code);
@@ -145,49 +127,62 @@ public class ThirdPartyTemplateManager {
 		return this.getTemplates(channelConfig, null);
 	}
 
-	public HSMTemplate3rdParty link(String thirdPartyTemplateId,
-			String hsmTemplateId) {
-		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate
-				.findById(thirdPartyTemplateId, HSMTemplate3rdParty.class);
+	public HSMTemplate3rdParty link(String thirdPartyTemplateId, String hsmTemplateId) {
+		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(thirdPartyTemplateId,
+				HSMTemplate3rdParty.class);
 		String hsmTemplateIdOld = thirdPartyTemplate.getHsmTemplateId();
 		thirdPartyTemplate.setHsmTemplateId(hsmTemplateId);
-		
+
 		commonMongoTemplate.save(thirdPartyTemplate);
 
 		this.linkRefresh(thirdPartyTemplate, hsmTemplateIdOld, null);
 		this.linkRefresh(thirdPartyTemplate, hsmTemplateId,
-				ArgUtil.parseAsString(
-						thirdPartyTemplate.getTemplate().get("status"),
-						Constants.BLANK));
+				ArgUtil.parseAsString(thirdPartyTemplate.getTemplate().get("status"), Constants.BLANK));
 		return thirdPartyTemplate;
 	}
 
-	public HSMTemplate3rdParty linkRefresh(
-			HSMTemplate3rdParty thirdPartyTemplate, String hsmTemplateId,
+	public HSMTemplate3rdParty linkRefresh(HSMTemplate3rdParty thirdPartyTemplate, String hsmTemplateId,
 			String status) {
 		if (ArgUtil.is(hsmTemplateId)) {
-			
-			HSMTemplateDoc hsmTemplateDoc = commonMongoTemplate
-					.findById(hsmTemplateId, HSMTemplateDoc.class); 
+
+			HSMTemplateDoc hsmTemplateDoc = commonMongoTemplate.findById(hsmTemplateId, HSMTemplateDoc.class);
 			if (ArgUtil.is(hsmTemplateDoc)) {
-					hsmTemplateDoc.options().put("waba",thirdPartyTemplate.getTemplate());
-				
-				
-				hsmTemplateDoc.approved(thirdPartyTemplate.getChannelId(),
-						thirdPartyTemplate.getHsmTemplateId(), status);
+				hsmTemplateDoc.options().put("waba", thirdPartyTemplate.getTemplate());
+
+				hsmTemplateDoc.approved(thirdPartyTemplate.getChannelId(), thirdPartyTemplate.getHsmTemplateId(),
+						status);
 				commonMongoTemplate.save(hsmTemplateDoc);
 			}
 		}
 		return thirdPartyTemplate;
 	}
 
-	public HSMTemplate3rdParty varMap(String thirdPartyTemplateId,
-			Map<String, Object> varMap) {
-		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate
-				.findById(thirdPartyTemplateId, HSMTemplate3rdParty.class);
+	public HSMTemplate3rdParty varMap(String thirdPartyTemplateId, Map<String, Object> varMap) {
+		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(thirdPartyTemplateId,
+				HSMTemplate3rdParty.class);
 		thirdPartyTemplate.setVarMap(varMap);
 		commonMongoTemplate.save(thirdPartyTemplate);
 		return thirdPartyTemplate;
+	}
+
+	public void refreshWabaFlows(ChannelConfig channelConfig) {
+		ChannelClient channelClient = clientFactory.get(channelConfig);
+		MapModel resp = channelClient.listOfFlows(channelConfig);
+		List<Map<String, Object>> flows = resp.entry("data").asListOfMap();
+
+		for (Map<String, Object> flowData : flows) {
+			String flowId = (String) flowData.get("id");
+			String id = String.format("%s/%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
+			WABAFlows flowDoc = commonMongoTemplate.findById(id, WABAFlows.class);
+			if (!ArgUtil.is(flowDoc)) {
+				flowDoc = new WABAFlows();
+			}
+			flowDoc.setId(id);
+			flowDoc.setFlowId(id);
+			flowDoc.setMeta(flowData);
+			commonMongoTemplate.save(flowDoc);
+		}
+
 	}
 
 }
