@@ -52,10 +52,13 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 				file.options().putAll(basicTemplate.options());
 
 				try {
+					Object waba = file.options().remove("waba");
+
 					String optionsString = JsonUtil.toJson(file.options());
 					optionsString = this.process(optionsString, file.getModel(), HANDLEBARS_JS);
 					Map<String, Object> options = JsonUtil.fromJsonToMap(optionsString);
 					if (options != null)
+		                options.put("waba",waba);
 						file.setOptions(options);
 				} catch (Exception e) {
 					LOGGER.error("CommonTmpPackageImpl.process", e);
