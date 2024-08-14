@@ -34,6 +34,7 @@ import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.http.CommonBeanService;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.MongoUtils;
@@ -122,6 +123,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Autowired
 	TmplClient tmplClient;
+	
+	@Autowired
+	CommonBeanService commonBeanService;
 
 	@Autowired
 	private PushClient pushClient;
@@ -501,7 +505,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	private void beforeSend(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.hsm().getCode())) {
-			AppCommonAuthUserProfile profile = ArgUtil.is(agentSession) ? agentSession.getProfile() : null;
+			
+			
+			AppCommonAuthUserProfile profile = commonBeanService.isBeanPresent(agentSession) ? agentSession.getProfile() : null;
 			if (ArgUtil.is(profile)
 					&& ArgUtil.is(agentSession.getProfile().code(), chatSessionDoc.getAssignedToAgent())) {
 				DepartmentResponseAuthDto dept = ((AgentResponseAuthDto) profile).getDept();
