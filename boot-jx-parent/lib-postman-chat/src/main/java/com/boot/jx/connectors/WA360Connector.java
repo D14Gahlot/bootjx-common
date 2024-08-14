@@ -381,6 +381,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
+
 			Object waba = outboxMessage.options().remove("waba");
 			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
 			outboxMessage.options().put("waba", waba);
