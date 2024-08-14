@@ -809,7 +809,6 @@ public class WA360CloudClient implements ChannelClient {
 
 	/** Call new metod to post msg directly to waba API **/
 	public MapModel sendTemplateRaw(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-		System.out.println("sendTemplateRaw :" + JsonUtil.toJson(outboxMessage));
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
