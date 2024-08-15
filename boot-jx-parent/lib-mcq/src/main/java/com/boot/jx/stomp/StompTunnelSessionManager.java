@@ -95,8 +95,8 @@ public class StompTunnelSessionManager {
 		ws2xSessionMap.fastRemove(wsSessionID);
 		boolean isExists = false;
 
-		//these are very coslty queries ignore no need to clear
-		//find alternate solution
+		// these are very coslty queries ignore no need to clear
+		// find alternate solution
 //		if (ArgUtil.is(xSessionId)) {
 //			for (Entry<String, String> entry : ws2xSessionMap.readAllEntrySet()) {
 //				if (entry.getValue().equals(xSessionId)) {
@@ -138,7 +138,9 @@ public class StompTunnelSessionManager {
 		if (tags != null && tags.length > 0) {
 			String[] etags = new String[tags.length];
 			for (int i = 0; i < tags.length; i++) {
-				etags[i] = createTagId(tags[i]);
+				if (ArgUtil.is(tags[i])) {
+					etags[i] = createTagId(tags[i]);
+				}
 			}
 			stompSession.setTags(etags);
 		}

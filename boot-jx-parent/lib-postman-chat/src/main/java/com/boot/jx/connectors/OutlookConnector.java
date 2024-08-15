@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
@@ -31,6 +30,7 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
+import com.boot.jx.postman.nexus.NexusEmailClient;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.OutlookPlugin;
@@ -65,8 +65,8 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 	@Autowired
 	private AppConfig appConfig;
 
-	@Value("${mry.nexus.url}")
-	private String nexusUrl;
+	@Autowired
+	private NexusEmailClient nexusEmailClient;
 
 	@Override
 	public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp, AuthState state)
@@ -83,7 +83,6 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 				.queryParam("scope", "offline_access user.read mail.read mail.send Mail.ReadWrite") //
 				.queryParam("response_mode", "form_post") //
 				.getURL();
-
 	}
 
 	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
@@ -170,11 +169,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-
-		restService.ajax(nexusUrl).path("/email/api/v1/outlook/" + channelConfig.getChannelId() + "/message/send")
-				.postJson(MapModel.createInstance().put("refId", outboxMessage.getMessageId()).put("messageId",
-						outboxMessage.getMessageId()))
-				.asNone();
+		nexusEmailClient.send(channelConfig, outboxMessage);
 		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	}
 

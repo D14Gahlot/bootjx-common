@@ -75,13 +75,7 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 	private RestService restService;
 
 	@Autowired
-	private WA360Client wa360Client;
-
-	@Autowired
 	private PMClientConfig pmClientConfig;
-
-	@Autowired
-	private CommonMongoTemplate commonMongoTemplate;
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
