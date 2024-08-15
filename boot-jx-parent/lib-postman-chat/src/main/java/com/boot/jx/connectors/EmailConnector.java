@@ -187,9 +187,6 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
-			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
-			// generic
-
 			Session session = getMailSession(channelConfig);
 
 			if (!ArgUtil.is(session)) {

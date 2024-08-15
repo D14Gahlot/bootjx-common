@@ -59,7 +59,6 @@ public class TwitterConnector extends AbstractConnector<TwitterConfigDetails, Tw
 
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		template(channelConfig, chatContactDoc, outboxMessage);
 		twitterClient.send(channelConfig, outboxMessage);
 		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	}

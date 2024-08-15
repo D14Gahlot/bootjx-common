@@ -170,13 +170,11 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
 
 		restService.ajax(nexusUrl).path("/email/api/v1/outlook/" + channelConfig.getChannelId() + "/message/send")
 				.postJson(MapModel.createInstance().put("refId", outboxMessage.getMessageId()).put("messageId",
 						outboxMessage.getMessageId()))
 				.asNone();
-		// generic
 		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	}
 
