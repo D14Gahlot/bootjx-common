@@ -520,9 +520,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
 
-			Object waba = outboxMessage.options().remove("waba");
 			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
-			outboxMessage.options().put("waba", waba);
 			// generic
 
 			boolean isValidContact = true;

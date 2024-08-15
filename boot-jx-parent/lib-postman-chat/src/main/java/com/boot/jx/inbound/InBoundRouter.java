@@ -14,6 +14,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatStatusService;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -77,7 +78,7 @@ public class InBoundRouter {
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 
-	public void inboundMessageEvent(String channelId, Map<String, Object> data) {
+	public void inboundMessageEvent(String channelType, String channelId, Map<String, Object> data) {
 		MapModel map = MapModel.from(data);
 		PMConfiguration config = pmEnvironment.config();
 		ChannelConfig channelConfig = config.channel(channelId);
@@ -91,7 +92,9 @@ public class InBoundRouter {
 		ConnectorHandler connector = connectorHandlerFactory.get(channelConfig);
 
 		if (!ArgUtil.is(connector)) {
-			LOGGER.error("Channel Not Found for " + channelId);
+			dumpUnhandledEvent(channelConfig.getContactType(), channelConfig.getChannelType(), channelId, channelConfig,
+					data, "Connector Not Found for " + channelId);
+			return;
 		}
 
 		try {
@@ -109,33 +112,51 @@ public class InBoundRouter {
 			} else if (ArgUtil.is(channelConfig) && ArgUtil.is(channelConfig.getUnhandledInboundForward())) {
 				restService.ajax(channelConfig.getUnhandledInboundForward()).post(data).asNone();
 			} else {
-				PayloadDumpCollection d = new PayloadDumpCollection();
-				d.setType("UNHANDLED_INBOX_EVENT");
-				if (ArgUtil.is(channelConfig)) {
-					d.setContactType(channelConfig.getContactType());
-					d.setChannelType(channelConfig.getChannelType());
-					d.setChannelId(channelConfig.getChannelId());
-				}
-				d.setDump(data);
-				commonMongoTemplate.save(d);
+				dumpUnhandledEvent(channelConfig.getContactType(), channelConfig.getChannelType(),
+						channelConfig.getChannelId(), channelConfig, data, null);
 			}
 
 		} catch (Exception e) {
 			auditService.excep(new PMAuditEvent(PMAuditEvent.Type.INBOUND_ERROR).data(data), LOGGER, e);
+			dumpUnhandledEvent(channelConfig.getContactType(), channelConfig.getChannelType(), channelId, channelConfig,
+					data, e.getMessage());
 		}
 	}
 
-	@Async
-	public void inboundMessageEventAsync(String channelId, Map<String, Object> data) {
-		this.inboundMessageEvent(channelId, data);
+	private void dumpUnhandledEvent(ContactType contactType, String channelType, String channelId,
+			ChannelConfig channelConfig, Map<String, Object> data, String log) {
+		PayloadDumpCollection d = new PayloadDumpCollection();
+		d.setType("UNHANDLED_INBOX_EVENT");
+		if (ArgUtil.is(channelConfig)) {
+			d.setContactType(channelConfig.getContactType());
+			d.setChannelType(channelConfig.getChannelType());
+			d.setChannelId(channelConfig.getChannelId());
+			d.setAutoCreatedChannel(channelConfig.isAutoCreated());
+		} else {
+			d.setContactType(contactType);
+			d.setChannelType(channelType);
+			d.setChannelId(channelId);
+		}
+		if (ArgUtil.is(log)) {
+			LOGGER.error(log);
+			d.logs().add(log);
+		}
+		d.setDump(data);
+		commonMongoTemplate.save(d);
 	}
 
 	@Async
-	public void inboundMessageEventAsync(String domain, String channelId, Map<String, Object> data) {
+	public void inboundMessageEventAsync(String channelType, String channelId, Map<String, Object> data) {
+		this.inboundMessageEvent(channelType, channelId, data);
+	}
+
+	@Async
+	public void inboundMessageEventAsync(String domain, String channelType, String channelId,
+			Map<String, Object> data) {
 		AppContextUtil.clear();
 		AppContextUtil.setTenant(domain);
 		AppContextUtil.init();
-		this.inboundMessageEvent(channelId, data);
+		this.inboundMessageEvent(channelType, channelId, data);
 	}
 
 	public CommonFile reloadMedia(String sessionId, String messageId, Integer index)
