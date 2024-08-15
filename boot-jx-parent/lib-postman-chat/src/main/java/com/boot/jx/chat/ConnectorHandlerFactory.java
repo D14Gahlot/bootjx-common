@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.inbound.InBound.MessageEvents;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.CommonFile;
@@ -150,9 +151,14 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 		default public void onException(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 				OutboxMessage outboxMessage, Exception e) {
-			outboxMessage.updateStatus(Message.Status.SENT_EXC);
-			outboxMessage.logs().add(e.getMessage());
-			LOGGER.error("SEND ERROR", e);
+			if (e instanceof AmxApiException) {
+				outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
+				outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
+			} else {
+				outboxMessage.updateStatus(Message.Status.SENT_EXC);
+				outboxMessage.logs().add(e.getMessage());
+				LOGGER.error("SEND ERROR", e);
+			}
 		}
 
 		void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);

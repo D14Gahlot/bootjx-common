@@ -1,6 +1,7 @@
 package com.boot.jx.postman.doc.tpo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,9 +32,13 @@ public class PayloadDumpCollection extends UpdatedTimeStampDoc implements Serial
 	@Indexed
 	private String channelId;
 
+	private boolean isAutoCreatedChannel;
+
 	private Map<String, Object> dump;
 
 	List<Object> incomingRequest;
+
+	private List<Object> logs;
 
 	public void setIncomingRequest(List<Object> incomingRequest) {
 		this.incomingRequest = incomingRequest;
@@ -89,6 +94,29 @@ public class PayloadDumpCollection extends UpdatedTimeStampDoc implements Serial
 
 	public void setDump(Map<String, Object> dump) {
 		this.dump = dump;
+	}
+
+	public boolean isAutoCreatedChannel() {
+		return isAutoCreatedChannel;
+	}
+
+	public void setAutoCreatedChannel(boolean isAutoCreatedChannel) {
+		this.isAutoCreatedChannel = isAutoCreatedChannel;
+	}
+
+	public List<Object> getLogs() {
+		return logs;
+	}
+
+	public void setLogs(List<Object> logs) {
+		this.logs = logs;
+	}
+
+	public List<Object> logs() {
+		if (this.getLogs() == null) {
+			this.setLogs(new ArrayList<Object>());
+		}
+		return this.getLogs();
 	}
 
 }

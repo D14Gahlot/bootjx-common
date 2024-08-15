@@ -157,7 +157,7 @@ public class InBoundController {
 	public ApiResponse<Object, Object> inboundMessageBoxEvent(@PathVariable(required = false) String channelType,
 			@PathVariable(required = false) String accountKey, @PathVariable(required = false) String channelId,
 			@PathVariable(required = false) String channelKey, @RequestBody Map<String, Object> data) {
-		inBoundRouter.inboundMessageEvent(PostManUtil.CHANNEL_ID_DECODED(channelId), data);
+		inBoundRouter.inboundMessageEvent(channelType, PostManUtil.CHANNEL_ID_DECODED(channelId), data);
 		return ApiResponse.build();
 	}
 
@@ -192,7 +192,7 @@ public class InBoundController {
 							AppContextUtil.clear();
 							AppContextUtil.setTenant(channel.getDomain());
 							AppContextUtil.init();
-							inBoundRouter.inboundMessageEventAsync(channel.getChannelId(), newData.map());
+							inBoundRouter.inboundMessageEventAsync(channelType, channel.getChannelId(), newData.map());
 							AppContextUtil.clear();
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -200,7 +200,7 @@ public class InBoundController {
 					}
 				} else {
 					String channelId = PostManUtil.CHANNEL_ID(channelType, pageId);
-					inBoundRouter.inboundMessageEventAsync(channelId, newData.map());
+					inBoundRouter.inboundMessageEventAsync(channelType, channelId, newData.map());
 				}
 
 			});
@@ -235,22 +235,22 @@ public class InBoundController {
 				if (ArgUtil.is(channels)) {
 					for (ChannelConfigDupsDoc channel : channels) {
 						try {
-							inBoundRouter.inboundMessageEventAsync(channel.getDomain(), channel.getChannelId(),
-									newData.map());
+							inBoundRouter.inboundMessageEventAsync(channel.getDomain(), channelType,
+									channel.getChannelId(), newData.map());
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
 				} else if (ArgUtil.is(pageId)) {
 					String channelIdForDomain = PostManUtil.CHANNEL_ID(channelType, pageId);
-					inBoundRouter.inboundMessageEventAsync(channelIdForDomain, newData.map());
+					inBoundRouter.inboundMessageEventAsync(channelIdForDomain, channelType, newData.map());
 				} else {
-					inBoundRouter.inboundMessageEventAsync(channelId, newData.map());
+					inBoundRouter.inboundMessageEventAsync(channelType, channelId, newData.map());
 				}
 
 			});
 		} else {
-			inBoundRouter.inboundMessageEvent(PostManUtil.CHANNEL_ID_DECODED(channelId), data);
+			inBoundRouter.inboundMessageEvent(channelType, PostManUtil.CHANNEL_ID_DECODED(channelId), data);
 		}
 		return ApiResponse.build();
 	}

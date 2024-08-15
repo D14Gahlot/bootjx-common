@@ -8,25 +8,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.activation.DataSource;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-
-import org.apache.commons.mail.util.MimeMessageParser;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.ModelMap;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.email.EmailReplyParser;
-import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
-import com.boot.jx.model.CommonFile;
-import com.boot.jx.model.CommonFileStream;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -34,12 +26,11 @@ import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageTempInbound;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
-import com.boot.jx.postman.model.ext.InBoundMsg;
-import com.boot.jx.postman.model.ext.InBoundWrapper;
-import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundMsg;
+import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.OutlookPlugin;
@@ -49,7 +40,6 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CollectionUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.DateUtil;
 import com.boot.utils.StringUtils;
@@ -74,6 +64,9 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	@Autowired
 	private AppConfig appConfig;
+
+	@Value("${mry.nexus.url}")
+	private String nexusUrl;
 
 	@Override
 	public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp, AuthState state)
@@ -177,14 +170,12 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		try {
-			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
-			// generic
-			outboxMessage.updateStatus(OutboxMessage.Status.SENT);
-		} catch (AmxApiException e) {
-			outboxMessage.updateStatus(OutboxMessage.Status.SENT_ERR);
-			outboxMessage.logs().add(((AmxApiException) e).getErrorKey());
-		}
+		template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
+
+		restService.ajax(nexusUrl).postJson(MapModel.createInstance().put("refId", outboxMessage.getMessageId())
+				.put("messageId", outboxMessage.getMessageId())).asNone();
+		// generic
+		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	}
 
 	@Override
