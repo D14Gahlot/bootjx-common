@@ -34,7 +34,8 @@ public class NexusEmailClient implements ChannelClient {
 				.postJson(MapModel.createInstance().put("refId", outboxMessage.getMessageId())
 						.put("messageId", outboxMessage.getMessageId())
 						.put("messageIdRef", outboxMessage.getMessageIdRef())
-						.put("messageIdExt", outboxMessage.getMessageIdExt()).put("id", outboxMessage.getId()))
+						.put("messageIdExt", outboxMessage.getMessageIdExt()).put("replyId", outboxMessage.getReplyId())
+						.put("replyIdExt", outboxMessage.getReplyIdExt()).put("id", outboxMessage.getId()))
 				.asNone();
 		return outboxMessage;
 	}
