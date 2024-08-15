@@ -111,7 +111,6 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		// System.out.println("onSend=====" + JsonUtil.toJson(outboxMessage));
-		template(channelConfig, chatContactDoc, outboxMessage);
 		instaClient.send(channelConfig, outboxMessage);
 		outboxMessage.updateStatus(Message.Status.SENT);
 	}

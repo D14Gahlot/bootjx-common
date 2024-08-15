@@ -35,8 +35,6 @@ public class SMSConnector extends AbstractConnector<SMSConfigDetails, SMSPlugin>
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
-			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
-			// generic
 			clientClient.sendSMS(channelConfig, outboxMessage);
 			outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 		} catch (AmxApiException e) {

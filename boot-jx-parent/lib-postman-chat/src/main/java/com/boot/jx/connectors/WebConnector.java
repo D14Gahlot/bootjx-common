@@ -152,7 +152,6 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		String contactId = outboxMessage.contact().getContactId();
-		template(channelConfig, chatContactDoc, outboxMessage);
 		String contactIdWeb = AppContextUtil.getTenant() + "/" + contactId;
 		if (redisson == null) {
 			try {
@@ -221,13 +220,13 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 				contactQuery.setPhoneVerified(false);
 			}
 		}
-		
+
 		ChannelConfig channel = getChannelConfig(inboxMessage);
 		List<TmplElement> inputs = new ArrayList<TmplElement>();
 		if (channel.getWeb().isPromptName()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getName())) {
-			inputs.add(new TmplElement().code("name").type("TEXT"));
-			return (OutboxMessage) inboxMessage.replyMessage("Please enter your name").option("inputs", inputs);
+				inputs.add(new TmplElement().code("name").type("TEXT"));
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your name").option("inputs", inputs);
 			}
 		}
 
@@ -235,19 +234,20 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 			if (ArgUtil.isEmpty(chatContactDoc.getEmail())) {
 				inputs.add(new TmplElement().code("email").type("EMAIL"));
 				return (OutboxMessage) inboxMessage.replyMessage("Please enter your email").option("inputs", inputs);
-				
+
 			}
 		}
 		if (channel.getWeb().isPromptPhone()) {
 			if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
 				inputs.add(new TmplElement().code("phone").type("PHONE"));
-			    return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone").option("inputs", inputs);
+				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone").option("inputs", inputs);
 			}
 		}
 
-		//if (ArgUtil.is(inputs) && inputs.size() > 0) {
-		//	return (OutboxMessage) inboxMessage.replyMessage("Please enter your").option("inputs", inputs);
-		//}
+		// if (ArgUtil.is(inputs) && inputs.size() > 0) {
+		// return (OutboxMessage) inboxMessage.replyMessage("Please enter
+		// your").option("inputs", inputs);
+		// }
 
 		return null;
 	}

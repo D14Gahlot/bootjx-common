@@ -76,6 +76,7 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 			outboxMessage.addTo(inboxMessage.getFrom());
 			outboxMessage.contact().setLane(inboxMessage.contact().getLane());
+			this.beforeSend(channelConfig, chatContactDoc, outboxMessage);
 			this.onSend(channelConfig, chatContactDoc, outboxMessage);
 		}
 
@@ -97,6 +98,7 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 			}
 			outboxMessage.addTo(chatContactDoc.getCsid());
 			outboxMessage.contact().setLane(chatContactDoc.getLane());
+			this.beforeSend(channelConfig, chatContactDoc, outboxMessage);
 			this.onSend(channelConfig, chatContactDoc, outboxMessage);
 		}
 
@@ -160,6 +162,8 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 				LOGGER.error("SEND ERROR", e);
 			}
 		}
+
+		void beforeSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
 		void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 

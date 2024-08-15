@@ -178,6 +178,11 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	}
 
 	@Override
+	public void beforeSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		template(channelConfig, chatContactDoc, outboxMessage);
+	}
+
+	@Override
 	public OutboxMessage template(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
 //	if (ArgUtil.is(outboxMessage.getMedia())) {
