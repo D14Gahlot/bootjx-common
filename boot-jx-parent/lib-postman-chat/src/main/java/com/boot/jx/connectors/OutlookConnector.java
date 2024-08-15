@@ -224,7 +224,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		inboxMessage.setMessageIdExt(m.keyEntry("id").asString());
 		// inboxMessage.setReplyIdExt(CollectionUtil.first(msg.getMimeMessage().getHeader("In-Reply-To")));
 		inboxMessage.setSubject(m.keyEntry("subject").asString());
-		inboxMessage.setMessage(EmailReplyParser.parseReply(m.keyEntry("body.content").asString()));
+		inboxMessage.setMessage(EmailReplyParser.parseReply(m.pathEntry("body.content").asString()));
 
 		if (ArgUtil.is(inboxMessage.getSubject())) {
 			String subject = StringUtils
