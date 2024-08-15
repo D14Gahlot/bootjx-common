@@ -24,6 +24,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageTempInbound;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -169,6 +170,23 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		ChatSessionDoc chatSession = ArgUtil.is(context().session()) ? context().session().getDoc() : null;
+
+		if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
+			if (ArgUtil.is(chatSession)) {
+				ChatMessageDTO lastMsg = chatSession.lastMsg();
+				if (ArgUtil.is(lastMsg)) {
+					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
+				}
+			}
+		}
+
+		if (!ArgUtil.is(outboxMessage.getSubject())) {
+			if (ArgUtil.is(chatSession)) {
+				outboxMessage.setSubject(chatSession.getSubject());
+			}
+		}
+
 		nexusEmailClient.send(channelConfig, outboxMessage);
 		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	}
