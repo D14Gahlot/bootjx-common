@@ -22,6 +22,7 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageTempInbound;
 import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -36,6 +37,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.OutlookPlugin;
 import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
@@ -68,6 +70,9 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	@Autowired
 	private NexusEmailClient nexusEmailClient;
+
+	@Autowired
+	private MessageStore messageStore;
 
 	@Override
 	public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp, AuthState state)
@@ -175,10 +180,21 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
 			if (ArgUtil.is(chatSession)) {
 				ChatMessageDTO lastMsg = chatSession.lastMsg();
-				if (ArgUtil.is(lastMsg)) {
+				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
+					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
+				} else if (ArgUtil.is(lastMsg.getMessageId())) {
+					MessageDoc lastMsgDoc = messageStore.findById(lastMsg.getMessageId(), ContactType.EMAIL);
+					outboxMessage.setReplyIdExt(lastMsgDoc.getMessageIdExt());
+				}
+			}
+
+			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
+				ChatMessageDTO lastMsg = chatSession.lastInBoundMsg();
+				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
 					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
 				}
 			}
+
 		}
 
 		if (!ArgUtil.is(outboxMessage.getSubject())) {
