@@ -14,6 +14,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,13 +24,14 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import com.boot.jx.dict.FileFormat;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.CommonFileStream;
+import com.boot.jx.postman.PostmanPackages.Text2Media;
 import com.boot.jx.postman.model.PostManFile;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.BaseFont;
 
-import gui.ava.html.Html2Image;
 import net.sf.jasperreports.engine.JRException;
 
 /**
@@ -47,6 +49,9 @@ public class ConverterAmxFlyingSaucer implements FileConverter {
 	public ConverterAmxFlyingSaucer() {
 		// com.itextpdf.licensekey.LicenseKey.loadLicenseFile(getClass().getResourceAsStream("/license/itextkey1520345049511_0.xml"));
 	}
+
+	@Autowired(required = false)
+	protected Text2Media text2Media;
 
 	/*
 	 * (non-Javadoc)
@@ -115,27 +120,31 @@ public class ConverterAmxFlyingSaucer implements FileConverter {
 					// html = html.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
 					LOGGER.info("====HTML=={}", html);
 
-					Html2Image img = Html2Image.fromHtml(html);
+					// Html2Image img = Html2Image.fromHtml(html);
 
+					String style = "";
 					// img.getImageRenderer().setWidth(700);
 					String width = ((Element) node).getAttribute("width");
 					if (width != null && !width.isEmpty()) {
-						img.getImageRenderer().setWidth(ArgUtil.parseAsInteger(width));
+						style = style + ArgUtil.parseAsInteger(width) + "px";
 					}
 					String height = ((Element) node).getAttribute("height");
 					if (height != null && !height.isEmpty()) {
-						img.getImageRenderer().setHeight(ArgUtil.parseAsInteger(height));
+						style = style + ArgUtil.parseAsInteger(height) + "px";
 					}
+
+					CommonFileStream imgStream = text2Media.toImageFile(html, style);
+
 					// LOGGER.info("====WIDTH=={},{}x{}",width,img.getImageRenderer().getWidth(),img.getImageRenderer().getHeight());
 					// img.getImageRenderer().getRootBox().setStyle(style);
 					// BufferedImage imageFromConvert = img.getImageRenderer().getBufferedImage();
 					// ImageIO.write(imageFromConvert, "png", os);
-					img.getImageRenderer().saveImage(os, true);
+
 					Element imgtag = doc.createElement("img");
 					// LOGGER.info("====IMG=={}","data:image/png;;base64,"
 					// + StringUtils.newStringUtf8(Base64.encodeBase64(os.toByteArray(), false)));
 					imgtag.setAttribute("src", "data:image/png;;base64,"
-							+ StringUtils.newStringUtf8(Base64.encodeBase64(os.toByteArray(), false)));
+							+ StringUtils.newStringUtf8(Base64.encodeBase64(imgStream.getBody(), false)));
 					node.removeChild(node.getFirstChild());
 					// doc.replaceChild(imgtag, node);
 					// doc.appendChild(node);
