@@ -61,6 +61,7 @@ import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.admin.dto.SummaryDocDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
+import com.boot.jx.admin.dto.UniqueContactDto;
 import com.boot.jx.admin.dto.WabaSummaryDocDto;
 import com.boot.jx.api.EventCountDto;
 import com.boot.jx.api.EventCountSummary;
@@ -697,6 +698,21 @@ public class AdminDashBoardManager {
 		List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class, contactType.toString());
 		return totalMsgDoc;
 	}
+	
+	public Integer getTotalMsgCountV1(Object contactType, long dateRange1, long dateRange2) {
+
+		Query queryAll = new Query();
+		queryAll.addCriteria(Criteria.where("timestamp").gt(dateRange1).lt(dateRange2));
+		queryAll.addCriteria(Criteria.where("type").in("I", "O"));
+		queryAll.with(new Sort(new Order(Direction.ASC, "timestamp")));
+		agentAnaMgr.removeMsgFields(queryAll);
+		//List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class, contactType.toString());
+		
+		Long totalMsgDoc= mongoTemplate.count(queryAll, contactType.toString());
+		Integer integerValue = Math.toIntExact(totalMsgDoc);
+		return integerValue;
+	}
+	
 
 	// To fetch In msg records from a collection
 	public List<MessageDoc> getTotalInMsgCount(Object contactType, long dateRange1, long dateRange2) {
@@ -825,25 +841,16 @@ public class AdminDashBoardManager {
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
-			String dateWithTime = new SimpleDateFormat("dd-MM-yyyy hh:mm").format(date);
 			String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
 			SimpleDateFormat sdfH = new SimpleDateFormat("hh aa");
 			String formattedDateH = sdfH.format(date);
 			dateWiseList.add(ddMMyyyyFormat);
-			// LOGGER.info("getHourWiseCount :"+formattedDateH);
-			/** 1 hr gap **/
-			// long hourTimeSamp = (long) (timeStamp / (60 * 1000));
-			// long hh = timeStamp / hourTimeSamp;
-			// hourList.add(hh);
-			// hourList.add(Long.parseLong(formattedDateH));// hour wise count
 			hourList.add(formattedDateH);
 		}
 		Collections.sort(hourList);
 		Set<Object> hourWiseCount = new HashSet<Object>(hourList);
 		for (Object key : hourWiseCount) {
 			mapLst.put(key, Collections.frequency(hourList, key));
-			// System.out.println("House wise VAlue :"+key + ": " +
-			// Collections.frequency(hourList, key));
 		}
 
 		return mapLst;
@@ -851,7 +858,6 @@ public class AdminDashBoardManager {
 
 	public Map<Object, Object> getHourWiseCountV1(List<MessageDoc> msgLst) {
 		List<Long> hourList = new ArrayList<Long>();
-		List<Object> dateWiseList = new ArrayList<Object>();
 		Map<Object, Object> mapLst = new HashMap<Object, Object>();
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
@@ -866,6 +872,7 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
+	
 
 	/** date wise count **/
 	public Map<Object, Object> getDateWiseCount(List<MessageDoc> msgLst) {
@@ -875,7 +882,6 @@ public class AdminDashBoardManager {
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
-			// String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
 			String ddMMyyyyFormat = new SimpleDateFormat("d").format(date);
 			dateWiseList.add(ddMMyyyyFormat);
 			dateWiseLongList.add(Long.parseLong(ddMMyyyyFormat));
@@ -886,7 +892,6 @@ public class AdminDashBoardManager {
 		Set<Object> dateWiseCount = new HashSet<Object>(dateWiseLongList);
 		for (Object key : dateWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWiseLongList, key));
-			// System.out.println(key + ": " + Collections.frequency(dateWiseList, key));
 		}
 
 		return mapLst;
@@ -919,14 +924,6 @@ public class AdminDashBoardManager {
 		for (MessageDoc msg : msgLst) {
 			long timeStamp = msg.getTimestamp();
 			Date date = new Date(timeStamp);
-			/*
-			 * String ddMMyyyyFormat = new SimpleDateFormat("dd-MM-yyyy").format(date);
-			 * cal.setTime(date); String month = cal.getDisplayName(Calendar.MONTH,
-			 * Calendar.LONG, Locale.getDefault()).toUpperCase(); int weekOfMonth =
-			 * cal.get(Calendar.WEEK_OF_MONTH); // int weekOfYear =
-			 * cal.get(Calendar.WEEK_OF_MONTH); String str = month + "  " + weekOfMonth;
-			 * weekWiseList.add(str);
-			 */
 			String monthWise = new SimpleDateFormat("MMM").format(date);
 			weekWiseList.add(monthWise);
 		}
