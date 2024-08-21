@@ -144,7 +144,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 					.postJson(MapModel.createInstance().put("changeType", "created").put("notificationUrl", webhookUrl)
 							.put("lifecycleNotificationUrl", webhookUrl)
 							.put("resource", "/me/mailFolders('inbox')/messages")
-							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1week")))
+							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1hour")))
 							.put("clientState", channelConfig.getOutlook().getMasterClientId())
 							.put("latestSupportedTlsVersion", "v1_2").toMap())
 					.asMapModel();
@@ -158,7 +158,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 					.postJson(MapModel.createInstance().put("changeType", "created").put("notificationUrl", webhookUrl)
 							.put("lifecycleNotificationUrl", webhookUrl)
 							.put("resource", "/me/mailFolders('SentItems')/messages")
-							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1week")))
+							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1hour")))
 							.put("clientState", channelConfig.getOutlook().getMasterClientId())
 							.put("latestSupportedTlsVersion", "v1_2").toMap())
 					.asMapModel();
