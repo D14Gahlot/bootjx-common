@@ -28,9 +28,12 @@ import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundMsg;
+import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.nexus.NexusEmailClient;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -262,6 +265,17 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		return inboxMessage;
 	}
 
+	private MessageReport toMessageReport(InBoundMsgStatus status, ChannelConfig channelConfig) {
+		MessageReport report = this.createMessageReport(channelConfig);
+		report.setMessageId(status.messageId);
+		report.setMessageIdExt(status.messageIdExt);
+		report.setMessageIdRef(status.messageId);
+		report.setChangeStamp(status.timestamp);
+		Status st = ArgUtil.parseAsEnumT(status.status, Status.class);
+		report.setStatus(st);
+		return report;
+	}
+
 	@Override
 	public MessageBoxEvent inboundMessageBoxEvent(ChannelConfig channelConfig, MapModel requestMap,
 			MessageBoxEvent messageBoxEvent) {
@@ -276,6 +290,10 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 				} catch (NoSuchAlgorithmException e) {
 					e.printStackTrace();
 				}
+			}
+		} else if (ArgUtil.is(inbound.statuses)) {
+			for (InBoundMsgStatus status : inbound.statuses) {
+				messageBoxEvent.addMessageReport(toMessageReport(status, channelConfig));
 			}
 		}
 		return messageBoxEvent;
