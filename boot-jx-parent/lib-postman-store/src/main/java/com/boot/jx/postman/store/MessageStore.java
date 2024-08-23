@@ -486,6 +486,10 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		return mongoTemplate.find(query, MessageDoc.class, MessageStore.getCollectionName(contactType));
 	}
 
+	public MessageDoc findById(String id, ContactType contactType) {
+		return mongoTemplate.findById(id, MessageDoc.class, MessageStore.getCollectionName(contactType));
+	}
+
 	public MessageDoc save(MessageDoc msg, ContactType contactType) {
 		if (!ArgUtil.is(msg.getAppType())) {
 			msg.setAppType(appConfig.getAppType());

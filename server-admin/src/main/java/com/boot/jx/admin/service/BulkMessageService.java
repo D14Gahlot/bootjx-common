@@ -87,9 +87,13 @@ public class BulkMessageService extends BatchJobExecuter {
 	}
 
 	public void registerJob(BatchJob job, ChronoScheduler scheduler) {
-		scheduler = ArgUtil.nonEmpty(scheduler, ChronoScheduler.task());
-		scheduler.setTopic("BulkMessageTask");
-		tunnelService.schedule(job.scheduler(scheduler));
+		if (!ArgUtil.is(scheduler)) {
+			registerJob(job);
+		} else {
+			scheduler = ArgUtil.nonEmpty(scheduler, ChronoScheduler.task());
+			scheduler.setTopic("BulkMessageTask");
+			tunnelService.schedule(job.scheduler(scheduler));
+		}
 	}
 
 	public BulkSessionDoc send(OutboxMessage bulkMessage, ChronoScheduler scheduler) throws NumberParseException {

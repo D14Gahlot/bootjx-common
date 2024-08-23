@@ -3,9 +3,7 @@ package com.boot.jx.connectors;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -416,11 +414,6 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
-
-			Object waba = outboxMessage.options().remove("waba");
-			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
-			outboxMessage.options().put("waba", waba);
-			// generic
 
 			boolean isValidContact = true;
 			if (outboxMessage.messageMetaWrapper().composeTypeIs(MESSAGE_COMPOSE_TYPE.SEND_CODE)) {

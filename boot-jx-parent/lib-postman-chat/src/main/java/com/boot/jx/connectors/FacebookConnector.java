@@ -122,7 +122,6 @@ public class FacebookConnector extends AbstractConnector<FacebookConfigDetails, 
 	}
 
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		template(channelConfig, chatContactDoc, outboxMessage);
 		facebooClient.send(channelConfig, outboxMessage);
 		outboxMessage.updateStatus(Message.Status.SENT);
 	}

@@ -35,7 +35,6 @@ public class OAConnector extends AbstractConnector<OAConfigDetails, OAPlugin> {
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
-			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
 			// generic
 			clientClient.sendSMS(channelConfig, outboxMessage);
 			outboxMessage.updateStatus(OutboxMessage.Status.SENT);

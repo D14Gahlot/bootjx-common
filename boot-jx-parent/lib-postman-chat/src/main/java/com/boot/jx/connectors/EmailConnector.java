@@ -75,13 +75,7 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 	private RestService restService;
 
 	@Autowired
-	private WA360Client wa360Client;
-
-	@Autowired
 	private PMClientConfig pmClientConfig;
-
-	@Autowired
-	private CommonMongoTemplate commonMongoTemplate;
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
@@ -187,9 +181,6 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 	@Override
 	public void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		try {
-			template(channelConfig, chatContactDoc, outboxMessage); // TODO:- This is common for all connector, make it
-			// generic
-
 			Session session = getMailSession(channelConfig);
 
 			if (!ArgUtil.is(session)) {
