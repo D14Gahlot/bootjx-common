@@ -176,7 +176,6 @@ public class PMConstants {
 
 		public static final String SEND_CODE = "N";
 		public static final String REPLY_CODE = "R";
-		
 
 	}
 
@@ -184,8 +183,9 @@ public class PMConstants {
 		public static final String PUSH_MESSAGE = "PM";
 		public static final String SESSION_MESSAGE = "SM";
 	}
-	public static class MEDIATEMPLATE{
-		public static final String MEDIA_TEMPLATE="mediaTemplate";
+
+	public static class MEDIATEMPLATE {
+		public static final String MEDIA_TEMPLATE = "mediaTemplate";
 	}
 
 	public final class MESSAGE_SENDER_TYPE {
@@ -358,6 +358,7 @@ public class PMConstants {
 	}
 
 	public static class ParamKeys {
+		public static final String X_API_CODE = "x-api-code";
 		public static final String X_API_ID = "x-api-id";
 		public static final String X_API_KEY = "x-api-key";
 

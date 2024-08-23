@@ -63,6 +63,7 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 
 		String apiKey = req.get(ParamKeys.X_API_KEY);
 		String apiId = req.get(ParamKeys.X_API_ID);
+		String apiCode = req.get(ParamKeys.X_API_CODE);
 
 		// For Swagger Handling
 		if (!ArgUtil.is(apiKey)) {
@@ -85,6 +86,10 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 		ClientApp apiKeyConfig = null;
 		if (ArgUtil.is(apiId) && apiKey.equals(pmCommonConfig.getScriptusSecret())) {
 			apiKeyConfig = config.clientApiKey(apiId);
+			if (ArgUtil.is(apiKeyConfig))
+				apiKey = apiKeyConfig.getKey();
+		} else if (ArgUtil.is(apiCode) && apiKey.equals(pmCommonConfig.getScriptusSecret())) {
+			apiKeyConfig = config.clientApiKey(apiCode);
 			if (ArgUtil.is(apiKeyConfig))
 				apiKey = apiKeyConfig.getKey();
 		} else {
