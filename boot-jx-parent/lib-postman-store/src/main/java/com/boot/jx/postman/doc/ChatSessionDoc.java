@@ -72,9 +72,14 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	private String subject;
 
+	@Indexed(sparse = true)
 	private String assignedToDept;
+
+	@Indexed(sparse = true)
 	private String assignedToAgent;
+
 	private String assignedToBot;
+
 	private String assignedToQueue;
 
 	@Indexed
@@ -86,6 +91,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	@Indexed
 	private boolean primary;
 
+	@Indexed
 	private long startSessionStamp;
 	private long fistResponseStamp;
 
