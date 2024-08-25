@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -61,7 +62,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
-public class AgentAnalyticsManager implements Serializable{
+public class AgentAnalyticsManager implements Serializable {
 	/**
 	 * 
 	 */
@@ -75,7 +76,6 @@ public class AgentAnalyticsManager implements Serializable{
 	public static final int OPEN_CONV_HR = 1;
 
 	public static final String MY_BOT = "BOT";
-
 
 	@Autowired
 	CommonMongoTemplate mongoTemplate;
@@ -106,53 +106,33 @@ public class AgentAnalyticsManager implements Serializable{
 		}
 
 		if (allAgent != null && !allAgent.isEmpty()) {
-			int i=0;
-			long totaSeconds=0;
-//			long st =  Instant.now().toEpochMilli();
-//			lstDto = getAgentAnalyticsMultiThreaded(allAgent,date1, date2,req.getContactType());
-//			Long et1=Instant.now().toEpochMilli();
-//			System.out.println("total time taken in seconds:"+st +"\t et"+ et1+"\t for all agents :"+getMitlToSeconds(et1-st));
-//			long diff = (et1-st1);
-			//lstDto.add(dto);
-			long st =  Instant.now().toEpochMilli();
-			LOGGER.info("Agent List :"+allAgent.size()+"\t Start Time :"+st);
-			for (Object chatSess : allAgent) {
-				i++;
-				Long st1= Instant.now().toEpochMilli();
-				
-				dto = new DashBoardResponseDto();
-				String agent = (String) chatSess;
-				if(!StringUtils.isBlank(agent)) {
-					dto = getAgentAnalytics(agent, date1, date2,req.getContactType());
-					lstDto.add(dto);
+			long st = Instant.now().toEpochMilli();
+			LOGGER.info("Agent List: " + allAgent.size() + "\t Start Time: " + st);
+
+			long date1Final = date1;
+			long date2Final = date2;
+
+			lstDto = allAgent.parallelStream().map(agent -> {
+				if (!StringUtils.isBlank(agent)) {
+					return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
 				}
-				
-				Long et1=Instant.now().toEpochMilli();
-				
-				long diff = (et1-st1);
-				totaSeconds+=diff;
-				
-			}
-			
-			
+				return null;
+			}).filter(Objects::nonNull).collect(Collectors.toList());
+
 			long et = Instant.now().toEpochMilli();
-			long diffT =(et-st);
-			LOGGER.info("total time taken in seconds:"+et+"\t for all agents :"+getMitlToSeconds(diffT));
-					
-			
-		} else  {
-			dto = getAgentAnalytics(req.getAgent(), date1, date2,req.getContactType());
+			LOGGER.info("Total time taken in seconds: " + et + "\t for all agents: " + getMitlToSeconds(et - st));
+		} else {
+			dto = getAgentAnalytics(req.getAgent(), date1, date2, req.getContactType());
 			lstDto.add(dto);
 		}
-	
-		
+
 		/** "mode" : "BOT", "assignedToAgent" : null, **/
-		if ((!ArgUtil.isEmptyString(req.getAgent()) &&  req.getAgent().equalsIgnoreCase(DEFAULT_AGENT))) {
-		dto = getAgentAnalytics(null, date1, date2,req.getContactType());
-		dto.setAgentName(MY_BOT);
-		lstDto.add(dto);
+		if ((!ArgUtil.isEmptyString(req.getAgent()) && req.getAgent().equalsIgnoreCase(DEFAULT_AGENT))) {
+			dto = getAgentAnalytics(null, date1, date2, req.getContactType());
+			dto.setAgentName(MY_BOT);
+			lstDto.add(dto);
 		}
-		
+
 		return lstDto;
 	}
 
@@ -179,7 +159,7 @@ public class AgentAnalyticsManager implements Serializable{
 
 		dto.setPeakLoad(new PeakLoadDto());
 		for (DashBoardResponseDto dt : dtoLst) {
-			//LOGGER.info("get Agent/channel  wise {  ==== }:" + JsonUtil.toJson(dt));
+			// LOGGER.info("get Agent/channel wise { ==== }:" + JsonUtil.toJson(dt));
 			totalInMsg += dt.getTotalInMsgExchanged();
 			totalOutMsg += dt.getTotalOutMsgExchanged();
 			totalMsg += dt.getTotalMsgExchanged();
@@ -194,11 +174,11 @@ public class AgentAnalyticsManager implements Serializable{
 			}
 			botScore = dt.getBotScore();
 			botClosure = dt.getBotClosure();
-			if(dt.getLeadMessanger()!=null) {
-			 dto.setLeadMessanger(dt.getLeadMessanger());
+			if (dt.getLeadMessanger() != null) {
+				dto.setLeadMessanger(dt.getLeadMessanger());
 			}
-			if(dt.getGraphApiDetails()!=null && !dt.getGraphApiDetails().isEmpty()) {
-			 graphApiMap = mergerMapKyAndValue(graphApiMap, dt.getGraphApiDetails());
+			if (dt.getGraphApiDetails() != null && !dt.getGraphApiDetails().isEmpty()) {
+				graphApiMap = mergerMapKyAndValue(graphApiMap, dt.getGraphApiDetails());
 			}
 			if (dt.getGraphApiDetailsV1() != null && !dt.getGraphApiDetailsV1().isEmpty()) {
 				graphApiMapV1 = mergerMapKyAndValue(graphApiMapV1, dt.getGraphApiDetailsV1());
@@ -227,7 +207,7 @@ public class AgentAnalyticsManager implements Serializable{
 			dto.setConverDuration(convDuration / totalMsg);
 		}
 		dto.setStartLag(totalStartLag);
-		if(graphApiMap!=null && !graphApiMap.isEmpty()) {
+		if (graphApiMap != null && !graphApiMap.isEmpty()) {
 			dto.setGraphApiDetails(graphApiMap);
 		}
 		if (graphApiMapV1 != null && !graphApiMapV1.isEmpty()) {
@@ -242,137 +222,138 @@ public class AgentAnalyticsManager implements Serializable{
 	}
 
 	@SuppressWarnings("unchecked")
-	public DashBoardResponseDto getAgentAnalytics(String agent, long dateRange1, long dateRange2,Object contact) {
+	public DashBoardResponseDto getAgentAnalytics(String agent, long dateRange1, long dateRange2, Object contact) {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 		LOGGER.debug(dtf.format(LocalDateTime.now()) + " Get Analytics for  :" + agent);
 		DashBoardResponseDto dto = new DashBoardResponseDto();
 		dto.setAgentName(agent == null ? MY_BOT : agent);
 		/** Unique agent list **/
 		List<UniqueContactDto> distinctContactLst = getUniqueAgentWiseContactListV1(agent, dateRange1, dateRange2);
-		
-		
+
 		if (ArgUtil.is(distinctContactLst)) {
 			dto.setUniqueConversation(distinctContactLst.size());
 		}
-	
+
 		/** Total Agent-contact wise msg **/
-  if(distinctContactLst!=null && !distinctContactLst.isEmpty()) {
-		
-	  List<MessageDoc> totalAgConMsgExchanged =getTotalMessageAgentAndContactWiseV1(distinctContactLst, dateRange1,
-				dateRange2,contact,agent);
-		long totalAgConMsgExchangedCnt=getTotalMessageAgentAndContactWiseV2(distinctContactLst, dateRange1,
-				dateRange2,contact,agent);
-		
-		if (ArgUtil.is(totalAgConMsgExchanged)) {
-			dto.setTotalMsgExchanged(totalAgConMsgExchangedCnt);
-			
-			List<MessageDoc> totalTemplateMsgExchanged = new ArrayList<>();
-			List<MessageDoc> totalTemplateMsgDelivered = new ArrayList<>();
-			for (MessageDoc messageDoc : totalAgConMsgExchanged) {
-				if (messageDoc != null) {
-					MessageMetaWrapper metaWrapper = new MessageMetaWrapper(messageDoc.getMeta());
-					if (metaWrapper != null) {
-						if (metaWrapper.sendType() != null && metaWrapper.sendType().equalsIgnoreCase("PM")) {
-							totalTemplateMsgExchanged.add(messageDoc);
-							if (messageDoc.getStamps().get(Message.Status.DLVRD.name()) != null) {
-								totalTemplateMsgDelivered.add(messageDoc);
+		if (distinctContactLst != null && !distinctContactLst.isEmpty()) {
+
+			List<MessageDoc> totalAgConMsgExchanged = getTotalMessageAgentAndContactWiseV1(distinctContactLst,
+					dateRange1, dateRange2, contact, agent);
+			long totalAgConMsgExchangedCnt = getTotalMessageAgentAndContactWiseV2(distinctContactLst, dateRange1,
+					dateRange2, contact, agent);
+
+			if (ArgUtil.is(totalAgConMsgExchanged)) {
+				dto.setTotalMsgExchanged(totalAgConMsgExchangedCnt);
+
+				List<MessageDoc> totalTemplateMsgExchanged = new ArrayList<>();
+				List<MessageDoc> totalTemplateMsgDelivered = new ArrayList<>();
+				for (MessageDoc messageDoc : totalAgConMsgExchanged) {
+					if (messageDoc != null) {
+						MessageMetaWrapper metaWrapper = new MessageMetaWrapper(messageDoc.getMeta());
+						if (metaWrapper != null) {
+							if (metaWrapper.sendType() != null && metaWrapper.sendType().equalsIgnoreCase("PM")) {
+								totalTemplateMsgExchanged.add(messageDoc);
+								if (messageDoc.getStamps().get(Message.Status.DLVRD.name()) != null) {
+									totalTemplateMsgDelivered.add(messageDoc);
+								}
 							}
 						}
 					}
 				}
+				if (ArgUtil.is(totalTemplateMsgDelivered)) {
+					dto.setTotalTemplateMsgDelivered(totalTemplateMsgDelivered.size());
+				}
+				if (ArgUtil.is(totalTemplateMsgExchanged)) {
+					dto.setTotalTemplateMsgSent(totalTemplateMsgExchanged.size());
+				}
 			}
-			if (ArgUtil.is(totalTemplateMsgDelivered)) {
-				dto.setTotalTemplateMsgDelivered(totalTemplateMsgDelivered.size());
+
+			/** Open conversation **/
+			long openConvesCnt = getAgentWiseOpenConversationV1(agent, dateRange1, dateRange2);
+			if (ArgUtil.is(openConvesCnt)) {
+				dto.setOpenConversation(openConvesCnt);
+
 			}
-			if (ArgUtil.is(totalTemplateMsgExchanged)) {
-				dto.setTotalTemplateMsgSent(totalTemplateMsgExchanged.size());
+
+			/** Resolved Conversation **/
+			long resConvCnt = getAgentWiseResolvedConversationV1(agent, dateRange1, dateRange2);
+			if (ArgUtil.is(resConvCnt)) {
+				dto.setResolvedConversation(resConvCnt);
+			}
+			/** Peak Load **/
+
+			PeakLoadDto peakLoadResult = adminDbMgr.getPeakLoadMsgCount(totalAgConMsgExchanged);// getAgentPeakLoadMsgCount(totalMsgExchanged);
+			dto.setPeakLoad(peakLoadResult);
+
+			/** lead Messanger **/
+
+			LeadMessanger leadMsg = getLeadMessenger(agent, dateRange1, dateRange2, contact);
+			dto.setLeadMessanger(leadMsg);
+
+			/** Converation duration **/
+			long conVerDuration = getConversationDurationV1(agent, dateRange1, dateRange2, distinctContactLst);
+
+			if (ArgUtil.is(conVerDuration)) {
+				dto.setConverDuration(conVerDuration);
+			}
+
+			/** startLag **/
+			double startLag = getStartLagV1(agent, dateRange1, dateRange2, distinctContactLst);
+			dto.setStartLag(startLag);
+
+			/** bot score **/
+
+			long botScore = getBotScoreV1(dateRange1, dateRange2);
+			dto.setBotScore(botScore);
+
+			/** bot closure **/
+
+			double botClosure = getBotClosureV1(dateRange1, dateRange2, dto.getTotalMsgExchanged());
+			dto.setBotClosure(botClosure);
+
+			/** Satisfaction score **/
+			double satisfactionScore = getSatisfactionScoreV1(dateRange1, dateRange2, agent);
+			dto.setSatisfactionScore(satisfactionScore);
+
+			/** find the date diff between two dates **/
+
+			Map<String, Integer> dateDiffMAp = getDateDiff(dateRange1, dateRange2);
+			int hour = 0;
+			int days = 0;
+			if (ArgUtil.is(dateDiffMAp)) {
+				hour = dateDiffMAp.get("HOUR");
+				days = dateDiffMAp.get("DAYS");
+			}
+			LOGGER.debug("mru hour {===}:" + hour + "\t dateDiffMAp :" + dateDiffMAp);
+
+			if (hour <= 24) {
+				Map<Object, Object> dayMapLst = getHourWiseCountV2(distinctContactLst, agent, dateRange1, dateRange2,
+						contact);
+				Map<Object, Object> hourWiseCount = (Map<Object, Object>) dayMapLst.get("HR");
+				Map<Object, Object> hourWiseCountV1 = (Map<Object, Object>) dayMapLst.get("HR_V1");
+
+				dto.setGraphApiDetails(hourWiseCount);
+				dto.setGraphApiDetailsV1(hourWiseCountV1);
+			} else if (hour > 24 && days <= 31) {
+				Map<Object, Object> dayMapLst = getDateWiseCountV2(distinctContactLst, agent, dateRange1, dateRange2,
+						contact);
+				Map<Object, Object> dateWiseCount = (Map<Object, Object>) dayMapLst.get("DAY");
+				Map<Object, Object> timeStampWiseCount = (Map<Object, Object>) dayMapLst.get("DAY_V1");
+
+				dto.setGraphApiDetails(dateWiseCount);
+				dto.setGraphApiDetailsV1(timeStampWiseCount);
+			} else {
+				Map<Object, Object> weekMapLst = getWeekWiseCountV2(distinctContactLst, agent, dateRange1, dateRange2,
+						contact);
+				Map<Object, Object> dweekWiseCount = (Map<Object, Object>) weekMapLst.get("WEEK");
+				Map<Object, Object> timeStampWiseCount = (Map<Object, Object>) weekMapLst.get("WEEK_V1");
+
+				dto.setGraphApiDetails(dweekWiseCount);
+				dto.setGraphApiDetailsV1(timeStampWiseCount);
+
 			}
 		}
 
-		/** Open conversation **/
-		long openConvesCnt = getAgentWiseOpenConversationV1(agent, dateRange1, dateRange2);
-		if (ArgUtil.is(openConvesCnt)) {
-			dto.setOpenConversation(openConvesCnt);
-			
-		}
-	
-
-		/** Resolved Conversation **/
-		long resConvCnt = getAgentWiseResolvedConversationV1(agent, dateRange1, dateRange2);
-		if (ArgUtil.is(resConvCnt)) {
-			dto.setResolvedConversation(resConvCnt);
-		}
-		/** Peak Load **/
-
-		PeakLoadDto peakLoadResult = adminDbMgr.getPeakLoadMsgCount(totalAgConMsgExchanged);// getAgentPeakLoadMsgCount(totalMsgExchanged);
-		dto.setPeakLoad(peakLoadResult);
-
-		/** lead Messanger **/
-
-		LeadMessanger leadMsg = getLeadMessenger(agent, dateRange1, dateRange2,contact);
-		dto.setLeadMessanger(leadMsg);
-
-		/** Converation duration **/
-		long conVerDuration = getConversationDurationV1(agent, dateRange1, dateRange2,distinctContactLst);
-		
-		if (ArgUtil.is(conVerDuration)) {
-			dto.setConverDuration(conVerDuration);
-		}
-
-		/** startLag **/
-		double startLag = getStartLagV1(agent, dateRange1, dateRange2,distinctContactLst);
-		dto.setStartLag(startLag);
-
-		/** bot score **/
-
-		long botScore = getBotScoreV1(dateRange1, dateRange2);
-		dto.setBotScore(botScore);
-
-		/** bot closure **/
-
-		double botClosure = getBotClosureV1(dateRange1, dateRange2, dto.getTotalMsgExchanged());
-		dto.setBotClosure(botClosure);
-
-		/** Satisfaction score **/
-		double satisfactionScore = getSatisfactionScoreV1(dateRange1, dateRange2, agent);
-		dto.setSatisfactionScore(satisfactionScore);
-
-		/** find the date diff between two dates **/
-
-		Map<String, Integer> dateDiffMAp = getDateDiff(dateRange1, dateRange2);
-		int hour = 0;
-		int days = 0;
-		if (ArgUtil.is(dateDiffMAp)) {
-			hour = dateDiffMAp.get("HOUR");
-			days = dateDiffMAp.get("DAYS");
-		}
-		LOGGER.debug("mru hour {===}:" + hour + "\t dateDiffMAp :" + dateDiffMAp);
-
-		if (hour <= 24) {
-			Map<Object, Object> dayMapLst =getHourWiseCountV2(distinctContactLst, agent, dateRange1, dateRange2, contact);
-			Map<Object, Object> hourWiseCount =(Map<Object, Object>)dayMapLst.get("HR");
-			Map<Object, Object> hourWiseCountV1 =(Map<Object, Object>)dayMapLst.get("HR_V1");
-		
-			dto.setGraphApiDetails(hourWiseCount);
-			dto.setGraphApiDetailsV1(hourWiseCountV1);
-		} else if (hour > 24 && days <= 31) {
-			Map<Object, Object> dayMapLst =getDateWiseCountV2(distinctContactLst, agent, dateRange1, dateRange2, contact);
-			Map<Object, Object> dateWiseCount=(Map<Object, Object>)dayMapLst.get("DAY");
-			Map<Object, Object> timeStampWiseCount=(Map<Object, Object>)dayMapLst.get("DAY_V1");
-		
-			dto.setGraphApiDetails(dateWiseCount);
-			dto.setGraphApiDetailsV1(timeStampWiseCount);
-		} else {
-			Map<Object, Object> weekMapLst =getWeekWiseCountV2(distinctContactLst, agent, dateRange1, dateRange2, contact);
-			Map<Object, Object> dweekWiseCount =(Map<Object, Object>)weekMapLst.get("WEEK");
-			Map<Object, Object> timeStampWiseCount =(Map<Object, Object>)weekMapLst.get("WEEK_V1");
-		
-			dto.setGraphApiDetails(dweekWiseCount);
-			dto.setGraphApiDetailsV1(timeStampWiseCount);
-
-		}
-  }
-  
 		return dto;
 	}
 
@@ -414,19 +395,19 @@ public class AgentAnalyticsManager implements Serializable{
 
 		return distinceContactList;
 	}
-	
+
 	public List<UniqueContactDto> getDefaultDistinctContactV1(long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		query.addCriteria(Criteria.where("assignedToAgent").exists(false));
-		// removeChatSessField(query);
 		query.fields().include("assignedAgentStamp").include("contactId").include("contact");
-		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		List<UniqueContactDto> distinceContactList = getDistinctV1(chatSessDocLst);
 
-		return distinceContactList;
+		// Fetch documents from MongoDB
+		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+
+		// Optimize distinct contact list processing
+		return getDistinctV1(chatSessDocLst);
 	}
-	
 
 	public List<String> getUniqueAgentWiseContactList(String agent, long dateRange1, long dateRange2) {
 
@@ -434,57 +415,47 @@ public class AgentAnalyticsManager implements Serializable{
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId");
-		//System.out.println("QRY :"+agent+"\t "+JsonUtil.toJsonPrettyPrint(query));
+		// System.out.println("QRY :"+agent+"\t "+JsonUtil.toJsonPrettyPrint(query));
 		// removeChatSessField(query);
 		List<String> distinctIdList = new ArrayList<>();
-		
+
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		
+
 		distinctIdList = getDistinct(chatSessDocLst);
 
-
-		if(agent==null) {
+		if (agent == null) {
 			distinctIdList = getDefaultDistinctContact(dateRange1, dateRange2);
 		}
 
 		return distinctIdList;
 	}
-	
+
 	public List<UniqueContactDto> getUniqueAgentWiseContactListV1(String agent, long dateRange1, long dateRange2) {
 
-		Query query = new Query();
-		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		// Early return if agent is null to avoid unnecessary query execution
+		if (agent == null) {
+			return getDefaultDistinctContactV1(dateRange1, dateRange2);
+		}
+
+		// Construct the query
+		Query query = new Query(
+				Criteria.where("assignedToAgent").is(agent).and("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
-		List<UniqueContactDto> distinctIdList = new ArrayList<>();
+
+		// Execute the query and fetch results
 		long st = System.currentTimeMillis();
-		//System.out.println("==============START TIME =========================="+st);
-		//System.out.println("==============getUniqueAgentWiseContactListV1 TIME =========================="+JsonUtil.toJson(query));
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		
-			
-		
 		long et = System.currentTimeMillis();
-		
-		if(ArgUtil.is(chatSessDocLst)) {
-		 distinctIdList = getDistinctV1(chatSessDocLst);
+		LOGGER.info("Mongo query execution time: {} ms", (et - st));
+
+		// Process the results
+		List<UniqueContactDto> distinctIdList = new ArrayList<>();
+		if (ArgUtil.is(chatSessDocLst)) {
+			distinctIdList = getDistinctV1(chatSessDocLst);
 		}
 
-		if(agent==null) {
-			distinctIdList = getDefaultDistinctContactV1(dateRange1, dateRange2);
-		}
-		
-		for(UniqueContactDto un:distinctIdList) {
-			//System.out.println("UNIQUE :"+JsonUtil.toJson(un));
-		}
-
-		//System.out.println("**************END TIME **************"+et +"\t difference in second :"+(et-st)/1000);
 		return distinctIdList;
 	}
-	
-	
-	
-	
 
 	public List<String> getDistinct(List<ChatSessionDoc> chatSessDocLst) {
 		List<String> distinctIdList = new ArrayList<>();
@@ -499,32 +470,27 @@ public class AgentAnalyticsManager implements Serializable{
 
 		return distinctIdList;
 	}
-	
+
 	public List<UniqueContactDto> getDistinctV1(List<ChatSessionDoc> chatSessDocLst) {
-		List<UniqueContactDto> distinctIdList = new ArrayList<>();
+		Set<String> seenContacts = new HashSet<>();
+		List<UniqueContactDto> uniqueContacts = new ArrayList<>();
+
 		for (ChatSessionDoc doc : chatSessDocLst) {
-			if (ArgUtil.is(doc.getContactId())) {
-				UniqueContactDto dto=new UniqueContactDto();
-				dto.setContactId(doc.getContactId());
-				dto.setContactType(doc.getContact().getContactType());
-				distinctIdList.add(dto);
+			if (ArgUtil.is(doc.getContactId()) && ArgUtil.is(doc.getContact())) {
+				String uniqueKey = doc.getContactId() + "-" + doc.getContact().getContactType();
+
+				// Add only if the combination is not already seen
+				if (seenContacts.add(uniqueKey)) {
+					UniqueContactDto dto = new UniqueContactDto();
+					dto.setContactId(doc.getContactId());
+					dto.setContactType(doc.getContact().getContactType());
+					uniqueContacts.add(dto);
+				}
 			}
 		}
-		 // Fetch unique combinations of contactId and contactType
-		 // Fetch unique combinations of contactId and contactType
-        List<UniqueContactDto> uniqueContacts = distinctIdList.stream()
-                .collect(Collectors.toMap(
-                        contact -> contact.getContactId() + "-" + contact.getContactType(), // Key: combination of contactId and contactType
-                        contact -> contact,     // Value: the UniqueContactDto object itself
-                        (contact1, contact2) -> contact1 // In case of duplicates, keep the first one
-                ))
-                .values()
-                .stream()
-                .collect(Collectors.toList());
 
 		return uniqueContacts;
 	}
-
 
 	public List<ChatSessionDoc> getAgentWiseTotalMsgExchanged(String agent, long dateRange1, long dateRange2) {
 
@@ -555,17 +521,15 @@ public class AgentAnalyticsManager implements Serializable{
 		}
 		return totalOpenMsgDoc;
 	}
-	
-	
+
 	public long getAgentWiseOpenConversationV1(String agent, long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("active").is(true));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
-		long count= mongoTemplate.count(query, CHAT_SESSION);
+		long count = mongoTemplate.count(query, CHAT_SESSION);
 		return count;
 	}
-
 
 	public List<ChatSessionDoc> getAgentWiseResolvedConversation(String agent, long dateRange1, long dateRange2) {
 		List<ChatSessionDoc> totalResolvedMsgDoc = new ArrayList<ChatSessionDoc>();
@@ -573,33 +537,36 @@ public class AgentAnalyticsManager implements Serializable{
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("resolved").is(true));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
-		//long st =System.currentTimeMillis();
-		//System.out.println("getAgentWiseResolvedConversation ST :"+st);
-		//System.out.println("getAgentWiseResolvedConversation query :"+JsonUtil.toJson(query));
+		// long st =System.currentTimeMillis();
+		// System.out.println("getAgentWiseResolvedConversation ST :"+st);
+		// System.out.println("getAgentWiseResolvedConversation query
+		// :"+JsonUtil.toJson(query));
 		List<ChatSessionDoc> totalMsgDoc = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		//long et1 =System.currentTimeMillis();
-		//System.out.println("getAgentWiseResolvedConversation END TIME QUERY EXE :"+et1 +"\t difference "+(et1-st));
+		// long et1 =System.currentTimeMillis();
+		// System.out.println("getAgentWiseResolvedConversation END TIME QUERY EXE
+		// :"+et1 +"\t difference "+(et1-st));
 		for (ChatSessionDoc chatDoc : totalMsgDoc) {
 			totalResolvedMsgDoc.add(chatDoc);
 		}
-		//long et2 =System.currentTimeMillis();
-		//System.out.println("getAgentWiseResolvedConversation END TIME totalResolvedMsgDoc :"+et2+"\t difference "+(et2-st));
+		// long et2 =System.currentTimeMillis();
+		// System.out.println("getAgentWiseResolvedConversation END TIME
+		// totalResolvedMsgDoc :"+et2+"\t difference "+(et2-st));
 		return totalResolvedMsgDoc;
 	}
-	
+
 	public long getAgentWiseResolvedConversationV1(String agent, long dateRange1, long dateRange2) {
-		
+
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("resolved").is(true));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact").include("resolved");
-		long count= mongoTemplate.count(query, CHAT_SESSION);
-		
+		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact")
+				.include("resolved");
+		long count = mongoTemplate.count(query, CHAT_SESSION);
+
 		return count;
 	}
-	
 
-	public long getConversationDuration(String agent, long startTime, long endTime,List<String> uniquContactIdLst) {
+	public long getConversationDuration(String agent, long startTime, long endTime, List<String> uniquContactIdLst) {
 		Map<String, Long> conVerMsgLst = new HashMap<String, Long>();
 		Long maxEntryKeyValue = new Long(0);
 		for (Object chatSession : uniquContactIdLst) {
@@ -623,8 +590,9 @@ public class AgentAnalyticsManager implements Serializable{
 
 		return maxEntryKeyValue;
 	}
-	
-	public long getConversationDurationV1(String agent, long startTime, long endTime,List<UniqueContactDto> uniquContactIdLst) {
+
+	public long getConversationDurationV1(String agent, long startTime, long endTime,
+			List<UniqueContactDto> uniquContactIdLst) {
 		Map<String, Long> conVerMsgLst = new HashMap<String, Long>();
 		Long maxEntryKeyValue = new Long(0);
 		for (UniqueContactDto chatSession : uniquContactIdLst) {
@@ -648,14 +616,14 @@ public class AgentAnalyticsManager implements Serializable{
 
 		return maxEntryKeyValue;
 	}
-	
 
-	public double getStartLag(String agent, long dateRange1, long dateRange2,List<String> uniquContactIdLst) {
+	public double getStartLag(String agent, long dateRange1, long dateRange2, List<String> uniquContactIdLst) {
 		Map<String, Double> startLagMapLst = new HashMap<String, Double>();
 		double startLag = 0.0d;
 		double percentageWithDecimal = 0.0d;
 
-		//List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
+		// List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent,
+		// dateRange1, dateRange2);
 		for (Object chatSession : uniquContactIdLst) {
 			String conId = (String) chatSession;
 			Query query = new Query();
@@ -681,11 +649,13 @@ public class AgentAnalyticsManager implements Serializable{
 
 		return startLag;
 	}
-	
-	public double getStartLagV1(String agent, long dateRange1, long dateRange2,List<UniqueContactDto> uniquContactIdLst) {
+
+	public double getStartLagV1(String agent, long dateRange1, long dateRange2,
+			List<UniqueContactDto> uniquContactIdLst) {
 		Map<String, Double> startLagMapLst = new HashMap<String, Double>();
 		double startLag = 0.0d;
-		//List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
+		// List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent,
+		// dateRange1, dateRange2);
 		for (UniqueContactDto chatSession : uniquContactIdLst) {
 			String conId = chatSession.getContactId();
 			Query query = new Query();
@@ -708,15 +678,13 @@ public class AgentAnalyticsManager implements Serializable{
 			Double maxEntryKeyValue = startLagMapLst.get(maxEntryKey);
 			startLag = maxEntryKeyValue;
 		}
-		
-		 // Return the maximum start lag value if available
+
+		// Return the maximum start lag value if available
 		double startLag1 = startLagMapLst.values().stream().max(Double::compareTo).orElse(0.0);
-	//	System.out.println("startLag1 :"+startLag1+"\t startLag :"+startLag);
+		// System.out.println("startLag1 :"+startLag1+"\t startLag :"+startLag);
 
 		return startLag;
 	}
-
-	
 
 	public PeakLoadDto getAgentPeakLoadMsgCountOld(String agent, long startTime, long endTime) {
 		Aggregation agg = newAggregation(match(Criteria.where("assignedAgentStamp").gt(startTime).lt(endTime)),
@@ -746,14 +714,14 @@ public class AgentAnalyticsManager implements Serializable{
 			String formattedDateH = sdfH.format(date);
 			dateWithTimeList.add(dateWithTime);
 			hourList.add(Integer.parseInt(formattedDateH));
-		
+
 		}
 		Collections.sort(dateWithTimeList);
 
 		Set<Object> dateWithTimeWiseCount = new HashSet<Object>(dateWithTimeList);
 		for (Object key : dateWithTimeWiseCount) {
 			mapLst.put(key, Collections.frequency(dateWithTimeList, key));
-			
+
 		}
 		if (mapLst != null && ArgUtil.is(mapLst) && !mapLst.isEmpty()) {
 			Object maxEntryKey = Collections.max(mapLst.entrySet(), Map.Entry.comparingByValue()).getKey();
@@ -766,19 +734,19 @@ public class AgentAnalyticsManager implements Serializable{
 	}
 
 	/** fetch lead mesenger **/
-	public LeadMessanger getLeadMessenger(Object contactype, long startTime, long endTime,Object contact) {
+	public LeadMessanger getLeadMessenger(Object contactype, long startTime, long endTime, Object contact) {
 		LeadMessanger leadMessanger = new LeadMessanger();
 		double percentageWithDecimal = 0.0;
-		//List<String> lst = adminDbMgr.getListOfContactType();
-		
-		List<String> lst =getContactType(contact);
-		
+		// List<String> lst = adminDbMgr.getListOfContactType();
+
+		List<String> lst = getContactType(contact);
+
 		Map<String, Integer> leasMsgLst = new HashMap<String, Integer>();
 		for (String contactType : lst) {
 			List<MessageDoc> msgDocLst = adminDbMgr.getTotalMsgCount(contactType, startTime, endTime);
 			leasMsgLst.put(contactType, msgDocLst.size());
 		}
-		//LOGGER.debug("lead Msg  :" + leasMsgLst.toString());
+		// LOGGER.debug("lead Msg :" + leasMsgLst.toString());
 
 		if (leasMsgLst != null && ArgUtil.is(leasMsgLst)) {
 			Object maxEntryKey = Collections.max(leasMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
@@ -794,51 +762,52 @@ public class AgentAnalyticsManager implements Serializable{
 			leadMessanger.setTotalContactMessage(sumOfAllContactMsg);
 			leadMessanger.setPercentage(percentageWithDecimal);
 		}
-		//getLeadMessengerV1(contactype,startTime,endTime,contact);
-		//System.out.println("LEAD MSG :"+JsonUtil.toJson(leadMessanger));
+		// getLeadMessengerV1(contactype,startTime,endTime,contact);
+		// System.out.println("LEAD MSG :"+JsonUtil.toJson(leadMessanger));
 		return leadMessanger;
 	}
+
 	/** Fetch lead messenger **/
-    public LeadMessanger getLeadMessengerV1(Object contacttype, long startTime, long endTime, Object contact) {
-        LeadMessanger leadMessanger = new LeadMessanger();
+	public LeadMessanger getLeadMessengerV1(Object contacttype, long startTime, long endTime, Object contact) {
+		LeadMessanger leadMessanger = new LeadMessanger();
 
-        // Fetch contact types list
-        List<String> contactTypeList = getContactType(contact);
+		// Fetch contact types list
+		List<String> contactTypeList = getContactType(contact);
 
-        // Map to hold the message count for each contact type
-        Map<String, Integer> messageCountMap = new HashMap<>();
+		// Map to hold the message count for each contact type
+		Map<String, Integer> messageCountMap = new HashMap<>();
 
-        // Populate the map with message counts
-        for (String type : contactTypeList) {
-        	Integer messageCount = adminDbMgr.getTotalMsgCountV1(type, startTime, endTime);
-            messageCountMap.put(type, messageCount);
-        }
-        LOGGER.debug("Lead Messenger message counts: " + messageCountMap);
+		// Populate the map with message counts
+		for (String type : contactTypeList) {
+			Integer messageCount = adminDbMgr.getTotalMsgCountV1(type, startTime, endTime);
+			messageCountMap.put(type, messageCount);
+		}
+		LOGGER.debug("Lead Messenger message counts: " + messageCountMap);
 
-        // Check if the map is not empty
-        if (!messageCountMap.isEmpty()) {
-            // Get the contact type with the maximum message count
-            Map.Entry<String, Integer> maxEntry = Collections.max(messageCountMap.entrySet(), Map.Entry.comparingByValue());
+		// Check if the map is not empty
+		if (!messageCountMap.isEmpty()) {
+			// Get the contact type with the maximum message count
+			Map.Entry<String, Integer> maxEntry = Collections.max(messageCountMap.entrySet(),
+					Map.Entry.comparingByValue());
 
-            Integer maxMessageCount = maxEntry.getValue();
-            Integer totalMessages = messageCountMap.values().stream().mapToInt(Integer::intValue).sum();
+			Integer maxMessageCount = maxEntry.getValue();
+			Integer totalMessages = messageCountMap.values().stream().mapToInt(Integer::intValue).sum();
 
-            // Calculate percentage of maxMessageCount relative to totalMessages
-            if (totalMessages > 0) {
-                double percentage = (double) maxMessageCount / totalMessages * 100;
-                double percentageWithDecimal = BigDecimal.valueOf(percentage).setScale(2, RoundingMode.HALF_UP).doubleValue();
+			// Calculate percentage of maxMessageCount relative to totalMessages
+			if (totalMessages > 0) {
+				double percentage = (double) maxMessageCount / totalMessages * 100;
+				double percentageWithDecimal = BigDecimal.valueOf(percentage).setScale(2, RoundingMode.HALF_UP)
+						.doubleValue();
 
-                leadMessanger.setContactType(maxEntry.getKey());
-                leadMessanger.setNoOfMessage(maxMessageCount);
-                leadMessanger.setTotalContactMessage(totalMessages);
-                leadMessanger.setPercentage(percentageWithDecimal);
-            }
-        }
-        //System.out.println("LEAD MSG v1:"+JsonUtil.toJson(leadMessanger));
-        return leadMessanger;
-    }
-    
-
+				leadMessanger.setContactType(maxEntry.getKey());
+				leadMessanger.setNoOfMessage(maxMessageCount);
+				leadMessanger.setTotalContactMessage(totalMessages);
+				leadMessanger.setPercentage(percentageWithDecimal);
+			}
+		}
+		// System.out.println("LEAD MSG v1:"+JsonUtil.toJson(leadMessanger));
+		return leadMessanger;
+	}
 
 	/** Timestamp **/
 
@@ -939,7 +908,7 @@ public class AgentAnalyticsManager implements Serializable{
 		long diffInMilliSeconds = date2 - date1;
 
 		int diffInMin = (int) (diffInMilliSeconds / (60 * 1000));
-		
+
 		int diffInHours = (int) (diffInMilliSeconds / (60 * 60 * 1000));
 
 		int diffInDays = (int) (diffInMilliSeconds / (24 * 60 * 60 * 1000));
@@ -954,124 +923,122 @@ public class AgentAnalyticsManager implements Serializable{
 	public Map<Object, Object> mergerMapKyAndValue(Map<Object, Object> mergeMap, Map<Object, Object> map2) {
 		Map<Object, Object> mergeValue = mergeMap;
 		// Merge maps
-		map2.forEach(
-				(key, value) -> mergeValue.merge(key, value, (v1, v2) -> v1 == v2 ? v1 : (Long) v1 + (Long) v2));
+		map2.forEach((key, value) -> mergeValue.merge(key, value, (v1, v2) -> v1 == v2 ? v1 : (Long) v1 + (Long) v2));
 		return mergeValue;
 	}
 
 	// Get Total Msg from
 
 	public List<MessageDoc> getTotalMessageAgentAndContactWise(List<String> contactIds, long dateRange1,
-			long dateRange2,Object contact,String agent) {
+			long dateRange2, Object contact, String agent) {
 		List<MessageDoc> totalMsgDocLst = new ArrayList<MessageDoc>();
 		for (String contactId : contactIds) {
-			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2,contact,agent);
+			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId, dateRange1, dateRange2, contact, agent);
 			totalMsgDocLst.addAll(msgDocLst);
 		}
 		return totalMsgDocLst;
 	}
-	
+
 	public List<MessageDoc> getTotalMessageAgentAndContactWiseV1(List<UniqueContactDto> contactIds, long dateRange1,
-			long dateRange2,Object contact,String agent) {
+			long dateRange2, Object contact, String agent) {
 		List<MessageDoc> totalMsgDocLst = new ArrayList<MessageDoc>();
-		List<String> contactList=new ArrayList<>();
+		List<String> contactList = new ArrayList<>();
 		for (UniqueContactDto contactId : contactIds) {
-			if(ArgUtil.isEmptyValue(contact)) {
-				contact ="MESSAGE_"+contactId.getContactType();
+			if (ArgUtil.isEmptyValue(contact)) {
+				contact = "MESSAGE_" + contactId.getContactType();
 				contactList.add(contact.toString());
 			}
 			long st = System.currentTimeMillis();
-			//System.out.println("getTotalMessageAgentAndContactWiseV1 start Time:"+st);
-			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId.getContactId(), dateRange1, dateRange2,contact,agent);
+			// System.out.println("getTotalMessageAgentAndContactWiseV1 start Time:"+st);
+			List<MessageDoc> msgDocLst = getMsgCountAgentContactWise(contactId.getContactId(), dateRange1, dateRange2,
+					contact, agent);
 			long et = System.currentTimeMillis();
-			//System.out.println("getTotalMessageAgentAndContactWiseV1 End Time:"+et+"\t difference :"+(et-st));
-			if(msgDocLst!=null && !msgDocLst.isEmpty()) {
-			 totalMsgDocLst.addAll(msgDocLst);
+			// System.out.println("getTotalMessageAgentAndContactWiseV1 End Time:"+et+"\t
+			// difference :"+(et-st));
+			if (msgDocLst != null && !msgDocLst.isEmpty()) {
+				totalMsgDocLst.addAll(msgDocLst);
 			}
 		}
-		for(Object con:contactList) {
-			//System.out.println("CONTACT LIST :"+con);
+		for (Object con : contactList) {
+			// System.out.println("CONTACT LIST :"+con);
 		}
-		
+
 		return totalMsgDocLst;
 	}
-	
+
 	public long getTotalMessageAgentAndContactWiseV2(List<UniqueContactDto> contactIds, long dateRange1,
-			long dateRange2,Object contact,String agent) {
-		long totalMsgCount=0; 
+			long dateRange2, Object contact, String agent) {
+		long totalMsgCount = 0;
 		for (UniqueContactDto contactId : contactIds) {
-			if(ArgUtil.isEmptyValue(contact)) {
-				contact ="MESSAGE_"+contactId.getContactType();
+			if (ArgUtil.isEmptyValue(contact)) {
+				contact = "MESSAGE_" + contactId.getContactType();
 			}
 			long st = System.currentTimeMillis();
-			//System.out.println("getTotalMessageAgentAndContactWiseV2 start Time:"+st);
-			long count = getMsgCountAgentContactWiseV2(contactId.getContactId(), dateRange1, dateRange2,contact,agent);
+			// System.out.println("getTotalMessageAgentAndContactWiseV2 start Time:"+st);
+			long count = getMsgCountAgentContactWiseV2(contactId.getContactId(), dateRange1, dateRange2, contact,
+					agent);
 			long et = System.currentTimeMillis();
-			//System.out.println("getTotalMessageAgentAndContactWiseV2 End Time:"+et+"\t difference :"+(et-st));
-			if(ArgUtil.is(count)) {
-				totalMsgCount+=count;
+			// System.out.println("getTotalMessageAgentAndContactWiseV2 End Time:"+et+"\t
+			// difference :"+(et-st));
+			if (ArgUtil.is(count)) {
+				totalMsgCount += count;
 			}
 		}
 		return totalMsgCount;
 	}
-	
 
 	// To fetch all the records from a collection
-	public List<MessageDoc> getMsgCountAgentContactWise(String contactId, long dateRange1, long dateRange2,Object contact,String agent) {
+	public List<MessageDoc> getMsgCountAgentContactWise(String contactId, long dateRange1, long dateRange2,
+			Object contact, String agent) {
 
 		List<MessageDoc> totalMsgDoc = new ArrayList<MessageDoc>();
 
-		List<String> lst  =getContactType(contact);
+		List<String> lst = getContactType(contact);
 		for (String contactType : lst) {
-			
-			
+
 			Query query = new Query();
 			query.addCriteria(Criteria.where("contactId").is(contactId));
-			if(ArgUtil.is(agent)) {
+			if (ArgUtil.is(agent)) {
 				query.addCriteria(Criteria.where("agent").is(agent));
 			}
 			query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
-			
+
 			query.with(Sort.by(Direction.ASC, "timestamp"));
 			removeMsgFields(query);
 			List<MessageDoc> totalMsg = mongoTemplate.find(query, MessageDoc.class, contactType.toString());
-			//System.out.println("getMsgCountAgentContactWise query { ===} "+JsonUtil.toJson(query));
-			
-			if(totalMsg!=null && !totalMsg.isEmpty()) {
-			  totalMsgDoc.addAll(totalMsg);
+			// System.out.println("getMsgCountAgentContactWise query { ===}
+			// "+JsonUtil.toJson(query));
+
+			if (totalMsg != null && !totalMsg.isEmpty()) {
+				totalMsgDoc.addAll(totalMsg);
 			}
 		}
 		return totalMsgDoc;
 	}
-	
-	
+
 	// To fetch all the records from a collection
-		public long getMsgCountAgentContactWiseV2(String contactId, long dateRange1, long dateRange2,Object contact,String agent) {
-			long totalMsg = 0;
-			
-			List<String> lst  =getContactType(contact);
-			for (String contactType : lst) {
-				Query query = new Query();
-				query.addCriteria(Criteria.where("contactId").is(contactId));
-				query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
-				if(ArgUtil.is(agent)) {
-					query.addCriteria(Criteria.where("agent").is(agent));
-				}
-				query.with(Sort.by(Direction.ASC, "timestamp"));
-				removeMsgFields(query);
-				long count= mongoTemplate.count(query, contactType.toString());
-				
-				if(count>0) {
-					totalMsg+=count; 
-				}
+	public long getMsgCountAgentContactWiseV2(String contactId, long dateRange1, long dateRange2, Object contact,
+			String agent) {
+		long totalMsg = 0;
+
+		List<String> lst = getContactType(contact);
+		for (String contactType : lst) {
+			Query query = new Query();
+			query.addCriteria(Criteria.where("contactId").is(contactId));
+			query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
+			if (ArgUtil.is(agent)) {
+				query.addCriteria(Criteria.where("agent").is(agent));
 			}
-			return totalMsg;
+			query.with(Sort.by(Direction.ASC, "timestamp"));
+			removeMsgFields(query);
+			long count = mongoTemplate.count(query, contactType.toString());
+
+			if (count > 0) {
+				totalMsg += count;
+			}
 		}
-		
-		
-		
-	
-	
+		return totalMsg;
+	}
 
 	/** get Bot Score **/
 
@@ -1091,33 +1058,30 @@ public class AgentAnalyticsManager implements Serializable{
 		if (botScoreLst.size() > 0 && totalBotScore != 0) {
 			averageBotScore = totalBotScore / botScoreLst.size();
 		}
-		//System.out.println("averageBotScore old :"+averageBotScore);
-		//getBotScoreV1(dateRange1,dateRange2);
+		// System.out.println("averageBotScore old :"+averageBotScore);
+		// getBotScoreV1(dateRange1,dateRange2);
 		return averageBotScore;
 	}
-	
-	
-	 public long getBotScoreV1(long dateRange1, long dateRange2) {
-		    long averageBotScore = 0;
-	        Query query = new Query();
-	        query.addCriteria(Criteria.where("mode").is("BOT"));
-	        query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
-	        removeChatSessField(query);
-	        // Fetch the list of ChatSessionDoc objects
-	        List<ChatSessionDoc> botScoreLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 
-	        // Calculate total bot score using streams
-	        long totalBotScore = botScoreLst.stream()
-	                .mapToLong(chat -> chat.getBotScore() == null ? 0 : chat.getBotScore())
-	                .sum();
+	public long getBotScoreV1(long dateRange1, long dateRange2) {
+		long averageBotScore = 0;
+		Query query = new Query();
+		query.addCriteria(Criteria.where("mode").is("BOT"));
+		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+		removeChatSessField(query);
+		// Fetch the list of ChatSessionDoc objects
+		List<ChatSessionDoc> botScoreLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 
-	      //  LOGGER.debug("Total Bot Score: " + totalBotScore);
-	        // Calculate the average bot score if the list is not empty
-	        averageBotScore = botScoreLst.isEmpty() ? 0 : totalBotScore / botScoreLst.size();
-	       //System.out.println("averageBotScore V1 :"+averageBotScore);
-	        return averageBotScore;
-	    }
+		// Calculate total bot score using streams
+		long totalBotScore = botScoreLst.stream().mapToLong(chat -> chat.getBotScore() == null ? 0 : chat.getBotScore())
+				.sum();
 
+		// LOGGER.debug("Total Bot Score: " + totalBotScore);
+		// Calculate the average bot score if the list is not empty
+		averageBotScore = botScoreLst.isEmpty() ? 0 : totalBotScore / botScoreLst.size();
+		// System.out.println("averageBotScore V1 :"+averageBotScore);
+		return averageBotScore;
+	}
 
 	/** get Bot Score **/
 
@@ -1138,35 +1102,32 @@ public class AgentAnalyticsManager implements Serializable{
 			BigDecimal bd = new BigDecimal(botClosure).setScale(2, RoundingMode.HALF_UP);
 			botClosure = bd.doubleValue();
 		}
-		  System.out.println("getBotClosure Old :"+botClosure);
-	//	getBotClosureV1(dateRange1,dateRange2,totalMsg);
+		System.out.println("getBotClosure Old :" + botClosure);
+		// getBotClosureV1(dateRange1,dateRange2,totalMsg);
 		return botClosure;
 	}
-	
-	
+
 	public double getBotClosureV1(long dateRange1, long dateRange2, long totalMsg) {
-        if (totalMsg <= 0) {
-            return 0.0;
-        }
-        double botClosure =0.0;
-        // Construct the query
-        Query query = new Query();
-        query.addCriteria(Criteria.where("mode").is("BOT"))
-             .addCriteria(Criteria.where("active").is(false))
-             .addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
-        removeChatSessField(query);
+		if (totalMsg <= 0) {
+			return 0.0;
+		}
+		double botClosure = 0.0;
+		// Construct the query
+		Query query = new Query();
+		query.addCriteria(Criteria.where("mode").is("BOT")).addCriteria(Criteria.where("active").is(false))
+				.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+		removeChatSessField(query);
 
-        // Fetch the list of inactive BOT sessions within the date range
-        long botSize = mongoTemplate.count(query, ChatSessionDoc.class, CHAT_SESSION);
+		// Fetch the list of inactive BOT sessions within the date range
+		long botSize = mongoTemplate.count(query, ChatSessionDoc.class, CHAT_SESSION);
 
-        // Calculate bot closure percentage
-        botClosure = ((double) botSize / totalMsg) * 100;
-        botClosure =BigDecimal.valueOf(botClosure).setScale(2, RoundingMode.HALF_UP).doubleValue();
-      //  System.out.println("getBotClosureV1 :"+botClosure);
-        // Round to two decimal places
-        return botClosure;
-    }
-	
+		// Calculate bot closure percentage
+		botClosure = ((double) botSize / totalMsg) * 100;
+		botClosure = BigDecimal.valueOf(botClosure).setScale(2, RoundingMode.HALF_UP).doubleValue();
+		// System.out.println("getBotClosureV1 :"+botClosure);
+		// Round to two decimal places
+		return botClosure;
+	}
 
 	/** get Satisfaction Score **/
 	public double getSatisfactionScore(long dateRange1, long dateRange2, String agent) {
@@ -1175,54 +1136,52 @@ public class AgentAnalyticsManager implements Serializable{
 		double totSatisScore = 0;
 		Query query = new Query();
 		query.addCriteria(Criteria.where("mode").is("BOT"));
-		//query.addCriteria(Criteria.where("assignedToQueue").is("feedback"));
+		// query.addCriteria(Criteria.where("assignedToQueue").is("feedback"));
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
 		query.addCriteria(Criteria.where("feedback").exists(true));
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		removeChatSessFieldForSatisScore(query);
 		List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		if (botLst != null && !botLst.isEmpty()) {
-			LOGGER.info("getSatisfactionScore :"+botLst.size());
+			LOGGER.info("getSatisfactionScore :" + botLst.size());
 			for (ChatSessionDoc doc : botLst) {
-				if(doc.getFeedback()!=null) {
-				totSatisScore += doc.getFeedback().get("score") == null ? 0 : (double) doc.getFeedback().get("score");
+				if (doc.getFeedback() != null) {
+					totSatisScore += doc.getFeedback().get("score") == null ? 0
+							: (double) doc.getFeedback().get("score");
 				}
 			}
-			LOGGER.info("totSatisScore :"+totSatisScore);
+			LOGGER.info("totSatisScore :" + totSatisScore);
 			if (totSatisScore > 0) {
 				satisfactionScore = totSatisScore / botLst.size();
 			}
 		}
-		//getSatisfactionScoreV1(dateRange1,dateRange2,agent);
-		 LOGGER.info("satisfactionScore OLD: " + satisfactionScore);
+		// getSatisfactionScoreV1(dateRange1,dateRange2,agent);
+		LOGGER.info("satisfactionScore OLD: " + satisfactionScore);
 		return satisfactionScore;
 	}
-	
-	
-	 public double getSatisfactionScoreV1(long dateRange1, long dateRange2, String agent) {
-	        Query query = new Query();
-	        query.addCriteria(Criteria.where("mode").is("BOT"))
-	             .addCriteria(Criteria.where("assignedToAgent").is(agent))
-	             .addCriteria(Criteria.where("feedback").exists(true))
-	             .addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
-	        removeChatSessFieldForSatisScore(query);
 
-	        // Fetch the list of sessions that match the query
-	        List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+	public double getSatisfactionScoreV1(long dateRange1, long dateRange2, String agent) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("mode").is("BOT")).addCriteria(Criteria.where("assignedToAgent").is(agent))
+				.addCriteria(Criteria.where("feedback").exists(true))
+				.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+		removeChatSessFieldForSatisScore(query);
 
-	        // Calculate the total satisfaction score
-	        double totalSatisfactionScore = botLst.stream()
-	            .filter(doc -> doc.getFeedback() != null && doc.getFeedback().get("score") != null)
-	            .mapToDouble(doc -> (double) doc.getFeedback().get("score"))
-	            .sum();
+		// Fetch the list of sessions that match the query
+		List<ChatSessionDoc> botLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 
-	        // Log information
-	        double satisfactionScore = botLst.isEmpty() ? 0.0 : totalSatisfactionScore / botLst.size();
-	        // Calculate the average satisfaction score
-	        
-	        LOGGER.info("satisfactionScore V1: " + satisfactionScore);
-	        return satisfactionScore;
-	    }
+		// Calculate the total satisfaction score
+		double totalSatisfactionScore = botLst.stream()
+				.filter(doc -> doc.getFeedback() != null && doc.getFeedback().get("score") != null)
+				.mapToDouble(doc -> (double) doc.getFeedback().get("score")).sum();
+
+		// Log information
+		double satisfactionScore = botLst.isEmpty() ? 0.0 : totalSatisfactionScore / botLst.size();
+		// Calculate the average satisfaction score
+
+		LOGGER.info("satisfactionScore V1: " + satisfactionScore);
+		return satisfactionScore;
+	}
 
 	public void removeMsgFields(Query query2) {
 		query2.fields().exclude("model").exclude("meta").exclude("stamps").exclude("contact").exclude("tags")
@@ -1237,298 +1196,288 @@ public class AgentAnalyticsManager implements Serializable{
 		query2.fields().exclude("updated").exclude("lastInBoundMsg").exclude("lastMsg").exclude("lastBotReply")
 				.exclude("msg").exclude("stamps").exclude("contact");
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public List<String> getContactType(Object contact){
-			List<String> lst =null;
-			if(ArgUtil.is(contact) && contact!=null) {
-				lst =new ArrayList<String>();
-				if (contact instanceof ArrayList) {
-					lst=(ArrayList)contact;
-				}else {
-					lst.add(contact.toString());
-				}
-				
-			}else{
-			  lst = adminDbMgr.getListOfContactType();
+	public List<String> getContactType(Object contact) {
+		List<String> lst = null;
+		if (ArgUtil.is(contact) && contact != null) {
+			lst = new ArrayList<String>();
+			if (contact instanceof ArrayList) {
+				lst = (ArrayList) contact;
+			} else {
+				lst.add(contact.toString());
 			}
-			return lst;
+
+		} else {
+			lst = adminDbMgr.getListOfContactType();
+		}
+		return lst;
 	}
-	
-	/**  Fetch data asynchronously **/
-	public List<DashBoardResponseDto> fetchDataAsynchronously(List<String> allAgent,long date1,long date2,Object contactType) {
-		Long st= Instant.now().getEpochSecond();
-		
+
+	/** Fetch data asynchronously **/
+	public List<DashBoardResponseDto> fetchDataAsynchronously(List<String> allAgent, long date1, long date2,
+			Object contactType) {
+		Long st = Instant.now().getEpochSecond();
+
 		// Define the ExecutorService
-        ExecutorService executorService = Executors.newFixedThreadPool(allAgent.size());
-        // Fetch data asynchronously
-        List<CompletableFuture<DashBoardResponseDto>> futures = allAgent.stream()
-                .map(agent -> fetchAgentAnalyticsAsync(agent, date1, date2,contactType, executorService))
-                .collect(Collectors.toList());
-       
-        
-        // Wait for all futures to complete and collect results
-        List<DashBoardResponseDto> results = futures.stream()
-                .map(CompletableFuture::join)
-                .collect(Collectors.toList());
-        
-        // Shutdown the executor service
-        executorService.shutdown();
-        Long et= Instant.now().getEpochSecond();
-        System.out.println("fetchDataAsynchronously tTime {} "+(et-st));
-        
-        return results;
+		ExecutorService executorService = Executors.newFixedThreadPool(allAgent.size());
+		// Fetch data asynchronously
+		List<CompletableFuture<DashBoardResponseDto>> futures = allAgent.stream()
+				.map(agent -> fetchAgentAnalyticsAsync(agent, date1, date2, contactType, executorService))
+				.collect(Collectors.toList());
+
+		// Wait for all futures to complete and collect results
+		List<DashBoardResponseDto> results = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+
+		// Shutdown the executor service
+		executorService.shutdown();
+		Long et = Instant.now().getEpochSecond();
+		System.out.println("fetchDataAsynchronously tTime {} " + (et - st));
+
+		return results;
 	}
-	
-	 /**Asynchronous method to fetch agent analytics **/
-    private  CompletableFuture<DashBoardResponseDto> fetchAgentAnalyticsAsync(String agent, long date1, long date2, Object contactType, ExecutorService executorService) {
-        
-    	return CompletableFuture.supplyAsync(() -> {
-            try {
-            	DashBoardResponseDto dto=new DashBoardResponseDto();
-            	dto=getAgentAnalytics(agent, date1, date2, contactType);
-            	System.out.println("agent :"+agent+"\t dto :"+JsonUtil.toJson(dto));
-                return dto;
-                
-            } catch (Exception e) {
-                System.err.println("Error fetching data for agent " + agent + ": " + e.getMessage());
-                return new DashBoardResponseDto(); // Return an empty DTO or handle appropriately
-            }
-        }, executorService);
-    }
-    
-    
-    
-    public Map<Object, Object> getHourWiseCountV2(List<UniqueContactDto> contactIds,String agent,long dateRange1,long dateRange2,Object contact) {
-    	 Map<Object, Object> mapLst = new HashMap<>(); // Store date (day) as key and count as value
-    	 Map<String, Long> hourCountMap = new HashMap<>();
-    	 Map<Long, Long> hourCountMapV1 = new HashMap<>();
-    	
-    	 if (ArgUtil.isEmptyValue(contact)) {
- 	        for (UniqueContactDto contactId : contactIds) {
- 	        	System.out.println("Agent :"+agent+"\t contactId :"+JsonUtil.toJson(contactId));
- 	            String contactType = "MESSAGE_" + contactId.getContactType();
- 	            Query query = new Query();
- 	            query.addCriteria(Criteria.where("contactId").is(contactId.getContactId()));
- 	           if (ArgUtil.is(agent)) {
-	                query.addCriteria(Criteria.where("agent").is(agent));
-	            }
- 	            query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
- 	            query.with(Sort.by(Sort.Direction.ASC, "timestamp"));
- 	            query.fields().include("_id").include("timestamp").include("time");
- 	            List<MessageDoc> msgLst = mongoTemplate.find(query, MessageDoc.class, contactType);
- 	            for (MessageDoc msg : msgLst) {
- 	                long timeStamp = msg.getTimestamp();
- 	                Date date = new Date(timeStamp);
- 	                SimpleDateFormat sdfH = new SimpleDateFormat("hh aa");
- 	  			    String formattedDateH = sdfH.format(date);
- 	  			    timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60)));
- 	                // Increment the count for this day in the map
- 	                hourCountMap.put(formattedDateH, hourCountMap.getOrDefault(formattedDateH, 0L) + 1);
- 	                hourCountMapV1.put(timeStamp, hourCountMapV1.getOrDefault(timeStamp, 0L) + 1);
- 	 	        }
- 	            }
- 	           
- 	        }
- 	    
- 	    mapLst.put("HR", hourCountMap);
- 	    mapLst.put("HR_V1", hourCountMapV1);
-    	return mapLst;
+
+	/** Asynchronous method to fetch agent analytics **/
+	private CompletableFuture<DashBoardResponseDto> fetchAgentAnalyticsAsync(String agent, long date1, long date2,
+			Object contactType, ExecutorService executorService) {
+
+		return CompletableFuture.supplyAsync(() -> {
+			try {
+				DashBoardResponseDto dto = new DashBoardResponseDto();
+				dto = getAgentAnalytics(agent, date1, date2, contactType);
+				System.out.println("agent :" + agent + "\t dto :" + JsonUtil.toJson(dto));
+				return dto;
+
+			} catch (Exception e) {
+				System.err.println("Error fetching data for agent " + agent + ": " + e.getMessage());
+				return new DashBoardResponseDto(); // Return an empty DTO or handle appropriately
+			}
+		}, executorService);
 	}
-    
-    public void getHourWiseCountV3(List<UniqueContactDto> contactIds, String agent, long dateRange1, long dateRange2, Object contact) {
-        if (ArgUtil.isEmptyValue(contact)) {
-            for (UniqueContactDto contactId : contactIds) {
-                System.out.println("Agent: " + agent + "\t contactId: " + JsonUtil.toJson(contactId));
-                String contactType = "MESSAGE_" + contactId.getContactType();
 
-                // Create Aggregation Pipeline
-                Aggregation aggregation = Aggregation.newAggregation(
-                    // Match Stage
-                    Aggregation.match(Criteria.where("contactId").is(contactId.getContactId())
-                        .and("agent").is(agent)
-                        .and("timestamp").gte(new Date(dateRange1)).lte(new Date(dateRange2))),
+	public Map<Object, Object> getHourWiseCountV2(List<UniqueContactDto> contactIds, String agent, long dateRange1,
+			long dateRange2, Object contact) {
+		Map<Object, Object> mapLst = new HashMap<>(); // Store date (day) as key and count as value
+		Map<String, Long> hourCountMap = new HashMap<>();
+		Map<Long, Long> hourCountMapV1 = new HashMap<>();
 
-                    // Project Stage
-                    Aggregation.project("timestamp")
-                        .andExpression("year(timestamp)").as("year")
-                        .andExpression("month(timestamp)").as("month")
-                        .andExpression("dayOfMonth(timestamp)").as("day")
-                        .andExpression("hour(timestamp)").as("hour")
-                        .andExpression("minute(timestamp)").as("minute")
-                        .andExpression("second(timestamp)").as("second")
-                        .andExpression("dateToMillis(timestamp)").as("hourStart")
-                        .andExpression("concat("
-                            + "toString( cond([eq([mod([hour(timestamp), 12]), 0]), 12, mod([hour(timestamp), 12]) ])), "
-                            + "cond([gte([hour(timestamp), 12]), 'PM', 'AM'])"
-                            + ")").as("hour12Format"),
+		if (ArgUtil.isEmptyValue(contact)) {
+			for (UniqueContactDto contactId : contactIds) {
+				System.out.println("Agent :" + agent + "\t contactId :" + JsonUtil.toJson(contactId));
+				String contactType = "MESSAGE_" + contactId.getContactType();
+				Query query = new Query();
+				query.addCriteria(Criteria.where("contactId").is(contactId.getContactId()));
+				if (ArgUtil.is(agent)) {
+					query.addCriteria(Criteria.where("agent").is(agent));
+				}
+				query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
+				query.with(Sort.by(Sort.Direction.ASC, "timestamp"));
+				query.fields().include("_id").include("timestamp").include("time");
+				List<MessageDoc> msgLst = mongoTemplate.find(query, MessageDoc.class, contactType);
+				for (MessageDoc msg : msgLst) {
+					long timeStamp = msg.getTimestamp();
+					Date date = new Date(timeStamp);
+					SimpleDateFormat sdfH = new SimpleDateFormat("hh aa");
+					String formattedDateH = sdfH.format(date);
+					timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60)));
+					// Increment the count for this day in the map
+					hourCountMap.put(formattedDateH, hourCountMap.getOrDefault(formattedDateH, 0L) + 1);
+					hourCountMapV1.put(timeStamp, hourCountMapV1.getOrDefault(timeStamp, 0L) + 1);
+				}
+			}
 
-                    // Group Stage
-                    Aggregation.group("hour", "hour12Format", "hourStart")
-                        .count().as("count"),
+		}
 
-                    // Project Stage
-                    Aggregation.project("count")
-                        .and("_id.hour").as("hour")
-                        .and("_id.hour12Format").as("hour12Format")
-                        .and("_id.hourStart").as("hourStamp"),
-
-                    // Sort Stage
-                    Aggregation.sort(Sort.by(Sort.Order.asc("hour"))
-                ));
-
-                // Execute Aggregation
-                AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, contactType, Map.class);
-
-                // Process Results
-                List<Map> resultList = results.getMappedResults();
-                Map<String, Integer> resultMap = new HashMap<>();
-                for (Map res : resultList) {
-                    String key = res.get("hour") + " " + res.get("hour12Format");
-                    Integer count = (Integer) res.get("count");
-                    resultMap.put(key, count);
-                }
-                System.out.println("ResultMap: " + agent + " ====" + JsonUtil.toJson(resultMap));
-            }
-        }
-    }
-    
-
-    
-    public Map<Object, Object> getDateWiseCountV2(List<UniqueContactDto> contactIds,String agent,long dateRange1,long dateRange2,Object contact) {
-    	 Map<Object, Object> mapLst = new HashMap<>(); // Store date (day) as key and count as value
-    	 Map<Long, Long> dayMapLst = new HashMap<>();
-    	 Map<Long, Long> dayMapLstV1 = new HashMap<>();
-    	    if (ArgUtil.isEmptyValue(contact)) {
-    	        for (UniqueContactDto contactId : contactIds) {
-    	            String contactType = "MESSAGE_" + contactId.getContactType();
-    	            Query query = new Query();
-    	            query.addCriteria(Criteria.where("contactId").is(contactId.getContactId()));
-    	            if (ArgUtil.is(agent)) {
-    	                query.addCriteria(Criteria.where("agent").is(agent));
-    	            }
-    	            query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
-    	           
-    	            query.with(Sort.by(Sort.Direction.ASC, "timestamp"));
-    	            query.fields().include("_id").include("timestamp").include("time");
-    	            List<MessageDoc> msgLst = mongoTemplate.find(query, MessageDoc.class, contactType);
-
-    	            for (MessageDoc msg : msgLst) {
-    	                long timeStamp = msg.getTimestamp();
-    	                Date date = new Date(timeStamp);
-    	                long day = Long.parseLong(new SimpleDateFormat("d").format(date));
-    	                timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60 * 24)));
-    	                // Increment the count for this day in the map
-    	                dayMapLst.put(day, dayMapLst.getOrDefault(day, 0L) + 1);
-    	                dayMapLstV1.put(timeStamp, dayMapLstV1.getOrDefault(timeStamp, 0L) + 1);
-    	            }
-    	        }
-    	    }
-    	    mapLst.put("DAY", dayMapLst);
-    	    mapLst.put("DAY_V1", dayMapLstV1);
-    	    
-    	    
-    	    return mapLst;
+		mapLst.put("HR", hourCountMap);
+		mapLst.put("HR_V1", hourCountMapV1);
+		return mapLst;
 	}
-    
-    public Map<Object, Object> getWeekWiseCountV2(List<UniqueContactDto> contactIds,String agent,long dateRange1,long dateRange2,Object contact) {
-   	 Map<Object, Object> mapLst = new HashMap<>(); // Store date (day) as key and count as value
-   	 Map<String, Long> weekCountMap = new HashMap<>();
-	 Map<Long, Long> weekCountMapV1 = new HashMap<>();
-   	    if (ArgUtil.isEmptyValue(contact)) {
-   	        for (UniqueContactDto contactId : contactIds) {
-   	            String contactType = "MESSAGE_" + contactId.getContactType();
-   	            Query query = new Query();
-   	            query.addCriteria(Criteria.where("contactId").is(contactId.getContactId()));
-   	            if(ArgUtil.is(agent)) {
-	                query.addCriteria(Criteria.where("agent").is(agent));
-	            }
-   	            query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
-   	           
-   	            query.with(Sort.by(Sort.Direction.ASC, "timestamp"));
-   	            query.fields().include("_id").include("timestamp").include("time");
-   	            List<MessageDoc> msgLst = mongoTemplate.find(query, MessageDoc.class, contactType);
 
-   	            for (MessageDoc msg : msgLst) {
-   	                long timeStamp = msg.getTimestamp();
-   	                Date date = new Date(timeStamp);
-   	                String monthWise = new SimpleDateFormat("MMM").format(date);
-   	                timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60 * 24)));
-   	                // Increment the count for this day in the map
-   	                weekCountMap.put(monthWise, weekCountMap.getOrDefault(weekCountMap, 0L) + 1);
-   	                weekCountMapV1.put(timeStamp, weekCountMapV1.getOrDefault(timeStamp, 0L) + 1);
-   	            }
-   	        }
-   	    }
-   	    mapLst.put("WEEK", weekCountMap);
-   	    mapLst.put("WEEK_V1", weekCountMapV1);
-   	    
-   	    
-   	    return mapLst;
+	public void getHourWiseCountV3(List<UniqueContactDto> contactIds, String agent, long dateRange1, long dateRange2,
+			Object contact) {
+		if (ArgUtil.isEmptyValue(contact)) {
+			for (UniqueContactDto contactId : contactIds) {
+				System.out.println("Agent: " + agent + "\t contactId: " + JsonUtil.toJson(contactId));
+				String contactType = "MESSAGE_" + contactId.getContactType();
+
+				// Create Aggregation Pipeline
+				Aggregation aggregation = Aggregation.newAggregation(
+						// Match Stage
+						Aggregation.match(Criteria.where("contactId").is(contactId.getContactId()).and("agent")
+								.is(agent).and("timestamp").gte(new Date(dateRange1)).lte(new Date(dateRange2))),
+
+						// Project Stage
+						Aggregation.project("timestamp").andExpression("year(timestamp)").as("year")
+								.andExpression("month(timestamp)").as("month").andExpression("dayOfMonth(timestamp)")
+								.as("day").andExpression("hour(timestamp)").as("hour")
+								.andExpression("minute(timestamp)").as("minute").andExpression("second(timestamp)")
+								.as("second").andExpression("dateToMillis(timestamp)").as("hourStart")
+								.andExpression("concat("
+										+ "toString( cond([eq([mod([hour(timestamp), 12]), 0]), 12, mod([hour(timestamp), 12]) ])), "
+										+ "cond([gte([hour(timestamp), 12]), 'PM', 'AM'])" + ")")
+								.as("hour12Format"),
+
+						// Group Stage
+						Aggregation.group("hour", "hour12Format", "hourStart").count().as("count"),
+
+						// Project Stage
+						Aggregation.project("count").and("_id.hour").as("hour").and("_id.hour12Format")
+								.as("hour12Format").and("_id.hourStart").as("hourStamp"),
+
+						// Sort Stage
+						Aggregation.sort(Sort.by(Sort.Order.asc("hour"))));
+
+				// Execute Aggregation
+				AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, contactType, Map.class);
+
+				// Process Results
+				List<Map> resultList = results.getMappedResults();
+				Map<String, Integer> resultMap = new HashMap<>();
+				for (Map res : resultList) {
+					String key = res.get("hour") + " " + res.get("hour12Format");
+					Integer count = (Integer) res.get("count");
+					resultMap.put(key, count);
+				}
+				System.out.println("ResultMap: " + agent + " ====" + JsonUtil.toJson(resultMap));
+			}
+		}
 	}
-    
-    
-    private String getMitlToSeconds(long timeInMillis) {
-    	 // Convert milliseconds to seconds
-        double timeInSeconds = timeInMillis / 1000.0;
-        
-        // Format the result to 2 decimal places
-        DecimalFormat df = new DecimalFormat("#.##");
-        String formattedTime = df.format(timeInSeconds);
-        return formattedTime;
-    }
-    
-    public List<DashBoardResponseDto> getAgentAnalyticsMultiThreaded(List<String> allAgent, long date1, long date2, Object contactType) {
-    	 List<DashBoardResponseDto> lstDto = new ArrayList<>();
-    	 ExecutorService executorService = Executors.newFixedThreadPool(Math.min(allAgent.size(), 10)); // Adjust pool size
-         List<Future<DashBoardResponseDto>> futures = new ArrayList<>();
 
-        
-         for (String agent : allAgent) {
-             // Skip blank agents
-             
-             // Each task creates its own instance of DashBoardResponseDto
-             Callable<DashBoardResponseDto> task = () -> {
-               
-                 DashBoardResponseDto dto = new DashBoardResponseDto();
+	public Map<Object, Object> getDateWiseCountV2(List<UniqueContactDto> contactIds, String agent, long dateRange1,
+			long dateRange2, Object contact) {
+		Map<Object, Object> mapLst = new HashMap<>(); // Store date (day) as key and count as value
+		Map<Long, Long> dayMapLst = new HashMap<>();
+		Map<Long, Long> dayMapLstV1 = new HashMap<>();
+		if (ArgUtil.isEmptyValue(contact)) {
+			for (UniqueContactDto contactId : contactIds) {
+				String contactType = "MESSAGE_" + contactId.getContactType();
+				Query query = new Query();
+				query.addCriteria(Criteria.where("contactId").is(contactId.getContactId()));
+				if (ArgUtil.is(agent)) {
+					query.addCriteria(Criteria.where("agent").is(agent));
+				}
+				query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
 
-                 try {
-                     dto = getAgentAnalytics(agent, date1, date2, contactType);
-                 } catch (Exception e) {
-                     // Log exception details
-                     System.err.println("Exception occurred for agent: " + agent);
-                     e.printStackTrace();
-                 }
-                 // Log dto content for debugging
-                 if (dto != null) {
-                     System.out.println("dto for agent VALUE {====}{" + agent + "}: " + JsonUtil.toJson(dto));
-                 } else {
-                     System.out.println("dto for agent {" + agent + "} is null");
-                 }
+				query.with(Sort.by(Sort.Direction.ASC, "timestamp"));
+				query.fields().include("_id").include("timestamp").include("time");
+				List<MessageDoc> msgLst = mongoTemplate.find(query, MessageDoc.class, contactType);
 
-                 return dto; // Return the individual DTO created for this task
-             };
+				for (MessageDoc msg : msgLst) {
+					long timeStamp = msg.getTimestamp();
+					Date date = new Date(timeStamp);
+					long day = Long.parseLong(new SimpleDateFormat("d").format(date));
+					timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60 * 24)));
+					// Increment the count for this day in the map
+					dayMapLst.put(day, dayMapLst.getOrDefault(day, 0L) + 1);
+					dayMapLstV1.put(timeStamp, dayMapLstV1.getOrDefault(timeStamp, 0L) + 1);
+				}
+			}
+		}
+		mapLst.put("DAY", dayMapLst);
+		mapLst.put("DAY_V1", dayMapLstV1);
 
-             // Submit the task to the executor service
-             futures.add(executorService.submit(task));
-         }
+		return mapLst;
+	}
 
-         // Collect the results from the futures
-         for (Future<DashBoardResponseDto> future : futures) {
-             try {
-                 DashBoardResponseDto dto = future.get(30, TimeUnit.SECONDS); // Add timeout to prevent indefinite blocking
-                 if (dto != null) {
-                     lstDto.add(dto);
-                 }
-             } catch (Exception e1) {
-                 System.err.println("Failed to retrieve result from future.");
-                 e1.printStackTrace();
-             }
-         }
+	public Map<Object, Object> getWeekWiseCountV2(List<UniqueContactDto> contactIds, String agent, long dateRange1,
+			long dateRange2, Object contact) {
+		Map<Object, Object> mapLst = new HashMap<>(); // Store date (day) as key and count as value
+		Map<String, Long> weekCountMap = new HashMap<>();
+		Map<Long, Long> weekCountMapV1 = new HashMap<>();
+		if (ArgUtil.isEmptyValue(contact)) {
+			for (UniqueContactDto contactId : contactIds) {
+				String contactType = "MESSAGE_" + contactId.getContactType();
+				Query query = new Query();
+				query.addCriteria(Criteria.where("contactId").is(contactId.getContactId()));
+				if (ArgUtil.is(agent)) {
+					query.addCriteria(Criteria.where("agent").is(agent));
+				}
+				query.addCriteria(Criteria.where("timestamp").gte(dateRange1).lt(dateRange2));
 
-         executorService.shutdown(); // Shutdown the executor service
+				query.with(Sort.by(Sort.Direction.ASC, "timestamp"));
+				query.fields().include("_id").include("timestamp").include("time");
+				List<MessageDoc> msgLst = mongoTemplate.find(query, MessageDoc.class, contactType);
 
-         return lstDto; // Return the list of DTOs
-    }
-    
+				for (MessageDoc msg : msgLst) {
+					long timeStamp = msg.getTimestamp();
+					Date date = new Date(timeStamp);
+					String monthWise = new SimpleDateFormat("MMM").format(date);
+					timeStamp = (timeStamp - (timeStamp % (1000 * 60 * 60 * 24)));
+					// Increment the count for this day in the map
+					weekCountMap.put(monthWise, weekCountMap.getOrDefault(weekCountMap, 0L) + 1);
+					weekCountMapV1.put(timeStamp, weekCountMapV1.getOrDefault(timeStamp, 0L) + 1);
+				}
+			}
+		}
+		mapLst.put("WEEK", weekCountMap);
+		mapLst.put("WEEK_V1", weekCountMapV1);
+
+		return mapLst;
+	}
+
+	private String getMitlToSeconds(long timeInMillis) {
+		// Convert milliseconds to seconds
+		double timeInSeconds = timeInMillis / 1000.0;
+
+		// Format the result to 2 decimal places
+		DecimalFormat df = new DecimalFormat("#.##");
+		String formattedTime = df.format(timeInSeconds);
+		return formattedTime;
+	}
+
+	public List<DashBoardResponseDto> getAgentAnalyticsMultiThreaded(List<String> allAgent, long date1, long date2,
+			Object contactType) {
+		List<DashBoardResponseDto> lstDto = new ArrayList<>();
+		ExecutorService executorService = Executors.newFixedThreadPool(Math.min(allAgent.size(), 10)); // Adjust pool
+																										// size
+		List<Future<DashBoardResponseDto>> futures = new ArrayList<>();
+
+		for (String agent : allAgent) {
+			// Skip blank agents
+
+			// Each task creates its own instance of DashBoardResponseDto
+			Callable<DashBoardResponseDto> task = () -> {
+
+				DashBoardResponseDto dto = new DashBoardResponseDto();
+
+				try {
+					dto = getAgentAnalytics(agent, date1, date2, contactType);
+				} catch (Exception e) {
+					// Log exception details
+					System.err.println("Exception occurred for agent: " + agent);
+					e.printStackTrace();
+				}
+				// Log dto content for debugging
+				if (dto != null) {
+					System.out.println("dto for agent VALUE {====}{" + agent + "}: " + JsonUtil.toJson(dto));
+				} else {
+					System.out.println("dto for agent {" + agent + "} is null");
+				}
+
+				return dto; // Return the individual DTO created for this task
+			};
+
+			// Submit the task to the executor service
+			futures.add(executorService.submit(task));
+		}
+
+		// Collect the results from the futures
+		for (Future<DashBoardResponseDto> future : futures) {
+			try {
+				DashBoardResponseDto dto = future.get(30, TimeUnit.SECONDS); // Add timeout to prevent indefinite
+																				// blocking
+				if (dto != null) {
+					lstDto.add(dto);
+				}
+			} catch (Exception e1) {
+				System.err.println("Failed to retrieve result from future.");
+				e1.printStackTrace();
+			}
+		}
+
+		executorService.shutdown(); // Shutdown the executor service
+
+		return lstDto; // Return the list of DTOs
+	}
+
 }

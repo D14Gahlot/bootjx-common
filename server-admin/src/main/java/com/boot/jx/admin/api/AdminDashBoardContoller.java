@@ -1,6 +1,7 @@
 package com.boot.jx.admin.api;
 
 import java.util.List;
+import java.util.Timer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +21,11 @@ import com.boot.jx.admin.dto.WabaSummaryDocDto;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
+import com.boot.utils.TimeUtils.TimePeriod;
+import com.boot.utils.TimeUtils.TimePeriodTimer;
 
 @RestController
 public class AdminDashBoardContoller {
@@ -53,10 +57,12 @@ public class AdminDashBoardContoller {
 
 	@RequestMapping(value = "/admin/agent-dashboard-analytics", method = { RequestMethod.POST })
 	public ApiResponse<DashBoardResponseDto, Object> getAgentWiseAnalytics(@RequestBody DashBoardRequestDto req) {
+		TimePeriodTimer timer = TimePeriodTimer.start();
 		ApiResponse<DashBoardResponseDto, Object> resp = new ApiResponse<DashBoardResponseDto, Object>();
 		List<DashBoardResponseDto> lst = agentAnaMgr.getAgentWiseAnalytics(req);
 		resp.results(lst);
 		resp.data(agentAnaMgr.getSummery(lst));
+		ApiResponseUtil.addLog("Total Time Taken : " + timer.now().toMillis());
 		return resp;
 	}
 
@@ -76,8 +82,9 @@ public class AdminDashBoardContoller {
 
 	@ResponseBody
 	@RequestMapping(value = { "/admin/daywise-summary" }, method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(@RequestParam(required = false) String dateRange1,
-			@RequestParam(required = false) String dateRange2, int days) {
+	public ApiResponse<ContactTypeSummaryDto, Object> getDayWiseSummary(
+			@RequestParam(required = false) String dateRange1, @RequestParam(required = false) String dateRange2,
+			int days) {
 		ContactTypeSummaryDto summary = adminDbMgr.dayChannelWiseWisesummary(dateRange1, dateRange2, days);
 		return ApiResponse.buildResult(summary);
 	}
@@ -104,30 +111,28 @@ public class AdminDashBoardContoller {
 		List<MonthDtlsDto> listofMonth = adminDbMgr.fetchUniqueMonth();
 		return ApiResponse.buildResults(listofMonth);
 	}
-	
-	
+
 	@ResponseBody
 	@RequestMapping(value = { "/admin/monthwise-summary-save" }, method = { RequestMethod.GET })
 	public ApiResponse<ContactTypeSummaryDto, Object> getMonthWiseSaving(long timestamp) {
 		ContactTypeSummaryDto summary = adminDbMgr.summaryV1(timestamp);
 		return ApiResponse.buildResult(summary);
 	}
-	
+
 	@ResponseBody
 	@RequestMapping(value = { "/admin/monthwise-summary/waba" }, method = { RequestMethod.GET })
 	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
 		List<WabaSummaryDocDto> summary = adminDbMgr.wabaSummary(timestamp);
-		
-		return ApiResponse.buildResults(summary);
-	}
-	@ResponseBody
-	@RequestMapping(value = { "/admin/monthwise-summary/waba/media-template" }, method = { RequestMethod.GET })
-	public ApiResponse<HSMTemplateDoc, Object> getMonthWiseWabaMediaTemplateSummary(long timestamp) {
-		List<HSMTemplateDoc>summary=adminDbMgr.getMediaTemplateCount(timestamp);
+
 		return ApiResponse.buildResults(summary);
 	}
 
-	
+	@ResponseBody
+	@RequestMapping(value = { "/admin/monthwise-summary/waba/media-template" }, method = { RequestMethod.GET })
+	public ApiResponse<HSMTemplateDoc, Object> getMonthWiseWabaMediaTemplateSummary(long timestamp) {
+		List<HSMTemplateDoc> summary = adminDbMgr.getMediaTemplateCount(timestamp);
+		return ApiResponse.buildResults(summary);
+	}
 
 	@ResponseBody
 	@RequestMapping(value = { "/admin/non-whatsup-msg-summary" }, method = { RequestMethod.GET })
@@ -135,21 +140,20 @@ public class AdminDashBoardContoller {
 		ContactTypeSummaryDto summary = adminDbMgr.getNonWhatsUpSummary(dateRange1, dateRange2);
 		return ApiResponse.buildResult(summary);
 	}
-	
+
 	@ResponseBody
 	@RequestMapping(value = { "/admin/event-summary" }, method = { RequestMethod.GET })
-	public ApiResponse<EventCountSummary, Object> getEventCountSummary(String dateRange1, String dateRange2,
-			int days) {
+	public ApiResponse<EventCountSummary, Object> getEventCountSummary(String dateRange1, String dateRange2, int days) {
 		EventCountSummary summary = adminDbMgr.getEventCountSummary(dateRange1, dateRange2, days);
 		return ApiResponse.buildResult(summary);
 	}
-	
+
 	@ResponseBody
 	@RequestMapping(value = { "/admin/customer-session-count-summary" }, method = { RequestMethod.GET })
-	public ApiResponse<ContactTypeSummaryDto, Object> getCustomerSessionCountSummary(String dateRange1, String dateRange2,int days){
-		ContactTypeSummaryDto summary = adminDbMgr.getCustomerSessionCountSummary(dateRange1,dateRange2,days);
+	public ApiResponse<ContactTypeSummaryDto, Object> getCustomerSessionCountSummary(String dateRange1,
+			String dateRange2, int days) {
+		ContactTypeSummaryDto summary = adminDbMgr.getCustomerSessionCountSummary(dateRange1, dateRange2, days);
 		return ApiResponse.buildResult(summary);
 	}
-
 
 }
