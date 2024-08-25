@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -472,24 +473,19 @@ public class AgentAnalyticsManager implements Serializable {
 	}
 
 	public List<UniqueContactDto> getDistinctV1(List<ChatSessionDoc> chatSessDocLst) {
-		Set<String> seenContacts = new HashSet<>();
-		List<UniqueContactDto> uniqueContacts = new ArrayList<>();
-
-		for (ChatSessionDoc doc : chatSessDocLst) {
-			if (ArgUtil.is(doc.getContactId()) && ArgUtil.is(doc.getContact())) {
-				String uniqueKey = doc.getContactId() + "-" + doc.getContact().getContactType();
-
-				// Add only if the combination is not already seen
-				if (seenContacts.add(uniqueKey)) {
-					UniqueContactDto dto = new UniqueContactDto();
-					dto.setContactId(doc.getContactId());
-					dto.setContactType(doc.getContact().getContactType());
-					uniqueContacts.add(dto);
-				}
-			}
-		}
-
-		return uniqueContacts;
+		Set<String> seenContacts = ConcurrentHashMap.newKeySet(); // Thread-safe set
+		return chatSessDocLst.parallelStream().filter(doc -> doc.getContactId() != null && doc.getContact() != null)
+				.map(doc -> {
+					String uniqueKey = doc.getContactId() + "-" + doc.getContact().getContactType();
+					if (seenContacts.add(uniqueKey)) { // Add only if not already seen
+						UniqueContactDto dto = new UniqueContactDto();
+						dto.setContactId(doc.getContactId());
+						dto.setContactType(doc.getContact().getContactType());
+						return dto;
+					}
+					return null; // Skip duplicates
+				}).filter(Objects::nonNull) // Remove nulls from skipped duplicates
+				.collect(Collectors.toList());
 	}
 
 	public List<ChatSessionDoc> getAgentWiseTotalMsgExchanged(String agent, long dateRange1, long dateRange2) {
