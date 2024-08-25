@@ -114,10 +114,7 @@ public class AgentAnalyticsManager implements Serializable {
 			long date2Final = date2;
 
 			lstDto = allAgent.parallelStream().map(agent -> {
-				if (!StringUtils.isBlank(agent)) {
-					return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
-				}
-				return null;
+				return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
 			}).filter(Objects::nonNull).collect(Collectors.toList());
 
 			long et = Instant.now().toEpochMilli();
