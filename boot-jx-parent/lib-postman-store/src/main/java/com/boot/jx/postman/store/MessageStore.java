@@ -28,6 +28,8 @@ import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDocAbstract;
 import com.boot.jx.postman.doc.MessageHold;
+import com.boot.jx.postman.doc.MessageHold.MessageHoldOriginal;
+import com.boot.jx.postman.doc.MessageHold.MessageHoldRejected;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -519,30 +521,48 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 
 	public void reject(InboxMessage inboxMessageOriginal, Throwable e) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
-		MessageHold hold = new MessageHold();
-		hold.setInboxMessage(inboxMessageOriginal);
-		hold.setContactId(contactId);
-		hold.setTimestamp(System.currentTimeMillis());
-		hold.setAppType(appConfig.getAppType());
-		hold.setAppVenv(appConfig.getAppVenv());
+		MessageHoldRejected rejectedMessage = new MessageHoldRejected();
+		rejectedMessage.setInboxMessage(inboxMessageOriginal);
+		rejectedMessage.setContactId(contactId);
+		rejectedMessage.setTimestamp(System.currentTimeMillis());
+		rejectedMessage.setAppType(appConfig.getAppType());
+		rejectedMessage.setAppVenv(appConfig.getAppVenv());
 
+		rejectedMessage.setReason(e.getMessage());
 		StackTraceElement[] traces = e.getStackTrace();
 		if (traces.length > 0 && traces[0].toString().length() > 0) {
 			for (StackTraceElement trace : traces) {
-				hold.logs().add(trace.toString());
+				rejectedMessage.logs().add(trace.toString());
 			}
 		}
 
 		if (e instanceof ApiHttpServerException || e instanceof ApiHttpException) {
-			hold.setHttpResp(MapModel.from(((ApiHttpException) e).getResponse().getBody()).toMap());
+			rejectedMessage.setHttpResp(MapModel.from(((ApiHttpException) e).getResponse().getBody()).toMap());
 		}
 
-		mongoTemplate.save(hold, MessageHold.COLLECTION_REJECTED);
+		mongoTemplate.save(rejectedMessage, MessageHold.COLLECTION_REJECTED);
+	}
+
+	public void reject(InboxMessage inboxMessageOriginal, String reason, String... details) {
+		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
+		MessageHoldRejected rejectedMessage = new MessageHoldRejected();
+		rejectedMessage.setInboxMessage(inboxMessageOriginal);
+		rejectedMessage.setContactId(contactId);
+		rejectedMessage.setTimestamp(System.currentTimeMillis());
+		rejectedMessage.setAppType(appConfig.getAppType());
+		rejectedMessage.setAppVenv(appConfig.getAppVenv());
+
+		rejectedMessage.setReason(reason);
+		for (String detail : details) {
+			rejectedMessage.logs().add(detail);
+		}
+
+		mongoTemplate.save(rejectedMessage, MessageHold.COLLECTION_REJECTED);
 	}
 
 	public void original(InboxMessage inboxMessageOriginal) {
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
-		MessageHold hold = new MessageHold();
+		MessageHold hold = new MessageHoldOriginal();
 		hold.setInboxMessage(inboxMessageOriginal);
 		hold.setContactId(contactId);
 		hold.setTimestamp(System.currentTimeMillis());
