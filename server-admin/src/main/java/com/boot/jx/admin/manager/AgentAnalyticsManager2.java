@@ -25,17 +25,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
 @Component
-public class AgentAnalyticsManager implements Serializable {
+public class AgentAnalyticsManager2 implements Serializable {
 	/**
 	 * 
 	 */
@@ -106,18 +105,38 @@ public class AgentAnalyticsManager implements Serializable {
 		}
 
 		if (allAgent != null && !allAgent.isEmpty()) {
+			int i = 0;
+			long totaSeconds = 0;
+//			long st =  Instant.now().toEpochMilli();
+//			lstDto = getAgentAnalyticsMultiThreaded(allAgent,date1, date2,req.getContactType());
+//			Long et1=Instant.now().toEpochMilli();
+//			System.out.println("total time taken in seconds:"+st +"\t et"+ et1+"\t for all agents :"+getMitlToSeconds(et1-st));
+//			long diff = (et1-st1);
+			// lstDto.add(dto);
 			long st = Instant.now().toEpochMilli();
-			LOGGER.info("Agent List: " + allAgent.size() + "\t Start Time: " + st);
+			LOGGER.info("Agent List :" + allAgent.size() + "\t Start Time :" + st);
+			for (Object chatSess : allAgent) {
+				i++;
+				Long st1 = Instant.now().toEpochMilli();
 
-			long date1Final = date1;
-			long date2Final = date2;
+				dto = new DashBoardResponseDto();
+				String agent = (String) chatSess;
+				if (!StringUtils.isBlank(agent)) {
+					dto = getAgentAnalytics(agent, date1, date2, req.getContactType());
+					lstDto.add(dto);
+				}
 
-			lstDto = allAgent.parallelStream().map(agent -> {
-				return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
-			}).filter(Objects::nonNull).collect(Collectors.toList());
+				Long et1 = Instant.now().toEpochMilli();
+
+				long diff = (et1 - st1);
+				totaSeconds += diff;
+
+			}
 
 			long et = Instant.now().toEpochMilli();
-			LOGGER.info("Total time taken in seconds: " + et + "\t for all agents: " + getMitlToSeconds(et - st));
+			long diffT = (et - st);
+			LOGGER.info("total time taken in seconds:" + et + "\t for all agents :" + getMitlToSeconds(diffT));
+
 		} else {
 			dto = getAgentAnalytics(req.getAgent(), date1, date2, req.getContactType());
 			lstDto.add(dto);
@@ -397,13 +416,12 @@ public class AgentAnalyticsManager implements Serializable {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		query.addCriteria(Criteria.where("assignedToAgent").exists(false));
+		// removeChatSessField(query);
 		query.fields().include("assignedAgentStamp").include("contactId").include("contact");
-
-		// Fetch documents from MongoDB
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+		List<UniqueContactDto> distinceContactList = getDistinctV1(chatSessDocLst);
 
-		// Optimize distinct contact list processing
-		return getDistinctV1(chatSessDocLst);
+		return distinceContactList;
 	}
 
 	public List<String> getUniqueAgentWiseContactList(String agent, long dateRange1, long dateRange2) {
@@ -429,28 +447,33 @@ public class AgentAnalyticsManager implements Serializable {
 
 	public List<UniqueContactDto> getUniqueAgentWiseContactListV1(String agent, long dateRange1, long dateRange2) {
 
-		// Early return if agent is null to avoid unnecessary query execution
-		if (agent == null) {
-			return getDefaultDistinctContactV1(dateRange1, dateRange2);
-		}
-
-		// Construct the query
-		Query query = new Query(
-				Criteria.where("assignedToAgent").is(agent).and("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		Query query = new Query();
+		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
+		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
-
-		// Execute the query and fetch results
-		long st = System.currentTimeMillis();
-		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		long et = System.currentTimeMillis();
-		LOGGER.info("Mongo query execution time: {} ms", (et - st));
-
-		// Process the results
 		List<UniqueContactDto> distinctIdList = new ArrayList<>();
+		long st = System.currentTimeMillis();
+		// System.out.println("==============START TIME =========================="+st);
+		// System.out.println("==============getUniqueAgentWiseContactListV1 TIME
+		// =========================="+JsonUtil.toJson(query));
+		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+
+		long et = System.currentTimeMillis();
+
 		if (ArgUtil.is(chatSessDocLst)) {
 			distinctIdList = getDistinctV1(chatSessDocLst);
 		}
 
+		if (agent == null) {
+			distinctIdList = getDefaultDistinctContactV1(dateRange1, dateRange2);
+		}
+
+		for (UniqueContactDto un : distinctIdList) {
+			// System.out.println("UNIQUE :"+JsonUtil.toJson(un));
+		}
+
+		// System.out.println("**************END TIME **************"+et +"\t difference
+		// in second :"+(et-st)/1000);
 		return distinctIdList;
 	}
 
