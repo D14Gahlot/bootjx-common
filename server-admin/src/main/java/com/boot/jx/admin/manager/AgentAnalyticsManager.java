@@ -56,6 +56,7 @@ import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
 import com.boot.jx.admin.dto.PeakLoadDto;
 import com.boot.jx.admin.dto.UniqueContactDto;
+import com.boot.jx.async.ContextAwareCollection;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -115,7 +116,7 @@ public class AgentAnalyticsManager implements Serializable {
 				long date1Final = date1;
 				long date2Final = date2;
 
-				lstDto = allAgent.parallelStream().map(agent -> {
+				lstDto = new ContextAwareCollection<String>(allAgent).ayncStream().map(agent -> {
 					if (ArgUtil.is(agent)) {
 						// System.out.println("pareller universe "+parellel);
 						return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
