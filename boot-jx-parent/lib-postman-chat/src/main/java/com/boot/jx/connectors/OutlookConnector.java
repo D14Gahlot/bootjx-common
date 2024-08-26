@@ -33,6 +33,7 @@ import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundMsg;
+import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.nexus.NexusEmailClient;
@@ -223,7 +224,6 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		return null;
 	}
 
-
 	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MessageTempInbound inbound)
 			throws NoSuchAlgorithmException {
 
@@ -261,8 +261,11 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			inboxMessage.session().setTicketHash(subject);
 		}
 
-
-		inboxMessage.setAttachments(inbound.getAttachments());
+		if (ArgUtil.is(inbound.getAttachments())) {
+			for (InBoundMsgMedia attachment : inbound.getAttachments()) {
+				inboxMessage.attachments().add(attachment.toAttachment());
+			}
+		}
 
 		return inboxMessage;
 	}
