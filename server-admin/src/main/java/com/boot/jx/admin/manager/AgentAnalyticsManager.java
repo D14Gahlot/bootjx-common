@@ -36,6 +36,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,17 +108,15 @@ public class AgentAnalyticsManager implements Serializable {
 
 		if (allAgent != null && !allAgent.isEmpty()) {
 			long st = Instant.now().toEpochMilli();
-			LOGGER.info("Agent List: " + allAgent.size() + "\t Start Time: " + st);
-
-			long date1Final = date1;
-			long date2Final = date2;
-
-			lstDto = allAgent.parallelStream().map(agent -> {
-				return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
-			}).filter(Objects::nonNull).collect(Collectors.toList());
-
-			long et = Instant.now().toEpochMilli();
-			LOGGER.info("Total time taken in seconds: " + et + "\t for all agents: " + getMitlToSeconds(et - st));
+			for (Object chatSess : allAgent) {
+			dto = new DashBoardResponseDto();
+			String agent = (String) chatSess;
+			if(!StringUtils.isBlank(agent)) {
+				dto = getAgentAnalytics(agent, date1, date2,req.getContactType());
+				lstDto.add(dto);
+			}
+			
+		}
 		} else {
 			dto = getAgentAnalytics(req.getAgent(), date1, date2, req.getContactType());
 			lstDto.add(dto);
