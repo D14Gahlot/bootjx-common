@@ -26,14 +26,16 @@ public class WABAFlows implements Serializable {
 	private Map<String, Object> meta;
 	private Map<String, Object> details;
 	private Map<String, Object> json;
-	private Map<String,String>FieldMeta;
+    private List<Map<String, String>> fieldMeta;
 	
 
-	// Getters and Setters
+    public List<Map<String, String>> getFieldMeta() {
+        return fieldMeta;
+    }
 
-	public Map<String, String> getFieldMeta() {
-		return FieldMeta;
-	}
+    public void setFieldMeta(List<Map<String, String>> fieldMeta) {
+        this.fieldMeta = fieldMeta;
+    }
 
 	
 
@@ -85,11 +87,7 @@ public class WABAFlows implements Serializable {
 		this.json = json;
 	}
 
-	public void setFieldMeta(Map<String, String> fieldMeta) {
-		// TODO Auto-generated method stub
-		this.FieldMeta=fieldMeta;
-		
-	}
+	
 
 	
 
