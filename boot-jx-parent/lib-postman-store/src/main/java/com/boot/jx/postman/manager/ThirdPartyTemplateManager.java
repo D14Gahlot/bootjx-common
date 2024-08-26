@@ -1,11 +1,16 @@
 package com.boot.jx.postman.manager;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -17,10 +22,14 @@ import com.boot.jx.postman.doc.tpo.WABAFlows;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Template;
+import com.boot.jx.postman.wacfb.WacfbClient;
+import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class ThirdPartyTemplateManager {
@@ -172,7 +181,7 @@ public class ThirdPartyTemplateManager {
 
 		for (Map<String, Object> flowData : flows) {
 			String flowId = (String) flowData.get("id");
-			String id = String.format("%s/%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
+			String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 			WABAFlows flowDoc = commonMongoTemplate.findById(id, WABAFlows.class);
 			if (!ArgUtil.is(flowDoc)) {
 				flowDoc = new WABAFlows();
@@ -181,8 +190,48 @@ public class ThirdPartyTemplateManager {
 			flowDoc.setFlowId(id);
 			flowDoc.setMeta(flowData);
 			commonMongoTemplate.save(flowDoc);
+            fetchAndSetScreenId(flowId, channelConfig);
+
 		}
 
 	}
+	@Autowired
+	WacfbClient wacfbClient;
+	
+	
+	@Async
+	public void fetchAndSetScreenId(String flowId, ChannelConfig channelConfig) {
+		
+	      try {
+			MapModel resp =wacfbClient.flowsAssets(flowId, channelConfig);
 
+			 List<Map<String, Object>> data = (List<Map<String, Object>>) resp.toMap().get("data");
+
+		        if (data != null && !data.isEmpty()) {
+		            String downloadUrl = (String) data.get(0).get("download_url");
+
+		            RestTemplate restTemplate = new RestTemplate();
+		            String jsonResponseString = restTemplate.getForObject(downloadUrl, String.class);
+
+		            ObjectMapper objectMapper = new ObjectMapper();
+		            Map<String, Object> jsonResponse = objectMapper.readValue(jsonResponseString, new TypeReference<Map<String, Object>>() {});
+
+		                String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
+		    			WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
+
+		                if (flow != null) {
+		                	if(jsonResponse!=null)
+		                	{
+		                		flow.setJson(jsonResponse);
+		                	}
+		                   
+		                	commonMongoTemplate.save(flow);
+		                }
+		            }
+		        
+	      }catch(Exception e)
+	      {
+	    	  System.out.print(e);
+	      }
+	}
 }

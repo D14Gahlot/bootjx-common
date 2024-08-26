@@ -14,7 +14,6 @@ import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
@@ -222,10 +221,6 @@ public class MessageContext {
 			sessionStore.upsert(chatContextQuery);
 		}
 		return null;
-	}
-
-	public void log(ErrorObject error) {
-		commonMongoTemplate.save(error);
 	}
 
 	public ClientApp clientApp(String assignedQueue, Contactable contactable) {

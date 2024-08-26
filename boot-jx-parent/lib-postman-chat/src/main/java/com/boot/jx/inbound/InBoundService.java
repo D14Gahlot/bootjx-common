@@ -26,7 +26,6 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.ErrorObject;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
@@ -204,11 +203,8 @@ public class InBoundService extends ATaskLimiter {
 				locallySessionAssigned = true;
 				messageContext.session(session);
 			} else {
-				ErrorObject error = new ErrorObject();
-				error.setIncomingMessage(inboxMessageOriginal);
-				error.setErrorType("NO_SESSION_CREATED");
-				error.setMessage("Cannot Create Session");
-				messageContext.log(error);
+				// error.setMessage("Cannot Create Session");
+				messageStore.reject(inboxMessageOriginal, "NO_SESSION_CREATED");
 				return inboxMessageOriginal;
 			}
 		}

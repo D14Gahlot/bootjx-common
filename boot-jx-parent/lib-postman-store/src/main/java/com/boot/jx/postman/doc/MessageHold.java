@@ -160,6 +160,16 @@ public class MessageHold extends UpdatedTimeStampDoc implements Serializable {
 	@TypeAlias("MessageHoldRejected")
 	public static class MessageHoldRejected extends MessageHold {
 		private static final long serialVersionUID = 5700536999322313441L;
+		private String reason;
+
+		public String getReason() {
+			return reason;
+		}
+
+		public void setReason(String reason) {
+			this.reason = reason;
+		}
+
 	}
 
 	@Document(collection = COLLECTION_QUEUED)

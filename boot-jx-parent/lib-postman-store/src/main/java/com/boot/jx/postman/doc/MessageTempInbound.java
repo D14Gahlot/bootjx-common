@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
-import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 
 @Document(collection = MessageTempInbound.COLLECTION_NAME)
 @TypeAlias("MessageTempInbound")
@@ -28,7 +28,7 @@ public class MessageTempInbound extends TimeStampDoc implements Serializable {
 	private String channelType;
 
 	private Map<String, Object> data;
-	private List<Attachment> attachments = null;
+	private List<InBoundMsgMedia> attachments = null;
 
 	private List<Object> logs;
 
@@ -71,11 +71,11 @@ public class MessageTempInbound extends TimeStampDoc implements Serializable {
 		this.data = data;
 	}
 
-	public List<Attachment> getAttachments() {
+	public List<InBoundMsgMedia> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<Attachment> attachments) {
+	public void setAttachments(List<InBoundMsgMedia> attachments) {
 		this.attachments = attachments;
 	}
 

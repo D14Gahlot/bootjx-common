@@ -466,10 +466,10 @@ public class WA360CloudClient implements ChannelClient {
 
 	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
-				wa360OutBoundMedia.setFilename(attachment.getMediaName());
+				wa360OutBoundMedia.setFilename(attachment.getMediaCaption());
 				wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
 		        wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		        if (mediaType.equalsIgnoreCase("image")) {
+		        if (mediaType.equalsIgnoreCase("image") ||mediaType.equalsIgnoreCase("video")  ) {
 			         wa360OutBoundMedia.setFilename(null);
 		}
 		return wa360OutBoundMedia;
@@ -809,7 +809,6 @@ public class WA360CloudClient implements ChannelClient {
 
 	/** Call new metod to post msg directly to waba API **/
 	public MapModel sendTemplateRaw(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-		System.out.println("sendTemplateRaw :" + JsonUtil.toJson(outboxMessage));
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 
