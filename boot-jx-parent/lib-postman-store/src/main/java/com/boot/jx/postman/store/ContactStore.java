@@ -344,6 +344,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				pbName.setFirstName(req.getName().getFirstName());
 				pbName.setLastName(req.getName().getLastName());
 				pbName.setMiddleName(req.getName().getMiddleName());
+				pbName.setFormattedName(req.getName().getFormattedName());
 				pbName.fix();
 				doc.setName(pbName);
 			}
