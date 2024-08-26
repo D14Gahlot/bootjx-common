@@ -1,6 +1,8 @@
 package com.boot.jx.postman.manager;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -214,7 +216,10 @@ public class ThirdPartyTemplateManager {
 		            String jsonResponseString = restTemplate.getForObject(downloadUrl, String.class);
 
 		            ObjectMapper objectMapper = new ObjectMapper();
+
 		            Map<String, Object> jsonResponse = objectMapper.readValue(jsonResponseString, new TypeReference<Map<String, Object>>() {});
+		            Map<String, String> fieldMeta = fetchFieldMeta(jsonResponse);
+
 
 		                String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 		    			WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
@@ -223,6 +228,7 @@ public class ThirdPartyTemplateManager {
 		                	if(jsonResponse!=null)
 		                	{
 		                		flow.setJson(jsonResponse);
+		                		  flow.setFieldMeta(fieldMeta); 
 		                	}
 		                   
 		                	commonMongoTemplate.save(flow);
@@ -234,4 +240,43 @@ public class ThirdPartyTemplateManager {
 	    	  System.out.print(e);
 	      }
 	}
+
+	 public static Map<String, String> fetchFieldMeta(Map<String, Object> jsonResponse) throws IOException {
+	        Map<String, String> fieldMeta = new LinkedHashMap<>();
+	        List<Map<String, Object>> screens = (List<Map<String, Object>>) jsonResponse.get("screens");
+
+	        if (screens != null) {
+	            for (int i = 0; i < screens.size(); i++) {
+	            	 Map<String, Object> screen = screens.get(i);
+	                 Map<String, Object> layout = (Map<String, Object>) screen.get("layout");
+	                if (layout != null) {
+	                    fetchChildren((List<Map<String, Object>>)layout.get("children"), fieldMeta, i);
+	                }
+	            }
+	        }
+
+	        return fieldMeta;
+	    }
+	 private static void fetchChildren(List<Map<String, Object>> children, Map<String, String> fieldMeta, int screenIndex) {
+		 if (children != null) {
+	            int inputIndex = 0;
+	            for (Map<String, Object> child : children) {
+	                String type = (String) child.get("type");
+
+	                if ("Form".equals(type)) {
+	                    fetchChildren((List<Map<String, Object>>) child.get("children"), fieldMeta, screenIndex);
+	                } else if (isFieldType(type)) {
+	                    String label = (String) child.get("label");
+	                    String key = "screen_" + screenIndex + "_" + type + "_" + inputIndex;
+	                    fieldMeta.put(key, label);
+	                    inputIndex++;
+	                }
+	            }
+	        }
+	 }
+	        private static boolean isFieldType(String type) {
+		        return "TextInput".equals(type) || "RadioButtonsGroup".equals(type) ||
+		               "DatePicker".equals(type) || "Dropdown".equals(type);
+		    }
+
 }
