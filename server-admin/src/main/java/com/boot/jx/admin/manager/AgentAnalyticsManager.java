@@ -36,7 +36,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +49,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContext;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
@@ -107,14 +109,31 @@ public class AgentAnalyticsManager implements Serializable {
 		}
 
 		if (allAgent != null && !allAgent.isEmpty()) {
-			for (String agent : allAgent) {
-				dto = new DashBoardResponseDto();
-				if (!StringUtils.isBlank(agent)) {
-					dto = getAgentAnalytics(agent, date1, date2, req.getContactType());
-					lstDto.add(dto);
-				}
+			boolean parellel = false;
 
+			if (parellel) {
+				long date1Final = date1;
+				long date2Final = date2;
+
+				lstDto = allAgent.parallelStream().map(agent -> {
+					if (ArgUtil.is(agent)) {
+						// System.out.println("pareller universe "+parellel);
+						return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
+					}
+					return null;
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+			} else {
+				for (String agent : allAgent) {
+					dto = new DashBoardResponseDto();
+					if (!StringUtils.isBlank(agent)) {
+						// System.out.println("pareller universe "+parellel);
+						dto = getAgentAnalytics(agent, date1, date2, req.getContactType());
+						lstDto.add(dto);
+					}
+
+				}
 			}
+
 		} else {
 			dto = getAgentAnalytics(req.getAgent(), date1, date2, req.getContactType());
 			lstDto.add(dto);
