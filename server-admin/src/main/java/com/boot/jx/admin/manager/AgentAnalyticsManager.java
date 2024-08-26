@@ -49,6 +49,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContext;
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
@@ -85,7 +87,7 @@ public class AgentAnalyticsManager implements Serializable {
 	AdminDashBoardManager adminDbMgr;
 
 	public List<DashBoardResponseDto> getAgentWiseAnalytics(DashBoardRequestDto req) {
-		LOGGER.info("getAgentWiseAnalytics {} :" + JsonUtil.toJson(req));
+		LOGGER.info("getAgentWiseAnalytics {}", JsonUtil.toJson(req));
 		List<DashBoardResponseDto> lstDto = new ArrayList<>();
 		DashBoardResponseDto dto = null;
 		List<String> allAgent = null;
@@ -107,29 +109,31 @@ public class AgentAnalyticsManager implements Serializable {
 		}
 
 		if (allAgent != null && !allAgent.isEmpty()) {
-//			long st = Instant.now().toEpochMilli();
-//			LOGGER.info("Agent List: " + allAgent.size() + "\t Start Time: " + st);
-//
-//			long date1Final = date1;
-//			long date2Final = date2;
-//
-//			lstDto = allAgent.parallelStream().map(agent -> {
-//				if (ArgUtil.is(agent)) {
-//					return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
-//				}
-//				return null;
-//			}).filter(Objects::nonNull).collect(Collectors.toList());
-//
-//			long et = Instant.now().toEpochMilli();
-//			LOGGER.info("Total time taken in seconds: " + et + "\t for all agents: " + getMitlToSeconds(et - st));
-			for (String agent : allAgent) {
-				dto = new DashBoardResponseDto();
-				if (!StringUtils.isBlank(agent)) {
-					dto = getAgentAnalytics(agent, date1, date2, req.getContactType());
-					lstDto.add(dto);
-				}
+			boolean parellel = false;
 
+			if (parellel) {
+				long date1Final = date1;
+				long date2Final = date2;
+
+				lstDto = allAgent.parallelStream().map(agent -> {
+					if (ArgUtil.is(agent)) {
+						// System.out.println("pareller universe "+parellel);
+						return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
+					}
+					return null;
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+			} else {
+				for (String agent : allAgent) {
+					dto = new DashBoardResponseDto();
+					if (!StringUtils.isBlank(agent)) {
+						// System.out.println("pareller universe "+parellel);
+						dto = getAgentAnalytics(agent, date1, date2, req.getContactType());
+						lstDto.add(dto);
+					}
+
+				}
 			}
+
 		} else {
 			dto = getAgentAnalytics(req.getAgent(), date1, date2, req.getContactType());
 			lstDto.add(dto);
@@ -232,6 +236,7 @@ public class AgentAnalyticsManager implements Serializable {
 
 	@SuppressWarnings("unchecked")
 	public DashBoardResponseDto getAgentAnalytics(String agent, long dateRange1, long dateRange2, Object contact) {
+
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 		LOGGER.debug(dtf.format(LocalDateTime.now()) + " Get Analytics for  :" + agent);
 		DashBoardResponseDto dto = new DashBoardResponseDto();
@@ -242,7 +247,8 @@ public class AgentAnalyticsManager implements Serializable {
 		if (ArgUtil.is(distinctContactLst)) {
 			dto.setUniqueConversation(distinctContactLst.size());
 		}
-
+//		System.out.println("getAgentAnalytics:" + agent + " : " + dateRange1 + "-  " + dateRange2 + "  = "
+//				+ ArgUtil.is(distinctContactLst) + "   TNT" + AppContextUtil.getTenant());
 		/** Total Agent-contact wise msg **/
 		if (distinctContactLst != null && !distinctContactLst.isEmpty()) {
 
@@ -452,10 +458,7 @@ public class AgentAnalyticsManager implements Serializable {
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
 
 		// Execute the query and fetch results
-		long st = System.currentTimeMillis();
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		long et = System.currentTimeMillis();
-		LOGGER.info("Mongo query execution time: {} ms", (et - st));
 
 		// Process the results
 		List<UniqueContactDto> distinctIdList = new ArrayList<>();
