@@ -108,9 +108,8 @@ public class AgentAnalyticsManager implements Serializable {
 
 		if (allAgent != null && !allAgent.isEmpty()) {
 			long st = Instant.now().toEpochMilli();
-			for (Object chatSess : allAgent) {
+			for (String agent : allAgent) {
 				dto = new DashBoardResponseDto();
-				String agent = (String) chatSess;
 				if (!StringUtils.isBlank(agent)) {
 					dto = getAgentAnalytics(agent, date1, date2, req.getContactType());
 					lstDto.add(dto);
