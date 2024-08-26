@@ -2212,7 +2212,7 @@ public class AdminDashBoardManager {
        return hourWiseCount;
 	}
 	//api for counting mediaTemp
-	public List<HSMTemplateDoc> getMediaTemplateCount(long timestamp ) {
+	public List<ChatSessionDoc> getMediaTemplateCount(long timestamp ) {
 		// List<MessageDoc> msgDocLst =null;
 		String tnt = AppContextUtil.getTenant();
 		Date dateTi = new Date(timestamp);
@@ -2226,9 +2226,10 @@ public class AdminDashBoardManager {
 		String offset = getTimeZoneFromSetup();
 		monthMinTimeStamp = monthMinTimeStamp + countryTimeZoneOffset(offset);
 		monthMaxTimeStamp = monthMaxTimeStamp + countryTimeZoneOffset(offset);
-		 Criteria criteria = Criteria.where("createdStamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp).and("options.attachment.mediaTemplate").exists(true);
+		 Criteria criteria = Criteria.where("msg.lastMsg.timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp).and("msg.lastOutBoundMsg.options.attachment.mediaTemplate").exists(true);
 		 Query query = new Query(criteria);
-		List<HSMTemplateDoc> hsmDocLst = mongoTemplate.find(query, HSMTemplateDoc.class);
+		List<ChatSessionDoc> hsmDocLst = mongoTemplate.find(query, ChatSessionDoc.class);
+		System.out.println("Number of records found: " + hsmDocLst.size());
 		return hsmDocLst;
 	}
 
