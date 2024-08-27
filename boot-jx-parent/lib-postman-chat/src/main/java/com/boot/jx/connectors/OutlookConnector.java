@@ -270,7 +270,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		return inboxMessage;
 	}
 
-	private MessageReport toMessageReport(InBoundMsgStatus status, ChannelConfig channelConfig) {
+	private MessageReport toMessageReport(ChannelConfig channelConfig, InBoundMsgStatus status) {
 		MessageReport report = this.createMessageReport(channelConfig);
 		report.setMessageId(status.messageId);
 		report.setMessageIdExt(status.messageIdExt);
@@ -291,14 +291,18 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			for (InBoundMsg message : inbound.messages) {
 				try {
 					MessageTempInbound msg = commonMongoTemplate.findById(message.messageId, MessageTempInbound.class);
-					messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, msg));
+					if (ArgUtil.is(msg)) {
+						messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, msg));
+					}
 				} catch (NoSuchAlgorithmException e) {
 					e.printStackTrace();
 				}
 			}
 		} else if (ArgUtil.is(inbound.statuses)) {
 			for (InBoundMsgStatus status : inbound.statuses) {
-				messageBoxEvent.addMessageReport(toMessageReport(status, channelConfig));
+				if (ArgUtil.is(status)) {
+					messageBoxEvent.addMessageReport(toMessageReport(channelConfig, status));
+				}
 			}
 		}
 		return messageBoxEvent;
