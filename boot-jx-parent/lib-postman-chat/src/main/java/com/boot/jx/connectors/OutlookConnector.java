@@ -261,13 +261,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			inboxMessage.session().setTicketHash(subject);
 		}
 
-		if (ArgUtil.is(inbound.getAttachments())) {
-			for (InBoundMsgMedia attachment : inbound.getAttachments()) {
-				if (ArgUtil.is(attachment)) {
-					inboxMessage.attachments().add(attachment.toAttachment());
-				}
-			}
-		}
+		inboxMessage.setAttachments(inbound.getAttachments());
 
 		return inboxMessage;
 	}
@@ -295,6 +289,8 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 					MessageTempInbound msg = commonMongoTemplate.findById(message.messageId, MessageTempInbound.class);
 					if (ArgUtil.is(msg)) {
 						messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, msg));
+					} else {
+						LOGGER.warn("no Message found for {} ", message.messageId);
 					}
 				} catch (NoSuchAlgorithmException e) {
 					e.printStackTrace();
