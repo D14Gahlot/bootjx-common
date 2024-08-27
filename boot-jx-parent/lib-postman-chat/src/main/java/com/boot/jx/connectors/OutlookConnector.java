@@ -263,7 +263,9 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 		if (ArgUtil.is(inbound.getAttachments())) {
 			for (InBoundMsgMedia attachment : inbound.getAttachments()) {
-				inboxMessage.attachments().add(attachment.toAttachment());
+				if (ArgUtil.is(attachment)) {
+					inboxMessage.attachments().add(attachment.toAttachment());
+				}
 			}
 		}
 
