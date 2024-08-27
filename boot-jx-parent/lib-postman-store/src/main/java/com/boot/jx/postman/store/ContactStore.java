@@ -47,6 +47,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -334,8 +336,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	public CustomerProfileDoc createprofile(CustomerProfileDoc req) {
 		CustomerProfileDoc doc = findById(req.getId(), CustomerProfileDoc.class);
 		if(ArgUtil.is(doc)) {
-			ApiResponseUtil.throwInputException(new ApiFieldError().field(doc.getCode())
-					.codeKey("ValidPhoneDuplicate").description(doc.getCode() + " already exists"));
+			updateProfile(req,doc);
 		}else {
 			doc= new CustomerProfileDoc();
 			
@@ -344,6 +345,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				pbName.setFirstName(req.getName().getFirstName());
 				pbName.setLastName(req.getName().getLastName());
 				pbName.setMiddleName(req.getName().getMiddleName());
+				pbName.setFormattedName(req.getName().getFormattedName());
 				pbName.fix();
 				doc.setName(pbName);
 			}
@@ -512,4 +514,147 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		  return fldCode;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public void updateProfile(CustomerProfileDoc req, CustomerProfileDoc doc) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		if (ArgUtil.is(req.getName())) {
+			PBName pbName = new PBName();
+			pbName.setFirstName(ArgUtil.parseAsString(req.getName().getFirstName(), doc.getName().getFirstName()));
+			pbName.setLastName(ArgUtil.parseAsString(req.getName().getMiddleName(), doc.getName().getMiddleName()));
+			pbName.setMiddleName(ArgUtil.parseAsString(req.getName().getLastName(), doc.getName().getLastName()));
+			pbName.setFormattedName(
+					ArgUtil.parseAsString(req.getName().getFormattedName(), doc.getName().getFormattedName()));
+			pbName.fix();
+			doc.setName(pbName);
+		}
+
+		if (req.getPhones() != null && !req.getPhones().isEmpty()) {
+			Set<PBPhone> reqPhones = req.getPhones();
+			for (PBPhone reqph : reqPhones) {
+				Optional<PBPhone> found = Optional.empty();
+				String uuid = reqph.getUuid();
+				found = doc.getPhones().stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
+				if (found.isPresent()) {
+					found.get().update(reqph);
+				} else {
+					PBPhone pb = parsePhone(reqph);
+					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
+					doc.getPhones().add(pb);
+				}
+
+			}
+		}
+		if (req.getEmails() != null && !req.getEmails().isEmpty()) {
+			Set<PBEmail> reqPbEmails = req.getEmails();
+			for (PBEmail reqEm : reqPbEmails) {
+				Optional<PBEmail> found = Optional.empty();
+				String uuid = reqEm.getUuid();
+				found = doc.getEmails().stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
+				if (found.isPresent()) {
+					found.get().update(reqEm);
+				} else {
+					PBEmail pbEm = new PBEmail();
+					pbEm.setUuid(ArgUtil.parseAsString(pbEm.getUuid(), UniqueID.generateString()));
+					pbEm.update(reqEm);
+					doc.getEmails().add(pbEm);
+				}
+
+			}
+
+		}
+
+		Map<String, Object> addInfoMap = req.getAdditionalInfo();
+		if (ArgUtil.is(addInfoMap)) {
+			for (Map.Entry<String, Object> entry : addInfoMap.entrySet()) {
+				LOGGER.info("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+				switch (entry.getKey()) {
+				case "title":
+				case "Title":
+					addInfoMap.put(entry.getKey(), ArgUtil.parseAsString(entry.getValue(),
+							doc.getAdditionalInfo().get(entry.getKey())==null?Constants.BLANK:doc.getAdditionalInfo().get(entry.getKey()).toString()));
+					break;
+				case "gender":
+				case "Gender":
+					addInfoMap.put(entry.getKey(), ArgUtil.parseAsString(entry.getValue(),
+							doc.getAdditionalInfo().get(entry.getKey())==null?Constants.BLANK:doc.getAdditionalInfo().get(entry.getKey()).toString()));
+					break;
+				case "dob":
+				case "DOB":
+					addInfoMap.put(entry.getKey(), ArgUtil.parseAsString(entry.getValue(),
+							doc.getAdditionalInfo().get(entry.getKey())==null?Constants.BLANK:doc.getAdditionalInfo().get(entry.getKey()).toString()));
+					break;
+				case "emails":
+				case "alt_emails":
+					List<PBEmail> pbEmails=objectMapper.convertValue(entry.getValue(), new TypeReference<List<PBEmail>>() {});
+					Set<PBEmail> spbmails =addUpdateEmail(pbEmails,doc);
+					addInfoMap.put(entry.getKey(),spbmails);
+					break;
+				case "phone":
+				case "alt_phones":
+					List<PBPhone> pbPhones = objectMapper.convertValue(entry.getValue(), new TypeReference<List<PBPhone>>() {});
+					Set<PBPhone> spbPhone =addUpdatePhone(pbPhones, doc);
+					addInfoMap.put(entry.getKey(),spbPhone);
+					break;	
+					
+				default:
+					Object object = checkFieldType(entry.getKey(), entry.getValue());
+					if (ArgUtil.isEmpty(object)) {
+						LOGGER.info("Json Util else  :" + JsonUtil.toJson(object) + "\t key-value :" + entry.getKey()
+								+ "-" + JsonUtil.toJson(entry.getValue()));
+					} else {
+						addInfoMap.put(entry.getKey(),
+								ArgUtil.parseAsT(entry.getValue(), doc.getAdditionalInfo().get(entry.getKey()), false));
+					}
+				}
+			}
+
+		}
+		doc.setAdditionalInfo(addInfoMap);
+		
+		doc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
+		mongoTemplate.save(doc);
+	}
+
+	private Set<PBPhone> addUpdatePhone(List<PBPhone> reqPhones, CustomerProfileDoc doc) {
+	    Set<PBPhone> setPbPhone = new TreeSet<>();
+	    for (PBPhone reqph : reqPhones) {
+	        Optional<PBPhone> found = Optional.empty();
+	        String uuid = reqph.getUuid();
+	        found = doc.getPhones().stream()
+	                   .filter(phone -> phone.getUuid().equals(uuid))
+	                   .findFirst();
+	        if (found.isPresent()) {
+	            found.get().update(reqph);
+	            setPbPhone.add(found.get());  // Add the updated phone
+	        } else {
+	            PBPhone pb = parsePhone(reqph);
+	            pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
+	            doc.getPhones().add(pb);
+	            setPbPhone.add(pb);  // Add the new phone
+	        }
+	    }
+	    return setPbPhone;
+	}
+
+	
+	private Set<PBEmail> addUpdateEmail(List<PBEmail> reqEmail, CustomerProfileDoc doc) {
+		Set<PBEmail> setPbEmail = new TreeSet<>();
+		for (PBEmail reqEm : reqEmail) {
+			Optional<PBEmail> found = Optional.empty();
+			String uuid = reqEm.getUuid();
+			found = doc.getEmails().stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
+			if (found.isPresent()) {
+				found.get().update(reqEm);
+				setPbEmail.add(found.get());  // Add the updated phone
+			} else {
+				PBEmail pbEm = new PBEmail();
+				pbEm.setUuid(ArgUtil.parseAsString(pbEm.getUuid(), UniqueID.generateString()));
+				pbEm.update(reqEm);
+				setPbEmail.add(pbEm);
+			}
+
+		}
+		return setPbEmail;
+	}
 }
+
