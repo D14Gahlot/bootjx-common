@@ -274,6 +274,8 @@ public class ConfigManagerImpl implements ConfigManager {
 		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.get(channelType);
 		String channelId = map.getString("channelId");
 		String lane = map.getString("lane");
+		String apiVersion = map.getString("apiVersion");
+		String channelConfigTempId = map.getString("channelConfigTempId");
 		boolean isAutoCreated = map.entry("isAutoCreated").asBoolean(Boolean.FALSE);
 
 		if (ArgUtil.is(data)) {
@@ -282,6 +284,8 @@ public class ConfigManagerImpl implements ConfigManager {
 				config = new ChannelConfig();
 				config.setLane(lane);
 				config.setAutoCreated(isAutoCreated);
+				config.setApiVersion(apiVersion);
+				config.setChannelConfigTempId(channelConfigTempId);
 			}
 			plugin.importChannelConfigFromMap(config, map, channelType);
 			save(config);

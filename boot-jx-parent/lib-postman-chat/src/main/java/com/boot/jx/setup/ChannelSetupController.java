@@ -33,7 +33,7 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
-import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.manager.ConfigManager;
 import com.boot.jx.postman.model.AuthStateManager;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
@@ -210,7 +210,7 @@ public class ChannelSetupController {
 		// ChannelConfigSetupDoc setup = commonMongoTemplate.findById(channelConfigId,
 		// ChannelConfigSetupDoc.class);
 		if (ArgUtil.is(master)) {
-			ChannelConfigTempDoc respDoc = new ChannelConfigTempDoc();
+			ChannelConfigLogger respDoc = new ChannelConfigLogger();
 			respDoc.setChannelConfigId(masterChannelId);
 			respDoc.setResp(response);
 			respDoc.setChannelType(master.getChannelType());
@@ -224,6 +224,8 @@ public class ChannelSetupController {
 					for (ChannelConfig channel : channels) {
 						channel.setContactType(master.getContactType());
 						channel.setChannelType(master.getChannelType());
+						channel.setMasterChannelId(masterChannelId);
+						channel.setChannelConfigTempId(respDoc.getId());
 						configManager.saveForDomain(channel, domainName);
 						returnVal.put(channel.getChannelId(), domainName);
 					}

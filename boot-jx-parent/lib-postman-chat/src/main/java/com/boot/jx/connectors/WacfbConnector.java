@@ -29,7 +29,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
@@ -97,8 +97,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	private CommonMongoTemplate commonMongoTemplate;
 
 	@Override
-	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
-			AuthState state) {
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigLogger channelConfigTemp, AuthState state) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		try {
 			MapModel resp = MapModel.from(channelConfigTemp.getResp());
@@ -211,7 +210,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	}
 
 	@Override
-	public void onChannelUpdate(ChannelConfig channelConfig) {
+	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 		// String webhookUrl = null;
 		// try {
 		// webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);

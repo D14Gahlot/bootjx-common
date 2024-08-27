@@ -52,6 +52,9 @@ public class ChannelConfig extends AChannelConfig {
 
 	private Map<String, Object> meta;
 
+	private String masterChannelId;
+	private String channelConfigTempId;
+
 	private Object error;
 
 	private String callbackPath;
@@ -303,4 +306,21 @@ public class ChannelConfig extends AChannelConfig {
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
 	}
+
+	public String getChannelConfigTempId() {
+		return channelConfigTempId;
+	}
+
+	public void setChannelConfigTempId(String channelConfigTempId) {
+		this.channelConfigTempId = channelConfigTempId;
+	}
+
+	public String getMasterChannelId() {
+		return masterChannelId;
+	}
+
+	public void setMasterChannelId(String masterChannelId) {
+		this.masterChannelId = masterChannelId;
+	}
+
 }
