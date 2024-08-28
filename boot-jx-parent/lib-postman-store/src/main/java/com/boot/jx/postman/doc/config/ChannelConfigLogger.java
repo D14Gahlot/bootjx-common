@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "TEMP_CONFIG_CHANNEL")
 @TypeAlias("ChannelConfigTemp")
-public class ChannelConfigTempDoc extends TimeStampDoc implements Serializable {
+public class ChannelConfigLogger extends TimeStampDoc implements Serializable {
 
 	private static final long serialVersionUID = -6368905475787041196L;
 
@@ -148,7 +148,7 @@ public class ChannelConfigTempDoc extends TimeStampDoc implements Serializable {
 		return this.logs;
 	}
 
-	public ChannelConfigTempDoc log(String api, Map<String, Object> resp) {
+	public ChannelConfigLogger log(String api, Map<String, Object> resp) {
 		ChannelConfigTempLog log = new ChannelConfigTempLog();
 		log.setApi(api);
 		log.setResp(resp);

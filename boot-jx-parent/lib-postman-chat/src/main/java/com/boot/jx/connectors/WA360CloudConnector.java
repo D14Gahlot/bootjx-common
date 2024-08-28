@@ -29,6 +29,7 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -93,8 +94,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	private CommonMongoTemplate commonMongoTemplate;
 
 	@Override
-	public void onChannelUpdate(ChannelConfig channelConfig) {
-		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null);
+	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
+		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null, null);
 		LOGGER.info("WA360CloudConnector onChannelUpdate :" + webhookUrl);
 		restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/webhook")
 				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())

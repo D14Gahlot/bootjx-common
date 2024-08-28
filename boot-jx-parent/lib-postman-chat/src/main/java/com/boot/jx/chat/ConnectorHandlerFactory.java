@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory.ConnectorHandler;
 import com.boot.jx.connectors.AbstractConnector.DefaultConnector;
 import com.boot.jx.dict.ContactType;
@@ -29,7 +30,7 @@ import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
@@ -167,7 +168,7 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 		void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
-		default void onChannelUpdate(ChannelConfig channelConfig) {
+		default void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 			LOGGER.error("WEBHOOK onChannelUpdate NOT FOUND ");
 		}
 
@@ -247,14 +248,14 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 		void reloadMedia(ChannelConfig channelConfig, MessageDoc msg) throws FileNotFoundException, IOException;
 
-		default List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc resp, AuthState state) {
+		default List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigLogger resp, AuthState state) {
 			LOGGER.error("Channel onRegister NOT FOUND ");
 			return null;
 		}
 
 		public ChannelClient getClient(ChannelConfig channelConfig);
 
-		default public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
+		default public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigTemp,
 				AuthState state) throws URISyntaxException, MalformedURLException {
 			return Constants.BLANK;
 		}
@@ -310,7 +311,16 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 			ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
 			if (ArgUtil.is(connector)) {
 				try {
-					connector.onChannelUpdate(channelConfig);
+					ChannelConfigLogger channelConfigTemp = commonMongoTemplate
+							.findById(channelConfig.getChannelConfigTempId(), ChannelConfigLogger.class);
+					if (!ArgUtil.is(channelConfigTemp)) {
+						channelConfigTemp = new ChannelConfigLogger();
+						channelConfigTemp.setChannelConfigId(channelConfig.getMasterChannelId());
+						channelConfigTemp.setChannelType(channelConfig.getChannelType());
+						channelConfigTemp.setDomain(AppContextUtil.getTenant());
+					}
+					connector.onChannelUpdate(channelConfig, channelConfigTemp);
+					commonMongoTemplate.save(channelConfigTemp);
 				} catch (Exception e) {
 					LOGGER.error("error onChannelUpdate " + channelConfig, e);
 				}

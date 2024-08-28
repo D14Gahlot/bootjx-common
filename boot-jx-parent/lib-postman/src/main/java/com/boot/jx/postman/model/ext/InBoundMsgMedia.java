@@ -1,5 +1,6 @@
 package com.boot.jx.postman.model.ext;
 
+import com.boot.jx.dict.FileFormat;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.utils.ArgUtil;
@@ -48,6 +49,21 @@ public class InBoundMsgMedia extends CommonMsg {
 		}
 		media.mimeType = attachment.getMediaMimeType();
 		return media;
+	}
+
+	public Attachment toAttachment() {
+		Attachment attachment = new Attachment();
+		attachment.setMediaCaption(caption);
+		attachment.setMediaName(filename);
+		attachment.setMediaURL(link);
+		if (ArgUtil.is(linkSecure)) {
+			attachment.setMediaURL(linkSecure);
+		}
+		attachment.setMediaMimeType(mimeType);
+		if (ArgUtil.is(mimeType)) {
+			attachment.setMediaType(FileFormat.from(mimeType).getFileType().toString());
+		}
+		return attachment;
 	}
 
 }

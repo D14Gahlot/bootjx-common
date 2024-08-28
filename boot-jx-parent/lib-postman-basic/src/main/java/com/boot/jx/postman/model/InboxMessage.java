@@ -54,6 +54,8 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 	protected Map<String, Object> form = new HashMap<String, Object>();
 	protected Map<String, Object> data = new HashMap<String, Object>();
 	private Map<String, Object> replyTo = new HashMap<String, Object>();
+	private MessageReferral referral;
+
 	protected TagDocument tags;
 	private List<Attachment> attachments = null;
 	private List<PBVCard> vccards = null;
@@ -451,6 +453,14 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 	@Override
 	public void id(String id) {
 		this.setMessageId(id);
+	}
+
+	public MessageReferral getReferral() {
+		return referral;
+	}
+
+	public void setReferral(MessageReferral referral) {
+		this.referral = referral;
 	}
 
 }

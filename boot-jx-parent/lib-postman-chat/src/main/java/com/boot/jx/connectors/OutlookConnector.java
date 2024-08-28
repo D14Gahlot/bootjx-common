@@ -24,7 +24,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageTempInbound;
-import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
@@ -78,7 +78,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 	private MessageStore messageStore;
 
 	@Override
-	public String createAuthUrl(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp, AuthState state)
+	public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigLogger, AuthState state)
 			throws URISyntaxException, MalformedURLException {
 		String redirectUri = String.format("%s%s/ext/setup/channel/callback/outlook", commonHttpRequest.getServerHost(),
 				appConfig.getAppPrefix(), environment.keyEntry("mry.prop.service.server").asString());
@@ -94,12 +94,12 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 				.getURL();
 	}
 
-	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigLogger channelConfigLogger,
 			AuthState state) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		try {
 
-			MapModel resp = MapModel.from(channelConfigTemp.getResp());
+			MapModel resp = MapModel.from(channelConfigLogger.getResp());
 			MapModel tokenResponse = restService.ajax(AUTHORIZE_TOKEN)//
 					.field("grant_type", "authorization_code")//
 					.field("code", resp.pathEntry("authResponse.code").asString())//
@@ -107,7 +107,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 					.field("client_secret", setup.getOutlook().getMasterClientSecret())//
 					.field("redirect_uri", state.getRedirectUrl()).submit().asMapModel();
 
-			channelConfigTemp.log("oauth2/v2.0/token", tokenResponse.toMap());
+			channelConfigLogger.log("oauth2/v2.0/token", tokenResponse.toMap());
 
 			String accessToken = tokenResponse.keyEntry("access_token").asString();
 			String refreshToken = tokenResponse.keyEntry("refresh_token").asString();
@@ -115,9 +115,10 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			MapModel profileResponse = restService.ajax("https://graph.microsoft.com/v1.0/me")
 					.header("Authorization", "Bearer " + accessToken).get().asMapModel();
 
-			channelConfigTemp.log("/me", profileResponse.toMap());
+			channelConfigLogger.log("/me", profileResponse.toMap());
 
 			ChannelConfig channel = new ChannelConfig();
+			channel.setApiVersion("v3");
 			channel.setOutlook(new OutlookConfigDetails());
 			channel.getOutlook().setAccessToken(accessToken);
 			channel.getOutlook().setRefreshToken(refreshToken);
@@ -127,21 +128,22 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 			channels.add(channel);
 		} catch (ApiHttpException e) {
-			channelConfigTemp.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
+			channelConfigLogger.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
 		}
-		commonMongoTemplate.save(channelConfigTemp);
+		commonMongoTemplate.save(channelConfigLogger);
 		return channels;
 	}
 
 	@Override
-	public void onChannelUpdate(ChannelConfig channelConfig) {
+	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 		Map<String, Object> meta = channelConfig.getMeta();
 		if (!ArgUtil.is(channelConfig.getMeta())) {
 			meta = new HashMap<String, Object>();
 		}
-		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, "nexus");
 
 		try {
+			String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, "nexus/email/api/v1",
+					MapModel.createInstance().put("folder", "inbox").toMap());
 			MapModel inbox = restService.ajax(GRAPH_API).path("/v1.0/subscriptions")
 					.authBearer(channelConfig.getOutlook().getAccessToken())
 					.postJson(MapModel.createInstance().put("changeType", "created").put("notificationUrl", webhookUrl)
@@ -152,9 +154,14 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 							.put("latestSupportedTlsVersion", "v1_2").toMap())
 					.asMapModel();
 
+			channelConfigLogger.log("/subscriptions?inbox", inbox.toMap());
+
 			if (inbox.containsKey("data")) {
 				meta.put("inbox_subscription", inbox.keyEntry("data").value());
 			}
+
+			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, "nexus/email/api/v1",
+					MapModel.createInstance().put("folder", "SentItems").toMap());
 
 			MapModel sentItems = restService.ajax(GRAPH_API).path("/v1.0/subscriptions")
 					.authBearer(channelConfig.getOutlook().getAccessToken())
@@ -166,11 +173,14 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 							.put("latestSupportedTlsVersion", "v1_2").toMap())
 					.asMapModel();
 
+			channelConfigLogger.log("/subscriptions?SentItems", sentItems.toMap());
+
 			if (sentItems.containsKey("data")) {
 				meta.put("sent_subscription", sentItems.keyEntry("data").value());
 			}
-		} catch (Exception e) {
+		} catch (ApiHttpException e) {
 			LOGGER.error("onChannelUpdate", e);
+			channelConfigLogger.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
 		}
 
 		channelConfig.setMeta(meta);
@@ -223,7 +233,6 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		return null;
 	}
 
-
 	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MessageTempInbound inbound)
 			throws NoSuchAlgorithmException {
 
@@ -261,13 +270,12 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			inboxMessage.session().setTicketHash(subject);
 		}
 
-
 		inboxMessage.setAttachments(inbound.getAttachments());
 
 		return inboxMessage;
 	}
 
-	private MessageReport toMessageReport(InBoundMsgStatus status, ChannelConfig channelConfig) {
+	private MessageReport toMessageReport(ChannelConfig channelConfig, InBoundMsgStatus status) {
 		MessageReport report = this.createMessageReport(channelConfig);
 		report.setMessageId(status.messageId);
 		report.setMessageIdExt(status.messageIdExt);
@@ -288,14 +296,20 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			for (InBoundMsg message : inbound.messages) {
 				try {
 					MessageTempInbound msg = commonMongoTemplate.findById(message.messageId, MessageTempInbound.class);
-					messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, msg));
+					if (ArgUtil.is(msg)) {
+						messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, msg));
+					} else {
+						LOGGER.warn("no Message found for {} ", message.messageId);
+					}
 				} catch (NoSuchAlgorithmException e) {
 					e.printStackTrace();
 				}
 			}
 		} else if (ArgUtil.is(inbound.statuses)) {
 			for (InBoundMsgStatus status : inbound.statuses) {
-				messageBoxEvent.addMessageReport(toMessageReport(status, channelConfig));
+				if (ArgUtil.is(status)) {
+					messageBoxEvent.addMessageReport(toMessageReport(channelConfig, status));
+				}
 			}
 		}
 		return messageBoxEvent;

@@ -35,6 +35,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -122,15 +123,15 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		ConnectorHandlerFactory.LOGGER.error("WEBHOOK REGISTRATION NOT DEFINED for URL");
 	}
 
-	public void registerWebhook(ChannelConfig channelConfig) {
-		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null);
+	public void registerWebhook(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
+		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null, null);
 		this.registerWebhook(channelConfig, webhookUrl);
 	}
 
 	@Override
-	public void onChannelUpdate(ChannelConfig channelConfig) {
+	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 		// Register Webhook URL
-		this.registerWebhook(channelConfig);
+		this.registerWebhook(channelConfig, channelConfigLogger);
 	}
 
 	public ChannelConfig getChannelConfig(String channleType, String lane) {

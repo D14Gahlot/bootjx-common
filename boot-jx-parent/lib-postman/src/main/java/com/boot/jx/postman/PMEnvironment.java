@@ -1,6 +1,7 @@
 package com.boot.jx.postman;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +118,7 @@ public class PMEnvironment {
 		private boolean isDisabled;
 		private boolean isDeleted;
 		private boolean isHidden;
+		private String apiVersion;
 
 		@JsonView(PMEnvironment.PublicProperty.class)
 		private String server;
@@ -266,6 +268,14 @@ public class PMEnvironment {
 
 		public void setHidden(boolean isHidden) {
 			this.isHidden = isHidden;
+		}
+
+		public String getApiVersion() {
+			return apiVersion;
+		}
+
+		public void setApiVersion(String apiVersion) {
+			this.apiVersion = apiVersion;
 		}
 
 	}
@@ -496,13 +506,15 @@ public class PMEnvironment {
 
 		TimePeriod getAgentSessionTimeout();
 
-		String getWebhookUrl(ChannelConfig channelConfig, String appPrefix);
+		String getWebhookUrl(ChannelConfig channelConfig, String appPrefix, Map<String, Object> query);
 
 		boolean isLocalDummyBotEnabled();
 
 		String getDefaultSender();
 
 		String getContactDetailsUrl();
+
+
 
 	}
 

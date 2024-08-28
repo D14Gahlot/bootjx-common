@@ -15,7 +15,7 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.fb.FacbookAttachment;
 import com.boot.jx.postman.fb.FacebookConstants.InBoundWrapperPaths;
 import com.boot.jx.postman.fb.FacebookEntry;
@@ -52,8 +52,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	private RestService restService;
 
 	@Override
-	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigTempDoc channelConfigTemp,
-			AuthState state) {
+	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigLogger channelConfigTemp, AuthState state) {
 		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
 		try {
 
@@ -99,7 +98,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 	}
 
 	@Override
-	public void onChannelUpdate(ChannelConfig channelConfig) {
+	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 		restService.ajax("https://graph.facebook.com/v18.0/").path(channelConfig.getInstagram().getFbPageId())
 				.path("/subscribed_apps").field("access_token", channelConfig.getInstagram().getAccessToken())
 				.field("subscribed_fields",
