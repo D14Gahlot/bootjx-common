@@ -44,4 +44,8 @@ public class MessageReferral implements Serializable {
 		this.body = body;
 	}
 
+    @Override
+    public String toString() {
+        return "MessageReferral{ \n"+"sourceUrl=" + sourceUrl  + ", sourceId=" + sourceId +", sourceType=" + sourceType +", body=" + body + "}";
+    }
 }
