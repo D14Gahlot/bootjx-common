@@ -35,9 +35,9 @@ public class CustomerProfileService {
 		return lstCmfields;
 	}
 
-	public List<CustomerFieldMasterDoc> fetchCustomerMstFields(String id,boolean active) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMstFields(String id,boolean active,int pageSize,int pageNo,String sortBy) {
 
-		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id,active);
+		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id,active,pageSize,pageNo,sortBy);
 		return lstCmfields;
 	}
 
@@ -57,8 +57,8 @@ public class CustomerProfileService {
 
 	}
 
-	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id) {
-		return cmFieldMgr.fetchCustomerProfileMasterDoc(id);
+	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id,int pageSize,int pageNo,String sortBy) {
+		return cmFieldMgr.fetchCustomerProfileMasterDoc(id,pageSize,pageNo,sortBy);
 
 	}
 //

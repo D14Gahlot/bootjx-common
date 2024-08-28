@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -104,12 +105,16 @@ public class CustomerMasterFldMgr {
 			commonMongoTemplate.save(cmFieldDoc);
 		}
 
-		return fetchCustomerMasfields(cmFieldDoc.getId(),true);
+		return fetchCustomerMasfields(cmFieldDoc.getId(),true,0,0,null);
 	}
 
-	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id,boolean active) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id,boolean active,int pagesize,int pageNo,String sortBy) {
 		List<CustomerFieldMasterDoc> dtoLst = new ArrayList<>();
 		CustomerFieldMasterDoc cmFieldDoc = null;
+		
+		int limit = pagesize == 0 ? 10 : pagesize;
+		String sortby = ArgUtil.parseAsString(sortBy, "_id");
+		
 		Query qryQuery=new Query();
 		
 		if (ArgUtil.is(id)) {
@@ -120,7 +125,12 @@ public class CustomerMasterFldMgr {
 				dtoLst.add(dto);
 			}
 		} else {
-			List<CustomerFieldMasterDoc> lstGropDocs = commonMongoTemplate.findAll(CustomerFieldMasterDoc.class);
+			
+			 qryQuery = new Query()
+		                .with(Sort.by(Sort.Direction.DESC, sortby))  // Sorting by the specified field in descending order
+		                .skip((pageNo - 1) * pagesize)                 // Skipping records for pagination
+		                .limit(limit); 
+			List<CustomerFieldMasterDoc> lstGropDocs = commonMongoTemplate.find(qryQuery,CustomerFieldMasterDoc.class);
 			for (CustomerFieldMasterDoc doc : lstGropDocs) {
 				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(doc, new CustomerFieldMasterDoc());
 				if (dto.isActive()==active) {
@@ -139,7 +149,7 @@ public class CustomerMasterFldMgr {
 			builder.set("active", reqDto.isActive());
 			commonMongoTemplate.upsert(builder);
 		}
-		return fetchCustomerMasfields(null,true);
+		return fetchCustomerMasfields(null,true,0,0,null);
 	}
 
 	public CustomerFieldMasterDoc toCheckDupFieldCode(String fieldCode) {
@@ -207,11 +217,13 @@ public class CustomerMasterFldMgr {
 		return null;
 	}
 
-	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id) {
-
+	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id,int pagesize, int pageNo,String sortBy) {
+		int limit = pagesize == 0 ? 10 : pagesize;
+		String sortby = ArgUtil.parseAsString(sortBy, "_id");
 		List<JobsResponseDto> dtoLst = new ArrayList<>();
 		JobScheduledDoc cmProfileDoc = null;
 		JobsResponseDto dto = null;
+		
 		if (ArgUtil.is(id)) {
 			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
 			if (ArgUtil.is(cmProfileDoc)) {
@@ -219,7 +231,14 @@ public class CustomerMasterFldMgr {
 				dtoLst.add(dto);
 			}
 		} else {
-			List<JobScheduledDoc> lstProfileDocs = commonMongoTemplate.findAll(JobScheduledDoc.class);
+			
+			 Query query = new Query()
+		                .with(Sort.by(Sort.Direction.DESC, sortby))  // Sorting by the specified field in descending order
+		                .skip((pageNo - 1) * pagesize)                 // Skipping records for pagination
+		                .limit(limit);                                  // Limiting the number of records to pageSize
+			
+			//List<JobScheduledDoc> lstProfileDocs = commonMongoTemplate.findAll(JobScheduledDoc.class);
+			 List<JobScheduledDoc> lstProfileDocs =commonMongoTemplate.find(query, JobScheduledDoc.class);
 			for (JobScheduledDoc doc : lstProfileDocs) {
 				dto = EntityDtoUtil.entityToDto(doc, new JobsResponseDto());
 				dtoLst.add(dto);
