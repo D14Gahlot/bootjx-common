@@ -146,8 +146,13 @@ public class PartnerController {
 	@RequestMapping(value = { "/pub/register" }, method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> register(Model model, HttpServletRequest request,
 			HttpServletResponse httpServletResponse, @RequestBody @Valid SignupContact signupContact) {
+
+		if (signupContact.getProduct() == null || signupContact.getProduct().isEmpty()) {
+			ApiResponseUtil.throwDuplicateInputException("Select at least one product you are interested in.",
+					new ApiFieldError().obzect("signupContact").field("product").codeKey("ValidProduct")
+							.description("Select at least one product you are interested in."));
+		}
 		createUser(signupContact);
-//Customer registers on our website
 		return ApiResponse.build().message("Verification email sent");
 	}
 
@@ -157,12 +162,6 @@ public class PartnerController {
 			ApiResponseUtil.throwDuplicateInputException("Email address already in use. Try reset password.",
 					new ApiFieldError().obzect("signupContact").field("email").codeKey("ValidEmailDuplicate")
 							.description("Email address already in use."));
-		}
-
-		if (signupContact.getProduct() == null || signupContact.getProduct().isEmpty()) {
-			ApiResponseUtil.throwDuplicateInputException("Select at least one product you are interested in.",
-					new ApiFieldError().obzect("signupContact").field("product").codeKey("ValidProduct")
-							.description("Select at least one product you are interested in."));
 		}
 
 		AccountMeta keys = new AccountMeta();
