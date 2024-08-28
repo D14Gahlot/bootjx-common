@@ -118,7 +118,6 @@ public class AgentAnalyticsManager implements Serializable {
 
 				lstDto = new ContextAwareCollection<String>(allAgent).ayncStream().map(agent -> {
 					if (ArgUtil.is(agent)) {
-						// System.out.println("pareller universe "+parellel);
 						return getAgentAnalytics(agent, date1Final, date2Final, req.getContactType());
 					}
 					return null;
@@ -127,7 +126,6 @@ public class AgentAnalyticsManager implements Serializable {
 				for (String agent : allAgent) {
 					dto = new DashBoardResponseDto();
 					if (!StringUtils.isBlank(agent)) {
-						// System.out.println("pareller universe "+parellel);
 						dto = getAgentAnalytics(agent, date1, date2, req.getContactType());
 						lstDto.add(dto);
 					}
@@ -585,7 +583,7 @@ public class AgentAnalyticsManager implements Serializable {
 		return count;
 	}
 
-	public long getConversationDuration(String agent, long startTime, long endTime, List<String> uniquContactIdLst) {
+	public long getConversationDuration(String agent, long startTime, long endTime,List<String> uniquContactIdLst) {
 		Map<String, Long> conVerMsgLst = new HashMap<String, Long>();
 		Long maxEntryKeyValue = new Long(0);
 		for (Object chatSession : uniquContactIdLst) {
@@ -609,9 +607,8 @@ public class AgentAnalyticsManager implements Serializable {
 
 		return maxEntryKeyValue;
 	}
-
-	public long getConversationDurationV1(String agent, long startTime, long endTime,
-			List<UniqueContactDto> uniquContactIdLst) {
+	
+	public long getConversationDurationV1(String agent, long startTime, long endTime,List<UniqueContactDto> uniquContactIdLst) {
 		Map<String, Long> conVerMsgLst = new HashMap<String, Long>();
 		Long maxEntryKeyValue = new Long(0);
 		for (UniqueContactDto chatSession : uniquContactIdLst) {
@@ -635,14 +632,14 @@ public class AgentAnalyticsManager implements Serializable {
 
 		return maxEntryKeyValue;
 	}
+	
 
-	public double getStartLag(String agent, long dateRange1, long dateRange2, List<String> uniquContactIdLst) {
+	public double getStartLag(String agent, long dateRange1, long dateRange2) {
 		Map<String, Double> startLagMapLst = new HashMap<String, Double>();
 		double startLag = 0.0d;
 		double percentageWithDecimal = 0.0d;
 
-		// List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent,
-		// dateRange1, dateRange2);
+		List<String> uniquContactIdLst = getUniqueAgentWiseContactList(agent, dateRange1, dateRange2);
 		for (Object chatSession : uniquContactIdLst) {
 			String conId = (String) chatSession;
 			Query query = new Query();
@@ -753,19 +750,20 @@ public class AgentAnalyticsManager implements Serializable {
 	}
 
 	/** fetch lead mesenger **/
-	public LeadMessanger getLeadMessenger(Object contactype, long startTime, long endTime, Object contact) {
+
+	public LeadMessanger getLeadMessenger(Object contactype, long startTime, long endTime,Object contact) {
 		LeadMessanger leadMessanger = new LeadMessanger();
 		double percentageWithDecimal = 0.0;
-		// List<String> lst = adminDbMgr.getListOfContactType();
-
-		List<String> lst = getContactType(contact);
-
+		//List<String> lst = adminDbMgr.getListOfContactType();
+		
+		List<String> lst =getContactType(contact);
+		
 		Map<String, Integer> leasMsgLst = new HashMap<String, Integer>();
 		for (String contactType : lst) {
 			List<MessageDoc> msgDocLst = adminDbMgr.getTotalMsgCount(contactType, startTime, endTime);
 			leasMsgLst.put(contactType, msgDocLst.size());
 		}
-		// LOGGER.debug("lead Msg :" + leasMsgLst.toString());
+		//LOGGER.debug("lead Msg  :" + leasMsgLst.toString());
 
 		if (leasMsgLst != null && ArgUtil.is(leasMsgLst)) {
 			Object maxEntryKey = Collections.max(leasMsgLst.entrySet(), Map.Entry.comparingByValue()).getKey();
@@ -781,52 +779,48 @@ public class AgentAnalyticsManager implements Serializable {
 			leadMessanger.setTotalContactMessage(sumOfAllContactMsg);
 			leadMessanger.setPercentage(percentageWithDecimal);
 		}
-		// getLeadMessengerV1(contactype,startTime,endTime,contact);
-		// System.out.println("LEAD MSG :"+JsonUtil.toJson(leadMessanger));
 		return leadMessanger;
 	}
-
 	/** Fetch lead messenger **/
-	public LeadMessanger getLeadMessengerV1(Object contacttype, long startTime, long endTime, Object contact) {
-		LeadMessanger leadMessanger = new LeadMessanger();
+    public LeadMessanger getLeadMessengerV1(Object contacttype, long startTime, long endTime, Object contact) {
+        LeadMessanger leadMessanger = new LeadMessanger();
 
-		// Fetch contact types list
-		List<String> contactTypeList = getContactType(contact);
+        // Fetch contact types list
+        List<String> contactTypeList = getContactType(contact);
 
-		// Map to hold the message count for each contact type
-		Map<String, Integer> messageCountMap = new HashMap<>();
+        // Map to hold the message count for each contact type
+        Map<String, Integer> messageCountMap = new HashMap<>();
 
-		// Populate the map with message counts
-		for (String type : contactTypeList) {
-			Integer messageCount = adminDbMgr.getTotalMsgCountV1(type, startTime, endTime);
-			messageCountMap.put(type, messageCount);
-		}
-		LOGGER.debug("Lead Messenger message counts: " + messageCountMap);
+        // Populate the map with message counts
+        for (String type : contactTypeList) {
+        	Integer messageCount = adminDbMgr.getTotalMsgCountV1(type, startTime, endTime);
+            messageCountMap.put(type, messageCount);
+        }
+        LOGGER.debug("Lead Messenger message counts: " + messageCountMap);
 
-		// Check if the map is not empty
-		if (!messageCountMap.isEmpty()) {
-			// Get the contact type with the maximum message count
-			Map.Entry<String, Integer> maxEntry = Collections.max(messageCountMap.entrySet(),
-					Map.Entry.comparingByValue());
+        // Check if the map is not empty
+        if (!messageCountMap.isEmpty()) {
+            // Get the contact type with the maximum message count
+            Map.Entry<String, Integer> maxEntry = Collections.max(messageCountMap.entrySet(), Map.Entry.comparingByValue());
 
-			Integer maxMessageCount = maxEntry.getValue();
-			Integer totalMessages = messageCountMap.values().stream().mapToInt(Integer::intValue).sum();
+            Integer maxMessageCount = maxEntry.getValue();
+            Integer totalMessages = messageCountMap.values().stream().mapToInt(Integer::intValue).sum();
 
-			// Calculate percentage of maxMessageCount relative to totalMessages
-			if (totalMessages > 0) {
-				double percentage = (double) maxMessageCount / totalMessages * 100;
-				double percentageWithDecimal = BigDecimal.valueOf(percentage).setScale(2, RoundingMode.HALF_UP)
-						.doubleValue();
+            // Calculate percentage of maxMessageCount relative to totalMessages
+            if (totalMessages > 0) {
+                double percentage = (double) maxMessageCount / totalMessages * 100;
+                double percentageWithDecimal = BigDecimal.valueOf(percentage).setScale(2, RoundingMode.HALF_UP).doubleValue();
 
-				leadMessanger.setContactType(maxEntry.getKey());
-				leadMessanger.setNoOfMessage(maxMessageCount);
-				leadMessanger.setTotalContactMessage(totalMessages);
-				leadMessanger.setPercentage(percentageWithDecimal);
-			}
-		}
-		// System.out.println("LEAD MSG v1:"+JsonUtil.toJson(leadMessanger));
-		return leadMessanger;
-	}
+                leadMessanger.setContactType(maxEntry.getKey());
+                leadMessanger.setNoOfMessage(maxMessageCount);
+                leadMessanger.setTotalContactMessage(totalMessages);
+                leadMessanger.setPercentage(percentageWithDecimal);
+            }
+        }
+        //System.out.println("LEAD MSG v1:"+JsonUtil.toJson(leadMessanger));
+        return leadMessanger;
+    }
+    
 
 	/** Timestamp **/
 
@@ -1061,6 +1055,7 @@ public class AgentAnalyticsManager implements Serializable {
 
 	/** get Bot Score **/
 
+	
 	public long getBotScore(long dateRange1, long dateRange2) {
 
 		long totalBotScore = 0;
@@ -1077,33 +1072,34 @@ public class AgentAnalyticsManager implements Serializable {
 		if (botScoreLst.size() > 0 && totalBotScore != 0) {
 			averageBotScore = totalBotScore / botScoreLst.size();
 		}
-		// System.out.println("averageBotScore old :"+averageBotScore);
-		// getBotScoreV1(dateRange1,dateRange2);
 		return averageBotScore;
 	}
+	
+	
+	 public long getBotScoreV1(long dateRange1, long dateRange2) {
+		    long averageBotScore = 0;
+	        Query query = new Query();
+	        query.addCriteria(Criteria.where("mode").is("BOT"));
+	        query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+	        removeChatSessField(query);
+	        // Fetch the list of ChatSessionDoc objects
+	        List<ChatSessionDoc> botScoreLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 
-	public long getBotScoreV1(long dateRange1, long dateRange2) {
-		long averageBotScore = 0;
-		Query query = new Query();
-		query.addCriteria(Criteria.where("mode").is("BOT"));
-		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
-		removeChatSessField(query);
-		// Fetch the list of ChatSessionDoc objects
-		List<ChatSessionDoc> botScoreLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
+	        // Calculate total bot score using streams
+	        long totalBotScore = botScoreLst.stream()
+	                .mapToLong(chat -> chat.getBotScore() == null ? 0 : chat.getBotScore())
+	                .sum();
 
-		// Calculate total bot score using streams
-		long totalBotScore = botScoreLst.stream().mapToLong(chat -> chat.getBotScore() == null ? 0 : chat.getBotScore())
-				.sum();
+	      //  LOGGER.debug("Total Bot Score: " + totalBotScore);
+	        // Calculate the average bot score if the list is not empty
+	        averageBotScore = botScoreLst.isEmpty() ? 0 : totalBotScore / botScoreLst.size();
+	      
+	        return averageBotScore;
+	    }
 
-		// LOGGER.debug("Total Bot Score: " + totalBotScore);
-		// Calculate the average bot score if the list is not empty
-		averageBotScore = botScoreLst.isEmpty() ? 0 : totalBotScore / botScoreLst.size();
-		// System.out.println("averageBotScore V1 :"+averageBotScore);
-		return averageBotScore;
-	}
 
 	/** get Bot Score **/
-
+	
 	public double getBotClosure(long dateRange1, long dateRange2, long totalMsg) {
 		long botSize = 0;
 		double botClosure = 0;
@@ -1121,32 +1117,30 @@ public class AgentAnalyticsManager implements Serializable {
 			BigDecimal bd = new BigDecimal(botClosure).setScale(2, RoundingMode.HALF_UP);
 			botClosure = bd.doubleValue();
 		}
-		System.out.println("getBotClosure Old :" + botClosure);
-		// getBotClosureV1(dateRange1,dateRange2,totalMsg);
 		return botClosure;
 	}
-
+	
+	
 	public double getBotClosureV1(long dateRange1, long dateRange2, long totalMsg) {
-		if (totalMsg <= 0) {
-			return 0.0;
-		}
-		double botClosure = 0.0;
-		// Construct the query
-		Query query = new Query();
-		query.addCriteria(Criteria.where("mode").is("BOT")).addCriteria(Criteria.where("active").is(false))
-				.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
-		removeChatSessField(query);
+        if (totalMsg <= 0) {
+            return 0.0;
+        }
+        double botClosure =0.0;
+        // Construct the query
+        Query query = new Query();
+        query.addCriteria(Criteria.where("mode").is("BOT"))
+             .addCriteria(Criteria.where("active").is(false))
+             .addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
+        removeChatSessField(query);
 
-		// Fetch the list of inactive BOT sessions within the date range
-		long botSize = mongoTemplate.count(query, ChatSessionDoc.class, CHAT_SESSION);
+        // Fetch the list of inactive BOT sessions within the date range
+        long botSize = mongoTemplate.count(query, ChatSessionDoc.class, CHAT_SESSION);
 
-		// Calculate bot closure percentage
-		botClosure = ((double) botSize / totalMsg) * 100;
-		botClosure = BigDecimal.valueOf(botClosure).setScale(2, RoundingMode.HALF_UP).doubleValue();
-		// System.out.println("getBotClosureV1 :"+botClosure);
-		// Round to two decimal places
-		return botClosure;
-	}
+        // Calculate bot closure percentage
+        botClosure = ((double) botSize / totalMsg) * 100;
+        botClosure =BigDecimal.valueOf(botClosure).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        return botClosure;
+    }
 
 	/** get Satisfaction Score **/
 	public double getSatisfactionScore(long dateRange1, long dateRange2, String agent) {
