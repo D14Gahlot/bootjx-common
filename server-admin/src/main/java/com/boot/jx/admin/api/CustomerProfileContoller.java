@@ -67,9 +67,9 @@ public class CustomerProfileContoller {
 	public ApiResponse<CustomerFieldMasterDoc, Object> fetchCusMasFields(
 			@RequestParam(value = "id", required = false) String id,
 			@RequestParam(value = "active", required = false,defaultValue = "true") boolean active,
-			@RequestParam(value = "pageSize", required = false) int pageSize,
-			@RequestParam(value = "pageNo", required = false) int pageNo,
-			@RequestParam(value = "sortBy", required = false) String sortBy) {
+			@RequestParam(value = "pageSize", required = false,defaultValue = "25") int pageSize,
+			@RequestParam(value = "pageNo", required = false,defaultValue = "0") int pageNo,
+			@RequestParam(value = "sortBy", required = false,defaultValue = "_id") String sortBy) {
 		return ApiResponse.buildResults(cusProfileService.fetchCustomerMstFields(id,active,pageSize,pageNo,sortBy));
 	}
 
@@ -91,9 +91,9 @@ public class CustomerProfileContoller {
 	@RequestMapping(value = "/api/fetch/schdelued/jobs", method = { RequestMethod.GET })
 	public ApiResponse<JobsResponseDto, Object> fetchCustomerProfileMasterDoc(
 			@RequestParam(value = "id", required = false) String id,
-			@RequestParam(value = "pageSize", required = false) int pageSize,
-			@RequestParam(value = "pageNo", required = false) int pageNo,
-			@RequestParam(value = "sortBy", required = false) String sortBy) {
+			@RequestParam(value = "pageSize", required = false,defaultValue = "25") int pageSize,
+			@RequestParam(value = "pageNo", required = false,defaultValue = "0") int pageNo,
+			@RequestParam(value = "sortBy", required = false,defaultValue = "_id") String sortBy) {
 		return ApiResponse.buildResults(cusProfileService.fetchCustomerProfileMasterDoc(id,pageSize,pageNo,sortBy));
 	}
 
