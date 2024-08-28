@@ -30,6 +30,7 @@ import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
@@ -255,8 +256,8 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 		public ChannelClient getClient(ChannelConfig channelConfig);
 
-		default public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigTemp,
-				AuthState state) throws URISyntaxException, MalformedURLException {
+		default public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigTemp, AuthState state)
+				throws URISyntaxException, MalformedURLException {
 			return Constants.BLANK;
 		}
 
@@ -300,13 +301,18 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 	 * @return TODO
 	 */
 	public ChannelConfig onChannelUpdate(String channelType, String lane) {
+		LOGGER.info("onChannelUpdate({},{})", channelType, lane);
 		String channelId = PostManUtil.CHANNEL_ID(channelType, lane);
 		PMConfiguration config = environment.local();
 		ChannelConfig channelConfig = config.channel(channelId);
+		if (!ArgUtil.is(channelConfig)) {
+			channelConfig = commonMongoTemplate.findById(channelId, ChannelConfigDoc.class);
+		}
 		return onChannelUpdate(channelConfig);
 	}
 
 	public ChannelConfig onChannelUpdate(ChannelConfig channelConfig) {
+		LOGGER.info("onChannelUpdate");
 		if (ArgUtil.is(channelConfig)) {
 			ConnectorHandler connector = get(channelConfig.getContactType(), channelConfig.getChannelType());
 			if (ArgUtil.is(connector)) {
@@ -324,7 +330,12 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 				} catch (Exception e) {
 					LOGGER.error("error onChannelUpdate " + channelConfig, e);
 				}
+			} else {
+				LOGGER.info("connector:NOT_FOUND {} {}", channelConfig.getContactType(),
+						channelConfig.getChannelType());
 			}
+		} else {
+			LOGGER.info("channelConfig:NOT_FOUND");
 		}
 		return channelConfig;
 	}
