@@ -186,8 +186,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		if ("text".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
-			String referral=map.entry(InBoundWrapperPaths.MESSAGE_TYPE).asString();
-	        if (referral != null && !referral.isEmpty()) {
+			if(map.entry(InBoundWrapperPaths.REFERRAL).exists())  {
 			  MessageReferral msgReferral = new MessageReferral();
 		        String sourceUrl = map.pathEntry("messages/[0]/referral/source_url").asString();
 		        String sourceId = map.pathEntry("messages/[0]/referral/source_id").asString();
