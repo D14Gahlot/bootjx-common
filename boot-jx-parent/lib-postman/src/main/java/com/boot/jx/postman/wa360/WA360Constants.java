@@ -26,7 +26,7 @@ public class WA360Constants {
 		public static final JsonPath INTERACTIVE_NFM_REPLY_BODY = new JsonPath(
 				"messages/[0]/interactive/nfm_reply/body");
 		public static final JsonPath REFERRAL = new JsonPath(
-				"messages/[0]/interactive/referral");
+				"messages/[0]/referral");
 		
 
 		public static final JsonPath SIMPLE_BUTTON_REPLY = new JsonPath("messages/[0]/button/text");
