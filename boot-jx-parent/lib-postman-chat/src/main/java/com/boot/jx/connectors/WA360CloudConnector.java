@@ -35,6 +35,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -185,8 +186,29 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		if ("text".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
-			inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
-		} else if ("interactive".equals(messageType)) {
+			String referral=map.entry(InBoundWrapperPaths.MESSAGE_TYPE).asString();
+	        if (referral != null && !referral.isEmpty()) {
+			  MessageReferral msgReferral = new MessageReferral();
+		        String sourceUrl = map.pathEntry("messages/[0]/referral/source_url").asString();
+		        String sourceId = map.pathEntry("messages/[0]/referral/source_id").asString();
+		        String sourceType = map.pathEntry("messages/[0]/referral/source_type").asString();
+		        String body = map.pathEntry("messages/[0]/referral/body").asString();
+		        msgReferral.setSourceUrl(sourceUrl);
+		        msgReferral.setSourceId(sourceId);
+		        msgReferral.setSourceType(sourceType);
+		        msgReferral.setBody(body);
+		        inboxMessage.setReferral(msgReferral);
+		        commonMongoTemplate.save(inboxMessage);//if this is correct way to store
+		        inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.getReferral().toString()+ " \n"+map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString()));
+				}
+	        else
+	        {
+				inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
+
+	        }
+		}
+
+		else if ("interactive".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
 			String interactiveType = map.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
 			String replyId = null;
@@ -509,6 +531,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		if (cloudRequestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
+			
 		} else if (cloudRequestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = cloudRequestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {
