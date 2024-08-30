@@ -96,6 +96,21 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 			apiKeyConfig = config.clientApiKey(apiKey);
 		}
 
+		if (!ArgUtil.is(apiKeyConfig) && apiKey.equals(pmCommonConfig.getScriptusSecret())) {
+			config = pmEnvironment.shared();
+			if (ArgUtil.is(apiId)) {
+				apiKeyConfig = config.clientApiKey(apiId);
+				if (ArgUtil.is(apiKeyConfig))
+					apiKey = apiKeyConfig.getKey();
+			} else if (ArgUtil.is(apiCode)) {
+				apiKeyConfig = config.clientApiKey(apiCode);
+				if (ArgUtil.is(apiKeyConfig))
+					apiKey = apiKeyConfig.getKey();
+			} else {
+				apiKeyConfig = config.clientApiKey(apiKey);
+			}
+		}
+
 		if (!ArgUtil.is(apiKeyConfig)) {
 			if (TimeUtils.isExpired(config.getUpdateStamp(), CONFIG_REFRESH_TIME)) {
 				appConfigPackage.clear();
