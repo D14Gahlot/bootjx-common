@@ -198,15 +198,11 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				msgReferral.setBody(body);
 				inboxMessage.setReferral(msgReferral);
 				commonMongoTemplate.save(inboxMessage);// if this is correct way to store
-				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.getReferral().toString() + " \n"
-						+ map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString()));
-			} else {
-				inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
-
 			}
-		}
 
-		else if ("interactive".equals(messageType)) {
+			inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
+
+		} else if ("interactive".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
 			String interactiveType = map.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
 			String replyId = null;
