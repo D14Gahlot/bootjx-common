@@ -52,7 +52,9 @@ public class EventPublisher {
 				Map<String, Object> eventPayload = creteJsonMap(jobSchId, tnt);
 				/** publish an event **/
 				tunnelService.task(eventPayload.get("topic").toString(), eventPayload);
-				//Listen event pending 
+				/** Listen to the event 'CAMPAIGN_UPDATED' **/
+				tunnelService.task("CAMPAIGN_UPDATED", eventPayload);
+				
 			}
 
 		}
