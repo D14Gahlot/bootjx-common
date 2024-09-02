@@ -18,6 +18,7 @@ import com.boot.jx.email.EmailReplyParser;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -30,6 +31,7 @@ import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundMsg;
@@ -279,8 +281,14 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		MessageReport report = this.createMessageReport(channelConfig);
 		report.setMessageId(status.messageId);
 		report.setMessageIdExt(status.messageIdExt);
-		report.setMessageIdRef(status.messageId);
+		// report.setMessageIdRef(status.messageId);
 		report.setChangeStamp(status.timestamp);
+		report.contact().setContactId(status.contactId);
+		if (ArgUtil.is(status.contact)) {
+			report.contact().setEmail(status.contact.email);
+			report.contact().setPhone(status.contact.phone);
+			report.contact().setCsid(status.contact.csid);
+		}
 		Status st = ArgUtil.parseAsEnumT(status.status, Status.class);
 		report.setStatus(st);
 		return report;
