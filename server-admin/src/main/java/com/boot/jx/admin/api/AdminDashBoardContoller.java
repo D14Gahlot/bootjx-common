@@ -26,6 +26,7 @@ import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.utils.TimeUtils.TimePeriod;
+import com.boot.utils.TimeUtils.TimePeriodTimer;
 //import com.boot.utils.TimeUtils.TimePeriodTimer;
 
 @RestController
@@ -58,12 +59,12 @@ public class AdminDashBoardContoller {
 
 	@RequestMapping(value = "/admin/agent-dashboard-analytics", method = { RequestMethod.POST })
 	public ApiResponse<DashBoardResponseDto, Object> getAgentWiseAnalytics(@RequestBody DashBoardRequestDto req) {
-		//TimePeriodTimer timer = TimePeriodTimer.start();
+		TimePeriodTimer timer = TimePeriodTimer.start();
 		ApiResponse<DashBoardResponseDto, Object> resp = new ApiResponse<DashBoardResponseDto, Object>();
 		List<DashBoardResponseDto> lst = agentAnaMgr.getAgentWiseAnalytics(req);
 		resp.results(lst);
 		resp.data(agentAnaMgr.getSummery(lst));
-		//ApiResponseUtil.addLog("Total Time Taken : " + timer.now().toMillis());
+		ApiResponseUtil.addLog("Total Time Taken : " + timer.now().toMillis());
 		return resp;
 	}
 
