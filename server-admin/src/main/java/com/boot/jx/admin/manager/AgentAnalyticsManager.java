@@ -6,6 +6,7 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.newA
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,6 +18,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -26,10 +28,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -37,6 +39,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.bson.Document;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +48,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.SortOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.AppContext;
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
@@ -64,6 +70,8 @@ import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+
+
 
 @Component
 public class AgentAnalyticsManager implements Serializable{
@@ -111,7 +119,7 @@ public class AgentAnalyticsManager implements Serializable{
 		}
 
 		if (allAgent != null && !allAgent.isEmpty()) {
-			boolean parellel = false;
+			boolean parellel = true;
 
 			if (parellel) {
 				long date1Final = date1;
@@ -128,7 +136,6 @@ public class AgentAnalyticsManager implements Serializable{
 				for (String agent : allAgent) {
 					dto = new DashBoardResponseDto();
 					if (!StringUtils.isBlank(agent)) {
-						// System.out.println("pareller universe "+parellel);
 						dto = getAgentAnalytics(agent, date1, date2, req.getContactType());
 						lstDto.add(dto);
 					}
@@ -352,7 +359,7 @@ public class AgentAnalyticsManager implements Serializable{
 			dto.setGraphApiDetails(hourWiseCount);
 			dto.setGraphApiDetailsV1(hourWiseCountV1);
 		} else if (hour > 24 && days <= 31) {
-			Map<Object, Object> dayMapLst =getDateWiseCountV2(distinctContactLst, agent, dateRange1, dateRange2, contact);
+			Map<Object, Object> dayMapLst =getDateWiseCountV3(distinctContactLst, agent, dateRange1, dateRange2, contact);
 			Map<Object, Object> dateWiseCount=(Map<Object, Object>)dayMapLst.get("DAY");
 			Map<Object, Object> timeStampWiseCount=(Map<Object, Object>)dayMapLst.get("DAY_V1");
 		
@@ -454,8 +461,6 @@ public class AgentAnalyticsManager implements Serializable{
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
 		List<UniqueContactDto> distinctIdList = new ArrayList<>();
 		long st = System.currentTimeMillis();
-		//System.out.println("==============START TIME =========================="+st);
-		//System.out.println("==============getUniqueAgentWiseContactListV1 TIME =========================="+JsonUtil.toJson(query));
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		
 			
@@ -469,12 +474,6 @@ public class AgentAnalyticsManager implements Serializable{
 		if(agent==null) {
 			distinctIdList = getDefaultDistinctContactV1(dateRange1, dateRange2);
 		}
-		
-		for(UniqueContactDto un:distinctIdList) {
-			//System.out.println("UNIQUE :"+JsonUtil.toJson(un));
-		}
-
-		//System.out.println("**************END TIME **************"+et +"\t difference in second :"+(et-st)/1000);
 		return distinctIdList;
 	}
 	
@@ -506,15 +505,9 @@ public class AgentAnalyticsManager implements Serializable{
 				distinctIdList.add(dto);
 			}
 		}
-		// Fetch unique combinations of contactId and contactType
-		// Fetch unique combinations of contactId and contactType
+		// Fetch unique combinations of contactId and contactType , Key:combination of contactId and contactType
 		List<UniqueContactDto> uniqueContacts = distinctIdList.stream()
-				.collect(Collectors.toMap(contact -> contact.getContactId() + "-" + contact.getContactType(), // Key:
-																												// combination
-																												// of
-																												// contactId
-																												// and
-																												// contactType
+				.collect(Collectors.toMap(contact -> contact.getContactId() + "-" + contact.getContactType(), 
 						contact -> contact, // Value: the UniqueContactDto object itself
 						(contact1, contact2) -> contact1 // In case of duplicates, keep the first one
 				)).values().stream().collect(Collectors.toList());
@@ -1117,7 +1110,6 @@ public class AgentAnalyticsManager implements Serializable{
 
 
 	/** get Bot Score **/
-
 	public double getBotClosure(long dateRange1, long dateRange2, long totalMsg) {
 		long botSize = 0;
 		double botClosure = 0;
@@ -1135,8 +1127,6 @@ public class AgentAnalyticsManager implements Serializable{
 			BigDecimal bd = new BigDecimal(botClosure).setScale(2, RoundingMode.HALF_UP);
 			botClosure = bd.doubleValue();
 		}
-		  System.out.println("getBotClosure Old :"+botClosure);
-	//	getBotClosureV1(dateRange1,dateRange2,totalMsg);
 		return botClosure;
 	}
 	
@@ -1159,8 +1149,6 @@ public class AgentAnalyticsManager implements Serializable{
         // Calculate bot closure percentage
         botClosure = ((double) botSize / totalMsg) * 100;
         botClosure =BigDecimal.valueOf(botClosure).setScale(2, RoundingMode.HALF_UP).doubleValue();
-      //  System.out.println("getBotClosureV1 :"+botClosure);
-        // Round to two decimal places
         return botClosure;
     }
 	
@@ -1423,11 +1411,76 @@ public class AgentAnalyticsManager implements Serializable{
     	    }
     	    mapLst.put("DAY", dayMapLst);
     	    mapLst.put("DAY_V1", dayMapLstV1);
-    	    
-    	    
     	    return mapLst;
 	}
     
+    
+    public Map<Object, Object> getDateWiseCountV3(List<UniqueContactDto> contactIds, String agent, long dateRange1, long dateRange2, Object contact) {
+        Map<Object, Object> mapLst = new HashMap<>();
+        Map<Long, Long> dayMapLst = new HashMap<>();
+   	   Map<Long, Long> dayMapLstV1 = new HashMap<>();
+        try {
+
+        if (ArgUtil.isEmptyValue(contact)) {
+            for (UniqueContactDto contactId : contactIds) {
+                String contactType = "MESSAGE_" + contactId.getContactType();
+
+                // Create match operation to filter by contactId, agent, and date range
+                MatchOperation matchOperation = Aggregation.match(Criteria
+                        .where("contactId").is(contactId.getContactId())
+                        .and("timestamp").gte(dateRange1).lt(dateRange2)
+                        .and(Optional.ofNullable(agent).isPresent() ? "agent" : null).is(Optional.ofNullable(agent).orElse(null)));
+
+                // Convert timestamp (long) to BSON Date and format to day string
+                AggregationOperation projectToDay = context -> new Document("$project",
+                        new Document("day", new Document("$dateToString", 
+                                new Document("format", "%Y-%m-%d")
+                                .append("date", new Document("$add", Arrays.asList(new Date(0), "$timestamp")))))
+                        .append("time", "$time"));
+
+                // Group by the formatted date string
+                GroupOperation groupOperation = Aggregation.group("day").count().as("count");
+
+                // Sort by the day
+                SortOperation sortOperation = Aggregation.sort(Sort.by(Sort.Direction.ASC, "_id"));
+
+                // Create the aggregation pipeline
+                Aggregation aggregation = Aggregation.newAggregation(matchOperation, projectToDay, groupOperation, sortOperation);
+
+                // Execute the aggregation
+                AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, contactType, Document.class);
+
+       
+                for (Document result : results.getMappedResults()) {
+                	System.out.println("JSON "+JsonUtil.toJson(result));
+                	
+                    String dayStr = result.getString("_id"); // Group key
+                    Long count = Long.valueOf(result.getInteger("count").longValue()); 
+                    
+                    SimpleDateFormat sdf = new SimpleDateFormat("d");
+                    long day = Long.parseLong(sdf.format(new SimpleDateFormat("yyyy-MM-dd").parse(dayStr)));
+
+                    SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    long timestamp = timestampFormat.parse(dayStr).getTime();
+
+                    dayMapLst.put(day, dayMapLst.getOrDefault(day, 0L) + count);
+	                dayMapLstV1.put(timestamp, dayMapLstV1.getOrDefault(timestamp, 0L) + count);
+	
+                }
+            }
+        }
+        
+        mapLst.put("DAY", dayMapLst);
+	    mapLst.put("DAY_V1", dayMapLstV1);
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }
+
+        return mapLst;
+    }
+    
+    
+       
     public Map<Object, Object> getWeekWiseCountV2(List<UniqueContactDto> contactIds,String agent,long dateRange1,long dateRange2,Object contact) {
    	 Map<Object, Object> mapLst = new HashMap<>(); // Store date (day) as key and count as value
    	 Map<String, Long> weekCountMap = new HashMap<>();
