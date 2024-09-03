@@ -26,7 +26,6 @@ import com.boot.jx.admin.dto.CsvDto;
 import com.boot.jx.admin.dto.SessionSearchRequest;
 import com.boot.jx.admin.manager.CSVHelper;
 import com.boot.jx.admin.manager.ChatParserAndImportor;
-import com.boot.jx.admin.manager.EventPublisher;
 import com.boot.jx.admin.service.BulkMessageService;
 import com.boot.jx.admin.service.CSVService;
 import com.boot.jx.admin.service.TestMessageService;
@@ -352,9 +351,6 @@ public class AdminMsgController {
 	@Autowired
 	private BulkMessageService bulkMessageService;
 
-	@Autowired
-	EventPublisher eventPublish;
-
 	@RequestMapping(value = "/api/message/test/push/send", method = { RequestMethod.POST })
 	public ApiResponse<BulkSessionDoc, Object> sendTestMessage(@RequestBody OutboxMessage bulkMessage)
 			throws NumberParseException {
@@ -362,12 +358,6 @@ public class AdminMsgController {
 			List<OutboxMessage> lstOutBoxMsg = getCsvData(bulkMessage);
 			BulkSessionDoc bulkDoc = bulkMessageService.sendMultiple(lstOutBoxMsg, bulkMessage.getScheduler());
 			if (ArgUtil.is(bulkDoc)) {
-				try {
-					eventPublish.publishEvent(bulkDoc.getBulkSessionId(), bulkMessage.getHsm().getId());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
 			} else {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
@@ -376,12 +366,6 @@ public class AdminMsgController {
 			List<OutboxMessage> lstOutBoxMsg = getGroupDetails(bulkMessage);
 			BulkSessionDoc bulkDoc = bulkMessageService.sendToGroup(lstOutBoxMsg, bulkMessage.getScheduler());
 			if (ArgUtil.is(bulkDoc)) {
-				try {
-					eventPublish.publishEvent(bulkDoc.getBulkSessionId(), bulkMessage.getHsm().getId());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
 			} else {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
@@ -398,8 +382,6 @@ public class AdminMsgController {
 			List<OutboxMessage> lstOutBoxMsg = getCsvData(bulkMessage);
 			BulkSessionDoc bulkDoc = bulkMessageService.sendMultiple(lstOutBoxMsg, bulkMessage.getScheduler());
 			if (ArgUtil.is(bulkDoc)) {
-				eventPublish.publishEvent(bulkDoc.getBulkSessionId(), bulkMessage.getHsm().getId());
-
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
 			} else {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
@@ -409,7 +391,6 @@ public class AdminMsgController {
 			List<OutboxMessage> lstOutBoxMsg = getGroupDetails(bulkMessage);
 			BulkSessionDoc bulkDoc = bulkMessageService.sendToGroup(lstOutBoxMsg, bulkMessage.getScheduler());
 			if (ArgUtil.is(bulkDoc)) {
-				eventPublish.publishEvent(bulkDoc.getBulkSessionId(), bulkMessage.getHsm().getId());
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
 			} else {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
@@ -418,7 +399,6 @@ public class AdminMsgController {
 		} else {
 			BulkSessionDoc bulkDoc = bulkMessageService.send(bulkMessage, bulkMessage.getScheduler());
 			if (ArgUtil.is(bulkDoc)) {
-				eventPublish.publishEvent(bulkDoc.getBulkSessionId(), bulkMessage.getHsm().getId());
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
 			} else {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");

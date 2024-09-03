@@ -1,5 +1,6 @@
 package com.boot.jx.stomp;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,15 +13,19 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConstants;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.scope.tnt.TenantContextHolder;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.jx.stomp.StompConfig.StompSession;
 import com.boot.model.MapModel;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
@@ -133,4 +138,18 @@ public class StompController {
 				MapModel.createInstance().put("message", "sendToTag:ping_tag/ping_pong").toMap());
 		return map;
 	}
+
+	public static class StompSockPacket implements Serializable, JsonIgnoreNull, JsonIgnoreUnknown {
+		private static final long serialVersionUID = 1L;
+		public StompQuery filter;
+		public Object payload;
+	}
+
+	@ResponseBody
+	@RequestMapping("/stomp/tunnel/send")
+	public ApiResponse<Object, Object> tunnelSend(@RequestBody StompSockPacket req) {
+		stompTunnelService.sendTo(req.filter, req.payload);
+		return ApiResponse.build();
+	}
+
 }

@@ -50,7 +50,9 @@ import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -74,21 +76,15 @@ public class BulkMessageService extends BatchJobExecuter {
 	@Autowired
 	private TunnelService tunnelService;
 
-	/** adding + sign in a phone if not there **/
-	public static final String PLUS_SIGN = "+";
-
-	private static String getPhoneWithPlus(String phoneNo) {
-		if (ArgUtil.is(phoneNo)) {
-			if (!phoneNo.startsWith(PLUS_SIGN)) {
-				phoneNo = PLUS_SIGN.concat(phoneNo);
-			}
-		}
-		return phoneNo;
+	public void registerJobAndTriggerSummary(BatchJob job) {
+		registerJob(job);
+		tunnelService.task("CAMPAIGN_CREATED",
+				MapModel.createInstance().putAll(job.data()).put("bulkSessionId", job.getJobId()).toMap());
 	}
 
 	public void registerJob(BatchJob job, ChronoScheduler scheduler) {
 		if (!ArgUtil.is(scheduler)) {
-			registerJob(job);
+			registerJobAndTriggerSummary(job);
 		} else {
 			scheduler = ArgUtil.nonEmpty(scheduler, ChronoScheduler.task());
 			scheduler.setTopic("BulkMessageTask");
@@ -133,7 +129,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
-			to = getPhoneWithPlus(to);
+			to = PhoneUtil.addPlusSign(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
@@ -202,7 +198,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
-			to = getPhoneWithPlus(to);
+			to = PhoneUtil.addPlusSign(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);
@@ -270,7 +266,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
-			to = getPhoneWithPlus(to);
+			to = PhoneUtil.addPlusSign(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().setPhone(to);

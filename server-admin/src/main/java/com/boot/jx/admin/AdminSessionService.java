@@ -17,7 +17,10 @@ import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.postman.PMConstants;
+import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
+import com.boot.jx.stomp.StompQuery;
+import com.boot.jx.stomp.StompTunnelSessionManager;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -34,6 +37,9 @@ public class AdminSessionService implements LogoutHandler, AuditDetailProvider {
 
 	@Autowired
 	private AdminAuthProvider adminAuthProvider;
+
+	@Autowired
+	private StompTunnelSessionManager stompTunnelSessionManager;
 
 	public void updateSession() {
 	}
@@ -73,6 +79,10 @@ public class AdminSessionService implements LogoutHandler, AuditDetailProvider {
 		if (agent.isDuperAdmin()) {
 			adminSessionBean.addRole(PMConstants.USER_ROLE.DUPER_USER);
 		}
+
+		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(), DEFAULT.NO_DEPT,
+				StompQuery.PING_TAG);
+
 		updateLogin(agent);
 	}
 

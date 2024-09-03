@@ -168,10 +168,7 @@ public class TunnelService implements ITunnelService {
 	public <T> long task(String topic, T messagePayload) {
 		if (messagePayload instanceof Schedulable) {
 			Schedulable scheduledTask = (Schedulable) messagePayload;
-			ChronoTaskEvent chronoTask = EntityDtoUtil.copyProperties(ChronoScheduler.task(topic),
-					scheduledTask.getScheduler());
-			chronoTask.data(messagePayload);
-			tunnelFilter.schedule(chronoTask);
+			schedule(topic, messagePayload, scheduledTask.getScheduler());
 		} else {
 			AppContext context = AppContextUtil.getContext();
 			boolean isPublish = tunnelFilter.beforeTaskPublish(topic, messagePayload, context);
@@ -181,6 +178,21 @@ public class TunnelService implements ITunnelService {
 			tunnelFilter.afterTaskPublish(topic, messagePayload, context);
 		}
 		return 0L;
+	}
+
+	/**
+	 * Same as {@code TunnelService#task(String, Object)} but schedules the job
+	 * instead of executing it right away according to info in ChronoScheduler
+	 * 
+	 * @param <T>
+	 * @param topic
+	 * @param messagePayload
+	 * @param chronoScheduler
+	 */
+	public <T> void schedule(String topic, T messagePayload, ChronoScheduler chronoScheduler) {
+		ChronoTaskEvent chronoTask = EntityDtoUtil.copyProperties(ChronoScheduler.task(topic), chronoScheduler);
+		chronoTask.data(messagePayload);
+		tunnelFilter.schedule(chronoTask);
 	}
 
 	public static <T> void debugEvent(TunnelMessage<T> message) {
