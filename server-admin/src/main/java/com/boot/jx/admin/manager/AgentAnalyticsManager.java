@@ -464,8 +464,6 @@ public class AgentAnalyticsManager implements Serializable {
 		long st = System.currentTimeMillis();
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		long et = System.currentTimeMillis();
-		LOGGER.info("Mongo query execution time: {} ms", (et - st));
-
 		// Process the results
 		List<UniqueContactDto> distinctIdList = new ArrayList<>();
 		if (ArgUtil.is(chatSessDocLst)) {
@@ -1435,8 +1433,6 @@ public class AgentAnalyticsManager implements Serializable {
 
 	       
 	                for (Document result : results.getMappedResults()) {
-	                	System.out.println("JSON "+JsonUtil.toJson(result));
-	                	
 	                    String dayStr = result.getString("_id"); // Group key
 	                    Long count = Long.valueOf(result.getInteger("count").longValue()); 
 	                    
