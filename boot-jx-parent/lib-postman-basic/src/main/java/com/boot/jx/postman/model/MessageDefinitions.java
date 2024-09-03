@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.PMConstants.CHANNEL_TYPE_ENUM;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
@@ -15,7 +14,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class MessageDefinitions {
 
@@ -256,7 +257,7 @@ public class MessageDefinitions {
 
 	}
 
-	public class ContactMetaKeyDeserializer extends KeyDeserializer {
+	public static class ContactMetaKeyDeserializer extends KeyDeserializer {
 		@Override
 		public Object deserializeKey(String key, DeserializationContext deserializationContext)
 				throws IOException, JsonProcessingException {
@@ -298,5 +299,13 @@ public class MessageDefinitions {
 		public String id();
 
 		public void id(String id);
+	}
+
+	static {
+		ObjectMapper objectMapper = JsonUtil.getMapper();
+		SimpleModule module = new SimpleModule();
+		module.addKeyDeserializer(ContactMeta.class, new ContactMetaKeyDeserializer());
+		objectMapper.registerModule(module);
+
 	}
 }
