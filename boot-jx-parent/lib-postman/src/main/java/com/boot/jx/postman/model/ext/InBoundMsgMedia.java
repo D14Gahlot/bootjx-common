@@ -60,7 +60,9 @@ public class InBoundMsgMedia extends CommonMsg {
 			attachment.setMediaURL(linkSecure);
 		}
 		attachment.setMediaMimeType(mimeType);
-		attachment.setMediaType(FileFormat.from(mimeType).getFileType().toString());
+		if (ArgUtil.is(mimeType)) {
+			attachment.setMediaType(FileFormat.from(mimeType).getFileType().toString());
+		}
 		return attachment;
 	}
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.connectors.TwitterConnector;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -27,100 +28,103 @@ import twitter4j.TwitterException;
 @RestController
 public class InBoundControllerTW {
 
-    @Autowired
-    private InBoundService inBoundService;
+	@Autowired
+	private InBoundService inBoundService;
 
-    @Autowired
-    private TwitterClient twitterClient;
+	@Autowired
+	private TwitterClient twitterClient;
 
-    @Autowired
-    private TwitterConnector twitterConnector;
+	@Autowired
+	private TwitterConnector twitterConnector;
 
-    @Value("${postman.twitter.polling.lanes}")
-    private String[] pollingLanes;
+	@Value("${postman.twitter.polling.lanes}")
+	private String[] pollingLanes;
 
-    @Value("${postman.twitter.webhook.lanes}")
-    private String[] webhookLanes;
+	@Value("${postman.twitter.webhook.lanes}")
+	private String[] webhookLanes;
 
-    @Autowired
-    private PMEnvironment pmEnvironment;
+	@Autowired
+	private PMEnvironment pmEnvironment;
 
-    @ApiVendorHeaders
-    @RequestMapping(
-	    value = { "/ext/inbound/v2/tw/callback/{accountKey}/{channelId}/{channelKey}",
-		    "/ext/inbound/v2/tw/callback/{accountKey}/{channelId}/{channelKey}/" },
-	    method = { RequestMethod.GET })
-    public Map<String, String> onReceiveMessageGet(@RequestParam String crc_token,
-	    // V2Params
-	    @PathVariable String accountKey, @PathVariable String channelId, @PathVariable String channelKey) {
-	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-	return twitterClient.verifyCRC(channelConfig, crc_token);
-    }
+	@Autowired
+	ConnectorHandlerFactory connectorHandlerFactory;
 
-    @RequestMapping(value = "/ext/crc/v2/tw/callback/{accountKey}/{channelId}/{channelKey}", method = RequestMethod.GET)
-    public WebhookInfo triggerCRC(@PathVariable String accountKey, @PathVariable(required = false) String channelId,
-	    @PathVariable String channelKey) throws InterruptedException, TwitterException {
-	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-	TwitterClientContext ctx = twitterClient.getContext(channelConfig);
-	ctx.getWebhookManager().triggerCRC();
-	WebhookInfo x = ctx.getWebhookManager().getWebhookInfo();
-	return x;
-    }
-
-    @Deprecated
-    @ApiVendorHeaders
-    @RequestMapping(value = "/ext/inbound/tw/callback/{channelId}", method = { RequestMethod.POST, })
-    public List<InboxMessage> onReceiveMessagePost(@PathVariable String channelId,
-	    @RequestBody Map<String, Object> update) throws InterruptedException, TwitterException {
-	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-	List<InboxMessage> tmr = twitterConnector.process(channelConfig, update);
-	if (tmr != null && !tmr.isEmpty()) {
-	    for (InboxMessage event : tmr) {
-		inBoundService.invokeMethodsAsync(event);
-		twitterClient.getContext(channelConfig).getTwitter()
-			.destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
-	    }
+	@ApiVendorHeaders
+	@RequestMapping(
+			value = { "/ext/inbound/v2/tw/callback/{accountKey}/{channelId}/{channelKey}",
+					"/ext/inbound/v2/tw/callback/{accountKey}/{channelId}/{channelKey}/" },
+			method = { RequestMethod.GET })
+	public Map<String, String> onReceiveMessageGet(@RequestParam String crc_token,
+			// V2Params
+			@PathVariable String accountKey, @PathVariable String channelId, @PathVariable String channelKey) {
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		return twitterClient.verifyCRC(channelConfig, crc_token);
 	}
-	return tmr;
-    }
 
-    @ApiVendorHeaders
-    @RequestMapping(value = "/ext/inbound/tw/get", method = RequestMethod.GET)
-    public List<InboxMessage> pollDirectMessages(@RequestParam(required = false) String channelId)
-	    throws InterruptedException, TwitterException {
-	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-	TwitterClientContext ctx = twitterClient.getContext(channelConfig);
-	List<InboxMessage> tmr = twitterConnector.fetch(channelConfig);
-	if (tmr != null && !tmr.isEmpty()) {
-	    for (InboxMessage event : tmr) {
-		inBoundService.invokeMethodsAsync(event);
-		ctx.getTwitter().destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
-	    }
+	@RequestMapping(value = "/ext/crc/v2/tw/callback/{accountKey}/{channelId}/{channelKey}", method = RequestMethod.GET)
+	public WebhookInfo triggerCRC(@PathVariable String accountKey, @PathVariable(required = false) String channelId,
+			@PathVariable String channelKey) throws InterruptedException, TwitterException {
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		TwitterClientContext ctx = twitterClient.getContext(channelConfig);
+		ctx.getWebhookManager().triggerCRC();
+		WebhookInfo x = ctx.getWebhookManager().getWebhookInfo();
+		return x;
 	}
-	return tmr;
-    }
 
-    @RequestMapping(value = "/ext/inbound/tw/registerwebhook", method = { RequestMethod.POST, RequestMethod.GET })
-    public WebhookInfo registerwebhook(@RequestParam(required = false) String channelId)
-	    throws InterruptedException, TwitterException {
-	ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
-	TwitterClientContext ctx = twitterClient.getContext(channelConfig);
-	twitterConnector.registerWebhook(channelConfig);
-	WebhookInfo x = ctx.getWebhookManager().getWebhookInfo();
-	return x;
-    }
-
-    // @Scheduled(fixedDelay = 5000)
-    public void registerService() {
-	for (String channelId : pollingLanes) {
-	    try {
-		if (ArgUtil.is(channelId)) {
-		    pollDirectMessages(channelId);
+	@Deprecated
+	@ApiVendorHeaders
+	@RequestMapping(value = "/ext/inbound/tw/callback/{channelId}", method = { RequestMethod.POST, })
+	public List<InboxMessage> onReceiveMessagePost(@PathVariable String channelId,
+			@RequestBody Map<String, Object> update) throws InterruptedException, TwitterException {
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		List<InboxMessage> tmr = twitterConnector.process(channelConfig, update);
+		if (tmr != null && !tmr.isEmpty()) {
+			for (InboxMessage event : tmr) {
+				inBoundService.invokeMethodsAsync(event);
+				twitterClient.getContext(channelConfig).getTwitter()
+						.destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
+			}
 		}
-	    } catch (InterruptedException | TwitterException e) {
-		e.printStackTrace();
-	    }
+		return tmr;
 	}
-    }
+
+	@ApiVendorHeaders
+	@RequestMapping(value = "/ext/inbound/tw/get", method = RequestMethod.GET)
+	public List<InboxMessage> pollDirectMessages(@RequestParam(required = false) String channelId)
+			throws InterruptedException, TwitterException {
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		TwitterClientContext ctx = twitterClient.getContext(channelConfig);
+		List<InboxMessage> tmr = twitterConnector.fetch(channelConfig);
+		if (tmr != null && !tmr.isEmpty()) {
+			for (InboxMessage event : tmr) {
+				inBoundService.invokeMethodsAsync(event);
+				ctx.getTwitter().destroyDirectMessage(Long.parseLong(event.getMessageIdExt()));
+			}
+		}
+		return tmr;
+	}
+
+	@RequestMapping(value = "/ext/inbound/tw/registerwebhook", method = { RequestMethod.POST, RequestMethod.GET })
+	public WebhookInfo registerwebhook(@RequestParam(required = false) String channelId)
+			throws InterruptedException, TwitterException {
+		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		TwitterClientContext ctx = twitterClient.getContext(channelConfig);
+		connectorHandlerFactory.onChannelUpdate(channelConfig);
+		WebhookInfo x = ctx.getWebhookManager().getWebhookInfo();
+		return x;
+	}
+
+	// @Scheduled(fixedDelay = 5000)
+	public void registerService() {
+		for (String channelId : pollingLanes) {
+			try {
+				if (ArgUtil.is(channelId)) {
+					pollDirectMessages(channelId);
+				}
+			} catch (InterruptedException | TwitterException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 }

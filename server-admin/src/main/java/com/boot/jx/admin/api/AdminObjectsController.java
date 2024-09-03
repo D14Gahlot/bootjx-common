@@ -28,7 +28,7 @@ import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
 import com.boot.jx.postman.doc.MessageHold;
 import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
-import com.boot.jx.postman.doc.config.ChannelConfigTempDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.store.MessageStore;
@@ -165,7 +165,7 @@ public class AdminObjectsController {
 
 	@RequestMapping(value = { "/api/objects/channel_setup_logs" }, method = { RequestMethod.GET })
 	@JsonView(PublicJsonProperty.class)
-	public ApiResponse<ChannelConfigTempDoc, Object> channelSetupLogs(@RequestParam(required = false) String id,
+	public ApiResponse<ChannelConfigLogger, Object> channelSetupLogs(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
@@ -174,7 +174,7 @@ public class AdminObjectsController {
 			@RequestParam(required = false) String channelId, @RequestParam(required = false) String domain,
 			@RequestParam(required = false) String lane) {
 		return ApiResponse.buildResults(
-				getPaginatedBulk(ChannelConfigTempDoc.class, "TEMP_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
+				getPaginatedBulk(ChannelConfigLogger.class, "TEMP_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
 	}
 
 	@RequestMapping(value = { "/api/objects/archive/channel" }, method = { RequestMethod.GET })

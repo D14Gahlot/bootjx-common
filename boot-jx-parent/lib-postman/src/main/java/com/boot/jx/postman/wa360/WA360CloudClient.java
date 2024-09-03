@@ -351,7 +351,6 @@ public class WA360CloudClient implements ChannelClient {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
 					media.setCaption(null);
-					//media.setFilename(null);
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());
@@ -466,7 +465,7 @@ public class WA360CloudClient implements ChannelClient {
 
 	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
-				wa360OutBoundMedia.setFilename(attachment.getMediaCaption());
+		        wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
 				wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
 		        wa360OutBoundMedia.setLink(attachment.getMediaURL());
 		        if (mediaType.equalsIgnoreCase("image") ||mediaType.equalsIgnoreCase("video")  ) {

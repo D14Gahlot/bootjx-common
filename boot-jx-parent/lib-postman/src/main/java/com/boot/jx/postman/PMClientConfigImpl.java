@@ -2,6 +2,8 @@ package com.boot.jx.postman;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -102,18 +104,22 @@ public class PMClientConfigImpl implements PMClientConfig {
 	}
 
 	@Override
-	public String getWebhookUrl(ChannelConfig channelConfig, String appPrefix) {
+	public String getWebhookUrl(ChannelConfig channelConfig, String appPrefix, Map<String, Object> query) {
 		PMConfigurationModel config = environment.local();
 		String webhookEndPoint = getWebhookBase(channelConfig, appPrefix);
 		String webhookPath = PostManUtil.CHANNEL_CALLBACK_PATH(config.getAccountKey(), channelConfig);
 		try {
 			URLBuilder url = URLBuilder.parse(webhookEndPoint).path(webhookPath);
 			url.queryParam("tnt", AppContextUtil.getTenant());
+			if (ArgUtil.is(query)) {
+				for (Entry<String, Object> entry : query.entrySet()) {
+					url.queryParam(entry.getKey(), entry.getValue());
+				}
+			}
 			return url.getURL();
 		} catch (MalformedURLException | URISyntaxException e) {
 			return String.format("%s/%s", webhookEndPoint, webhookPath);
 		}
-
 	}
 
 }

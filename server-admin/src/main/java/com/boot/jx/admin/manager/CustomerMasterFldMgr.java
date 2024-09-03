@@ -236,7 +236,6 @@ public class CustomerMasterFldMgr {
 		                .with(Sort.by(Sort.Direction.DESC, sortby))  // Sorting by the specified field in descending order
 		                .skip((pageNo - 1) * pagesize)                 // Skipping records for pagination
 		                .limit(limit);                                  // Limiting the number of records to pageSize
-			
 			 List<JobScheduledDoc> lstProfileDocs =commonMongoTemplate.find(query, JobScheduledDoc.class);
 			for (JobScheduledDoc doc : lstProfileDocs) {
 				dto = EntityDtoUtil.entityToDto(doc, new JobsResponseDto());

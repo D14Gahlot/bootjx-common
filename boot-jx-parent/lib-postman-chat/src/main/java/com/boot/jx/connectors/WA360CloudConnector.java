@@ -29,11 +29,13 @@ import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -93,8 +95,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	private CommonMongoTemplate commonMongoTemplate;
 
 	@Override
-	public void onChannelUpdate(ChannelConfig channelConfig) {
-		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null);
+	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
+		String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null, null);
 		LOGGER.info("WA360CloudConnector onChannelUpdate :" + webhookUrl);
 		restService.ajax(WA360Constants.BASE_CLOUD_URL).path("v1/configs/webhook")
 				.header(WA360Constants.D360_CLOUD_API_KEY, channelConfig.getWa360dc().getApiKey())
@@ -184,7 +186,22 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		if ("text".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
+			if (map.entry(InBoundWrapperPaths.REFERRAL).exists()) {
+				MessageReferral msgReferral = new MessageReferral();
+				String sourceUrl = map.pathEntry("messages/[0]/referral/source_url").asString();
+				String sourceId = map.pathEntry("messages/[0]/referral/source_id").asString();
+				String sourceType = map.pathEntry("messages/[0]/referral/source_type").asString();
+				String body = map.pathEntry("messages/[0]/referral/body").asString();
+				msgReferral.setSourceUrl(sourceUrl);
+				msgReferral.setSourceId(sourceId);
+				msgReferral.setSourceType(sourceType);
+				msgReferral.setBody(body);
+				inboxMessage.setReferral(msgReferral);
+				commonMongoTemplate.save(inboxMessage);// if this is correct way to store
+			}
+
 			inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
+
 		} else if ("interactive".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
 			String interactiveType = map.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
@@ -508,6 +525,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		if (cloudRequestMap.containsKey("messages")) {
 			messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, cloudRequestMap));
+
 		} else if (cloudRequestMap.containsKey("statuses")) {
 			List<Map<String, Object>> statusMaps = cloudRequestMap.keyEntry("statuses").asListOfMap();
 			for (Map<String, Object> statusMap : statusMaps) {

@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
@@ -21,6 +22,7 @@ import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
+import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
 import com.boot.jx.model.ModelPatch.ModelPatches;
@@ -53,6 +55,8 @@ import com.boot.utils.MapBuilder.BuilderMap;
 
 @Service
 public class ConfigManagerImpl implements ConfigManager {
+
+	public static Logger LOGGER = LoggerService.getLogger(ConfigManagerImpl.class);
 
 	@Autowired
 	public ConfigMaster configStore;
@@ -260,6 +264,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void save(ChannelConfig config) {
+		LOGGER.info("save");
 		pmEnvironment.addChannel(config);
 		this.refresh(ChannelConfigDoc.DOCUMENT_NAME, config.getChannelId());
 		config = connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
@@ -270,10 +275,15 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public ChannelConfig saveChannelConfig(String channelType, Map<String, Object> data) {
+		LOGGER.info("onChannelUpdate:{}", channelType);
 		MapModel map = MapModel.from(data);
 		ChannelPlugin<? extends AChannelDetails> plugin = ChannelPluginProvider.get(channelType);
 		String channelId = map.getString("channelId");
 		String lane = map.getString("lane");
+		String apiVersion = map.getString("apiVersion");
+		String channelConfigTempId = map.getString("channelConfigTempId");
+		String masterChannelId = map.getString("masterChannelId");
+
 		boolean isAutoCreated = map.entry("isAutoCreated").asBoolean(Boolean.FALSE);
 
 		if (ArgUtil.is(data)) {
@@ -282,6 +292,9 @@ public class ConfigManagerImpl implements ConfigManager {
 				config = new ChannelConfig();
 				config.setLane(lane);
 				config.setAutoCreated(isAutoCreated);
+				config.setApiVersion(apiVersion);
+				config.setChannelConfigTempId(channelConfigTempId);
+				config.setMasterChannelId(masterChannelId);
 			}
 			plugin.importChannelConfigFromMap(config, map, channelType);
 			save(config);
@@ -309,6 +322,7 @@ public class ConfigManagerImpl implements ConfigManager {
 	@Override
 	@Async
 	public void saveForDomain(ChannelConfig config, String domain) {
+		LOGGER.info("onChannelUpdate");
 		AppContextUtil.clear();
 		AppContextUtil.setTenant(domain);
 		AppContextUtil.init();
