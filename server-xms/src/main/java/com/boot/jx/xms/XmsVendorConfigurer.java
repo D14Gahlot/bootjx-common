@@ -16,7 +16,7 @@ import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
-import com.boot.jx.scope.tnt.TenantSpecific;
+import com.boot.jx.scope.tnt.TenantDefinations.TenantSpecific;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;

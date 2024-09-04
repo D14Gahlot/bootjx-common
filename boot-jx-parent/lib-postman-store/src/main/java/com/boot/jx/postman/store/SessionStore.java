@@ -30,8 +30,8 @@ import com.boot.jx.postman.PMConstants.DEFAULT_VALUES;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
-import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ChatProfileDoc;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickTag;
@@ -63,9 +63,6 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 	@Autowired
 	private PMDomainConfig pmDomainConfig;
-
-	@Autowired
-	private SessionStore sessionStore;
 
 	public ChatContactDoc getContact(Contactable contactable) {
 		String contactId = PostManUtil.createContactId(contactable);
@@ -823,8 +820,8 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		removeMsgFields(query);
 		LOGGER.debug("query {===}" + query);
 
-		return sessionStore.find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query)
-				.skipDBRefByNames("lastMsg", "lastInBoundMsg", "lastOutBoundMsg", "lastBotReply", "lastAgentReply"));
+		return find(CommonMongoQueryBuilder.collection(ChatSessionDoc.class).query(query).skipDBRefByNames("lastMsg",
+				"lastInBoundMsg", "lastOutBoundMsg", "lastBotReply", "lastAgentReply"));
 
 		// return super.find(query, ChatSessionDoc.class);
 	}
