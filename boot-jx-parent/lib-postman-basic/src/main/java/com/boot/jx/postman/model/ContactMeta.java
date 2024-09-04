@@ -95,16 +95,6 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 		return this;
 	}
 
-	public ContactMeta mobile(String mobile) {
-		this.phone = mobile;
-		return this;
-	}
-
-	public ContactMeta email(String email) {
-		this.email = email;
-		return this;
-	}
-
 	public List<Map<String, String>> getKeymap() {
 		return keymap;
 	}
