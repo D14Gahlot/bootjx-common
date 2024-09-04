@@ -353,7 +353,7 @@ public class AgentAnalyticsManager implements Serializable {
 				dto.setGraphApiDetails(hourWiseCount);
 				dto.setGraphApiDetailsV1(hourWiseCountV1);
 			} else if (hour > 24 && days <= 31) {
-				Map<Object, Object> dayMapLst = getDateWiseCountV2(distinctContactLst, agent, dateRange1, dateRange2,
+				Map<Object, Object> dayMapLst = getDateWiseCountV3(distinctContactLst, agent, dateRange1, dateRange2,
 						contact);
 				Map<Object, Object> dateWiseCount = (Map<Object, Object>) dayMapLst.get("DAY");
 				Map<Object, Object> timeStampWiseCount = (Map<Object, Object>) dayMapLst.get("DAY_V1");
