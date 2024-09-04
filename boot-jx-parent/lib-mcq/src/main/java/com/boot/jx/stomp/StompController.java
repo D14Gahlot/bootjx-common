@@ -15,6 +15,7 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppConstants;
@@ -146,7 +147,7 @@ public class StompController {
 	}
 
 	@ResponseBody
-	@RequestMapping("/stomp/tunnel/send")
+	@RequestMapping(value = "/stomp/tunnel/send", method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> tunnelSend(@RequestBody StompSockPacket req) {
 		stompTunnelService.sendTo(req.filter, req.payload);
 		return ApiResponse.build();
