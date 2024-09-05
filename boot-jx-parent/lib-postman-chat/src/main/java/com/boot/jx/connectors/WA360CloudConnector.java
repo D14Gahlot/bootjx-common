@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
+import com.boot.jx.postman.doc.tpo.WABAFlows;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
@@ -60,6 +62,7 @@ import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360InboundMedia;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
@@ -93,6 +96,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
+	
+	@Autowired TunnelService tunnelService;
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
@@ -198,6 +203,13 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				msgReferral.setBody(body);
 				inboxMessage.setReferral(msgReferral);
 				commonMongoTemplate.save(inboxMessage);// if this is correct way to store
+				   Map<String, String> messagePayload = new HashMap<>();
+				   messagePayload.put("channelId", channelConfig.getChannelType());
+				   messagePayload.put("contactType", channelConfig.getContactType().toString());
+				   messagePayload.put("messageId",inboxMessage.getMessageIdExt());
+				   messagePayload.put("sourceUrl", msgReferral.getSourceUrl());
+			        tunnelService.task("ON_REFERRAL_MESSAGE", messagePayload);
+				
 				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.getReferral().toString() + " \n"
 						+ map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString()));
 			} else {
@@ -224,8 +236,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			} else if ("nfm_reply".equals(interactiveType)) {
 				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
 						.asString();
-				// replyJsonMap.put("response_json", responseJsonString);
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
+				
 				inboxMessage.form().put("reply_json", replyJsonMap);
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY).asString());
