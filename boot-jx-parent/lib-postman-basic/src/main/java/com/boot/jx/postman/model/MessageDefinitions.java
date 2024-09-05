@@ -91,29 +91,8 @@ public class MessageDefinitions {
 
 		public void setChannelType(String channelType);
 
-		public default Contactable type(ContactType contactType) {
+		public default void type(ContactType contactType) {
 			this.setContactType(ArgUtil.parseAsString(contactType));
-			return this;
-		}
-
-		public default Contactable channelType(Object channelType) {
-			this.setChannelType(ArgUtil.parseAsString(channelType));
-			return this;
-		}
-
-		public default Contactable contactId(String contactId) {
-			this.setContactId(contactId);
-			return this;
-		}
-
-		public default Contactable phone(String phone) {
-			this.setPhone(phone);
-			return this;
-		}
-
-		public default Contactable email(String email) {
-			this.setEmail(email);
-			return this;
 		}
 
 		public default void copyFrom(Contactable contactable) {

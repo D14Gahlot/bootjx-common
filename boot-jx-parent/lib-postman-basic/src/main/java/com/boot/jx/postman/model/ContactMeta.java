@@ -31,7 +31,6 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 	List<Map<String, String>> keymap;
 
 	public ContactMeta() {
-		super();
 	}
 
 	public Language getLang() {
