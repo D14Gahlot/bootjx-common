@@ -30,6 +30,7 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
+import com.boot.jx.postman.doc.tpo.WABAFlows;
 import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.AuthStateManager.AuthState;
@@ -211,21 +212,19 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
-		// String webhookUrl = null;
-		// try {
-		// webhookUrl = pmClientConfig.getWebhookUrl(channelConfig);
-		// MapModel webhook =
-		// MapModel.createInstance().put("override_callback_uri",
-		// webhookUrl).put("verify_token",
-		// channelConfig.getWacfb().getVerifyToken());
-		//
-		// restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
-		// .path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
-		// .postJson(webhook.toMap()).asMapModel();
-		//
-		// } catch (Exception e) {
-		// logManager.error("While Setting " + webhookUrl, e);
-		// }
+		 String webhookUrl = null;
+		 try {
+		 webhookUrl = pmClientConfig.getWebhookUrl(channelConfig,null,null);
+		 MapModel webhook =MapModel.createInstance().put("override_callback_uri",webhookUrl).put("verify_token",
+		 channelConfig.getWacfb().getVerifyToken());
+		
+		 restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
+		.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
+		.postJson(webhook.toMap()).asMapModel();
+		
+		 } catch (Exception e) {
+		 logManager.error("While Setting " + webhookUrl, e);
+		}
 	}
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
@@ -331,13 +330,40 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
 						.asString();
 				// replyJsonMap.put("response_json", responseJsonString);
+				
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
+				String flow_token=replyJsonMap.get("flow_token").toString();
+				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flow_token);
+				
+    			WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
+    			 if (flow != null) {
+    					inboxMessage.form().put("field_meta", flow.getFieldMeta());
+    			 }
 				inboxMessage.form().put("reply_json", replyJsonMap);
+				
+				
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY).asString());
+				StringBuilder formattedOutput = new StringBuilder();
+
+				List<Map<String, Object>> fieldMetaList = (List<Map<String, Object>>) inboxMessage.form().get("field_meta");
+
+				if (fieldMetaList != null) {
+				    for (Map<String, Object> fieldMeta : fieldMetaList) {
+				        String label = (String) fieldMeta.get("label");
+				        String key = (String) fieldMeta.get("key");
+
+				        String value = replyJsonMap.containsKey(key) ? replyJsonMap.get(key).toString() : "N/A";
+
+				        formattedOutput.append(label).append(" : ").append(value).append("\n");
+				    }
+				}
+
+				inboxMessage.setMessage(ArgUtil.parseAsString(formattedOutput.toString(), Constants.BLANK));
+				
 			}
 
-			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
+			//inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
 			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();

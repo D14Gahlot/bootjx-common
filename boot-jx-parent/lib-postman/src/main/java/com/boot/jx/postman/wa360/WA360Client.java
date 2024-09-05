@@ -775,4 +775,10 @@ public class WA360Client implements ChannelClient {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public MapModel flowsAssets(String flowId, ChannelConfig channelConfig) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

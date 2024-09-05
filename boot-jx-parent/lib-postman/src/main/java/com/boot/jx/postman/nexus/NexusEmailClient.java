@@ -64,4 +64,10 @@ public class NexusEmailClient implements ChannelClient {
 		return null;
 	}
 
+	@Override
+	public MapModel flowsAssets(String flowId, ChannelConfig channelConfig) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

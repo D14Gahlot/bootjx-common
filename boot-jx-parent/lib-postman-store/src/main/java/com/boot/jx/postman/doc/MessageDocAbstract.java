@@ -16,6 +16,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
+import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.pbook.PBVCard;
@@ -86,6 +87,15 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private Map<String, Object> replyTo;
 	private String appType;
 	private String appVenv;
+	private MessageReferral referral;
+
+	public MessageReferral getReferral() {
+		return referral;
+	}
+
+	public void setReferral(MessageReferral referral) {
+		this.referral = referral;
+	}
 
 	@Indexed
 	private String contactId;

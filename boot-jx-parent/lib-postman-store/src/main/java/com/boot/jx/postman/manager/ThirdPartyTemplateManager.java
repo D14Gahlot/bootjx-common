@@ -206,7 +206,9 @@ public class ThirdPartyTemplateManager {
 	public void fetchAndSetScreenId(String flowId, ChannelConfig channelConfig) {
 		
 	      try {
-			MapModel resp =wacfbClient.flowsAssets(flowId, channelConfig);
+	    	  ChannelClient channelClient = clientFactory.get(channelConfig);
+	  		MapModel resp = channelClient.flowsAssets(flowId,channelConfig);
+	    	  
 
 			 List<Map<String, Object>> data = (List<Map<String, Object>>) resp.toMap().get("data");
 

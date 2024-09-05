@@ -660,7 +660,7 @@ public class WacfbClient implements ChannelClient {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "flow");
 
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS, MapModel.createInstance()
-					.put("flow_message_version", "3").put("flow_token", outboxMessage.getMessageId())
+					.put("flow_message_version", "3").put("flow_token", button.getUid())
 					.put("flow_id", button.getUid()).put("flow_cta", button.getLabel())
 					.put("flow_action", StringUtils.toLowerCase(button.getAction().toLowerCase()))
 					.put("flow_action_payload", MapModel.createInstance().put("screen", button.getCode()).toMap())
