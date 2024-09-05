@@ -45,3 +45,4 @@ ext-resources
 .sass-cache
 *.log
 lib-common/lib-common-config/src/main/resources/application.branch.properties
+certs

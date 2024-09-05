@@ -21,6 +21,7 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 	private String messageIdRef;
 	private String sessionId;
 	private Contactable contact;
+	
 
 	private long timestamp;
 	protected long changeStamp;
