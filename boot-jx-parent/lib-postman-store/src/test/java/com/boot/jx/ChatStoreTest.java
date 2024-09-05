@@ -8,11 +8,13 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.proj
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,14 +23,17 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.test.context.TestPropertySource;
 
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoSourceProvider;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.MongoUtils;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.pbook.PBPhone;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
@@ -51,10 +56,28 @@ public class ChatStoreTest { // Noncompliant
 
 	private CommonMongoTemplate mongoTemplate;
 
+	@BeforeClass
+	public static void setup() {
+
+		String userDir = System.getProperty("user.dir");
+		File userDirFile = new File(userDir);;
+		File userDirFolder = userDirFile.getParentFile();
+		System.out.println("userDirFolder:" + userDirFolder);
+		System.setProperty("javax.net.ssl.trustStore", userDirFolder + "/../certs/cacerts");
+		// System.setProperty("javax.net.ssl.trustStore",
+		// "/path/to/your/truststore.jks");
+		// System.setProperty("javax.net.ssl.trustStorePassword",
+		// "yourTrustStorePassword");
+		// System.setProperty("javax.net.ssl.trustStoreType", "JKS"); // Optional if not
+		// using JKS
+
+	}
+
 	private void initMongo() {
-		AppContextUtil.setTenant("lalit");
+
+		AppContextUtil.setTenant("demo");
 		String connectionString = System.getProperty("spring.data.mongodb.uri");
-		System.out.println(connectionString);
+		System.out.println("connecting " + connectionString);
 		CommonMongoSourceProvider commonMongoSourceProvider = new CommonMongoSourceProvider();
 		commonMongoSourceProvider.setDataSourceUrl(connectionString);
 		commonMongoSourceProvider.setGlobalDataSourceUrl(connectionString);
@@ -83,7 +106,7 @@ public class ChatStoreTest { // Noncompliant
 
 	public static void main(String[] args) throws ParseException {
 		String connectionString = System.getProperty("mongodb.uri");
-		// System.out.println(connectionString);
+		System.out.println(connectionString);
 //		try (MongoClient mongoClient = MongoClients.create(connectionString)) {
 //			MongoDatabase db = mongoClient.getDatabase("sample_training");
 //			MongoCollection<Document> zips = db.getCollection("zips");
@@ -109,6 +132,16 @@ public class ChatStoreTest { // Noncompliant
 		}
 	}
 
+	@Test
+	public void contactableTest() {
+		initMongo();
+		MessageDoc msg = mongoTemplate.findById("66d988af7ecdb50001cc36ba", MessageDoc.class,
+				MessageStore.getCollectionName(ContactType.EMAIL));
+		System.out.println("=========================================");
+		System.out.println("====" + JsonUtil.toJson(msg.getContact()));
+		System.out.println("=========================================");
+	}
+
 	// @Test
 	public void profile() {
 		initMongo();
@@ -128,7 +161,7 @@ public class ChatStoreTest { // Noncompliant
 		System.out.println("=========================================");
 	}
 
-	@Test
+	// @Test
 	public void testSkillMatch() {
 		initMongo();
 		System.out.println("=testSkillMatch==");

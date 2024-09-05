@@ -3,7 +3,6 @@ package com.boot.jx.postman.model;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
@@ -195,7 +194,7 @@ public class PushMessage extends Message<PushMessage> {
 			StringJoiner orCondition = new StringJoiner(") || (");
 			int totalOrConditions = 0;
 			for (ContactMeta singleContact : this.getContacts()) {
-				for (Map<String, Object> singleFilter : singleContact.getFilter()) {
+				for (Map<String, Object> singleFilter : singleContact.getFilters()) {
 					StringJoiner andCondition = new StringJoiner(PushMessage.CONDITION_SEPRATOR_AND);
 					for (Entry<String, Object> entry : singleFilter.entrySet()) {
 						andCondition.add("'" + PushMessage.topic(entry.getKey(), entry.getValue()) + "%sx%' in topics");
@@ -220,48 +219,6 @@ public class PushMessage extends Message<PushMessage> {
 		if (totalConditions > 5) {
 			throw new PostManException(PostManException.ErrorCode.TOO_MANY_CONDITIONS);
 		}
-	}
-
-	public static ContactMeta toContact(String topic) {
-		ContactMeta c = new ContactMeta();
-
-		Matcher m = PushMessage.FORMAT_TO_USER_PATTERN_V3.matcher(topic);
-		if (m.find()) {
-			c.setUserid(m.group(3));
-			String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
-			c.setTenant(tenant);
-			c.setLang(Language.fromString(m.group(4), null));
-			return c;
-		}
-		m = PushMessage.FORMAT_TO_NATIONALITY_PATTERN_V3.matcher(topic);
-		if (m.find()) {
-			c.setCountry(m.group(3));
-			String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
-			c.setTenant(tenant);
-			c.setLang(Language.fromString(m.group(4), null));
-			return c;
-		}
-		m = PushMessage.FORMAT_TO_ALL_PATTERN_V3.matcher(topic);
-		if (m.find()) {
-			String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
-			c.setTenant(tenant);
-			c.setLang(Language.fromString(m.group(3), null));
-			return c;
-		}
-
-		m = PushMessage.FORMAT_TO_KEY_PATTERN_V3.matcher(topic);
-		if (m.find()) {
-			String tenant = Tenants.fromAsString(m.group(2), Tenants.DEFAULT);
-			c.setTenant(tenant);
-			Map<String, String> keys = new HashMap<String, String>();
-			keys.put("k", m.group(3));
-			keys.put("v", m.group(4));
-			c.getKeymap().add(keys);
-			c.setLang(Language.fromString(m.group(4), null));
-			return c;
-		}
-
-		return toContactV2(topic);
 	}
 
 	public static ContactMeta toContactV2(String topic) {

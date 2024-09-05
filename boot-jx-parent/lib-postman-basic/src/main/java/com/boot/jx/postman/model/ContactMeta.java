@@ -1,25 +1,24 @@
 package com.boot.jx.postman.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.boot.jx.dict.Language;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ContactMeta implements java.io.Serializable, Contactable {
+public class ContactMeta implements Serializable, Contactable {
 
 	private static final long serialVersionUID = -2229330167964350550L;
-	String tenant;
-	String country;
-	String userid;
-	String prefix;
-	String phone;
-	String email;
-	String name;
-	Language lang;
+	protected String tenant;
+	protected String country;
+	protected String userid;
+	protected String prefix;
+	protected String phone;
+	protected String email;
+	protected String name;
 
 	private String contactType;
 	private String channelType;
@@ -27,18 +26,10 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 	private String csid;
 	private String contactId;
 
-	List<Map<String, Object>> filter;
+	List<Map<String, Object>> filters;
 	List<Map<String, String>> keymap;
 
 	public ContactMeta() {
-	}
-
-	public Language getLang() {
-		return lang;
-	}
-
-	public void setLang(Language lang) {
-		this.lang = lang;
 	}
 
 	public String getPrefix() {
@@ -102,19 +93,19 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 		this.keymap = keymap;
 	}
 
-	public List<Map<String, Object>> getFilter() {
-		return filter;
+	public List<Map<String, Object>> getFilters() {
+		return filters;
 	}
 
-	public void setFilter(List<Map<String, Object>> filter) {
-		this.filter = filter;
+	public void setFilters(List<Map<String, Object>> filters) {
+		this.filters = filters;
 	}
 
-	public List<Map<String, Object>> filter() {
-		if (this.filter == null) {
-			this.filter = new ArrayList<Map<String, Object>>();
+	public List<Map<String, Object>> filters() {
+		if (this.filters == null) {
+			this.filters = new ArrayList<Map<String, Object>>();
 		}
-		return this.filter;
+		return this.filters;
 	}
 
 	public List<Map<String, String>> keymap() {
@@ -125,7 +116,7 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 	}
 
 	public ContactMeta or(Map<String, Object> or) {
-		this.filter().add(or);
+		this.filters().add(or);
 		return this;
 	}
 
