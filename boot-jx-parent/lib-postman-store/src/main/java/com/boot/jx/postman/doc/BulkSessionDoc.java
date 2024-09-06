@@ -51,7 +51,7 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	private BatchJob job;
 	
-	private Map<String, Long> campaignSummary;
+	private Map<String, Object> campaignSummary;
 
 	
 
@@ -230,11 +230,11 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 		this.scheduler = scheduler;
 	}
 	
-	public Map<String, Long> getCampaignSummary() {
+	public Map<String, Object> getCampaignSummary() {
 		return campaignSummary;
 	}
 
-	public void setCampaignSummary(Map<String, Long> campaignSummary) {
+	public void setCampaignSummary(Map<String, Object> campaignSummary) {
 		this.campaignSummary = campaignSummary;
 	}
 
