@@ -28,14 +28,6 @@ public class JobsResponseDto extends TimeStampDoc {
 		this.id = id;
 	}
 
-	public String getJobtype() {
-		return jobtype;
-	}
-
-	public void setJobtype(String jobtype) {
-		this.jobtype = jobtype;
-	}
-
 	public String getIsactive() {
 		return isactive;
 	}
@@ -100,6 +92,15 @@ public class JobsResponseDto extends TimeStampDoc {
 
 	public void setOutput(Map<String, List<Object>> output) {
 		this.output = output;
+	}
+
+	
+	public String getJobtype() {
+		return jobtype;
+	}
+
+	public void setJobtype(String jobtype) {
+		this.jobtype = jobtype;
 	}
 
 	

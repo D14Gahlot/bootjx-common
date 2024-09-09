@@ -1,5 +1,7 @@
 package com.boot.jx.admin.api;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.admin.dto.ProfileSearchQuery;
+import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
@@ -24,6 +28,9 @@ public class AdminCustomerController {
 
 	@Autowired
 	private ContactStore contactStore;
+	
+	@Autowired
+	CustomerProfileService cusProfileService;
 
 	// CustomerProfile
 	@RequestMapping(value = "/profile", method = { RequestMethod.GET })
@@ -98,6 +105,13 @@ public class AdminCustomerController {
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> createprofile(@RequestBody CustomerProfileDoc req) {
 		return ApiResponse.buildResult(contactStore.createprofile(req));
+	}
+	
+	@RequestMapping(value = "/profile/search", method = { RequestMethod.GET })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestBody ProfileSearchQuery searchQry) {
+		List<CustomerProfileDoc> docs = cusProfileService.getProfileSearch(searchQry);
+		return ApiResponse.buildResults(docs);
 	}
 
 }
