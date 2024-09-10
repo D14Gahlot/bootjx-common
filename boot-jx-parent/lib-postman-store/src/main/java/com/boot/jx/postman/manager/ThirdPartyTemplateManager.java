@@ -279,6 +279,13 @@ public class ThirdPartyTemplateManager {
 	                    Map<String, String> meta = new HashMap<>();
 	                    meta.put("key", key);
 	                    meta.put("label", label);
+	                    meta.put("type",type);
+	                    if (child.containsKey("data-source")) {
+	                        List<Map<String, String>> dataSource = (List<Map<String, String>>) child.get("data-source");
+	                        meta.put("data-source", dataSource.toString()); 
+	                    }
+
+	                    
 	                    fieldMeta.add(meta);
 	                    inputIndex++;
 	                }

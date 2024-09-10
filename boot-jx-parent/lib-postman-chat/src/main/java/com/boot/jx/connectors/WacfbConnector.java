@@ -3,9 +3,14 @@ package com.boot.jx.connectors;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -329,41 +334,52 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			} else if ("nfm_reply".equals(interactiveType)) {
 				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
 						.asString();
-				// replyJsonMap.put("response_json", responseJsonString);
-				
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
 				String flow_token=replyJsonMap.get("flow_token").toString();
 				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flow_token);
-				
     			WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
     			 if (flow != null) {
     					inboxMessage.form().put("field_meta", flow.getFieldMeta());
     			 }
 				inboxMessage.form().put("reply_json", replyJsonMap);
-				
-				
-				inboxMessage.form().put("reply_title",
-						map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY).asString());
-				StringBuilder formattedOutput = new StringBuilder();
+				inboxMessage.form().put("reply_title",map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY)
+						.asString() );
 
+						
+				List<Map<String, Object>> formattedObjects = new ArrayList<>();
 				List<Map<String, Object>> fieldMetaList = (List<Map<String, Object>>) inboxMessage.form().get("field_meta");
-
 				if (fieldMetaList != null) {
 				    for (Map<String, Object> fieldMeta : fieldMetaList) {
 				        String label = (String) fieldMeta.get("label");
 				        String key = (String) fieldMeta.get("key");
+				        String type = (String) fieldMeta.get("type");
+				        String text = replyJsonMap.containsKey(key) ? replyJsonMap.get(key).toString() : "N/A";
+				        if (!"N/A".equals(text) && fieldMeta.containsKey("data-source")) {
+				            String dataSource = (String) fieldMeta.get("data-source");
+				            Pattern pattern = Pattern.compile("\\{id=(.*?), title=(.*?)\\}");
+				            Matcher matcher = pattern.matcher(dataSource);
+				            while (matcher.find()) {
+				                String idFromDataSource = matcher.group(1);
+				                String title = matcher.group(2);
 
-				        String value = replyJsonMap.containsKey(key) ? replyJsonMap.get(key).toString() : "N/A";
-
-				        formattedOutput.append(label).append(" : ").append(value).append("\n");
+				                if (idFromDataSource.equals(text)) {
+				                    text = title;
+				                    break;
+				                }
+				            }
+				        }
+				        Map<String, Object> formattedObject = new HashMap<>();
+				        formattedObject.put("key", key);
+				        formattedObject.put("label", label);
+				        formattedObject.put("type", type);
+				        formattedObject.put("text", text);
+				        formattedObjects.add(formattedObject);
 				    }
 				}
 
-				inboxMessage.setMessage(ArgUtil.parseAsString(formattedOutput.toString(), Constants.BLANK));
-				
+				inboxMessage.form().put("reply_json_Map", formattedObjects.toString());
 			}
-
-			//inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
+				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
 			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
