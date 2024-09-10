@@ -217,18 +217,18 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
-		 String webhookUrl = null;
-		 try {
-		 webhookUrl = pmClientConfig.getWebhookUrl(channelConfig,null,null);
-		 MapModel webhook =MapModel.createInstance().put("override_callback_uri",webhookUrl).put("verify_token",
-		 channelConfig.getWacfb().getVerifyToken());
-		
-		 restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
-		.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
-		.postJson(webhook.toMap()).asMapModel();
-		
-		 } catch (Exception e) {
-		 logManager.error("While Setting " + webhookUrl, e);
+		String webhookUrl = null;
+		try {
+			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null, null);
+			MapModel webhook = MapModel.createInstance().put("override_callback_uri", webhookUrl).put("verify_token",
+					channelConfig.getWacfb().getVerifyToken());
+
+			restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
+					.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
+					.postJson(webhook.toMap()).asMapModel();
+
+		} catch (Exception e) {
+			logManager.error("While Setting " + webhookUrl, e);
 		}
 	}
 
@@ -335,51 +335,51 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
 						.asString();
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
-				String flow_token=replyJsonMap.get("flow_token").toString();
+				String flow_token = replyJsonMap.get("flow_token").toString();
 				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flow_token);
-    			WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
-    			 if (flow != null) {
-    					inboxMessage.form().put("field_meta", flow.getFieldMeta());
-    			 }
+				WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
+				if (flow != null) {
+					inboxMessage.form().put("field_meta", flow.getFieldMeta());
+				}
 				inboxMessage.form().put("reply_json", replyJsonMap);
-				inboxMessage.form().put("reply_title",map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY)
-						.asString() );
+				inboxMessage.form().put("reply_title",
+						map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY).asString());
 
-						
 				List<Map<String, Object>> formattedObjects = new ArrayList<>();
-				List<Map<String, Object>> fieldMetaList = (List<Map<String, Object>>) inboxMessage.form().get("field_meta");
+				List<Map<String, Object>> fieldMetaList = (List<Map<String, Object>>) inboxMessage.form()
+						.get("field_meta");
 				if (fieldMetaList != null) {
-				    for (Map<String, Object> fieldMeta : fieldMetaList) {
-				        String label = (String) fieldMeta.get("label");
-				        String key = (String) fieldMeta.get("key");
-				        String type = (String) fieldMeta.get("type");
-				        String text = replyJsonMap.containsKey(key) ? replyJsonMap.get(key).toString() : "N/A";
-				        if (!"N/A".equals(text) && fieldMeta.containsKey("data-source")) {
-				            String dataSource = (String) fieldMeta.get("data-source");
-				            Pattern pattern = Pattern.compile("\\{id=(.*?), title=(.*?)\\}");
-				            Matcher matcher = pattern.matcher(dataSource);
-				            while (matcher.find()) {
-				                String idFromDataSource = matcher.group(1);
-				                String title = matcher.group(2);
+					for (Map<String, Object> fieldMeta : fieldMetaList) {
+						String label = (String) fieldMeta.get("label");
+						String key = (String) fieldMeta.get("key");
+						String type = (String) fieldMeta.get("type");
+						String text = replyJsonMap.containsKey(key) ? replyJsonMap.get(key).toString() : "N/A";
+						if (!"N/A".equals(text) && fieldMeta.containsKey("data-source")) {
+							String dataSource = (String) fieldMeta.get("data-source");
+							Pattern pattern = Pattern.compile("\\{id=(.*?), title=(.*?)\\}");
+							Matcher matcher = pattern.matcher(dataSource);
+							while (matcher.find()) {
+								String idFromDataSource = matcher.group(1);
+								String title = matcher.group(2);
 
-				                if (idFromDataSource.equals(text)) {
-				                    text = title;
-				                    break;
-				                }
-				            }
-				        }
-				        Map<String, Object> formattedObject = new HashMap<>();
-				        formattedObject.put("key", key);
-				        formattedObject.put("label", label);
-				        formattedObject.put("type", type);
-				        formattedObject.put("text", text);
-				        formattedObjects.add(formattedObject);
-				    }
+								if (idFromDataSource.equals(text)) {
+									text = title;
+									break;
+								}
+							}
+						}
+						Map<String, Object> formattedObject = new HashMap<>();
+						formattedObject.put("key", key);
+						formattedObject.put("label", label);
+						formattedObject.put("type", type);
+						formattedObject.put("text", text);
+						formattedObjects.add(formattedObject);
+					}
 				}
 
 				inboxMessage.form().put("reply_json_Map", formattedObjects.toString());
 			}
-				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
+			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("button".equals(messageType)) {
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
 			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
