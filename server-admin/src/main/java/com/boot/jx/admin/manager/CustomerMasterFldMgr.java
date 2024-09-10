@@ -535,9 +535,15 @@ public class CustomerMasterFldMgr {
 			}
 			orCriterias.add(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])));
 		}
-		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+		MongoQueryBuilder<CustomerProfileDoc> qb=null;
+		if(ArgUtil.is(orCriterias)) {
+		 qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
 				.where(new Criteria().orOperator(orCriterias.toArray(new Criteria[orCriterias.size()]))).sortBy(sortDir)
 				.limit(limit);
+		}else {
+			qb = MongoQueryBuilder.collection(CustomerProfileDoc.class).page(searchQry.getPageNo(),
+					searchQry.getPageSize());
+		}
 		LOGGER.info("QB {} " + JsonUtil.toJson(qb));
 		return contactStore.find(qb);
 	}
