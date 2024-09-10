@@ -107,7 +107,7 @@ public class AdminCustomerController {
 		return ApiResponse.buildResult(contactStore.createprofile(req));
 	}
 	
-	@RequestMapping(value = "/profile/search", method = { RequestMethod.GET })
+	@RequestMapping(value = "/profile/search", method = { RequestMethod.POST })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestBody ProfileSearchQuery searchQry) {
 		List<CustomerProfileDoc> docs = cusProfileService.getProfileSearch(searchQry);
