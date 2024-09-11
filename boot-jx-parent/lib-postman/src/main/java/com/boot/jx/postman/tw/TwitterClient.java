@@ -170,7 +170,9 @@ public class TwitterClient implements MessageClient {
 						if (ArgUtil.areEqual(attachment.getMediaType(), FileType.IMAGE.toString())) {
 							String mediaId = uploadImage(twitter, attachment.getMediaURL(),
 									attachment.getMediaCaption());
-							attachment.mediaId(mediaId);
+							attachment.mediaId(mediaId); // TODO To Validate if it is OK
+							attachment.mediaIdExt(mediaId); // Latest
+							attachment.mediaIdInline(mediaId); // Latest
 
 //			    DirectMessage resp = sendReply(twitter, to,
 //				    ArgUtil.nonEmpty(attachment.getMediaCaption(), message.getSubject()), mediaId);
