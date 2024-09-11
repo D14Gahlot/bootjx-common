@@ -17,7 +17,7 @@ public class JobsOutPutDoc extends TimeStampDoc {
 
 	@Id
 	private String id;
-	private String jobtype;
+	private String jobType;
 	Map<String, List<Object>> output = new HashMap<String, List<Object>>();
 	private String isactive;
 	public String status;
@@ -32,13 +32,7 @@ public class JobsOutPutDoc extends TimeStampDoc {
 		this.id = id;
 	}
 
-	public String getJobtype() {
-		return jobtype;
-	}
-
-	public void setJobtype(String jobtype) {
-		this.jobtype = jobtype;
-	}
+	
 
 	public String getIsactive() {
 		return isactive;
@@ -79,6 +73,14 @@ public class JobsOutPutDoc extends TimeStampDoc {
 
 	public void setJobId(String jobId) {
 		this.jobId = jobId;
+	}
+
+	public String getJobType() {
+		return jobType;
+	}
+
+	public void setJobType(String jobType) {
+		this.jobType = jobType;
 	}
 
 }

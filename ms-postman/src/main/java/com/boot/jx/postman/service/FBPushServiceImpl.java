@@ -193,7 +193,7 @@ public class FBPushServiceImpl implements IPushNotifyService {
 				StringJoiner orCondition = new StringJoiner(") || (");
 				int totalOrConditions = 0;
 				for (ContactMeta singleContact : msg.getContacts()) {
-					for (Map<String, Object> singleFilter : singleContact.getFilter()) {
+					for (Map<String, Object> singleFilter : singleContact.getFilters()) {
 						StringJoiner andCondition = new StringJoiner(PushMessage.CONDITION_SEPRATOR_AND);
 						for (Entry<String, Object> entry : singleFilter.entrySet()) {
 							andCondition.add(

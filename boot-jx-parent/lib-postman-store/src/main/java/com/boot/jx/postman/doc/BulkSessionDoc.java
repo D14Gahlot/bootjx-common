@@ -50,6 +50,10 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 	private ChronoScheduler scheduler;
 
 	private BatchJob job;
+	
+	private Map<String, Object> campaignSummary;
+
+	
 
 	@Override
 	public String getCreatedBy() {
@@ -224,6 +228,14 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	public void setScheduler(ChronoScheduler scheduler) {
 		this.scheduler = scheduler;
+	}
+	
+	public Map<String, Object> getCampaignSummary() {
+		return campaignSummary;
+	}
+
+	public void setCampaignSummary(Map<String, Object> campaignSummary) {
+		this.campaignSummary = campaignSummary;
 	}
 
 }

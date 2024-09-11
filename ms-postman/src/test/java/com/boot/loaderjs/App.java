@@ -82,7 +82,7 @@ public class App { // Noncompliant
 			StringJoiner orCondition = new StringJoiner(") || (");
 			int totalOrConditions = 0;
 			for (ContactMeta singleContact : msg.getContacts()) {
-				for (Map<String, Object> singleFilter : singleContact.getFilter()) {
+				for (Map<String, Object> singleFilter : singleContact.getFilters()) {
 					StringJoiner andCondition = new StringJoiner(PushMessage.CONDITION_SEPRATOR_AND);
 					for (Entry<String, Object> entry : singleFilter.entrySet()) {
 						andCondition.add("'" + PushMessage.topic(entry.getKey(), entry.getValue()) + "%sx%' in topics");

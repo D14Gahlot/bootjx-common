@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -49,6 +50,7 @@ import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 import com.boot.utils.UniqueID;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 
 @Component
 public class CustomerMasterFldMgr {
@@ -91,29 +93,29 @@ public class CustomerMasterFldMgr {
 
 				cmFieldDoc.setRequired(reqDto.isRequired());
 				cmFieldDoc.setPredefined(reqDto.isPredefined());
+				cmFieldDoc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 				commonMongoTemplate.save(cmFieldDoc);
 			}
 		} else {
 			cmFieldDoc.setCode(reqDto.getCode());
 			cmFieldDoc.setLabel(reqDto.getLabel());
 			cmFieldDoc.setDesc(reqDto.getDesc());
-			cmFieldDoc.setType(reqDto.getType());
+			cmFieldDoc.setType(ArgUtil.parseAsString(reqDto.getType(), "String"));
 			cmFieldDoc.setActive(reqDto.isActive());
 			cmFieldDoc.setRequired(reqDto.isRequired());
 			cmFieldDoc.setPredefined(reqDto.isPredefined());
-			cmFieldDoc.setCreated(TimeStampIndex.now());
+			cmFieldDoc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			commonMongoTemplate.save(cmFieldDoc);
 		}
+		
 
-		return fetchCustomerMasfields(cmFieldDoc.getId(),true,0,0,null);
+		return fetchCustomerMasfields(cmFieldDoc.getId(),true,0,0,null,null);
 	}
 
-	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id,boolean active,int pagesize,int pageNo,String sortBy) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id,boolean active,int pageSize,int pageNo,String sortBy,String sortDir) {
 		List<CustomerFieldMasterDoc> dtoLst = new ArrayList<>();
 		CustomerFieldMasterDoc cmFieldDoc = null;
 		
-		int limit = pagesize == 0 ? 10 : pagesize;
-		String sortby = ArgUtil.parseAsString(sortBy, "_id");
 		
 		Query qryQuery=new Query();
 		
@@ -126,12 +128,14 @@ public class CustomerMasterFldMgr {
 			}
 		} else {
 			
-			 qryQuery = new Query()
-		                .with(Sort.by(Sort.Direction.DESC, sortby))  // Sorting by the specified field in descending order
-		                .skip((pageNo - 1) * pagesize)                 // Skipping records for pagination
-		                .limit(limit); 
-			List<CustomerFieldMasterDoc> lstGropDocs = commonMongoTemplate.find(qryQuery,CustomerFieldMasterDoc.class);
-			for (CustomerFieldMasterDoc doc : lstGropDocs) {
+			
+			MongoQueryBuilder<CustomerFieldMasterDoc> qry = MongoQueryBuilder.collection(CustomerFieldMasterDoc.class).page(pageNo,pageSize);
+			
+			if (ArgUtil.is(sortBy)) {
+				qry = qry.sortBy(sortBy, Direction.fromString(sortDir));
+			}
+			List<CustomerFieldMasterDoc> lstGropDocs=contactStore.find(qry);
+				for (CustomerFieldMasterDoc doc : lstGropDocs) {
 				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(doc, new CustomerFieldMasterDoc());
 				if (dto.isActive()==active) {
 					dtoLst.add(dto);
@@ -149,7 +153,7 @@ public class CustomerMasterFldMgr {
 			builder.set("active", reqDto.isActive());
 			commonMongoTemplate.upsert(builder);
 		}
-		return fetchCustomerMasfields(null,true,0,0,null);
+		return fetchCustomerMasfields(null,true,0,0,null,null);
 	}
 
 	public CustomerFieldMasterDoc toCheckDupFieldCode(String fieldCode) {
@@ -304,8 +308,7 @@ public class CustomerMasterFldMgr {
 			}
 		}
 
-		System.out.println("url :" + url);
-
+		
 		return dtoLst;
 
 	}
@@ -366,7 +369,7 @@ public class CustomerMasterFldMgr {
 			jobsOpDoc.setJobId(id);
 			jobsOpDoc.setOutput(jobsOpDoc.getOutput());
 			jobsOpDoc.setIsactive(Constants.YES);
-			jobsOpDoc.setJobtype("customer_profile_bulk_output");
+			jobsOpDoc.setJobType("customer_profile_bulk_output");
 			jobsOpDoc.setTime(TimeStampIndex.now());
 			jobsOpDoc.setStatus(ArgUtil.parseAsString(Status.SCHLD));
 			commonMongoTemplate.save(jobsOpDoc);
@@ -402,6 +405,7 @@ public class CustomerMasterFldMgr {
 		if (lstDocs != null && !lstDocs.isEmpty()) {
 			for (JobsOutPutDoc op : lstDocs) {
 				JobsResponseDto dto = EntityDtoUtil.entityToDto(op, new JobsResponseDto());
+				dto.setJobtype(op.getJobType());
 				lstDtos.add(dto);
 			}
 
@@ -531,9 +535,15 @@ public class CustomerMasterFldMgr {
 			}
 			orCriterias.add(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])));
 		}
-		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+		MongoQueryBuilder<CustomerProfileDoc> qb=null;
+		if(ArgUtil.is(orCriterias)) {
+		 qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
 				.where(new Criteria().orOperator(orCriterias.toArray(new Criteria[orCriterias.size()]))).sortBy(sortDir)
 				.limit(limit);
+		}else {
+			qb = MongoQueryBuilder.collection(CustomerProfileDoc.class).page(searchQry.getPageNo(),
+					searchQry.getPageSize());
+		}
 		LOGGER.info("QB {} " + JsonUtil.toJson(qb));
 		return contactStore.find(qb);
 	}

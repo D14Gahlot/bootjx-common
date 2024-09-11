@@ -67,10 +67,11 @@ public class CustomerProfileContoller {
 	public ApiResponse<CustomerFieldMasterDoc, Object> fetchCusMasFields(
 			@RequestParam(value = "id", required = false) String id,
 			@RequestParam(value = "active", required = false,defaultValue = "true") boolean active,
-			@RequestParam(value = "pageSize", required = false,defaultValue = "25") int pageSize,
-			@RequestParam(value = "pageNo", required = false,defaultValue = "0") int pageNo,
-			@RequestParam(value = "sortBy", required = false,defaultValue = "_id") String sortBy) {
-		return ApiResponse.buildResults(cusProfileService.fetchCustomerMstFields(id,active,pageSize,pageNo,sortBy));
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false,defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "created") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir) {
+		return ApiResponse.buildResults(cusProfileService.fetchCustomerMstFields(id,active,pageSize,pageNo,sortBy,sortDir));
 	}
 
 	@Autowired
@@ -96,18 +97,6 @@ public class CustomerProfileContoller {
 			@RequestParam(value = "sortBy", required = false,defaultValue = "_id") String sortBy) {
 		return ApiResponse.buildResults(cusProfileService.fetchCustomerProfileMasterDoc(id,pageSize,pageNo,sortBy));
 	}
-
-//	@RequestMapping(value = "/api/fetch/customer/contact/profile", method = { RequestMethod.GET })
-//	public ApiResponse<JobsResponseDto, Object> fetchCustomerContactProfile(
-//			@RequestParam(value = "id", required = true) String id) {
-//		return ApiResponse.buildResults(cusProfileService.fetchCustomerContactProfile(id));
-//	}
-
-//	@RequestMapping(value = "/api/save/customer/upload/contact/details", method = { RequestMethod.POST })
-//	public ApiResponse<CustomerContactDto, Object> fetchCustomerContactDetails(@RequestParam(value = "id", required = true) String id){
-//			return ApiResponse.buildResults(cusProfileService.fetchCustomerContactDetails(id));
-//		}
-
 	@RequestMapping(value = "/api/agent/customer/contact/info", method = { RequestMethod.GET })
 	public ApiResponse<CustomerProfileDoc, Object> fetchCustomerContactInfo(
 			@RequestParam(value = "id", required = true) String id,
@@ -117,12 +106,7 @@ public class CustomerProfileContoller {
 		return ApiResponse.buildResults(cusProfileService.fetchCustomerContactInfo(id, customerId, phoneno, emailid));
 	}
 
-//	@RequestMapping(value = "/api/save/jobs/output", method = { RequestMethod.POST })
-//	public ApiResponse<JobsResponseDto, Object> saveJobsOutPut(@RequestParam(value = "id", required = true) String id,@RequestBody Map<String, List<Object>> maps){
-//			return ApiResponse.buildResults(cusProfileService.saveJobsOutPut(id,maps));
-//		}
-//	
-//
+
 	@RequestMapping(value = "/api/fetch/jobs/output", method = { RequestMethod.GET })
 	public ApiResponse<JobsResponseDto, Object> fetchJobsOutPut(@RequestParam(value = "id", required = false) String id,
 			@RequestParam(value = "jobid", required = false) String jobid) {
@@ -145,7 +129,7 @@ public class CustomerProfileContoller {
 //		return ApiResponse.buildResults(cusProfileService.fetchCustomeProfile(search));
 //	}
 
-	@RequestMapping(value = "/profile/filter", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/profile/filter/search", method = { RequestMethod.POST })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestBody ProfileSearchQuery searchQry) {
 		List<CustomerProfileDoc> docs = cusProfileService.getProfileSearch(searchQry);
