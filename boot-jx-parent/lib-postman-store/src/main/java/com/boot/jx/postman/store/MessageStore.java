@@ -87,6 +87,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 	private MessageDoc updateMessageDoc(InboxMessage inboxMessage, MessageDoc doc) {
 		doc.setSubject(inboxMessage.getSubject());
 		doc.setMessage(inboxMessage.getMessage());
+		doc.setMessageTrail(inboxMessage.getMessageTrail());
 		doc.setSessionId(inboxMessage.getSessionId());
 
 		doc.setRoute(inboxMessage.getRoute());

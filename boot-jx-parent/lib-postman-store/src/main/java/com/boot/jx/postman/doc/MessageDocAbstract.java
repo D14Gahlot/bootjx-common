@@ -54,6 +54,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private String action;
 	private String handler;
 	private String message;
+	private String messageTrail;
 	private String subject;
 
 	private String formatType;
@@ -506,6 +507,14 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 
 	public void setTime(TimeStampIndex time) {
 		this.time = time;
+	}
+
+	public String getMessageTrail() {
+		return messageTrail;
+	}
+
+	public void setMessageTrail(String messageTrail) {
+		this.messageTrail = messageTrail;
 	}
 
 }

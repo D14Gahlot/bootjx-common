@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class ChatMessageDTO implements Serializable, IMessageId {
 	private static final long serialVersionUID = 7766790295486098869L;
 	private String text;
+	private String messageTrail;
 	private String template;
 	private String templateId;
 	private String action;
@@ -277,5 +278,13 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 
 	public void setForm(Map<String, Object> form) {
 		this.form = form;
+	}
+
+	public String getMessageTrail() {
+		return messageTrail;
+	}
+
+	public void setMessageTrail(String messageTrail) {
+		this.messageTrail = messageTrail;
 	}
 }

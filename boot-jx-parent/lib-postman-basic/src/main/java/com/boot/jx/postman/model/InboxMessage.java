@@ -37,6 +37,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 
 	private long timestamp;
 	private String message;
+	private String messageTrail;
 	private String subject;
 	private String formatType;
 	private String formatSubType;
@@ -461,6 +462,14 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 
 	public void setReferral(MessageReferral referral) {
 		this.referral = referral;
+	}
+
+	public String getMessageTrail() {
+		return messageTrail;
+	}
+
+	public void setMessageTrail(String messageTrail) {
+		this.messageTrail = messageTrail;
 	}
 
 }

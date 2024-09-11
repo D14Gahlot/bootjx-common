@@ -86,6 +86,7 @@ public class ChatDTOUtil {
 
 		messageDto.setType(messageDoc.getType());
 		messageDto.setText(messageDoc.getMessage());
+		messageDto.setMessageTrail(messageDoc.getMessageTrail());
 		messageDto.setTemplate(messageDoc.getTemplate());
 		messageDto.setTemplateId(messageDoc.getTemplateId());
 		messageDto.setTimestamp(messageDoc.getTimestamp());
