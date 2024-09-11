@@ -218,7 +218,8 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 			// Create the message part
 			if (ArgUtil.is(outboxMessage.getMessage())) {
 				messageBodyPart = new MimeBodyPart();
-				messageBodyPart.setText(outboxMessage.getMessage());
+				// messageBodyPart.setText(outboxMessage.getMessage());
+				messageBodyPart.setContent(outboxMessage.getMessage(), "text/html; charset=utf-8");
 				multipart.addBodyPart(messageBodyPart);
 			}
 
