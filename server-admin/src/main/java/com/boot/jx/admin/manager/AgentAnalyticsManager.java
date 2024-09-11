@@ -17,6 +17,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +47,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.SortOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -110,8 +117,7 @@ public class AgentAnalyticsManager implements Serializable {
 		}
 
 		if (allAgent != null && !allAgent.isEmpty()) {
-			boolean parellel = false;
-
+			boolean parellel = true;
 			if (parellel) {
 				long date1Final = date1;
 				long date2Final = date2;
@@ -458,8 +464,6 @@ public class AgentAnalyticsManager implements Serializable {
 		long st = System.currentTimeMillis();
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		long et = System.currentTimeMillis();
-		LOGGER.info("Mongo query execution time: {} ms", (et - st));
-
 		// Process the results
 		List<UniqueContactDto> distinctIdList = new ArrayList<>();
 		if (ArgUtil.is(chatSessDocLst)) {
@@ -1391,6 +1395,70 @@ public class AgentAnalyticsManager implements Serializable {
 
 		return mapLst;
 	}
+	
+	 public Map<Object, Object> getDateWiseCountV3(List<UniqueContactDto> contactIds, String agent, long dateRange1, long dateRange2, Object contact) {
+	        Map<Object, Object> mapLst = new HashMap<>();
+	        Map<Long, Long> dayMapLst = new HashMap<>();
+	   	   Map<Long, Long> dayMapLstV1 = new HashMap<>();
+	        try {
+
+	        if (ArgUtil.isEmptyValue(contact)) {
+	            for (UniqueContactDto contactId : contactIds) {
+	                String contactType = "MESSAGE_" + contactId.getContactType();
+
+	                // Create match operation to filter by contactId, agent, and date range
+	                MatchOperation matchOperation = Aggregation.match(Criteria
+	                        .where("contactId").is(contactId.getContactId())
+	                        .and("timestamp").gte(dateRange1).lt(dateRange2)
+	                        .and(Optional.ofNullable(agent).isPresent() ? "agent" : null).is(Optional.ofNullable(agent).orElse(null)));
+
+	                // Convert timestamp (long) to BSON Date and format to day string
+	                AggregationOperation projectToDay = context -> new Document("$project",
+	                        new Document("day", new Document("$dateToString", 
+	                                new Document("format", "%Y-%m-%d")
+	                                .append("date", new Document("$add", Arrays.asList(new Date(0), "$timestamp")))))
+	                        .append("time", "$time"));
+
+	                // Group by the formatted date string
+	                GroupOperation groupOperation = Aggregation.group("day").count().as("count");
+
+	                // Sort by the day
+	                SortOperation sortOperation = Aggregation.sort(Sort.by(Sort.Direction.ASC, "_id"));
+
+	                // Create the aggregation pipeline
+	                Aggregation aggregation = Aggregation.newAggregation(matchOperation, projectToDay, groupOperation, sortOperation);
+
+	                // Execute the aggregation
+	                AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, contactType, Document.class);
+
+	       
+	                for (Document result : results.getMappedResults()) {
+	                    String dayStr = result.getString("_id"); // Group key
+	                    Long count = Long.valueOf(result.getInteger("count").longValue()); 
+	                    
+	                    SimpleDateFormat sdf = new SimpleDateFormat("d");
+	                    long day = Long.parseLong(sdf.format(new SimpleDateFormat("yyyy-MM-dd").parse(dayStr)));
+
+	                    SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd");
+	                    long timestamp = timestampFormat.parse(dayStr).getTime();
+
+	                    dayMapLst.put(day, dayMapLst.getOrDefault(day, 0L) + count);
+		                dayMapLstV1.put(timestamp, dayMapLstV1.getOrDefault(timestamp, 0L) + count);
+		
+	                }
+	            }
+	        }
+	        
+	        mapLst.put("DAY", dayMapLst);
+		    mapLst.put("DAY_V1", dayMapLstV1);
+	        }catch(Exception e) {
+	        	e.printStackTrace();
+	        }
+
+	        return mapLst;
+	    }
+
+
 
 	public Map<Object, Object> getWeekWiseCountV2(List<UniqueContactDto> contactIds, String agent, long dateRange1,
 			long dateRange2, Object contact) {

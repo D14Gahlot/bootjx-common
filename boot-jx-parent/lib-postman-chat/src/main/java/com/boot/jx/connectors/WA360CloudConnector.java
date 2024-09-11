@@ -203,6 +203,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				msgReferral.setBody(body);
 				inboxMessage.setReferral(msgReferral);
 				commonMongoTemplate.save(inboxMessage);// if this is correct way to store
+
 				   Map<String, String> messagePayload = new HashMap<>();
 				   messagePayload.put("channelId", channelConfig.getChannelType());
 				   messagePayload.put("contactType", channelConfig.getContactType().toString());
@@ -215,10 +216,12 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			} else {
 				inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
 
-			}
-		}
 
-		else if ("interactive".equals(messageType)) {
+			}
+
+			inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
+
+		} else if ("interactive".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
 			String interactiveType = map.entry(InBoundWrapperPaths.INTERACTIVE_TYPE).asString();
 			String replyId = null;

@@ -17,7 +17,7 @@ public class BulkMessageTask implements ITunnelSubscriber<BatchJob> {
 
 	@Override
 	public void onListen(String channel, BatchJob message) {
-		bulkMessageService.registerJob(message);
+		bulkMessageService.registerJobAndTriggerSummary(message);
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.boot.jx.agent.api;
 
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.agent.AgentSessionBean;
@@ -283,5 +286,16 @@ public class AgChatSessionController {
 			@RequestParam PMConstants.CHAT_STATUS status) {
 		return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
 	}
+	
+	@RequestMapping(value = "/api/upload/pofile", method = { RequestMethod.POST })
+	public ApiResponse<CommonFile, Object> uploadExcel(
+			@RequestParam(name = "file", required = false) MultipartFile file) {
+		CommonFile url = fileStore.upload1(file,
+				String.format("%s/profileExcel/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
+				file.getOriginalFilename());
+		return ApiResponse.buildResults(url);
+
+	}
+
 
 }

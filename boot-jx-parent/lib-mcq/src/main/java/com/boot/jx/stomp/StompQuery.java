@@ -14,6 +14,10 @@ public class StompQuery {
 	private List<String> tags;
 	private String appType;
 
+	public StompQuery() {
+		super();
+	}
+
 	public StompQuery(String topic) {
 		this.topic = topic;
 	}

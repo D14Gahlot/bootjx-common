@@ -16,7 +16,7 @@ import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
-import com.boot.jx.scope.tnt.TenantSpecific;
+import com.boot.jx.scope.tnt.TenantDefinations.TenantSpecific;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
@@ -94,6 +94,21 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 				apiKey = apiKeyConfig.getKey();
 		} else {
 			apiKeyConfig = config.clientApiKey(apiKey);
+		}
+
+		if (!ArgUtil.is(apiKeyConfig) && apiKey.equals(pmCommonConfig.getScriptusSecret())) {
+			config = pmEnvironment.shared();
+			if (ArgUtil.is(apiId)) {
+				apiKeyConfig = config.clientApiKey(apiId);
+				if (ArgUtil.is(apiKeyConfig))
+					apiKey = apiKeyConfig.getKey();
+			} else if (ArgUtil.is(apiCode)) {
+				apiKeyConfig = config.clientApiKey(apiCode);
+				if (ArgUtil.is(apiKeyConfig))
+					apiKey = apiKeyConfig.getKey();
+			} else {
+				apiKeyConfig = config.clientApiKey(apiKey);
+			}
 		}
 
 		if (!ArgUtil.is(apiKeyConfig)) {

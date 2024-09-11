@@ -4,8 +4,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +32,6 @@ import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 
 @Component
-@PropertySource("classpath:application-rapiwha.properties")
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = "RAPIWHA")
 public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebPlugin> {
 
@@ -43,7 +40,6 @@ public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebP
 	@Autowired
 	private RestService restService;
 
-	@Value("${rapiwha.api.key}")
 	private String apiWhaKey;
 
 	@Autowired

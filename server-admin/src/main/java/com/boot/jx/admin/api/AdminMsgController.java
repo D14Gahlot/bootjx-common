@@ -377,7 +377,7 @@ public class AdminMsgController {
 
 	@RequestMapping(value = "/api/message/bulk/push/send", method = { RequestMethod.POST })
 	public ApiResponse<BulkSessionDoc, Object> sendBulkMessage(@RequestBody OutboxMessage bulkMessage)
-			throws NumberParseException {
+			throws Exception {
 		if (ArgUtil.is(bulkMessage.getReferenceKey())) {
 			List<OutboxMessage> lstOutBoxMsg = getCsvData(bulkMessage);
 			BulkSessionDoc bulkDoc = bulkMessageService.sendMultiple(lstOutBoxMsg, bulkMessage.getScheduler());
@@ -397,8 +397,12 @@ public class AdminMsgController {
 			}
 
 		} else {
-			return ApiResponse.buildResult(bulkMessageService.send(bulkMessage, bulkMessage.getScheduler()))
-					.message("Bulk Message Job Created");
+			BulkSessionDoc bulkDoc = bulkMessageService.send(bulkMessage, bulkMessage.getScheduler());
+			if (ArgUtil.is(bulkDoc)) {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Created");
+			} else {
+				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+			}
 		}
 	}
 

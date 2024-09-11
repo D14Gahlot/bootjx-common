@@ -31,6 +31,7 @@ import com.boot.jx.account.doc.waba.WabaUsageDoc;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.service.EmpAuthService;
+import com.boot.jx.common.store.MasterDomainStore;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
@@ -75,28 +76,12 @@ public class WabaPartnerController {
 	@Autowired
 	private AccountSessionBean userSessionBean;
 
+	@Autowired
+	MasterDomainStore masterDomainStore;
+
 	private String wabaServer() {
 		// return "https://stoplight.io/mocks/360dialog/360dialog-partner-api/24588693";
 		return "https://hub.360dialog.io/api/v2";
-	}
-
-	private WabaPartnerDoc getPartnerWabaDoc(String partnerId, String cur) {
-		String serviceServer = pmCommonConfig.getServiceServer();
-
-		String serviceServerKey = serviceServer;
-
-		if (ArgUtil.is(cur)) {
-			serviceServerKey = serviceServerKey + "#" + cur;
-		}
-
-		WabaPartnerDoc partner = mongoTemplate.findByIdSafeCheck(serviceServerKey, WabaPartnerDoc.class);
-		if (ArgUtil.not(partner) && ArgUtil.is(partnerId)) {
-			partner = new WabaPartnerDoc();
-			partner.setId(serviceServerKey);
-			partner.setIsPrimaryPartner(true);
-			partner.setPartnerId(partnerId);
-		}
-		return partner;
 	}
 
 	@RequestMapping(value = { "/app/waba/register" }, method = { RequestMethod.GET })
@@ -116,7 +101,7 @@ public class WabaPartnerController {
 		WabaPartnerLog wabaPartnerLog = new WabaPartnerLog().eventType("WABA_LINK");
 
 		mongoTemplate.save(wabaPartnerLog);
-		WabaPartnerDoc partner = getPartnerWabaDoc(null, null);
+		WabaPartnerDoc partner = masterDomainStore.getPartnerWabaDoc();
 		String redirect_url =
 				// "https://5dbb-2405-201-400f-df13-a1d4-2fc8-b47b-3e9a.ngrok.io/"
 				String.format("https://app.%s/partner/app/waba/redirect/%s",
@@ -188,7 +173,7 @@ public class WabaPartnerController {
 			@RequestParam(required = false) String password, @RequestParam(required = false) String partnerId,
 			@RequestParam(required = false) String cur) throws NoSuchAlgorithmException {
 
-		WabaPartnerDoc partner = getPartnerWabaDoc(partnerId, cur);
+		WabaPartnerDoc partner = masterDomainStore.getPartnerWabaDoc(partnerId, cur);
 		username = ArgUtil.parseAsString(username, partner.getUsername());
 		password = ArgUtil.parseAsString(password, partner.getPassword());
 		partnerId = ArgUtil.parseAsString(partnerId, partner.getPartnerId());
@@ -234,7 +219,7 @@ public class WabaPartnerController {
 			@RequestParam(required = false, defaultValue = "false") boolean refresh) throws NoSuchAlgorithmException {
 		if (refresh) {
 			String wabaserver = wabaServer();
-			WabaPartnerDoc partner = getPartnerWabaDoc(null, null);
+			WabaPartnerDoc partner = masterDomainStore.getPartnerWabaDoc();
 			MapModel resp = restService.ajax(wabaserver).path("/partners/" + partner.getPartnerId() + "/clients")
 					.header("Authorization", String.format("%s %s", partner.getAuthorization().get("token_type"),
 							partner.getAuthorization().get("access_token")))
@@ -268,7 +253,7 @@ public class WabaPartnerController {
 		WabaPartnerDoc clientDoc = mongoTemplate.findByIdSafeCheck(clientId, WabaPartnerDoc.class);
 		if (refresh || TimeUtils.isExpired(ArgUtil.parseAsLong(clientDoc.getBalanceStamp(), 0L), "5min")) {
 			String wabaserver = wabaServer();
-			WabaPartnerDoc partner = getPartnerWabaDoc(null, null);
+			WabaPartnerDoc partner = masterDomainStore.getPartnerWabaDoc();
 			MapModel resp = restService.ajax(wabaserver)
 					.path("/partners/" + partner.getPartnerId() + "/clients/" + clientId + "/info/balance")
 					.header("Authorization",
@@ -311,7 +296,7 @@ public class WabaPartnerController {
 		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.DUPER_USER, PMConstants.USER_ROLE.SUPER_DEV)) {
 			if (refresh) {
 				String wabaserver = wabaServer();
-				WabaPartnerDoc partner = getPartnerWabaDoc(null, null);
+				WabaPartnerDoc partner = masterDomainStore.getPartnerWabaDoc();
 				MapModel resp = restService.ajax(wabaserver).path("/partners/" + partner.getPartnerId() + "/channels")
 						.header("Authorization",
 								String.format("%s %s", partner.getAuthorization().get("token_type"),
@@ -360,7 +345,7 @@ public class WabaPartnerController {
 		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.DUPER_USER, PMConstants.USER_ROLE.SUPER_DEV)
 				|| allowedChannels.contains(channelId)) {
 			String wabaserver = wabaServer();
-			WabaPartnerDoc partner = getPartnerWabaDoc(null, null);
+			WabaPartnerDoc partner = masterDomainStore.getPartnerWabaDoc();
 			try {
 				MapModel resp = restService.ajax(wabaserver)
 						.path("/partners/" + partner.getPartnerId() + "/channels/" + channelId + "/api_keys")

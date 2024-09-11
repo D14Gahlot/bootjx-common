@@ -31,7 +31,6 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 	List<Map<String, String>> keymap;
 
 	public ContactMeta() {
-		super();
 	}
 
 	public Language getLang() {
@@ -92,16 +91,6 @@ public class ContactMeta implements java.io.Serializable, Contactable {
 
 	public ContactMeta prefix(String prefix) {
 		this.prefix = prefix;
-		return this;
-	}
-
-	public ContactMeta mobile(String mobile) {
-		this.phone = mobile;
-		return this;
-	}
-
-	public ContactMeta email(String email) {
-		this.email = email;
 		return this;
 	}
 
