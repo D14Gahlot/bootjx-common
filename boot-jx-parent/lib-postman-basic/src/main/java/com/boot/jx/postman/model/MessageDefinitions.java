@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
@@ -25,7 +27,7 @@ public class MessageDefinitions {
 
 	@JsonDeserialize(as = ContactMeta.class, keyUsing = ContactMetaKeyDeserializer.class)
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static interface Contact extends Serializable {
+	public static interface Contact extends Serializable, JsonIgnoreNull, JsonIgnoreUnknown {
 		public String getName();
 
 		public void setName(String name);
