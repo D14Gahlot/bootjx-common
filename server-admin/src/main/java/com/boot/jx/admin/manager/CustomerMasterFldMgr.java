@@ -50,7 +50,6 @@ import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 import com.boot.utils.UniqueID;
-import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 
 @Component
 public class CustomerMasterFldMgr {

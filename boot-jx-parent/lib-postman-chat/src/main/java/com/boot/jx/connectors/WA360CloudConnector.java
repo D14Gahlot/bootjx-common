@@ -32,7 +32,6 @@ import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
-import com.boot.jx.postman.doc.tpo.WABAFlows;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;

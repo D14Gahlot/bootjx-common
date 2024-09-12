@@ -31,7 +31,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -56,8 +55,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.AppContext;
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.admin.dto.DashBoardRequestDto;
 import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.LeadMessanger;
