@@ -196,6 +196,18 @@ public class ClientAppConfigConstants {
 
 				});
 
+		APP_CONFIGS.put(APP_TYPE.FEEDBACK_V2,
+				new ConfigMeta[] {
+						new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Feedback V2")
+								.desc("Use this app to collect feedback from customers when ticket is closed"//
+								).group("About App"),
+						new ConfigMeta().title("Feedback Message Template").path("props.template").group("TEMPLATES")
+								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+						new ConfigMeta().title("Session Close Template").path("props.template_close").group("TEMPLATES")
+								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code")
+
+				});
+
 		APP_CONFIGS.put(APP_TYPE.APP_SCRIPT,
 				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Script")
 						.desc("Use this app to write custom handling of inbound/outboud messages using script editor "//

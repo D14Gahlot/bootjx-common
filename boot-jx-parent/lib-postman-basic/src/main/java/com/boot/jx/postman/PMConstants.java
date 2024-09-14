@@ -114,7 +114,7 @@ public class PMConstants {
 	}
 
 	public static enum CHAT_MODE {
-		AGENT, BOT, PUSH, WEBHOOK, NONE;
+		AGENT, BOT, SCRIPTUS, PUSH, WEBHOOK, NONE;
 
 		public static boolean isPushOnly(String mode) {
 			if (!ArgUtil.is(mode)) {
@@ -142,6 +142,9 @@ public class PMConstants {
 		// Bot modes
 		TEAM_ROUTER(CHAT_MODE.BOT), APP_ROUTER(CHAT_MODE.BOT), APP_SWITCH(CHAT_MODE.BOT), QUICK_GALLERY(CHAT_MODE.BOT),
 		QUICK_MENU(CHAT_MODE.BOT), FEEDBACK(CHAT_MODE.BOT), AVAMO(CHAT_MODE.BOT),
+
+		// SCRIPTUS MODES
+		FEEDBACK_V2(CHAT_MODE.SCRIPTUS),
 
 		// Agent Mdoes
 		MITEL(CHAT_MODE.AGENT),

@@ -151,7 +151,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						// }
 					}
 
-					updateStatus(inboxMessage, Status.FORWARDED);
+					updateStatus(inboxMessage, Status.CONSUMED);
+					return;
+				}
+
+				if (CHAT_MODE.SCRIPTUS.equals(appType.getMode())) {
+					forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
+							defaultClient.getId());
 					return;
 				}
 
@@ -375,6 +381,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				} else if (appType.is(CHAT_MODE.WEBHOOK)) {
 					sendEventWebhook(event, targetAppQueue);
 					return;
+				} else if (appType.is(CHAT_MODE.SCRIPTUS)) {
+					sendEventWebhook(event, targetAppQueue);
+					return;
 				} else if (appType.is(CHAT_MODE.AGENT)) {
 					String agentUrl = ArgUtil.nonEmpty(targetAppQueue.getWebhook(), pmCommonConfig.getAgentUrl());
 					chatClient.sessionEvent(agentUrl, event, pmArgs);
@@ -435,7 +444,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		LOGGER.debug("Forwarding Session Routing Event to Xternal Service ");
 		try {
 			APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
-			boolean internalwebhook = APP_TYPE.APP_SCRIPT.equals(appType);
+			CHAT_MODE chatMode = CHAT_MODE.from(defaultClient.getAppMode());
+			boolean internalwebhook = APP_TYPE.APP_SCRIPT.equals(appType) || CHAT_MODE.SCRIPTUS.equals(chatMode);
 
 			String webhookUrl = internalwebhook ? (pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD)
 					: defaultClient.getWebhook();
