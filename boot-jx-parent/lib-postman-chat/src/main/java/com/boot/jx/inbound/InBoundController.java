@@ -243,7 +243,7 @@ public class InBoundController {
 					}
 				} else if (ArgUtil.is(pageId)) {
 					String channelIdForDomain = PostManUtil.CHANNEL_ID(channelType, pageId);
-					inBoundRouter.inboundMessageEventAsync(channelIdForDomain, channelType, newData.map());
+					inBoundRouter.inboundMessageEventAsync(channelType, channelIdForDomain, newData.map());
 				} else {
 					inBoundRouter.inboundMessageEventAsync(channelType, channelId, newData.map());
 				}
