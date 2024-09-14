@@ -220,6 +220,18 @@ public class ClientAppConfigConstants {
 
 				});
 
+		APP_CONFIGS.put(APP_TYPE.BOTFLOW,
+				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("BOT Flow")
+						.desc("Use this app to create your custom flow using botflow"//
+						).group("About App"),
+						new ConfigMeta().title("Sender Type").path("props.sender_type").options(
+								new ConfigOption(MESSAGE_SENDER_TYPE.BOT).label("Bot"),
+								new ConfigOption(MESSAGE_SENDER_TYPE.AGENT).label("Agent"),
+								new ConfigOption(MESSAGE_SENDER_TYPE.ADMIN).label("Admin"),
+								new ConfigOption(MESSAGE_SENDER_TYPE.SYSTEM).label("System"))
+
+				});
+
 		APP_CONFIGS.put(APP_TYPE.FAQ,
 				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("Faq")
 						.desc("Use this app  to tranfer from FAQ bot to Bot Builder Menu"//
