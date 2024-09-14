@@ -142,8 +142,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		if (ArgUtil.is(contact.getEmail())) {
 			orOperator.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(contact.getEmail())));
 		}
-		if (ArgUtil.is(contact.getPhone())) {
-			PBPhone ph = parsePhone(new PBPhone().phone(contact.getPhone()));
+		if (ArgUtil.is(contact.phone())) {
+			PBPhone ph = parsePhone(new PBPhone().phone(contact.phone()));
 			orOperator.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber").is(ph.nationalNumber)
 					.and("countryCallingCode").is(ph.countryCallingCode)));
 		}

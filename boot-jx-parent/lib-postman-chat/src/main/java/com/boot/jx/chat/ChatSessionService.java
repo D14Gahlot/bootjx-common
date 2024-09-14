@@ -180,7 +180,7 @@ public class ChatSessionService {
 
 			ChatUserProfileRequest chatUserProfileRequest = new ChatUserProfileRequest();
 			chatUserProfileRequest.setEmail(contact.getEmail());
-			chatUserProfileRequest.setMobile(contact.getPhone());
+			chatUserProfileRequest.setMobile(contact.phone());
 			chatUserProfileRequest.setContactId(contact.getContactId());
 			chatUserProfileRequest.setContactType(contact.getContactType());
 			chatUserProfileRequest.setLane(contact.getLane());

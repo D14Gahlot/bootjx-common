@@ -110,8 +110,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChatContactQuery contactQuery = messageContext.contact();
 		ChatContactDoc chatContactDoc = contactQuery.getDoc();
-		if (chatContactDoc.getPhone() == null) {
-			contactQuery.setPhone(inboxMessage.contact().getPhone());
+		if (chatContactDoc.phone() == null) {
+			contactQuery.setPhone(inboxMessage.contact().phone());
 		}
 		if (chatContactDoc.getPhoneVerified() == null) {
 			contactQuery.setPhoneVerified(true);
@@ -162,7 +162,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 	@Override
 	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
-		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
+		return contactStore.findProfileByPhone(chatContactDoc.phone());
 	}
 
 	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {
@@ -176,7 +176,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		inboxMessage.contact().setCsid(contactNumber);
 		inboxMessage.contact().setName(contactName);
-		inboxMessage.contact().setPhone(contactNumber);
+		inboxMessage.contact().phone(contactNumber);
 
 		// Set Additional info
 		inboxMessage.setFrom(contactNumber);
@@ -601,7 +601,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
 			String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
-			String phone = chatContactDoc.getPhone();
+			String phone = chatContactDoc.phone();
 			try {
 				phone = phone.replace(" ", "").replaceAll("^[\\+0\\s]+(?!$)", "").trim();
 				PhoneNumber phoneNumber = PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion);

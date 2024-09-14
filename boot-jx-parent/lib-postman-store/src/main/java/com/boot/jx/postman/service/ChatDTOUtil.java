@@ -35,7 +35,7 @@ public class ChatDTOUtil {
 	public static ContactMeta getContactMeta(ChatContactDoc chatContactDoc) {
 		ContactMeta contact = new ContactMeta();
 		contact.setName(chatContactDoc.getName());
-		contact.setPhone(chatContactDoc.getPhone());
+		contact.phone(chatContactDoc.phone());
 		contact.setEmail(chatContactDoc.getEmail());
 		contact.setContactType(chatContactDoc.getContactType());
 		return contact;
@@ -49,7 +49,7 @@ public class ChatDTOUtil {
 			contact.setContactType(chatContactDoc.getContactType());
 			contact.setChannelType(chatContactDoc.getChannelType());
 			contact.setName(chatContactDoc.getName());
-			contact.setPhone(chatContactDoc.getPhone());
+			contact.phone(chatContactDoc.phone());
 			contact.setEmail(chatContactDoc.getEmail());
 			contact.setPhoneVerified(chatContactDoc.getPhoneVerified());
 			contact.setEmailVerified(chatContactDoc.getEmailVerified());

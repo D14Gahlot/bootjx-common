@@ -129,7 +129,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 
 		ContactDetailDoc contact = new ContactDetailDoc();
 		// contact.copyFrom(inboxMessage.contact()); TOO MUCH DATA
-		contact.setPhone(inboxMessage.getFrom());
+		contact.phone(inboxMessage.getFrom());
 		contact.setContactType(ArgUtil.parseAsString(contactType));
 		contact.setChannelType(inboxMessage.contact().getChannelType());
 		doc.setContact(contact);
@@ -291,8 +291,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.setContactId(PostManUtil.createContactId(outMessage));
 
 		ContactDetailDoc contact = new ContactDetailDoc();
-		contact.setPhone(to);
-		contact.setMobile(to);
+		contact.phone(to);
 		contact.setContactType(ArgUtil.parseAsString(outMessage.contact().getContactType()));
 		doc.setContact(contact);
 

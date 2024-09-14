@@ -54,7 +54,7 @@ public class InBoundContact implements JsonIgnoreUnknown, JsonIgnoreNull {
 		contact.profile = new InBoundContactProfile();
 		contact.profile.name = contactable.getName();
 		contact.profile.email = contactable.getEmail();
-		contact.profile.phone = contactable.getPhone();
+		contact.profile.phone = contactable.phone();
 
 		return contact;
 	}

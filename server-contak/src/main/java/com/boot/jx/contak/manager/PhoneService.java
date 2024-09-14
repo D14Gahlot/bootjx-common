@@ -67,7 +67,7 @@ public class PhoneService {
 
 	public OutboxMessage sendPhoneOTP(String phone, String otp) {
 		OutboxMessage ob = new OutboxMessage();
-		ob.contact().setPhone(phone);
+		ob.contact().phone(phone);
 		ob.setHsm(new CommonTemplateMeta().code("verification_otp")
 				.data(MapModel.createInstance().put("otp", otp).toMap()));
 

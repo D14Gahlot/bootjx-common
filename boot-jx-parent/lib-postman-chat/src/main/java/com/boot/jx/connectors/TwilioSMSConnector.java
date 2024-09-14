@@ -45,7 +45,7 @@ public class TwilioSMSConnector extends AbstractConnector<TwilioConfigDetails, T
 
 	@Override
 	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
-		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
+		return contactStore.findProfileByPhone(chatContactDoc.phone());
 	}
 
 	@Override

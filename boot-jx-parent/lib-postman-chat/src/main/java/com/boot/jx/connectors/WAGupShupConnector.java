@@ -126,7 +126,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
 
 	@Override
 	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
-		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
+		return contactStore.findProfileByPhone(chatContactDoc.phone());
 	}
 
 	@Override
@@ -150,7 +150,7 @@ public class WAGupShupConnector extends AbstractConnector<GupShupConfigDetails, 
 		inboxMessage.contact().setLane(inbound.getWaNumber());
 		inboxMessage.contact().setCsid(inbound.getMobile());
 		inboxMessage.contact().setName(inbound.getName());
-		inboxMessage.contact().setPhone(inbound.getMobile());
+		inboxMessage.contact().phone(inbound.getMobile());
 
 		inboxMessage.setFrom(inbound.getMobile());
 		inboxMessage.setFromName(inbound.getName());

@@ -225,7 +225,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	@Override
 	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
-		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
+		return contactStore.findProfileByPhone(chatContactDoc.phone());
 	}
 
 	@Override
@@ -285,7 +285,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		report.contact().setContactId(status.contactId);
 		if (ArgUtil.is(status.contact)) {
 			report.contact().setEmail(status.contact.email);
-			report.contact().setPhone(status.contact.phone);
+			report.contact().phone(status.contact.phone);
 			report.contact().setCsid(status.contact.csid);
 		}
 		Status st = ArgUtil.parseAsEnumT(status.status, Status.class);

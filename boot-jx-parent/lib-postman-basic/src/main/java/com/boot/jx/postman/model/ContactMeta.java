@@ -40,11 +40,11 @@ public class ContactMeta implements Serializable, Contactable {
 		this.prefix = prefix;
 	}
 
-	public String getPhone() {
+	public String phone() {
 		return phone;
 	}
 
-	public void setPhone(String mobile) {
+	public void phone(String mobile) {
 		this.phone = mobile;
 	}
 
@@ -166,6 +166,14 @@ public class ContactMeta implements Serializable, Contactable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 }

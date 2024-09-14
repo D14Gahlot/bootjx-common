@@ -115,7 +115,7 @@ public class Demo4Controller extends CommonBotController {
 				outboxMessage1.contact().type(ContactType.WHATSAPP);
 				outboxMessage1.contact().setLane(lane);
 				// alert phone number
-				outboxMessage1.contact().setPhone(contact);
+				outboxMessage1.contact().phone(contact);
 				// outboxMessage1.contact().setCsid(contact);
 				outboxMessage1.data(data);
 				send(outboxMessage1);

@@ -253,8 +253,8 @@ public class MessageService {
 		outboxMessage.contact().setChannelType(channel.getChannelType());
 		outboxMessage.contact().setLane(channel.getLane());
 
-		if (ArgUtil.is(contact.getPhone()) && contact.getPhone().startsWith("+")) {
-			contact.setPhone(StringUtils.removeSpaces(contact.getPhone().replaceFirst("\\+", "")));
+		if (ArgUtil.is(contact.phone()) && contact.phone().startsWith("+")) {
+			contact.phone(StringUtils.removeSpaces(contact.phone().replaceFirst("\\+", "")));
 		}
 
 		outboxMessage.contact().copyFrom(contact);

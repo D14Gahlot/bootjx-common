@@ -238,7 +238,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 			}
 		}
 		if (channel.getWeb().isPromptPhone()) {
-			if (ArgUtil.isEmpty(chatContactDoc.getPhone())) {
+			if (ArgUtil.isEmpty(chatContactDoc.phone())) {
 				inputs.add(new TmplElement().code("phone").type("PHONE"));
 				return (OutboxMessage) inboxMessage.replyMessage("Please enter your phone").option("inputs", inputs);
 			}

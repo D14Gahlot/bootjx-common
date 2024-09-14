@@ -31,12 +31,12 @@ public class ContactDetailDoc extends ContactMeta implements Serializable, Conta
 	private Map<String, Object> filter;
 
 	@Override
-	public String getPhone() {
+	public String phone() {
 		return ArgUtil.nonEmpty(this.phone, this.mobile);
 	}
 
 	@Override
-	public void setPhone(String phone) {
+	public void phone(String phone) {
 		this.phone = phone;
 		this.mobile = phone;
 	}
@@ -51,13 +51,12 @@ public class ContactDetailDoc extends ContactMeta implements Serializable, Conta
 
 	@Deprecated
 	public String getMobile() {
-		return ArgUtil.nonEmpty(this.phone, this.mobile);
+		return this.mobile;
 	}
 
 	@Deprecated
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
-		this.phone = mobile;
 	}
 
 }

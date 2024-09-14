@@ -46,7 +46,7 @@ public class PostManUtil {
 			switch (contactType) {
 			case WHATSAPP:
 			case SMS:
-				return contact.getPhone();
+				return contact.phone();
 			case EMAIL:
 				return contact.getEmail();
 			default:

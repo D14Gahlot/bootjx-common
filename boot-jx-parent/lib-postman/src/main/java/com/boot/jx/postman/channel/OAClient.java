@@ -30,7 +30,7 @@ public class OAClient {
 		MapModel resp = restService.ajax("https://" + oa.getClientId() + OA_URL).header("x-api-key", oa.getApiKey())
 				.postJson(MapModel.createInstance()
 						//
-						.put("phone", outboxMessage.contact().getPhone())
+						.put("phone", outboxMessage.contact().phone())
 						.put(TEMPLATE_CODE, outboxMessage.getTemplateExt().getCode())
 						.put(TEMPLATE_MODEL, outboxMessage.getModel())
 						//

@@ -94,7 +94,7 @@ public class ChatParserAndImportor {
 
 		Contactable c = Contactable.instance();
 		c.type(contactType);
-		c.setPhone(contactMobile);
+		c.phone(contactMobile);
 		c.setLane(lane);
 
 		String contactId = PostManUtil.createContactId(c);

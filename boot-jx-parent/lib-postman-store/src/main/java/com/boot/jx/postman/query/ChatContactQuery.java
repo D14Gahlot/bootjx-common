@@ -33,7 +33,7 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	}
 
 	public String getPhone() {
-		return this.getDoc().getPhone();
+		return this.getDoc().phone();
 	}
 
 	public String getEmail() {
@@ -163,7 +163,7 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 	}
 
 	public ChatContactQuery setPhone(String phone) {
-		this.doc.setPhone(phone);
+		this.doc.phone(phone);
 		this.set("phone", phone);
 		return this;
 	}
@@ -253,8 +253,8 @@ public class ChatContactQuery extends DocQueryBuilder<ChatContactDoc> {
 			this.setEmail(ArgUtil.nonEmpty(contactable.getEmail(), this.doc.getEmail()));
 		}
 
-		if (ArgUtil.is(contactable.getPhone())) {
-			this.setPhone(ArgUtil.nonEmpty(contactable.getPhone(), this.doc.getPhone()));
+		if (ArgUtil.is(contactable.phone())) {
+			this.setPhone(ArgUtil.nonEmpty(contactable.phone(), this.doc.phone()));
 		}
 
 		return this;

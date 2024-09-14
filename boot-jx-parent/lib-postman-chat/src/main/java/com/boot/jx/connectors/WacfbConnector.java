@@ -233,8 +233,8 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChatContactQuery contactQuery = messageContext.contact();
 		ChatContactDoc chatContactDoc = contactQuery.getDoc();
-		if (chatContactDoc.getPhone() == null) {
-			contactQuery.setPhone(inboxMessage.contact().getPhone());
+		if (chatContactDoc.phone() == null) {
+			contactQuery.setPhone(inboxMessage.contact().phone());
 		}
 		if (chatContactDoc.getPhoneVerified() == null) {
 			contactQuery.setPhoneVerified(true);
@@ -285,7 +285,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Override
 	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
-		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
+		return contactStore.findProfileByPhone(chatContactDoc.phone());
 	}
 
 	public InboxMessage toInboxMessage(ChannelConfig channelConfig, MapModel map) {
@@ -299,7 +299,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 		inboxMessage.contact().setCsid(contactNumber);
 		inboxMessage.contact().setName(contactName);
-		inboxMessage.contact().setPhone(contactNumber);
+		inboxMessage.contact().phone(contactNumber);
 
 		// Set Additional info
 		inboxMessage.setFrom(contactNumber);

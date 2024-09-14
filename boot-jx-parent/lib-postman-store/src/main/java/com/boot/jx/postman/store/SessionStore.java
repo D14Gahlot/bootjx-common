@@ -388,11 +388,11 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		ChatContactDoc contact = getContact(contactId);
 
 		List<ChatContactDoc> contacts = null;
-		if (ArgUtil.is(contact) && !ArgUtil.areEmpty(contact.getPhone(), contact.getEmail())) {
+		if (ArgUtil.is(contact) && !ArgUtil.areEmpty(contact.phone(), contact.getEmail())) {
 			Query query1 = new Query();
 			List<Criteria> orExpression = new ArrayList<Criteria>();
-			if (ArgUtil.is(contact.getPhone())) {
-				orExpression.add(Criteria.where("phone").is(contact.getPhone()));
+			if (ArgUtil.is(contact.phone())) {
+				orExpression.add(Criteria.where("phone").is(contact.phone()));
 			}
 			if (ArgUtil.is(contact.getEmail())) {
 				orExpression.add(Criteria.where("email").is(contact.getEmail()));

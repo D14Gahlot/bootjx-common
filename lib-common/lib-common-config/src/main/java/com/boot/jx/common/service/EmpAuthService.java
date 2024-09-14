@@ -331,7 +331,7 @@ public class EmpAuthService {
 		}
 
 		OutboxMessage ob = new OutboxMessage();
-		ob.contact().setPhone(loginToken.getDomainUserPhone());
+		ob.contact().phone(loginToken.getDomainUserPhone());
 		ob.setTemplateExt(new HSMTemplate3rdParty().code("login_otp"));
 		ob.model().put("prefix", otpDetails.getPrefix());
 		ob.model().put("value", otpDetails.getOtp());

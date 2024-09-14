@@ -44,9 +44,9 @@ public class ChatArchiveService {
 						ChatProfileDoc.class);
 				ChatProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
 				dto.setProfile(profileDTO);
-			} else if (ArgUtil.is(contact.getPhone())) {
+			} else if (ArgUtil.is(contact.phone())) {
 				Query query = new Query();
-				query.addCriteria(Criteria.where("mobile").is(contact.getPhone()));
+				query.addCriteria(Criteria.where("mobile").is(contact.phone()));
 				ChatProfileDoc profileDoc = mongoTemplate.findOne(query, ChatProfileDoc.class);
 				ChatProfileDTO profileDTO = ChatDTOUtil.getProfileDTO(profileDoc);
 				dto.setProfile(profileDTO);
@@ -64,7 +64,7 @@ public class ChatArchiveService {
 		chatSessionDto.setName(contact.getName());
 		chatSessionDto.setProfilePic(contact.getProfilePic());
 		chatSessionDto.setEmail(contact.getEmail());
-		chatSessionDto.setPhone(contact.getPhone());
+		chatSessionDto.setPhone(contact.phone());
 		chatSessionDto.setContactId(contact.getContactId());
 
 		return chatSessionDto;

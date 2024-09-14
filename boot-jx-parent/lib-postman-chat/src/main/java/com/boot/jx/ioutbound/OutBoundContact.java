@@ -9,50 +9,58 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OutBoundContact implements ContactID {
 
-    private static final long serialVersionUID = -4577777772782792298L;
+	private static final long serialVersionUID = -4577777772782792298L;
 
-    @ApiMockModelProperty(value = "Contact Id is unique id for any contact, you will recieve it in Inbound.contact")
-    String contactId;
+	@ApiMockModelProperty(value = "Contact Id is unique id for any contact, you will recieve it in Inbound.contact")
+	String contactId;
 
-    @ApiMockModelProperty(value = "Phone in caseo of SMS/WHATSAPP")
-    String phone;
+	@ApiMockModelProperty(value = "Phone in caseo of SMS/WHATSAPP")
+	String phone;
 
-    @ApiMockModelProperty(value = "Name of to be used will, override the name in message")
-    String name;
+	@ApiMockModelProperty(value = "Name of to be used will, override the name in message")
+	String name;
 
-    @ApiMockModelProperty(value = "Email Address for email message.")
-    String email;
+	@ApiMockModelProperty(value = "Email Address for email message.")
+	String email;
 
-    public String getName() {
-	return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-	this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String getPhone() {
-	return phone;
-    }
+	public String phone() {
+		return phone;
+	}
 
-    public void setPhone(String phone) {
-	this.phone = phone;
-    }
+	public void phone(String phone) {
+		this.phone = phone;
+	}
 
-    public String getEmail() {
-	return email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setEmail(String email) {
-	this.email = email;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public String getContactId() {
-	return contactId;
-    }
+	public String getContactId() {
+		return contactId;
+	}
 
-    public void setContactId(String contactId) {
-	this.contactId = contactId;
-    }
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
 }

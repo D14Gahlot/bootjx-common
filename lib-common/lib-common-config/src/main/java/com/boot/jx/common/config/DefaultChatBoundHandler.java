@@ -233,7 +233,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		InBoundMsg msg = new InBoundMsg();
 		msg.messageId = inboxMessage.getMessageId();
 		msg.messageIdExt = inboxMessage.getMessageIdExt();
-		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().getPhone(), inboxMessage.contact().getEmail(),
+		msg.contactFrom = ArgUtil.nonEmpty(inboxMessage.contact().phone(), inboxMessage.contact().getEmail(),
 				inboxMessage.contact().getCsid());
 		msg.contactId = contact.contactId;
 		msg.session = new MsgSession();

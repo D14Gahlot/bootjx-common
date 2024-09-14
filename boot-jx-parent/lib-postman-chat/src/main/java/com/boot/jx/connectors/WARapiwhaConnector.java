@@ -79,7 +79,7 @@ public class WARapiwhaConnector extends AbstractConnector<WebConfigDetails, WebP
 
 	@Override
 	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
-		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
+		return contactStore.findProfileByPhone(chatContactDoc.phone());
 	}
 
 	@Override

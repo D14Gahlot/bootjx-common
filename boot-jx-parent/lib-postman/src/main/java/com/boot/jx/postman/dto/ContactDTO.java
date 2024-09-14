@@ -78,11 +78,11 @@ public class ContactDTO implements java.io.Serializable, Contactable {
 		this.email = email;
 	}
 
-	public String getPhone() {
+	public String phone() {
 		return phone;
 	}
 
-	public void setPhone(String phone) {
+	public void phone(String phone) {
 		this.phone = phone;
 	}
 
@@ -236,6 +236,14 @@ public class ContactDTO implements java.io.Serializable, Contactable {
 
 	public void setPhoneVerified(Boolean phoneVerified) {
 		this.phoneVerified = phoneVerified;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 }

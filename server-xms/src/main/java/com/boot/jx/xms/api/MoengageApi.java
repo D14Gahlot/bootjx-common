@@ -75,7 +75,7 @@ public class MoengageApi {
 		//LOGGER.info("messageWrapper ---template "+template);
 		/** setting the contact **/
 		String to =(String)botreply.get("to");
-		contactmeta.setPhone(to);
+		contactmeta.phone(to);
 		outboxMessage.setContact(contactmeta);
 		/** end contact **/
 		// set template name 

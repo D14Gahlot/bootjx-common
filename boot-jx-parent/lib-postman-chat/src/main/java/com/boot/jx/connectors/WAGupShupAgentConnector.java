@@ -105,7 +105,7 @@ public class WAGupShupAgentConnector extends AbstractConnector<GupShupConfigDeta
 
 	@Override
 	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
-		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
+		return contactStore.findProfileByPhone(chatContactDoc.phone());
 	}
 
 	@Override

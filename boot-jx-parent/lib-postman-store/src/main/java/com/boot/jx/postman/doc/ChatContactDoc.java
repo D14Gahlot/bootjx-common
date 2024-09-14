@@ -82,7 +82,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 
 	private Long createdStamp;
 	private String createdBy;
-	
+
 	private ChatInfoDTO info;
 
 	public String getContactId() {
@@ -175,11 +175,11 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 		this.channel = channel;
 	}
 
-	public String getPhone() {
+	public String phone() {
 		return phone;
 	}
 
-	public void setPhone(String phone) {
+	public void phone(String phone) {
 		this.phone = phone;
 	}
 
@@ -359,7 +359,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 		}
 		return profile;
 	}
-	
+
 	public ChatInfoDTO getInfo() {
 		return info;
 	}
@@ -367,11 +367,19 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 	public void setInfo(ChatInfoDTO info) {
 		this.info = info;
 	}
-	
+
 	public ChatInfoDTO info() {
 		if (this.info == null) {
 			this.info = new ChatInfoDTO();
 		}
 		return info;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 }

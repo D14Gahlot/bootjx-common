@@ -132,7 +132,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			to = PhoneUtil.addPlusSign(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-			doc.getContact().setPhone(to);
+			doc.getContact().phone(to);
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
 			doc.setHsm(hsmTemp);
@@ -201,7 +201,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			to = PhoneUtil.addPlusSign(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-			doc.getContact().setPhone(to);
+			doc.getContact().phone(to);
 			doc.setMessage(bulkMsg.getMessage());
 			doc.setHsm(bulkMsg.getHsm());
 			doc.setTemplateId(bulkMsg.templateId());
@@ -269,7 +269,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			to = PhoneUtil.addPlusSign(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-			doc.getContact().setPhone(to);
+			doc.getContact().phone(to);
 			doc.setMessage(bulkMsg.getMessage());
 			doc.setHsm(bulkMsg.getHsm());
 			doc.setTemplateId(bulkMsg.templateId());
@@ -392,7 +392,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			outboxMessage.contact().setChannelType(channelType);
 			outboxMessage.contact().setLane(lane);
 			outboxMessage.contact().setEmail(msg.getContact().getEmail());
-			outboxMessage.contact().setPhone(msg.getContact().getPhone());
+			outboxMessage.contact().phone(msg.getContact().phone());
 			outboxMessage.contact().setContactId(msg.getContact().getContactId());
 			outboxMessage.setRoute(msg.getRoute());
 

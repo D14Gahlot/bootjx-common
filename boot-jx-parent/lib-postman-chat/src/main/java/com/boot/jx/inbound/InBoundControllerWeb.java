@@ -248,7 +248,7 @@ public class InBoundControllerWeb {
 		Contactable contact = PostManUtil.getContactMeta(msg.contact());
 		contact.setName(userName);
 		contact.setEmail(userEmail);
-		contact.setPhone(userPhone);
+		contact.phone(userPhone);
 		ChatContactQuery chatContactQuery = new ChatContactQuery(contact.getContactId());
 		chatContactQuery.update(contact);
 		chatContactQuery.updateCreatedStamp();

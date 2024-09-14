@@ -34,15 +34,17 @@ public class MessageDefinitions {
 
 		public String getEmail();
 
-		public String getPhone();
+		public String phone();
 
 		public void setPhone(String phone);
+
+		public void phone(String phone);
 
 		public void setEmail(String email);
 
 		public default void copyFrom(Contact contactable) {
 			this.setName(contactable.getName());
-			this.setPhone(contactable.getPhone());
+			this.phone(contactable.phone());
 			this.setEmail(contactable.getEmail());
 		}
 
@@ -61,7 +63,7 @@ public class MessageDefinitions {
 		public default void copyFrom(ContactID contactable) {
 			// Contact
 			this.setName(contactable.getName());
-			this.setPhone(contactable.getPhone());
+			this.phone(contactable.phone());
 			this.setEmail(contactable.getEmail());
 			// ContactID
 			this.setContactId(contactable.getContactId());
@@ -105,8 +107,8 @@ public class MessageDefinitions {
 			if (ArgUtil.is(contactable.getName())) {
 				this.setName(contactable.getName());
 			}
-			if (ArgUtil.is(contactable.getPhone())) {
-				this.setPhone(contactable.getPhone());
+			if (ArgUtil.is(contactable.phone())) {
+				this.phone(contactable.phone());
 			}
 			if (ArgUtil.is(contactable.getEmail())) {
 				this.setEmail(contactable.getEmail());

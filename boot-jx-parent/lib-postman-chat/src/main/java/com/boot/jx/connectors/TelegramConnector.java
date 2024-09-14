@@ -131,7 +131,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 
 	@Override
 	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
-		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
+		return contactStore.findProfileByPhone(chatContactDoc.phone());
 	}
 
 	@Override
@@ -156,7 +156,7 @@ public class TelegramConnector extends AbstractConnector<TelegramConfigDetails, 
 
 		Contactable contactDoc = messageContext.contact().getDoc();
 
-		if (ArgUtil.isEmpty(contactDoc.getPhone())) {
+		if (ArgUtil.isEmpty(contactDoc.phone())) {
 			ChannelConfig config = getChannelConfig(inboxMessage);
 			telegramClient.promptShareNumber(config, inboxMessage.getFrom(),
 					"Confirm that you would like to share your contact number and continue, by clicking on the button below");

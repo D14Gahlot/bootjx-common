@@ -46,7 +46,7 @@ public class OAConnector extends AbstractConnector<OAConfigDetails, OAPlugin> {
 
 	@Override
 	public CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
-		return contactStore.findProfileByPhone(chatContactDoc.getPhone());
+		return contactStore.findProfileByPhone(chatContactDoc.phone());
 	}
 
 	@Override
