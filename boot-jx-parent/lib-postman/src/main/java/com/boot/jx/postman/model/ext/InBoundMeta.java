@@ -13,6 +13,10 @@ public class InBoundMeta {
 			required = false)
 	public String appId;
 
+	@ApiMockModelProperty(example = "feedback_v2", value = "Client App Queue Code if webhook is set for an App ",
+			required = false)
+	public String appCode;
+
 	public boolean debug;
 
 	public InBoundMeta domain(String domain) {
@@ -29,7 +33,12 @@ public class InBoundMeta {
 		this.appId = appId;
 		return this;
 	}
-	
+
+	public InBoundMeta appCode(String appCode) {
+		this.appCode = appCode;
+		return this;
+	}
+
 	public InBoundMeta debug(boolean debug) {
 		this.debug = debug;
 		return this;

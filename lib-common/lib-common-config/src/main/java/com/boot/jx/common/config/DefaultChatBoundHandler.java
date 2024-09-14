@@ -141,11 +141,11 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						inboxMessage.setOriginalMessage(null);
 						chatClient.forward(defaultClient.getForward() + PATH.INBOUND_FRWRD, inboxMessage);
 					} else if (ArgUtil.is(defaultClient.getWebhook())) {
-						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient.getId(), true);
+						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient, true);
 					} else {
 						// if (APP_TYPE.APP_SCRIPT.equals(appType)) {
 						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-								defaultClient.getId());
+								defaultClient);
 						// } else {
 						// ApiResponseUtil.throwException("Forward URL missing");
 						// }
@@ -157,7 +157,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 				if (CHAT_MODE.SCRIPTUS.equals(appType.getMode())) {
 					forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-							defaultClient.getId());
+							defaultClient);
 					return;
 				}
 
@@ -222,11 +222,11 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		updateStatus(inboxMessage, status, null);
 	}
 
-	private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl, String clientAppId) {
-		forward2Webhook(inboxMessage, forwardUrl, clientAppId, false);
+	private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl, ClientApp defaultClient) {
+		forward2Webhook(inboxMessage, forwardUrl, defaultClient, false);
 	}
 
-	private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl, String clientAppId,
+	private void forward2Webhook(InboxMessage inboxMessage, String forwardUrl, ClientApp defaultClient,
 			boolean externalTimeout) {
 		InBoundContact contact = InBoundContact.from(inboxMessage.contact());
 
@@ -283,14 +283,14 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		InBoundWrapper wrap = new InBoundWrapper().type("messages");
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-				.appId(clientAppId)
+				.appId(defaultClient.getId()).appCode(defaultClient.getQueue())
 				.debug(pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
 
 		try {
-			(externalTimeout ? restHookService : restService).ajax(forwardUrl).cookie(ParamKeys.X_API_ID, clientAppId)
-					.postJson(wrap).asNone();
+			(externalTimeout ? restHookService : restService).ajax(forwardUrl)
+					.cookie(ParamKeys.X_API_ID, defaultClient.getId()).postJson(wrap).asNone();
 		} catch (Exception e) {
 			ApiResponseUtil.addError("Connection Error:" + forwardUrl);
 			throw e;
@@ -320,7 +320,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						InBoundWrapper wrap = new InBoundWrapper().type("statuses");
 						wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 								.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-								.appId(defaultClient.getId());
+								.appId(defaultClient.getId()).appCode(defaultClient.getQueue());
 						wrap.contacts = CollectionUtil.asList(contact);
 						wrap.statuses = CollectionUtil.asList(status);
 						restHookService.ajax(defaultClient.getWebhook()).postJson(wrap).asNone();
@@ -456,7 +456,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				InBoundWrapper wrap = new InBoundWrapper().type("events");
 				wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-						.appId(defaultClient.getId()).debug(pmEnvironment
+						.appId(defaultClient.getId()).appCode(defaultClient.getQueue()).debug(pmEnvironment
 								.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
