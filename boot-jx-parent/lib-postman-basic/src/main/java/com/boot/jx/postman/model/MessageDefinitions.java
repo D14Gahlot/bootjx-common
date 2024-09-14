@@ -1,27 +1,18 @@
 package com.boot.jx.postman.model;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
+import com.boot.jx.postman.model.ContactableDeserializer.ContactMetaKeyDeserializer;
 import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonPath;
-import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class MessageDefinitions {
 
@@ -279,29 +270,4 @@ public class MessageDefinitions {
 		public void id(String id);
 	}
 
-	public static class ContactMetaKeyDeserializer extends KeyDeserializer {
-		@Override
-		public Object deserializeKey(String key, DeserializationContext deserializationContext)
-				throws IOException, JsonProcessingException {
-			return JsonUtil.getMapper().readValue(key, ContactMeta.class);
-		}
-	}
-
-	public static class ContactableDeserializer extends JsonDeserializer<Contactable> {
-		@Override
-		public Contactable deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-			JsonNode jsonNode = jp.getCodec().readTree(jp);
-			String text = jsonNode.asText();
-			return JsonUtil.getMapper().convertValue(text, ContactMeta.class);
-		}
-	}
-
-	static {
-		ObjectMapper objectMapper = JsonUtil.getMapper();
-		SimpleModule module = new SimpleModule();
-		module.addKeyDeserializer(ContactMeta.class, new ContactMetaKeyDeserializer());
-		module.addDeserializer(Contactable.class, new ContactableDeserializer());
-		objectMapper.registerModule(module);
-
-	}
 }
