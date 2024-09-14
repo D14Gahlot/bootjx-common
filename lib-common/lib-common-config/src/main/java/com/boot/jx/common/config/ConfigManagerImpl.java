@@ -264,7 +264,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Override
 	public void save(ChannelConfig config) {
-		LOGGER.info("save");
+		// LOGGER.info("save");
 		pmEnvironment.addChannel(config);
 		this.refresh(ChannelConfigDoc.DOCUMENT_NAME, config.getChannelId());
 		config = connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());

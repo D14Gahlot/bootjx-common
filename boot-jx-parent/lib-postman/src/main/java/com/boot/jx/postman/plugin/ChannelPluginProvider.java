@@ -187,6 +187,8 @@ public class ChannelPluginProvider {
 			if (channelDetails == null) {
 				channelDetails = newChannelDetails();
 			}
+			boolean isSandbox = config.isSandbox();
+			boolean isMaster = config.isMaster();
 			importChannelDetailsFromMap(channelDetails, map, channelType);
 
 			config.setName(map.getString("name", ArgUtil.nonEmpty(config.getName(), getDefaultName(config))));
@@ -197,6 +199,10 @@ public class ChannelPluginProvider {
 			config.setInboundQueue(map.getString("inboundQueue"));
 
 			config.setWebhookUrl(map.getString("webhookUrl", config.getWebhookUrl()));
+
+			config.setSandbox(isSandbox);
+			config.setMaster(isMaster);
+
 			updateChannelConfig(config, channelDetails);
 		}
 
