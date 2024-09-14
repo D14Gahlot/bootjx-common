@@ -235,8 +235,10 @@ public class InBoundController {
 				if (ArgUtil.is(channels)) {
 					for (ChannelConfigDupsDoc channel : channels) {
 						try {
-							inBoundRouter.inboundMessageEventAsync(channel.getDomain(), channelType,
-									channel.getChannelId(), newData.map());
+							// This is for sandbox numbers
+							String routedDomain = ArgUtil.nonEmpty(channel.getDomainProxy(), channel.getDomain());
+							inBoundRouter.inboundMessageEventAsync(routedDomain, channelType, channel.getChannelId(),
+									newData.map());
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

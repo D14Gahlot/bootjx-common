@@ -23,6 +23,7 @@ public class ChannelConfigDupsDoc extends TimeStampSupportedModel implements Ser
 
 	@Indexed
 	private String domain;
+	private String domainProxy;
 
 	@Indexed
 	private String lane;
@@ -179,6 +180,14 @@ public class ChannelConfigDupsDoc extends TimeStampSupportedModel implements Ser
 
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
+	}
+
+	public String getDomainProxy() {
+		return domainProxy;
+	}
+
+	public void setDomainProxy(String domainProxy) {
+		this.domainProxy = domainProxy;
 	}
 
 }
