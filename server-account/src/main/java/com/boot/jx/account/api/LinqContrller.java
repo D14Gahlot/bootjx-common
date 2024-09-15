@@ -84,6 +84,8 @@ public class LinqContrller {
 				accountStore.save(accountDoc);
 				sessionService.sendResetMail(accountDoc, "tenant-verify-email");
 				sessionService.sendMailToSalesTeam(accountDoc, "new-customer-register-email");
+
+				sessionService.login(accountDoc, request);
 			}
 
 			return ApiResponse.buildResult(info).statusKey("AUTHORISED").redirectUrl("/partner/app/home");
