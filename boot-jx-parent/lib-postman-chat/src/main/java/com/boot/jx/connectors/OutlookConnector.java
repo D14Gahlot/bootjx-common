@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
+import com.boot.jx.auth.AuthStateManager.AuthState;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.email.EmailReplyParser;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
@@ -26,7 +27,6 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageTempInbound;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.dto.ChatMessageDTO;
-import com.boot.jx.postman.model.AuthStateManager.AuthState;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;

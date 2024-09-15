@@ -1,5 +1,7 @@
 package com.boot.jx.account.api;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
@@ -54,10 +56,12 @@ import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.sso.service.CommonAuthenticator;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
+import com.javachinna.oauth2.user.SocialEnums.ChannelPartner;
 
 @Controller
 @RequestMapping("/partner")

@@ -18,6 +18,7 @@ import com.boot.jx.inbound.InBoundPoller;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoSource;
+import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.store.ConfigMaster;
@@ -63,7 +64,8 @@ public class DomainJobs {
 
 		for (ChannelConfigDupsDoc emailChannel : emailChannels) {
 			LOGGER.debug("Searching Config {}", emailChannel.getId());
-			if (!emailChannel.isDisabled() && !emailChannel.isDeleted()) {
+			if (!emailChannel.isDisabled() && !emailChannel.isDeleted()
+					&& !CHANNEL_TYPE.OUTLOOK.equalsIgnoreCase(emailChannel.getChannelType())) {
 				AppContextUtil.clear();
 				AppContextUtil.setTenant(emailChannel.getDomain());
 				AppContextUtil.init();

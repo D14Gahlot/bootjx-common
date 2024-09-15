@@ -64,7 +64,11 @@
 			<artifactId>bootjx-common-lib</artifactId>
 		</dependency>
 
-
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>bootjx-common-linq</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>common-lib-session</artifactId>

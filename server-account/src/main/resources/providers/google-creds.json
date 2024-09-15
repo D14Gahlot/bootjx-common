@@ -1,0 +1,26 @@
+{
+	"web": {
+		"client_id": "115760398155-dqd56tnkimv0tu5pl1i490lc8n3oh79i.apps.googleusercontent.com",
+		"project_id": "meherysoccom",
+		"auth_uri": "https://accounts.google.com/o/oauth2/auth",
+		"token_uri": "https://oauth2.googleapis.com/token",
+		"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+		"client_secret": "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",
+		"redirect_uris": [
+			"https://app.mehery.com/linq/auth/callback/google",
+			"https://app.mehery.io/linq/auth/callback/google",
+			"https://app.mehery.xyz/linq/auth/callback/google",
+			"https://app.local.com/linq/auth/callback/google",
+			"https://app.mehery.com/linq/app/v1/connect/google/callback",
+			"https://app.mehery.io/linq/app/v1/connect/google/callback",
+			"https://app.mehery.xyz/linq/app/v1/connect/google/callback",
+			"https://app.local.com/linq/app/v1/connect/google/callback"
+		],
+		"javascript_origins": [
+			"https://app.mehery.com",
+			"https://app.mehery.io",
+			"https://app.mehery.xyz",
+			"https://app.local.com"
+		]
+	}
+}

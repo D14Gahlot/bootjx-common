@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.boot.jx.auth.AuthStateManager;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
-import com.boot.jx.postman.model.AuthStateManager;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 
 public class AppAuthModels {
