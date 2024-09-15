@@ -519,9 +519,10 @@ public class CustomerMasterFldMgr {
 				case "phones":
 				case "mobile":
 				case "mobiles":
-					PBPhone ph = contactStore.parsePhone(new PBPhone().phone(src.getValue().toString()));
-					andCriteriaList.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber")
-							.is(ph.nationalNumber).and("countryCallingCode").is(ph.countryCallingCode)));
+//					PBPhone ph = contactStore.parsePhone(new PBPhone().phone(src.getValue().toString()));
+//					andCriteriaList.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber")
+//							.is(ph.nationalNumber).and("countryCallingCode").is(ph.countryCallingCode)));
+					andCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue()));
 					break;
 				case "email":
 				case "emails":
