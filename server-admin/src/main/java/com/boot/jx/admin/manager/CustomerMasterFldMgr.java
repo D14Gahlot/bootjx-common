@@ -111,7 +111,7 @@ public class CustomerMasterFldMgr {
 		return fetchCustomerMasfields(cmFieldDoc.getId(),true,0,0,null,null);
 	}
 
-	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id,boolean active,int pageSize,int pageNo,String sortBy,String sortDir) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id,Boolean active,int pageSize,int pageNo,String sortBy,String sortDir) {
 		List<CustomerFieldMasterDoc> dtoLst = new ArrayList<>();
 		CustomerFieldMasterDoc cmFieldDoc = null;
 		
@@ -119,7 +119,10 @@ public class CustomerMasterFldMgr {
 		Query qryQuery=new Query();
 		
 		if (ArgUtil.is(id)) {
-			qryQuery.addCriteria(Criteria.where("id").is(id).and("active").is(active));
+			qryQuery.addCriteria(Criteria.where("id").is(id));
+			if(ArgUtil.is(active)) {
+				qryQuery.addCriteria(Criteria.where("active").is(active));
+			}
 			cmFieldDoc = commonMongoTemplate.findByIdString(id, CustomerFieldMasterDoc.class);
 			if (ArgUtil.is(cmFieldDoc)) {
 				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(cmFieldDoc, new CustomerFieldMasterDoc());
@@ -127,18 +130,19 @@ public class CustomerMasterFldMgr {
 			}
 		} else {
 			
-			
 			MongoQueryBuilder<CustomerFieldMasterDoc> qry = MongoQueryBuilder.collection(CustomerFieldMasterDoc.class).page(pageNo,pageSize);
 			
+			if(ArgUtil.is(active)) {
+				qry.where("active", active);
+			}
 			if (ArgUtil.is(sortBy)) {
 				qry = qry.sortBy(sortBy, Direction.fromString(sortDir));
 			}
 			List<CustomerFieldMasterDoc> lstGropDocs=contactStore.find(qry);
 				for (CustomerFieldMasterDoc doc : lstGropDocs) {
 				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(doc, new CustomerFieldMasterDoc());
-				if (dto.isActive()==active) {
 					dtoLst.add(dto);
-				}
+				
 			}
 		}
 

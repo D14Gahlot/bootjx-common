@@ -66,7 +66,7 @@ public class CustomerProfileContoller {
 	@RequestMapping(value = "/api/fetch/customer/master/fields", method = { RequestMethod.GET })
 	public ApiResponse<CustomerFieldMasterDoc, Object> fetchCusMasFields(
 			@RequestParam(value = "id", required = false) String id,
-			@RequestParam(value = "active", required = false,defaultValue = "true") boolean active,
+			@RequestParam(value = "active", required = false) Boolean active,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false,defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "created") String sortBy,
