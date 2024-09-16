@@ -272,7 +272,7 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		if (ArgUtil.is(m.getRead())) {
 			report.setChangeStamp(m.getReadWatermark());
 			report.setStatus(Status.READ);
-		} else if (ArgUtil.is(m.getMessage().isIs_deleted())) {
+		} else if (ArgUtil.is(m.getMessage()) && ArgUtil.is(m.getMessage().isIs_deleted())) {
 			report.setMessageIdExt(m.getMessage().getMid());
 			report.setChangeStamp(m.getTimestamp());
 			report.setStatus(Status.DELTD);
