@@ -189,109 +189,108 @@ public class ThirdPartyTemplateManager {
 			flowDoc.setFlowId(id);
 			flowDoc.setMeta(flowData);
 			commonMongoTemplate.save(flowDoc);
-            fetchAndSetScreenId(flowId, channelConfig);
+			fetchAndSetScreenId(flowId, channelConfig);
 
 		}
 
 	}
+
 	@Autowired
 	WacfbClient wacfbClient;
-	
-	
+
 	@Async
 	public void fetchAndSetScreenId(String flowId, ChannelConfig channelConfig) {
-		
-	      try {
-	    	  ChannelClient channelClient = clientFactory.get(channelConfig);
-	  		MapModel resp = channelClient.flowsAssets(flowId,channelConfig);
-	    	  
 
-			 List<Map<String, Object>> data = (List<Map<String, Object>>) resp.toMap().get("data");
+		try {
+			ChannelClient channelClient = clientFactory.get(channelConfig);
+			MapModel resp = channelClient.flowsAssets(flowId, channelConfig);
 
-		        if (data != null && !data.isEmpty()) {
-		            String downloadUrl = (String) data.get(0).get("download_url");
+			List<Map<String, Object>> data = (List<Map<String, Object>>) resp.toMap().get("data");
 
-		            RestTemplate restTemplate = new RestTemplate();
-		            String jsonResponseString = restTemplate.getForObject(downloadUrl, String.class);
+			if (data != null && !data.isEmpty()) {
+				String downloadUrl = (String) data.get(0).get("download_url");
 
-		            ObjectMapper objectMapper = new ObjectMapper();
+				RestTemplate restTemplate = new RestTemplate();
+				String jsonResponseString = restTemplate.getForObject(downloadUrl, String.class);
 
-		            Map<String, Object> jsonResponse = objectMapper.readValue(jsonResponseString, new TypeReference<Map<String, Object>>() {});
-		            List<Map<String, String>> fieldMe = fetchFieldMeta(jsonResponse);
+				ObjectMapper objectMapper = new ObjectMapper();
 
+				Map<String, Object> jsonResponse = objectMapper.readValue(jsonResponseString,
+						new TypeReference<Map<String, Object>>() {
+						});
+				List<Map<String, String>> fieldMe = fetchFieldMeta(jsonResponse);
 
-		                String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
-		    			WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
+				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
+				WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
 
-		                if (flow != null) {
-		                	if(jsonResponse!=null)
-		                	{
-		                		flow.setJson(jsonResponse);
-		                		  flow.setFieldMeta(fieldMe); 
-		                	}
-		                   
-		                	commonMongoTemplate.save(flow);
-		                }
-		            }
-		        
-	      }catch(Exception e)
-	      {
-	    	  System.out.print(e);
-	      }
+				if (flow != null) {
+					if (jsonResponse != null) {
+						flow.setJson(jsonResponse);
+						flow.setFieldMeta(fieldMe);
+					}
+
+					commonMongoTemplate.save(flow);
+				}
+			}
+
+		} catch (Exception e) {
+			System.out.print(e);
+		}
 	}
 
-	 public static List<Map<String, String>> fetchFieldMeta(Map<String, Object> jsonResponse) throws IOException {
-		 List<Map<String, String>> fieldMeta = new ArrayList<>();
-	        List<Map<String, Object>> screens = (List<Map<String, Object>>) jsonResponse.get("screens");
+	public static List<Map<String, String>> fetchFieldMeta(Map<String, Object> jsonResponse) throws IOException {
+		List<Map<String, String>> fieldMeta = new ArrayList<>();
+		List<Map<String, Object>> screens = (List<Map<String, Object>>) jsonResponse.get("screens");
 
-	        if (screens != null) {
-	            for (int i = 0; i < screens.size(); i++) {
-	                Map<String, Object> screen = screens.get(i);
-	                Map<String, Object> layout = (Map<String, Object>) screen.get("layout");
-	                if (layout != null) {
-	                    fetchChildren((List<Map<String, Object>>) layout.get("children"), fieldMeta, i);
-	                }
-	            }
-	        }
+		if (screens != null) {
+			for (int i = 0; i < screens.size(); i++) {
+				Map<String, Object> screen = screens.get(i);
+				Map<String, Object> layout = (Map<String, Object>) screen.get("layout");
+				if (layout != null) {
+					fetchChildren((List<Map<String, Object>>) layout.get("children"), fieldMeta, i);
+				}
+			}
+		}
 
-	        return fieldMeta;
-	    }
+		return fieldMeta;
+	}
 
-	 private static void fetchChildren(List<Map<String, Object>> children, List<Map<String, String>> fieldMeta, int screenIndex) {
-		 if (children != null) {
-	            int inputIndex = 0;
-	            for (Map<String, Object> child : children) {
-	                String type = (String) child.get("type");
+	private static void fetchChildren(List<Map<String, Object>> children, List<Map<String, String>> fieldMeta,
+			int screenIndex) {
+		if (children != null) {
+			int inputIndex = 0;
+			for (Map<String, Object> child : children) {
+				String type = (String) child.get("type");
 
-	                if ("Form".equals(type)) {
-	                    Object childChildren = child.get("children");
-	                    if (childChildren instanceof List) {
-	                        fetchChildren((List<Map<String, Object>>) childChildren, fieldMeta, screenIndex);
-	                    }
-	                } else if (isFieldType(type)) {
-	                    String label = (String) child.get("label");
-	                    String key = "screen_" + screenIndex + "_" + type + "_" + inputIndex;
+				if ("Form".equals(type)) {
+					Object childChildren = child.get("children");
+					if (childChildren instanceof List) {
+						fetchChildren((List<Map<String, Object>>) childChildren, fieldMeta, screenIndex);
+					}
+				} else if (isFieldType(type)) {
+					String label = (String) child.get("label");
+					String key = "screen_" + screenIndex + "_" + type + "_" + inputIndex;
 
-	                    Map<String, String> meta = new HashMap<>();
-	                    meta.put("key", key);
-	                    meta.put("label", label);
-	                    meta.put("type",type);
-	                    if (child.containsKey("data-source")) {
-	                        List<Map<String, String>> dataSource = (List<Map<String, String>>) child.get("data-source");
-	                        meta.put("data-source", dataSource.toString()); 
-	                    }
+					Map<String, String> meta = new HashMap<>();
+					meta.put("key", key);
+					meta.put("label", label);
+					meta.put("type", type);
+					if (child.containsKey("data-source")) {
+						List<Map<String, String>> dataSource = (List<Map<String, String>>) child.get("data-source");
+						meta.put("data-source", dataSource.toString());
+					}
 
-	                    
-	                    fieldMeta.add(meta);
-	                    inputIndex++;
-	                }
-	            }
-	        }
-	    }
-	 
-	        private static boolean isFieldType(String type) {
-		        return "TextInput".equals(type) || "RadioButtonsGroup".equals(type) ||
-		               "DatePicker".equals(type) || "Dropdown".equals(type);
-		    }
+					fieldMeta.add(meta);
+					inputIndex++;
+				}
+			}
+		}
+	}
+
+	private static boolean isFieldType(String type) {
+		return "TextInput".equals(type) || "RadioButtonsGroup".equals(type) || "DatePicker".equals(type)
+				|| "Dropdown".equals(type) || "CheckBoxGroup".equalsIgnoreCase(type) || "OptIn".equalsIgnoreCase(type)
+				|| "textArea".equalsIgnoreCase(type);
+	}
 
 }
