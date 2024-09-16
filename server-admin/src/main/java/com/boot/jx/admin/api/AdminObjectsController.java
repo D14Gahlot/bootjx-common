@@ -208,7 +208,7 @@ public class AdminObjectsController {
 				getPaginatedBulk(MessageHold.class, "MESSAGE_" + messageQueueType, pageNo, pageSize, sortBy, sortDir));
 	}
 
-	@RequestMapping(value = { "/api/objects/messages" }, method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/objects/messages", method = { RequestMethod.GET })
 	@JsonView(PublicJsonProperty.class)
 	public ApiResponse<MessageDoc, Object> allMessages(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,

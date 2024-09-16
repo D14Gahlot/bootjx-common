@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.model.Attachment;
-import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
@@ -40,7 +39,7 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 
 	private String sender;
 	private String status;
-	private Contactable contact;
+	private ContactDTO contact;
 
 	private Map<String, Object> meta;
 	private Map<String, Object> options;
@@ -162,11 +161,11 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 		this.status = status;
 	}
 
-	public Contactable getContact() {
+	public ContactDTO getContact() {
 		return contact;
 	}
 
-	public void setContact(Contactable contact) {
+	public void setContact(ContactDTO contact) {
 		this.contact = contact;
 	}
 

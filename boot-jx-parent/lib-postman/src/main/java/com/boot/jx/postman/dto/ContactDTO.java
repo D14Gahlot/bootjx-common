@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ContactDTO implements java.io.Serializable, Contactable {
+public class ContactDTO implements Contactable {
 
 	private static final long serialVersionUID = 8977954934029643371L;
 
@@ -20,6 +20,10 @@ public class ContactDTO implements java.io.Serializable, Contactable {
 	private String contactType;
 
 	private String channelType;
+
+	public ContactDTO() {
+		super();
+	}
 
 	private String lane;
 
