@@ -295,7 +295,7 @@ public class ThirdPartyTemplateManager {
 	 
 	        private static boolean isFieldType(String type) {
 		        return "TextInput".equals(type) || "RadioButtonsGroup".equals(type) ||
-		               "DatePicker".equals(type) || "Dropdown".equals(type);
+		               "DatePicker".equals(type) || "Dropdown".equals(type)||"CheckBoxGroup".equalsIgnoreCase(type)||"OptIn".equalsIgnoreCase(type)||"textArea".equalsIgnoreCase(type);
 		    }
 
 }

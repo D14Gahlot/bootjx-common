@@ -49,6 +49,11 @@ public class FeedbackController extends CommonBotController {
 	@ChatMapping(key = "feedback-onselect")
 	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
 		String text = toReplyEnum(inboxMessage);
+		if(inboxMessage.form().containsKey("reply_id"))
+		{inboxMessage.replyTo().put("type", "feedback");
+		
+		}
+
 		if (StringUtils.isNumeric(text)) {
 			context().session().set("feedback.score", ArgUtil.parseAsDouble(text));
 		} else {
