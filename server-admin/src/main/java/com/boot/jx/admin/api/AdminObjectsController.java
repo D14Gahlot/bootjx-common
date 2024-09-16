@@ -64,7 +64,10 @@ public class AdminObjectsController {
 			case "pageNo":
 			case "sortBy":
 			case "sortDir":
+				break;
 			case "id":
+				String idValue = commonHttpRequest.getRequest().getParameter("id");
+				q.whereId(idValue);
 				break;
 			default:
 				String paramValue = commonHttpRequest.getRequest().getParameter(param);
@@ -234,5 +237,18 @@ public class AdminObjectsController {
 
 		return ApiResponse.buildResults(getPaginatedBulk(MessageDoc.class, MessageStore.getCollectionName(contactType),
 				pageNo, pageSize, sortBy, sortDir));
+	}
+
+	@RequestMapping(value = "/api/objects/sessions", method = { RequestMethod.GET })
+	@JsonView(PublicJsonProperty.class)
+	public ApiResponse<ChatSessionDoc, Object> getSession(@RequestParam(required = false) String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir,
+			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
+			@RequestParam(required = false) String channelId, @RequestParam(required = false) String type) {
+		return ApiResponse.buildResults(
+				getPaginatedBulk(ChatSessionDoc.class, "CHAT_SESSION", pageNo, pageSize, sortBy, sortDir));
 	}
 }
