@@ -350,7 +350,7 @@ public class AgentAnalyticsManager implements Serializable {
 				dto.setGraphApiDetails(hourWiseCount);
 				dto.setGraphApiDetailsV1(hourWiseCountV1);
 			} else if (hour > 24 && days <= 31) {
-				Map<Object, Object> dayMapLst = getDateWiseCountV2(distinctContactLst, agent, dateRange1, dateRange2,
+				Map<Object, Object> dayMapLst = getDateWiseCountV3(distinctContactLst, agent, dateRange1, dateRange2,
 						contact);
 				Map<Object, Object> dateWiseCount = (Map<Object, Object>) dayMapLst.get("DAY");
 				Map<Object, Object> timeStampWiseCount = (Map<Object, Object>) dayMapLst.get("DAY_V1");
@@ -555,20 +555,11 @@ public class AgentAnalyticsManager implements Serializable {
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("resolved").is(true));
 		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
-		// long st =System.currentTimeMillis();
-		// System.out.println("getAgentWiseResolvedConversation ST :"+st);
-		// System.out.println("getAgentWiseResolvedConversation query
-		// :"+JsonUtil.toJson(query));
+		
 		List<ChatSessionDoc> totalMsgDoc = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
-		// long et1 =System.currentTimeMillis();
-		// System.out.println("getAgentWiseResolvedConversation END TIME QUERY EXE
-		// :"+et1 +"\t difference "+(et1-st));
 		for (ChatSessionDoc chatDoc : totalMsgDoc) {
 			totalResolvedMsgDoc.add(chatDoc);
 		}
-		// long et2 =System.currentTimeMillis();
-		// System.out.println("getAgentWiseResolvedConversation END TIME
-		// totalResolvedMsgDoc :"+et2+"\t difference "+(et2-st));
 		return totalResolvedMsgDoc;
 	}
 
