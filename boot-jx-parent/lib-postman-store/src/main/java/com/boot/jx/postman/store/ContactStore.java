@@ -168,7 +168,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
 			return find(qb);
 		} else {
-			new ArrayList<CustomerProfileDoc>();
+			return new ArrayList<CustomerProfileDoc>();
 		}
 	}
 
