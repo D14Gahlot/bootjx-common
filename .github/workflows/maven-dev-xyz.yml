@@ -1,12 +1,12 @@
-name: Junit- build-xyz-upgrade
+name: Junit- dev-xyz
 
 on:
   push:
     branches:
-      - build-xyz-upgrade
+      - dev-xyz
   pull_request:
     branches:
-      - build-xyz-upgrade
+      - dev-xyz
 
 jobs:
   build:
