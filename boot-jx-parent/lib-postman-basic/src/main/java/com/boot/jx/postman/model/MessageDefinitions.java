@@ -25,6 +25,8 @@ public class MessageDefinitions {
 
 		public String getEmail();
 
+		public String getPhone();
+
 		public String phone();
 
 		public void setPhone(String phone);
