@@ -123,6 +123,10 @@ public class MessageDefinitions {
 			}
 		}
 
+		public default String phone() {
+			return this.getPhone();
+		}
+
 		public static Contactable instance() {
 			return new ContactMeta();
 		}
