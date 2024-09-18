@@ -1,11 +1,9 @@
 package com.boot.jx.aws;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -23,7 +21,6 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileAbstract;
 import com.boot.jx.model.CommonFileStream;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
 
 @Component
