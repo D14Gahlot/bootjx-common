@@ -22,6 +22,8 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
+          distribution: 'temurin' # Specify the distribution, e.g., 'adopt', 'zulu', 'temurin'
+          cache: maven
 
       # Install dependencies and run tests
       - name: Build with Maven
