@@ -115,8 +115,8 @@ public class StarterDocKit {
 			createPredefinedMstField("title", "Title", "String");
 			createPredefinedMstField("dob", "Date of Birth", "timestamp");
 			createPredefinedMstField("gender", "Gender", "String");
-			createPredefinedMstField("alt_phones", "Alternate phone 1 - Value", "phone");
-			createPredefinedMstField("alt_emails", "Alternate email 1 - Value", "email");
+			createPredefinedMstField("alt_phones", "Alternate phone", "phone");
+			createPredefinedMstField("alt_emails", "Alternate email", "email");
 			version.setValue(predefiend_customer_filed_version);
 			configManager.save(version);
 		}

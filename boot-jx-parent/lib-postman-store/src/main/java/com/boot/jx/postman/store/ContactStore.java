@@ -517,6 +517,18 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	@SuppressWarnings("unchecked")
 	public void updateProfile(CustomerProfileDoc req, CustomerProfileDoc doc) {
 		ObjectMapper objectMapper = new ObjectMapper();
+		
+		if(ArgUtil.is(req.getCode())){
+			CustomerProfileDoc docCode =findProfileByCode(req.getCode());
+			if(ArgUtil.is(docCode) && !docCode.getId().equalsIgnoreCase(doc.getId())) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("code").field("code")
+						.codeKey("ValidCodeDuplicate").description(req.getCode() + " already exists"));
+			}else {
+				doc.setCode(ArgUtil.parseAsString(req.getCode(), doc.getCode()));
+			}
+		}
+
+		doc.setRmCode(ArgUtil.parseAsString(req.getRmCode(), doc.getRmCode()));
 		if (ArgUtil.is(req.getName())) {
 			PBName pbName = new PBName();
 			pbName.setFirstName(ArgUtil.parseAsString(req.getName().getFirstName(), doc.getName().getFirstName()));

@@ -153,8 +153,12 @@ public class CustomerMasterFldMgr {
 		if (ArgUtil.is(reqDto.getId())) {
 			MongoQueryBuilder<CustomerFieldMasterDoc> builder = MongoQueryBuilder
 					.collection(CustomerFieldMasterDoc.class).whereId(reqDto.getId());
-			builder.set("active", reqDto.isActive());
-			commonMongoTemplate.upsert(builder);
+			//builder.set("active", reqDto.isActive());
+			//commonMongoTemplate.upsert(builder);
+			// Proceed to remove the documents
+            commonMongoTemplate.remove(builder.getQuery(), CustomerFieldMasterDoc.class);
+
+			
 		}
 		return fetchCustomerMasfields(null,true,0,0,null,null);
 	}
