@@ -5,13 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.ContactMeta;
 import com.boot.model.TimeModels.ITimeStampIndex;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChatSessionDTO implements Serializable {
+//@JsonDeserialize(using = ChatSessionDTODeserializer.class)
+public class ChatSessionDTO implements Serializable, JsonIgnoreNull, JsonIgnoreUnknown {
 
 	private static final long serialVersionUID = 1L;
 
@@ -61,7 +64,7 @@ public class ChatSessionDTO implements Serializable {
 	private String state;
 	private List<String> tagId;
 
-	private ContactDTO contact;
+	private ContactMeta contact;
 
 	private List<ChatMessageDTO> messages;
 
@@ -247,11 +250,11 @@ public class ChatSessionDTO implements Serializable {
 		this.closeSessionStamp = closeSessionStamp;
 	}
 
-	public ContactDTO getContact() {
+	public ContactMeta getContact() {
 		return contact;
 	}
 
-	public void setContact(ContactDTO contact) {
+	public void setContact(ContactMeta contact) {
 		this.contact = contact;
 	}
 
@@ -342,7 +345,7 @@ public class ChatSessionDTO implements Serializable {
 		this.primary = primary;
 	}
 
-	public Contactable contact() {
+	public ContactMeta contact() {
 		if (this.contact == null) {
 			this.contact = new ContactDTO();
 		}
