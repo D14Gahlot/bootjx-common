@@ -16,7 +16,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public class ContactMeta implements Serializable, Contactable {
 
 	private static final long serialVersionUID = -2229330167964350550L;
+	@Deprecated
 	protected String tenant;
+	@Deprecated
 	protected String country;
 	protected String userid;
 	protected String prefix;
