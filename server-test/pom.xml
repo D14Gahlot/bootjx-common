@@ -99,7 +99,7 @@
 			<artifactId>lib-tmpl</artifactId>
 			<version>${jax.version}</version>
 		</dependency>
-
+		
 	</dependencies>
 
 	<build>
