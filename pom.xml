@@ -93,6 +93,7 @@
 		<module>server-xms</module>
 		<module>server-account</module>
 		<module>server-contak</module>
+		<module>server-test</module>
 	</modules>
 </project>
 
