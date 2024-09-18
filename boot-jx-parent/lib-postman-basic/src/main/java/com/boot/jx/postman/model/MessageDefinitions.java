@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.model.ContactableDeserializer.ContactMetaKeyDeserializer;
+import com.boot.jx.postman.model.ContactableDeserializerDef.ContactMetaKeyDeserializer;
 import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;

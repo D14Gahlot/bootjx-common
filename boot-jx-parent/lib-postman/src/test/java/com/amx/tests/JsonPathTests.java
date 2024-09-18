@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wa360.WA360Template;
 import com.boot.model.MapModel;
@@ -17,12 +18,23 @@ public class JsonPathTests {
 
 	public static void main(String[] arg) {
 		new JsonPathTests().curl();
+		new JsonPathTests().chatSessionDTO();
 	}
 
 	public void curl() {
 		URL url = FileUtil.getResource("sample/curl_test.txt", JsonPathTests.class);
 		String text = FileUtil.read(url);
 		System.out.println(JsonUtil.toJsonPrettyPrint(CurlCommand.parse(text)));
+	}
+
+	@Test
+	public void chatSessionDTO() {
+		// assertEquals("t1", StringUtils.trim("/abc/def/ghij", '/'), "abc/def/ghij");
+		URL url = FileUtil.getResource("sample/chat_session_dto.json", JsonPathTests.class);
+		String json = FileUtil.read(url);
+
+		ChatSessionDTO dto = JsonUtil.parse(json, ChatSessionDTO.class);
+		System.out.println(JsonUtil.toJson(dto));
 	}
 
 	// @Test
@@ -51,7 +63,7 @@ public class JsonPathTests {
 
 	}
 
-	@Test
+	// @Test
 	public void wa360Templates() {
 		// assertEquals("t1", StringUtils.trim("/abc/def/ghij", '/'), "abc/def/ghij");
 		URL url = FileUtil.getResource("sample/wa360d_templates.json");

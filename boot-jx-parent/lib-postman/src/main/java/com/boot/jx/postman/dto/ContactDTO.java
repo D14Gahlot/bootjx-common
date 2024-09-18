@@ -2,13 +2,15 @@ package com.boot.jx.postman.dto;
 
 import java.util.List;
 
-import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@JsonDeserialize(as = ContactDTO.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ContactDTO implements Contactable {
+public class ContactDTO extends ContactMeta {
 
 	private static final long serialVersionUID = 8977954934029643371L;
 
@@ -16,28 +18,12 @@ public class ContactDTO implements Contactable {
 	@JsonProperty("contactId")
 	private String contactId;
 
-	@JsonProperty("contactType")
-	private String contactType;
-
-	private String channelType;
-
 	public ContactDTO() {
 		super();
 	}
 
-	private String lane;
-
-	private String csid;
-
-	@ApiMockModelProperty(example = "John Doe", required = false)
-	private String name;
-
-	@ApiMockModelProperty(example = "John.Doe@company.co", required = false)
-	private String email;
 	private Boolean emailVerified;
 
-	@ApiMockModelProperty(example = "919876543210", required = false)
-	private String phone;
 	private Boolean phoneVerified;
 
 	private String profilePic;
@@ -98,14 +84,6 @@ public class ContactDTO implements Contactable {
 		this.labelId = labelId;
 	}
 
-	public String getContactType() {
-		return contactType;
-	}
-
-	public void setContactType(String contactType) {
-		this.contactType = contactType;
-	}
-
 	public String getProfilePic() {
 		return profilePic;
 	}
@@ -120,22 +98,6 @@ public class ContactDTO implements Contactable {
 
 	public void setProfile(ChatProfileDTO profile) {
 		this.profile = profile;
-	}
-
-	public String getLane() {
-		return lane;
-	}
-
-	public void setLane(String lane) {
-		this.lane = lane;
-	}
-
-	public String getCsid() {
-		return csid;
-	}
-
-	public void setCsid(String csid) {
-		this.csid = csid;
 	}
 
 	public long getFirstInBoundStamp() {
@@ -216,14 +178,6 @@ public class ContactDTO implements Contactable {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
-	}
-
-	public String getChannelType() {
-		return channelType;
-	}
-
-	public void setChannelType(String channelType) {
-		this.channelType = channelType;
 	}
 
 	public Boolean getEmailVerified() {

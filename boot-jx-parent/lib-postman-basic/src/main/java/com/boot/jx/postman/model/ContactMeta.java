@@ -7,7 +7,10 @@ import java.util.Map;
 
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@JsonDeserialize(as = ContactMeta.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ContactMeta implements Serializable, Contactable {
 
@@ -20,7 +23,9 @@ public class ContactMeta implements Serializable, Contactable {
 	protected String email;
 	protected String name;
 
+	@JsonProperty("contactType")
 	private String contactType;
+	
 	private String channelType;
 	private String lane;
 	private String csid;
