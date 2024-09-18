@@ -25,6 +25,8 @@ public class MessageDefinitions {
 
 		public String getEmail();
 
+		public String getPhone();
+
 		public String phone();
 
 		public void setPhone(String phone);
@@ -121,6 +123,10 @@ public class MessageDefinitions {
 			if (ArgUtil.is(contactable.getCsid())) {
 				this.setCsid(contactable.getCsid());
 			}
+		}
+
+		public default String phone() {
+			return this.getPhone();
 		}
 
 		public static Contactable instance() {

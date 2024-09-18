@@ -12,12 +12,32 @@ public class ContactDTO extends ContactMeta {
 
 	private static final long serialVersionUID = 8977954934029643371L;
 
+	@ApiMockModelProperty(example = "wa919876543210", required = false)
+	@JsonProperty("contactId")
+	private String contactId;
+
+	@JsonProperty("contactType")
+	private String contactType;
+
+	private String channelType;
+
 	public ContactDTO() {
 		super();
 	}
 
+	private String lane;
+
+	private String csid;
+
+	@ApiMockModelProperty(example = "John Doe", required = false)
+	private String name;
+
+	@ApiMockModelProperty(example = "John.Doe@company.co", required = false)
+	private String email;
 	private Boolean emailVerified;
 
+	@ApiMockModelProperty(example = "919876543210", required = false)
+	private String phone;
 	private Boolean phoneVerified;
 
 	private String profilePic;
@@ -37,6 +57,14 @@ public class ContactDTO extends ContactMeta {
 	private String createdBy;
 
 	private String sessionId;
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
 
 	public String getName() {
 		return name;
@@ -70,6 +98,14 @@ public class ContactDTO extends ContactMeta {
 		this.labelId = labelId;
 	}
 
+	public String getContactType() {
+		return contactType;
+	}
+
+	public void setContactType(String contactType) {
+		this.contactType = contactType;
+	}
+
 	public String getProfilePic() {
 		return profilePic;
 	}
@@ -84,6 +120,22 @@ public class ContactDTO extends ContactMeta {
 
 	public void setProfile(ChatProfileDTO profile) {
 		this.profile = profile;
+	}
+
+	public String getLane() {
+		return lane;
+	}
+
+	public void setLane(String lane) {
+		this.lane = lane;
+	}
+
+	public String getCsid() {
+		return csid;
+	}
+
+	public void setCsid(String csid) {
+		this.csid = csid;
 	}
 
 	public long getFirstInBoundStamp() {
@@ -164,6 +216,14 @@ public class ContactDTO extends ContactMeta {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
+	}
+
+	public String getChannelType() {
+		return channelType;
+	}
+
+	public void setChannelType(String channelType) {
+		this.channelType = channelType;
 	}
 
 	public Boolean getEmailVerified() {

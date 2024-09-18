@@ -82,7 +82,7 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 
 	private Long createdStamp;
 	private String createdBy;
-
+	
 	private ChatInfoDTO info;
 
 	public String getContactId() {
