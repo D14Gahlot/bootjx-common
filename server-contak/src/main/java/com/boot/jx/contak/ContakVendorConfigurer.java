@@ -15,7 +15,7 @@ import com.boot.jx.http.CommonHttpRequest.ApiRequestDetail;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.ParamKeys;
 import com.boot.jx.scope.tnt.TenantAuthContext.TenantAuthFilter;
-import com.boot.jx.scope.tnt.TenantSpecific;
+import com.boot.jx.scope.tnt.TenantDefinations.TenantSpecific;
 import com.boot.utils.ArgUtil;
 
 @Component
