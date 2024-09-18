@@ -7,17 +7,17 @@ import java.util.Map;
 
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.model.TimeModels.ITimeStampIndex;
+import com.boot.model.UtilityModels.JsonIgnoreNull;
+import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonDeserialize(using = ChatSessionDTODeserializer.class)
-public class ChatSessionDTO implements Serializable {
+//@JsonDeserialize(using = ChatSessionDTODeserializer.class)
+public class ChatSessionDTO implements Serializable, JsonIgnoreNull, JsonIgnoreUnknown {
 
 	private static final long serialVersionUID = 1L;
 
-	
 	private String sessionId;
 	private String ticketHash;
 	private String routingId;

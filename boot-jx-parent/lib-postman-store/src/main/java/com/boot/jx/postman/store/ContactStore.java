@@ -1,5 +1,6 @@
 package com.boot.jx.postman.store;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,10 +66,10 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 	@Autowired
 	protected PMEnvironment environment;
-	
+
 	@Autowired
 	CommonMongoTemplate cMongoTemplate;
-	
+
 	@Autowired(required = false)
 	protected AuditDetailProvider auditDetailProvider;
 
@@ -162,9 +163,13 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					.and("countryCallingCode").is(ph.countryCallingCode)));
 		}
 
-		MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
-				.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
-		return find(qb);
+		if (ArgUtil.is(orOperator.size())) {
+			MongoQueryBuilder<CustomerProfileDoc> qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+					.where(new Criteria().orOperator(orOperator.toArray(new Criteria[orOperator.size()])));
+			return find(qb);
+		} else {
+			return new ArrayList<CustomerProfileDoc>();
+		}
 	}
 
 	public void linkProfile(ChatContactQuery contactQuery, CustomerProfileDoc profile) {
@@ -517,13 +522,13 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	@SuppressWarnings("unchecked")
 	public void updateProfile(CustomerProfileDoc req, CustomerProfileDoc doc) {
 		ObjectMapper objectMapper = new ObjectMapper();
-		
-		if(ArgUtil.is(req.getCode())){
-			CustomerProfileDoc docCode =findProfileByCode(req.getCode());
-			if(ArgUtil.is(docCode) && !docCode.getId().equalsIgnoreCase(doc.getId())) {
+
+		if (ArgUtil.is(req.getCode())) {
+			CustomerProfileDoc docCode = findProfileByCode(req.getCode());
+			if (ArgUtil.is(docCode) && !docCode.getId().equalsIgnoreCase(doc.getId())) {
 				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("code").field("code")
 						.codeKey("ValidCodeDuplicate").description(req.getCode() + " already exists"));
-			}else {
+			} else {
 				doc.setCode(ArgUtil.parseAsString(req.getCode(), doc.getCode()));
 			}
 		}
