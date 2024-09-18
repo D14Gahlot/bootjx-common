@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -25,10 +26,13 @@ public class ContactMeta implements Serializable, Contactable {
 
 	@JsonProperty("contactType")
 	private String contactType;
-	
+
 	private String channelType;
 	private String lane;
 	private String csid;
+
+	@ApiMockModelProperty(example = "wa919876543210", required = false)
+	@JsonProperty("contactId")
 	private String contactId;
 
 	List<Map<String, Object>> filters;

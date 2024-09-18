@@ -3,9 +3,7 @@ package com.boot.jx.postman.dto;
 import java.util.List;
 
 import com.boot.jx.postman.model.ContactMeta;
-import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(as = ContactDTO.class)
@@ -13,10 +11,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public class ContactDTO extends ContactMeta {
 
 	private static final long serialVersionUID = 8977954934029643371L;
-
-	@ApiMockModelProperty(example = "wa919876543210", required = false)
-	@JsonProperty("contactId")
-	private String contactId;
 
 	public ContactDTO() {
 		super();
@@ -43,14 +37,6 @@ public class ContactDTO extends ContactMeta {
 	private String createdBy;
 
 	private String sessionId;
-
-	public String getContactId() {
-		return contactId;
-	}
-
-	public void setContactId(String contactId) {
-		this.contactId = contactId;
-	}
 
 	public String getName() {
 		return name;
