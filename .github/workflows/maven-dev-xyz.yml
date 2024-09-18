@@ -1,4 +1,4 @@
-name: Junit test for server-test
+name: Junit- dev-xyz
 
 on:
   push:
