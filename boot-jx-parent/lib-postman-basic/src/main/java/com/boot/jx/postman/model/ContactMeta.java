@@ -22,8 +22,14 @@ public class ContactMeta implements Serializable, Contactable {
 	protected String country;
 	protected String userid;
 	protected String prefix;
+	
+	@ApiMockModelProperty(example = "919876543210", required = false)
 	protected String phone;
+	
+	@ApiMockModelProperty(example = "John.Doe@company.co", required = false)
 	protected String email;
+	
+	@ApiMockModelProperty(example = "John Doe", required = false)
 	protected String name;
 
 	@JsonProperty("contactType")

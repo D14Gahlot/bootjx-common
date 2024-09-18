@@ -25,6 +25,8 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.MongoUtils;
+import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickMedia;
@@ -99,15 +101,36 @@ public class ChatStoreTest extends BaseMongoTestSetup { // Noncompliant
 	}
 
 	@Test
+	public void chatSessionTest() {
+		ensureMongoConnection();
+		ChatSessionDoc chatSessionDoc = new ChatSessionDoc();
+		chatSessionDoc.setContact(new ContactDetailDoc());
+
+		mongoTemplate.save(chatSessionDoc);
+		ChatSessionDoc session = mongoTemplate.findById(chatSessionDoc.getSessionId(), ChatSessionDoc.class);
+		System.out.println("=========================================");
+		if (ArgUtil.is(session)) {
+			System.out.println("====" + JsonUtil.toJson(session));
+		} else {
+			System.out.println("==== Not found for " + chatSessionDoc.getSessionId());
+		}
+		System.out.println("=========================================");
+	}
+
+	@Test
 	public void contactableTest() {
 		ensureMongoConnection();
-		MessageDoc msg = mongoTemplate.findById("66d988af7ecdb50001cc36ba", MessageDoc.class,
-				MessageStore.getCollectionName(ContactType.EMAIL));
+
+		MessageDoc msg = new MessageDoc();
+		mongoTemplate.save(msg, MessageStore.getCollectionName(ContactType.DUMMY));
+
+		msg = mongoTemplate.findById(msg.getMessageId(), MessageDoc.class,
+				MessageStore.getCollectionName(ContactType.DUMMY));
 		System.out.println("=========================================");
 		if (ArgUtil.is(msg)) {
-			System.out.println("====" + JsonUtil.toJson(msg.getContact()));
+			System.out.println("====" + JsonUtil.toJson(msg));
 		} else {
-			System.out.println("==== Not found for 66d988af7ecdb50001cc36ba");
+			System.out.println("==== Not found for " + msg.getSessionId());
 		}
 		System.out.println("=========================================");
 	}
