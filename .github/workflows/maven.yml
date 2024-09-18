@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Junit test for server-test
 
 on:
   push:
