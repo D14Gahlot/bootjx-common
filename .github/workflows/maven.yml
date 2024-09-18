@@ -16,6 +16,9 @@ jobs:
       # Check out the repository code
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          submodules: true  # This ensures submodules are initialized and updated
+          fetch-depth: 0    # Ensures the full history is fetched (needed for submodules)
 
       # Set up JDK 11 (or whatever version your project needs)
       - name: Set up JDK 11
