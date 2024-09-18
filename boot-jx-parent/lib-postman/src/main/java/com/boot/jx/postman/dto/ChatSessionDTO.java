@@ -61,7 +61,7 @@ public class ChatSessionDTO implements Serializable {
 	private String state;
 	private List<String> tagId;
 
-	private Contactable contact;
+	private ContactDTO contact;
 
 	private List<ChatMessageDTO> messages;
 
@@ -247,11 +247,11 @@ public class ChatSessionDTO implements Serializable {
 		this.closeSessionStamp = closeSessionStamp;
 	}
 
-	public Contactable getContact() {
+	public ContactDTO getContact() {
 		return contact;
 	}
 
-	public void setContact(Contactable contact) {
+	public void setContact(ContactDTO contact) {
 		this.contact = contact;
 	}
 
