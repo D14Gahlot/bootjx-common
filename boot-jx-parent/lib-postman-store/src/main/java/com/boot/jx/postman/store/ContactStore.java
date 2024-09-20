@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -479,7 +481,12 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 							LOGGER.info("Json Util else  :" + JsonUtil.toJson(object) + "\t key-value :"
 									+ entry.getKey() + "-" + JsonUtil.toJson(entry.getValue()));
 						} else {
-							addInfoMap.put(entry.getKey(), entry.getValue());
+							//addInfoMap.put(entry.getKey(), entry.getValue());
+							// Convert the string to a List using split and Arrays.asList
+							if(ArgUtil.is(entry.getValue())) {
+							List<Object> listOfType = Arrays.asList(entry.getValue().toString().split(","));
+							addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType, null, false));
+							}
 						}
 					}
 				}
@@ -547,6 +554,14 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			for (PBPhone reqph : reqPhones) {
 				Optional<PBPhone> found = Optional.empty();
 				String uuid = reqph.getUuid();
+				String ph =reqph.getPhone(); 
+				CustomerProfileDoc dupPh=findProfileByPhone(ph);
+				if (ArgUtil.is(dupPh) && !dupPh.getId().equalsIgnoreCase(doc.getId())) {
+					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("phone").field("phone")
+							.codeKey("ValidPhoneDuplicate").description(ph + " already exists"));
+				}
+		
+				
 				found = doc.getPhones().stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
 				if (found.isPresent()) {
 					found.get().update(reqph);
@@ -563,6 +578,12 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			for (PBEmail reqEm : reqPbEmails) {
 				Optional<PBEmail> found = Optional.empty();
 				String uuid = reqEm.getUuid();
+				String em =reqEm.getEmail(); 
+				CustomerProfileDoc dupEm=findProfileByEmail(em);
+				if (ArgUtil.is(dupEm) && !dupEm.getId().equalsIgnoreCase(doc.getId())) {
+					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("email").field("Email")
+							.codeKey("ValidEmailDuplicate").description(em + " already exists"));
+				}
 				found = doc.getEmails().stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
 				if (found.isPresent()) {
 					found.get().update(reqEm);
@@ -626,8 +647,13 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 						LOGGER.info("Json Util else  :" + JsonUtil.toJson(object) + "\t key-value :" + entry.getKey()
 								+ "-" + JsonUtil.toJson(entry.getValue()));
 					} else {
-						addInfoMap.put(entry.getKey(),
-								ArgUtil.parseAsT(entry.getValue(), doc.getAdditionalInfo().get(entry.getKey()), false));
+				//		addInfoMap.put(entry.getKey(),
+				//				ArgUtil.parseAsT(entry.getValue(), doc.getAdditionalInfo().get(entry.getKey()), false));
+						if(ArgUtil.is(entry.getValue())) {
+						List<Object> listOfType = Arrays.asList(entry.getValue().toString().split(","));
+						addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType, null, false));
+						}
+						
 					}
 				}
 			}
@@ -677,4 +703,12 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 		return setPbEmail;
 	}
+	
+	// Generic method to convert a string into a list of a specific type (String or Integer)
+    public static <T> List<T> convertStringToList(String input, String delimiter, Function<String, T> converter) {
+        return Arrays.stream(input.split(delimiter))
+                     .map(converter)
+                     .collect(Collectors.toList());
+    }
+	
 }

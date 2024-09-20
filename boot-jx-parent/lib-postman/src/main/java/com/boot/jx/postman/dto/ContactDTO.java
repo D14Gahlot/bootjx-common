@@ -5,7 +5,6 @@ import java.util.List;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(as = ContactDTO.class)
@@ -14,32 +13,12 @@ public class ContactDTO extends ContactMeta {
 
 	private static final long serialVersionUID = 8977954934029643371L;
 
-	@ApiMockModelProperty(example = "wa919876543210", required = false)
-	@JsonProperty("contactId")
-	private String contactId;
-
-	@JsonProperty("contactType")
-	private String contactType;
-
-	private String channelType;
-
 	public ContactDTO() {
 		super();
 	}
 
-	private String lane;
-
-	private String csid;
-
-	@ApiMockModelProperty(example = "John Doe", required = false)
-	private String name;
-
-	@ApiMockModelProperty(example = "John.Doe@company.co", required = false)
-	private String email;
 	private Boolean emailVerified;
 
-	@ApiMockModelProperty(example = "919876543210", required = false)
-	private String phone;
 	private Boolean phoneVerified;
 
 	private String profilePic;
@@ -60,52 +39,12 @@ public class ContactDTO extends ContactMeta {
 
 	private String sessionId;
 
-	public String getContactId() {
-		return contactId;
-	}
-
-	public void setContactId(String contactId) {
-		this.contactId = contactId;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String phone() {
-		return phone;
-	}
-
-	public void phone(String phone) {
-		this.phone = phone;
-	}
-
 	public List<String> getLabelId() {
 		return labelId;
 	}
 
 	public void setLabelId(List<String> labelId) {
 		this.labelId = labelId;
-	}
-
-	public String getContactType() {
-		return contactType;
-	}
-
-	public void setContactType(String contactType) {
-		this.contactType = contactType;
 	}
 
 	public String getProfilePic() {
@@ -122,22 +61,6 @@ public class ContactDTO extends ContactMeta {
 
 	public void setProfile(ChatProfileDTO profile) {
 		this.profile = profile;
-	}
-
-	public String getLane() {
-		return lane;
-	}
-
-	public void setLane(String lane) {
-		this.lane = lane;
-	}
-
-	public String getCsid() {
-		return csid;
-	}
-
-	public void setCsid(String csid) {
-		this.csid = csid;
 	}
 
 	public long getFirstInBoundStamp() {
@@ -220,14 +143,6 @@ public class ContactDTO extends ContactMeta {
 		this.sessionId = sessionId;
 	}
 
-	public String getChannelType() {
-		return channelType;
-	}
-
-	public void setChannelType(String channelType) {
-		this.channelType = channelType;
-	}
-
 	public Boolean getEmailVerified() {
 		return emailVerified;
 	}
@@ -242,14 +157,6 @@ public class ContactDTO extends ContactMeta {
 
 	public void setPhoneVerified(Boolean phoneVerified) {
 		this.phoneVerified = phoneVerified;
-	}
-
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
 	}
 
 }
