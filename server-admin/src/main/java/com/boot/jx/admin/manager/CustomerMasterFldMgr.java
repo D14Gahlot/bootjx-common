@@ -509,52 +509,71 @@ public class CustomerMasterFldMgr {
 	/** profile search **/
 
 	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
-		int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
-		String sortDir = ArgUtil.parseAsString(searchQry.getSortBy(), "desc");
-		List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
+	    int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
+	    String sortDir = ArgUtil.parseAsString(searchQry.getSortBy(), "desc");
+	    List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
 
-		List<Criteria> orCriterias = new LinkedList<Criteria>();
+	    // List to hold ANDed criteria
+	    List<Criteria> andCriteriaList = new ArrayList<>();
 
-		for (List<ProfileSearchCriteria> srcLst : searchCriterias) {
-			List<Criteria> andCriteriaList = new ArrayList<>();
-			for (ProfileSearchCriteria src : srcLst) {
-				switch (src.getKey()) {
-				case "phone":
-				case "phones":
-				case "mobile":
-				case "mobiles":
-//					PBPhone ph = contactStore.parsePhone(new PBPhone().phone(src.getValue().toString()));
-//					andCriteriaList.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber")
-//							.is(ph.nationalNumber).and("countryCallingCode").is(ph.countryCallingCode)));
-					andCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue()));
-					break;
-				case "email":
-				case "emails":
-					andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
-					break;
-				case "name":
-				case "name.formattedName":	
-					andCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
-					break;
-				default:
-					andCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
-				}
+	    for (List<ProfileSearchCriteria> srcLst : searchCriterias) {
+	        // Temporary list to hold OR criteria
+	        List<Criteria> orCriteriaList = new ArrayList<>();
 
-			}
-			orCriterias.add(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])));
-		}
-		MongoQueryBuilder<CustomerProfileDoc> qb=null;
-		if(ArgUtil.is(orCriterias)) {
-		 qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
-				.where(new Criteria().orOperator(orCriterias.toArray(new Criteria[orCriterias.size()]))).sortBy(sortDir)
-				.limit(limit);
-		}else {
-			qb = MongoQueryBuilder.collection(CustomerProfileDoc.class).page(searchQry.getPageNo(),
-					searchQry.getPageSize());
-		}
-		LOGGER.info("QB {} " + JsonUtil.toJson(qb));
-		return contactStore.find(qb);
+	        for (ProfileSearchCriteria src : srcLst) {
+	            switch (src.getKey()) {
+	                case "phone":
+	                case "phones":
+	                case "mobile":
+	                case "mobiles":
+	                    orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue()));
+	                    break;
+
+	                case "email":
+	                case "emails":
+	                    // When dealing with email, we will directly add to the AND list
+	                    andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
+	                    break;
+
+	                case "name":
+	                case "name.formattedName":
+	                    orCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
+	                    break;
+
+	                case "code":
+	                    orCriteriaList.add(createCriteria("code", src.getOperator(), src.getValue()));
+	                    break;
+
+	                default:
+	                    orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
+	                    break;
+	            }
+	        }
+
+	        // If there are multiple conditions in the OR list, combine them using OR
+	        if (!orCriteriaList.isEmpty()) {
+	            Criteria orCriteria = new Criteria().orOperator(orCriteriaList.toArray(new Criteria[orCriteriaList.size()]));
+	            // Add the OR result to the AND list
+	            andCriteriaList.add(orCriteria);
+	        }
+	    }
+
+	    // Build the final Mongo query with AND criteria
+	    MongoQueryBuilder<CustomerProfileDoc> qb = null;
+	    if (ArgUtil.is(andCriteriaList)) {
+	        qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+	            .where(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])))
+	            .sortBy(sortDir)
+	            .limit(limit);
+	    } else {
+	        qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
+	            .page(searchQry.getPageNo(), searchQry.getPageSize());
+	    }
+
+	    LOGGER.info("QB {} " + JsonUtil.toJson(qb));
+	    return contactStore.find(qb);
 	}
+
 
 	private Criteria createCriteria(String key, String operation, Object value) {
 		switch (operation) {
