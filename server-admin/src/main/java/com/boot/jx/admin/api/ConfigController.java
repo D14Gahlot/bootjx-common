@@ -171,8 +171,7 @@ public class ConfigController {
 	@RequestMapping(value = "/api/config/tokenkey", method = { RequestMethod.PATCH })
 	public ApiResponse<CompanyTokenKeyDoc, Object> updateTokeKeys(@RequestBody ModelPatches patch)
 			throws InstantiationException, IllegalAccessException {
-		mongoTemplate.patch(patch, CompanyTokenKeyDoc.class);
-		return ApiResponse.buildResults(mongoTemplate.findById(patch.getId(), CompanyTokenKeyDoc.class));
+		return ApiResponse.buildResults(configManager.patch(patch, CompanyTokenKeyDoc.class));
 	}
 
 }
