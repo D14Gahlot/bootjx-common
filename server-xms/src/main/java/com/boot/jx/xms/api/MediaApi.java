@@ -48,16 +48,18 @@ public class MediaApi {
 	public ApiResponse<Attachment, Object> uploadMedia(@RequestParam(required = false) String drive,
 			@RequestParam(required = false) String bucket, @RequestParam(required = false) String name,
 			@RequestParam(required = false) String caption, @RequestParam MultipartFile file) throws Exception {
-		String drive_name = ArgUtil.nonEmpty(drive, "drive");
+		String drive_code = ArgUtil.nonEmpty(drive, "drive");
 		String bucket_name = ArgUtil.nonEmpty(bucket, "bucket");
 		String file_name = ArgUtil.nonEmpty(name, UUID.randomUUID().toString());
 		String folder_path = ArgUtil.nonEmpty(Constants.BLANK, UUID.randomUUID().toString());
 
 		CommonFile f = fileStore.upload1(file,
-				String.format("%s/%s/%s/%s", AppContextUtil.getTenant(), drive_name, bucket_name, folder_path),
+				String.format("%s/%s/%s/%s", AppContextUtil.getTenant(), drive_code, bucket_name, folder_path),
 				file_name);
 
-		Attachment media = new MediaDoc().mediaURL(f.getUrl()).mediaType(f.getFileType()).mediaCaption(caption);
+		Attachment media = new MediaDoc().drive(drive_code).mediaMimeType(f.getContentType()).mediaName(f.getName())
+				.mediaURL(f.getUrl()).mediaType(f.getFileType()).mediaCaption(caption);
+
 		commonMongoTemplate.save(media, MediaDoc.COLLECTION_NAME);
 		return ApiResponse.buildResult(media);
 	}

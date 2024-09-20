@@ -62,6 +62,9 @@ public class Attachment implements Serializable {
 	@ApiMockModelProperty(example = "ABC_PROMO", value = "QuickMedia Code")
 	String mediaCode;
 
+	@ApiMockModelProperty(example = "Drive02", value = "Drive Code")
+	String drive;
+
 	public String getMediaURL() {
 		return mediaURL;
 	}
@@ -120,6 +123,11 @@ public class Attachment implements Serializable {
 
 	public Attachment mediaName(String mediaName) {
 		this.mediaName = mediaName;
+		return this;
+	}
+
+	public Attachment drive(String drive) {
+		this.drive = drive;
 		return this;
 	}
 
@@ -228,6 +236,14 @@ public class Attachment implements Serializable {
 
 	public void setMediaIdInline(String mediaIdInline) {
 		this.mediaIdInline = mediaIdInline;
+	}
+
+	public String getDrive() {
+		return drive;
+	}
+
+	public void setDrive(String drive) {
+		this.drive = drive;
 	}
 
 }
