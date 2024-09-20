@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.mongo.CommonDocInterfaces.SimpleDocument;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.utils.ArgUtil;
@@ -14,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "CONFIG_VARS")
 @TypeAlias("VarsConfigDoc")
-public class VarsConfigDoc extends PMConfigurationObject {
+public class VarsConfigDoc extends PMConfigurationObject implements SimpleDocument {
 
 	private static final long serialVersionUID = -4251710793999219993L;
 
