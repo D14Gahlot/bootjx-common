@@ -78,7 +78,8 @@ public class ChatDTOUtil {
 				.collect(Collectors.toList());
 	}
 
-	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String defaultSender) {
+	public static ChatMessageDTO getChatMessageDTO(
+			MessageDoc messageDoc, String contactName, String defaultSender) {
 		ChatMessageDTO messageDto = new ChatMessageDTO();
 		if (!ArgUtil.is(messageDoc)) {
 			return messageDto;
@@ -112,6 +113,7 @@ public class ChatDTOUtil {
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
 		messageDto.setForm(messageDoc.getForm());
+		messageDto.setReferral(messageDoc.getReferral());
 		if (ArgUtil.is(messageDoc.getOptions())) {
 			messageDto.setOptions(messageDoc.getOptions());
 		} else {

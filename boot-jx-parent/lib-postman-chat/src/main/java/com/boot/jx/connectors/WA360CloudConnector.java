@@ -201,7 +201,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				msgReferral.setSourceType(sourceType);
 				msgReferral.setBody(body);
 				inboxMessage.setReferral(msgReferral);
-				commonMongoTemplate.save(inboxMessage);// if this is correct way to store
+				commonMongoTemplate.save(inboxMessage);
 
 				   Map<String, String> messagePayload = new HashMap<>();
 				   messagePayload.put("channelId", channelConfig.getChannelType());
@@ -209,6 +209,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				   messagePayload.put("messageId",inboxMessage.getMessageIdExt());
 				   messagePayload.put("sourceUrl", msgReferral.getSourceUrl());
 			        tunnelService.task("ON_REFERRAL_MESSAGE", messagePayload);
+			       
+			        
 				
 				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.getReferral().toString() + " \n"
 						+ map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString()));

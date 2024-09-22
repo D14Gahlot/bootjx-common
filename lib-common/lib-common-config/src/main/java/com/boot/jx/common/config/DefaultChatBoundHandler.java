@@ -34,6 +34,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.FormReply;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageReplyTo;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
@@ -243,8 +244,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		msg.timestamp = inboxMessage.getTimestamp();
 		msg.tags = inboxMessage.getTags();
 		msg.input = inboxMessage.form();
+		msg.msgreplyTo = JsonUtil.toObject(inboxMessage.replyTo(), MessageReplyTo.class);
 
-		msg.form = JsonUtil.toObject(inboxMessage.form(), FormReply.class);
+	    msg.form = JsonUtil.toObject(inboxMessage.form(), FormReply.class);
 
 		if (ArgUtil.is(inboxMessage.getAttachments())) {
 			Attachment atth = inboxMessage.attachments().get(0);

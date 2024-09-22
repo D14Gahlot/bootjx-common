@@ -89,6 +89,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.setMessage(inboxMessage.getMessage());
 		doc.setMessageTrail(inboxMessage.getMessageTrail());
 		doc.setSessionId(inboxMessage.getSessionId());
+		doc.setReferral(inboxMessage.getReferral());
 
 		doc.setRoute(inboxMessage.getRoute());
 		doc.setQueue(ArgUtil.nonEmpty(inboxMessage.route().getQueueCode(), inboxMessage.session().getQueue()));
@@ -117,9 +118,11 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 
 	private MessageDoc createMessageDoc(InboxMessage inboxMessage) {
 		ContactType contactType = inboxMessage.contact().type();
+
 		MessageDoc doc = MessageDoc.instance(contactType);
 		doc.setTraceId(AppContextUtil.getTraceId());
 		doc.setContactId(PostManUtil.createContactId(inboxMessage));
+		doc.setReferral(inboxMessage.getReferral());
 		doc.setType("I");
 		doc.setTimestamp(System.currentTimeMillis());
 		doc.setTime(TimeStampIndex.now());
@@ -133,6 +136,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		contact.setContactType(ArgUtil.parseAsString(contactType));
 		contact.setChannelType(inboxMessage.contact().getChannelType());
 		doc.setContact(contact);
+		
 
 		updateMessageDoc(inboxMessage, doc);
 
@@ -185,6 +189,8 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 						doc.replyTo().put("bulkSessionId", replyTo.getBulkSessionId());
 					}
 				}
+				
+				
 			}
 		}
 		return doc;
