@@ -9,9 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MessageReplyTo implements Serializable, JsonIgnoreNull, JsonIgnoreUnknown {
 
-	@JsonProperty("type")
-	@ApiMockModelProperty(example = "feedback/story", value = "type")
-	public String msgReplyTo;
+	private static final long serialVersionUID = 3550234068884721183L;
 
+	@JsonProperty("type")
+	@ApiMockModelProperty(example = "feedback", value = "type", allowableValues = "story,feedback")
+	public String msgReplyTo;
 
 }

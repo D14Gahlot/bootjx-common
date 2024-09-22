@@ -246,7 +246,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		msg.input = inboxMessage.form();
 		msg.msgreplyTo = JsonUtil.toObject(inboxMessage.replyTo(), MessageReplyTo.class);
 
-	    msg.form = JsonUtil.toObject(inboxMessage.form(), FormReply.class);
+		msg.form = JsonUtil.toObject(inboxMessage.form(), FormReply.class);
 
 		if (ArgUtil.is(inboxMessage.getAttachments())) {
 			Attachment atth = inboxMessage.attachments().get(0);

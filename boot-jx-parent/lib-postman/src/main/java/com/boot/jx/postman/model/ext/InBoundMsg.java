@@ -33,12 +33,12 @@ public class InBoundMsg {
 	@ApiMockModelProperty(example = "text", value = "message-type",
 			allowableValues = "audio,document,image,location,system,text,video,voice")
 	public String type;
-	
-	
 
 	public InBoundMsgText text;
+
 	@ApiMockModelProperty(hidden = true)
 	public InBoundMsgText system;
+
 	public InBoundMsgMedia video;
 	public InBoundMsgMedia voice;
 	public InBoundMsgMedia audio;
@@ -53,14 +53,11 @@ public class InBoundMsg {
 
 	@ApiMockModelProperty(value = "Form (Button/List/Flows) selections by user")
 	public FormReply form = new FormReply();
-	
-	public MessageReplyTo msgreplyTo=new MessageReplyTo();
-	
+
+	public MessageReplyTo msgreplyTo = new MessageReplyTo();
 
 	@ApiMockModelProperty(hidden = true)
 	public Map<String, Object> input = new HashMap<String, Object>();
-	
-	
 
 	@ApiMockModelProperty(value = "Several Tags/Categories Assigned by our ML/NLP program")
 	public TagDocument tags;
