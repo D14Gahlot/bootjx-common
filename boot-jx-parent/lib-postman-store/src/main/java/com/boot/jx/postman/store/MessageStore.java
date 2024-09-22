@@ -136,7 +136,6 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		contact.setContactType(ArgUtil.parseAsString(contactType));
 		contact.setChannelType(inboxMessage.contact().getChannelType());
 		doc.setContact(contact);
-		
 
 		updateMessageDoc(inboxMessage, doc);
 
@@ -184,13 +183,17 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 				if (ArgUtil.is(replyTo)) {
 					if (ArgUtil.is(replyTo.getMessageId())) {
 						doc.setReplyId(replyTo.getMessageId());
+						doc.replyTo().put("messageId", replyTo.getMessageId());
+					}
+					if (ArgUtil.is(replyTo.getMessageIdExt())) {
+						doc.setReplyIdExt(replyTo.getMessageIdExt());
+						doc.replyTo().put("messageIdExt", replyTo.getMessageIdExt());
 					}
 					if (ArgUtil.is(replyTo.getBulkSessionId())) {
 						doc.replyTo().put("bulkSessionId", replyTo.getBulkSessionId());
 					}
 				}
-				
-				
+
 			}
 		}
 		return doc;

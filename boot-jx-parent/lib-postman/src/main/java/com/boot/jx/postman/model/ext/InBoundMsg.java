@@ -54,7 +54,7 @@ public class InBoundMsg {
 	@ApiMockModelProperty(value = "Form (Button/List/Flows) selections by user")
 	public FormReply form = new FormReply();
 
-	public MessageReplyTo msgreplyTo = new MessageReplyTo();
+	public MessageReplyTo replyTo = new MessageReplyTo();
 
 	@ApiMockModelProperty(hidden = true)
 	public Map<String, Object> input = new HashMap<String, Object>();

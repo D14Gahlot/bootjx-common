@@ -13,6 +13,8 @@ public class MessageReplyTo implements Serializable, JsonIgnoreNull, JsonIgnoreU
 
 	@JsonProperty("type")
 	@ApiMockModelProperty(example = "feedback", value = "type", allowableValues = "story,feedback")
-	public String msgReplyTo;
+	public String type;
+
+	public String bulkSessionId;
 
 }
