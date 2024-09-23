@@ -88,7 +88,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private Map<String, Object> replyTo;
 	private String appType;
 	private String appVenv;
-	private MessageReferral referral;
+	public MessageReferral referral;
 
 	public MessageReferral getReferral() {
 		return referral;

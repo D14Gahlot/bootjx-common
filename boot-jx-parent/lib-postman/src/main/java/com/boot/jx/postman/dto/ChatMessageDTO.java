@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
+import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.pbook.PBVCard;
@@ -48,6 +49,15 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 	private MessageRouter route;
 	private Map<String, Long> stamps;
 	public List<Object> logs;
+	private MessageReferral referral;
+
+	public MessageReferral getReferral() {
+		return referral;
+	}
+
+	public void setReferral(MessageReferral referral) {
+		this.referral = referral;
+	}
 
 	public String getText() {
 		return text;
