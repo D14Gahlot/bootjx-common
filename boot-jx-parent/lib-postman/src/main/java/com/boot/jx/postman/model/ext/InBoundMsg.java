@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.model.FormReply;
+import com.boot.jx.postman.model.MessageReplyTo;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -34,8 +35,10 @@ public class InBoundMsg {
 	public String type;
 
 	public InBoundMsgText text;
+
 	@ApiMockModelProperty(hidden = true)
 	public InBoundMsgText system;
+
 	public InBoundMsgMedia video;
 	public InBoundMsgMedia voice;
 	public InBoundMsgMedia audio;
@@ -50,6 +53,8 @@ public class InBoundMsg {
 
 	@ApiMockModelProperty(value = "Form (Button/List/Flows) selections by user")
 	public FormReply form = new FormReply();
+
+	public MessageReplyTo replyTo = new MessageReplyTo();
 
 	@ApiMockModelProperty(hidden = true)
 	public Map<String, Object> input = new HashMap<String, Object>();

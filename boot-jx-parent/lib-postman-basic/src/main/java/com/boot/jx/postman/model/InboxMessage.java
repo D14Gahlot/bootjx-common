@@ -333,6 +333,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 
 	public void setReplyId(String replyId) {
 		this.replyId = replyId;
+		this.replyTo().put("messageId", replyIdExt);
 	}
 
 	@Override
@@ -342,6 +343,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 
 	public void setReplyIdExt(String replyIdExt) {
 		this.replyIdExt = replyIdExt;
+		this.replyTo().put("messageIdExt", replyIdExt);
 	}
 
 	public String getFormatType() {
