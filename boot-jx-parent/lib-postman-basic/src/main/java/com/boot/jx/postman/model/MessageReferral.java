@@ -11,6 +11,15 @@ public class MessageReferral implements Serializable {
 	String sourceId;
 	String sourceType;
 	String body;
+	String imageUrl;
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 
 	public String getSourceUrl() {
 		return sourceUrl;
