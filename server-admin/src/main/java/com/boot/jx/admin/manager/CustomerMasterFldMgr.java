@@ -51,6 +51,8 @@ import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 import com.boot.utils.UniqueID;
 
+import microsoft.exchange.webservices.data.core.enumeration.search.SortDirection;
+
 @Component
 public class CustomerMasterFldMgr {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerMasterFldMgr.class);
@@ -510,8 +512,11 @@ public class CustomerMasterFldMgr {
 
 	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
 	    int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
-	    String sortDir = ArgUtil.parseAsString(searchQry.getSortBy(), "desc");
+	    String sortBy = ArgUtil.parseAsString(searchQry.getSortBy(), "created.stamp");
+	    String sortdir = ArgUtil.parseAsString(searchQry.getSortDir(), "DESC");
 	    List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
+	    
+	    //Direction.fromString(sortDir)
 
 	    // List to hold ANDed criteria
 	    List<Criteria> andCriteriaList = new ArrayList<>();
@@ -563,13 +568,18 @@ public class CustomerMasterFldMgr {
 	    if (ArgUtil.is(andCriteriaList)) {
 	        qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
 	            .where(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])))
-	            .sortBy(sortDir)
+	            .sortBy(sortBy,Direction.fromString(sortdir))
 	            .limit(limit);
 	    } else {
 	        qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
-	            .page(searchQry.getPageNo(), searchQry.getPageSize());
+	            .page(searchQry.getPageNo(), searchQry.getPageSize())
+	            .sortBy(sortBy,Direction.fromString(sortdir));
+	          //  .sortBy("created.stamp", Sort.Direction.DESC);  // Sort by "created.stamp" in descending order;
 	    }
 
+	    
+	   
+	    
 	    LOGGER.info("QB {} " + JsonUtil.toJson(qb));
 	    return contactStore.find(qb);
 	}

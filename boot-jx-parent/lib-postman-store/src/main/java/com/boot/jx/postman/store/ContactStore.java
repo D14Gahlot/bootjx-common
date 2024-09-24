@@ -484,8 +484,9 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 							//addInfoMap.put(entry.getKey(), entry.getValue());
 							// Convert the string to a List using split and Arrays.asList
 							if(ArgUtil.is(entry.getValue())) {
-							List<Object> listOfType = Arrays.asList(entry.getValue().toString().split(","));
-							addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType, null, false));
+							//List<Object> listOfType = Arrays.asList(entry.getValue().toString().split(","));
+							//addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType, null, false));
+								addInfoMap.put(entry.getKey(), entry.getValue());
 							}
 						}
 					}
@@ -647,11 +648,11 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 						LOGGER.info("Json Util else  :" + JsonUtil.toJson(object) + "\t key-value :" + entry.getKey()
 								+ "-" + JsonUtil.toJson(entry.getValue()));
 					} else {
-				//		addInfoMap.put(entry.getKey(),
-				//				ArgUtil.parseAsT(entry.getValue(), doc.getAdditionalInfo().get(entry.getKey()), false));
+				
 						if(ArgUtil.is(entry.getValue())) {
-						List<Object> listOfType = Arrays.asList(entry.getValue().toString().split(","));
-						addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType, null, false));
+						//List<Object> listOfType = Arrays.asList(entry.getValue().toString().split(","));
+						//addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType, null, false));
+							addInfoMap.put(entry.getKey(), entry.getValue());
 						}
 						
 					}
