@@ -602,7 +602,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		Map<String, Object> addInfoMap = req.getAdditionalInfo();
 		if (ArgUtil.is(addInfoMap)) {
 			for (Map.Entry<String, Object> entry : addInfoMap.entrySet()) {
-				LOGGER.info("Key: " + entry.getKey() + ", Value: " + entry.getValue());
 				switch (entry.getKey()) {
 				case "title":
 				case "Title":

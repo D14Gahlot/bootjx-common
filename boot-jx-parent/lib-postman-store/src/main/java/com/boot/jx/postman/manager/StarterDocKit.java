@@ -112,9 +112,9 @@ public class StarterDocKit {
 		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.customer.field.master");
 		String predefiend_customer_filed_version = "v1.4";
 		if (!version.is(predefiend_customer_filed_version)) {
-			createPredefinedMstField("title", "Title", "String");
-			createPredefinedMstField("dob", "Date of Birth", "timestamp");
-			createPredefinedMstField("gender", "Gender", "String");
+			createPredefinedMstField("title", "Title", "text");
+			createPredefinedMstField("dob", "Date of Birth", "text");
+			createPredefinedMstField("gender", "Gender", "text");
 			createPredefinedMstField("alt_phones", "Alternate phone", "phone");
 			createPredefinedMstField("alt_emails", "Alternate email", "email");
 			version.setValue(predefiend_customer_filed_version);
