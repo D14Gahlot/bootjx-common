@@ -51,8 +51,6 @@ import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
 import com.boot.utils.UniqueID;
 
-import microsoft.exchange.webservices.data.core.enumeration.search.SortDirection;
-
 @Component
 public class CustomerMasterFldMgr {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerMasterFldMgr.class);
@@ -94,6 +92,7 @@ public class CustomerMasterFldMgr {
 
 				cmFieldDoc.setRequired(reqDto.isRequired());
 				cmFieldDoc.setPredefined(reqDto.isPredefined());
+				cmFieldDoc.setPossibleOptions(reqDto.getPossibleOptions());
 				cmFieldDoc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 				commonMongoTemplate.save(cmFieldDoc);
 			}
@@ -101,10 +100,11 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc.setCode(reqDto.getCode());
 			cmFieldDoc.setLabel(reqDto.getLabel());
 			cmFieldDoc.setDesc(reqDto.getDesc());
-			cmFieldDoc.setType(ArgUtil.parseAsString(reqDto.getType(), "String"));
+			cmFieldDoc.setType(ArgUtil.parseAsString(reqDto.getType(), "text"));
 			cmFieldDoc.setActive(reqDto.isActive());
 			cmFieldDoc.setRequired(reqDto.isRequired());
 			cmFieldDoc.setPredefined(reqDto.isPredefined());
+			cmFieldDoc.setPossibleOptions(reqDto.getPossibleOptions());
 			cmFieldDoc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			commonMongoTemplate.save(cmFieldDoc);
 		}
@@ -259,28 +259,6 @@ public class CustomerMasterFldMgr {
 		return dtoLst;
 	}
 
-	/** read customer contacts from s3 bucket -excel **/
-
-//	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
-//		List<JobsResponseDto> dtoLst = new ArrayList<>();
-//		JobScheduledDoc cmProfileDoc = null;
-//		String url = null;
-//		if (ArgUtil.is(id)) {
-//			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
-//			if (ArgUtil.is(cmProfileDoc)) {
-//				// url = cmProfileDoc.getFileUploadMap().
-//				JobsResponseDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
-//				dtoLst.add(dto);
-//			}
-//		}else {
-//			List<JobScheduledDoc> lstAllDocs = commonMongoTemplate.findAll(null);
-//		}
-//
-//		System.out.println("url :" + url);
-//
-//		return dtoLst;
-//
-//	}
 
 	@Deprecated
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
@@ -334,7 +312,6 @@ public class CustomerMasterFldMgr {
 		}
 
 		if (ArgUtil.is(id) && lstCusProMap != null && !lstCusProMap.isEmpty()) {
-			LOGGER.info("saveCustomerProfileMaster size :" + lstCusProMap.size());
 			for (CustomerProfileDoc doc : lstCusProMap) {
 				commonMongoTemplate.save(doc);
 				docs.add(doc);
@@ -574,7 +551,7 @@ public class CustomerMasterFldMgr {
 	        qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
 	            .page(searchQry.getPageNo(), searchQry.getPageSize())
 	            .sortBy(sortBy,Direction.fromString(sortdir));
-	          //  .sortBy("created.stamp", Sort.Direction.DESC);  // Sort by "created.stamp" in descending order;
+	         
 	    }
 
 	    

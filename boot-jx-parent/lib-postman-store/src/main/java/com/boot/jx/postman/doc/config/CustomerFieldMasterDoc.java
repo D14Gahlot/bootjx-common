@@ -1,5 +1,8 @@
 package com.boot.jx.postman.doc.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -27,6 +30,7 @@ public class CustomerFieldMasterDoc extends TimeStampDoc {
 
 	private boolean required;
 	private boolean predefined;
+	List<Object> possibleOptions=new ArrayList<>();
 
 	public String getId() {
 		return id;
@@ -90,6 +94,14 @@ public class CustomerFieldMasterDoc extends TimeStampDoc {
 
 	public void setLabel(String label) {
 		this.label = label;
+	}
+
+	public List<Object> getPossibleOptions() {
+		return possibleOptions;
+	}
+
+	public void setPossibleOptions(List<Object> possibleOptions) {
+		this.possibleOptions = possibleOptions;
 	}
 
 }
