@@ -1,6 +1,9 @@
 package com.boot.jx.admin.api;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,20 +72,26 @@ public class TmplHSMController {
 	}
 
 	@RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.GET })
-	public ApiResponse<HSMTemplate3rdParty, Object> listWabaTemplates(@RequestParam String channelId,
+	public ApiResponse<HSMTemplate3rdParty, Object> listWabaTemplatesAndflows(@RequestParam String channelId,
 			@RequestParam(required = false) String templateCode,
 			@RequestParam(required = false, defaultValue = "false") boolean sync) {
-		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		 ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
 
-		if (!ArgUtil.is(channelConfig)) {
-			return ApiResponse.build();
-		}
-
-		if (sync) {
-			thirdPartyTmplManager.refreshWA360Templates(channelConfig);
-		}
-		return new ApiResponse<HSMTemplate3rdParty, Object>()
-				.results(thirdPartyTmplManager.getTemplates(channelConfig, templateCode));
+		    if (!ArgUtil.is(channelConfig)) {
+		        return ApiResponse.build();
+		    }
+		   		    if (sync) {
+		        thirdPartyTmplManager.refreshWA360Templates(channelConfig);
+		    }
+		      List<HSMTemplate3rdParty> templates = thirdPartyTmplManager.getTemplates(channelConfig, templateCode);
+		    
+		    if (channelConfig.getChannelType().equalsIgnoreCase("wacfb")) {
+		        listFlows(channelId, sync);
+		      }
+		                
+		    return new ApiResponse<HSMTemplate3rdParty, Object>()
+					.results(thirdPartyTmplManager.getTemplates(channelConfig, templateCode));
+		   
 	}
 
 	@RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.POST })
