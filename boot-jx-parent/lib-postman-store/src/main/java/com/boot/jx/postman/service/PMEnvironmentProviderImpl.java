@@ -133,12 +133,6 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 					channel.setDomain(tnt);
 					if (channel.isSandbox() || channel.isShared()) {
 						newSharedConfiguration.channels(channel, serviceServer);
-						if (ArgUtil.is(channel.getDomainProxy())) {
-							PMConfigurationModel proxyConfig = localConfigMap.getIfPresent(channel.getDomainProxy());
-							if (proxyConfig != null) {
-								proxyConfig.channels(channel);
-							}
-						}
 					}
 				}
 
