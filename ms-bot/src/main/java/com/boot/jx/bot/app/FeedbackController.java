@@ -13,6 +13,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.store.MessageStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.StringUtils;
 import com.boot.utils.StringUtils.StringMatcher;
@@ -54,8 +55,9 @@ public class FeedbackController extends CommonBotController {
 		String text = toReplyEnum(inboxMessage);
 		if (inboxMessage.form().get("reply_id") != null) {
 			inboxMessage.replyTo().put("type", "feedback");
-			sessionStore.update(
-					MQB.collection(MessageDoc.class).whereId(inboxMessage.id()).set("replyTo.type", "feedback"));
+			sessionStore.updateFirst(
+					MQB.select(MessageDoc.class, MessageStore.getCollectionName(inboxMessage.contact().type()))
+							.whereId(inboxMessage.id()).set("replyTo.type", "feedback"));
 		}
 
 		if (StringUtils.isNumeric(text)) {
