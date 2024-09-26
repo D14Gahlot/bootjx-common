@@ -107,7 +107,7 @@ public class InBoundPoller extends ATaskLimiter {
 
 			String error = readPop3Emails(task, channelId, channel, messageBoxEvent);
 			if (ArgUtil.is(error)) {
-				ChannelConfigDoc channelDoc = configMaster.findById(channelId, ChannelConfigDoc.class);
+				ChannelConfig channelDoc = configMaster.findById(channelId, ChannelConfigDoc.class);
 				boolean isDisabled = ArgUtil.is(channelDoc.getError()) && ArgUtil.is(channelDoc.getError(), error);
 				if (isDisabled) {
 					channelDoc.setDisabled(isDisabled);
@@ -117,7 +117,7 @@ public class InBoundPoller extends ATaskLimiter {
 				configMaster.save(channelDoc);
 				sharedConfigManager.clear();
 			} else if (channel.isDisabled() && ArgUtil.is(channel.getError())) {
-				ChannelConfigDoc channelDoc = configMaster.findById(channelId, ChannelConfigDoc.class);
+				ChannelConfig channelDoc = configMaster.findById(channelId, ChannelConfigDoc.class);
 				channelDoc.setDisabled(false);
 				channelDoc.setError(null);
 				configMaster.save(channelDoc);

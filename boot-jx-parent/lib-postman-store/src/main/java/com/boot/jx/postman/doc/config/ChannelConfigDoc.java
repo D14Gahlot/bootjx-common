@@ -16,9 +16,6 @@ public class ChannelConfigDoc extends ChannelConfig implements TimeStampDocSuppo
 
 	private static final long serialVersionUID = -6368905475787041196L;
 
-	private String domain;
-	private String domainProxy;
-
 	@Id
 	public String getId() {
 		return id;
@@ -30,22 +27,6 @@ public class ChannelConfigDoc extends ChannelConfig implements TimeStampDocSuppo
 
 	public boolean isReadOnly() {
 		return (this.isSandbox() || this.isShared()) && !ArgUtil.areEqual(domain, AppContextUtil.getTenant());
-	}
-
-	public String getDomain() {
-		return domain;
-	}
-
-	public void setDomain(String domain) {
-		this.domain = domain;
-	}
-
-	public String getDomainProxy() {
-		return domainProxy;
-	}
-
-	public void setDomainProxy(String domainProxy) {
-		this.domainProxy = domainProxy;
 	}
 
 }

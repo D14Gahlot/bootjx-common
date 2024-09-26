@@ -71,6 +71,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -1129,7 +1130,7 @@ public class AccountDashBoardManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("isDisabled").is(false).and("isSandbox").is(false));
 		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
-		for (ChannelConfigDoc cofigDoc : cofigDocLst) {
+		for (ChannelConfig cofigDoc : cofigDocLst) {
 			listOfChannelConfig.add(cofigDoc.getChannelType());
 		}
 
