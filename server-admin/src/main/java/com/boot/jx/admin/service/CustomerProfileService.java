@@ -17,6 +17,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.utils.ArgUtil;
@@ -108,6 +109,23 @@ public class CustomerProfileService {
 	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
 		// TODO Auto-generated method stub
 		return cmFieldMgr.getProfileSearch(searchQry);
+	}
+	
+	
+	public List<ProfileFilterMasterDoc> addEditProfileFilterGroup(ProfileFilterMasterDoc searchQry) {
+		List<ProfileFilterMasterDoc> lstCmfields = cmFieldMgr.addEditProfileFilterGroup(searchQry);
+		return lstCmfields;
+	}
+
+	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
+		List<ProfileFilterMasterDoc> lstCmfields = cmFieldMgr.deleteProfileFilterGroup(reqDto);
+		return lstCmfields;
+	}
+
+	public  List<ProfileFilterMasterDoc> fetchProfileFilterGroup(String id, Boolean active, int pageSize, int pageNo, String sortBy,
+			String sortDir) {
+		List<ProfileFilterMasterDoc> lstCmfields = cmFieldMgr.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir);
+		return lstCmfields;
 	}
 
 }
