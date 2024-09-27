@@ -34,6 +34,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.jx.postman.model.Message.Status;
@@ -598,6 +599,53 @@ public class CustomerMasterFldMgr {
 			throw new IllegalArgumentException("Invalid operation: " + operation);
 		}
 
+	}
+
+	public List<ProfileFilterMasterDoc> addEditProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
+		
+		ProfileFilterMasterDoc filDoc = new ProfileFilterMasterDoc();
+		if (ArgUtil.is(reqDto.getId())) {
+			filDoc = commonMongoTemplate.findByIdString(reqDto.getId(), ProfileFilterMasterDoc.class);
+			if (ArgUtil.is(filDoc)) {
+			filDoc.setFilterName(reqDto.getFilterName());
+			filDoc.setFilterCriteria(reqDto.getFilterCriteria());
+			filDoc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
+			commonMongoTemplate.save(filDoc);
+			}
+		}else {
+			filDoc.setFilterName(reqDto.getFilterName());
+			filDoc.setFilterCriteria(reqDto.getFilterCriteria());
+			filDoc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
+			commonMongoTemplate.save(filDoc);
+		}
+		
+		return fetchProfileFilterGroup(null,null,10,0,null,null);
+	}
+
+	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
+		if (ArgUtil.is(reqDto.getId())) {
+			MongoQueryBuilder<ProfileFilterMasterDoc> builder = MongoQueryBuilder
+					.collection(ProfileFilterMasterDoc.class).whereId(reqDto.getId());
+			commonMongoTemplate.remove(builder.getQuery(), ProfileFilterMasterDoc.class);
+		}
+		return fetchProfileFilterGroup(null,null,10,0,null,null);
+	}
+
+	public List<ProfileFilterMasterDoc> fetchProfileFilterGroup(String id, Boolean active, int pagesize, int pageNo,
+			String sortby, String sortdir) {
+		    int pageSize = pagesize == 0 ? 25 : pagesize;
+		    String sortBy = ArgUtil.parseAsString(sortby, "created.stamp");
+		    String sortDir = ArgUtil.parseAsString(sortdir, "DESC");
+		
+		    MongoQueryBuilder<ProfileFilterMasterDoc> qb = MongoQueryBuilder.collection(ProfileFilterMasterDoc.class).page(pageNo,
+					pageSize);
+			if (ArgUtil.is(id)) {
+				qb = qb.whereId(id);
+			}
+			if (ArgUtil.is(sortBy)) {
+				qb = qb.sortBy(sortBy, Direction.fromString(sortDir));
+			}
+			return contactStore.find(qb);
 	}
 
 	
