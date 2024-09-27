@@ -93,7 +93,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 			List<ChannelConfigDoc> channels = configMaster.findAll(ChannelConfigDoc.class);
 			// System.out.println("TENE==" + tnt + "=====" + mappedTo + "====" +
 			// channels.size());
-			for (ChannelConfigDoc channel : channels) {
+			for (ChannelConfig channel : channels) {
 				channel.setDomain(tnt);
 				localConfiguration.channels(channel);
 			}
@@ -129,7 +129,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 					newSharedConfiguration.setFeature(entry.getValue(), serviceServer);
 				}
 				List<ChannelConfigDoc> sandboxChannels = configMaster.findAll(ChannelConfigDoc.class);
-				for (ChannelConfigDoc channel : sandboxChannels) {
+				for (ChannelConfig channel : sandboxChannels) {
 					channel.setDomain(tnt);
 					if (channel.isSandbox() || channel.isShared()) {
 						newSharedConfiguration.channels(channel, serviceServer);

@@ -59,6 +59,8 @@ public class ChannelConfig extends AChannelConfig {
 
 	private String callbackPath;
 	private String unhandledInboundForward;
+	protected String domain;
+	private String domainProxy;
 
 	public String getLane() {
 		return lane;
@@ -321,6 +323,22 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setMasterChannelId(String masterChannelId) {
 		this.masterChannelId = masterChannelId;
+	}
+
+	public String getDomain() {
+		return domain;
+	}
+
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
+
+	public String getDomainProxy() {
+		return domainProxy;
+	}
+
+	public void setDomainProxy(String domainProxy) {
+		this.domainProxy = domainProxy;
 	}
 
 }

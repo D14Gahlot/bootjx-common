@@ -264,7 +264,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	public ChannelConfig getChannelConfig(String channelId) {
 		if (ArgUtil.is(channelId)) {
-			ChannelConfigDoc channelConfig = configStore.findById(channelId, ChannelConfigDoc.class);
+			ChannelConfig channelConfig = configStore.findById(channelId, ChannelConfigDoc.class);
 			if (!ArgUtil.is(channelConfig)) {
 				return null;
 			}
@@ -330,7 +330,7 @@ public class ConfigManagerImpl implements ConfigManager {
 	@Override
 	public ChannelConfig patchChannelConfig(ModelPatches req) {
 		String channelId = req.getId();
-		ChannelConfigDoc config = configStore.findById(channelId, ChannelConfigDoc.class);
+		ChannelConfig config = configStore.findById(channelId, ChannelConfigDoc.class);
 		MapModel map = MapModel.from(JsonUtil.toMap(config));
 		for (ModelPatch patch : req.getPatches()) {
 			if (ModelPatchCommand.SET.equals(patch.getCommand())) {
