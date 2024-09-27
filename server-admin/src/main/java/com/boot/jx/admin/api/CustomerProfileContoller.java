@@ -137,33 +137,32 @@ public class CustomerProfileContoller {
 		return ApiResponse.buildResults(docs);
 	}
 	
-	/** create profile group with custom filter**/
-	
-	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.POST })
-	public ApiResponse<ProfileFilterMasterDoc, Object> addEditProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
-		return ApiResponse.buildResults(cusProfileService.addEditProfileFilterGroup(reqDto));
-	}
-	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.PATCH })
-	public ApiResponse<ProfileFilterMasterDoc, Object> updateProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
-		return ApiResponse.buildResults(cusProfileService.addEditProfileFilterGroup(reqDto));
-	}
-	
-	
-	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.GET })
-	public ApiResponse<ProfileFilterMasterDoc, Object> fetchProfileFilterGroup(
-			@RequestParam(value = "id", required = false) String id,
-			@RequestParam(value = "active", required = false) Boolean active,
-			@RequestParam(required = false, defaultValue = "25") int pageSize,
-			@RequestParam(required = false,defaultValue = "0") int pageNo,
-			@RequestParam(required = false, defaultValue = "created") String sortBy,
-			@RequestParam(required = false, defaultValue = "desc") String sortDir)  {
-	return ApiResponse.buildResults(cusProfileService.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir));
-}
-
-	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.DELETE })
-	public ApiResponse<ProfileFilterMasterDoc, Object> deleteProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
-		return ApiResponse.buildResults(cusProfileService.deleteProfileFilterGroup(reqDto));
-	}
+//	/** create profile group with custom filter**/
+//	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.POST })
+//	public ApiResponse<ProfileFilterMasterDoc, Object> addEditProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
+//		return ApiResponse.buildResults(cusProfileService.addEditProfileFilterGroup(reqDto));
+//	}
+//	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.PATCH })
+//	public ApiResponse<ProfileFilterMasterDoc, Object> updateProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
+//		return ApiResponse.buildResults(cusProfileService.addEditProfileFilterGroup(reqDto));
+//	}
+//	
+//	
+//	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.GET })
+//	public ApiResponse<ProfileFilterMasterDoc, Object> fetchProfileFilterGroup(
+//			@RequestParam(value = "id", required = false) String id,
+//			@RequestParam(value = "active", required = false) Boolean active,
+//			@RequestParam(required = false, defaultValue = "25") int pageSize,
+//			@RequestParam(required = false,defaultValue = "0") int pageNo,
+//			@RequestParam(required = false, defaultValue = "created") String sortBy,
+//			@RequestParam(required = false, defaultValue = "desc") String sortDir)  {
+//	return ApiResponse.buildResults(cusProfileService.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir));
+//}
+//
+//	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.DELETE })
+//	public ApiResponse<ProfileFilterMasterDoc, Object> deleteProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
+//		return ApiResponse.buildResults(cusProfileService.deleteProfileFilterGroup(reqDto));
+//	}
 
 
 }

@@ -550,8 +550,8 @@ public class CustomerMasterFldMgr {
 	            .limit(limit);
 	    } else {
 	        qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
-	            .page(searchQry.getPageNo(), searchQry.getPageSize())
-	            .sortBy(sortBy,Direction.fromString(sortdir));
+	            .sortBy(sortBy,Direction.fromString(sortdir))
+	            .page(searchQry.getPageNo(), searchQry.getPageSize());
 	         
 	    }
 
