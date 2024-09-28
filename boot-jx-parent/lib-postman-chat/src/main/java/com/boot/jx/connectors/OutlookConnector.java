@@ -263,7 +263,10 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		inboxMessage.setMessage(EmailReplyParser.parseReply(m.pathEntry("body.content").asString()));
 		inboxMessage.setMessageTrail(m.pathEntry("body.trail").asString());
 
-		if (ArgUtil.is(inboxMessage.getSubject())) {
+		MapPathEntry conversationId = m.pathEntry("conversationId");
+		if (conversationId.exists()) {
+			inboxMessage.session().setTicketHash(conversationId.asString());
+		} else if (ArgUtil.is(inboxMessage.getSubject())) {
 			String subject = StringUtils
 					.normalizeSpace(inboxMessage.getSubject().replaceFirst(EmailConnector.SUBJECT_CLEANER_STR, ""));
 			String conatctid = PostManUtil.CONTACT_ID(inboxMessage.contact());
