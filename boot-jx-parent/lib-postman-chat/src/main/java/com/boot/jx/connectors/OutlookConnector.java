@@ -219,6 +219,10 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			}
 		}
 
+		if (ArgUtil.is(chatSession) && ArgUtil.is(chatSession.getTicketHash())) {
+			outboxMessage.session().setTicketHash(chatSession.getTicketHash());
+		}
+
 		nexusEmailClient.send(channelConfig, outboxMessage);
 		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	}
