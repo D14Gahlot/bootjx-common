@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,6 +37,8 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -57,6 +60,7 @@ import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.TypeCount;
+import com.boot.jx.account.dto.WabaSummary;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.api.EventCountDto;
 import com.boot.jx.api.EventCountSummary;
@@ -416,7 +420,8 @@ public class AccountDashBoardManager {
 
 	/** WABA summary count **/
 
-	public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
+	public WabaSummary wabaSummary(long timestamp) {
+		WabaSummary summary = new WabaSummary();
 		String tnt = AppContextUtil.getTenant();
 		// List<String> lst = getListOfContactType();
 		Date dateTi = new Date(timestamp);
@@ -452,8 +457,14 @@ public class AccountDashBoardManager {
 			dto.setPricing(waba.getPricing());
 			wabaLst.add(dto);
 		}
+		
+		
+		Map<String,Long> mediaTemSum= getMediaTemplateCountV1(monthMinTimeStamp,monthMaxTimeStamp);
+		
+		summary.setWabaSummaryCount(wabaLst);
+		summary.setMediaSummaryCount(mediaTemSum);
 
-		return wabaLst;
+		return summary;
 	}
 
 	public ContactTypeSummaryDto hourWisesummary(long timestamp, long hr) {
@@ -1445,5 +1456,49 @@ public class AccountDashBoardManager {
 		}
        return hourWiseCount;
 	}
+	
+	
+	/** api for counting mediaTemp **/
+	public Map<String,Long> getMediaTemplateCountV1(long monthMinTimeStamp,long monthMaxTimeStamp ) {
+			
+		// Match operation to filter based on format, timestamp range, and non-null mediaTemplate
+	        MatchOperation matchOperation = Aggregation.match(
+	                Criteria.where("msg.lastOutBoundMsg.options.attachment.mediaTemplate").ne(null)
+	                        .and("msg.lastMsg.options.waba.components.format").is("IMAGE")
+	                        .and("msg.lastMsg.timestamp").gte(monthMinTimeStamp).lte(monthMaxTimeStamp)
+	        );
+
+	        // Group operation to group by categoryType and count total documents
+	        GroupOperation groupOperation = Aggregation.group("msg.lastMsg.meta.categoryType")
+	                .count().as("totalDocuments");
+
+	        // Create aggregation pipeline
+	        Aggregation aggregation = Aggregation.newAggregation(
+	                matchOperation,   // Apply the match operation
+	                groupOperation    // Apply the group operation
+	        );
+
+	        // Execute the aggregation query
+	        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "CHAT_SESSION", Document.class);
+
+	        // Initialize a Map to store the result
+	        Map<String, Long> categoryCountMap = new HashMap<>();
+
+	        // Iterate over the results and populate the map
+	        for (Document document : results.getMappedResults()) {
+	            String categoryType = document.getString("_id");  // _id contains the categoryType
+	            Long count = Long.valueOf(document.getInteger("totalDocuments").longValue());  // totalDocuments contains the count 
+	            categoryCountMap.put(categoryType, count);
+	        }
+	        // List of all expected categories
+	        List<String> expectedKeys = Arrays.asList("MARKETING", "UTILITY", "SERVICE", "AUTHENTICATION");
+	        
+	        expectedKeys.forEach(key -> categoryCountMap.putIfAbsent(key, Long.valueOf(0)));
+
+	        // Return the map
+	        return categoryCountMap;
+		}
+
+
 	
 }

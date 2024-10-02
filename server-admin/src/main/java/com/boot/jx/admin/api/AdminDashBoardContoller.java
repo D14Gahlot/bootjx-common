@@ -16,6 +16,7 @@ import com.boot.jx.admin.dto.DashBoardResponseDto;
 import com.boot.jx.admin.dto.MonthDtlsDto;
 import com.boot.jx.admin.dto.TagDocumentDto;
 import com.boot.jx.admin.dto.TagDocumentLst;
+import com.boot.jx.admin.dto.WabaSummary;
 import com.boot.jx.admin.dto.WabaSummaryDocDto;
 import com.boot.jx.admin.manager.AdminDashBoardManager;
 import com.boot.jx.admin.manager.AgentAnalyticsManager;
@@ -119,11 +120,9 @@ public class AdminDashBoardContoller {
 
 	@ResponseBody
 	@RequestMapping(value = { "/admin/monthwise-summary/waba" }, method = { RequestMethod.GET })
-	public ApiResponse<WabaSummaryDocDto, Object> getMonthWiseWabaSummary(long timestamp) {
-		List<WabaSummaryDocDto> summary = adminDbMgr.wabaSummary(timestamp);
-
-		
-		return ApiResponse.buildResults(summary);
+	public ApiResponse<WabaSummary, Object> getMonthWiseWabaSummary(long timestamp) {
+		WabaSummary summary = adminDbMgr.wabaSummary(timestamp);
+		return ApiResponse.buildResult(summary);
 	}
 	
 
