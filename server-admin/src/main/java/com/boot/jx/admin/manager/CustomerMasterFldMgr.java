@@ -609,17 +609,19 @@ public class CustomerMasterFldMgr {
 			if (ArgUtil.is(filDoc)) {
 			filDoc.setFilterName(reqDto.getFilterName());
 			filDoc.setFilterCriteria(reqDto.getFilterCriteria());
+			filDoc.set_filterCriteria(reqDto.get_filterCriteria());
 			filDoc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			commonMongoTemplate.save(filDoc);
 			}
 		}else {
 			filDoc.setFilterName(reqDto.getFilterName());
 			filDoc.setFilterCriteria(reqDto.getFilterCriteria());
+			filDoc.set_filterCriteria(reqDto.get_filterCriteria());
 			filDoc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			commonMongoTemplate.save(filDoc);
 		}
 		
-		return fetchProfileFilterGroup(null,null,10,0,null,null);
+		return fetchProfileFilterGroup(filDoc.getId(),null,10,0,null,null);
 	}
 
 	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {

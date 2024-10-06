@@ -3,6 +3,8 @@ package com.boot.jx.postman.doc;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 @Document(collection = "MASTER_PROFILE_FILTER")
@@ -13,6 +15,7 @@ public class ProfileFilterMasterDoc extends TimeStampDoc {
 	String id;
 	String filterName;
 	String filterCriteria;
+	List<String> _filterCriteria =new ArrayList<>();
 	
 	
 	public String getId() {
@@ -32,6 +35,12 @@ public class ProfileFilterMasterDoc extends TimeStampDoc {
 	}
 	public void setFilterCriteria(String filterCriteria) {
 		this.filterCriteria = filterCriteria;
+	}
+	public List<String> get_filterCriteria() {
+		return _filterCriteria;
+	}
+	public void set_filterCriteria(List<String> _filterCriteria) {
+		this._filterCriteria = _filterCriteria;
 	}
 	
 	
