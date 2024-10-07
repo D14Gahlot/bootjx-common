@@ -248,9 +248,9 @@ public class ConfigConstants {
 								new ConfigOption(200).label("200 Chats"))
 						.defaultValue(100).group(GROUP_AGENT).hidden()),
 
-		AGENT_MESSAGE_HELPER(new ConfigMeta("ChatGPT-based helper for outbound agents", "agent.message.helper")
-				.desc("The agent will use ChatGPT to help draft a message before sending it . Please ensure that the API keys and ORG ID have already been set up in 'Token & Keys'").optionsOnOff()
-				.group(GROUP_AGENT)),
+		AGENT_MESSAGE_HELPER(new ConfigMeta("ChatGPT-based helper for outbound agents", "agent.message.helper").desc(
+				"The agent will use ChatGPT to help draft a message before sending it . Please ensure that the API keys and ORG ID have already been set up in 'Token & Keys'")
+				.optionsOnOff().group(GROUP_AGENT)),
 
 		POSTMAN_PHONEBOOK_REGION(new ConfigMeta("Default ISD Country", "postman.phonebook.region")
 				.optionValues(PHONE_NUMBER_UTIL.getSupportedRegions().toArray()).defaultValue("IN")),
@@ -364,6 +364,8 @@ public class ConfigConstants {
 
 		MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
 				.group(APP_MODULES)),
+
+		AGENT_RM(new ConfigMeta("Relationship Managment", "feature.mngmnt.rm.agent").optionsOnOff().group(GROUP_AGENT)),
 
 		// Ends here
 		;
