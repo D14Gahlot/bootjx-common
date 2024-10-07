@@ -365,7 +365,7 @@ public class ConfigConstants {
 		MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
 				.group(APP_MODULES)),
 
-		AGENT_RM(new ConfigMeta("Relationship Managment", "feature.mngmnt.rm.agent").optionsOnOff().group(GROUP_AGENT)),
+		AGENT_RM(new ConfigMeta("Relationship Managment", "feature.agent.rm").optionsOnOff().group(GROUP_AGENT)),
 
 		// Ends here
 		;
