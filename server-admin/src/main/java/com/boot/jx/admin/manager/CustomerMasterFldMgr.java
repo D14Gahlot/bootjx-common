@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -556,9 +557,6 @@ public class CustomerMasterFldMgr {
 	         
 	    }
 
-	    
-	   
-	    
 	    LOGGER.info("QB {} " + JsonUtil.toJson(qb));
 	    return contactStore.find(qb);
 	}
@@ -621,8 +619,10 @@ public class CustomerMasterFldMgr {
 			filDoc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			commonMongoTemplate.save(filDoc);
 		}
-		
-		return fetchProfileFilterGroup(filDoc.getId(),null,10,0,null,null);
+		List<ProfileFilterMasterDoc> lst =new ArrayList<>();
+		lst.add(filDoc);
+		//return fetchProfileFilterGroup(filDoc.getId(),null,10,0,null,null);
+		return lst;
 	}
 
 	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
@@ -640,14 +640,15 @@ public class CustomerMasterFldMgr {
 		    String sortBy = ArgUtil.parseAsString(sortby, "created.stamp");
 		    String sortDir = ArgUtil.parseAsString(sortdir, "DESC");
 		
-		    MongoQueryBuilder<ProfileFilterMasterDoc> qb = MongoQueryBuilder.collection(ProfileFilterMasterDoc.class).page(pageNo,
-					pageSize);
-			if (ArgUtil.is(id)) {
+		    MongoQueryBuilder<ProfileFilterMasterDoc> qb = MongoQueryBuilder.collection(ProfileFilterMasterDoc.class)
+		    		 .sortBy(sortBy,Direction.fromString(sortDir))
+		    		 .page(pageNo,pageSize);
+			if (!StringUtils.isBlank(id)) {
 				qb = qb.whereId(id);
 			}
-			if (ArgUtil.is(sortBy)) {
-				qb = qb.sortBy(sortBy, Direction.fromString(sortDir));
-			}
+//			if (ArgUtil.is(sortBy)) {
+//				qb = qb.sortBy(sortBy, Direction.fromString(sortDir));
+//			}
 			return contactStore.find(qb);
 	}
 
