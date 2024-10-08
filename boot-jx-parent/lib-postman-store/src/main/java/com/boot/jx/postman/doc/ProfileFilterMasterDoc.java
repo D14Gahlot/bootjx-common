@@ -4,18 +4,24 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 @Document(collection = "MASTER_PROFILE_FILTER")
 @TypeAlias("ProfileFilterMaster")
-public class ProfileFilterMasterDoc extends TimeStampDoc {
+public class ProfileFilterMasterDoc extends TimeStampDoc implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9013008834161079131L;
 	
 	@Id
 	String id;
 	String filterName;
 	String filterCriteria;
-	List<String> _filterCriteria =new ArrayList<>();
+	List<List<Object>> _filterCriteria =new ArrayList<>();
 	
 	
 	public String getId() {
@@ -36,12 +42,13 @@ public class ProfileFilterMasterDoc extends TimeStampDoc {
 	public void setFilterCriteria(String filterCriteria) {
 		this.filterCriteria = filterCriteria;
 	}
-	public List<String> get_filterCriteria() {
+	public List<List<Object>> get_filterCriteria() {
 		return _filterCriteria;
 	}
-	public void set_filterCriteria(List<String> _filterCriteria) {
+	public void set_filterCriteria(List<List<Object>> _filterCriteria) {
 		this._filterCriteria = _filterCriteria;
 	}
+	
 	
 	
 }

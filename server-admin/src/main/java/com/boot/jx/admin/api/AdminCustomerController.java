@@ -142,7 +142,9 @@ public class AdminCustomerController {
 
 	@RequestMapping(value = "/profile/filter", method = { RequestMethod.DELETE })
 	@JsonView(PMEnvironment.PublicProperty.class)
-	public ApiResponse<ProfileFilterMasterDoc, Object> deleteProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
+	public ApiResponse<ProfileFilterMasterDoc, Object> deleteProfileFilterGroup(@RequestParam(value = "id", required = true) String id) {
+		ProfileFilterMasterDoc reqDto=new ProfileFilterMasterDoc();
+		reqDto.setId(id);
 		return ApiResponse.buildResults(cusProfileService.deleteProfileFilterGroup(reqDto));
 	}
 
