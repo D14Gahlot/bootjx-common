@@ -57,9 +57,8 @@ public class FeedbackController extends CommonBotController {
 			inboxMessage.replyTo().put("type", "feedback");
 			sessionStore.updateFirst(
 					MQB.select(MessageDoc.class, MessageStore.getCollectionName(inboxMessage.contact().type()))
-							.whereId(inboxMessage.id()).set("replyTo.type", "feedback"));
+							.whereIdSafe(inboxMessage.id()).set("replyTo.type", "feedback"));
 		}
-
 		if (StringUtils.isNumeric(text)) {
 			context().session().set("feedback.score", ArgUtil.parseAsDouble(text));
 		} else {
