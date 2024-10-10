@@ -24,6 +24,10 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 @Component
 public class StarterDocKit {
@@ -96,6 +100,21 @@ public class StarterDocKit {
 			fiedMaster.setPredefined(true);
 			fiedMaster.setRequired(false);
 			fiedMaster.setCreated(TimeStampIndex.now());
+			if(ArgUtil.is(code) && code.equalsIgnoreCase("gender")) {
+				List<Object> defaultOptions = new ArrayList<>();
+				// Option 1: Male
+			    Map<String, String> maleOption = new HashMap<>();
+			    maleOption.put("label", "Male");
+			    maleOption.put("value", "male");
+			    defaultOptions.add(maleOption);
+			    // Option 2: Female
+			    Map<String, String> femaleOption = new HashMap<>();
+			    femaleOption.put("label", "Female");
+			    femaleOption.put("value", "female");
+			    defaultOptions.add(femaleOption);
+			    // Set the default options in the fieldMaster
+			    fiedMaster.setPossibleOptions(defaultOptions);
+			}
 		}
 
 		if (ArgUtil.is(fiedMaster)) {
@@ -113,8 +132,8 @@ public class StarterDocKit {
 		String predefiend_customer_filed_version = "v1.4";
 		if (!version.is(predefiend_customer_filed_version)) {
 			createPredefinedMstField("title", "Title", "text");
-			createPredefinedMstField("dob", "Date of Birth", "text");
-			createPredefinedMstField("gender", "Gender", "text");
+			createPredefinedMstField("dob", "Date of Birth", "date");
+			createPredefinedMstField("gender", "Gender", "dropdown");
 			createPredefinedMstField("alt_phones", "Alternate phone", "phone");
 			createPredefinedMstField("alt_emails", "Alternate email", "email");
 			version.setValue(predefiend_customer_filed_version);
