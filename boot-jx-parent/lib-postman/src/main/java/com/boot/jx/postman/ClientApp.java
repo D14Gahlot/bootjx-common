@@ -55,6 +55,8 @@ public interface ClientApp extends Serializable, AuditIdentifier {
 
 	boolean isAgentApp();
 
+	boolean isFeedbackApp();
+
 	boolean equals(CHAT_MODE mode);
 
 	boolean equals(APP_TYPE appType);
