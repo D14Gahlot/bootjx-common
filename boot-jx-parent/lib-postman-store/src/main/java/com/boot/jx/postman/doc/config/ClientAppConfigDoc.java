@@ -218,7 +218,7 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 
 	@Override
 	public boolean isFeedbackApp() {
-		return ArgUtil.isEqual(getAppMode(), APP_TYPE.FEEDBACK, APP_TYPE.FEEDBACK_V2);
+		return ArgUtil.isEqual(getAppType(), APP_TYPE.FEEDBACK, APP_TYPE.FEEDBACK_V2);
 	}
 
 	@Override
