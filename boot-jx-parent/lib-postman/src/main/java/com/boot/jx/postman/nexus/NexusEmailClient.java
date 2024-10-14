@@ -18,7 +18,7 @@ import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 
 @Component
-@ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.OUTLOOK)
+@ConnectorMapping(contactType = ContactType.EMAIL, channel = { CHANNEL_TYPE.OUTLOOK, CHANNEL_TYPE.GMAIL })
 public class NexusEmailClient implements ChannelClient {
 
 	@Autowired
@@ -30,7 +30,9 @@ public class NexusEmailClient implements ChannelClient {
 	@Async
 	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
 	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-		restService.ajax(nexusUrl).path("/email/api/v1/outlook/" + channelConfig.getChannelId() + "/message/send")
+		restService.ajax(nexusUrl)
+				.path("/email/api/v1/" + channelConfig.getChannelType() + "/" + channelConfig.getChannelId()
+						+ "/message/send")
 				.postJson(MapModel.createInstance().put("refId", outboxMessage.getMessageId())
 						.put("messageId", outboxMessage.getMessageId())
 						.put("messageIdRef", outboxMessage.getMessageIdRef())

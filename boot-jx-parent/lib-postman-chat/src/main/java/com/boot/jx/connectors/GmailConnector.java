@@ -1,9 +1,12 @@
 package com.boot.jx.connectors;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,20 +51,33 @@ import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.DateUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
-import com.boot.utils.TimeUtils.TimePeriod;
 import com.boot.utils.Urly;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
 @Component
 @ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.GMAIL)
 public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailPlugin> {
 
 	private static Logger LOGGER = LoggerService.getLogger(GmailConnector.class);
-	private static final String AUTHORITY = "https://login.microsoftonline.com";
-	private static final String GRAPH_API = "https://graph.microsoft.com";
-	private static final String AUTHORIZE_URL = AUTHORITY + "/common/oauth2/v2.0/authorize";
-	private static final String AUTHORIZE_TOKEN = AUTHORITY + "/common/oauth2/v2.0/token";
+//	private static final String AUTHORITY = "https://login.microsoftonline.com";
+//	private static final String GRAPH_API = "https://graph.microsoft.com";
+//	private static final String AUTHORIZE_URL = AUTHORITY + "/common/oauth2/v2.0/authorize";
+//	private static final String AUTHORIZE_TOKEN = AUTHORITY + "/common/oauth2/v2.0/token";
+
+	private static final String GOOGLE = "https://accounts.google.com";
+	private static final String GOOGLE_OAUTH_URL = GOOGLE + "/o/oauth2/v2/auth";
+	private static final String FACEBOOK_GRAPHAPI = "https://oauth2.googleapis.com";
+	private static final String AUTHORIZE_TOKEN = FACEBOOK_GRAPHAPI + "/token";
+
+	private static final String[] SCOPES = { "https://www.googleapis.com/auth/gmail.modify", // Modify Gmail
+			"https://www.googleapis.com/auth/pubsub", // Pub/Sub access
+			"https://www.googleapis.com/auth/gmail.send" // Send emails
+	};
 
 	@Autowired
 	private RestService restService;
@@ -81,18 +97,19 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 	@Override
 	public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigLogger, AuthState state)
 			throws URISyntaxException, MalformedURLException {
-		String redirectUri = String.format("%s%s/ext/setup/channel/callback/outlook", commonHttpRequest.getServerHost(),
+		String redirectUri = String.format("%s%s/ext/setup/channel/callback/gmail", commonHttpRequest.getServerHost(),
 				appConfig.getAppPrefix(), environment.keyEntry("mry.prop.service.server").asString());
 		/// &state=fooobar&scope=r_liteprofile%20r_emailaddress%20w_member_social
 		state.setRedirectUrl(redirectUri);
 
-		return Urly.parse(AUTHORIZE_URL).queryParam("response_type", "code") //
-				.queryParam("client_id", setup.getOutlook().getMasterClientId()) //
-				.queryParam("redirect_uri", redirectUri).queryParam("state", state.toString()) // State
-				.queryParam("nonce", state.getNonce()) //
-				.queryParam("scope", "offline_access user.read mail.read mail.send Mail.ReadWrite") //
-				.queryParam("response_mode", "form_post") //
-				.getURL();
+		return Urly.parse(GOOGLE_OAUTH_URL).queryParam("response_type", "code")
+				.queryParam("client_id", setup.getGmail().getMasterClientId()) // CLIENT_ID
+				.queryParam("access_type", "offline") // access_type
+				.queryParam("scope", String.join(" ", SCOPES)) //
+				.queryParam("redirect_uri", redirectUri) //
+				.queryParam("prompt", "consent") //
+				.queryParam("state", state.toString()) //
+				.queryParam("nonce", state.getNonce()).getURL();
 	}
 
 	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigLogger channelConfigLogger,
@@ -101,33 +118,74 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 		try {
 
 			MapModel resp = MapModel.from(channelConfigLogger.getResp());
-			MapModel tokenResponse = restService.ajax(AUTHORIZE_TOKEN)//
-					.field("grant_type", "authorization_code")//
-					.field("code", resp.pathEntry("authResponse.code").asString())//
-					.field("client_id", setup.getOutlook().getMasterClientId())//
-					.field("client_secret", setup.getOutlook().getMasterClientSecret())//
-					.field("redirect_uri", state.getRedirectUrl()).submit().asMapModel();
 
-			channelConfigLogger.log("oauth2/v2.0/token", tokenResponse.toMap());
+			MapPathEntry token = resp.pathEntry("authResponse.credential");
+			MapPathEntry stateStr = resp.pathEntry("authResponse.state");
+			MapPathEntry code = resp.pathEntry("authResponse.code");
+			MapPathEntry scope = resp.pathEntry("authResponse.scope");
 
-			String accessToken = tokenResponse.keyEntry("access_token").asString();
-			String refreshToken = tokenResponse.keyEntry("refresh_token").asString();
+			String redirectUri = String.format("%s%s/ext/setup/channel/callback/gmail",
+					commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
+					environment.keyEntry("mry.prop.service.server").asString());
+			if (ArgUtil.is(state.getRedirectUrl())) {
+				redirectUri = state.getRedirectUrl();
+			} else if (ArgUtil.is(stateStr)) {
+				AuthState newstate = AuthState.fromString(stateStr.toString());
+				redirectUri = newstate.getRedirectUrl();
+			}
 
-			MapModel profileResponse = restService.ajax("https://graph.microsoft.com/v1.0/me")
-					.header("Authorization", "Bearer " + accessToken).get().asMapModel();
+			String clientId = setup.getGmail().getMasterClientId();
+			String clientSecret = setup.getGmail().getMasterClientSecret();
 
-			channelConfigLogger.log("/me", profileResponse.toMap());
+			if (ArgUtil.is(code.exists())) {
+				MapModel tokenResponse = restService.ajax(AUTHORIZE_TOKEN)//
+						.field("code", code)//
+						.field("client_id", clientId)//
+						.field("client_secret", clientSecret)//
+						.field("grant_type", "authorization_code")//
+						.field("redirect_uri", redirectUri)//
+						.submit().asMapModel();
+				channelConfigLogger.log("oauth2/v2.0/token", tokenResponse.toMap());
+				token = tokenResponse.keyEntry("id_token");
 
-			ChannelConfig channel = new ChannelConfig();
-			channel.setApiVersion("v3");
-			channel.setOutlook(new OutlookConfigDetails());
-			channel.getOutlook().setAccessToken(accessToken);
-			channel.getOutlook().setRefreshToken(refreshToken);
-			channel.getOutlook().setEmail(profileResponse.keyEntry("mail").orKeyEntry("userPrincipalName").asString());
-			channel.getOutlook().setMasterClientId(setup.getOutlook().getMasterClientId());
-			channel.setName(profileResponse.keyEntry("displayName").asString());
+			}
 
-			channels.add(channel);
+			if (ArgUtil.is(token)) {
+				GsonFactory jacksonFactory = new GsonFactory();
+				NetHttpTransport netHttpTransport = new NetHttpTransport();
+
+				GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(netHttpTransport, jacksonFactory)
+						.setAudience(Collections.singletonList(clientId)).build();
+
+				GoogleIdToken idToken = null;
+				try {
+					idToken = verifier.verify(token.asString());
+					if (idToken != null) {
+						GoogleIdToken.Payload payload = idToken.getPayload();
+
+						channelConfigLogger.log("/me", JsonUtil.toJsonMap(payload));
+
+						ChannelConfig channel = new ChannelConfig();
+						channel.setApiVersion("v3");
+						channel.setOutlook(new OutlookConfigDetails());
+						// channel.getOutlook().setAccessToken(accessToken);
+						// channel.getOutlook().setRefreshToken(refreshToken);
+						channel.getOutlook().setEmail(payload.getEmail());
+						channel.getOutlook().setMasterClientId(setup.getOutlook().getMasterClientId());
+						channel.setName(ArgUtil.parseAsString(payload.get("name")));
+
+						channels.add(channel);
+
+					} else {
+						LOGGER.warn("Invalid Google ID token.");
+					}
+				} catch (GeneralSecurityException e) {
+					LOGGER.warn(e.getLocalizedMessage());
+				} catch (IOException e) {
+					LOGGER.warn(e.getLocalizedMessage());
+				}
+			}
+
 		} catch (ApiHttpException e) {
 			channelConfigLogger.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
 		}
@@ -141,49 +199,6 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 		if (!ArgUtil.is(channelConfig.getMeta())) {
 			meta = new HashMap<String, Object>();
 		}
-
-		try {
-			String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, "nexus/email/api/v1",
-					MapModel.createInstance().put("folder", "inbox").toMap());
-			MapModel inbox = restService.ajax(GRAPH_API).path("/v1.0/subscriptions")
-					.authBearer(channelConfig.getOutlook().getAccessToken())
-					.postJson(MapModel.createInstance().put("changeType", "created").put("notificationUrl", webhookUrl)
-							.put("lifecycleNotificationUrl", webhookUrl)
-							.put("resource", "/me/mailFolders('inbox')/messages")
-							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1hour")))
-							.put("clientState", channelConfig.getOutlook().getMasterClientId())
-							.put("latestSupportedTlsVersion", "v1_2").toMap())
-					.asMapModel();
-
-			channelConfigLogger.log("/subscriptions?inbox", inbox.toMap());
-
-			if (inbox.containsKey("data")) {
-				meta.put("inbox_subscription", inbox.keyEntry("data").value());
-			}
-
-			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, "nexus/email/api/v1",
-					MapModel.createInstance().put("folder", "SentItems").toMap());
-
-			MapModel sentItems = restService.ajax(GRAPH_API).path("/v1.0/subscriptions")
-					.authBearer(channelConfig.getOutlook().getAccessToken())
-					.postJson(MapModel.createInstance().put("changeType", "created").put("notificationUrl", webhookUrl)
-							.put("lifecycleNotificationUrl", webhookUrl)
-							.put("resource", "/me/mailFolders('SentItems')/messages")
-							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1hour")))
-							.put("clientState", channelConfig.getOutlook().getMasterClientId())
-							.put("latestSupportedTlsVersion", "v1_2").toMap())
-					.asMapModel();
-
-			channelConfigLogger.log("/subscriptions?SentItems", sentItems.toMap());
-
-			if (sentItems.containsKey("data")) {
-				meta.put("sent_subscription", sentItems.keyEntry("data").value());
-			}
-		} catch (ApiHttpException e) {
-			LOGGER.error("onChannelUpdate", e);
-			channelConfigLogger.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
-		}
-
 		channelConfig.setMeta(meta);
 	}
 
