@@ -349,6 +349,9 @@ public class ConfigConstants {
 		CHANNEL_AUTOCONFIGURE_OUTLOOK(new ConfigMeta("AutoConfigure Outlook", "feature.channel.autoconfigure.outlook")
 				.optionsOnOff().group(CHANNELS)),
 
+		CHANNEL_AUTOCONFIGURE_GMAIL(new ConfigMeta("AutoConfigure Gmail", "feature.channel.autoconfigure.gmail")
+				.optionsOnOff().group(CHANNELS)),
+
 		CHANNEL_BROADCAST_TELEGRAM(new ConfigMeta("AutoConfigure Telegram", "feature.channel.broadcast.telegram")
 				.optionsOnOff().group(CHANNELS).defaultFalse()),
 		CHANNEL_BROADCAST_WHATSAPP(new ConfigMeta("Boradcast WhatsApp", "feature.channel.broadcast.whatsapp")
