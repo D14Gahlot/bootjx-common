@@ -8,6 +8,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
+import com.boot.jx.postman.plugin.GmailPlugin.GmailConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.plugin.OAPlugin.OAConfigDetails;
 import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
@@ -41,6 +42,7 @@ public class ChannelConfig extends AChannelConfig {
 	private WACFBConfigDetails wacfb;
 	private OAConfigDetails oa;
 	private OutlookConfigDetails outlook;
+	private GmailConfigDetails gmail;
 
 	private boolean isAutoCreated;
 	private boolean isMaster;
@@ -339,6 +341,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setDomainProxy(String domainProxy) {
 		this.domainProxy = domainProxy;
+	}
+
+	public GmailConfigDetails getGmail() {
+		return gmail;
+	}
+
+	public void setGmail(GmailConfigDetails gmail) {
+		this.gmail = gmail;
 	}
 
 }
