@@ -212,7 +212,7 @@ public class ChannelSetupController {
 				MapModel.createInstance().put(JsonPath.at("authResponse.code"), code)
 						.put(JsonPath.at("authResponse.token"), token).put(JsonPath.at("authResponse.scope"), scope)
 						.put(JsonPath.at("authResponse.state"), state).toJson());
-		return this.setupChannel(CHANNEL_TYPE_ENUM.outlook, UniqueID.generateString62(), ContactType.EMAIL,
+		return this.setupChannel(CHANNEL_TYPE_ENUM.gmail, UniqueID.generateString62(), ContactType.EMAIL,
 				Constants.BLANK, model);
 	}
 
