@@ -38,7 +38,8 @@ import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.nexus.NexusEmailClient;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
-import com.boot.jx.postman.plugin.OutlookPlugin;
+import com.boot.jx.postman.plugin.GmailPlugin;
+import com.boot.jx.postman.plugin.GmailPlugin.GmailConfigDetails;
 import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
@@ -54,7 +55,7 @@ import com.boot.utils.Urly;
 
 @Component
 @ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.GMAIL)
-public class GmailConnector extends AbstractConnector<OutlookConfigDetails, OutlookPlugin> {
+public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailPlugin> {
 
 	private static Logger LOGGER = LoggerService.getLogger(GmailConnector.class);
 	private static final String AUTHORITY = "https://login.microsoftonline.com";
