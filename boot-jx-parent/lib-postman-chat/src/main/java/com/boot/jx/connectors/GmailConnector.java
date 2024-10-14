@@ -168,10 +168,10 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 						ChannelConfig channel = new ChannelConfig();
 						channel.setApiVersion("v3");
 						channel.setOutlook(new OutlookConfigDetails());
-						// channel.getOutlook().setAccessToken(accessToken);
-						// channel.getOutlook().setRefreshToken(refreshToken);
-						channel.getOutlook().setEmail(payload.getEmail());
-						channel.getOutlook().setMasterClientId(setup.getOutlook().getMasterClientId());
+						// channel.getGmail().setAccessToken(accessToken);
+						// channel.getGmail().setRefreshToken(refreshToken);
+						channel.getGmail().setEmail(payload.getEmail());
+						channel.getGmail().setMasterClientId(setup.getGmail().getMasterClientId());
 						channel.setName(ArgUtil.parseAsString(payload.get("name")));
 
 						channels.add(channel);
