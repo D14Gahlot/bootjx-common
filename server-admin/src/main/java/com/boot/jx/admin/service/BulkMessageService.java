@@ -92,6 +92,13 @@ public class BulkMessageService extends BatchJobExecuter {
 		}
 	}
 
+	public void cancelJobAndTriggerSummary(BatchJob job) {
+		cancelJob(job);
+		tunnelService.task("CAMPAIGN_CANCELLED",
+				MapModel.createInstance().putAll(job.data()).put("bulkSessionId", job.getJobId()).toMap());
+	}
+	
+	
 	public BulkSessionDoc send(OutboxMessage bulkMessage, ChronoScheduler scheduler) throws NumberParseException {
 
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
