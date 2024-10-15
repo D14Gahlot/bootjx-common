@@ -137,6 +137,11 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 			String clientId = setup.getGmail().getMasterClientId();
 			String clientSecret = setup.getGmail().getMasterClientSecret();
 
+			ChannelConfig channel = new ChannelConfig();
+			channel.setApiVersion("v3");
+			channel.setGmail(new GmailConfigDetails());
+			channel.getGmail().setMasterClientId(setup.getGmail().getMasterClientId());
+
 			if (ArgUtil.is(code.exists())) {
 				MapModel tokenResponse = restService.ajax(AUTHORIZE_TOKEN)//
 						.field("code", code.asString())//
@@ -146,8 +151,10 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 						.field("redirect_uri", redirectUri)//
 						.submit().asMapModel();
 				channelConfigLogger.log("oauth2/v2.0/token", tokenResponse.toMap());
-				token = tokenResponse.keyEntry("id_token");
+				token = tokenResponse.keyEntry("access_token");
 
+				channel.getGmail().setAccessToken(token.asString());
+				channel.getGmail().setRefreshToken(tokenResponse.keyEntry("refresh_token").asString());
 			}
 
 			if (ArgUtil.is(token)) {
@@ -165,13 +172,10 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 						channelConfigLogger.log("/me", JsonUtil.toJsonMap(payload));
 
-						ChannelConfig channel = new ChannelConfig();
-						channel.setApiVersion("v3");
-						channel.setOutlook(new OutlookConfigDetails());
 						// channel.getGmail().setAccessToken(accessToken);
 						// channel.getGmail().setRefreshToken(refreshToken);
 						channel.getGmail().setEmail(payload.getEmail());
-						channel.getGmail().setMasterClientId(setup.getGmail().getMasterClientId());
+
 						channel.setName(ArgUtil.parseAsString(payload.get("name")));
 
 						channels.add(channel);
