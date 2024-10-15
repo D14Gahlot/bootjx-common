@@ -76,8 +76,8 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 	private static final String[] SCOPES = { "https://www.googleapis.com/auth/gmail.modify", // Modify Gmail
 			"https://www.googleapis.com/auth/pubsub", // Pub/Sub access
-			"https://www.googleapis.com/auth/gmail.send" // Send emails
-	};
+			"https://www.googleapis.com/auth/gmail.send", // Send emails
+			"openid", "email", "profile" };
 
 	@Autowired
 	private RestService restService;
