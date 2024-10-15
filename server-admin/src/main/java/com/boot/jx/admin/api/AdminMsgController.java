@@ -419,11 +419,15 @@ public class AdminMsgController {
 			 bulkDoc = CollectionUtil.getOne(mongoTemplate
 					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 			if(ArgUtil.is(bulkDoc) && ArgUtil.is(bulkDoc.getScheduler()) && bulkMessage.cancelExisting==true) {
+				if(ArgUtil.is(bulkMessage.getScheduler())) {
+					bulkDoc.setScheduler(bulkMessage.getScheduler());
+					mongoTemplate.save(bulkDoc);
+				}
 				bulkMessageService.registerJob(bulkDoc.getJob(),bulkMessage.getScheduler());
-				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
 			}else {
 				bulkMessageService.registerJob(bulkDoc.getJob(),bulkMessage.getScheduler());
-				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been re-send");
 			}
 		}
 		 return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
