@@ -65,6 +65,8 @@ public class LinqContrller {
 		if (ArgUtil.is(info)) {
 			BusinessUserDoc accountDoc = accountStore.findUserByEmail(info.getEmail());
 			if (ArgUtil.is(accountDoc)) {
+				accountDoc.getContact().setPicture(info.getPicture());
+				accountStore.save(accountDoc);
 				sessionService.login(accountDoc, request);
 			} else {
 
