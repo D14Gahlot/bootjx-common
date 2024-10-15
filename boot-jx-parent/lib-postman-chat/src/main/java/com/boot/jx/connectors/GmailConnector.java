@@ -139,7 +139,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 			if (ArgUtil.is(code.exists())) {
 				MapModel tokenResponse = restService.ajax(AUTHORIZE_TOKEN)//
-						.field("code", code)//
+						.field("code", code.asString())//
 						.field("client_id", clientId)//
 						.field("client_secret", clientSecret)//
 						.field("grant_type", "authorization_code")//
