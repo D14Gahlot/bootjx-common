@@ -42,6 +42,17 @@ public class NexusEmailClient implements ChannelClient {
 		return outboxMessage;
 	}
 
+	@Async
+	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+	public ChannelConfig subscribe(ChannelConfig channelConfig) {
+		restService.ajax(nexusUrl)
+				.path("/email/api/v1/" + channelConfig.getChannelType() + "/" + channelConfig.getChannelId()
+						+ "/subscription/create")
+				.field("lane", channelConfig.getLane()).field("channelId", channelConfig.getChannelId()).submit()
+				.asNone();
+		return channelConfig;
+	}
+
 	@Override
 	public MapModel updateTemplates(ChannelConfig channelConfig, MapModel from) {
 		// TODO Auto-generated method stub

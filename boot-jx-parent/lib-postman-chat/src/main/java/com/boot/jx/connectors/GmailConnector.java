@@ -204,6 +204,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 		if (!ArgUtil.is(channelConfig.getMeta())) {
 			meta = new HashMap<String, Object>();
 		}
+		nexusEmailClient.subscribe(channelConfig);
 		channelConfig.setMeta(meta);
 	}
 
