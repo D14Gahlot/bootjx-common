@@ -34,13 +34,13 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 		@ConfigMetaProperty(path = "sms.number", title = "My phone number / Header / Sender", defaultValue = "ABCLTD")
 		private String number;
 
-		@ConfigMetaProperty(path = "sms.provider", title = "SMS Provider", defaultValue = "TEXTLOCAL",
-				inputType = INPUT_TYPE.OPTIONS, optionsSource = "data:/config/sms_provider")
-		private String provider;
-
 		@ConfigMetaProperty(path = "sms.country", title = "SMS Country", defaultValue = "IN", searchable = true,
 				filterable = true, inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/pub/meta/options/isdcode")
 		private String country;
+
+		@ConfigMetaProperty(path = "sms.provider", title = "SMS Provider", defaultValue = "TEXTLOCAL",
+				inputType = INPUT_TYPE.OPTIONS, optionsSource = "data:/config/sms_provider")
+		private String provider;
 
 		@ConfigMetaProperty(path = "sms.pub", writeonly = false, title = "Identifiers JSON", hidden = false,
 				desc = "A json with all public identifiers to be used in api request", inputType = INPUT_TYPE.JSON)
