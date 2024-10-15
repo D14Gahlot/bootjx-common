@@ -42,17 +42,17 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 				filterable = true, inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/pub/meta/options/isdcode")
 		private String country;
 
-		@ConfigMetaProperty(path = "sms.pub", writeonly = false, title = "Identifiers JSON", hidden = true,
+		@ConfigMetaProperty(path = "sms.pub", writeonly = false, title = "Identifiers JSON", hidden = false,
 				desc = "A json with all public identifiers to be used in api request", inputType = INPUT_TYPE.JSON)
 		private Map<String, Object> pub;
 
 		@JsonView(PMEnvironment.ProtectedProperty.class)
-		@ConfigMetaProperty(path = "sms.secret", writeonly = false, title = "Secret Keys JSON", hidden = true,
+		@ConfigMetaProperty(path = "sms.secret", writeonly = false, title = "Secret Keys JSON", hidden = false,
 				desc = "A json with all secret keys to be used in api request", inputType = INPUT_TYPE.JSON)
 		private Map<String, Object> secret;
 
 		@ConfigMetaProperty(path = "sms.request", pathRaw = "sms.request.bash", writeonly = false,
-				title = "Request Object", hidden = true, desc = "Request in curl format", optional = true,
+				title = "Request Object", hidden = false, desc = "Request in curl format", optional = true,
 				inputType = INPUT_TYPE.TEXTAREA)
 		private CurlCommand request;
 
