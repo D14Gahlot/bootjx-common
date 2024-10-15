@@ -134,19 +134,16 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 				redirectUri = newstate.getRedirectUrl();
 			}
 
-			String clientId = setup.getGmail().getMasterClientId();
-			String clientSecret = setup.getGmail().getMasterClientSecret();
-
 			ChannelConfig channel = new ChannelConfig();
 			channel.setApiVersion("v3");
 			channel.setGmail(new GmailConfigDetails());
 			channel.getGmail().setMasterClientId(setup.getGmail().getMasterClientId());
 
-			if (ArgUtil.is(code.exists())) {
+			if (code.exists()) {
 				MapModel tokenResponse = restService.ajax(AUTHORIZE_TOKEN)//
 						.field("code", code.asString())//
-						.field("client_id", clientId)//
-						.field("client_secret", clientSecret)//
+						.field("client_id", setup.getGmail().getMasterClientId())//
+						.field("client_secret", setup.getGmail().getMasterClientSecret())//
 						.field("grant_type", "authorization_code")//
 						.field("redirect_uri", redirectUri)//
 						.submit().asMapModel();
@@ -157,12 +154,12 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 				channel.getGmail().setRefreshToken(tokenResponse.keyEntry("refresh_token").asString());
 			}
 
-			if (ArgUtil.is(token)) {
+			if (token.exists()) {
 				GsonFactory jacksonFactory = new GsonFactory();
 				NetHttpTransport netHttpTransport = new NetHttpTransport();
 
 				GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(netHttpTransport, jacksonFactory)
-						.setAudience(Collections.singletonList(clientId)).build();
+						.setAudience(Collections.singletonList(setup.getGmail().getMasterClientId())).build();
 
 				GoogleIdToken idToken = null;
 				try {
@@ -192,6 +189,8 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 		} catch (ApiHttpException e) {
 			channelConfigLogger.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
+		} catch (Exception e) {
+			channelConfigLogger.log("exception", e);
 		}
 		commonMongoTemplate.save(channelConfigLogger);
 		return channels;
