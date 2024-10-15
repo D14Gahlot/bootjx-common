@@ -123,6 +123,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 			MapPathEntry stateStr = resp.pathEntry("authResponse.state");
 			MapPathEntry code = resp.pathEntry("authResponse.code");
 			MapPathEntry scope = resp.pathEntry("authResponse.scope");
+			MapPathEntry id_token = resp.pathEntry("authResponse.id_token");
 
 			String redirectUri = String.format("%s%s/ext/setup/channel/callback/gmail",
 					commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
@@ -149,6 +150,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 						.submit().asMapModel();
 				channelConfigLogger.log("oauth2/v2.0/token", tokenResponse.toMap());
 				token = tokenResponse.keyEntry("access_token");
+				id_token = tokenResponse.keyEntry("id_token");
 
 				channel.getGmail().setAccessToken(token.asString());
 				channel.getGmail().setRefreshToken(tokenResponse.keyEntry("refresh_token").asString());
@@ -163,7 +165,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 				GoogleIdToken idToken = null;
 				try {
-					idToken = verifier.verify(token.asString());
+					idToken = verifier.verify(id_token.asString());
 					if (idToken != null) {
 						GoogleIdToken.Payload payload = idToken.getPayload();
 
