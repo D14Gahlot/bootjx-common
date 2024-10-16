@@ -20,7 +20,6 @@ import com.boot.jx.AppConfigPackage.AppSharedConfigChange;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
-import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.logger.LoggerService;
@@ -382,7 +381,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		return list;
 	}
 
-	public List<Map<String, Object>> getFeature(FEATURES_KEY key) {
+	public List<Map<String, Object>> getFeature(CONFIG_FEATURES_KEY key) {
 		if (!ArgUtil.is(key)) {
 			return this.getFeature();
 		}
@@ -417,7 +416,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		this.refresh();
 	}
 
-	public void deletePerm(FEATURES_KEY key) {
+	public void deletePerm(CONFIG_FEATURES_KEY key) {
 		pmEnvironment.local().features().remove(key);
 		FeaturesConfigDoc prefsConfigDoc = new FeaturesConfigDoc();
 		prefsConfigDoc.setKey(key.getKey());

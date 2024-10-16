@@ -287,7 +287,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 				.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
 				.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode()) //
-				.debug(pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
+				.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
 
@@ -462,7 +462,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 						.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
 						.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode()) //
-						.debug(pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT)
+						.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT)
 								.is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
