@@ -290,6 +290,8 @@ public class ChannelConfig extends AChannelConfig {
 			return this.getTwitter();
 		case CHANNEL_TYPE.TELEGRAM:
 			return this.getTelegram();
+		case CHANNEL_TYPE.OUTLOOK:
+			return this.getOutlook();	
 		default:
 			return null;
 		}
