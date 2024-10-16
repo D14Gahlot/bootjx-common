@@ -253,10 +253,10 @@ public class ConfigManagerImpl implements ConfigManager {
 				.filter(patch -> "primary".equals(patch.getField())).findFirst();
 		if (primaryPatch.isPresent()) {
 			if (ArgUtil.is(thisConfig) && ArgUtil.is(thisConfig.getType())) {
-				configStore.updateMulti(MQB.select(clazz).where("type", thisConfig.getType()).set("primary", false));
+				//configStore.updateMulti(MQB.select(clazz).where("type", thisConfig.getType()).set("primary", false));
 			}
 		}
-		configStore.patch(patches, CompanyTokenKeyDoc.class);
+		//configStore.patch(patches, CompanyTokenKeyDoc.class);
 		this.refresh();
 		return thisConfig;
 	}
