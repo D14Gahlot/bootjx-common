@@ -587,6 +587,7 @@ public class WA360CloudClient implements ChannelClient {
 				intr.put("image", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
+				wa360OutBoundMedia.setFilename(null);
 				intr.put("video", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
