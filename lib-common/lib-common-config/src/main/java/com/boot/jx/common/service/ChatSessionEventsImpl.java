@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.chat.ChatSessionService;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.inbound.InBound.ChatSessionEvents;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMEnvironment;
@@ -34,7 +34,7 @@ public class ChatSessionEventsImpl implements ChatSessionEvents {
 	@Override
 	public NodeEntry<InBoundEvent> onSessionIdleOutBound(ChatSessionDoc session) {
 		PMConfigurationObject frwrdQueue = pmEnvironment
-				.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
+				.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
 		assignToQueue(session, frwrdQueue);
 		return null;
 	}
@@ -42,9 +42,9 @@ public class ChatSessionEventsImpl implements ChatSessionEvents {
 	@Override
 	public NodeEntry<InBoundEvent> onSessionIdleInBound(ChatSessionDoc session) {
 		ClientApp clientApp = pmEnvironment.config().clientApiKey(session.getAssignedToQueue());
-		MapEntry frwrdQueue = clientApp.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+		MapEntry frwrdQueue = clientApp.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 		if (!frwrdQueue.exists()) {
-			frwrdQueue = pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+			frwrdQueue = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 		}
 		assignToQueue(session, frwrdQueue);
 		return null;

@@ -1,5 +1,7 @@
 package com.boot.jx.admin.api;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,6 +57,7 @@ import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.tunnel.ChronoScheduler;
 import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.utils.ArgUtil;
@@ -406,6 +409,53 @@ public class AdminMsgController {
 		}
 	}
 
+	/** reschedule action : use /resend with a flag 'cancelExisting' **/
+	/**resend action : /resend > same req as /send along with bulkSessionId**/
+	@RequestMapping(value = "/api/message/bulk/push/re-send", method = { RequestMethod.POST })
+	public ApiResponse<BulkSessionDoc, Object> reSendBulkMessage(@RequestBody OutboxMessage bulkMessage)throws Exception {
+		BulkSessionDoc bulkDoc =null;
+		if(ArgUtil.is(bulkMessage) && ArgUtil.is(bulkMessage.getBulkSessionId()))
+		{	String bulkSessionId =bulkMessage.getBulkSessionId(); 
+			 bulkDoc = CollectionUtil.getOne(mongoTemplate
+					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+			if(ArgUtil.is(bulkDoc) && ArgUtil.is(bulkDoc.getScheduler()) && bulkMessage.cancelExisting==true) {
+				if(ArgUtil.is(bulkMessage.getScheduler())) {
+					bulkDoc.setScheduler(bulkMessage.getScheduler());
+					mongoTemplate.save(bulkDoc);
+				}
+				bulkMessageService.registerJob(bulkDoc.getJob(),bulkMessage.getScheduler());
+				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
+			}else {
+				bulkMessageService.registerJob(bulkDoc.getJob(),bulkMessage.getScheduler());
+				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been re-send");
+			}
+		}
+		 return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
+		
+	}
+	
+	
+	@RequestMapping(value = "/api/message/bulk/push/cancel", method = { RequestMethod.POST })
+	public ApiResponse<BulkSessionDoc, Object> cancelBulkMessage(@RequestParam String bulkSessionId)
+			throws Exception {
+		BulkSessionDoc bulkDoc = CollectionUtil.getOne(mongoTemplate
+				.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+		if(ArgUtil.is(bulkDoc) && ArgUtil.is(bulkDoc.getScheduler())) {
+			// Parse the interval to ZonedDateTime
+			ChronoScheduler cSch=bulkDoc.getScheduler();
+	        ZonedDateTime intervalTime = ZonedDateTime.parse(cSch.getInterval(), DateTimeFormatter.ISO_ZONED_DATE_TIME);
+	     // Get the current time
+	        ZonedDateTime currentTime = ZonedDateTime.now();
+	        // Check if the interval is in the future
+	        if (intervalTime.isAfter(currentTime)) {
+	        	LOGGER.info("The interval is a valid future date."+cSch.getInterval());
+	            bulkMessageService.cancelJob(bulkDoc.getJob());
+	        }
+		}
+		return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been canceled");
+	}
+	
+	
 	@RequestMapping(value = "/api/message/bulk/push/retry", method = { RequestMethod.POST })
 	public ApiResponse<Object, Object> sendBulkMessage(@RequestParam String jobId, @RequestParam String action)
 			throws NumberParseException {

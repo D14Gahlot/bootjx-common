@@ -23,7 +23,7 @@ import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ChatCommands;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionService;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
@@ -137,7 +137,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		long timeThen = System.currentTimeMillis() - chatClientConfig.getAgentSessionTimeout().toMillis();
 
 		// Relationship Manager Agent Sticky Logic
-		String rmStickyLogic = environment.local().keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_STICKY_RMAGENT)
+		String rmStickyLogic = environment.local().keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_STICKY_RMAGENT)
 				.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
 		String rmCode = null;
 
@@ -186,7 +186,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		// Last Session Agent Sticky Logic
 		String lastStickyLogic = environment.local()
-				.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_STICKYSESSION)
+				.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_STICKYSESSION)
 				.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
 		String lastAgent = null;
 
@@ -214,7 +214,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			}
 		}
 
-		String assignmentRule = environment.local().keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_ASSIGNMENT)
+		String assignmentRule = environment.local().keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ASSIGNMENT)
 				.asString(PMConstants.ASSIGNMENT_RULE.ROUND_ROBIN);
 
 		String assignedDept = ArgUtil.nonEmpty(params.getAssignToDeptCode(),
@@ -317,7 +317,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		if (!ArgUtil.is(chatSessionDoc.getAssignedToQueue())) {
 			chatSessionManager.assignToQueue(chatSessionDoc,
-					environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
+					environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
 							.asString(PMConstants.DEFAULT.AGENT_QUEUE_CODE));
 		}
 
@@ -375,7 +375,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		String agentDeptOld = chatSessionDoc.getAssignedToDept();
 
 		if (ArgUtil.is(agentCodeOld) && !agentSession.isAdmin()) {
-			boolean canPickAssigned = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_PICK_ASSIGNED)
+			boolean canPickAssigned = environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_PICK_ASSIGNED)
 					.asBoolean(true);
 			if (!canPickAssigned) {
 				ApiResponseUtil.throwAccessDeniedException("Not Allowed, Contact Admin");
@@ -492,7 +492,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				break;
 			}
 		} else {
-			PMConfigurationObject header = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_HEADER);
+			PMConfigurationObject header = environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_HEADER);
 			if (header.exists() && !ArgUtil.is(outboxMessage.getSubject())) {
 				outboxMessage.setSubject(tmplClient.process(header.asString(), outboxMessage.session()));
 			}

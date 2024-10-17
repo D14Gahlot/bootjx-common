@@ -36,6 +36,10 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private String campaignTitle;
 	private String groupName;
 	private ChronoScheduler scheduler;
+	/** for resend/cancel schedular API**/
+	private String bulkSessionId;
+	/** use /resend with a flag 'cancelExisting'*/
+	public boolean cancelExisting;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -198,6 +202,22 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public void setScheduler(ChronoScheduler scheduler) {
 		this.scheduler = scheduler;
+	}
+
+	public String getBulkSessionId() {
+		return bulkSessionId;
+	}
+
+	public void setBulkSessionId(String bulkSessionId) {
+		this.bulkSessionId = bulkSessionId;
+	}
+
+	public boolean getCancelExisting() {
+		return cancelExisting;
+	}
+
+	public void setCancelExisting(boolean cancelExisting) {
+		this.cancelExisting = cancelExisting;
 	}
 
 }

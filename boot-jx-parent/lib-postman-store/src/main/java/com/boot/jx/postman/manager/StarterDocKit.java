@@ -114,8 +114,33 @@ public class StarterDocKit {
 			    defaultOptions.add(femaleOption);
 			    // Set the default options in the fieldMaster
 			    fiedMaster.setPossibleOptions(defaultOptions);
+			}else if(ArgUtil.is(code) && code.equalsIgnoreCase("title")) {
+					List<Object> defaultOptions = new ArrayList<>();
+					// Option 1: Mr.
+				    Map<String, String> mrOpt = new HashMap<>();
+					mrOpt.put("label", "Mr.");
+					mrOpt.put("value", "mr.");
+				    defaultOptions.add(mrOpt);
+				    // Option 2: Mrs.
+				    Map<String, String> mrsOpt = new HashMap<>();
+				    mrsOpt.put("label", "Mrs.");
+				    mrsOpt.put("value", "mrs.");
+				    defaultOptions.add(mrsOpt);
+				    
+				    Map<String, String> msOpt = new HashMap<>();
+				    msOpt.put("label", "Ms.");
+				    msOpt.put("value", "ms.");
+				    defaultOptions.add(msOpt);
+				    
+				    Map<String, String> drOpt = new HashMap<>();
+				    drOpt.put("label", "Dr.");
+				    drOpt.put("value", "dr.");
+				    defaultOptions.add(drOpt);
+				    // Set the default options in the fieldMaster
+				    fiedMaster.setPossibleOptions(defaultOptions);
+				}
 			}
-		}
+		
 
 		if (ArgUtil.is(fiedMaster)) {
 			try {
@@ -131,7 +156,7 @@ public class StarterDocKit {
 		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.customer.field.master");
 		String predefiend_customer_filed_version = "v1.4";
 		if (!version.is(predefiend_customer_filed_version)) {
-			createPredefinedMstField("title", "Title", "text");
+			createPredefinedMstField("title", "Title", "dropdown");
 			createPredefinedMstField("dob", "Date of Birth", "date");
 			createPredefinedMstField("gender", "Gender", "dropdown");
 			createPredefinedMstField("alt_phones", "Alternate phone", "phone");

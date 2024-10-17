@@ -24,7 +24,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.service.SessionEventTimer;
@@ -126,7 +126,7 @@ public class AgChatSessionController {
 
 		// Session Stuff Logging <
 		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())
-				|| (environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean()
+				|| (environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean()
 						&& !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()))) {
 			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
 			agentChatHandlerImpl.onAssign(agent, sessionDoc);

@@ -13,9 +13,17 @@ public class InBoundMeta {
 			required = false)
 	public String appId;
 
-	@ApiMockModelProperty(example = "feedback_v2", value = "Client App Queue Code if webhook is set for an App ",
+	@ApiMockModelProperty(example = "my_bot", value = "Client App Queue Code if webhook is set for an App ",
 			required = false)
 	public String appCode;
+
+	@ApiMockModelProperty(example = "FEEDBACK_V2", value = "Client App Type ", required = false,
+			allowableValues = "FEEDBACK_V2,BOTFLOW,APP_SCRIPT,BOT,FAQ,DEFAULT")
+	public String appType;
+
+	@ApiMockModelProperty(example = "WEBHOOK", value = "Client App mode ", required = false,
+			allowableValues = "AGENT,BOT,SCRIPTUS,PUSH,WEBHOOK,NONE")
+	public String appMode;
 
 	public boolean debug;
 
@@ -43,4 +51,15 @@ public class InBoundMeta {
 		this.debug = debug;
 		return this;
 	}
+
+	public InBoundMeta appType(String appType) {
+		this.appType = appType;
+		return this;
+	}
+
+	public InBoundMeta appMode(String appMode) {
+		this.appMode = appMode;
+		return this;
+	}
+
 }

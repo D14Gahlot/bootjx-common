@@ -44,9 +44,14 @@ public class TunnelFilterDefaultImpl implements TunnelFilter {
 
 	@Override
 	public boolean postSubscriptions(List<String> topics) {
-		for (String topic : topics) {
-			LOGGER.info("TunnelFilterDefaultImpl postSubscriptions:{}", topic);
+		if (ArgUtil.is(topics)) {
+			for (String topic : topics) {
+				LOGGER.info("TunnelFilterDefaultImpl postSubscriptions:{}", topic);
+			}
+		} else {
+			LOGGER.info("TunnelFilterDefaultImpl postSubscriptions:NONE");
 		}
+
 		return false;
 	}
 

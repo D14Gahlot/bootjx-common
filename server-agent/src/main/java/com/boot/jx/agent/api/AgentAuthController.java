@@ -21,7 +21,7 @@ import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_FEATURES_KEY;
 import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
@@ -72,7 +72,7 @@ public class AgentAuthController {
 	private boolean isPanelActive() {
 		return pmEnvironment.keyEntry("mry.domain.active").asBoolean()
 				&& pmEnvironment.keyEntry("mry.domain.agent.active").asBoolean()
-				&& pmEnvironment.featureEntry(ConfigConstants.FEATURES_KEY.APP_MODULE_AGENT).asBoolean(true);
+				&& pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.APP_MODULE_AGENT).asBoolean(true);
 	}
 
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })

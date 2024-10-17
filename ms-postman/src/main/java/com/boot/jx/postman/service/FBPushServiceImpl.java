@@ -51,11 +51,11 @@ public class FBPushServiceImpl implements IPushNotifyService {
 	private static final Logger LOGGER = LoggerService.getLogger(FBPushServiceImpl.class);
 
 	/** The server key. */
-	@Value("${fcm.server.key}")
+	@Value("${fcm.server.key:}")
 	String serverKey;
 
 	/** The server key. */
-	@Value("${fcm.api.key}")
+	@Value("${fcm.api.key:}")
 	String apiKey;
 
 	@Value("${android.app.domain}")

@@ -126,6 +126,25 @@
 				</script>
 			</span>	
 					
+			<span th:case="'gmail'" th:remove="tag">
+				<script>
+					window.CONST.extend({
+						channelConfig : {
+							id : '[[${selectedChannel.id}]]',
+							masterChannelId :  '[[${selectedChannel.id}]]',
+							channelType : '[[${selectedChannel.channelType}]]',
+							contactType : '[[${selectedChannel.contactType}]]',
+							title : '[[${selectedChannel.gmail.masterAppTitle}]]',
+							masterClientId : '[[${selectedChannel.gmail.masterClientId}]]',
+							masterTenantId : '[[${selectedChannel.gmail.masterTenantId}]]',
+							AUTH_URL : '[(${AUTH_URL})]',
+							response : wrapObj( [(${response})] )
+						}
+					});
+				</script>
+			</span>	
+			
+			
 		</span>	
 	</span>
 </span>
@@ -240,13 +259,12 @@
 						  }
 						</script>
 					</span>
-					<span th:case="'outlook'" th:remove="tag">
+					<span th:case="*" th:remove="tag">
 						<script>
 						  function launchWhatsAppSignup() {
 						  }
 						</script>
 					</span>	
-					
 					
 				</span>	
 		</span>

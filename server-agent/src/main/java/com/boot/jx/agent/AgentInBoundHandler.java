@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.DefaultChatBoundHandler;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.inbound.InBound.SessionAssginHandler;
 import com.boot.jx.postman.ClientApp;
@@ -66,7 +66,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		agentChatHandler.onMessageReceive(inboxMessage);
 	}
 
-	private MapEntry getTemplate(MapModel props, String propKey, ConfigConstants.SETUP_KEY KEY) {
+	private MapEntry getTemplate(MapModel props, String propKey, CONFIG_SETUP_KEY KEY) {
 		MapEntry talk2agent = props.keyEntry(propKey);
 		if (talk2agent.exists()) {
 			return talk2agent;
@@ -95,7 +95,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 					&& ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
 
 				MapEntry templ = getTemplate(props, "agent_connected",
-						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
+						CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 				if (templ.exists()) {
 					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
 					return;
@@ -104,7 +104,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 					&& !ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
 
 				MapEntry templ = getTemplate(props, "agent_notfound",
-						ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+						CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
 				if (templ.exists()) {
 					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
 					return;

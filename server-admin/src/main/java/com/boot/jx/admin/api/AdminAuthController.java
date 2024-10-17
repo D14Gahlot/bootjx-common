@@ -25,7 +25,7 @@ import com.boot.jx.admin.AdminAuthProvider;
 import com.boot.jx.admin.AdminSessionBean;
 import com.boot.jx.admin.AdminSessionService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_FEATURES_KEY;
 import com.boot.jx.common.dto.AgentResponseAuthDto;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.http.ApiRequest;
@@ -69,7 +69,7 @@ public class AdminAuthController {
 
 	private boolean isPanelActive() {
 		return pmEnvironment.keyEntry("mry.domain.active").asBoolean()
-				&& pmEnvironment.featureEntry(ConfigConstants.FEATURES_KEY.APP_MODULE_ADMIN).asBoolean(true);
+				&& pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.APP_MODULE_ADMIN).asBoolean(true);
 	}
 
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })

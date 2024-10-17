@@ -29,6 +29,8 @@ public class SignupContact implements Serializable {
 	@NotNull
 	private String role;
 
+	private String picture;
+
 	private List<Object> product;
 
 	@NotNull
@@ -88,6 +90,14 @@ public class SignupContact implements Serializable {
 
 	public void setProduct(List<Object> product) {
 		this.product = product;
+	}
+
+	public String getPicture() {
+		return picture;
+	}
+
+	public void setPicture(String picture) {
+		this.picture = picture;
 	}
 
 }

@@ -552,6 +552,19 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 		if (req.getPhones() != null && !req.getPhones().isEmpty()) {
 			Set<PBPhone> reqPhones = req.getPhones();
+			// Convert the request objects to a Set of UUIDs (to identify which are new or missing)
+			Set<String> reqPhoneUuids = reqPhones.stream()
+			    .map(PBPhone::getUuid)
+			    .collect(Collectors.toSet());
+			
+			// Find phones in DB that are not in the request (to be deleted)
+			List<PBPhone> phonesToDelete = doc.getPhones().stream()
+			    .filter(phone -> !reqPhoneUuids.contains(phone.getUuid()))
+			    .collect(Collectors.toList());
+			
+			 // Remove the phones from the document that are not present in the request
+	        doc.getPhones().removeAll(phonesToDelete);
+			
 			for (PBPhone reqph : reqPhones) {
 				Optional<PBPhone> found = Optional.empty();
 				String uuid = reqph.getUuid();
@@ -565,7 +578,10 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				
 				found = doc.getPhones().stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
 				if (found.isPresent()) {
-					found.get().update(reqph);
+					String upPh=reqph.getPhone();
+					PBPhone phu = parsePhone(new PBPhone().phone(upPh));
+					phu.setUuid(reqph.getUuid());
+					found.get().update(phu);
 				} else {
 					PBPhone pb = parsePhone(reqph);
 					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
@@ -576,6 +592,21 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 		if (req.getEmails() != null && !req.getEmails().isEmpty()) {
 			Set<PBEmail> reqPbEmails = req.getEmails();
+			
+			
+			// Convert the request objects to a Set of UUIDs (to identify which are new or missing)
+			Set<String> reqEmailUuids = reqPbEmails.stream()
+			    .map(PBEmail::getUuid)
+			    .collect(Collectors.toSet());
+			
+			// Find phones in DB that are not in the request (to be deleted)
+			List<PBEmail> eMailToDelete = doc.getEmails().stream()
+			    .filter(email -> !reqEmailUuids.contains(email.getUuid()))
+			    .collect(Collectors.toList());
+			
+			 // Remove the phones from the document that are not present in the request
+	        doc.getEmails().removeAll(eMailToDelete);
+			
 			for (PBEmail reqEm : reqPbEmails) {
 				Optional<PBEmail> found = Optional.empty();
 				String uuid = reqEm.getUuid();
@@ -629,7 +660,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					List<PBEmail> pbEmails = objectMapper.convertValue(entry.getValue(),
 							new TypeReference<List<PBEmail>>() {
 							});
-					Set<PBEmail> spbmails = addUpdateEmail(pbEmails, doc);
+					Set<PBEmail> spbmails = addUpdateEmail(pbEmails, doc,entry.getKey().toString());
 					addInfoMap.put(entry.getKey(), spbmails);
 					break;
 				case "phone":
@@ -637,7 +668,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					List<PBPhone> pbPhones = objectMapper.convertValue(entry.getValue(),
 							new TypeReference<List<PBPhone>>() {
 							});
-					Set<PBPhone> spbPhone = addUpdatePhone(pbPhones, doc);
+					
+					Set<PBPhone> spbPhone = addUpdatePhone(pbPhones, doc,entry.getKey().toString());
 					addInfoMap.put(entry.getKey(), spbPhone);
 					break;
 
@@ -665,31 +697,76 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		mongoTemplate.save(doc);
 	}
 
-	private Set<PBPhone> addUpdatePhone(List<PBPhone> reqPhones, CustomerProfileDoc doc) {
+	private Set<PBPhone> addUpdatePhone(List<PBPhone> reqPhones, CustomerProfileDoc doc,String entryKey) {
 		Set<PBPhone> setPbPhone = new TreeSet<>();
+		ObjectMapper objectMapper = new ObjectMapper();
+		// Convert the request objects to a Set of UUIDs (to identify which are new or missing)
+		Set<String> reqPhoneUuids = reqPhones.stream()
+		    .map(PBPhone::getUuid)
+		    .collect(Collectors.toSet());
+		
+		// Find phones in DB that are not in the request (to be deleted)
+		List<PBPhone> pbPhoneDbList=objectMapper.convertValue(doc.getAdditionalInfo().get(entryKey),
+				new TypeReference<List<PBPhone>>() {
+				});
+		if(ArgUtil.isNotEmpty(pbPhoneDbList)) {
+		List<PBPhone> phonesToDelete =pbPhoneDbList.stream()
+		    .filter(phone -> !reqPhoneUuids.contains(phone.getUuid()))
+		    .collect(Collectors.toList());
+		// Remove phones that are not in the request from the document
+		pbPhoneDbList.removeAll(phonesToDelete);
+		}
+		
+		
 		for (PBPhone reqph : reqPhones) {
 			Optional<PBPhone> found = Optional.empty();
 			String uuid = reqph.getUuid();
-			found = doc.getPhones().stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
+			//found = doc.getPhones().stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
+			if(ArgUtil.isNotEmpty(pbPhoneDbList)) {
+			found = pbPhoneDbList.stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
+			}
+			
 			if (found.isPresent()) {
-				found.get().update(reqph);
+				String upPh=reqph.getPhone();
+				PBPhone phu = parsePhone(new PBPhone().phone(upPh));
+				phu.setUuid(reqph.getUuid());
+				found.get().update(phu);
 				setPbPhone.add(found.get()); // Add the updated phone
 			} else {
 				PBPhone pb = parsePhone(reqph);
 				pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
-				doc.getPhones().add(pb);
 				setPbPhone.add(pb); // Add the new phone
 			}
 		}
 		return setPbPhone;
 	}
 
-	private Set<PBEmail> addUpdateEmail(List<PBEmail> reqEmail, CustomerProfileDoc doc) {
+	private Set<PBEmail> addUpdateEmail(List<PBEmail> reqEmail, CustomerProfileDoc doc,String entryKey) {
 		Set<PBEmail> setPbEmail = new TreeSet<>();
+		ObjectMapper objectMapper = new ObjectMapper();
+		// Convert the request objects to a Set of UUIDs (to identify which are new or missing)
+		Set<String> reqEmailUuids = reqEmail.stream()
+		    .map(PBEmail::getUuid)
+		    .collect(Collectors.toSet());
+		
+		// Find phones in DB that are not in the request (to be deleted)
+		List<PBEmail> pbEmailDbList=objectMapper.convertValue(doc.getAdditionalInfo().get(entryKey),
+				new TypeReference<List<PBEmail>>() {
+				});
+		if(ArgUtil.isNotEmpty(pbEmailDbList)) {
+		List<PBEmail> eMailToDelete =pbEmailDbList.stream()
+		    .filter(phone -> !reqEmailUuids.contains(phone.getUuid()))
+		    .collect(Collectors.toList());
+		// Remove phones that are not in the request from the document
+		pbEmailDbList.removeAll(eMailToDelete);
+		}	
 		for (PBEmail reqEm : reqEmail) {
 			Optional<PBEmail> found = Optional.empty();
 			String uuid = reqEm.getUuid();
-			found = doc.getEmails().stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
+			if(ArgUtil.isNotEmpty(pbEmailDbList)) {
+			found = pbEmailDbList.stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
+			}
+			
 			if (found.isPresent()) {
 				found.get().update(reqEm);
 				setPbEmail.add(found.get()); // Add the updated phone
