@@ -1,5 +1,6 @@
 package com.boot.jx.postman.plugin;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
@@ -20,6 +21,7 @@ import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
+import com.boot.utils.ArgUtil;
 
 public class ChannelConfig extends AChannelConfig {
 
@@ -304,7 +306,13 @@ public class ChannelConfig extends AChannelConfig {
 	public Map<String, Object> getMeta() {
 		return meta;
 	}
-
+	public Map<String, Object> meta() {
+		  if (!ArgUtil.is(this.meta)) { 
+		        meta = new HashMap<String, Object>();
+		    }
+	    return meta;
+	}
+   
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
 	}

@@ -131,6 +131,13 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			if (ArgUtil.is(phoneNumberId)) {
 				MapModel phoneMap = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
 						.authBearer(userAccessToken).get().asMapModel();
+				
+				Map<String, Object> meta = setup.meta();				
+				if (ArgUtil.is(phoneMap)) {
+					meta.put("status ", phoneMap.toObject());
+					}
+				setup.setMeta(meta);
+		 			
 				channelConfigTemp.log("/phone_number_by_id", phoneMap.toMap());
 
 				ChannelConfig channel = new ChannelConfig();
@@ -145,7 +152,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channel.getWacfb().setMasterAppConfigId(setup.getWacfb().getMasterAppConfigId());
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
 				channels.add(channel);
-
+       
 				MapModel subscribeResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
 						.path("/subscribed_apps").authBearer(setup.getWacfb().getMasterSUAccessToken()).post()
 						.asMapModel();
@@ -224,10 +231,13 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
 					.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
 					.postJson(webhook.toMap()).asMapModel();
-
-		} catch (Exception e) {
+					
+		}
+				
+		 catch (Exception e) {
 			logManager.error("While Setting " + webhookUrl, e);
 		}
+	
 	}
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
