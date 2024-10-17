@@ -145,8 +145,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient, true);
 					} else {
 						// if (APP_TYPE.APP_SCRIPT.equals(appType)) {
-						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-								defaultClient);
+						forward2Webhook(inboxMessage, ArgUtil.anyOf(defaultClient.getWebhook(),
+								pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD), defaultClient);
 						// } else {
 						// ApiResponseUtil.throwException("Forward URL missing");
 						// }
@@ -157,8 +157,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				}
 
 				if (CHAT_MODE.SCRIPTUS.equals(appType.getMode())) {
-					forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-							defaultClient);
+					forward2Webhook(inboxMessage, ArgUtil.anyOf(defaultClient.getWebhook(),
+							pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD), defaultClient);
 					return;
 				}
 
@@ -451,7 +451,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			CHAT_MODE chatMode = CHAT_MODE.from(defaultClient.getAppMode());
 			boolean internalwebhook = APP_TYPE.APP_SCRIPT.equals(appType) || CHAT_MODE.SCRIPTUS.equals(chatMode);
 
-			String webhookUrl = internalwebhook ? (pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD)
+			String webhookUrl = internalwebhook
+					? ArgUtil.anyOf(defaultClient.getWebhook(), pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD)
 					: defaultClient.getWebhook();
 
 			if (ArgUtil.is(webhookUrl)) {
@@ -462,8 +463,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 						.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
 						.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode()) //
-						.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT)
-								.is(contact.contactId));
+						.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
 				(internalwebhook ? restService : restHookService).ajax(webhookUrl)
