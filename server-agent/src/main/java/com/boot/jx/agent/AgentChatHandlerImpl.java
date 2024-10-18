@@ -123,7 +123,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Autowired
 	TmplClient tmplClient;
-	
+
 	@Autowired
 	CommonBeanService commonBeanService;
 
@@ -185,8 +185,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		}
 
 		// Last Session Agent Sticky Logic
-		String lastStickyLogic = environment.local()
-				.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_STICKYSESSION)
+		String lastStickyLogic = environment.local().keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_STICKYSESSION)
 				.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
 		String lastAgent = null;
 
@@ -493,7 +492,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			}
 		} else {
 			PMConfigurationObject header = environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_HEADER);
-			if (header.exists() && !ArgUtil.is(outboxMessage.getSubject())) {
+			if (header.exists() && !ArgUtil.is(outboxMessage.getSubject()) && !ArgUtil.is(sessionDoc.getTicketHash())) {
 				outboxMessage.setSubject(tmplClient.process(header.asString(), outboxMessage.session()));
 			}
 			sessionStore.updateResponseTime(sessionDoc);
@@ -505,9 +504,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	private void beforeSend(ChatSessionDoc chatSessionDoc, OutboxMessage outboxMessage) {
 		if (ArgUtil.is(outboxMessage.hsm().getCode())) {
-			
-			
-			AppCommonAuthUserProfile profile = commonBeanService.isBeanPresent(agentSession) ? agentSession.getProfile() : null;
+
+			AppCommonAuthUserProfile profile = commonBeanService.isBeanPresent(agentSession) ? agentSession.getProfile()
+					: null;
 			if (ArgUtil.is(profile)
 					&& ArgUtil.is(agentSession.getProfile().code(), chatSessionDoc.getAssignedToAgent())) {
 				DepartmentResponseAuthDto dept = ((AgentResponseAuthDto) profile).getDept();
