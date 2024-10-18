@@ -91,9 +91,11 @@ public class ConfigConstants {
 		POSTMAN_CHAT_FEEDBACK_QUEUE(new ConfigMeta("Default Feedback Queue", PROPERTIES.POSTMAN_CHAT_FEEDBACK_QUEUE)
 				.desc("Default Feedback App").optionsSource("getx:/api/options/inbound_queue").optionsKey("code")
 				.optionsLabel("code").filter("appType", APP_TYPE.FEEDBACK)),
+		
 
 		POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 				.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
+		POSTMAN_RESEND_FAILED_MESSAGES(new ConfigMeta("Resend Failed Messages","postman.resend.failed.messages").desc("enable to resend failed messages by schedular").optionsOnOff()),
 
 		POSTMAN_CHAT_WEB_CHANNEL(new ConfigMeta("Default Web Channel", PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL)
 				.desc("This channel will be connected your Page").optionsSource("getx:/api/options/channels")
@@ -117,6 +119,7 @@ public class ConfigConstants {
 						// .optionValues("1hr", "2hr", "4hr", "8hr", "12hr", "16hr", "20hr", "24hr",
 						// "2d", "5d", "3d", "7d")
 						.group(GROUP_CUSTOMER_CHAT)),
+		
 
 		POSTMAN_AGENT_CUSTOMER_CONTACT_INFO_MASK(
 				new ConfigMeta("Mask Number", "postman.agent.customer.contact.info.mask").optionsOnOff()
