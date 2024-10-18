@@ -11,6 +11,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
+import com.boot.jx.postman.model.MessageSession;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
@@ -34,6 +35,7 @@ public class NexusEmailClient implements ChannelClient {
 				.path("/email/api/v1/" + channelConfig.getChannelType() + "/" + channelConfig.getChannelId()
 						+ "/message/send")
 				.postJson(MapModel.createInstance().put("refId", outboxMessage.getMessageId())
+						.put("ticketHash", outboxMessage.session().getTicketHash())
 						.put("messageId", outboxMessage.getMessageId())
 						.put("messageIdRef", outboxMessage.getMessageIdRef())
 						.put("messageIdExt", outboxMessage.getMessageIdExt()).put("replyId", outboxMessage.getReplyId())
