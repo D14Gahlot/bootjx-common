@@ -198,6 +198,23 @@ public class ChannelSetupController {
 				Constants.BLANK, model);
 	}
 
+	@ApiRequest(tenant = "app")
+	@RequestMapping(value = "/ext/setup/channel/callback/gmail", method = { RequestMethod.GET, RequestMethod.POST })
+	public String setupChannelCallbackGmail(@RequestParam(required = false) String code, Model model,
+			@RequestParam(required = false) String state, @RequestParam(required = false) String credential,
+			@RequestParam(required = false) String scope)
+			throws FileNotFoundException, IOException, URISyntaxException {
+		AuthState authState = authStateManager.fromState(state);
+		if (ArgUtil.is(authState) && ArgUtil.is(authState.getDomain())) {
+			AppContextUtil.set("domain", authState.getDomain());
+		}
+		model.addAttribute("response", MapModel.createInstance().put(JsonPath.at("authResponse.code"), code)
+				.put(JsonPath.at("authResponse.credential"), credential).put(JsonPath.at("authResponse.scope"), scope)
+				.put(JsonPath.at("authResponse.state"), state).toJson());
+		return this.setupChannel(CHANNEL_TYPE_ENUM.gmail, UniqueID.generateString62(), ContactType.EMAIL,
+				Constants.BLANK, model);
+	}
+
 	@ResponseBody
 	@ApiRequest(tenant = "app")
 	@RequestMapping(value = "/ext/setup/channel/resp", method = { RequestMethod.POST })

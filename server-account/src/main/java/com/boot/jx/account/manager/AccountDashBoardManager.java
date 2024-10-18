@@ -64,7 +64,7 @@ import com.boot.jx.account.dto.WabaSummary;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.api.EventCountDto;
 import com.boot.jx.api.EventCountSummary;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.dict.ContactType;
@@ -1255,7 +1255,7 @@ public class AccountDashBoardManager {
 	}
 
 	public String getTimeZoneFromSetup() {
-		String offset = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+		String offset = environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
 				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
 	}

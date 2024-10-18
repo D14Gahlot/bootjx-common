@@ -65,6 +65,8 @@ public class LinqContrller {
 		if (ArgUtil.is(info)) {
 			BusinessUserDoc accountDoc = accountStore.findUserByEmail(info.getEmail());
 			if (ArgUtil.is(accountDoc)) {
+				accountDoc.getContact().setPicture(info.getPicture());
+				accountStore.save(accountDoc);
 				sessionService.login(accountDoc, request);
 			} else {
 
@@ -73,6 +75,7 @@ public class LinqContrller {
 				signupContact.setName(info.getName());
 				signupContact.setPhone(info.getPhone());
 				signupContact.setRole(info.getJobTitle());
+				signupContact.setPicture(info.getPicture());
 
 				AccountMeta keys = new AccountMeta();
 				keys.setEmailVerificationCode(UUID.randomUUID().toString());

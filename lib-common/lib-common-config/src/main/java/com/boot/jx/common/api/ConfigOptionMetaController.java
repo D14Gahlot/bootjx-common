@@ -23,8 +23,8 @@ import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.config.CDNBuilder;
 import com.boot.jx.common.config.ClientAppConfigConstants;
 import com.boot.jx.common.config.ConfigConstants;
-import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.config.ConfigManagerImpl;
+import com.boot.jx.common.config.CONFIG_FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.dict.ContactType;
@@ -132,7 +132,7 @@ public class ConfigOptionMetaController {
 			if (ArgUtil.is(appModule, APP_MODULES.ADMIN, APP_MODULES.AGENT)) {
 				modules.add(appModule);
 			} else {
-				for (FEATURES_KEY featureKey : FEATURES_KEY.values()) {
+				for (CONFIG_FEATURES_KEY featureKey : CONFIG_FEATURES_KEY.values()) {
 					if (featureKey.name().equals("APP_MODULE_" + appModule.name())
 							&& pmEnvironment.featureEntry(featureKey).asBoolean()) {
 						modules.add(appModule);
@@ -275,7 +275,7 @@ public class ConfigOptionMetaController {
 
 	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.PUT })
-	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestParam FEATURES_KEY key,
+	public ApiResponse<Map<String, Object>, Object> setFeature(@RequestParam CONFIG_FEATURES_KEY key,
 			@RequestParam String value, @RequestParam(defaultValue = "false") boolean shared) {
 		FeaturesConfigDoc map = new FeaturesConfigDoc();
 		map.setKey(key.getKey());
@@ -286,14 +286,14 @@ public class ConfigOptionMetaController {
 
 	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature/{key}", method = { RequestMethod.POST })
-	public ApiResponse<Map<String, Object>, Object> setFeature(@PathVariable("key") FEATURES_KEY key,
+	public ApiResponse<Map<String, Object>, Object> setFeature(@PathVariable("key") CONFIG_FEATURES_KEY key,
 			@RequestBody FeaturesConfigDoc map) {
 		map.setKey(key.getKey());
 		return setFeature(map);
 	}
 
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.GET })
-	public ApiResponse<Map<String, Object>, Object> getFeature(@RequestParam(required = false) FEATURES_KEY key,
+	public ApiResponse<Map<String, Object>, Object> getFeature(@RequestParam(required = false) CONFIG_FEATURES_KEY key,
 			@RequestParam(required = false) boolean refresh) {
 		if (refresh) {
 			configManager.refresh();
@@ -303,7 +303,7 @@ public class ConfigOptionMetaController {
 
 	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.DELETE })
-	public ApiResponse<Map<String, Object>, Object> deleteFeature(@RequestParam(required = false) FEATURES_KEY key) {
+	public ApiResponse<Map<String, Object>, Object> deleteFeature(@RequestParam(required = false) CONFIG_FEATURES_KEY key) {
 		configManager.deletePerm(key);
 		return ApiResponse.buildResults(configManager.getFeature());
 	}

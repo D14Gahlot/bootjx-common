@@ -20,6 +20,7 @@ import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.logger.LoggerService;
@@ -83,7 +84,7 @@ public class TestMessageService {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -144,7 +145,7 @@ public class TestMessageService {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();

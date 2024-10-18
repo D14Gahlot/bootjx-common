@@ -285,8 +285,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		InBoundWrapper wrap = new InBoundWrapper().type("messages");
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-				.appId(defaultClient.getId()).appCode(defaultClient.getQueue())
-				.debug(pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
+				.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
+				.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode()) //
+				.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
 
@@ -322,7 +323,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						InBoundWrapper wrap = new InBoundWrapper().type("statuses");
 						wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 								.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-								.appId(defaultClient.getId()).appCode(defaultClient.getQueue());
+								.appId(defaultClient.getId()).appCode(defaultClient.getQueue())
+								.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode());
 						wrap.contacts = CollectionUtil.asList(contact);
 						wrap.statuses = CollectionUtil.asList(status);
 						restHookService.ajax(defaultClient.getWebhook()).postJson(wrap).asNone();
@@ -458,8 +460,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				InBoundWrapper wrap = new InBoundWrapper().type("events");
 				wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-						.appId(defaultClient.getId()).appCode(defaultClient.getQueue()).debug(pmEnvironment
-								.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
+						.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
+						.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode()) //
+						.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT)
+								.is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
 				(internalwebhook ? restService : restHookService).ajax(webhookUrl)

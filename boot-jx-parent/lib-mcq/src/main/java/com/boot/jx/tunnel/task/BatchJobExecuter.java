@@ -130,6 +130,24 @@ public abstract class BatchJobExecuter {
 		}
 		return batchJob;
 	}
+	
+	public BatchJob cancelJob(BatchJob batchJob) {
+		try {
+			batchJob.setTenant(AppContextUtil.getTenant());
+			batchJob.setStatus(JOB_STATUS.CANCELLED);
+			batchJob.setOpenStamp(System.currentTimeMillis());
+			batchJob.setDonePercent(0L);
+			batchJob.setDoneTaskCount(0L);
+			batchJob.setPushedTaskCount(0L);
+			batchJob.setVersion(batchJob.getOpenStamp());
+			jobQueue().add(batchJob);
+			jobStatus().put(batchJob.jobUUID(), batchJob);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return batchJob;
+	}
+	
 
 	public BatchJob registerJob(String jobId) {
 		BatchJob job = new BatchJob();
