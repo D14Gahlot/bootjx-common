@@ -271,19 +271,7 @@ public class AgMainController {
 		}else if(ArgUtil.is(searchCode)) {
 			return ApiResponse.buildResults(contactStore.findProfileByCode(searchCode));
 		}
-		MongoQueryBuilder<CustomerProfileDoc> q = MongoQueryBuilder.collection(CustomerProfileDoc.class).page(pageNo,
-				pageSize);
-		if (ArgUtil.is(id)) {
-			q = q.whereId(id);
-		}
-
-		q.search("name.formattedName", searchName).search("code", searchCode).search("emails.email", searchEmail)
-				.search("phones.phone", searchPhone);
-
-		if (ArgUtil.is(sortBy)) {
-			q = q.sortBy(sortBy, Direction.fromString(sortDir));
-		}
-		return ApiResponse.buildResults(contactStore.find(q));
+		return ApiResponse.buildResult(null);
 	}
 
 }
