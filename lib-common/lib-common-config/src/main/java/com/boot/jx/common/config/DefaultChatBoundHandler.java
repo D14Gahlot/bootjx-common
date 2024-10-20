@@ -307,7 +307,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		ClientApp defaultClient = context().clientApp(messageReport.session().getQueue(), messageReport.contact());
 
 		if (ArgUtil.is(defaultClient)) {
-			if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
+			if (ArgUtil.is(defaultClient.getAppType(), CHAT_MODE.WEBHOOK.toString(), CHAT_MODE.SCRIPTUS.toString())) {
 				LOGGER.debug("Forwarding MessageReport to Xternal Service ");
 				try {
 					if (ArgUtil.is(defaultClient.getWebhook())) {
