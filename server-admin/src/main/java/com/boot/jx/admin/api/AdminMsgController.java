@@ -464,6 +464,8 @@ public class AdminMsgController {
 			bulkMessageService.refreshJob(jobId);
 		} else if (ArgUtil.is(action, "reset")) {
 			bulkMessageService.resetJob(jobId);
+		}else if (ArgUtil.is(action, "restart")) {
+			bulkMessageService.resetJob(jobId);
 		} else if (ArgUtil.is(action, "stop")) {
 			bulkMessageService.stopJob(jobId);
 		} else if (ArgUtil.is(action, "tally")) {
