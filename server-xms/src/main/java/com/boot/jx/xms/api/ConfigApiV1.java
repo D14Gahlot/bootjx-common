@@ -17,6 +17,7 @@ import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelConfig;
@@ -63,14 +64,16 @@ public class ConfigApiV1 {
 		ClientApp x = PMContextUtil.clientApp();
 		if (ArgUtil.is(x)) {
 			ClientAppConfigDoc xo = configMaster.findById(x.getId(), ClientAppConfigDoc.class);
-			if (ArgUtil.areEqual(xo.getAppType(), ClientApp.APP_TYPE_WEBHOOK)) {
+			if (ArgUtil.equalsIgnoreCase(xo.getAppMode(), PMConstants.CHAT_MODE.WEBHOOK.toString())
+					|| ArgUtil.equalsIgnoreCase(xo.getAppMode(), PMConstants.CHAT_MODE.SCRIPTUS.toString())) {
 				xo.setWebhook(req.url);
 				xo.setForward(req.forward);
 				configManager.save(xo);
 				configManager.refresh();
 			} else {
-				ApiResponseUtil.throwInputException(new ApiFieldError().field("appType").obzect("WebhookUrlRequest")
-						.codeKey("INCORRECT_APP_TYPE").description("ClientApp is not configured for Webhook type"));
+				ApiResponseUtil.throwInputException(
+						new ApiFieldError().field("appType").obzect("WebhookUrlRequest").codeKey("INCORRECT_APP_TYPE")
+								.description("ClientApp is not configured for Webhook/Scriptus type"));
 			}
 		} else {
 			ApiResponseUtil.throwInputException(new ApiFieldError().field("appType").obzect("WebhookUrlRequest")
@@ -101,7 +104,7 @@ public class ConfigApiV1 {
 	@XMSClientAuth
 	@RequestMapping(value = "/api/v1/config/tmpl/hsm", method = { RequestMethod.GET })
 	public ApiResponse<HSMTemplateDoc, Object> getHSMTemplates(@RequestParam(required = false) String channelId,
-			@RequestParam(required=false)String channelStatus) {
+			@RequestParam(required = false) String channelStatus) {
 
 		MongoQueryBuilder<HSMTemplateDoc> cmq = MongoQueryBuilder.collection(HSMTemplateDoc.class);
 
