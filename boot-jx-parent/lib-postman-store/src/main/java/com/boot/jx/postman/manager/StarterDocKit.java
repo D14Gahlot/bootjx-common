@@ -154,7 +154,7 @@ public class StarterDocKit {
 
 	private void createPredefinedMstField() {
 		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.customer.field.master");
-		String predefiend_customer_filed_version = "v1.4";
+		String predefiend_customer_filed_version = "v1.6";
 		if (!version.is(predefiend_customer_filed_version)) {
 			createPredefinedMstField("title", "Title", "dropdown");
 			createPredefinedMstField("dob", "Date of Birth", "date");
