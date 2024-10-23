@@ -4,47 +4,29 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.boot.jx.AppConfig;
-import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.account.AccountSessionBean;
-import com.boot.jx.account.doc.AccountStore;
 import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.AdminAgentAccountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.TimeZoneOfSet;
+import com.boot.jx.account.dto.WabaCostReqDto;
 import com.boot.jx.account.dto.WabaSummary;
-import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.EventCountSummary;
-import com.boot.jx.http.CommonHttpRequest;
 
 @Controller
 @RequestMapping("/partnerdashboard")
 public class PartnerDashBoardController {
 
-	@Autowired
-	private AppConfig appConfig;
-
-	@Autowired
-	private CommonHttpRequest commonHttpRequest;
-
-	@Autowired
-	private AppCommonConfig appCommonConfig;
-
-	@Autowired
-	private AccountSessionBean adminSessionBean;
-
-	@Autowired
-	private AccountStore accountStore;
-
+	
 	@Autowired
 	AccountDashBoardManager dashBMgr;
 
@@ -146,8 +128,6 @@ public class PartnerDashBoardController {
 	
 /** to fetch all domain email id's **/
 	
-	
-	
 	@ResponseBody
 	@RequestMapping(value = { "/pub/admin-agent-dtls" }, method = { RequestMethod.GET })
 	public ApiResponse<AdminAgentAccountDto, Object> getAdminAgentSummary() {
@@ -155,4 +135,11 @@ public class PartnerDashBoardController {
 		return ApiResponse.buildResult(summary);
 	}
 
+	@ResponseBody
+	@RequestMapping(value = { "/pub/waba-cost/add-edit" }, method = { RequestMethod.POST })
+	public ApiResponse<AdminAgentAccountDto, Object> wabaDepositAddedit(@RequestBody WabaCostReqDto reqDto) {
+		AdminAgentAccountDto summary = dashBMgr.getAdminAgentSummary();
+		return ApiResponse.buildResult(summary);
+	}
+	
 }
