@@ -228,9 +228,14 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 			dto.setDateTimeStamp(timestamp);
 			dto.setWabaId(wabaId);
 			dto.setNumber(number);
-			
-			WabaAccountBalanceDoc waAccBal=getAccountBalance(wabaId);
-			double deposiTamt=waAccBal.getDepositAmt();
+			WabaAccountBalanceDoc waAccBal=null;
+			if(ArgUtil.is(wabaId)) {
+			 waAccBal=getAccountBalance(wabaId);
+			}
+			double deposiTamt =0.0;
+			if(ArgUtil.is(waAccBal)) { 
+				deposiTamt=waAccBal.getDepositAmt();
+			}
 			dto.setDepostAmt(deposiTamt);
 			dto.setTotalCount(totalConvCnt);
 			dto.setTotalCost(totalConvCost);

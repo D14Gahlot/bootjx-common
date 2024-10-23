@@ -1618,8 +1618,10 @@ public class AccountDashBoardManager {
 			dto.setDateTimeStamp(timestamp);
 			dto.setWabaId(wabaId);
 			dto.setNumber(number);
-			
-			WabaAccountBalanceDoc waAccBal=getAccountBalance(wabaId);
+			WabaAccountBalanceDoc waAccBal=null;
+			if(ArgUtil.is(wabaId)) {
+			 waAccBal=getAccountBalance(wabaId);
+			}
 			double deposiTamt=0.0;
 			if(ArgUtil.is(waAccBal)) {
 				deposiTamt=waAccBal.getDepositAmt();
