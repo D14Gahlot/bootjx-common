@@ -450,7 +450,8 @@ public class AdminMsgController {
 	        if (intervalTime.isAfter(currentTime)) {
 	        	LOGGER.info("The interval is a valid future date."+cSch.getInterval());
 	        	cSch.setTopic("CANCELLED");
-	        	bulkMessageService.registerJob(bulkDoc.getJob(),bulkDoc.getScheduler());	        	
+	        	bulkMessageService.registerJob(bulkDoc.getJob(),bulkDoc.getScheduler());
+	        	bulkMessageService.stopJob(bulkDoc.getJob().getJobId());
 	            return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been canceled");
 	        }
 	       return ApiResponse.buildResult(bulkDoc).message("Scheduled time for bulk messages has passed");
