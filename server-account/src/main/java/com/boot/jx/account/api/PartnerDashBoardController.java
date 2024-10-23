@@ -21,6 +21,7 @@ import com.boot.jx.account.dto.WabaSummary;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.EventCountSummary;
+import com.boot.jx.api.WabaBalanceDto;
 
 @Controller
 @RequestMapping("/partnerdashboard")
@@ -135,11 +136,12 @@ public class PartnerDashBoardController {
 		return ApiResponse.buildResult(summary);
 	}
 
+	
 	@ResponseBody
-	@RequestMapping(value = { "/pub/waba-cost/add-edit" }, method = { RequestMethod.POST })
-	public ApiResponse<AdminAgentAccountDto, Object> wabaDepositAddedit(@RequestBody WabaCostReqDto reqDto) {
-		AdminAgentAccountDto summary = dashBMgr.getAdminAgentSummary();
-		return ApiResponse.buildResult(summary);
+	@RequestMapping(value = { "/pub/fetch/balance/waba/summary" }, method = { RequestMethod.GET })
+	public ApiResponse<WabaBalanceDto, Object> wabaDepositAddedit(@RequestParam long timeStamp) { 
+		WabaBalanceDto cost = dashBMgr.getWabaCostAnalyticsV1(timeStamp);
+		return ApiResponse.buildResult(cost);
 	}
 	
 }
