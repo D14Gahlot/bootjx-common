@@ -7,9 +7,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.admin.dto.WabaBalanceDto;
 import com.boot.jx.admin.service.WabaService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.api.WabaBalanceDto;
+import com.boot.jx.common.dto.AgentResponseDto;
 import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 
 @RestController
@@ -24,11 +25,12 @@ public class AdminWabaController {
 		return ApiResponse.buildResult(doc);
 	}
 	
-	@RequestMapping(value = "/api/fetch/balance/waba", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/fetch/balance/waba/summary", method = { RequestMethod.GET })
 	public ApiResponse<WabaBalanceDto, Object> fetchWabaAccountBalance(@RequestParam long timestamp){
 		WabaBalanceDto dto = wabaService.fetchWabaAccountBalance(timestamp);
 		return ApiResponse.buildResult(dto);
 	}
 
+	
 	
 }

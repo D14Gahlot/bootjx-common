@@ -62,12 +62,12 @@ import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.TypeCount;
+import com.boot.jx.account.dto.WabaBalanceDto;
+import com.boot.jx.account.dto.WabaDateWiseBalanceDto;
 import com.boot.jx.account.dto.WabaSummary;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.api.EventCountDto;
 import com.boot.jx.api.EventCountSummary;
-import com.boot.jx.api.WabaBalanceDto;
-import com.boot.jx.api.WabaDateWiseBalanceDto;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.store.AgentStore;
@@ -76,7 +76,6 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.MessageDoc;
-import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
@@ -88,13 +87,14 @@ import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapUtils;
 import com.mongodb.client.MongoCursor;
+import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 
 @Component
-public class AccountDashBoardManager  {
+public class AccountDashBoardManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccountDashBoardManager.class);
-
-	private static final List<String> expectedKeys = Arrays.asList("MARKETING", "UTILITY", "SERVICE", "AUTHENTICATION");
+//	@Autowired
+//	MongoTemplate mongoTemplate;
 	
 	@Autowired
 	CommonMongoTemplate mongoTemplate;
@@ -110,8 +110,6 @@ public class AccountDashBoardManager  {
 	
 	@Autowired
 	AgentStore agentStore;
-	
-	
 
 	public List<DomainDoc> getAllDomainAccount() {
 		Query query = new Query();
@@ -1157,15 +1155,6 @@ public class AccountDashBoardManager  {
 
 		return listOfChannelConfig;
 	}
-	
-	public List<ChannelConfigDoc> getListChannelCongigFowWa(String domain) {
-		Query query = new Query();
-		query.addCriteria(Criteria.where("domain").is(domain).and("isDisabled").is(false).and("contactType").is(ContactType.WHATSAPP.name()));
-		query.fields().include("domain").include("wacfb.number").include("wacfb.wabaId").include("contactType").include("isDisabled");
-		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
-		return cofigDocLst;
-	}
-
 
 	public String getLane(String contactid) {
 		String lane = "";
@@ -1507,7 +1496,7 @@ public class AccountDashBoardManager  {
 	            categoryCountMap.put(categoryType, count);
 	        }
 	        // List of all expected categories
-	        //List<String> expectedKeys = Arrays.asList("MARKETING", "UTILITY", "SERVICE", "AUTHENTICATION");
+	        List<String> expectedKeys = Arrays.asList("MARKETING", "UTILITY", "SERVICE", "AUTHENTICATION");
 	        
 	        expectedKeys.forEach(key -> categoryCountMap.putIfAbsent(key, Long.valueOf(0)));
 
@@ -1629,8 +1618,10 @@ public class AccountDashBoardManager  {
 			dto.setDateTimeStamp(timestamp);
 			dto.setWabaId(wabaId);
 			dto.setNumber(number);
-			
-			WabaAccountBalanceDoc waAccBal=getAccountBalance(wabaId);
+			WabaAccountBalanceDoc waAccBal=null;
+			if(ArgUtil.is(wabaId)) {
+			 waAccBal=getAccountBalance(wabaId);
+			}
 			double deposiTamt=0.0;
 			if(ArgUtil.is(waAccBal)) {
 				deposiTamt=waAccBal.getDepositAmt();
@@ -1666,5 +1657,15 @@ public class AccountDashBoardManager  {
 		}
 		return doc;
 	}
+ 
+ public List<ChannelConfigDoc> getListChannelCongigFowWa(String domain) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("domain").is(domain).and("isDisabled").is(false).and("contactType").is(ContactType.WHATSAPP.name()));
+		query.fields().include("domain").include("wacfb.number").include("wacfb.wabaId").include("contactType").include("isDisabled");
+		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
+		return cofigDocLst;
+	}
+	
+
 	
 }
