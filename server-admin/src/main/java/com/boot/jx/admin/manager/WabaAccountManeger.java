@@ -17,8 +17,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.api.WabaBalanceDto;
-import com.boot.jx.api.WabaDateWiseBalanceDto;
+import com.boot.jx.admin.dto.WabaBalanceDto;
+import com.boot.jx.admin.dto.WabaDateWiseBalanceDto;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
@@ -271,16 +271,6 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 		
 		WabaBalanceDto wDto=new WabaBalanceDto();
 		// TODO Auto-generated method stub
-//		
-//		List<WabaDateWiseBalanceDto> lstList = new ArrayList<>();
-//		lstList.add(dto);
-//		wDto.setDateWiseBaL(lstList);
-//		wDto.setWabaId(dto.getWabaId());
-//		wDto.setWabaNumber(dto.getNumber());
-//		wDto.setTnt(AppContextUtil.getTenant());
-//		wDto.setDepositAmt(depostAmt);
-//		wDto.setBalanceAmt(balanceAmt);
-//		wDto.setTotalMsgCost(timestamp);
 		wDto =getWabaCostAnalyticsV1(timestamp);
 		return wDto;
 	}
