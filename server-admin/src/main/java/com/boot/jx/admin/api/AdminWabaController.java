@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.admin.dto.WabaBalanceDto;
 import com.boot.jx.admin.service.WabaService;
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.common.dto.AgentResponseDto;
 import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 
 @RestController
