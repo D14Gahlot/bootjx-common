@@ -25,8 +25,11 @@ import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.Constants;
+import com.boot.utils.StringUtils;
 
 @Component
 public class TmplClient {
@@ -66,7 +69,6 @@ public class TmplClient {
 		file.setModel(outboxMessage.getModel());
 		file.setTemplate(outboxMessage.getHsm());
 		file = this.process(file, outboxMessage.contact().type()).getResult();
-
 		outboxMessage.setMessage(file.getContent());
 
 		Object categoryType = file.meta().get("categoryType");
@@ -88,9 +90,11 @@ public class TmplClient {
 
 		for (Map<String, Object> map : buttonsModel) {
 			MapModel buttonMapModel = MapModel.from(map);
+
 			buttons.add(new TmplElement().code(buttonMapModel.getString("key")).label(buttonMapModel.getString("label"))
 					.desc(buttonMapModel.getString("desc")).type(buttonMapModel.getString("type"))
-					.url(buttonMapModel.getString("url")).phone(buttonMapModel.getString("phone_number")));
+					.variable(buttonMapModel.getString("variable")).url(buttonMapModel.getString("url"))
+					.phone(buttonMapModel.getString("phone_number")));
 		}
 
 		for (Entry<String, Object> entry : file.getOptions().entrySet()) {

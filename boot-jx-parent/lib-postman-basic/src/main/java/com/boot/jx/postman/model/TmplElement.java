@@ -23,6 +23,9 @@ public class TmplElement implements Serializable {
 	@ApiMockModelProperty(example = "occupation", value = "key to be used programmatically", required = false)
 	private String code;
 
+	@ApiMockModelProperty(example = "{{data.var_1}}", value = "dynamic variable", required = false)
+	private String variable;
+
 	@ApiMockModelProperty(example = "Occupation", value = "Display Text to be used programmatically", required = false)
 	private String label;
 
@@ -71,6 +74,11 @@ public class TmplElement implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public TmplElement variable(String variable) {
+		this.variable = variable;
+		return this;
 	}
 
 	public TmplElement code(String code) {
@@ -149,6 +157,14 @@ public class TmplElement implements Serializable {
 
 	public void setUid(String uid) {
 		this.uid = uid;
+	}
+
+	public String getVariable() {
+		return variable;
+	}
+
+	public void setVariable(String variable) {
+		this.variable = variable;
 	}
 
 }
