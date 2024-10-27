@@ -46,9 +46,19 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 
 	public WabaAccountBalanceDoc addEditAccountBalance(WabaAccountBalanceDoc reqDto) {
 		WabaAccountBalanceDoc doc = new WabaAccountBalanceDoc(); 
+		WabaAccountBalanceDoc oldDoc=null;
 		if(ArgUtil.is(reqDto.getId())){
 			doc = commonMongoTemplate.findByIdString(reqDto.getId(), WabaAccountBalanceDoc.class);
-			doc.setDepositAmt(reqDto.getDepositAmt());
+			 oldDoc=doc;
+			 if(ArgUtil.is(doc.getOldVersions())) {
+				 doc.oldVersion(oldDoc);
+			 }else {
+				 List<WabaAccountBalanceDoc> lstList=new ArrayList<>();
+				 lstList.add(oldDoc);
+				// doc.setOldVersions(lstList);
+			 }
+			
+			doc.setDepositAmt(doc.getDepositAmt()+reqDto.getDepositAmt());
 			doc.setCurrencyCode(reqDto.getCurrencyCode());
 			doc.setTimeStamp(System.currentTimeMillis());
 			doc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
@@ -194,16 +204,19 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 
 	
 
+	public WabaBalanceDto fetchWabaAccountBalance(long timestamp) {
+		WabaBalanceDto wDto=new WabaBalanceDto();
+		// TODO Auto-generated method stub
+		wDto =getWabaCostAnalyticsV1(timestamp);
+		return wDto;
+	}
+	
 	
 	public WabaAccountBalanceDoc getAccountBalance(String wabaId) {
-		WabaAccountBalanceDoc doc = null; 
 		MongoQueryBuilder<WabaAccountBalanceDoc> qb=null;
-		Query query=new Query();
 		if(ArgUtil.is(wabaId)) {
-			//query.addCriteria(Criteria.where("wabaId").is(wabaId));
 			 qb = CommonMongoQueryBuilder.collection(WabaAccountBalanceDoc.class)
 					.where(Criteria.where("wabaId").is(wabaId));
-			//doc = commonMongoTemplate.find(query, WabaAccountBalanceDoc.class);
 		}
 		
 		return findOne(qb);
