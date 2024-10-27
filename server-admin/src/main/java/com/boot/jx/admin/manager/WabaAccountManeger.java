@@ -63,65 +63,6 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 		return doc;
 	}
 	
-
-	
-	public WabaDateWiseBalanceDto getWabaCostAnalytics(long timestamp) {
-		WabaDateWiseBalanceDto dto=new WabaDateWiseBalanceDto();
-		
-		String month=DateUtil.monthNameByTimestamp(timestamp);
-		long startTStamp=DateUtil.startTStampForaMonth(timestamp);
-		long endTStamp=DateUtil.endTStampForaMonth(timestamp);
-		
-		Query query = new Query();
-		query.addCriteria(Criteria.where("start").gt(startTStamp).and("end").lt(endTStamp));
-		List<WabaAnalyticsDoc> wabaAnaLst=commonMongoTemplate.find(query,WabaAnalyticsDoc.class);
-		Map<String, Long> countMap=new HashMap<>();
-		Map<String, Double> costMap=new HashMap<>();
-		long totalCount=0l;
-		double totalCost=0;
-		DecimalFormat df = new DecimalFormat("####0.000");
-		
-		if(ArgUtil.isNotEmpty(wabaAnaLst)) {
-			for(WabaAnalyticsDoc doc:wabaAnaLst) {
-				dto.setWabaId(doc.getWabaId());
-				dto.setNumber(doc.getNumber());
-				String category=doc.getConversation_category();
-				long count=doc.getConversation();
-				totalCount+=count;
-				double cost =doc.getCost();
-				
-				cost = Double.valueOf(df.format(cost));
-				totalCost+=cost;
-				if(countMap.containsKey(category)) {
-					long sum =countMap.get(category);
-					countMap.put(category, sum+count);
-				}else {
-					countMap.put(category, count);
-				}
-				
-				
-				if(costMap.containsKey(category)) {
-					double sum =costMap.get(category);
-					sum = Double.valueOf(df.format(sum));
-					costMap.put(category, sum+cost);
-				}else {
-					costMap.put(category, cost);
-				}
-			}
-			
-		}
-		
-		 // List of all expected categories
-        List<String> expectedKeys = Arrays.asList("MARKETING", "UTILITY", "SERVICE", "AUTHENTICATION");
-        
-        expectedKeys.forEach(key -> countMap.putIfAbsent(key, Long.valueOf(0)));
-        
-        expectedKeys.forEach(key -> costMap.putIfAbsent(key, Double.valueOf(0)));
-        
-		getWabaCostAnalyticsV1(timestamp);
-		return dto;
-	}
-	
 	
 	 public WabaBalanceDto getWabaCostAnalyticsV1(long timestamp) {
 		 
@@ -253,28 +194,6 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 
 	
 
-	public WabaBalanceDto fetchWabaAccountBalance(long timestamp) {
-		WabaDateWiseBalanceDto dto =getWabaCostAnalytics(timestamp);
-		
-		List<WabaAccountBalanceDoc> doc = null; 
-		Query query=new Query();
-		if(ArgUtil.is(dto)) {
-		query.addCriteria(Criteria.where("wabaId").is(dto.getWabaId()));
-		doc = commonMongoTemplate.find(query, WabaAccountBalanceDoc.class);
-		}
-		double balanceAmt =0.0;
-		double depostAmt=0.0;
-		if(ArgUtil.isNotEmpty(doc)) {
-		 depostAmt =doc.get(0).getDepositAmt();
-		 balanceAmt = depostAmt-dto.getTotalCost();
-		}
-		
-		WabaBalanceDto wDto=new WabaBalanceDto();
-		// TODO Auto-generated method stub
-		wDto =getWabaCostAnalyticsV1(timestamp);
-		return wDto;
-	}
-	
 	
 	public WabaAccountBalanceDoc getAccountBalance(String wabaId) {
 		WabaAccountBalanceDoc doc = null; 
