@@ -77,21 +77,21 @@ public class TmplHSMController {
 			@RequestParam(required = false, defaultValue = "false") boolean sync) {
 		ChannelConfig channelConfig = pmEnvironment.config().domainProxy().channel(channelId);
 
-		    if (!ArgUtil.is(channelConfig)) {
-		        return ApiResponse.build();
-		    }
-		   		    if (sync) {
-		        thirdPartyTmplManager.refreshWA360Templates(channelConfig);
-		    }
-		      List<HSMTemplate3rdParty> templates = thirdPartyTmplManager.getTemplates(channelConfig, templateCode);
-		    
-		    if (channelConfig.getChannelType().equalsIgnoreCase("wacfb")) {
-		        listFlows(channelId, sync);
-		      }
-		                
-		    return new ApiResponse<HSMTemplate3rdParty, Object>()
-					.results(thirdPartyTmplManager.getTemplates(channelConfig, templateCode));
-		   
+		if (!ArgUtil.is(channelConfig)) {
+			return ApiResponse.build();
+		}
+		if (sync) {
+			thirdPartyTmplManager.refreshWA360Templates(channelConfig);
+		}
+		List<HSMTemplate3rdParty> templates = thirdPartyTmplManager.getTemplates(channelConfig, templateCode);
+
+		if (channelConfig.getChannelType().equalsIgnoreCase("wacfb")) {
+			listFlows(channelId, sync);
+		}
+
+		return new ApiResponse<HSMTemplate3rdParty, Object>()
+				.results(thirdPartyTmplManager.getTemplates(channelConfig, templateCode));
+
 	}
 
 	@RequestMapping(value = "/api/tmpl/hsm/waba_templates", method = { RequestMethod.POST })
@@ -152,11 +152,9 @@ public class TmplHSMController {
 	@PutMapping("/api/tmpl/hsm/waba_migrate")
 	public ApiResponse<HSMTemplate3rdParty, Object> MigrateTemplate(@RequestParam String oldChannelId,
 			@RequestParam String newChannelId) {
-		Query query = new Query(Criteria.where("channelId").is(oldChannelId));
-		Update update = new Update().set("channelId", newChannelId);
-
-		mongoTemplate.updateMulti(query, update, HSMTemplate3rdParty.class);
-		return new ApiResponse<HSMTemplate3rdParty, Object>().message("Template Migrated");
+		return new ApiResponse<HSMTemplate3rdParty, Object>()
+				.results(thirdPartyTmplManager.migrateWABATemplate(oldChannelId, newChannelId))
+				.message("Template Migrated");
 	}
 
 	// HSMTemplate

@@ -19,10 +19,12 @@ import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.tpo.WABAFlows;
+import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Template;
 import com.boot.jx.postman.wacfb.WacfbClient;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -118,6 +120,28 @@ public class ThirdPartyTemplateManager {
 			commonMongoTemplate.remove(temp);
 		}
 		return temp;
+	}
+
+	public HSMTemplate3rdParty migrateWABATemplate(HSMTemplate3rdParty fromTemplate, String toChannelId) {
+		Contactable channelInfo = PostManUtil.parseChannelId(toChannelId);
+		HSMTemplate3rdParty newTemp = JsonUtil.deepCopy(fromTemplate, HSMTemplate3rdParty.class);
+		newTemp.setChannelId(toChannelId);
+		newTemp.setChannelType(channelInfo.getChannelType());
+		newTemp.setContactType(channelInfo.getContactType());
+		return newTemp;
+	}
+
+	public List<HSMTemplate3rdParty> migrateWABATemplate(String fromChannelId, String toChannelId) {
+		MongoQueryBuilder<HSMTemplate3rdParty> q = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+				.where(Criteria.where("channelId").is(fromChannelId));
+		List<HSMTemplate3rdParty> tmps = commonMongoTemplate.find(q);
+		for (HSMTemplate3rdParty hsmTemplate3rdParty : tmps) {
+			HSMTemplate3rdParty newTemp = migrateWABATemplate(hsmTemplate3rdParty, toChannelId);
+			commonMongoTemplate.save(newTemp);
+		}
+		MongoQueryBuilder<HSMTemplate3rdParty> q2 = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+				.where(Criteria.where("channelId").is(toChannelId));
+		return commonMongoTemplate.find(q2);
 	}
 
 	public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig, String code) {
