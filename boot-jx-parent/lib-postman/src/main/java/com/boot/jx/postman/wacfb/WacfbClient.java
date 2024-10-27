@@ -414,12 +414,14 @@ public class WacfbClient implements ChannelClient {
 						} else if ("QUICK_REPLY".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
-
 									String path = (String) buttonParameter.get("path");
-									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
-											i);
-									buttonComponent.parameter("payload", model.pathEntry(path).asString());
-									components.add(buttonComponent.build().map());
+									String code = model.pathEntry(path).asString();
+									if (validateButton(code, path)) {
+										TmplComponent buttonComponent = TmplComponent.createInstance()
+												.button("quick_reply", i);
+										buttonComponent.parameter("payload", code);
+										components.add(buttonComponent.build().map());
+									}
 								}
 							}
 						} else if ("FLOW".equals(buttonType)) {
@@ -439,8 +441,10 @@ public class WacfbClient implements ChannelClient {
 						if (ArgUtil.is(button) && "QUICK_REPLY".equals(button.getType())
 								&& "QUICK_REPLY".equals(buttonType)) {
 							TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
-							buttonComponent.parameter("payload", "reply_id:" + button.getCode());
-							components.add(buttonComponent.build().map());
+							if (validateButton(button.getCode(), button.getVariable())) {
+								buttonComponent.parameter("payload", "reply_id:" + button.getCode());
+								components.add(buttonComponent.build().map());
+							}
 						} else if ("FLOW".equals(buttonType)) {
 							TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
 							buttonComponent.parameter("action",
@@ -640,21 +644,13 @@ public class WacfbClient implements ChannelClient {
 		if ("button".equalsIgnoreCase(type)) {
 			List<Object> rows = new ArrayList<Object>();
 			for (TmplElement button : buttons) {
-				if (ArgUtil.is(button.getCode())) {
+				if (validateButton(button.getCode(), button.getVariable())) {
 					rows.add(MapModel.createInstance().put("type", "reply")
 							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
 									StringUtils.substring(button.getCode(), 256))
 							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
 									StringUtils.substring(button.getLabel(), 20))
 							.toMap());
-				} else {
-					ApiFieldError error = new ApiFieldError();
-					error.code("100");
-					// error.codeKey(errorTitle);
-					error.setDescription(ArgUtil.nonEmpty(button.getVariable(), "button.code") + " is missing");
-					error.field("button.code").code(ApiStatusCodes.PARAM_MISSING);
-					// error.setBody(resp.get("errors"));
-					ApiResponseUtil.throwException(error);
 				}
 			}
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
@@ -679,6 +675,19 @@ public class WacfbClient implements ChannelClient {
 		}
 
 		return send(req, channelConfig);
+	}
+
+	private boolean validateButton(String code, String variable) {
+		if (!ArgUtil.is(code)) {
+			ApiFieldError error = new ApiFieldError();
+			error.code("100");
+			// error.codeKey(errorTitle);
+			error.setDescription(ArgUtil.nonEmpty(variable, "button.code") + " is missing");
+			error.field("button.code").code(ApiStatusCodes.PARAM_MISSING);
+			// error.setBody(resp.get("errors"));
+			ApiResponseUtil.throwException(error);
+		}
+		return true;
 	}
 
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
