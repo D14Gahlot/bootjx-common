@@ -130,7 +130,6 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 		 
 		 List<ChannelConfigDoc>  chDocs=getListChannelCongigFowWa();
 		 for(ChannelConfigDoc chdoc:chDocs) {
-			System.out.println("chdoc JSON {--}"+JsonUtil.toJson(chdoc));
 	        // Get the month, start, and end timestamp using your DateUtil utility
 	        String month = DateUtil.monthNameByTimestamp(timestamp);
 	        long startTStamp = DateUtil.startTStampForaMonth(timestamp);
