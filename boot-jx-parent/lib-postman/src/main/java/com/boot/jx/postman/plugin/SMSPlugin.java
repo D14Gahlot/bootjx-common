@@ -42,12 +42,12 @@ public class SMSPlugin implements DefaultChannelPlugin<SMSConfigDetails> {
 				inputType = INPUT_TYPE.OPTIONS, optionsSource = "data:/config/sms_provider")
 		private String provider;
 
-		@ConfigMetaProperty(path = "sms.pub", writeonly = false, title = "Identifiers JSON", hidden = false,
+		@ConfigMetaProperty(path = "sms.pub", writeonly = false, title = "Identifiers JSON", hidden = true,
 				desc = "A json with all public identifiers to be used in api request", inputType = INPUT_TYPE.JSON)
 		private Map<String, Object> pub;
 
 		@JsonView(PMEnvironment.ProtectedProperty.class)
-		@ConfigMetaProperty(path = "sms.secret", writeonly = false, title = "Secret Keys JSON", hidden = false,
+		@ConfigMetaProperty(path = "sms.secret", writeonly = false, title = "Secret Keys JSON", hidden = true,
 				desc = "A json with all secret keys to be used in api request", inputType = INPUT_TYPE.JSON)
 		private Map<String, Object> secret;
 

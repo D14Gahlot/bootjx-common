@@ -29,6 +29,7 @@ import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 import com.boot.jx.postman.doc.WabaAnalyticsDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
+import com.boot.jx.utils.CommonUtils;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
@@ -130,11 +131,10 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 		 
 		 List<ChannelConfigDoc>  chDocs=getListChannelCongigFowWa();
 		 for(ChannelConfigDoc chdoc:chDocs) {
-			System.out.println("chdoc JSON {--}"+JsonUtil.toJson(chdoc));
 	        // Get the month, start, and end timestamp using your DateUtil utility
-	        String month = DateUtil.monthNameByTimestamp(timestamp);
-	        long startTStamp = DateUtil.startTStampForaMonth(timestamp);
-	        long endTStamp = DateUtil.endTStampForaMonth(timestamp);
+	        String month = CommonUtils.monthNameByTimestamp(timestamp);
+	        long startTStamp = CommonUtils.startTStampForaMonth(timestamp);
+	        long endTStamp = CommonUtils.endTStampForaMonth(timestamp);
 	        if(ArgUtil.is(chdoc.getWacfb())) {
 	        String wabaId =chdoc.getWacfb().getWabaId();//"430589913462237";
 	        String number =chdoc.getWacfb().getNumber();

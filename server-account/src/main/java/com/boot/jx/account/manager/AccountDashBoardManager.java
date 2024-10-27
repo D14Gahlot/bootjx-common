@@ -76,18 +76,19 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.utils.CommonUtils;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapUtils;
 import com.mongodb.client.MongoCursor;
-import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 
 @Component
 public class AccountDashBoardManager {
@@ -1521,9 +1522,9 @@ public class AccountDashBoardManager {
 		 List<ChannelConfigDoc>  chDocs=getListChannelCongigFowWa(domDoc.getDomain());
 		 for(ChannelConfigDoc chdoc:chDocs) {
 			// Get the month, start, and end timestamp using your DateUtil utility
-	        String month = DateUtil.monthNameByTimestamp(timestamp);
-	        long startTStamp = DateUtil.startTStampForaMonth(timestamp);
-	        long endTStamp = DateUtil.endTStampForaMonth(timestamp);
+	        String month = CommonUtils.monthNameByTimestamp(timestamp);
+	        long startTStamp = CommonUtils.startTStampForaMonth(timestamp);
+	        long endTStamp = CommonUtils.endTStampForaMonth(timestamp);
 	        if(ArgUtil.is(chdoc.getWacfb())) {
 	        String wabaId =chdoc.getWacfb().getWabaId();//"430589913462237";
 	        String number =chdoc.getWacfb().getNumber();
