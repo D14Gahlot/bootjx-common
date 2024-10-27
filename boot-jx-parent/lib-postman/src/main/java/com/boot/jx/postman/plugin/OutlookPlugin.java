@@ -158,7 +158,7 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 
 	@Override
 	public boolean isPushFreeTextAllowed() {
-		return false;
+		return true;
 	}
 
 	@Override
