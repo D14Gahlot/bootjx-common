@@ -148,7 +148,7 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 
 	@Override
 	public boolean isPushAllowed() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -163,7 +163,7 @@ public class OutlookPlugin implements DefaultChannelPlugin<OutlookConfigDetails>
 
 	@Override
 	public boolean isPushToNewContactAllowed() {
-		return false;
+		return true;
 	}
 
 	@Override
