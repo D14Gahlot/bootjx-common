@@ -136,6 +136,11 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
+		nexusEmailClient.subscribe(channelConfig);
+	}
+
+	@Deprecated
+	public void onChannelUpdateFallback(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 		Map<String, Object> meta = channelConfig.getMeta();
 		if (!ArgUtil.is(channelConfig.getMeta())) {
 			meta = new HashMap<String, Object>();
