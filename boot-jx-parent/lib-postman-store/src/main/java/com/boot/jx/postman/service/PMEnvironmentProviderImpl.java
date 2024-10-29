@@ -154,6 +154,8 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	public ChannelConfig configInternal(ChannelConfig config) {
 		ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 		doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
+		ChannelConfigDoc configUpdated = configMaster.findById(config.getChannelId(), ChannelConfigDoc.class);
+		doc.meta().putAll(configUpdated.meta());
 		configMaster.saveChannelConfig(doc);
 		return doc;
 	}
