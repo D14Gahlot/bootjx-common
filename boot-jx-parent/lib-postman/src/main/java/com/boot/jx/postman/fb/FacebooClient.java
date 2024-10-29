@@ -31,7 +31,6 @@ import com.boot.utils.JsonUtil;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @Component
-@PropertySource("classpath:application-facebook.properties")
 @EnableEncryptableProperties
 public class FacebooClient implements MessageClient {
 
