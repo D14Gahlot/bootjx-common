@@ -403,11 +403,13 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
 			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
 			inboxMessage.form().put("reply_payload", reply_payload);
+			inboxMessage.form().put("reply_id", reply_payload);
 			if (ArgUtil.is(reply_payload) && reply_payload.startsWith("reply_id:")) {
 				String reply_id = reply_payload.replaceFirst("reply_id:", "");
 				inboxMessage.form().put("reply_id", reply_id);
 				inboxMessage.form().put("reply_payload", reply_id);
 			}
+
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("image".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.IMAGE);

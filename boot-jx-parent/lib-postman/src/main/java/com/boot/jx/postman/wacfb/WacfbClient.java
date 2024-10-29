@@ -419,7 +419,7 @@ public class WacfbClient implements ChannelClient {
 									if (validateButton(code, path)) {
 										TmplComponent buttonComponent = TmplComponent.createInstance()
 												.button("quick_reply", i);
-										buttonComponent.parameter("payload", code);
+										buttonComponent.parameter("payload", "reply_id:" + code);
 										components.add(buttonComponent.build().map());
 									}
 								}
