@@ -389,11 +389,11 @@ public class WA360CloudClient implements ChannelClient {
 						} else if ("QUICK_REPLY".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
-
 									String path = (String) buttonParameter.get("path");
+									String code = model.pathEntry(path).asString();
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
-									buttonComponent.parameter("payload", model.pathEntry(path).asString());
+									buttonComponent.parameter("payload", code);
 									components.add(buttonComponent.build().map());
 								}
 							}
