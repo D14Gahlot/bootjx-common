@@ -290,6 +290,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		pmEnvironment.addChannel(config);
 		this.refresh(ChannelConfigDoc.DOCUMENT_NAME, config.getChannelId());
 		config = connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
+		
 	}
 
 	@Override

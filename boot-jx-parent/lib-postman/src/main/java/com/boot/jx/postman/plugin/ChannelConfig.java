@@ -293,7 +293,7 @@ public class ChannelConfig extends AChannelConfig {
 		case CHANNEL_TYPE.TELEGRAM:
 			return this.getTelegram();
 		case CHANNEL_TYPE.OUTLOOK:
-			return this.getOutlook();	
+			return this.getOutlook();
 		default:
 			return null;
 		}
@@ -310,13 +310,14 @@ public class ChannelConfig extends AChannelConfig {
 	public Map<String, Object> getMeta() {
 		return meta;
 	}
+
 	public Map<String, Object> meta() {
-		  if (!ArgUtil.is(this.meta)) { 
-		        meta = new HashMap<String, Object>();
-		    }
-	    return meta;
+		if (!ArgUtil.is(this.meta)) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
 	}
-   
+
 	public void setMeta(Map<String, Object> meta) {
 		this.meta = meta;
 	}

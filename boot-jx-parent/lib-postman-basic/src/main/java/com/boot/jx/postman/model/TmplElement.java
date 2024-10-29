@@ -23,7 +23,7 @@ public class TmplElement implements Serializable {
 	@ApiMockModelProperty(example = "occupation", value = "key to be used programmatically", required = false)
 	private String code;
 
-	@ApiMockModelProperty(example = "{{data.var_1}}", value = "dynamic variable", required = false)
+	@ApiMockModelProperty(example = "\\{\\{data.var_1\\}\\}", value = "dynamic variable", required = false)
 	private String variable;
 
 	@ApiMockModelProperty(example = "Occupation", value = "Display Text to be used programmatically", required = false)
