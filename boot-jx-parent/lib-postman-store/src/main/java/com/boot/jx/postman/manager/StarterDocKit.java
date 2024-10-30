@@ -89,6 +89,12 @@ public class StarterDocKit {
 		Criteria criteria = Criteria.where("code").is(code);
 		qryQuery.addCriteria(criteria);
 		CustomerFieldMasterDoc fiedMaster = commonMongoTemplate.findOne(qryQuery, CustomerFieldMasterDoc.class);
+		if(ArgUtil.is(fiedMaster)) {
+			if(!type.equalsIgnoreCase(fiedMaster.getType())) {
+				commonMongoTemplate.remove(fiedMaster);
+				fiedMaster =null;
+			}
+		}
 
 		if (!ArgUtil.is(fiedMaster)) {
 			fiedMaster = new CustomerFieldMasterDoc();
@@ -154,7 +160,7 @@ public class StarterDocKit {
 
 	private void createPredefinedMstField() {
 		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.customer.field.master");
-		String predefiend_customer_filed_version = "v1.4";
+		String predefiend_customer_filed_version = "v1.7";
 		if (!version.is(predefiend_customer_filed_version)) {
 			createPredefinedMstField("title", "Title", "dropdown");
 			createPredefinedMstField("dob", "Date of Birth", "date");
