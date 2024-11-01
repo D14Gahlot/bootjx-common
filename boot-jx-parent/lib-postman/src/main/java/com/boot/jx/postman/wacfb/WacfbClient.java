@@ -488,6 +488,7 @@ public class WacfbClient implements ChannelClient {
 
 	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
+        wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
 		wa360OutBoundMedia.setCaption(attachment.getMediaName());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
 		if (mediaType.equalsIgnoreCase("image")) {
@@ -879,7 +880,8 @@ public class WacfbClient implements ChannelClient {
 	}
 
 	private static byte[] downloadFile(String fileUrl) throws IOException {
-		try (InputStream in = new URL(fileUrl).openStream(); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+		try (InputStream in = new URL(fileUrl).openStream(); 
+			ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			byte[] buffer = new byte[1024];
 			int bytesRead;
 			while ((bytesRead = in.read(buffer)) != -1) {
