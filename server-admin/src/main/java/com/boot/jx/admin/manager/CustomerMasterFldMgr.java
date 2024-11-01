@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -78,6 +79,11 @@ public class CustomerMasterFldMgr {
 	
 	@Autowired(required = false)
 	protected AuditDetailProvider auditDetailProvider;
+	
+	
+	@Value("${mry.chrono.url}")
+	private String cronoJobUrl;
+	
 
 	public List<CustomerFieldMasterDoc> addAndEditMasterfield(CustomerFieldMasterDoc reqDto) {
 
@@ -192,7 +198,8 @@ public class CustomerMasterFldMgr {
 
 			commonMongoTemplate.save(doc);
 			SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
-			String nodeUrl = globalVars.keyEntry("cp_node_url").asString();
+			String nodeUrl = cronoJobUrl+"/scheduler/api/v1/job/now";
+			//String nodeUrl =globalVars.keyEntry("cp_node_url").asString();
 			LOGGER.info("isSchedular :" + nodeUrl);
 
 			/** to call node API **/

@@ -81,7 +81,7 @@ public class CustomerProfileContoller {
 	@RequestMapping(value = "/api/upload/pofile", method = { RequestMethod.POST })
 	public ApiResponse<JobScheduledDoc, Object> uploadExcel(
 			@RequestParam(name = "file", required = false) MultipartFile file) {
-		CommonFile url = fileStore.upload1(file,
+		CommonFile url =fileStore.upload1(file,
 				String.format("%s/profileExcel/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
 				file.getOriginalFilename());
 		JobScheduledDoc jobSch = cusProfileService.uploadFile(url);

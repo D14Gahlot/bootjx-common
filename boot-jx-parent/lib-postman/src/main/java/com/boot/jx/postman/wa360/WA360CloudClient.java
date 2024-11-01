@@ -203,11 +203,11 @@ public class WA360CloudClient implements ChannelClient {
 		if (ArgUtil.is(outboxMessage.getAttachments())) {
 			for (Attachment attachment : outboxMessage.getAttachments()) {
 				if (ArgUtil.is(textMessage) && ArgUtil.isEqual(attachment.getMediaType(), FileType.IMAGE.toString(),
-						FileType.VIDEO.toString(),FileType.DOCUMENT.toString())){
+						FileType.VIDEO.toString(), FileType.DOCUMENT.toString())) {
 					attachment.setMediaCaption(textMessage);
 					textMessage = null;
 				}
-				
+
 				MapModel resp = sendMedia(channelConfig, outboxMessage, attachment);
 				msgIds.add(getMessageId(resp));
 			}
@@ -467,11 +467,11 @@ public class WA360CloudClient implements ChannelClient {
 
 	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
-		        wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
-				wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
-		        wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		        if (mediaType.equalsIgnoreCase("image") ||mediaType.equalsIgnoreCase("video")  ) {
-			         wa360OutBoundMedia.setFilename(null);
+		wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
+		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
+		wa360OutBoundMedia.setLink(attachment.getMediaURL());
+		if (mediaType.equalsIgnoreCase("image") || mediaType.equalsIgnoreCase("video")) {
+			wa360OutBoundMedia.setFilename(null);
 		}
 		return wa360OutBoundMedia;
 	}
@@ -622,12 +622,19 @@ public class WA360CloudClient implements ChannelClient {
 		if ("button".equalsIgnoreCase(type)) {
 			List<Object> rows = new ArrayList<Object>();
 			for (TmplElement button : buttons) {
-				rows.add(MapModel.createInstance().put("type", "reply")
-						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
-								StringUtils.substring(button.getCode(), 256))
-						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
-								StringUtils.substring(button.getLabel(), 20))
-						.toMap());
+				if (ArgUtil.is(button.getCode())) {
+					rows.add(MapModel.createInstance().put("type", "reply")
+							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
+									StringUtils.substring(button.getCode(), 256))
+							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
+									StringUtils.substring(button.getLabel(), 20))
+							.toMap());
+				} else {
+					rows.add(MapModel.createInstance().put("type", "reply")
+							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
+									StringUtils.substring(button.getLabel(), 20))
+							.toMap());
+				}
 			}
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
 		} else if ("cta_url".equalsIgnoreCase(type)) {
@@ -653,7 +660,7 @@ public class WA360CloudClient implements ChannelClient {
 
 		return send(req, channelConfig);
 	}
-     
+
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
 
 		try {

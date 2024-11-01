@@ -131,8 +131,8 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 			if (ArgUtil.is(state.getRedirectUrl())) {
 				redirectUri = state.getRedirectUrl();
 			} else if (ArgUtil.is(stateStr)) {
-				AuthState newstate = AuthState.fromString(stateStr.toString());
-				redirectUri = newstate.getRedirectUrl();
+				//AuthState newstate = AuthState.fromString(stateStr.toString());
+				//redirectUri = newstate.getRedirectUrl();
 			}
 
 			ChannelConfig channel = new ChannelConfig();

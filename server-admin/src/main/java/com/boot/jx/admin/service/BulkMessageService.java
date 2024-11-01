@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -86,18 +87,15 @@ public class BulkMessageService extends BatchJobExecuter {
 	public void registerJob(BatchJob job, ChronoScheduler scheduler) {
 		if (!ArgUtil.is(scheduler)) {
 			registerJobAndTriggerSummary(job);
-		} else {
+		}else if(ArgUtil.is(scheduler) && !StringUtils.isBlank(scheduler.getTopic()) && scheduler.getTopic().equalsIgnoreCase("CANCELLED")) {
+			tunnelService.schedule(job.scheduler(scheduler));
+		}else {
 			scheduler = ArgUtil.nonEmpty(scheduler, ChronoScheduler.task());
 			scheduler.setTopic("BulkMessageTask");
 			tunnelService.schedule(job.scheduler(scheduler));
 		}
 	}
 
-	public void cancelJobAndTriggerSummary(BatchJob job) {
-		cancelJob(job);
-		tunnelService.task("CAMPAIGN_CANCELLED",
-				MapModel.createInstance().putAll(job.data()).put("bulkSessionId", job.getJobId()).toMap());
-	}
 	
 	
 	public BulkSessionDoc send(OutboxMessage bulkMessage, ChronoScheduler scheduler) throws NumberParseException {

@@ -19,12 +19,14 @@ import com.boot.jx.account.dto.AdminAgentAccountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
 import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.TimeZoneOfSet;
+import com.boot.jx.account.dto.WabaCostReqDto;
 import com.boot.jx.account.dto.WabaSummary;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.account.dto.WabaBalanceDto;
 
 @Controller
 @RequestMapping("/partnerdashboard")
@@ -146,8 +148,6 @@ public class PartnerDashBoardController {
 	
 /** to fetch all domain email id's **/
 	
-	
-	
 	@ResponseBody
 	@RequestMapping(value = { "/pub/admin-agent-dtls" }, method = { RequestMethod.GET })
 	public ApiResponse<AdminAgentAccountDto, Object> getAdminAgentSummary() {
@@ -155,4 +155,12 @@ public class PartnerDashBoardController {
 		return ApiResponse.buildResult(summary);
 	}
 
+	@ResponseBody
+	@RequestMapping(value = { "/pub/fetch/balance/waba/summary" }, method = { RequestMethod.GET })
+	public ApiResponse<WabaBalanceDto, Object> wabaDepositAddedit(@RequestParam long timeStamp) { 
+		WabaBalanceDto cost = dashBMgr.getWabaCostAnalyticsV1(timeStamp);
+		return ApiResponse.buildResult(cost);
+	}
+
+	
 }

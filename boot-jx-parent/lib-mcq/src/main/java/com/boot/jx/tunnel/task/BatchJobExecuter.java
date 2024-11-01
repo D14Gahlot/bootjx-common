@@ -223,6 +223,8 @@ public abstract class BatchJobExecuter {
 				currentBatchJob.setStatus(JOB_STATUS.EXECUTING);
 			} else if (JOB_STATUS.CLOSED == currentBatchJob.getStatus()) {
 				currentBatchJob.setStatus(JOB_STATUS.COMPLETED);
+			} else if (JOB_STATUS.CANCELLED == currentBatchJob.getStatus()) {
+				currentBatchJob.setStatus(JOB_STATUS.CANCELLED);
 			}
 
 			try {

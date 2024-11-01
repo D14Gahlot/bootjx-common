@@ -1,6 +1,7 @@
 package com.boot.jx.tmpl;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -13,7 +14,10 @@ import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
 import com.boot.jx.postman.PostmanPackages.TemplateResolver;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
+import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
 import com.github.jknack.handlebars.EscapingStrategy;
@@ -52,14 +56,25 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 				file.options().putAll(basicTemplate.options());
 
 				try {
+					// Extra handling
 					Object waba = file.options().remove("waba");
+					MapModel optionsModel = MapModel.from(file.options());
+					List<Map<String, Object>> buttonsModel = optionsModel.keyEntry("buttons").asListOfMap();
+					for (Map<String, Object> map : buttonsModel) {
+						MapModel buttonMapModel = MapModel.from(map);
+						MapPathEntry key = buttonMapModel.keyEntry("key");
+						if (key.exists() && StringUtils.contains(key.asString(), "{{")) {
+							buttonMapModel.put("variable", key.asString().replaceAll("\\{", Constants.BLANK)
+									.replaceAll("\\}", Constants.BLANK));
+						}
+					}
 
 					String optionsString = JsonUtil.toJson(file.options());
 					optionsString = this.process(optionsString, file.getModel(), HANDLEBARS_JS);
 					Map<String, Object> options = JsonUtil.fromJsonToMap(optionsString);
 					if (options != null)
-		                options.put("waba",waba);
-						file.setOptions(options);
+						options.put("waba", waba);
+					file.setOptions(options);
 				} catch (Exception e) {
 					LOGGER.error("CommonTmpPackageImpl.process", e);
 				}

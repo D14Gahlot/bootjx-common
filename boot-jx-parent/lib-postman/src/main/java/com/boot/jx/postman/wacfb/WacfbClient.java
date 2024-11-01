@@ -25,6 +25,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
+import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
@@ -413,12 +414,14 @@ public class WacfbClient implements ChannelClient {
 						} else if ("QUICK_REPLY".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
-
 									String path = (String) buttonParameter.get("path");
-									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
-											i);
-									buttonComponent.parameter("payload", model.pathEntry(path).asString());
-									components.add(buttonComponent.build().map());
+									String code = model.pathEntry(path).asString();
+									if (validateButton(code, path)) {
+										TmplComponent buttonComponent = TmplComponent.createInstance()
+												.button("quick_reply", i);
+										buttonComponent.parameter("payload", code);
+										components.add(buttonComponent.build().map());
+									}
 								}
 							}
 						} else if ("FLOW".equals(buttonType)) {
@@ -438,8 +441,10 @@ public class WacfbClient implements ChannelClient {
 						if (ArgUtil.is(button) && "QUICK_REPLY".equals(button.getType())
 								&& "QUICK_REPLY".equals(buttonType)) {
 							TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply", i);
-							buttonComponent.parameter("payload", "reply_id:" + button.getCode());
-							components.add(buttonComponent.build().map());
+							if (validateButton(button.getCode(), button.getVariable())) {
+								buttonComponent.parameter("payload", "reply_id:" + button.getCode());
+								components.add(buttonComponent.build().map());
+							}
 						} else if ("FLOW".equals(buttonType)) {
 							TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
 							buttonComponent.parameter("action",
@@ -639,12 +644,14 @@ public class WacfbClient implements ChannelClient {
 		if ("button".equalsIgnoreCase(type)) {
 			List<Object> rows = new ArrayList<Object>();
 			for (TmplElement button : buttons) {
-				rows.add(MapModel.createInstance().put("type", "reply")
-						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
-								StringUtils.substring(button.getCode(), 256))
-						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
-								StringUtils.substring(button.getLabel(), 20))
-						.toMap());
+				if (validateButton(button.getCode(), button.getVariable())) {
+					rows.add(MapModel.createInstance().put("type", "reply")
+							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
+									StringUtils.substring(button.getCode(), 256))
+							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
+									StringUtils.substring(button.getLabel(), 20))
+							.toMap());
+				}
 			}
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
 		} else if ("cta_url".equalsIgnoreCase(type)) {
@@ -660,14 +667,27 @@ public class WacfbClient implements ChannelClient {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "flow");
 
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS, MapModel.createInstance()
-					.put("flow_message_version", "3").put("flow_token", button.getUid())
-					.put("flow_id", button.getUid()).put("flow_cta", button.getLabel())
+					.put("flow_message_version", "3").put("flow_token", button.getUid()).put("flow_id", button.getUid())
+					.put("flow_cta", button.getLabel())
 					.put("flow_action", StringUtils.toLowerCase(button.getAction().toLowerCase()))
 					.put("flow_action_payload", MapModel.createInstance().put("screen", button.getCode()).toMap())
 					.toMap());
 		}
 
 		return send(req, channelConfig);
+	}
+
+	private boolean validateButton(String code, String variable) {
+		if (!ArgUtil.is(code)) {
+			ApiFieldError error = new ApiFieldError();
+			error.code("100");
+			// error.codeKey(errorTitle);
+			error.setDescription(ArgUtil.nonEmpty(variable, "button.code") + " is missing");
+			error.field("button.code").code(ApiStatusCodes.PARAM_MISSING);
+			// error.setBody(resp.get("errors"));
+			ApiResponseUtil.throwException(error);
+		}
+		return true;
 	}
 
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
@@ -812,17 +832,14 @@ public class WacfbClient implements ChannelClient {
 			throw e;
 		}
 	}
-	public MapModel flowsAssets(String flowId,ChannelConfig channelConfig)
-	{
+
+	public MapModel flowsAssets(String flowId, ChannelConfig channelConfig) {
 		try {
-			MapModel resp=restService.ajax(WA360Constants.META_WA_CLOUD_URL)
-	                .path(flowId + "/assets")
-	                .authBearer(channelConfig.getWacfb().getAccessToken())
-	                .header("Content-Type", "application/json")
-	                .get().asMapModel();
+			MapModel resp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(flowId + "/assets")
+					.authBearer(channelConfig.getWacfb().getAccessToken()).header("Content-Type", "application/json")
+					.get().asMapModel();
 			return resp;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			System.err.println("Unexpected error: " + e.getMessage());
 			throw e;
 		}
