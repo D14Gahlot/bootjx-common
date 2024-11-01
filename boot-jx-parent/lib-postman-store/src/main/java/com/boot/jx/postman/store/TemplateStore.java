@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.postman.PostmanPackages.TemplateResolver;
@@ -25,7 +26,7 @@ public class TemplateStore implements TemplateResolver {
 		return x;
 	}
 
-	public BasicTemplate resolve(CommonTemplateMeta template) {
+	public BasicTemplate resolve(CommonTemplateMeta template, ContactType contactType) {
 
 		if (ArgUtil.is(template.getId())) {
 			if (template.getId().startsWith("QR=")) {
@@ -45,14 +46,36 @@ public class TemplateStore implements TemplateResolver {
 				if (ArgUtil.is(temps)) {
 					HSMTemplateDoc resolvedTemplate = null;
 					if (temps.size() > 1) {
+						HSMTemplateDoc wildCardTemp = null;
+						HSMTemplateDoc exactTemp = null;
+						HSMTemplateDoc noLangTemp = null;
+						HSMTemplateDoc noContactTemp = null;
+						HSMTemplateDoc engLangTemp = null;
+
 						for (HSMTemplateDoc hsmTemplate3rdParty : temps) {
-							if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), template.getLang())) {
-								resolvedTemplate = hsmTemplate3rdParty;
+							if (ArgUtil.not(hsmTemplate3rdParty.getContactType())
+									&& ArgUtil.not(hsmTemplate3rdParty.getLang())) {
+								wildCardTemp = hsmTemplate3rdParty;
+							} else if (ArgUtil.is(hsmTemplate3rdParty.getContactType(), contactType)
+									&& ArgUtil.is(hsmTemplate3rdParty.getLang(), template.getLang())) {
+								exactTemp = hsmTemplate3rdParty;
 								break;
-							} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
-								resolvedTemplate = hsmTemplate3rdParty;
+							} else if (ArgUtil.is(hsmTemplate3rdParty.getContactType(), contactType)
+									&& (ArgUtil.not(hsmTemplate3rdParty.getLang()) || (ArgUtil.not(noLangTemp)
+											&& ArgUtil.is(hsmTemplate3rdParty.getLang(), "en", "en_US", "en_GB")))) {
+								noLangTemp = hsmTemplate3rdParty;
+							} else if (ArgUtil.not(hsmTemplate3rdParty.getContactType())
+									&& ArgUtil.is(hsmTemplate3rdParty.getLang(), template.getLang())) {
+								noContactTemp = hsmTemplate3rdParty;
+							} else if (ArgUtil.not(hsmTemplate3rdParty.getContactType())
+									&& ArgUtil.is(hsmTemplate3rdParty.getLang(), "en", "en_US", "en_GB")) {
+								engLangTemp = hsmTemplate3rdParty;
 							}
 						}
+
+						resolvedTemplate = ArgUtil.anyOf(exactTemp, noLangTemp, engLangTemp, wildCardTemp,
+								noContactTemp);
+
 					} else {
 						resolvedTemplate = temps.get(0);
 					}
@@ -65,7 +88,7 @@ public class TemplateStore implements TemplateResolver {
 	}
 
 	private HSMTemplateDoc createTemplateDoc(CommonTemplateMeta template, QuickReply qr) {
-		if(ArgUtil.is(qr)) {
+		if (ArgUtil.is(qr)) {
 			HSMTemplateDoc tmpl = new HSMTemplateDoc();
 			tmpl.setId(template.getId());
 			tmpl.setCode(qr.getCode());
@@ -77,13 +100,18 @@ public class TemplateStore implements TemplateResolver {
 	}
 
 	@Override
-	public BasicTemplate get(CommonTemplateMeta template) {
-		BasicTemplate basicTemplate = resolve(template);
+	public BasicTemplate get(CommonTemplateMeta template, ContactType contactType) {
+		BasicTemplate basicTemplate = resolve(template, contactType);
 		if (ArgUtil.is(basicTemplate)) {
 			template.setCode(basicTemplate.getCode());
 			template.setId(basicTemplate.getId());
 		}
 		return basicTemplate;
+	}
+
+	@Override
+	public BasicTemplate get(CommonTemplateMeta template) {
+		return get(template, null);
 	}
 
 }

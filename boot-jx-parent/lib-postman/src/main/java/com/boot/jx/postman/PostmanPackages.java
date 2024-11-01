@@ -22,6 +22,8 @@ public class PostmanPackages {
 		public BasicTemplate get(String templateId);
 
 		public BasicTemplate get(CommonTemplateMeta template);
+
+		public BasicTemplate get(CommonTemplateMeta template, ContactType contactType);
 	}
 
 	public static interface MessageClient {
