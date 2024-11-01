@@ -194,6 +194,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			} else {
 				MapModel phoneNumbers = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
 						.path("/phone_numbers").authBearer(userAccessToken).get().asMapModel();
+				
 				channelConfigTemp.log("/phone_numbers", phoneNumbers.toMap());
 				final String assignedWaBaIdFinal = assignedWaBaId;
 
@@ -299,9 +300,11 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	}
 
 	private boolean isValidEmail(String email) {
-		String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-		Pattern pattern = Pattern.compile(emailRegex);
-		return pattern.matcher(email).matches();
+
+		String emailRegex = "^[A-Za-z0-9+_]+@[A-Za-z0-9-]+.[A-Za-z]{3,6}";
+	    Pattern pattern = Pattern.compile(emailRegex);
+	    return pattern.matcher(email).matches();
+
 	}
 
 	@Override

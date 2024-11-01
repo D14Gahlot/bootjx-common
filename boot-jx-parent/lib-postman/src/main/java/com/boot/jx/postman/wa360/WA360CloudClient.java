@@ -363,7 +363,10 @@ public class WA360CloudClient implements ChannelClient {
 					TmplComponent bodyComponent = TmplComponent.createInstance().body();
 					for (Map<String, Object> bodyParameter : bodyParametersTemp) {
 						String path = (String) bodyParameter.get("path");
-						bodyComponent.parameter("text", model.pathEntry(path).asString());
+						String originalText = model.pathEntry(path).asString();
+						originalText = originalText.replaceAll("\n", "\\\\n");
+						bodyComponent.parameter("text", originalText);
+
 					}
 					components.add(bodyComponent.build().map());
 				}
@@ -477,6 +480,8 @@ public class WA360CloudClient implements ChannelClient {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
+		String originalText = outboxMessage.getMessage();
+		outboxMessage.setMessage(originalText);
 		req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY,
 				StringUtils.wrap("*", outboxMessage.getSubject(), "*\n") + outboxMessage.getMessage());
 		return send(req, channelConfig);
