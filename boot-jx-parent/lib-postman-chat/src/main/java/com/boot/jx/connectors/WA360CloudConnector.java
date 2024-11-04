@@ -168,7 +168,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 		return null;
 	}
 	private boolean isValidEmail(String email) {
-		String emailRegex = "^[A-Za-z0-9+_]+@[A-Za-z0-9-]+.[A-Za-z]{3,6}";
+		String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 		Pattern pattern = Pattern.compile(emailRegex);
 	    return pattern.matcher(email).matches();
 	}
