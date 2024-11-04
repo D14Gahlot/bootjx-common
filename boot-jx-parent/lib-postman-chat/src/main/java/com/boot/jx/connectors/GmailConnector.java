@@ -131,8 +131,8 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 			if (ArgUtil.is(state.getRedirectUrl())) {
 				redirectUri = state.getRedirectUrl();
 			} else if (ArgUtil.is(stateStr)) {
-				//AuthState newstate = AuthState.fromString(stateStr.toString());
-				//redirectUri = newstate.getRedirectUrl();
+				// AuthState newstate = AuthState.fromString(stateStr.toString());
+				// redirectUri = newstate.getRedirectUrl();
 			}
 
 			ChannelConfig channel = new ChannelConfig();
@@ -200,12 +200,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
-		Map<String, Object> meta = channelConfig.getMeta();
-		if (!ArgUtil.is(channelConfig.getMeta())) {
-			meta = new HashMap<String, Object>();
-		}
 		nexusEmailClient.subscribe(channelConfig);
-		channelConfig.setMeta(meta);
 	}
 
 	@Override

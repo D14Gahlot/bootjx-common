@@ -131,13 +131,13 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			if (ArgUtil.is(phoneNumberId)) {
 				MapModel phoneMap = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(phoneNumberId)
 						.authBearer(userAccessToken).get().asMapModel();
-				
-				Map<String, Object> meta = setup.meta();				
+
+				Map<String, Object> meta = setup.meta();
 				if (ArgUtil.is(phoneMap)) {
 					meta.put("status ", phoneMap.toObject());
-					}
+				}
 				setup.setMeta(meta);
-		 			
+
 				channelConfigTemp.log("/phone_number_by_id", phoneMap.toMap());
 
 				ChannelConfig channel = new ChannelConfig();
@@ -152,7 +152,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				channel.getWacfb().setMasterAppConfigId(setup.getWacfb().getMasterAppConfigId());
 				channel.setName(phoneMap.keyEntry("verified_name").asString());
 				channels.add(channel);
-       
+
 				MapModel subscribeResp = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
 						.path("/subscribed_apps").authBearer(setup.getWacfb().getMasterSUAccessToken()).post()
 						.asMapModel();
@@ -232,13 +232,13 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(channelConfig.getWacfb().getWabaId())
 					.path("/subscribed_apps").authBearer(channelConfig.getWacfb().getAccessToken())
 					.postJson(webhook.toMap()).asMapModel();
-					
+
 		}
-				
-		 catch (Exception e) {
+
+		catch (Exception e) {
 			logManager.error("While Setting " + webhookUrl, e);
 		}
-	
+
 	}
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
@@ -298,10 +298,13 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 		return null;
 	}
+
 	private boolean isValidEmail(String email) {
+
 		String emailRegex = "^[A-Za-z0-9+_]+@[A-Za-z0-9-]+.[A-Za-z]{3,6}";
 	    Pattern pattern = Pattern.compile(emailRegex);
 	    return pattern.matcher(email).matches();
+
 	}
 
 	@Override
@@ -403,10 +406,13 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			inboxMessage.form().put("reply_title", map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_REPLY).asString());
 			String reply_payload = map.entry(InBoundWrapperPaths.SIMPLE_BUTTON_PAYLOAD).asString();
 			inboxMessage.form().put("reply_payload", reply_payload);
+			inboxMessage.form().put("reply_id", reply_payload);
 			if (ArgUtil.is(reply_payload) && reply_payload.startsWith("reply_id:")) {
 				String reply_id = reply_payload.replaceFirst("reply_id:", "");
 				inboxMessage.form().put("reply_id", reply_id);
+				inboxMessage.form().put("reply_payload", reply_id);
 			}
+
 			inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.form().get("reply_title"), Constants.BLANK));
 		} else if ("image".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.IMAGE);

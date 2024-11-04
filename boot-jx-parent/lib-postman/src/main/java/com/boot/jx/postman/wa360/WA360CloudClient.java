@@ -349,6 +349,7 @@ public class WA360CloudClient implements ChannelClient {
 				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
+			        media.setFilename(ArgUtil.nonEmpty(outboxMessage.getAttachments().get(0).getMediaCaption(), outboxMessage.getAttachments().get(0).getMediaName()));
 					media.setCaption(null);
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
@@ -392,11 +393,11 @@ public class WA360CloudClient implements ChannelClient {
 						} else if ("QUICK_REPLY".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
-
 									String path = (String) buttonParameter.get("path");
+									String code = model.pathEntry(path).asString();
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
-									buttonComponent.parameter("payload", model.pathEntry(path).asString());
+									buttonComponent.parameter("payload", code);
 									components.add(buttonComponent.build().map());
 								}
 							}

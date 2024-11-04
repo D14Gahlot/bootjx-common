@@ -45,16 +45,12 @@ import twitter4j.UploadedMedia;
 import twitter4j.conf.ConfigurationBuilder;
 
 @Component
-@PropertySource("classpath:application-twitter.properties")
 @EnableEncryptableProperties
 public class TwitterClient implements MessageClient {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterClient.class);
 	private static Map<String, TwitterClientContext> CLIENTS = Collections
 			.synchronizedMap(new HashMap<String, TwitterClientContext>());
-
-	@Value("${postman.twitter.default.lane}")
-	private String defaultLane;
 
 	@Autowired
 	private PMEnvironment environment;
