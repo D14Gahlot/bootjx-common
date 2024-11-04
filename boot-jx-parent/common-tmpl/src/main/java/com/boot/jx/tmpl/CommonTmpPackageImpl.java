@@ -50,7 +50,7 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 	@Override
 	public CommonFile process(CommonFile file, ContactType contactType) {
 		if (ArgUtil.is(templateResolver) && ArgUtil.is(file.getTemplate())) {
-			BasicTemplate basicTemplate = templateResolver.get(file.getTemplate());
+			BasicTemplate basicTemplate = templateResolver.get(file.getTemplate(),contactType);
 			if (ArgUtil.is(basicTemplate)) {
 				String content = this.process(basicTemplate.getTemplate(), file.getModel());
 				file.options().putAll(basicTemplate.options());
