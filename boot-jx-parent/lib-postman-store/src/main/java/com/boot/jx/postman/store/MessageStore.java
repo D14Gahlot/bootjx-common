@@ -363,6 +363,15 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 		return messages;
 	}
+	
+	public List<MessageDoc> findByBulkSessionIdWithRplyCount(String bulkSessionId, ContactType contactType) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("type").is('I'));
+		query2.addCriteria(Criteria.where("replyTo.bulkSessionId").is(bulkSessionId))
+				.with(new Sort(Direction.ASC, "timestamp"));
+		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
+		return messages;
+	}
 
 	public void updateStatus(ContactType contactType, MessageDoc messageDoc, Status status, String reason) {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
