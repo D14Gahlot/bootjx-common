@@ -51,8 +51,8 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	protected String message = null;
 	protected String footer;
 
-	private String formatType;
-	private String formatSubType;
+//	private String formatType;
+//	private String formatSubType;
 
 	protected List<String> to = null;
 	protected List<ContactMeta> contacts = null;
@@ -548,22 +548,22 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	public void setTemplateExt(BasicExternalTemplate templateExt) {
 		this.templateExt = templateExt;
 	}
-
-	public String getFormatType() {
-		return formatType;
-	}
-
-	public void setFormatType(String formatType) {
-		this.formatType = formatType;
-	}
-
-	public String getFormatSubType() {
-		return formatSubType;
-	}
-
-	public void setFormatSubType(String formatSubType) {
-		this.formatSubType = formatSubType;
-	}
+//
+//	public String getFormatType() {
+//		return formatType;
+//	}
+//
+//	public void setFormatType(String formatType) {
+//		this.formatType = formatType;
+//	}
+//
+//	public String getFormatSubType() {
+//		return formatSubType;
+//	}
+//
+//	public void setFormatSubType(String formatSubType) {
+//		this.formatSubType = formatSubType;
+//	}
 
 	public CommonTemplateMeta hsm() {
 		if (this.hsm == null) {

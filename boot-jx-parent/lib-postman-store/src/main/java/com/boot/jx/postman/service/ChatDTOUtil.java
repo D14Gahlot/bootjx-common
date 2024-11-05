@@ -19,6 +19,7 @@ import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
+import com.boot.jx.postman.model.outbound.OutBoundMsgBasic.OutBoundMsg;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -78,8 +79,7 @@ public class ChatDTOUtil {
 				.collect(Collectors.toList());
 	}
 
-	public static ChatMessageDTO getChatMessageDTO(
-			MessageDoc messageDoc, String contactName, String defaultSender) {
+	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String defaultSender) {
 		ChatMessageDTO messageDto = new ChatMessageDTO();
 		if (!ArgUtil.is(messageDoc)) {
 			return messageDto;
@@ -270,5 +270,11 @@ public class ChatDTOUtil {
 	private static Map<String, Object> getDefaultMap(Map<String, Object> defMap) {
 		defMap.put("", "");
 		return defMap;
+	}
+
+	public static OutBoundMsg toOutBoundMsg(MessageDoc resendMsg) {
+		
+		
+		return null;
 	}
 }

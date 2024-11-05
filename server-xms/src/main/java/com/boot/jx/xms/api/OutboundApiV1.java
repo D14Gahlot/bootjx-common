@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.ioutbound.MessageService;
-import com.boot.jx.ioutbound.OutBoundMsgBasic.OutBoundMsg;
-import com.boot.jx.ioutbound.OutBoundReciept;
+import com.boot.jx.outbound.MessageService;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.outbound.OutBoundMsgBasic.OutBoundMsg;
+import com.boot.jx.postman.model.outbound.OutBoundReciept;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
 
 import io.swagger.annotations.Api;

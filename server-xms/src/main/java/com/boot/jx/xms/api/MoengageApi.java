@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.boot.jx.api.ApiResponse;
-import com.boot.jx.ioutbound.MessageService;
-import com.boot.jx.ioutbound.OutBoundReciept;
+import com.boot.jx.outbound.MessageService;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.outbound.OutBoundReciept;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
 import com.boot.model.MapModel;
 import com.boot.utils.JsonUtil;
