@@ -10,17 +10,17 @@ public class Email extends Message<Email> implements Cloneable {
 
 	private static final long serialVersionUID = 9210306073311369368L;
 	private String from = null;
-	private String replyTo = null;
+	private String replyToEmail = null;
 	private List<String> cc = null;
 
 	private boolean isHtml;
 
-	public String getReplyTo() {
-		return replyTo;
+	public String getReplyToEmail() {
+		return replyToEmail;
 	}
 
-	public void setReplyTo(String replyTo) {
-		this.replyTo = replyTo;
+	public void setReplyToEmail(String replyTo) {
+		this.replyToEmail = replyTo;
 	}
 
 	public Email() {

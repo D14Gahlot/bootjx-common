@@ -83,10 +83,12 @@ public class MessageService {
 				ApiResponseUtil.throwInputException(new ApiFieldError().field("messageIdResend").obzect("OutBoundMsg")
 						.codeKey("MESSAGE_NOT_FOUND").description("Message cannot be Resent"));
 			}
-			message = ChatDTOUtil.toOutBoundMsg(resendMsg);
+			OutboxMessage outboxmessage = ChatDTOUtil.toOutboxMessage(resendMsg);
+			outboxmessage.setMessageIdResend(message.getMessageIdResend());
+			return send(channel, resendMsg.getContact(), outboxmessage);
+		} else {
+			return send(message, channel);
 		}
-
-		return send(message, channel);
 	}
 
 	public OutBoundReciept send(OutBoundMsg message, ChannelConfig channel) {
@@ -98,6 +100,7 @@ public class MessageService {
 		}
 
 		OutboxMessage outboxMessage = new OutboxMessage();
+		outboxMessage.setFormatType(message.getType());
 
 		if ("text".equalsIgnoreCase(message.getType())) {
 			if (!ArgUtil.is(message.getText()) || !ArgUtil.is(message.getText().getBody())) {
