@@ -265,6 +265,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 
 		doc.setSessionId(outMessage.getSessionId());
 		doc.setMessageIdRef(outMessage.getMessageIdRef());
+		doc.setMessageIdResend(outMessage.getMessageIdResend());
 
 		doc.setTrace(outMessage.getTrace());
 		doc.setLogs(outMessage.getLogs());

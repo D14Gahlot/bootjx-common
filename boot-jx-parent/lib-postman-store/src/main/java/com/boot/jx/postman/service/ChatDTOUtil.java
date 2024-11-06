@@ -97,6 +97,7 @@ public class ChatDTOUtil {
 		messageDto.setMessageId(messageDoc.getMessageId());
 		messageDto.setMessageIdExt(ArgUtil.parseAsString(messageDoc.getMessageIdExt(), Constants.BLANK));
 		messageDto.setMessageIdRef(ArgUtil.parseAsString(messageDoc.getMessageIdRef(), Constants.BLANK));
+		messageDto.setMessageIdResend(ArgUtil.parseAsString(messageDoc.getMessageIdResend(), Constants.BLANK));
 
 		messageDto.setReplyId(ArgUtil.parseAsString(messageDoc.getReplyId(), Constants.BLANK));
 		messageDto.setReplyIdExt(ArgUtil.parseAsString(messageDoc.getReplyIdExt(), Constants.BLANK));
