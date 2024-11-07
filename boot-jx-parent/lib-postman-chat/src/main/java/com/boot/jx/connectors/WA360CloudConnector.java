@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,9 +123,16 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			if (user_input_type.equals("name")) {
 				contactQuery.setInfoName(inboxMessage.getMessage());
 			}
-			if (user_input_type.equals("email")) {
-				contactQuery.setInfoEmail(inboxMessage.getMessage());
-			}
+	
+				if (user_input_type.equals("email")) {
+					String email = inboxMessage.getMessage();
+					if (isValidEmail(email)) {
+						contactQuery.setInfoEmail(email);
+					} else {
+						return (OutboxMessage) inboxMessage.replyMessage("Please enter a valid email address.");
+					}
+				}
+			
 			if (user_input_type.equals("phone")) {
 				contactQuery.setInfoPhone(inboxMessage.getMessage());
 			}
@@ -159,7 +167,11 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		return null;
 	}
-
+	private boolean isValidEmail(String email) {
+		String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+		Pattern pattern = Pattern.compile(emailRegex);
+	    return pattern.matcher(email).matches();
+	}
 	@Override
 	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
 		return contactStore.findProfileByPhone(chatContactDoc.phone());
@@ -201,7 +213,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				msgReferral.setSourceType(sourceType);
 				msgReferral.setBody(body);
 				inboxMessage.setReferral(msgReferral);
-				commonMongoTemplate.save(inboxMessage);// if this is correct way to store
+				commonMongoTemplate.save(inboxMessage);
 
 				   Map<String, String> messagePayload = new HashMap<>();
 				   messagePayload.put("channelId", channelConfig.getChannelType());
@@ -209,6 +221,8 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				   messagePayload.put("messageId",inboxMessage.getMessageIdExt());
 				   messagePayload.put("sourceUrl", msgReferral.getSourceUrl());
 			        tunnelService.task("ON_REFERRAL_MESSAGE", messagePayload);
+			       
+			        
 				
 				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.getReferral().toString() + " \n"
 						+ map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString()));

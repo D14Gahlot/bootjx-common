@@ -24,6 +24,10 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 @Component
 public class StarterDocKit {
@@ -85,6 +89,12 @@ public class StarterDocKit {
 		Criteria criteria = Criteria.where("code").is(code);
 		qryQuery.addCriteria(criteria);
 		CustomerFieldMasterDoc fiedMaster = commonMongoTemplate.findOne(qryQuery, CustomerFieldMasterDoc.class);
+		if(ArgUtil.is(fiedMaster)) {
+			if(!type.equalsIgnoreCase(fiedMaster.getType())) {
+				commonMongoTemplate.remove(fiedMaster);
+				fiedMaster =null;
+			}
+		}
 
 		if (!ArgUtil.is(fiedMaster)) {
 			fiedMaster = new CustomerFieldMasterDoc();
@@ -96,7 +106,47 @@ public class StarterDocKit {
 			fiedMaster.setPredefined(true);
 			fiedMaster.setRequired(false);
 			fiedMaster.setCreated(TimeStampIndex.now());
-		}
+			if(ArgUtil.is(code) && code.equalsIgnoreCase("gender")) {
+				List<Object> defaultOptions = new ArrayList<>();
+				// Option 1: Male
+			    Map<String, String> maleOption = new HashMap<>();
+			    maleOption.put("label", "Male");
+			    maleOption.put("value", "male");
+			    defaultOptions.add(maleOption);
+			    // Option 2: Female
+			    Map<String, String> femaleOption = new HashMap<>();
+			    femaleOption.put("label", "Female");
+			    femaleOption.put("value", "female");
+			    defaultOptions.add(femaleOption);
+			    // Set the default options in the fieldMaster
+			    fiedMaster.setPossibleOptions(defaultOptions);
+			}else if(ArgUtil.is(code) && code.equalsIgnoreCase("title")) {
+					List<Object> defaultOptions = new ArrayList<>();
+					// Option 1: Mr.
+				    Map<String, String> mrOpt = new HashMap<>();
+					mrOpt.put("label", "Mr.");
+					mrOpt.put("value", "mr.");
+				    defaultOptions.add(mrOpt);
+				    // Option 2: Mrs.
+				    Map<String, String> mrsOpt = new HashMap<>();
+				    mrsOpt.put("label", "Mrs.");
+				    mrsOpt.put("value", "mrs.");
+				    defaultOptions.add(mrsOpt);
+				    
+				    Map<String, String> msOpt = new HashMap<>();
+				    msOpt.put("label", "Ms.");
+				    msOpt.put("value", "ms.");
+				    defaultOptions.add(msOpt);
+				    
+				    Map<String, String> drOpt = new HashMap<>();
+				    drOpt.put("label", "Dr.");
+				    drOpt.put("value", "dr.");
+				    defaultOptions.add(drOpt);
+				    // Set the default options in the fieldMaster
+				    fiedMaster.setPossibleOptions(defaultOptions);
+				}
+			}
+		
 
 		if (ArgUtil.is(fiedMaster)) {
 			try {
@@ -110,13 +160,13 @@ public class StarterDocKit {
 
 	private void createPredefinedMstField() {
 		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.customer.field.master");
-		String predefiend_customer_filed_version = "v1.4";
+		String predefiend_customer_filed_version = "v1.7";
 		if (!version.is(predefiend_customer_filed_version)) {
-			createPredefinedMstField("title", "Title", "String");
-			createPredefinedMstField("dob", "Date of Birth", "timestamp");
-			createPredefinedMstField("gender", "Gender", "String");
-			createPredefinedMstField("alt_phones", "Alternate phone 1 - Value", "phone");
-			createPredefinedMstField("alt_emails", "Alternate email 1 - Value", "email");
+			createPredefinedMstField("title", "Title", "dropdown");
+			createPredefinedMstField("dob", "Date of Birth", "date");
+			createPredefinedMstField("gender", "Gender", "dropdown");
+			createPredefinedMstField("alt_phones", "Alternate phone", "phone");
+			createPredefinedMstField("alt_emails", "Alternate email", "email");
 			version.setValue(predefiend_customer_filed_version);
 			configManager.save(version);
 		}

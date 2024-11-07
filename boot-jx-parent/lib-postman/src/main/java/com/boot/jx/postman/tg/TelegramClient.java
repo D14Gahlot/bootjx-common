@@ -42,19 +42,10 @@ import com.boot.utils.CollectionUtil;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @Component
-@PropertySource("classpath:application-telegram.properties")
 @EnableEncryptableProperties
 public class TelegramClient implements MessageClient {
 
 	boolean isRegistered;
-
-	@Value("${postman.telegram.webhook.url}")
-	private String telegramWebhookUrl;
-	@Value("${postman.telegram.webhook.path}")
-	private String telegramWebhooPath;
-
-	@Value("${postman.telegram.default.lane}")
-	private String defaultLane;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TelegramClient.class);
 

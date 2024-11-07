@@ -292,8 +292,14 @@ public interface PMConfiguration extends Serializable {
 
 		private PMConfigurationModel local;
 		private PMConfigurationModel shared;
+		private boolean domainProxy = false;
 
 		private AppConfig appConfig;
+
+		public PMConfigurationWrappper domainProxy() {
+			this.domainProxy = true;
+			return this;
+		}
 
 		public PMConfigurationWrappper local(PMConfigurationModel local) {
 			this.local = local;
@@ -324,7 +330,15 @@ public interface PMConfiguration extends Serializable {
 			if (ArgUtil.is(x)) {
 				return x;
 			}
-			return this.shared().channel(channelId);
+			if (this.domainProxy) {
+				x = this.shared().channel(channelId);
+				if (ArgUtil.is(x.getDomainProxy(), AppContextUtil.getTenant())) {
+					return x;
+				}
+				return null;
+			} else {
+				return this.shared().channel(channelId);
+			}
 		}
 
 		@Override

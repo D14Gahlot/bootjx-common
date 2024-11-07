@@ -166,4 +166,12 @@ public class ConfigController {
 		return ApiResponse.buildResults(configManager.remove(companyVar));
 	}
 
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@ResponseBody
+	@RequestMapping(value = "/api/config/tokenkey", method = { RequestMethod.PATCH })
+	public ApiResponse<CompanyTokenKeyDoc, Object> updateTokeKeys(@RequestBody ModelPatches patch)
+			throws InstantiationException, IllegalAccessException {
+		return ApiResponse.buildResults(configManager.patch(patch, CompanyTokenKeyDoc.class));
+	}
+
 }

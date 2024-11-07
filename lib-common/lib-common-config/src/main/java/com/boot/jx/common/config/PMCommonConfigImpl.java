@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.cdn.BootJxConfigService.BootJxConfigProvider;
-import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.http.CommonHttpRequest;
@@ -135,7 +134,7 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 
 	private SafeKeyHashMap<Object> featuresConfigAttributes() {
 		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
-		for (FEATURES_KEY config : ConfigConstants.FEATURES_KEY.values()) {
+		for (CONFIG_FEATURES_KEY config : CONFIG_FEATURES_KEY.values()) {
 			setup.put(config.name(),
 					ArgUtil.nonEmpty(pmEnvironment.featureEntry(config.getKey()).getValue(), config.getDefaultValue()));
 		}

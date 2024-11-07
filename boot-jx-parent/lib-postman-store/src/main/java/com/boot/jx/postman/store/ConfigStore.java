@@ -15,6 +15,7 @@ import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -42,7 +43,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract<ConfigStore> {
 		log(prefsConfigDoc, "updated");
 	}
 
-	public void saveChannelConfig(ChannelConfigDoc configDoc, String action) {
+	public void saveChannelConfig(ChannelConfig configDoc, String action) {
 		if ("disable".equalsIgnoreCase(action)) {
 			configDoc.disabled(true);
 		} else if ("enable".equalsIgnoreCase(action)) {
@@ -61,7 +62,7 @@ public class ConfigStore extends CommonMongoTemplateAbstract<ConfigStore> {
 		log(configDoc, "updated", action);
 	}
 
-	public void saveChannelConfig(ChannelConfigDoc doc) {
+	public void saveChannelConfig(ChannelConfig doc) {
 		saveChannelConfig(doc, null);
 	}
 

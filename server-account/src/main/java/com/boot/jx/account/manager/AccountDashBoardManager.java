@@ -6,10 +6,12 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.newA
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,7 +37,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOptions;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -57,10 +62,13 @@ import com.boot.jx.account.dto.MonthDtlsDto;
 import com.boot.jx.account.dto.SummaryDocDto;
 import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.TypeCount;
+import com.boot.jx.account.dto.WabaBalanceDto;
+import com.boot.jx.account.dto.WabaDateWiseBalanceDto;
+import com.boot.jx.account.dto.WabaSummary;
 import com.boot.jx.account.dto.WabaSummaryDocDto;
 import com.boot.jx.api.EventCountDto;
 import com.boot.jx.api.EventCountSummary;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.dict.ContactType;
@@ -68,10 +76,13 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.jx.utils.CommonUtils;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.DateUtil;
@@ -415,7 +426,8 @@ public class AccountDashBoardManager {
 
 	/** WABA summary count **/
 
-	public List<WabaSummaryDocDto> wabaSummary(long timestamp) {
+	public WabaSummary wabaSummary(long timestamp) {
+		WabaSummary summary = new WabaSummary();
 		String tnt = AppContextUtil.getTenant();
 		// List<String> lst = getListOfContactType();
 		Date dateTi = new Date(timestamp);
@@ -451,8 +463,14 @@ public class AccountDashBoardManager {
 			dto.setPricing(waba.getPricing());
 			wabaLst.add(dto);
 		}
+		
+		
+		Map<String,Long> mediaTemSum= getMediaTemplateCountV1(monthMinTimeStamp,monthMaxTimeStamp);
+		
+		summary.setWabaSummaryCount(wabaLst);
+		summary.setMediaSummaryCount(mediaTemSum);
 
-		return wabaLst;
+		return summary;
 	}
 
 	public ContactTypeSummaryDto hourWisesummary(long timestamp, long hr) {
@@ -1129,7 +1147,7 @@ public class AccountDashBoardManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("isDisabled").is(false).and("isSandbox").is(false));
 		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
-		for (ChannelConfigDoc cofigDoc : cofigDocLst) {
+		for (ChannelConfig cofigDoc : cofigDocLst) {
 			listOfChannelConfig.add(cofigDoc.getChannelType());
 		}
 
@@ -1243,7 +1261,7 @@ public class AccountDashBoardManager {
 	}
 
 	public String getTimeZoneFromSetup() {
-		String offset = environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+		String offset = environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
 				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
 	}
@@ -1444,5 +1462,211 @@ public class AccountDashBoardManager {
 		}
        return hourWiseCount;
 	}
+	
+	
+	/** api for counting mediaTemp **/
+	public Map<String,Long> getMediaTemplateCountV1(long monthMinTimeStamp,long monthMaxTimeStamp ) {
+			
+		// Match operation to filter based on format, timestamp range, and non-null mediaTemplate
+	        MatchOperation matchOperation = Aggregation.match(
+	                Criteria.where("msg.lastOutBoundMsg.options.attachment.mediaTemplate").ne(null)
+	                        .and("msg.lastMsg.options.waba.components.format").is("IMAGE")
+	                        .and("msg.lastMsg.timestamp").gte(monthMinTimeStamp).lte(monthMaxTimeStamp)
+	        );
+
+	        // Group operation to group by categoryType and count total documents
+	        GroupOperation groupOperation = Aggregation.group("msg.lastMsg.meta.categoryType")
+	                .count().as("totalDocuments");
+
+	        // Create aggregation pipeline
+	        Aggregation aggregation = Aggregation.newAggregation(
+	                matchOperation,   // Apply the match operation
+	                groupOperation    // Apply the group operation
+	        );
+
+	        // Execute the aggregation query
+	        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "CHAT_SESSION", Document.class);
+
+	        // Initialize a Map to store the result
+	        Map<String, Long> categoryCountMap = new HashMap<>();
+
+	        // Iterate over the results and populate the map
+	        for (Document document : results.getMappedResults()) {
+	            String categoryType = document.getString("_id");  // _id contains the categoryType
+	            Long count = Long.valueOf(document.getInteger("totalDocuments").longValue());  // totalDocuments contains the count 
+	            categoryCountMap.put(categoryType, count);
+	        }
+	        // List of all expected categories
+	        List<String> expectedKeys = Arrays.asList("MARKETING", "UTILITY", "SERVICE", "AUTHENTICATION");
+	        
+	        expectedKeys.forEach(key -> categoryCountMap.putIfAbsent(key, Long.valueOf(0)));
+
+	        // Return the map
+	        return categoryCountMap;
+		}
+
+	/** waba analytics cost api*/
+ public WabaBalanceDto getWabaCostAnalyticsV1(long timestamp) {
+		 
+		 WabaBalanceDto wDto=new WabaBalanceDto();
+		 List<WabaDateWiseBalanceDto> lstList = new ArrayList<>();
+		 DecimalFormat df = new DecimalFormat("####0.000");
+		 
+		 List<DomainDoc> domains=getAllDomainAccount();
+		 if(!ArgUtil.is(domains)) {
+			 DomainDoc doc =new DomainDoc();
+			 doc.setDomain(AppContextUtil.getTenant());
+			 domains.add(doc);
+		 }
+		 for(DomainDoc domDoc:domains) {
+		 List<ChannelConfigDoc>  chDocs=getListChannelCongigFowWa(domDoc.getDomain());
+		 for(ChannelConfigDoc chdoc:chDocs) {
+			// Get the month, start, and end timestamp using your DateUtil utility
+	        String month = CommonUtils.monthNameByTimestamp(timestamp);
+	        long startTStamp = CommonUtils.startTStampForaMonth(timestamp);
+	        long endTStamp = CommonUtils.endTStampForaMonth(timestamp);
+	        if(ArgUtil.is(chdoc.getWacfb())) {
+	        String wabaId =chdoc.getWacfb().getWabaId();//"430589913462237";
+	        String number =chdoc.getWacfb().getNumber();
+	        String tnt=chdoc.getDomain();
+	        
+	        
+	        WabaDateWiseBalanceDto dto = new WabaDateWiseBalanceDto();
+	        Integer totalConvCnt=0;
+	        Double totalConvCost=0.0;
+	       
+	        
+	        // Define the aggregation pipeline
+	        Aggregation aggregation = Aggregation.newAggregation(
+	            // $match stage to filter by wabaId, start, and end
+	            Aggregation.match(Criteria.where("wabaId").is(wabaId)
+	                .and("start").gt(startTStamp)
+	                .and("end").lt(endTStamp)),
+
+	            // $group stage to group by conversation_type and conversation_category
+	            Aggregation.group("conversation_type", "conversation_category")
+	                .sum("conversation").as("totalConversations")
+	                .sum("cost").as("totalCost"),
+
+	            // $group again by conversation_type to restructure the output
+	            Aggregation.group("_id.conversation_type")
+	                .push(new Document("category", "$_id.conversation_category")
+	                    .append("totalConversations", "$totalConversations")
+	                    .append("totalCost", "$totalCost"))
+	                .as("conversationCategory")
+	        )
+	        .withOptions(AggregationOptions.builder().allowDiskUse(true).build());
+
+	        // Execute the aggregation
+	        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "TP_WABA_ANALYTICS", Document.class);
+
+	        // Convert the results to List<Map<String, Object>>
+	        List<Map<String, Object>> resultList = new ArrayList<>();
+	        for (Document doc : results) {
+	            Map<String, Object> resultMap = new HashMap<>();
+	            resultMap.put("conversation_type", doc.getString("_id"));
+
+	            // Manually convert the conversationCategory array into a map in Java
+	            List<Document> conversationCategoryList = (List<Document>)doc.get("conversationCategory");
+	            Map<String, Map<String, Object>> categoryMap = new HashMap<>();
+
+	            for (Document categoryDoc : conversationCategoryList) {
+	                String category = categoryDoc.getString("category");
+	                Map<String, Object> valuesMap = new HashMap<>();
+	                totalConvCnt+=(Integer)categoryDoc.get("totalConversations");
+	                
+	                Object totalCostObj = categoryDoc.get("totalCost");
+	                
+	                if (totalCostObj instanceof Number) {
+	                	totalConvCost += ((Number) totalCostObj).doubleValue();
+	                }
+	                totalConvCost =Double.valueOf(df.format(totalConvCost));
+	                
+	                valuesMap.put("totalConversations", categoryDoc.get("totalConversations"));
+	                valuesMap.put("totalCost", categoryDoc.get("totalCost"));
+	               
+	                categoryMap.put(category, valuesMap);
+	            }
+	            resultMap.put("conversationCategory", categoryMap);
+
+	            resultList.add(resultMap);
+	        }
+	         
+	        
+//	     // Expected keys
+	        List<String> expectedKeys = Arrays.asList("MARKETING", "UTILITY", "SERVICE", "AUTHENTICATION");
+
+	        // Iterate through countCostMap
+	        for (Map<String, Object> entry : resultList) {
+	            String conversationType = (String) entry.get("conversation_type");
+	            Map<String, Object> conversationCategory = (Map<String, Object>) entry.get("conversationCategory");
+
+	            // Check for missing keys
+	            for (String key : expectedKeys) {
+	                if (!conversationCategory.containsKey(key)) {
+	                	 // Add the missing key with default values using HashMap
+	                    Map<String, Object> defaultValues = new HashMap<>();
+	                    defaultValues.put("totalConversations", 0);  // Default value
+	                    defaultValues.put("totalCost", 0.0);         // Default value
+	                    conversationCategory.put(key, defaultValues);
+	                }
+	            }
+	        }
+	        
+	        
+	        dto.setCountCostMap(resultList);
+	        dto.setMonth(month);
+			dto.setDateTimeStamp(timestamp);
+			dto.setWabaId(wabaId);
+			dto.setNumber(number);
+			WabaAccountBalanceDoc waAccBal=null;
+			if(ArgUtil.is(wabaId)) {
+			 waAccBal=getAccountBalance(wabaId);
+			}
+			double deposiTamt=0.0;
+			if(ArgUtil.is(waAccBal)) {
+				deposiTamt=waAccBal.getDepositAmt();
+			}
+			dto.setDepostAmt(deposiTamt);
+			dto.setTotalCount(totalConvCnt);
+			dto.setTotalCost(totalConvCost);
+			dto.setBalanceAmt(deposiTamt-totalConvCost);
+			dto.setTnt(ArgUtil.parseAsString(tnt,AppContextUtil.getTenant()));
+			lstList.add(dto);
+	        }
+		 }
+		 wDto.setDateWiseBaL(lstList);
+		 }
+		 
+			
+			wDto.setDateWiseBaL(lstList);
+			
+	        return wDto; 
+	    }
+
+	
+ public WabaAccountBalanceDoc getAccountBalance(String wabaId) {
+		List<WabaAccountBalanceDoc> docLst = null; 
+		WabaAccountBalanceDoc doc=null;
+		Query query=new Query();
+		if(ArgUtil.is(wabaId)) {
+			query.addCriteria(Criteria.where("wabaId").is(wabaId));
+			docLst =mongoTemplate.find(query, WabaAccountBalanceDoc.class);
+			if(ArgUtil.is(docLst)) {
+				doc=docLst.get(0);
+			}
+		}
+		return doc;
+	}
+ 
+ public List<ChannelConfigDoc> getListChannelCongigFowWa(String domain) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("domain").is(domain).and("isDisabled").is(false).and("contactType").is(ContactType.WHATSAPP.name()));
+		query.fields().include("domain").include("wacfb.number").include("wacfb.wabaId").include("contactType").include("isDisabled");
+		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
+		return cofigDocLst;
+	}
+	
+
 	
 }

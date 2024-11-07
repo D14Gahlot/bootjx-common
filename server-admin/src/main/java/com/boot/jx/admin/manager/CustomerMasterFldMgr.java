@@ -8,9 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -34,6 +36,7 @@ import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.jx.postman.model.Message.Status;
@@ -76,6 +79,11 @@ public class CustomerMasterFldMgr {
 	
 	@Autowired(required = false)
 	protected AuditDetailProvider auditDetailProvider;
+	
+	
+	@Value("${mry.chrono.url}")
+	private String cronoJobUrl;
+	
 
 	public List<CustomerFieldMasterDoc> addAndEditMasterfield(CustomerFieldMasterDoc reqDto) {
 
@@ -92,6 +100,7 @@ public class CustomerMasterFldMgr {
 
 				cmFieldDoc.setRequired(reqDto.isRequired());
 				cmFieldDoc.setPredefined(reqDto.isPredefined());
+				cmFieldDoc.setPossibleOptions(reqDto.getPossibleOptions());
 				cmFieldDoc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 				commonMongoTemplate.save(cmFieldDoc);
 			}
@@ -99,10 +108,11 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc.setCode(reqDto.getCode());
 			cmFieldDoc.setLabel(reqDto.getLabel());
 			cmFieldDoc.setDesc(reqDto.getDesc());
-			cmFieldDoc.setType(ArgUtil.parseAsString(reqDto.getType(), "String"));
+			cmFieldDoc.setType(ArgUtil.parseAsString(reqDto.getType(), "text"));
 			cmFieldDoc.setActive(reqDto.isActive());
 			cmFieldDoc.setRequired(reqDto.isRequired());
 			cmFieldDoc.setPredefined(reqDto.isPredefined());
+			cmFieldDoc.setPossibleOptions(reqDto.getPossibleOptions());
 			cmFieldDoc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			commonMongoTemplate.save(cmFieldDoc);
 		}
@@ -153,8 +163,12 @@ public class CustomerMasterFldMgr {
 		if (ArgUtil.is(reqDto.getId())) {
 			MongoQueryBuilder<CustomerFieldMasterDoc> builder = MongoQueryBuilder
 					.collection(CustomerFieldMasterDoc.class).whereId(reqDto.getId());
-			builder.set("active", reqDto.isActive());
-			commonMongoTemplate.upsert(builder);
+			//builder.set("active", reqDto.isActive());
+			//commonMongoTemplate.upsert(builder);
+			// Proceed to remove the documents
+            commonMongoTemplate.remove(builder.getQuery(), CustomerFieldMasterDoc.class);
+
+			
 		}
 		return fetchCustomerMasfields(null,true,0,0,null,null);
 	}
@@ -184,7 +198,8 @@ public class CustomerMasterFldMgr {
 
 			commonMongoTemplate.save(doc);
 			SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
-			String nodeUrl = globalVars.keyEntry("cp_node_url").asString();
+			String nodeUrl = cronoJobUrl+"/scheduler/api/v1/job/now";
+			//String nodeUrl =globalVars.keyEntry("cp_node_url").asString();
 			LOGGER.info("isSchedular :" + nodeUrl);
 
 			/** to call node API **/
@@ -253,28 +268,6 @@ public class CustomerMasterFldMgr {
 		return dtoLst;
 	}
 
-	/** read customer contacts from s3 bucket -excel **/
-
-//	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
-//		List<JobsResponseDto> dtoLst = new ArrayList<>();
-//		JobScheduledDoc cmProfileDoc = null;
-//		String url = null;
-//		if (ArgUtil.is(id)) {
-//			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
-//			if (ArgUtil.is(cmProfileDoc)) {
-//				// url = cmProfileDoc.getFileUploadMap().
-//				JobsResponseDto dto = EntityDtoUtil.entityToDto(cmProfileDoc, new JobsResponseDto());
-//				dtoLst.add(dto);
-//			}
-//		}else {
-//			List<JobScheduledDoc> lstAllDocs = commonMongoTemplate.findAll(null);
-//		}
-//
-//		System.out.println("url :" + url);
-//
-//		return dtoLst;
-//
-//	}
 
 	@Deprecated
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
@@ -328,7 +321,6 @@ public class CustomerMasterFldMgr {
 		}
 
 		if (ArgUtil.is(id) && lstCusProMap != null && !lstCusProMap.isEmpty()) {
-			LOGGER.info("saveCustomerProfileMaster size :" + lstCusProMap.size());
 			for (CustomerProfileDoc doc : lstCusProMap) {
 				commonMongoTemplate.save(doc);
 				docs.add(doc);
@@ -505,52 +497,77 @@ public class CustomerMasterFldMgr {
 	/** profile search **/
 
 	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
-		int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
-		String sortDir = ArgUtil.parseAsString(searchQry.getSortBy(), "desc");
-		List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
+	    int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
+	    String sortBy = ArgUtil.parseAsString(searchQry.getSortBy(), "created.stamp");
+	    String sortdir = ArgUtil.parseAsString(searchQry.getSortDir(), "DESC");
+	    List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
+	    
+	    //Direction.fromString(sortDir)
 
-		List<Criteria> orCriterias = new LinkedList<Criteria>();
+	    // List to hold ANDed criteria
+	    List<Criteria> andCriteriaList = new ArrayList<>();
 
-		for (List<ProfileSearchCriteria> srcLst : searchCriterias) {
-			List<Criteria> andCriteriaList = new ArrayList<>();
-			for (ProfileSearchCriteria src : srcLst) {
-				switch (src.getKey()) {
-				case "phone":
-				case "phones":
-				case "mobile":
-				case "mobiles":
-//					PBPhone ph = contactStore.parsePhone(new PBPhone().phone(src.getValue().toString()));
-//					andCriteriaList.add(Criteria.where("phones").elemMatch(Criteria.where("nationalNumber")
-//							.is(ph.nationalNumber).and("countryCallingCode").is(ph.countryCallingCode)));
-					andCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue()));
-					break;
-				case "email":
-				case "emails":
-					andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
-					break;
-				case "name":
-				case "name.formattedName":	
-					andCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
-					break;
-				default:
-					andCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
-				}
+	    for (List<ProfileSearchCriteria> srcLst : searchCriterias) {
+	        // Temporary list to hold OR criteria
+	        List<Criteria> orCriteriaList = new ArrayList<>();
 
-			}
-			orCriterias.add(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])));
-		}
-		MongoQueryBuilder<CustomerProfileDoc> qb=null;
-		if(ArgUtil.is(orCriterias)) {
-		 qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
-				.where(new Criteria().orOperator(orCriterias.toArray(new Criteria[orCriterias.size()]))).sortBy(sortDir)
-				.limit(limit);
-		}else {
-			qb = MongoQueryBuilder.collection(CustomerProfileDoc.class).page(searchQry.getPageNo(),
-					searchQry.getPageSize());
-		}
-		LOGGER.info("QB {} " + JsonUtil.toJson(qb));
-		return contactStore.find(qb);
+	        for (ProfileSearchCriteria src : srcLst) {
+	            switch (src.getKey()) {
+	                case "phone":
+	                case "phones":
+	                case "mobile":
+	                case "mobiles":
+	                    orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue()));
+	                    break;
+
+	                case "email":
+	                case "emails":
+	                    // When dealing with email, we will directly add to the AND list
+	                    //andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
+	                	orCriteriaList.add(createCriteria("emails.email", src.getOperator(), src.getValue()));
+	                    break;
+
+	                case "name":
+	                case "name.formattedName":
+	                    orCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
+	                    break;
+
+	                case "code":
+	                    orCriteriaList.add(createCriteria("code", src.getOperator(), src.getValue()));
+	                    break;
+
+	                default:
+	                    orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
+	                    break;
+	            }
+	        }
+
+	        // If there are multiple conditions in the OR list, combine them using OR
+	        if (!orCriteriaList.isEmpty()) {
+	            Criteria orCriteria = new Criteria().orOperator(orCriteriaList.toArray(new Criteria[orCriteriaList.size()]));
+	            // Add the OR result to the AND list
+	            andCriteriaList.add(orCriteria);
+	        }
+	    }
+
+	    // Build the final Mongo query with AND criteria
+	    MongoQueryBuilder<CustomerProfileDoc> qb = null;
+	    if (ArgUtil.is(andCriteriaList)) {
+	        qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+	            .where(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])))
+	            .sortBy(sortBy,Direction.fromString(sortdir))
+	            .limit(limit);
+	    } else {
+	        qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
+	            .sortBy(sortBy,Direction.fromString(sortdir))
+	            .page(searchQry.getPageNo(), searchQry.getPageSize());
+	         
+	    }
+
+	    LOGGER.info("QB {} " + JsonUtil.toJson(qb));
+	    return contactStore.find(qb);
 	}
+
 
 	private Criteria createCriteria(String key, String operation, Object value) {
 		switch (operation) {
@@ -588,6 +605,58 @@ public class CustomerMasterFldMgr {
 			throw new IllegalArgumentException("Invalid operation: " + operation);
 		}
 
+	}
+
+	public List<ProfileFilterMasterDoc> addEditProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
+		
+		ProfileFilterMasterDoc filDoc = new ProfileFilterMasterDoc();
+		if (ArgUtil.is(reqDto.getId())) {
+			filDoc = commonMongoTemplate.findByIdString(reqDto.getId(), ProfileFilterMasterDoc.class);
+			if (ArgUtil.is(filDoc)) {
+			filDoc.setFilterName(reqDto.getFilterName());
+			filDoc.setFilterCriteria(reqDto.getFilterCriteria());
+			filDoc.set_filterCriteria(reqDto.get_filterCriteria());
+			filDoc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
+			commonMongoTemplate.save(filDoc);
+			}
+		}else {
+			filDoc.setFilterName(reqDto.getFilterName());
+			filDoc.setFilterCriteria(reqDto.getFilterCriteria());
+			filDoc.set_filterCriteria(reqDto.get_filterCriteria());
+			filDoc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
+			commonMongoTemplate.save(filDoc);
+		}
+		List<ProfileFilterMasterDoc> lst =new ArrayList<>();
+		lst.add(filDoc);
+		//return fetchProfileFilterGroup(filDoc.getId(),null,10,0,null,null);
+		return lst;
+	}
+
+	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
+		if (ArgUtil.is(reqDto.getId())) {
+			MongoQueryBuilder<ProfileFilterMasterDoc> builder = MongoQueryBuilder
+					.collection(ProfileFilterMasterDoc.class).whereId(reqDto.getId());
+			commonMongoTemplate.remove(builder.getQuery(), ProfileFilterMasterDoc.class);
+		}
+		return fetchProfileFilterGroup(null,null,10,0,null,null);
+	}
+
+	public List<ProfileFilterMasterDoc> fetchProfileFilterGroup(String id, Boolean active, int pagesize, int pageNo,
+			String sortby, String sortdir) {
+		    int pageSize = pagesize == 0 ? 25 : pagesize;
+		    String sortBy = ArgUtil.parseAsString(sortby, "created.stamp");
+		    String sortDir = ArgUtil.parseAsString(sortdir, "DESC");
+		
+		    MongoQueryBuilder<ProfileFilterMasterDoc> qb = MongoQueryBuilder.collection(ProfileFilterMasterDoc.class)
+		    		 .sortBy(sortBy,Direction.fromString(sortDir))
+		    		 .page(pageNo,pageSize);
+			if (!StringUtils.isBlank(id)) {
+				qb = qb.whereId(id);
+			}
+//			if (ArgUtil.is(sortBy)) {
+//				qb = qb.sortBy(sortBy, Direction.fromString(sortDir));
+//			}
+			return contactStore.find(qb);
 	}
 
 	

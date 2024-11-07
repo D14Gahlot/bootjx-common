@@ -41,7 +41,7 @@ public class ChatController {
 	private ChatSessionManager chatSessionManager;
 
 	@Autowired
-	private SessionStore sessionStore;
+	protected SessionStore sessionStore;
 
 	@Autowired
 	protected ChatLogger logManager;

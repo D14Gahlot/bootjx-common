@@ -12,14 +12,14 @@ public class FormReply implements Serializable, JsonIgnoreNull, JsonIgnoreUnknow
 	private static final long serialVersionUID = -2276133193201979913L;
 
 	@ApiMockModelProperty(example = "ACCEPT", value = "Button Code")
-	protected String reply_id;
+	public String reply_id;
 
 	@ApiMockModelProperty(example = "I Accept", value = "Button Title")
-	protected String reply_title;
+	public String reply_title;
 
 	@ApiMockModelProperty(value = "Button Description")
-	protected String reply_desc;
+	public String reply_desc;
 
 	@ApiMockModelProperty(value = "JSON Collection of all input selections by customer in form")
-	protected Map<String, Object> reply_json;
+	public Map<String, Object> reply_json;
 }

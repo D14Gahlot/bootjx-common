@@ -203,11 +203,11 @@ public class WA360CloudClient implements ChannelClient {
 		if (ArgUtil.is(outboxMessage.getAttachments())) {
 			for (Attachment attachment : outboxMessage.getAttachments()) {
 				if (ArgUtil.is(textMessage) && ArgUtil.isEqual(attachment.getMediaType(), FileType.IMAGE.toString(),
-						FileType.VIDEO.toString(),FileType.DOCUMENT.toString())){
+						FileType.VIDEO.toString(), FileType.DOCUMENT.toString())) {
 					attachment.setMediaCaption(textMessage);
 					textMessage = null;
 				}
-				
+
 				MapModel resp = sendMedia(channelConfig, outboxMessage, attachment);
 				msgIds.add(getMessageId(resp));
 			}
@@ -349,6 +349,7 @@ public class WA360CloudClient implements ChannelClient {
 				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
+			        media.setFilename(ArgUtil.nonEmpty(outboxMessage.getAttachments().get(0).getMediaCaption(), outboxMessage.getAttachments().get(0).getMediaName()));
 					media.setCaption(null);
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
@@ -363,7 +364,10 @@ public class WA360CloudClient implements ChannelClient {
 					TmplComponent bodyComponent = TmplComponent.createInstance().body();
 					for (Map<String, Object> bodyParameter : bodyParametersTemp) {
 						String path = (String) bodyParameter.get("path");
-						bodyComponent.parameter("text", model.pathEntry(path).asString());
+						String originalText = model.pathEntry(path).asString();
+						originalText = originalText.replaceAll("\n", "\\\\n");
+						bodyComponent.parameter("text", originalText);
+
 					}
 					components.add(bodyComponent.build().map());
 				}
@@ -389,11 +393,11 @@ public class WA360CloudClient implements ChannelClient {
 						} else if ("QUICK_REPLY".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
-
 									String path = (String) buttonParameter.get("path");
+									String code = model.pathEntry(path).asString();
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("quick_reply",
 											i);
-									buttonComponent.parameter("payload", model.pathEntry(path).asString());
+									buttonComponent.parameter("payload", code);
 									components.add(buttonComponent.build().map());
 								}
 							}
@@ -464,11 +468,11 @@ public class WA360CloudClient implements ChannelClient {
 
 	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
-		        wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
-				wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
-		        wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		        if (mediaType.equalsIgnoreCase("image") ||mediaType.equalsIgnoreCase("video")  ) {
-			         wa360OutBoundMedia.setFilename(null);
+		wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
+		wa360OutBoundMedia.setCaption(attachment.getMediaCaption());
+		wa360OutBoundMedia.setLink(attachment.getMediaURL());
+		if (mediaType.equalsIgnoreCase("image") || mediaType.equalsIgnoreCase("video")) {
+			wa360OutBoundMedia.setFilename(null);
 		}
 		return wa360OutBoundMedia;
 	}
@@ -477,6 +481,8 @@ public class WA360CloudClient implements ChannelClient {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
 				.put("recipient_type", "individual").put("to", outboxMessage.contact().getCsid());
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
+		String originalText = outboxMessage.getMessage();
+		outboxMessage.setMessage(originalText);
 		req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY,
 				StringUtils.wrap("*", outboxMessage.getSubject(), "*\n") + outboxMessage.getMessage());
 		return send(req, channelConfig);
@@ -587,6 +593,7 @@ public class WA360CloudClient implements ChannelClient {
 				intr.put("image", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
+				wa360OutBoundMedia.setFilename(null);
 				intr.put("video", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
@@ -616,12 +623,19 @@ public class WA360CloudClient implements ChannelClient {
 		if ("button".equalsIgnoreCase(type)) {
 			List<Object> rows = new ArrayList<Object>();
 			for (TmplElement button : buttons) {
-				rows.add(MapModel.createInstance().put("type", "reply")
-						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
-								StringUtils.substring(button.getCode(), 256))
-						.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
-								StringUtils.substring(button.getLabel(), 20))
-						.toMap());
+				if (ArgUtil.is(button.getCode())) {
+					rows.add(MapModel.createInstance().put("type", "reply")
+							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_ID,
+									StringUtils.substring(button.getCode(), 256))
+							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
+									StringUtils.substring(button.getLabel(), 20))
+							.toMap());
+				} else {
+					rows.add(MapModel.createInstance().put("type", "reply")
+							.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_REPLY_TITLE,
+									StringUtils.substring(button.getLabel(), 20))
+							.toMap());
+				}
 			}
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_BUTTONS, rows);
 		} else if ("cta_url".equalsIgnoreCase(type)) {
@@ -647,7 +661,7 @@ public class WA360CloudClient implements ChannelClient {
 
 		return send(req, channelConfig);
 	}
-     
+
 	public MapModel send(MapModel req, ChannelConfig channelConfig) {
 
 		try {

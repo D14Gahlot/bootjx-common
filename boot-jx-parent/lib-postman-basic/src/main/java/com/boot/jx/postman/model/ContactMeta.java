@@ -6,24 +6,41 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@JsonDeserialize(as = ContactMeta.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ContactMeta implements Serializable, Contactable {
 
 	private static final long serialVersionUID = -2229330167964350550L;
+	@Deprecated
 	protected String tenant;
+	@Deprecated
 	protected String country;
 	protected String userid;
 	protected String prefix;
+	
+	@ApiMockModelProperty(example = "919876543210", required = false)
 	protected String phone;
+	
+	@ApiMockModelProperty(example = "John.Doe@company.co", required = false)
 	protected String email;
+	
+	@ApiMockModelProperty(example = "John Doe", required = false)
 	protected String name;
 
+	@JsonProperty("contactType")
 	private String contactType;
+
 	private String channelType;
 	private String lane;
 	private String csid;
+
+	@ApiMockModelProperty(example = "wa919876543210", required = false)
+	@JsonProperty("contactId")
 	private String contactId;
 
 	List<Map<String, Object>> filters;

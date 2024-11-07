@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -19,13 +20,13 @@ import com.boot.jx.AppConfigPackage.AppSharedConfigChange;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
-import com.boot.jx.common.config.ConfigConstants.FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
 import com.boot.jx.model.ModelPatch.ModelPatches;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMEnvironment;
@@ -38,6 +39,7 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
+import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.postman.manager.ConfigManager;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
@@ -239,9 +241,29 @@ public class ConfigManagerImpl implements ConfigManager {
 		return companyVarsConfig;
 	}
 
+	public <T extends VarsConfigDoc> T patch(ModelPatches patches, Class<T> clazz)
+			throws InstantiationException, IllegalAccessException {
+		T thisConfig = configStore.findById(patches.getId(), clazz);
+
+		if (!ArgUtil.is(patches.getPatches())) {
+			return thisConfig;
+		}
+
+		Optional<ModelPatch> primaryPatch = patches.getPatches().stream()
+				.filter(patch -> "primary".equals(patch.getField())).findFirst();
+		if (primaryPatch.isPresent()) {
+			if (ArgUtil.is(thisConfig) && ArgUtil.is(thisConfig.getType())) {
+				configStore.updateMulti(MQB.select(clazz).where("type", thisConfig.getType()).set("primary", false));
+			}
+		}
+		configStore.patch(patches, CompanyTokenKeyDoc.class);
+		this.refresh();
+		return thisConfig;
+	}
+
 	public ChannelConfig getChannelConfig(String channelId) {
 		if (ArgUtil.is(channelId)) {
-			ChannelConfigDoc channelConfig = configStore.findById(channelId, ChannelConfigDoc.class);
+			ChannelConfig channelConfig = configStore.findById(channelId, ChannelConfigDoc.class);
 			if (!ArgUtil.is(channelConfig)) {
 				return null;
 			}
@@ -268,9 +290,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		pmEnvironment.addChannel(config);
 		this.refresh(ChannelConfigDoc.DOCUMENT_NAME, config.getChannelId());
 		config = connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
-		if (ArgUtil.is(config) && ArgUtil.is(config.getMeta())) {
-			pmEnvironment.addChannel(config);
-		}
+		
 	}
 
 	@Override
@@ -307,7 +327,7 @@ public class ConfigManagerImpl implements ConfigManager {
 	@Override
 	public ChannelConfig patchChannelConfig(ModelPatches req) {
 		String channelId = req.getId();
-		ChannelConfigDoc config = configStore.findById(channelId, ChannelConfigDoc.class);
+		ChannelConfig config = configStore.findById(channelId, ChannelConfigDoc.class);
 		MapModel map = MapModel.from(JsonUtil.toMap(config));
 		for (ModelPatch patch : req.getPatches()) {
 			if (ModelPatchCommand.SET.equals(patch.getCommand())) {
@@ -359,7 +379,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		return list;
 	}
 
-	public List<Map<String, Object>> getFeature(FEATURES_KEY key) {
+	public List<Map<String, Object>> getFeature(CONFIG_FEATURES_KEY key) {
 		if (!ArgUtil.is(key)) {
 			return this.getFeature();
 		}
@@ -394,7 +414,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		this.refresh();
 	}
 
-	public void deletePerm(FEATURES_KEY key) {
+	public void deletePerm(CONFIG_FEATURES_KEY key) {
 		pmEnvironment.local().features().remove(key);
 		FeaturesConfigDoc prefsConfigDoc = new FeaturesConfigDoc();
 		prefsConfigDoc.setKey(key.getKey());

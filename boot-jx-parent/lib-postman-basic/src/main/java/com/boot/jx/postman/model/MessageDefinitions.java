@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.model.ContactableDeserializer.ContactMetaKeyDeserializer;
+import com.boot.jx.postman.model.ContactableDeserializerDef.ContactMetaKeyDeserializer;
 import com.boot.model.UtilityModels.JsonIgnoreNull;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
@@ -24,6 +24,8 @@ public class MessageDefinitions {
 		public void setName(String name);
 
 		public String getEmail();
+
+		public String getPhone();
 
 		public String phone();
 
@@ -121,6 +123,10 @@ public class MessageDefinitions {
 			if (ArgUtil.is(contactable.getCsid())) {
 				this.setCsid(contactable.getCsid());
 			}
+		}
+
+		public default String phone() {
+			return this.getPhone();
 		}
 
 		public static Contactable instance() {

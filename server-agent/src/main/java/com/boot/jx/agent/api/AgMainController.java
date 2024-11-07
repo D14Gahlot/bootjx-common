@@ -264,20 +264,15 @@ public class AgMainController {
 			@RequestParam(required = false, value = "search.emails") String searchEmail) {
 		if (ArgUtil.is(contactId)) {
 			return ApiResponse.buildResults(contactStore.findProfileByContactId(contactId));
+		}else if(ArgUtil.is(searchPhone)) {
+			return ApiResponse.buildResults(contactStore.findProfileByPhone(searchPhone));
+		}else if(ArgUtil.is(searchEmail)) {
+			return ApiResponse.buildResults(contactStore.findProfileByEmail(searchEmail));
+		}else if(ArgUtil.is(searchCode)) {
+			return ApiResponse.buildResults(contactStore.findProfileByCode(searchCode));
 		}
-		MongoQueryBuilder<CustomerProfileDoc> q = MongoQueryBuilder.collection(CustomerProfileDoc.class).page(pageNo,
-				pageSize);
-		if (ArgUtil.is(id)) {
-			q = q.whereId(id);
-		}
+		return ApiResponse.buildResult(null);
 
-		q.search("name.formattedName", searchName).search("code", searchCode).search("emails.email", searchEmail)
-				.search("phones.phone", searchPhone);
-
-		if (ArgUtil.is(sortBy)) {
-			q = q.sortBy(sortBy, Direction.fromString(sortDir));
-		}
-		return ApiResponse.buildResults(contactStore.find(q));
 	}
 
 }

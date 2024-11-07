@@ -93,7 +93,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 			List<ChannelConfigDoc> channels = configMaster.findAll(ChannelConfigDoc.class);
 			// System.out.println("TENE==" + tnt + "=====" + mappedTo + "====" +
 			// channels.size());
-			for (ChannelConfigDoc channel : channels) {
+			for (ChannelConfig channel : channels) {
 				channel.setDomain(tnt);
 				localConfiguration.channels(channel);
 			}
@@ -129,7 +129,7 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 					newSharedConfiguration.setFeature(entry.getValue(), serviceServer);
 				}
 				List<ChannelConfigDoc> sandboxChannels = configMaster.findAll(ChannelConfigDoc.class);
-				for (ChannelConfigDoc channel : sandboxChannels) {
+				for (ChannelConfig channel : sandboxChannels) {
 					channel.setDomain(tnt);
 					if (channel.isSandbox() || channel.isShared()) {
 						newSharedConfiguration.channels(channel, serviceServer);
@@ -154,6 +154,10 @@ public class PMEnvironmentProviderImpl implements PMEnvironmentProvider, AppShar
 	public ChannelConfig configInternal(ChannelConfig config) {
 		ChannelConfigDoc doc = EntityDtoUtil.dtoToEntity(config, new ChannelConfigDoc());
 		doc.setId(StringUtils.toLowerCase(doc.getChannelId()));
+		ChannelConfigDoc configUpdated = configMaster.findById(config.getChannelId(), ChannelConfigDoc.class);
+		if (ArgUtil.is(configUpdated)) {
+			doc.meta().putAll(configUpdated.meta());
+		}
 		configMaster.saveChannelConfig(doc);
 		return doc;
 	}

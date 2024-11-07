@@ -1,5 +1,6 @@
 package com.boot.jx.postman.plugin;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
@@ -8,6 +9,7 @@ import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
+import com.boot.jx.postman.plugin.GmailPlugin.GmailConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.plugin.OAPlugin.OAConfigDetails;
 import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
@@ -20,6 +22,7 @@ import com.boot.jx.postman.plugin.WA360Plugin.WA360ConfigDetails;
 import com.boot.jx.postman.plugin.WAGupShupPlugin.GupShupConfigDetails;
 import com.boot.jx.postman.plugin.WacfbPlugin.WACFBConfigDetails;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
+import com.boot.utils.ArgUtil;
 
 public class ChannelConfig extends AChannelConfig {
 
@@ -41,6 +44,7 @@ public class ChannelConfig extends AChannelConfig {
 	private WACFBConfigDetails wacfb;
 	private OAConfigDetails oa;
 	private OutlookConfigDetails outlook;
+	private GmailConfigDetails gmail;
 
 	private boolean isAutoCreated;
 	private boolean isMaster;
@@ -59,6 +63,8 @@ public class ChannelConfig extends AChannelConfig {
 
 	private String callbackPath;
 	private String unhandledInboundForward;
+	protected String domain;
+	private String domainProxy;
 
 	public String getLane() {
 		return lane;
@@ -286,6 +292,8 @@ public class ChannelConfig extends AChannelConfig {
 			return this.getTwitter();
 		case CHANNEL_TYPE.TELEGRAM:
 			return this.getTelegram();
+		case CHANNEL_TYPE.OUTLOOK:
+			return this.getOutlook();
 		default:
 			return null;
 		}
@@ -301,6 +309,13 @@ public class ChannelConfig extends AChannelConfig {
 
 	public Map<String, Object> getMeta() {
 		return meta;
+	}
+
+	public Map<String, Object> meta() {
+		if (!ArgUtil.is(this.meta)) {
+			this.meta = new HashMap<String, Object>();
+		}
+		return this.meta;
 	}
 
 	public void setMeta(Map<String, Object> meta) {
@@ -321,6 +336,30 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setMasterChannelId(String masterChannelId) {
 		this.masterChannelId = masterChannelId;
+	}
+
+	public String getDomain() {
+		return domain;
+	}
+
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
+
+	public String getDomainProxy() {
+		return domainProxy;
+	}
+
+	public void setDomainProxy(String domainProxy) {
+		this.domainProxy = domainProxy;
+	}
+
+	public GmailConfigDetails getGmail() {
+		return gmail;
+	}
+
+	public void setGmail(GmailConfigDetails gmail) {
+		this.gmail = gmail;
 	}
 
 }

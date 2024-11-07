@@ -289,6 +289,7 @@ public class PMEnvironment {
 		String server;
 		boolean shared;
 		boolean disabled;
+		boolean primary;
 
 		public PMConfigurationObject(String key, Object value) {
 			super(value);
@@ -345,6 +346,14 @@ public class PMEnvironment {
 
 		public void setDisabled(boolean disabled) {
 			this.disabled = disabled;
+		}
+
+		public boolean isPrimary() {
+			return primary;
+		}
+
+		public void setPrimary(boolean primary) {
+			this.primary = primary;
 		}
 
 	}
@@ -513,8 +522,6 @@ public class PMEnvironment {
 		String getDefaultSender();
 
 		String getContactDetailsUrl();
-
-
 
 	}
 

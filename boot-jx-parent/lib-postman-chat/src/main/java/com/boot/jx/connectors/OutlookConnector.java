@@ -136,6 +136,11 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
+		nexusEmailClient.subscribe(channelConfig);
+	}
+
+	@Deprecated
+	public void onChannelUpdateFallback(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 		Map<String, Object> meta = channelConfig.getMeta();
 		if (!ArgUtil.is(channelConfig.getMeta())) {
 			meta = new HashMap<String, Object>();
@@ -219,6 +224,10 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 			}
 		}
 
+		if (ArgUtil.is(chatSession) && ArgUtil.is(chatSession.getTicketHash())) {
+			outboxMessage.session().setTicketHash(chatSession.getTicketHash());
+		}
+
 		nexusEmailClient.send(channelConfig, outboxMessage);
 		outboxMessage.updateStatus(OutboxMessage.Status.SENT);
 	}
@@ -263,7 +272,10 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		inboxMessage.setMessage(EmailReplyParser.parseReply(m.pathEntry("body.content").asString()));
 		inboxMessage.setMessageTrail(m.pathEntry("body.trail").asString());
 
-		if (ArgUtil.is(inboxMessage.getSubject())) {
+		MapPathEntry conversationId = m.pathEntry("conversationId");
+		if (conversationId.exists()) {
+			inboxMessage.session().setTicketHash(conversationId.asString());
+		} else if (ArgUtil.is(inboxMessage.getSubject())) {
 			String subject = StringUtils
 					.normalizeSpace(inboxMessage.getSubject().replaceFirst(EmailConnector.SUBJECT_CLEANER_STR, ""));
 			String conatctid = PostManUtil.CONTACT_ID(inboxMessage.contact());

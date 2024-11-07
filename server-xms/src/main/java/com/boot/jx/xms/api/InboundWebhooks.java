@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMContextUtil;
 import com.boot.jx.postman.PMEnvironment;
@@ -52,7 +52,7 @@ public class InboundWebhooks {
 	@ApiCallbacktParams
 	@RequestMapping(value = "/api/v1/contact/info", method = { RequestMethod.POST })
 	public ContactInfoUpdate onProfileCallback(@RequestBody InBoundContact contactInfoRequest) {
-		PMConfigurationObject conatctUrlEntry = pmEnvironment.keyEntry(SETUP_KEY.POSTMAN_CONTACT_DETAILS_URL);
+		PMConfigurationObject conatctUrlEntry = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CONTACT_DETAILS_URL);
 		if (conatctUrlEntry.exists()) {
 			return restService.ajax(conatctUrlEntry.asString()).post(contactInfoRequest).as(ContactInfoUpdate.class);
 		}

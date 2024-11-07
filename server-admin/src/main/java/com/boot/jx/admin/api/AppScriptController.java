@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
-import com.boot.jx.common.config.ConfigConstants.SETUP_KEY;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
@@ -101,7 +101,7 @@ public class AppScriptController {
 		}
 
 		if (!ArgUtil.is(contactId)) {
-			contactId = pmEnvironment.keyEntry(SETUP_KEY.POSTMAN_DEBUG_CONTACT).asString();
+			contactId = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).asString();
 		}
 
 		return restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getLogs").queryParam("app_id", appId)

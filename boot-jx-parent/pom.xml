@@ -82,6 +82,13 @@
 			
 			<dependency>
 				<groupId>com.boot.jx</groupId>
+				<artifactId>bootjx-common-test</artifactId>
+				<version>${boot.jx.version}</version>
+				<scope>test</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.boot.jx</groupId>
 				<artifactId>common-table</artifactId>
 				<version>${myproject.version}</version>
 			</dependency>

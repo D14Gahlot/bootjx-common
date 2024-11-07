@@ -18,6 +18,7 @@ import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -112,6 +113,39 @@ public class AdminCustomerController {
 	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestBody ProfileSearchQuery searchQry) {
 		List<CustomerProfileDoc> docs = cusProfileService.getProfileSearch(searchQry);
 		return ApiResponse.buildResults(docs);
+	}
+	
+	/** create profile group with custom filter**/
+	@RequestMapping(value = "/profile/filter", method = { RequestMethod.POST })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ProfileFilterMasterDoc, Object> addEditProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
+		return ApiResponse.buildResults(cusProfileService.addEditProfileFilterGroup(reqDto));
+	}
+	@RequestMapping(value = "/profile/filter", method = { RequestMethod.PATCH })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ProfileFilterMasterDoc, Object> updateProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
+		return ApiResponse.buildResults(cusProfileService.addEditProfileFilterGroup(reqDto));
+	}
+	
+	
+	@RequestMapping(value = "/profile/filter", method = { RequestMethod.GET })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ProfileFilterMasterDoc, Object> fetchProfileFilterGroup(
+			@RequestParam(value = "id", required = false) String id,
+			@RequestParam(value = "active", required = false) Boolean active,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false,defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "created") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir)  {
+	return ApiResponse.buildResults(cusProfileService.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir));
+}
+
+	@RequestMapping(value = "/profile/filter", method = { RequestMethod.DELETE })
+	@JsonView(PMEnvironment.PublicProperty.class)
+	public ApiResponse<ProfileFilterMasterDoc, Object> deleteProfileFilterGroup(@RequestParam(value = "id", required = true) String id) {
+		ProfileFilterMasterDoc reqDto=new ProfileFilterMasterDoc();
+		reqDto.setId(id);
+		return ApiResponse.buildResults(cusProfileService.deleteProfileFilterGroup(reqDto));
 	}
 
 }

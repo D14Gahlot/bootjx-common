@@ -1,7 +1,5 @@
 package com.boot.jx.account.api;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
@@ -56,12 +54,11 @@ import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.scope.tnt.Tenants;
-import com.boot.jx.sso.service.CommonAuthenticator;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
-import com.javachinna.oauth2.user.SocialEnums.ChannelPartner;
 
 @Controller
 @RequestMapping("/partner")
@@ -100,13 +97,18 @@ public class PartnerController {
 
 		model.addAllAttributes(appCommonConfig.appAttributes());
 		Authentication auth = AccountAuthService.getAuthentication();
+
 		if (ArgUtil.is(auth) && ArgUtil.is(userSessionBean.domainUser())) {
 			model.addAttribute("APP_USER", auth.getName());
 			model.addAttribute("APP_USER_NAME", userSessionBean.domainUser().contact().getName());
+			model.addAttribute("APP_USER_PICTURE", userSessionBean.domainUser().contact().getPicture());
+			model.addAttribute("APP_USER_PROFILE", JsonUtil.toJson(userSessionBean.domainUser().contact()));
 			model.addAttribute("APP_USER_ROLE", JsonUtil.toJson(userSessionBean.role()));
 		} else {
 			model.addAttribute("APP_USER", "");
 			model.addAttribute("APP_USER_NAME", "");
+			model.addAttribute("APP_USER_PICTURE", "");
+			model.addAttribute("APP_USER_PROFILE", "{}");
 			model.addAttribute("APP_USER_ROLE", "['GUEST']");
 		}
 
@@ -325,6 +327,8 @@ public class PartnerController {
 		} else {
 			resp.addResult(defaultDomain(domainUser, new DomainDoc()));
 		}
+
+		resp.meta(domainUser.getContact());
 
 		return resp;
 	}

@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;
 
@@ -26,7 +25,6 @@ public class ApiWhaService {
 
 	private static Logger LOGGER = LoggerService.getLogger(ApiWhaService.class);
 
-	@Value("${apiwha.api.key}")
 	String apiWhaKey;
 
 	@Autowired
@@ -60,9 +58,7 @@ public class ApiWhaService {
 				auditService.gauge(pMGaugeEvent.set(message).result(Result.REJECTED));
 			} else {
 				String responseText = restService.ajax("http://panel.apiwha.com/send_message.php")
-						.field("apikey", apiWhaKey).field("number",
-								message.getTo())
-						.postForm().asString();
+						.field("apikey", apiWhaKey).field("number", message.getTo()).postForm().asString();
 				auditService.gauge(pMGaugeEvent.responseText(responseText).set(message));
 			}
 		} catch (Exception e) {

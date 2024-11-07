@@ -26,13 +26,13 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 
 	@Override
 	public String getDefaultInboundQueue() {
-		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_INBOUND_QUEUE).asString();
+		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_INBOUND_QUEUE).asString();
 	}
 
 	@Override
 	public String getDefaultInboundQueue(String channelId, CHAT_MODE mode) {
 		if (CHAT_MODE.AGENT.equals(mode)) {
-			return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
+			return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
 					.asString(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 		} else {
 			ChannelConfig channel = environment.config().channel(channelId);
@@ -62,22 +62,22 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 
 	@Override
 	public PMConfigurationObject getAgentHistoryPeriod() {
-		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
+		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
 	}
 
 	@Override
 	public PMConfigurationObject getAgentHistoryCount() {
-		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LIMIT);
+		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LIMIT);
 	}
 
 	@Override
 	public PMConfigurationObject getChatIdleTimeout() {
-		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_CHAT_IDLE_TIMEOUT);
+		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_IDLE_TIMEOUT);
 	}
 	
 	@Override
 	public PMConfigurationObject getAgentChatDisable() {
-		return environment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_AGENT_CUSTOMER_CHAT_DISABLE);
+		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CUSTOMER_CHAT_DISABLE);
 	}
 	
 	

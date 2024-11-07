@@ -11,6 +11,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
+import com.boot.jx.postman.model.MessageSession;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
@@ -18,7 +19,7 @@ import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
 
 @Component
-@ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.OUTLOOK)
+@ConnectorMapping(contactType = ContactType.EMAIL, channel = { CHANNEL_TYPE.OUTLOOK, CHANNEL_TYPE.GMAIL })
 public class NexusEmailClient implements ChannelClient {
 
 	@Autowired
@@ -30,14 +31,28 @@ public class NexusEmailClient implements ChannelClient {
 	@Async
 	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
 	public OutboxMessage send(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
-		restService.ajax(nexusUrl).path("/email/api/v1/outlook/" + channelConfig.getChannelId() + "/message/send")
+		restService.ajax(nexusUrl)
+				.path("/email/api/v1/" + channelConfig.getChannelType() + "/" + channelConfig.getChannelId()
+						+ "/message/send")
 				.postJson(MapModel.createInstance().put("refId", outboxMessage.getMessageId())
+						.put("ticketHash", outboxMessage.session().getTicketHash())
 						.put("messageId", outboxMessage.getMessageId())
 						.put("messageIdRef", outboxMessage.getMessageIdRef())
 						.put("messageIdExt", outboxMessage.getMessageIdExt()).put("replyId", outboxMessage.getReplyId())
 						.put("replyIdExt", outboxMessage.getReplyIdExt()).put("id", outboxMessage.getId()))
 				.asNone();
 		return outboxMessage;
+	}
+
+	@Async
+	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+	public ChannelConfig subscribe(ChannelConfig channelConfig) {
+		restService.ajax(nexusUrl)
+				.path("/email/api/v1/" + channelConfig.getChannelType() + "/" + channelConfig.getChannelId()
+						+ "/subscription/create")
+				.field("lane", channelConfig.getLane()).field("channelId", channelConfig.getChannelId()).submit()
+				.asNone();
+		return channelConfig;
 	}
 
 	@Override

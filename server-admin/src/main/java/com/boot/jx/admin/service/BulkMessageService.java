@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -23,6 +24,7 @@ import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonTemplateMeta;
@@ -85,13 +87,17 @@ public class BulkMessageService extends BatchJobExecuter {
 	public void registerJob(BatchJob job, ChronoScheduler scheduler) {
 		if (!ArgUtil.is(scheduler)) {
 			registerJobAndTriggerSummary(job);
-		} else {
+		}else if(ArgUtil.is(scheduler) && !StringUtils.isBlank(scheduler.getTopic()) && scheduler.getTopic().equalsIgnoreCase("CANCELLED")) {
+			tunnelService.schedule(job.scheduler(scheduler));
+		}else {
 			scheduler = ArgUtil.nonEmpty(scheduler, ChronoScheduler.task());
 			scheduler.setTopic("BulkMessageTask");
 			tunnelService.schedule(job.scheduler(scheduler));
 		}
 	}
 
+	
+	
 	public BulkSessionDoc send(OutboxMessage bulkMessage, ChronoScheduler scheduler) throws NumberParseException {
 
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
@@ -120,7 +126,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -188,7 +194,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -256,7 +262,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();

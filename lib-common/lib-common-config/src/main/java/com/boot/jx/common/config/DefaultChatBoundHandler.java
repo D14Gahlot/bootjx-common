@@ -34,6 +34,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.FormReply;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageReplyTo;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
@@ -144,8 +145,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient, true);
 					} else {
 						// if (APP_TYPE.APP_SCRIPT.equals(appType)) {
-						forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-								defaultClient);
+						forward2Webhook(inboxMessage, ArgUtil.anyOf(defaultClient.getWebhook(),
+								pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD), defaultClient);
 						// } else {
 						// ApiResponseUtil.throwException("Forward URL missing");
 						// }
@@ -156,8 +157,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				}
 
 				if (CHAT_MODE.SCRIPTUS.equals(appType.getMode())) {
-					forward2Webhook(inboxMessage, pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD,
-							defaultClient);
+					forward2Webhook(inboxMessage, ArgUtil.anyOf(defaultClient.getWebhook(),
+							pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD), defaultClient);
 					return;
 				}
 
@@ -243,6 +244,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		msg.timestamp = inboxMessage.getTimestamp();
 		msg.tags = inboxMessage.getTags();
 		msg.input = inboxMessage.form();
+		msg.replyTo = JsonUtil.toObject(inboxMessage.replyTo(), MessageReplyTo.class);
 
 		msg.form = JsonUtil.toObject(inboxMessage.form(), FormReply.class);
 
@@ -283,8 +285,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		InBoundWrapper wrap = new InBoundWrapper().type("messages");
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-				.appId(defaultClient.getId()).appCode(defaultClient.getQueue())
-				.debug(pmEnvironment.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
+				.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
+				.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode()) //
+				.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
 
@@ -304,7 +307,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		ClientApp defaultClient = context().clientApp(messageReport.session().getQueue(), messageReport.contact());
 
 		if (ArgUtil.is(defaultClient)) {
-			if (ArgUtil.areEqual(CHAT_MODE.WEBHOOK.toString(), defaultClient.getAppType())) {
+			if (ArgUtil.is(defaultClient.getAppType(), CHAT_MODE.WEBHOOK.toString(), CHAT_MODE.SCRIPTUS.toString())) {
 				LOGGER.debug("Forwarding MessageReport to Xternal Service ");
 				try {
 					if (ArgUtil.is(defaultClient.getWebhook())) {
@@ -320,7 +323,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 						InBoundWrapper wrap = new InBoundWrapper().type("statuses");
 						wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 								.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-								.appId(defaultClient.getId()).appCode(defaultClient.getQueue());
+								.appId(defaultClient.getId()).appCode(defaultClient.getQueue())
+								.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode());
 						wrap.contacts = CollectionUtil.asList(contact);
 						wrap.statuses = CollectionUtil.asList(status);
 						restHookService.ajax(defaultClient.getWebhook()).postJson(wrap).asNone();
@@ -447,7 +451,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			CHAT_MODE chatMode = CHAT_MODE.from(defaultClient.getAppMode());
 			boolean internalwebhook = APP_TYPE.APP_SCRIPT.equals(appType) || CHAT_MODE.SCRIPTUS.equals(chatMode);
 
-			String webhookUrl = internalwebhook ? (pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD)
+			String webhookUrl = internalwebhook
+					? ArgUtil.anyOf(defaultClient.getWebhook(), pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD)
 					: defaultClient.getWebhook();
 
 			if (ArgUtil.is(webhookUrl)) {
@@ -456,8 +461,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				InBoundWrapper wrap = new InBoundWrapper().type("events");
 				wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
-						.appId(defaultClient.getId()).appCode(defaultClient.getQueue()).debug(pmEnvironment
-								.keyEntry(ConfigConstants.SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
+						.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
+						.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode()) //
+						.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
 				(internalwebhook ? restService : restHookService).ajax(webhookUrl)

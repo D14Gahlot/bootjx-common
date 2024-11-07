@@ -37,11 +37,7 @@ public class InBoundControllerTW {
 	@Autowired
 	private TwitterConnector twitterConnector;
 
-	@Value("${postman.twitter.polling.lanes}")
 	private String[] pollingLanes;
-
-	@Value("${postman.twitter.webhook.lanes}")
-	private String[] webhookLanes;
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
@@ -116,6 +112,9 @@ public class InBoundControllerTW {
 
 	// @Scheduled(fixedDelay = 5000)
 	public void registerService() {
+		if (!ArgUtil.is(pollingLanes)) {
+			return;
+		}
 		for (String channelId : pollingLanes) {
 			try {
 				if (ArgUtil.is(channelId)) {

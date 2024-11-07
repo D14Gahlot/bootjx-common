@@ -1,0 +1,33 @@
+name: Junit- build-xyz-upgrade
+
+on:
+  push:
+    branches:
+      - build-xyz-upgrade
+  pull_request:
+    branches:
+      - build-xyz-upgrade
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: true  # This ensures submodules are initialized and updated
+          fetch-depth: 0    # Ensures the full history is fetched (needed for submodules)
+
+      # Set up JDK 11 (or whatever version your project needs)
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin' # Specify the distribution, e.g., 'adopt', 'zulu', 'temurin'
+          cache: maven
+
+      # Install dependencies and run tests
+      - name: Build with Maven
+        run: mvn clean install test  -pl server-test  -am -U --batch-mode
