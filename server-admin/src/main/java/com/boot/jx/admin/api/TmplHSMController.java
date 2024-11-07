@@ -220,7 +220,10 @@ public class TmplHSMController {
 		if (sync) {
 			thirdPartyTmplManager.refreshWabaFlows(channelConfig);
 		}
-		return ApiResponse.buildResults(mongoTemplate.findAll(WABAFlows.class));
+
+		return new ApiResponse<WABAFlows, Object>()
+				.results(thirdPartyTmplManager.getFlows(channelConfig));
+
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -158,7 +159,22 @@ public class ThirdPartyTemplateManager {
 	public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig) {
 		return this.getTemplates(channelConfig, null);
 	}
+	public List<WABAFlows> getFlows(ChannelConfig channelConfig, String code) {
+		
+		MongoQueryBuilder<WABAFlows> q = MongoQueryBuilder.collection(WABAFlows.class)
+				.where(Criteria.where("wabaId").is(channelConfig.getWacfb().getWabaId()));
 
+		if (ArgUtil.is(code)) {
+			q.where("code", code);
+		}
+
+		return commonMongoTemplate.find(q);
+	}
+	
+
+	public List<WABAFlows> getFlows(ChannelConfig channelConfig) {
+		return this.getFlows(channelConfig, null);
+	}
 	public HSMTemplate3rdParty link(String thirdPartyTemplateId, String hsmTemplateId) {
 		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(thirdPartyTemplateId,
 				HSMTemplate3rdParty.class);
@@ -204,11 +220,13 @@ public class ThirdPartyTemplateManager {
 
 		for (Map<String, Object> flowData : flows) {
 			String flowId = (String) flowData.get("id");
+			
 			String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 			WABAFlows flowDoc = commonMongoTemplate.findById(id, WABAFlows.class);
 			if (!ArgUtil.is(flowDoc)) {
 				flowDoc = new WABAFlows();
 			}
+			flowDoc.setWabaId(channelConfig.getWacfb().getWabaId());
 			flowDoc.setId(id);
 			flowDoc.setFlowId(id);
 			flowDoc.setMeta(flowData);
