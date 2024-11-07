@@ -496,11 +496,12 @@ public class WacfbClient implements ChannelClient {
         wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
 		wa360OutBoundMedia.setCaption(attachment.getMediaName());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		if (mediaType.equalsIgnoreCase("image")) {
+		if (mediaType.equalsIgnoreCase("image")||mediaType.equalsIgnoreCase("video")) {
 			wa360OutBoundMedia.setFilename(null);
 		}
 		return wa360OutBoundMedia;
 	}
+	
 
 	private MapModel sendText(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
@@ -616,6 +617,7 @@ public class WacfbClient implements ChannelClient {
 				intr.put("image", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
+				wa360OutBoundMedia.setFilename(null);
 				intr.put("video", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
