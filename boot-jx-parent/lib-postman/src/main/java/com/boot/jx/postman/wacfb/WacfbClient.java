@@ -372,8 +372,12 @@ public class WacfbClient implements ChannelClient {
 				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
+ 			        media.setFilename(ArgUtil.nonEmpty(outboxMessage.getAttachments().get(0).getMediaCaption(), outboxMessage.getAttachments().get(0).getMediaName()));
 					media.setCaption(null);
-					// media.setFilename(null);
+                    if(lowerFormat.equalsIgnoreCase("image")|| (lowerFormat.equalsIgnoreCase("video")))	
+                    {
+                    	media.setFilename(null);
+                    }
 					headerComponentReq.parameter(lowerFormat, media);
 					if (headerComponentReq.parameters().size() > 0) {
 						components.add(headerComponentReq.build().map());
@@ -610,6 +614,7 @@ public class WacfbClient implements ChannelClient {
 				intr.put("image", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
+				wa360OutBoundMedia.setFilename(null);
 				intr.put("video", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
