@@ -1,5 +1,10 @@
 package com.boot.jx.postman.manager;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -17,6 +22,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
@@ -24,10 +30,6 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 @Component
 public class StarterDocKit {
@@ -45,6 +47,9 @@ public class StarterDocKit {
 
 	@Autowired(required = false)
 	private ConfigManager configManager;
+
+	@Autowired(required = false)
+	private CommonServiceClient commonServiceClient;
 
 	private QuickMedia createTemplateReply(String name, String title, String category, String content, String url) {
 		QuickMedia temp5 = commonMongoTemplate.findById(name, QuickMedia.class);
@@ -241,6 +246,7 @@ public class StarterDocKit {
 			version.setValue(domain_created_version);
 			configManager.save(version);
 			onlyOncePerDomain();
+			commonServiceClient.publishDomainCreatedEvent(domain_created_version);
 			if (ArgUtil.is(configManager)) {
 				configManager.refresh();
 			}
