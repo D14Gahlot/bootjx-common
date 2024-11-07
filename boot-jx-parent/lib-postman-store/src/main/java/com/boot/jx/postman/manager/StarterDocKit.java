@@ -89,10 +89,10 @@ public class StarterDocKit {
 		Criteria criteria = Criteria.where("code").is(code);
 		qryQuery.addCriteria(criteria);
 		CustomerFieldMasterDoc fiedMaster = commonMongoTemplate.findOne(qryQuery, CustomerFieldMasterDoc.class);
-		if(ArgUtil.is(fiedMaster)) {
-			if(!type.equalsIgnoreCase(fiedMaster.getType())) {
+		if (ArgUtil.is(fiedMaster)) {
+			if (!type.equalsIgnoreCase(fiedMaster.getType())) {
 				commonMongoTemplate.remove(fiedMaster);
-				fiedMaster =null;
+				fiedMaster = null;
 			}
 		}
 
@@ -106,47 +106,46 @@ public class StarterDocKit {
 			fiedMaster.setPredefined(true);
 			fiedMaster.setRequired(false);
 			fiedMaster.setCreated(TimeStampIndex.now());
-			if(ArgUtil.is(code) && code.equalsIgnoreCase("gender")) {
+			if (ArgUtil.is(code) && code.equalsIgnoreCase("gender")) {
 				List<Object> defaultOptions = new ArrayList<>();
 				// Option 1: Male
-			    Map<String, String> maleOption = new HashMap<>();
-			    maleOption.put("label", "Male");
-			    maleOption.put("value", "male");
-			    defaultOptions.add(maleOption);
-			    // Option 2: Female
-			    Map<String, String> femaleOption = new HashMap<>();
-			    femaleOption.put("label", "Female");
-			    femaleOption.put("value", "female");
-			    defaultOptions.add(femaleOption);
-			    // Set the default options in the fieldMaster
-			    fiedMaster.setPossibleOptions(defaultOptions);
-			}else if(ArgUtil.is(code) && code.equalsIgnoreCase("title")) {
-					List<Object> defaultOptions = new ArrayList<>();
-					// Option 1: Mr.
-				    Map<String, String> mrOpt = new HashMap<>();
-					mrOpt.put("label", "Mr.");
-					mrOpt.put("value", "mr.");
-				    defaultOptions.add(mrOpt);
-				    // Option 2: Mrs.
-				    Map<String, String> mrsOpt = new HashMap<>();
-				    mrsOpt.put("label", "Mrs.");
-				    mrsOpt.put("value", "mrs.");
-				    defaultOptions.add(mrsOpt);
-				    
-				    Map<String, String> msOpt = new HashMap<>();
-				    msOpt.put("label", "Ms.");
-				    msOpt.put("value", "ms.");
-				    defaultOptions.add(msOpt);
-				    
-				    Map<String, String> drOpt = new HashMap<>();
-				    drOpt.put("label", "Dr.");
-				    drOpt.put("value", "dr.");
-				    defaultOptions.add(drOpt);
-				    // Set the default options in the fieldMaster
-				    fiedMaster.setPossibleOptions(defaultOptions);
-				}
+				Map<String, String> maleOption = new HashMap<>();
+				maleOption.put("label", "Male");
+				maleOption.put("value", "male");
+				defaultOptions.add(maleOption);
+				// Option 2: Female
+				Map<String, String> femaleOption = new HashMap<>();
+				femaleOption.put("label", "Female");
+				femaleOption.put("value", "female");
+				defaultOptions.add(femaleOption);
+				// Set the default options in the fieldMaster
+				fiedMaster.setPossibleOptions(defaultOptions);
+			} else if (ArgUtil.is(code) && code.equalsIgnoreCase("title")) {
+				List<Object> defaultOptions = new ArrayList<>();
+				// Option 1: Mr.
+				Map<String, String> mrOpt = new HashMap<>();
+				mrOpt.put("label", "Mr.");
+				mrOpt.put("value", "mr.");
+				defaultOptions.add(mrOpt);
+				// Option 2: Mrs.
+				Map<String, String> mrsOpt = new HashMap<>();
+				mrsOpt.put("label", "Mrs.");
+				mrsOpt.put("value", "mrs.");
+				defaultOptions.add(mrsOpt);
+
+				Map<String, String> msOpt = new HashMap<>();
+				msOpt.put("label", "Ms.");
+				msOpt.put("value", "ms.");
+				defaultOptions.add(msOpt);
+
+				Map<String, String> drOpt = new HashMap<>();
+				drOpt.put("label", "Dr.");
+				drOpt.put("value", "dr.");
+				defaultOptions.add(drOpt);
+				// Set the default options in the fieldMaster
+				fiedMaster.setPossibleOptions(defaultOptions);
 			}
-		
+		}
 
 		if (ArgUtil.is(fiedMaster)) {
 			try {
@@ -230,9 +229,23 @@ public class StarterDocKit {
 		commonMongoTemplate.save(createQuickReply("5", "You're welcome.", "conversation-complete"));
 	}
 
-	public void domain() {
+	public void onlyOncePerDomain() {
 		createMessageIndex();
 		createPredefinedMstField();
+	}
+
+	public void domain() {
+		String domain_created_version = "v1";
+		PMConfigurationObject version = pmEnvironment.local().keyEntry("domain.created.version");
+		if (!version.is(domain_created_version)) {
+			version.setValue(domain_created_version);
+			configManager.save(version);
+			onlyOncePerDomain();
+			if (ArgUtil.is(configManager)) {
+				configManager.refresh();
+			}
+		}
+
 	}
 
 	@PostConstruct
