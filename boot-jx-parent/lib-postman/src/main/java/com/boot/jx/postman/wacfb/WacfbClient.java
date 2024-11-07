@@ -373,7 +373,7 @@ public class WacfbClient implements ChannelClient {
 				} else if (ArgUtil.is(outboxMessage.getAttachments())) {
 					String lowerFormat = extTemplateComponentFormat.toLowerCase();
 					WA360CloudOutBoundMedia media = createMedia(lowerFormat, outboxMessage.getAttachments().get(0));
-			        media.setFilename(ArgUtil.nonEmpty(outboxMessage.getAttachments().get(0).getMediaCaption(), outboxMessage.getAttachments().get(0).getMediaName()));
+			        	media.setFilename(ArgUtil.nonEmpty(outboxMessage.getAttachments().get(0).getMediaCaption(), outboxMessage.getAttachments().get(0).getMediaName()));
 					media.setCaption(null);
 					if(lowerFormat.equalsIgnoreCase("image")||lowerFormat.equalsIgnoreCase("video"))
 							{
@@ -500,12 +500,11 @@ public class WacfbClient implements ChannelClient {
         wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
 		wa360OutBoundMedia.setCaption(attachment.getMediaName());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		if (mediaType.equalsIgnoreCase("image")||mediaType.equalsIgnoreCase("video")) {
+		if (mediaType.equalsIgnoreCase("image")|| mediaType.equalsIgnoreCase("video")) {
 			wa360OutBoundMedia.setFilename(null);
 		}
 		return wa360OutBoundMedia;
 	}
-	
 
 	private MapModel sendText(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
 		MapModel req = MapModel.createInstance().put("messaging_product", outboxMessage.getContact().getContactType())
@@ -621,7 +620,7 @@ public class WacfbClient implements ChannelClient {
 				intr.put("image", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
-				wa360OutBoundMedia.setFilename(null);
+				wa360OutBoundMedia.setFilename(null);//filename not supported in meta-cloud for video/image. for refernce-https://developers.facebook.com/docs/messenger-platform/send-messages/template/media/
 				intr.put("video", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
