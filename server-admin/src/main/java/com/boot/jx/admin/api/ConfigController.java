@@ -90,7 +90,7 @@ public class ConfigController {
 
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@ResponseBody
-	@RequestMapping(value = "/api/config/channel", method = { RequestMethod.PATCH })
+	@RequestMapping(value = "/api/config/clientapikey", method = { RequestMethod.PATCH })
 	public ApiResponse<ClientApp, Object> patchClientApiKey(@RequestBody ModelPatches req)
 			throws InstantiationException, IllegalAccessException {
 		return ApiResponse.buildResults(configManager.patchClientApiKey(req));
