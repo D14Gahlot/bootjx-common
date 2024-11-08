@@ -47,7 +47,9 @@ public class ClientAppConfigConstants {
 						.optionsKey("code").optionsLabel("Name").group("Team"),
 				new ConfigMeta().title("When Agent is connected").path("props.agent_connected")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
-				new ConfigMeta().title("When no agent is found").path("props.agent_notfound")
+				new ConfigMeta().title("When no agent is found in working hours").path("props.agent_notfound")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
+						new ConfigMeta().title("When no agent is found in non-working hours").path("props.agent_notfound")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
 				new ConfigMeta().title("When chat is transferred").path("props.agent_transfer")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
