@@ -31,6 +31,7 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	@Indexed
 	private String messageIdExt;
 	private String messageIdRef;
+	private String messageIdResend;
 	private String traceId;
 
 	@Indexed
@@ -515,6 +516,14 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 
 	public void setMessageTrail(String messageTrail) {
 		this.messageTrail = messageTrail;
+	}
+
+	public String getMessageIdResend() {
+		return messageIdResend;
+	}
+
+	public void setMessageIdResend(String messageIdResend) {
+		this.messageIdResend = messageIdResend;
 	}
 
 }

@@ -265,10 +265,12 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 
 		doc.setSessionId(outMessage.getSessionId());
 		doc.setMessageIdRef(outMessage.getMessageIdRef());
+		doc.setMessageIdResend(outMessage.getMessageIdResend());
 
 		doc.setTrace(outMessage.getTrace());
 		doc.setLogs(outMessage.getLogs());
 		doc.setMessageIdExt(outMessage.getMessageIdExt());
+		doc.setReplyTo(outMessage.getReplyTo());
 		doc.setStatus(ArgUtil.parseAsString(outMessage.getStatus()));
 
 		doc.stamps().putAll(outMessage.stamps());
@@ -287,12 +289,17 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 			doc.setMessageId(outMessage.getMessageId());
 		}
 
+		doc.setMessageIdResend(outMessage.getMessageIdResend());
+
 		if (ArgUtil.is(outMessage.getAction())) {
 			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "A"));
 			doc.setAction(outMessage.getAction());
 		} else {
 			doc.setType(ArgUtil.nonEmpty(outMessage.getType(), "O"));
 		}
+		doc.setFormatType(outMessage.getFormatType());
+		doc.setFormatSubType(outMessage.getFormatSubType());
+
 		doc.setTimestamp(System.currentTimeMillis());
 		doc.setTime(TimeStampIndex.now());
 
@@ -300,6 +307,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.setContactId(PostManUtil.createContactId(outMessage));
 
 		ContactDetailDoc contact = new ContactDetailDoc();
+		contact.copyFrom(outMessage.contact());
 		contact.phone(to);
 		contact.setContactType(ArgUtil.parseAsString(outMessage.contact().getContactType()));
 		doc.setContact(contact);
@@ -359,6 +367,15 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 	public List<MessageDoc> findByBulkSessionId(String bulkSessionId, ContactType contactType) {
 		Query query2 = new Query();
 		query2.addCriteria(Criteria.where("bulkSessionId").is(bulkSessionId))
+				.with(new Sort(Direction.ASC, "timestamp"));
+		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
+		return messages;
+	}
+
+	public List<MessageDoc> findByBulkSessionIdWithRplyCount(String bulkSessionId, ContactType contactType) {
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("type").is('I'));
+		query2.addCriteria(Criteria.where("replyTo.bulkSessionId").is(bulkSessionId))
 				.with(new Sort(Direction.ASC, "timestamp"));
 		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 		return messages;

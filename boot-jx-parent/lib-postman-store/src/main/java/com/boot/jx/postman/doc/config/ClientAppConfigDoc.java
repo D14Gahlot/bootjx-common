@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditableByIdEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.SimpleDocument;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -20,7 +21,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "CONFIG_CLIENT_KEY")
 @TypeAlias("ClientAppConfigDoc")
-public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, ClientApp, JsonIgnoreUnknown {
+public class ClientAppConfigDoc
+		implements IDocument, AuditableByIdEntity, ClientApp, JsonIgnoreUnknown, SimpleDocument {
 
 	private static final long serialVersionUID = -3070718912315245729L;
 
@@ -59,6 +61,7 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 
 	private String domain;
 	private boolean isShared;
+	private boolean isDisabled;
 
 	public String getId() {
 		return id;
@@ -273,6 +276,14 @@ public class ClientAppConfigDoc implements IDocument, AuditableByIdEntity, Clien
 			this.config = new HashMap<String, Object>();
 		}
 		return config;
+	}
+
+	public boolean isDisabled() {
+		return isDisabled;
+	}
+
+	public void setDisabled(boolean isDisabled) {
+		this.isDisabled = isDisabled;
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.boot.jx.ioutbound;
+package com.boot.jx.postman.model.outbound;
 
 import java.io.Serializable;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.postman.model.ext.CommonMsgLocation;
 import com.boot.jx.postman.model.ext.CommonMsgOptions;
+import com.boot.jx.postman.model.ext.CommonMsgText;
 import com.boot.jx.postman.model.ext.CommonMsgText.OutBoundMsgText;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
@@ -36,6 +37,10 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class OutBoundMsg extends OutBoundMsgBasic {
 		private static final long serialVersionUID = 5358190519262995012L;
+
+		@ApiMockModelProperty(example = "gBEGkYiEB1VXAglK1ZEqA1YKPrU", value = "Messsage to be resent",
+				required = false)
+		public String messageIdResend;
 
 		@ApiMockModelProperty(required = false)
 		public OutBoundMsgText text;
@@ -132,6 +137,14 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 
 		public void setOptions(CommonMsgOptions options) {
 			this.options = options;
+		}
+
+		public String getMessageIdResend() {
+			return messageIdResend;
+		}
+
+		public void setMessageIdResend(String messageIdResend) {
+			this.messageIdResend = messageIdResend;
 		}
 	}
 

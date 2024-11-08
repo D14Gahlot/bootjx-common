@@ -219,6 +219,22 @@ public class ConfigManagerImpl implements ConfigManager {
 		return clientApiKey;
 	}
 
+	public ClientApp patchClientApiKey(ModelPatches patches) throws InstantiationException, IllegalAccessException {
+		ClientApp app = pmEnvironment.config().clientApiKey(patches.getId());
+
+		if (ArgUtil.is(app) && app.isReadOnly()) {
+			ApiResponseUtil.throwUnAuthorizedException("ReadOnly App");
+		}
+
+		if (!ArgUtil.is(patches.getPatches())) {
+			return (ClientAppConfigDoc) app;
+		}
+
+		configStore.patch(patches, ClientAppConfigDoc.class);
+		this.refresh();
+		return (ClientAppConfigDoc) app;
+	}
+
 	public ClientAppConfigDoc remove(ClientAppConfigDoc clientApiKey) {
 		ClientApp app = pmEnvironment.config().clientApiKey(clientApiKey.getId());
 		if (ArgUtil.is(app) && app.isReadOnly()) {
@@ -290,7 +306,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		pmEnvironment.addChannel(config);
 		this.refresh(ChannelConfigDoc.DOCUMENT_NAME, config.getChannelId());
 		config = connectorHandlerFactory.onChannelUpdate(config.getChannelType(), config.getLane());
-		
+
 	}
 
 	@Override

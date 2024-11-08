@@ -1,4 +1,4 @@
-package com.boot.jx.ioutbound;
+package com.boot.jx.postman.model.outbound;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;

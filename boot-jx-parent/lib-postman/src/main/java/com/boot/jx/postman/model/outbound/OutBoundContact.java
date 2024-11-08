@@ -1,4 +1,4 @@
-package com.boot.jx.ioutbound;
+package com.boot.jx.postman.model.outbound;
 
 import com.boot.jx.postman.model.MessageDefinitions.ContactID;
 import com.boot.jx.swagger.ApiMockModelProperty;
