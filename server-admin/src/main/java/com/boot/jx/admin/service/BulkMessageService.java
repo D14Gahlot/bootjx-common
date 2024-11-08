@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -36,6 +37,7 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
@@ -77,6 +79,11 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	@Autowired
 	private TunnelService tunnelService;
+	
+	@Autowired
+	CommonServiceClient commonSerClient;
+	
+	
 
 	public void registerJobAndTriggerSummary(BatchJob job) {
 		registerJob(job);
@@ -88,7 +95,10 @@ public class BulkMessageService extends BatchJobExecuter {
 		if (!ArgUtil.is(scheduler)) {
 			registerJobAndTriggerSummary(job);
 		}else if(ArgUtil.is(scheduler) && !StringUtils.isBlank(scheduler.getTopic()) && scheduler.getTopic().equalsIgnoreCase("CANCELLED")) {
-			tunnelService.schedule(job.scheduler(scheduler));
+			Map<String, Object> data = job.getData();
+			data.put("jobId", job.getJobId());
+			scheduler.setData(data);
+			commonSerClient.schedule(scheduler);
 		}else {
 			scheduler = ArgUtil.nonEmpty(scheduler, ChronoScheduler.task());
 			scheduler.setTopic("BulkMessageTask");
