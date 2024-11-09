@@ -10,6 +10,7 @@ import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
 import com.boot.jx.postman.plugin.FacebookPlugin.FacebookConfigDetails;
 import com.boot.jx.postman.plugin.FirebasePlugin.FirebaseConfigDetails;
 import com.boot.jx.postman.plugin.GmailPlugin.GmailConfigDetails;
+import com.boot.jx.postman.plugin.ImapPlugin.ImapConfigDetails;
 import com.boot.jx.postman.plugin.InstagramPlugin.InstagramConfig;
 import com.boot.jx.postman.plugin.OAPlugin.OAConfigDetails;
 import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
@@ -45,6 +46,7 @@ public class ChannelConfig extends AChannelConfig {
 	private OAConfigDetails oa;
 	private OutlookConfigDetails outlook;
 	private GmailConfigDetails gmail;
+	private ImapConfigDetails imap;
 
 	private boolean isAutoCreated;
 	private boolean isMaster;
@@ -360,6 +362,14 @@ public class ChannelConfig extends AChannelConfig {
 
 	public void setGmail(GmailConfigDetails gmail) {
 		this.gmail = gmail;
+	}
+
+	public ImapConfigDetails getImap() {
+		return imap;
+	}
+
+	public void setImap(ImapConfigDetails imap) {
+		this.imap = imap;
 	}
 
 }

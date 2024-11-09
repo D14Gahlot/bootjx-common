@@ -87,6 +87,7 @@ public class PMConstants {
 		public static final String FIREBASE = "firebase";
 		public static final String OUTLOOK = "outlook";
 		public static final String GMAIL = "gmail";
+		public static final String IMAP = "imap";
 
 		// WhatsApp Channels
 		public static final String WA_GUPSHUP = "wags";
@@ -99,7 +100,7 @@ public class PMConstants {
 	}
 
 	public enum CHANNEL_TYPE_ENUM {
-		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase, wacfb, outlook, gmail
+		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase, wacfb, outlook, gmail, imap
 	}
 
 	public static enum CHAT_STATUS {

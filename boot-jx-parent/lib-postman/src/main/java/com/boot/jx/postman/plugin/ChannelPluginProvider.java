@@ -248,6 +248,12 @@ public class ChannelPluginProvider {
 						cm.defaultValue(annotation.defaultValue());
 					}
 
+					if (ArgUtil.is(annotation.optionValues())) {
+						for (String optionValue : annotation.optionValues()) {
+							cm.optionValues(optionValue);
+						}
+					}
+
 					if (annotation.hidden()) {
 						cm.hidden();
 					}

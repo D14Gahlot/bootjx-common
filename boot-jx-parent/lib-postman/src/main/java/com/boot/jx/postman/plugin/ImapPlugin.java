@@ -9,14 +9,14 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
-import com.boot.jx.postman.plugin.EmailPlugin.EmailConfigDetails;
+import com.boot.jx.postman.plugin.ImapPlugin.ImapConfigDetails;
 import com.fasterxml.jackson.annotation.JsonView;
 
-public class EmailPlugin implements DefaultChannelPlugin<EmailConfigDetails> {
+public class ImapPlugin implements DefaultChannelPlugin<ImapConfigDetails> {
 
 	@Override
 	public String getChannelType() {
-		return CHANNEL_TYPE.EMAIL;
+		return CHANNEL_TYPE.IMAP;
 	}
 
 	@Override
@@ -24,54 +24,54 @@ public class EmailPlugin implements DefaultChannelPlugin<EmailConfigDetails> {
 		return ContactType.EMAIL;
 	}
 
-	public static class EmailConfigDetails extends AChannelDetails {
+	public static class ImapConfigDetails extends AChannelDetails {
 
 		private static final long serialVersionUID = -2397678752642150000L;
 		private String protocol;
 
-		@ConfigMetaProperty(path = "email.pop3Host", title = "POP3 Host")
-		private String pop3Host;
+		@ConfigMetaProperty(path = "imap.imapHost", title = "IMAP Host")
+		private String imapHost;
 
-		@ConfigMetaProperty(path = "email.pop3Port", title = "POP3 Port", defaultValue = "995",
-				optionValues = { "995", "110" })
-		private String pop3Port;
+		@ConfigMetaProperty(path = "imap.imapPort", title = "IMAP Port", defaultValue = "993",
+				optionValues = { "993", "143" })
+		private String imapPort;
 
-		@ConfigMetaProperty(path = "email.pop3User", createonly = true, title = "POP3 User")
-		private String pop3User;
+		@ConfigMetaProperty(path = "imap.imapUser", createonly = true, title = "IMAP User")
+		private String imapUser;
 
 		@JsonView(PMEnvironment.ProtectedProperty.class)
-		@ConfigMetaProperty(path = "email.pop3Pass", writeonly = false, title = "POP3 Password")
-		private String pop3Pass;
+		@ConfigMetaProperty(path = "imap.imapPass", writeonly = false, title = "IMAP Password")
+		private String imapPass;
 
-		@ConfigMetaProperty(path = "email.pop3StartTls", title = "Enable POP3 TLS", inputType = INPUT_TYPE.OPTIONS,
+		@ConfigMetaProperty(path = "imap.imapStartTls", title = "Enable IMAP TLS", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN)
 		private boolean pop3StartTls;
 
-		@ConfigMetaProperty(path = "email.smtpAuth", title = "SMTP Auth", inputType = INPUT_TYPE.OPTIONS,
+		@ConfigMetaProperty(path = "imap.smtpAuth", title = "SMTP Auth", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN)
 		private boolean smtpAuth;
 
-		@ConfigMetaProperty(path = "email.smtpStartTls", title = "SMTP TLS", inputType = INPUT_TYPE.OPTIONS,
+		@ConfigMetaProperty(path = "imap.smtpStartTls", title = "SMTP TLS", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN)
 		private boolean smtpStartTls;
 
-		@ConfigMetaProperty(path = "email.smtpHost", title = "SMTP Host")
+		@ConfigMetaProperty(path = "imap.smtpHost", title = "SMTP Host")
 		private String smtpHost;
 
-		@ConfigMetaProperty(path = "email.smtpPort", title = "SMTP Port", defaultValue = "465",
+		@ConfigMetaProperty(path = "imap.smtpPort", title = "SMTP Port", defaultValue = "465",
 				optionValues = { "465", "587", "25" })
 		private String smtpPort;
 
-		@ConfigMetaProperty(path = "email.smtpUser", title = "SMTP User")
+		@ConfigMetaProperty(path = "imap.smtpUser", title = "SMTP User")
 		private String smtpUser;
 
 		@JsonView(PMEnvironment.ProtectedProperty.class)
-		@ConfigMetaProperty(path = "email.smtpPass", title = "SMTP Password")
+		@ConfigMetaProperty(path = "imap.smtpPass", title = "SMTP Password")
 		private String smtpPass;
 
 		@Override
 		public String getLane() {
-			return this.pop3User;
+			return this.imapUser;
 		}
 
 		public String getProtocol() {
@@ -80,14 +80,6 @@ public class EmailPlugin implements DefaultChannelPlugin<EmailConfigDetails> {
 
 		public void setProtocol(String protocol) {
 			this.protocol = protocol;
-		}
-
-		public String getPop3Host() {
-			return pop3Host;
-		}
-
-		public void setPop3Host(String pop3Host) {
-			this.pop3Host = pop3Host;
 		}
 
 		public boolean isPop3StartTls() {
@@ -130,22 +122,6 @@ public class EmailPlugin implements DefaultChannelPlugin<EmailConfigDetails> {
 			this.smtpPort = smtpPort;
 		}
 
-		public String getPop3User() {
-			return pop3User;
-		}
-
-		public void setPop3User(String pop3User) {
-			this.pop3User = pop3User;
-		}
-
-		public String getPop3Pass() {
-			return pop3Pass;
-		}
-
-		public void setPop3Pass(String pop3Pass) {
-			this.pop3Pass = pop3Pass;
-		}
-
 		public String getSmtpUser() {
 			return smtpUser;
 		}
@@ -162,29 +138,53 @@ public class EmailPlugin implements DefaultChannelPlugin<EmailConfigDetails> {
 			this.smtpPass = smtpPass;
 		}
 
-		public String getPop3Port() {
-			return pop3Port;
+		public String getImapHost() {
+			return imapHost;
 		}
 
-		public void setPop3Port(String pop3Port) {
-			this.pop3Port = pop3Port;
+		public void setImapHost(String imapHost) {
+			this.imapHost = imapHost;
+		}
+
+		public String getImapPort() {
+			return imapPort;
+		}
+
+		public void setImapPort(String imapPort) {
+			this.imapPort = imapPort;
+		}
+
+		public String getImapUser() {
+			return imapUser;
+		}
+
+		public void setImapUser(String imapUser) {
+			this.imapUser = imapUser;
+		}
+
+		public String getImapPass() {
+			return imapPass;
+		}
+
+		public void setImapPass(String imapPass) {
+			this.imapPass = imapPass;
 		}
 
 	}
 
 	@Override
-	public void setDetails(ChannelConfig config, EmailConfigDetails details) {
-		config.setEmail(details);
+	public void setDetails(ChannelConfig config, ImapConfigDetails details) {
+		config.setImap(details);
 	}
 
 	@Override
-	public EmailConfigDetails getDetails(ChannelConfig config) {
-		return config.getEmail();
+	public ImapConfigDetails getDetails(ChannelConfig config) {
+		return config.getImap();
 	}
 
 	@Override
-	public EmailConfigDetails newChannelDetails() {
-		return new EmailConfigDetails();
+	public ImapConfigDetails newChannelDetails() {
+		return new ImapConfigDetails();
 	}
 
 	@Override
