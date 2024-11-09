@@ -45,7 +45,7 @@ public class ImapPlugin implements DefaultChannelPlugin<ImapConfigDetails> {
 
 		@ConfigMetaProperty(path = "imap.imapStartTls", title = "Enable IMAP TLS", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN)
-		private boolean pop3StartTls;
+		private boolean imapStartTls;
 
 		@ConfigMetaProperty(path = "imap.smtpAuth", title = "SMTP Auth", inputType = INPUT_TYPE.OPTIONS,
 				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN)
