@@ -82,14 +82,6 @@ public class ImapPlugin implements DefaultChannelPlugin<ImapConfigDetails> {
 			this.protocol = protocol;
 		}
 
-		public boolean isPop3StartTls() {
-			return pop3StartTls;
-		}
-
-		public void setPop3StartTls(boolean pop3StartTls) {
-			this.pop3StartTls = pop3StartTls;
-		}
-
 		public boolean isSmtpAuth() {
 			return smtpAuth;
 		}
@@ -168,6 +160,14 @@ public class ImapPlugin implements DefaultChannelPlugin<ImapConfigDetails> {
 
 		public void setImapPass(String imapPass) {
 			this.imapPass = imapPass;
+		}
+
+		public boolean isImapStartTls() {
+			return imapStartTls;
+		}
+
+		public void setImapStartTls(boolean imapStartTls) {
+			this.imapStartTls = imapStartTls;
 		}
 
 	}
