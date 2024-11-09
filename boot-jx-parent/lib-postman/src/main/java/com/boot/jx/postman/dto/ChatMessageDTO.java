@@ -28,6 +28,7 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 	private String messageId;
 	private String messageIdExt;
 	private String messageIdRef;
+	private String messageIdResend;
 
 	private String replyIdExt;
 	private String replyId;
@@ -295,5 +296,13 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 
 	public void setMessageTrail(String messageTrail) {
 		this.messageTrail = messageTrail;
+	}
+
+	public String getMessageIdResend() {
+		return messageIdResend;
+	}
+
+	public void setMessageIdResend(String messageIdResend) {
+		this.messageIdResend = messageIdResend;
 	}
 }

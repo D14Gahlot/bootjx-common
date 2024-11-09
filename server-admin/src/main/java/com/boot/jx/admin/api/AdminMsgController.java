@@ -534,6 +534,24 @@ public class AdminMsgController {
 		return resp;
 	}
 	
+	@RequestMapping(value = "/api/message/bulk/push/messages/replay/count", method = { RequestMethod.POST })
+	public ApiResponse<ChatMessageDTO, BulkSessionDoc> getBulkMessagesReplayCount(@RequestParam String bulkSessionId)
+			throws NumberParseException {
+		ApiResponse<ChatMessageDTO, BulkSessionDoc> resp = ApiResponse.instance(ChatMessageDTO.class,
+				BulkSessionDoc.class);
+
+		BulkSessionDoc session = CollectionUtil.getOne(mongoTemplate
+				.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+		resp.setMeta(session);
+
+		if (ArgUtil.is(session)) {
+			List<MessageDoc> msgs = messageStore.findByBulkSessionIdWithRplyCount(session.getBulkSessionId(), session.contactType());
+			resp.results(ChatDTOUtil.getChatMessageDTO(msgs, null, session.getCreatedBy()));
+		}
+		return resp;
+	}
+	
+	
 	
 	/** search by status or tagCategory **/
 	@ResponseBody

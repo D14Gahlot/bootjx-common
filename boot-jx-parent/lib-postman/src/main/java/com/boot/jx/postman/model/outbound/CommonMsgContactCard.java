@@ -1,4 +1,4 @@
-package com.boot.jx.ioutbound;
+package com.boot.jx.postman.model.outbound;
 
 import java.util.List;
 

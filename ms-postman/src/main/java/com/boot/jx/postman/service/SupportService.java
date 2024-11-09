@@ -59,7 +59,7 @@ public class SupportService {
 		map.put("lines", Utils.concatenate(email.getLines(), " \n "));
 
 		email.setFrom(this.supportContactFrom);
-		email.setReplyTo(email.getVisitorEmail());
+		email.setReplyToEmail(email.getVisitorEmail());
 		email.addAllTo(supportContactTo);
 		email.getModel().put("data", map);
 		email.setSubject(supportContactSubject);

@@ -64,6 +64,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private Map<String, Object> model = new HashMap<String, Object>();
 	protected Map<String, Object> options = new HashMap<String, Object>();
 	protected Map<String, Object> meta;
+	private Map<String, Object> replyTo = new HashMap<String, Object>();
 
 	private List<PostManFile> files = null;
 	private List<Attachment> attachments = null;
@@ -73,6 +74,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private String messageId;
 	private String messageIdExt;
 	private String messageIdRef;
+	private String messageIdResend;
 	private String replyId;
 	private String replyIdExt;
 
@@ -651,5 +653,28 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 			this.vccards = new ArrayList<PBVCard>();
 		}
 		return this.vccards;
+	}
+
+	public String getMessageIdResend() {
+		return messageIdResend;
+	}
+
+	public void setMessageIdResend(String messageIdResend) {
+		this.messageIdResend = messageIdResend;
+	}
+
+	public Map<String, Object> getReplyTo() {
+		return replyTo;
+	}
+
+	public void setReplyTo(Map<String, Object> replyTo) {
+		this.replyTo = replyTo;
+	}
+
+	public Map<String, Object> replyTo() {
+		if (replyTo == null) {
+			this.replyTo = new HashMap<String, Object>();
+		}
+		return this.replyTo;
 	}
 }

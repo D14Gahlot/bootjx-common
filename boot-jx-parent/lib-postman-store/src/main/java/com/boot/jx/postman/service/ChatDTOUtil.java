@@ -19,6 +19,9 @@ import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
+import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.outbound.OutBoundContact;
+import com.boot.jx.postman.model.outbound.OutBoundMsgBasic.OutBoundMsg;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
@@ -78,8 +81,7 @@ public class ChatDTOUtil {
 				.collect(Collectors.toList());
 	}
 
-	public static ChatMessageDTO getChatMessageDTO(
-			MessageDoc messageDoc, String contactName, String defaultSender) {
+	public static ChatMessageDTO getChatMessageDTO(MessageDoc messageDoc, String contactName, String defaultSender) {
 		ChatMessageDTO messageDto = new ChatMessageDTO();
 		if (!ArgUtil.is(messageDoc)) {
 			return messageDto;
@@ -95,6 +97,7 @@ public class ChatDTOUtil {
 		messageDto.setMessageId(messageDoc.getMessageId());
 		messageDto.setMessageIdExt(ArgUtil.parseAsString(messageDoc.getMessageIdExt(), Constants.BLANK));
 		messageDto.setMessageIdRef(ArgUtil.parseAsString(messageDoc.getMessageIdRef(), Constants.BLANK));
+		messageDto.setMessageIdResend(ArgUtil.parseAsString(messageDoc.getMessageIdResend(), Constants.BLANK));
 
 		messageDto.setReplyId(ArgUtil.parseAsString(messageDoc.getReplyId(), Constants.BLANK));
 		messageDto.setReplyIdExt(ArgUtil.parseAsString(messageDoc.getReplyIdExt(), Constants.BLANK));
@@ -270,5 +273,38 @@ public class ChatDTOUtil {
 	private static Map<String, Object> getDefaultMap(Map<String, Object> defMap) {
 		defMap.put("", "");
 		return defMap;
+	}
+
+	public static OutBoundMsg toOutBoundMsg(MessageDoc resendMsg) {
+		OutBoundMsg outBoundMsg = new OutBoundMsg();
+		OutBoundContact c = new OutBoundContact();
+		c.copyFrom(resendMsg.getContact());
+		outBoundMsg.setToContact(c);
+		outBoundMsg.setChannelId(PostManUtil.CHANNEL_ID(resendMsg.getContact()));
+		outBoundMsg.setType(resendMsg.getFormatType());
+
+		return outBoundMsg;
+	}
+
+	public static OutboxMessage toOutboxMessage(MessageDoc resendMsg) {
+		OutboxMessage outMessage = new OutboxMessage();
+		// outBoundMsg.setMessageIdResend(resendMsg.getMessageId());
+		outMessage.setFormatType(resendMsg.getFormatType());
+		outMessage.setFormatSubType(resendMsg.getFormatSubType());
+		outMessage.contact().copyFrom(resendMsg.getContact());
+
+		outMessage.template(resendMsg.getTemplate());
+		outMessage.setHsm(resendMsg.getHsm());
+		outMessage.setModel(resendMsg.getModel());
+
+		outMessage.setSubject(resendMsg.getSubject());
+		outMessage.setMessage(resendMsg.getMessage());
+
+		outMessage.setAttachments(resendMsg.getAttachments());
+		outMessage.setVccards(resendMsg.getVccards());
+
+		outMessage.options().putAll(resendMsg.options());
+
+		return outMessage;
 	}
 }

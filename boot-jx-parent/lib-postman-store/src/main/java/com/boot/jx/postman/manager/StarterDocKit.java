@@ -1,5 +1,10 @@
 package com.boot.jx.postman.manager;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -17,6 +22,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
@@ -24,10 +30,6 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 @Component
 public class StarterDocKit {
@@ -45,6 +47,9 @@ public class StarterDocKit {
 
 	@Autowired(required = false)
 	private ConfigManager configManager;
+
+	@Autowired(required = false)
+	private CommonServiceClient commonServiceClient;
 
 	private QuickMedia createTemplateReply(String name, String title, String category, String content, String url) {
 		QuickMedia temp5 = commonMongoTemplate.findById(name, QuickMedia.class);
@@ -89,10 +94,10 @@ public class StarterDocKit {
 		Criteria criteria = Criteria.where("code").is(code);
 		qryQuery.addCriteria(criteria);
 		CustomerFieldMasterDoc fiedMaster = commonMongoTemplate.findOne(qryQuery, CustomerFieldMasterDoc.class);
-		if(ArgUtil.is(fiedMaster)) {
-			if(!type.equalsIgnoreCase(fiedMaster.getType())) {
+		if (ArgUtil.is(fiedMaster)) {
+			if (!type.equalsIgnoreCase(fiedMaster.getType())) {
 				commonMongoTemplate.remove(fiedMaster);
-				fiedMaster =null;
+				fiedMaster = null;
 			}
 		}
 
@@ -106,47 +111,46 @@ public class StarterDocKit {
 			fiedMaster.setPredefined(true);
 			fiedMaster.setRequired(false);
 			fiedMaster.setCreated(TimeStampIndex.now());
-			if(ArgUtil.is(code) && code.equalsIgnoreCase("gender")) {
+			if (ArgUtil.is(code) && code.equalsIgnoreCase("gender")) {
 				List<Object> defaultOptions = new ArrayList<>();
 				// Option 1: Male
-			    Map<String, String> maleOption = new HashMap<>();
-			    maleOption.put("label", "Male");
-			    maleOption.put("value", "male");
-			    defaultOptions.add(maleOption);
-			    // Option 2: Female
-			    Map<String, String> femaleOption = new HashMap<>();
-			    femaleOption.put("label", "Female");
-			    femaleOption.put("value", "female");
-			    defaultOptions.add(femaleOption);
-			    // Set the default options in the fieldMaster
-			    fiedMaster.setPossibleOptions(defaultOptions);
-			}else if(ArgUtil.is(code) && code.equalsIgnoreCase("title")) {
-					List<Object> defaultOptions = new ArrayList<>();
-					// Option 1: Mr.
-				    Map<String, String> mrOpt = new HashMap<>();
-					mrOpt.put("label", "Mr.");
-					mrOpt.put("value", "mr.");
-				    defaultOptions.add(mrOpt);
-				    // Option 2: Mrs.
-				    Map<String, String> mrsOpt = new HashMap<>();
-				    mrsOpt.put("label", "Mrs.");
-				    mrsOpt.put("value", "mrs.");
-				    defaultOptions.add(mrsOpt);
-				    
-				    Map<String, String> msOpt = new HashMap<>();
-				    msOpt.put("label", "Ms.");
-				    msOpt.put("value", "ms.");
-				    defaultOptions.add(msOpt);
-				    
-				    Map<String, String> drOpt = new HashMap<>();
-				    drOpt.put("label", "Dr.");
-				    drOpt.put("value", "dr.");
-				    defaultOptions.add(drOpt);
-				    // Set the default options in the fieldMaster
-				    fiedMaster.setPossibleOptions(defaultOptions);
-				}
+				Map<String, String> maleOption = new HashMap<>();
+				maleOption.put("label", "Male");
+				maleOption.put("value", "male");
+				defaultOptions.add(maleOption);
+				// Option 2: Female
+				Map<String, String> femaleOption = new HashMap<>();
+				femaleOption.put("label", "Female");
+				femaleOption.put("value", "female");
+				defaultOptions.add(femaleOption);
+				// Set the default options in the fieldMaster
+				fiedMaster.setPossibleOptions(defaultOptions);
+			} else if (ArgUtil.is(code) && code.equalsIgnoreCase("title")) {
+				List<Object> defaultOptions = new ArrayList<>();
+				// Option 1: Mr.
+				Map<String, String> mrOpt = new HashMap<>();
+				mrOpt.put("label", "Mr.");
+				mrOpt.put("value", "mr.");
+				defaultOptions.add(mrOpt);
+				// Option 2: Mrs.
+				Map<String, String> mrsOpt = new HashMap<>();
+				mrsOpt.put("label", "Mrs.");
+				mrsOpt.put("value", "mrs.");
+				defaultOptions.add(mrsOpt);
+
+				Map<String, String> msOpt = new HashMap<>();
+				msOpt.put("label", "Ms.");
+				msOpt.put("value", "ms.");
+				defaultOptions.add(msOpt);
+
+				Map<String, String> drOpt = new HashMap<>();
+				drOpt.put("label", "Dr.");
+				drOpt.put("value", "dr.");
+				defaultOptions.add(drOpt);
+				// Set the default options in the fieldMaster
+				fiedMaster.setPossibleOptions(defaultOptions);
 			}
-		
+		}
 
 		if (ArgUtil.is(fiedMaster)) {
 			try {
@@ -230,9 +234,24 @@ public class StarterDocKit {
 		commonMongoTemplate.save(createQuickReply("5", "You're welcome.", "conversation-complete"));
 	}
 
-	public void domain() {
+	public void onlyOncePerDomain() {
 		createMessageIndex();
 		createPredefinedMstField();
+	}
+
+	public void domain() {
+		String domain_created_version = "v1";
+		PMConfigurationObject version = pmEnvironment.local().keyEntry("domain.created.version");
+		if (!version.is(domain_created_version)) {
+			version.setValue(domain_created_version);
+			configManager.save(version);
+			onlyOncePerDomain();
+			commonServiceClient.publishDomainCreatedEvent(domain_created_version);
+			if (ArgUtil.is(configManager)) {
+				configManager.refresh();
+			}
+		}
+
 	}
 
 	@PostConstruct
