@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.amazonaws.services.amplify.model.JobStatus;
 import com.boot.jx.admin.dto.CsvDto;
 import com.boot.jx.admin.dto.SessionSearchRequest;
 import com.boot.jx.admin.manager.CSVHelper;
@@ -39,6 +40,7 @@ import com.boot.jx.common.dto.GroupSessionDto;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonTemplateMeta;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
@@ -53,6 +55,7 @@ import com.boot.jx.postman.manager.StarterDocKit;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.SessionSearchQuery;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
@@ -452,6 +455,14 @@ public class AdminMsgController {
 	        	cSch.setTopic("CANCELLED");
 	        	bulkMessageService.registerJob(bulkDoc.getJob(),bulkDoc.getScheduler());
 	        	bulkMessageService.stopJob(bulkDoc.getJob().getJobId());
+	        	
+	        	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+	        	Query query = new Query().addCriteria(
+	    				QueryCriteria.where("bulkSessionId").is(bulkDoc.getJob().getJobId()).and("stamps.SENT").exists(false));
+	    		builder.set("status", JobStatus.CANCELLED.toString());
+	    		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(bulkDoc.getContactType()));
+
+	        	
 	            return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been canceled");
 	        }
 	       return ApiResponse.buildResult(bulkDoc).message("Scheduled time for bulk messages has passed");
