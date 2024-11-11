@@ -44,13 +44,14 @@ public class AppScriptController {
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false) String sortBy,
 			@RequestParam(required = false, defaultValue = "asc") String sortDir) {
-
+		
 		ClientApp app = pmEnvironment.local().clientApiKey(appId);
 		if (!ArgUtil.is(app) || !(APP_TYPE.APP_SCRIPT.name().equals(app.getAppType())
 				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType())
 				|| CHAT_MODE.SCRIPTUS.name().equals(app.getAppMode()))) {
 			ApiResponseUtil.throwAccessDeniedException("App Not found");
 		}
+		
 		MapModel meta = MapModel.createInstance().put("appId", app.getId()).put("appQueue", app.getQueue())
 				.put("appName", app.getKeyName()).put("appMode", app.getAppMode()).put("appType", app.getAppType());
 
