@@ -5,15 +5,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.model.UtilityModels.UniqueIndex;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(as = ContactMeta.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ContactMeta implements Serializable, Contactable {
+public class ContactMeta implements Serializable, Contactable, Comparable<ContactMeta>, UniqueIndex<ContactMeta> {
 
 	private static final long serialVersionUID = -2229330167964350550L;
 	@Deprecated
@@ -22,13 +27,13 @@ public class ContactMeta implements Serializable, Contactable {
 	protected String country;
 	protected String userid;
 	protected String prefix;
-	
+
 	@ApiMockModelProperty(example = "919876543210", required = false)
 	protected String phone;
-	
+
 	@ApiMockModelProperty(example = "John.Doe@company.co", required = false)
 	protected String email;
-	
+
 	@ApiMockModelProperty(example = "John Doe", required = false)
 	protected String name;
 
@@ -191,6 +196,57 @@ public class ContactMeta implements Serializable, Contactable {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		ContactMeta that = (ContactMeta) o;
+		if (ArgUtil.is(that.contactId)) {
+			return ArgUtil.is(this.contactId, that.contactId);
+		}
+		return new EqualsBuilder().append(this.csid, that.csid).append(this.lane, that.lane)
+				.append(this.channelType, that.channelType).isEquals();
+	}
+
+	@Override
+	public String toString() {
+		return this.getContactId();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 31).append(this.contactId).toHashCode();
+	}
+
+	@Override
+	public int compareTo(ContactMeta o) {
+		if (o == null) {
+			return 1;
+		}
+		return this.toString().compareTo(o.toString());
+	}
+
+	@Override
+	public String uuid() {
+		return this.contactId;
+	}
+
+	@Override
+	public String uuid(String contactId) {
+		if (ArgUtil.not(this.contactId)) {
+			this.contactId = contactId;
+		}
+		return this.contactId;
+	}
+
+	@Override
+	public ContactMeta update(ContactMeta fromObject) {
+		this.copyFrom(fromObject);
+		return this;
 	}
 
 }
