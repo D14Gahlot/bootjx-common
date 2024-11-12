@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
@@ -29,7 +31,7 @@ public interface PMConfiguration extends Serializable {
 
 	public NodeEntry<Object> keyEntry(String string);
 
-	public List<AChannelConfig> listChannels();
+	public Set<AChannelConfig> listChannels();
 
 	public List<ClientApp> listApps();
 
@@ -234,8 +236,8 @@ public interface PMConfiguration extends Serializable {
 			return this;
 		}
 
-		public List<AChannelConfig> listChannels() {
-			List<AChannelConfig> list = new ArrayList<AChannelConfig>();
+		public Set<AChannelConfig> listChannels() {
+			Set<AChannelConfig> list = new TreeSet<AChannelConfig>();
 			for (Entry<String, ChannelConfig> aChannelDetails : this.channels().entrySet()) {
 				list.add(aChannelDetails.getValue());
 			}
@@ -371,10 +373,10 @@ public interface PMConfiguration extends Serializable {
 		}
 
 		@Override
-		public List<AChannelConfig> listChannels() {
-			List<AChannelConfig> list = this.local().listChannels();
+		public Set<AChannelConfig> listChannels() {
+			Set<AChannelConfig> list = this.local().listChannels();
 			if (!Tenants.isDefault(AppContextUtil.getTenant())) {
-				List<AChannelConfig> cs = this.shared().listChannels();
+				Set<AChannelConfig> cs = this.shared().listChannels();
 				for (AChannelConfig aChannelConfig : cs) {
 					if (aChannelConfig.isShared()
 							|| (aChannelConfig.isSandbox() && keyEntry("postman.chat.channel.sandbox").asBoolean())) {
