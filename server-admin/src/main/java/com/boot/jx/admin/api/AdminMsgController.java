@@ -422,13 +422,20 @@ public class AdminMsgController {
 			 bulkDoc = CollectionUtil.getOne(mongoTemplate
 					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 			if(ArgUtil.is(bulkDoc) && ArgUtil.is(bulkDoc.getScheduler()) && bulkMessage.cancelExisting==true) {
+				bulkMessageService.cancelScheduleJob(bulkDoc);
+				bulkMessageService.reSchedule(bulkDoc, bulkMessage.getScheduler());
+//				bulkDoc.setStatus("CREATED");
+//				if(ArgUtil.is(bulkMessage.getScheduler())) {
+//					bulkDoc.setScheduler(bulkMessage.getScheduler());
+//				}
+//				mongoTemplate.save(bulkDoc);
+				//bulkMessageService.registerJob(bulkDoc.getJob(),bulkMessage.getScheduler());
+				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
+			}else {
 				if(ArgUtil.is(bulkMessage.getScheduler())) {
 					bulkDoc.setScheduler(bulkMessage.getScheduler());
 					mongoTemplate.save(bulkDoc);
 				}
-				bulkMessageService.registerJob(bulkDoc.getJob(),bulkMessage.getScheduler());
-				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
-			}else {
 				bulkMessageService.registerJob(bulkDoc.getJob(),bulkMessage.getScheduler());
 				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been re-send");
 			}
@@ -443,27 +450,15 @@ public class AdminMsgController {
 			throws Exception {
 		BulkSessionDoc bulkDoc = CollectionUtil.getOne(mongoTemplate
 				.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+		
 		if(ArgUtil.is(bulkDoc) && ArgUtil.is(bulkDoc.getScheduler())) {
+			boolean isSchValid =isScheduleTimeValid(bulkDoc);
 			// Parse the interval to ZonedDateTime
 			ChronoScheduler cSch=bulkDoc.getScheduler();
-	        ZonedDateTime intervalTime = ZonedDateTime.parse(cSch.getInterval(), DateTimeFormatter.ISO_ZONED_DATE_TIME);
-	     // Get the current time
-	        ZonedDateTime currentTime = ZonedDateTime.now();
-	        // Check if the interval is in the future
-	        if (intervalTime.isAfter(currentTime)) {
-	        	LOGGER.info("The interval is a valid future date."+cSch.getInterval());
-	        	cSch.setTopic("CANCELLED");
-	        	bulkMessageService.registerJob(bulkDoc.getJob(),bulkDoc.getScheduler());
-	        	bulkMessageService.stopJob(bulkDoc.getJob().getJobId());
-	        	
-	        	CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
-	        	Query query = new Query().addCriteria(
-	    				QueryCriteria.where("bulkSessionId").is(bulkDoc.getJob().getJobId()).and("stamps.SENT").exists(false));
-	    		builder.set("status", JobStatus.CANCELLED.toString());
-	    		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(bulkDoc.getContactType()));
-
-	        	
-	            return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been canceled");
+	      //  if (intervalTime.isAfter(currentTime)) {
+	        if(isSchValid==true) {
+	        	bulkDoc =bulkMessageService.cancelScheduleJob(bulkDoc);
+	        	return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been canceled");
 	        }
 	       return ApiResponse.buildResult(bulkDoc).message("Scheduled time for bulk messages has passed");
 	        
@@ -750,5 +745,19 @@ public class AdminMsgController {
 		}
 		return lst;
 	}
-
+	
+	public boolean isScheduleTimeValid(BulkSessionDoc bulkDoc) {
+				boolean isScheduleValid=false;
+				// Parse the interval to ZonedDateTime
+				ChronoScheduler cSch=bulkDoc.getScheduler();
+		        ZonedDateTime intervalTime = ZonedDateTime.parse(cSch.getInterval(), DateTimeFormatter.ISO_ZONED_DATE_TIME);
+		     // Get the current time
+		        ZonedDateTime currentTime = ZonedDateTime.now();
+		        // Check if the interval is in the future
+		        if (intervalTime.isAfter(currentTime)) {
+		        	isScheduleValid=true;
+		            return isScheduleValid;
+		        }
+		       return isScheduleValid;
+		}
 }

@@ -21,11 +21,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.amazonaws.services.amplify.model.JobStatus;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
-import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonTemplateMeta;
@@ -79,11 +80,9 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	@Autowired
 	private TunnelService tunnelService;
-	
+
 	@Autowired
 	CommonServiceClient commonSerClient;
-	
-	
 
 	public void registerJobAndTriggerSummary(BatchJob job) {
 		registerJob(job);
@@ -94,20 +93,19 @@ public class BulkMessageService extends BatchJobExecuter {
 	public void registerJob(BatchJob job, ChronoScheduler scheduler) {
 		if (!ArgUtil.is(scheduler)) {
 			registerJobAndTriggerSummary(job);
-		}else if(ArgUtil.is(scheduler) && !StringUtils.isBlank(scheduler.getTopic()) && scheduler.getTopic().equalsIgnoreCase("CANCELLED")) {
+		} else if (ArgUtil.is(scheduler) && !StringUtils.isBlank(scheduler.getTopic())
+				&& scheduler.getTopic().equalsIgnoreCase("CANCELLED")) {
 			Map<String, Object> data = job.getData();
 			data.put("jobId", job.getJobId());
 			scheduler.setData(data);
 			commonSerClient.schedule(scheduler);
-		}else {
+		} else {
 			scheduler = ArgUtil.nonEmpty(scheduler, ChronoScheduler.task());
 			scheduler.setTopic("BulkMessageTask");
 			tunnelService.schedule(job.scheduler(scheduler));
 		}
 	}
 
-	
-	
 	public BulkSessionDoc send(OutboxMessage bulkMessage, ChronoScheduler scheduler) throws NumberParseException {
 
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
@@ -437,7 +435,8 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		QA list = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
 				QA.project("statuss", QA.objectToArray("stamps")), Aggregation.unwind("statuss"),
-				Aggregation.group("statuss.k").count().as("count"));;
+				Aggregation.group("statuss.k").count().as("count"));
+		;
 
 		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 //				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
@@ -520,6 +519,57 @@ public class BulkMessageService extends BatchJobExecuter {
 		} catch (Exception e) {
 			throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
 		}
+	}
+
+	public BulkSessionDoc cancelScheduleJob(BulkSessionDoc bulkDoc) {
+		try {
+			ChronoScheduler cSch = bulkDoc.getScheduler();
+			LOGGER.info("The interval is a valid future date." + cSch.getInterval());
+			cSch.setTopic("CANCELLED");
+			registerJob(bulkDoc.getJob(), bulkDoc.getScheduler());
+			stopJob(bulkDoc.getJob().getJobId());
+			CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+			Query query = new Query().addCriteria(QueryCriteria.where("bulkSessionId").is(bulkDoc.getJob().getJobId())
+					.and("stamps.SENT").exists(false));
+			builder.set("status", JobStatus.CANCELLED.toString());
+			messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(bulkDoc.getContactType()));
+		} catch (Exception e) {
+			e.getMessage();
+			throw new RuntimeException("The bulk message cancel job could not be found");
+		}
+		return bulkDoc;
+	}
+	
+	public BulkSessionDoc reSchedule(BulkSessionDoc bulkDoc,ChronoScheduler schedular) {
+		BatchJob job = bulkDoc.getJob();
+		String jobId = job.getJobId();
+		BatchJob oldJob = stopJob(jobId);
+		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
+		session.setStatus("CREATED");
+		session.setScheduler(schedular);
+		mongoTemplate.save(session);
+
+		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
+				PostManUtil.CHANNEL_ID(session.getContactType(), "", session.getLane()));
+
+		ChannelConfig channelConfig = enviroment.config().channel(channelId);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+
+		Query query = new Query().addCriteria(
+				QueryCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
+		builder.set("status", Status.SCHLD.toString());
+		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
+		registerJob(JobTaskModel.newBatchJob()
+				// Set Unique Job Id
+				.jobId(session.getBulkSessionId())
+				// Contact Type for each message
+				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channelType", channelConfig.getChannelType())
+				// Lane for each message
+				.data("lane", session.getLane()), schedular);
+		return session;
 	}
 
 }
