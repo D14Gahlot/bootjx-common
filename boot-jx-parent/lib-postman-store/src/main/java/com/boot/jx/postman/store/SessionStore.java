@@ -32,7 +32,6 @@ import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatProfileDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
-import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.dto.ChatProfileDTO;
@@ -41,8 +40,6 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
-import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
-import com.boot.jx.postman.query.ChatContactQuery;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -122,123 +119,6 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		return null;
 	}
 
-	/**
-	 * 
-	 * This method will take messages and returns session, session sbhould be
-	 * created if there is not present session against this message or return if its
-	 * there, this method should return null only in case there is nothing can be
-	 * done for message.
-	 * 
-	 * Additionally this message is responsible for updating ContactDoc and Session
-	 * doc for stamps and entry points
-	 * 
-	 * @param sessionMessage
-	 * @return
-	 */
-	@Deprecated
-	public ChatSessionDoc createSession(SessionMessage sessionMessage) {
-		return createSessionOld(sessionMessage);
-	}
-
-	@Deprecated
-	public ChatSessionDoc createSessionOld(SessionMessage sessionMessage) {
-		Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
-
-		String sessionId = sessionMessage.getSessionId();
-		String contactId = contact.getContactId();
-
-		ChatSessionDoc chatSessionDoc = null;
-		ChatContactDoc chatContactDoc = null;
-
-		if (ArgUtil.isEmpty(contactId)) {
-			if (ArgUtil.isEmpty(sessionId)) {
-				// If these conact & session are not present there is nothing we can do about
-				// this message
-				return null;
-			}
-			chatSessionDoc = getSession(sessionId);
-
-			if (ArgUtil.isEmpty(chatSessionDoc)) {
-				// Session Not found
-				return null;
-			}
-
-			if (!isSessionValid(chatSessionDoc)) {
-				// Session Found but invalid
-				contactId = chatSessionDoc.getContactId();
-				chatContactDoc = super.findById(contactId, ChatContactDoc.class);
-				contact.copyFrom(chatContactDoc);
-			}
-
-		}
-
-		// Find Out Chat Session
-		if (ArgUtil.isEmpty(chatSessionDoc)) {
-			if (ArgUtil.isEmpty(sessionId)) {
-				chatContactDoc = super.findById(contactId, ChatContactDoc.class);
-				if (ArgUtil.is(chatContactDoc)) {
-					sessionId = chatContactDoc.getSessionId();
-				}
-			}
-			if (ArgUtil.is(sessionId)) {
-				chatSessionDoc = getValidSession(sessionId);
-			}
-		}
-
-		ChatContactQuery chatContactQuery = ArgUtil.is(chatContactDoc) ? new ChatContactQuery(chatContactDoc)
-				: new ChatContactQuery(contactId);
-
-		if (!isSessionValid(chatSessionDoc)) {
-
-			closeAllPreviousSessions(contactId);
-
-			if (!ArgUtil.is(chatContactDoc)) {
-				chatContactDoc = super.findById(contactId, ChatContactDoc.class);
-			}
-
-			// SESSION CREATION
-			chatSessionDoc = new ChatSessionDoc();
-			chatSessionDoc.setContactId(contactId);
-			chatSessionDoc.setContactType(sessionMessage.contact().getContactType());
-			chatSessionDoc.setChannel(sessionMessage.contact().getChannelType());
-			chatSessionDoc.setLane(sessionMessage.contact().getLane());
-
-			// SESSION UPDATE
-			chatSessionDoc.setActive(true);
-			chatSessionDoc.setPrimary(true);
-
-			if (ArgUtil.is(chatContactDoc)) {
-				chatSessionDoc.setContact(new ContactDetailDoc());
-				if (ArgUtil.is(chatContactDoc.getName())) {
-					chatSessionDoc.contact().setName(chatContactDoc.getName());
-				}
-				chatSessionDoc.getContact().copyFrom(chatContactDoc);
-			}
-
-			saveSession(chatSessionDoc);
-			chatContactQuery.setSessionId(chatSessionDoc.getSessionId());
-
-			chatContactQuery.update(contact);
-			chatContactQuery.updateCreatedStamp();
-			// CONTACT CREATION - needs creation or updation if
-			if (ArgUtil.isEmpty(chatContactDoc)) {
-				upsert(chatContactQuery);
-			} else {
-				// CONTACT UPDATE
-				updateFirst(chatContactQuery);
-			}
-		} else {
-			// SESSION UPDATE
-			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
-			chatSessionDocQuery.setActive(true);
-			if (!ArgUtil.is(chatSessionDoc.getContactName())) {
-				chatSessionDocQuery.setContactName(chatSessionDoc.getContactName());
-			}
-			updateFirst(chatSessionDocQuery);
-		}
-		return chatSessionDoc;
-	}
-
 	public SessionInfo updateMessageFromSession(ChatSessionDoc chatSessionDoc, SessionInfo iMessage) {
 		if (ArgUtil.isEmpty(iMessage.contact().getName())) {
 			iMessage.contact().setName(chatSessionDoc.contact().getName());
@@ -261,55 +141,6 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		iMessage.route().setRouterId(chatSessionDoc.getRoutingId());
 
 		return iMessage;
-	}
-
-	@Deprecated
-	public ChatSessionDoc linkSession(ChatSessionDoc chatSessionDoc, IMessage iMessage) {
-		if (!ArgUtil.is(chatSessionDoc)) {
-			return null;
-		}
-
-		if (PostManUtil.isInBound(iMessage)) {
-			chatSessionDoc.setLastInComingStamp(iMessage.getTimestamp());
-			// Query Update for Session
-			ChatSessionQuery chatSessionDocQuery = new ChatSessionQuery(chatSessionDoc);
-			chatSessionDocQuery.setLastInComingStamp(chatSessionDoc.getLastInComingStamp());
-
-			if (ArgUtil.isEmptyValue(chatSessionDoc.getFirstInComingStamp())) {
-				chatSessionDocQuery.setFirstInComingStamp(iMessage.getTimestamp());
-			}
-
-			// Assign Queue
-			if (ArgUtil.isEmptyValue(chatSessionDoc.getAssignedToQueue())) {
-
-				String defaultQueue = iMessage.route().getQueueCode();
-				if (!ArgUtil.is(defaultQueue)) {
-					defaultQueue = pmDomainConfig.getDefaultInboundQueue(iMessage.contact());
-				}
-				if (ArgUtil.is(defaultQueue)) {
-					chatSessionDocQuery.setQueue(defaultQueue);
-				}
-			}
-
-			updateFirst(chatSessionDocQuery);
-
-			// Query Update for Contact
-			ChatContactQuery chatContactQuery = new ChatContactQuery(chatSessionDoc.getContactId());
-			chatContactQuery.setLastInBoundStamp(iMessage.getTimestamp());
-			chatContactQuery.update(iMessage.contact());
-			updateFirst(chatContactQuery);
-		} else if (PostManUtil.isOutBound(iMessage)) {
-
-		}
-		updateMessageFromSession(chatSessionDoc, iMessage);
-		return chatSessionDoc;
-	}
-
-	@Deprecated
-	public ChatSessionDoc linkSession(IMessage iMessage) {
-		ChatSessionDoc chatSessionDoc = this.createSession(iMessage);
-		chatSessionDoc = linkSession(chatSessionDoc, iMessage);
-		return chatSessionDoc;
 	}
 
 	public IMessageExtended toSessionMessage(ChatSessionDoc session) {
