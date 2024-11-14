@@ -424,19 +424,35 @@ public class AdminMsgController {
 			if(ArgUtil.is(bulkDoc) && ArgUtil.is(bulkDoc.getScheduler()) && bulkMessage.cancelExisting==true) {
 				bulkMessageService.cancelScheduleJob(bulkDoc);
 				bulkMessageService.reSchedule(bulkDoc, bulkMessage.getScheduler());
-//				bulkDoc.setStatus("CREATED");
-//				if(ArgUtil.is(bulkMessage.getScheduler())) {
-//					bulkDoc.setScheduler(bulkMessage.getScheduler());
-//				}
-//				mongoTemplate.save(bulkDoc);
-				//bulkMessageService.registerJob(bulkDoc.getJob(),bulkMessage.getScheduler());
 				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
 			}else {
 				if(ArgUtil.is(bulkMessage.getScheduler())) {
-					bulkDoc.setScheduler(bulkMessage.getScheduler());
-					mongoTemplate.save(bulkDoc);
+					bulkMessage.templateId(bulkDoc.getTemplateId());
+					bulkMessage.message(bulkDoc.getMessage());
+					bulkMessage.contact().setLane(bulkDoc.getLane());
+					bulkMessage.contact().setContactId(bulkDoc.getChannelId());
+					bulkMessage.contact().setContactType(bulkDoc.getContactType());
+					bulkMessage.setCampaignTitle(bulkDoc.getCampaignTitle());
+					if(ArgUtil.is(bulkDoc.getGroupId())) {
+						bulkMessage.setGroupId(bulkDoc.getGroupId());
+						 List<OutboxMessage> lstOutBoxMsg =getGroupDetails(bulkMessage);
+						 bulkMessageService.sendToGroup(lstOutBoxMsg, bulkMessage.getScheduler());
+					}else {
+					Query queryAll = new Query();
+					queryAll.addCriteria(Criteria.where("type").in("O"));
+					queryAll.addCriteria(Criteria.where("bulkSessionId").is(bulkDoc.getBulkSessionId()));
+					queryAll.fields().include("contact.phone").include("messageId");
+				    List<MessageDoc> msgDoc = mongoTemplate.find(queryAll, MessageDoc.class, MessageDoc.COLLECTION_NAME + "_" +bulkDoc.getContactType().toString());
+				   List<String> to=new ArrayList<>();
+				    if(ArgUtil.is(msgDoc)) {
+				    	msgDoc.forEach(doc -> to.add(doc.getContact().getPhone()));
+				    	bulkMessage.setTo(to);
+				    }
+					bulkMessageService.send(bulkMessage, bulkMessage.getScheduler());
+					}
+				
 				}
-				bulkMessageService.registerJob(bulkDoc.getJob(),bulkMessage.getScheduler());
+				
 				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been re-send");
 			}
 		}

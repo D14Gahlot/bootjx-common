@@ -543,7 +543,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	public BulkSessionDoc reSchedule(BulkSessionDoc bulkDoc,ChronoScheduler schedular) {
 		BatchJob job = bulkDoc.getJob();
 		String jobId = job.getJobId();
-		BatchJob oldJob = stopJob(jobId);
+		//BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
 		session.setStatus("CREATED");
 		session.setScheduler(schedular);
@@ -557,7 +557,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
 		Query query = new Query().addCriteria(
-				QueryCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
+				QueryCriteria.where("bulkSessionId").is(job.getJobId()).and("stamps.SENT").exists(false));
 		builder.set("status", Status.SCHLD.toString());
 		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
 		registerJob(JobTaskModel.newBatchJob()
