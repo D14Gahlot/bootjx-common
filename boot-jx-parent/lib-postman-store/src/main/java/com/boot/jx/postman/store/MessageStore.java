@@ -278,6 +278,9 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.meta().putAll(outMessage.meta());
 		doc.options().putAll(outMessage.options());
 
+		//Incase it was missed
+		doc.setContactId(PostManUtil.createContactId(outMessage));
+
 		return doc;
 	}
 
@@ -304,7 +307,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.setTime(TimeStampIndex.now());
 
 		String to = CollectionUtil.getOne(outMessage.getTo());
-		doc.setContactId(PostManUtil.createContactId(outMessage));
+		//doc.setContactId(PostManUtil.createContactId(outMessage));
 
 		ContactDetailDoc contact = new ContactDetailDoc();
 		contact.copyFrom(outMessage.contact());
