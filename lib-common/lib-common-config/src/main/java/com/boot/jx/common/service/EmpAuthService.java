@@ -20,6 +20,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.CDNBuilder;
+import com.boot.jx.common.config.CONFIG_FEATURES_KEY;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.doc.UserAuthTokenDoc;
@@ -304,6 +305,12 @@ public class EmpAuthService {
 	}
 
 	public boolean sendOTP(UserAuthToken loginToken) {
+
+		PMConfigurationObject auth2Fa = pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.AUTH_2FA);
+
+		if (!auth2Fa.exists() || !auth2Fa.asBoolean()) {
+			return false;
+		}
 
 		PMConfigurationObject mfaEnabled = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_ENABLED);
 
