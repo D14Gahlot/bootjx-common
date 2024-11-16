@@ -9,6 +9,8 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 	BUILD_VERSION(
 			new ConfigMeta("BUILD_VERSION", "feature.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
 	CONTACT_CENTER(new ConfigMeta("Customer Profile", "feature.contact.center").optionsOnOff()),
+	AUTH_2FA(new ConfigMeta("2FA Auth for login", "feature.auth.2fa").optionsOnOff()),
+
 	CHANNEL_AUTOCONFIGURE_FACEBOOK(new ConfigMeta("AutoConfigure Facebook", "feature.channel.autoconfigure.facebook")
 			.optionsOnOff().group(ConfigConstants.CHANNELS)),
 	CHANNEL_AUTOCONFIGURE_WHATSAPP(new ConfigMeta("AutoConfigure WhatsApp", "feature.channel.autoconfigure.whatsapp")
