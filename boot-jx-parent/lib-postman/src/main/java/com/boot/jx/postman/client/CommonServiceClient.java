@@ -19,7 +19,6 @@ import com.boot.jx.rest.RestService;
 import com.boot.jx.tunnel.ChronoScheduler;
 import com.boot.jx.tunnel.ITunnelService;
 import com.boot.model.MapModel;
-import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 
@@ -55,44 +54,39 @@ public class CommonServiceClient {
 				.toMap();
 		tunnelService.task("DOMAIN_CREATED", domainCreatedInfo);
 		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(null).asNone();
-
 	}
-	
-	
-	
+
 	public ChronoScheduler schedule(ChronoScheduler chronoTask) {
 		if (ArgUtil.is(scheduler)) {
-			MapModel resp =null;
-			if(ArgUtil.is(chronoTask.getTopic()) && chronoTask.getTopic().equalsIgnoreCase("CANCELLED")) {
-				String cancelUrl=null;
+			MapModel resp = null;
+			if (ArgUtil.is(chronoTask.getTopic()) && chronoTask.getTopic().equalsIgnoreCase("CANCELLED")) {
+				String cancelUrl = null;
 				try {
-					cancelUrl= cronoJobUrl+"/scheduler/api/v1/job/tunnel/cancel";
+					cancelUrl = cronoJobUrl + "/scheduler/api/v1/job/tunnel/cancel";
 					String instanceId = null;
-					Map<String, Object> data =new HashMap<>();
-					if(ArgUtil.is(chronoTask.getData())) {
-						instanceId = (String)chronoTask.getData().get("jobId");
+					Map<String, Object> data = new HashMap<>();
+					if (ArgUtil.is(chronoTask.getData())) {
+						instanceId = (String) chronoTask.getData().get("jobId");
 						data.put("instanceId", instanceId);
-					
-				    resp = restService.ajax(cancelUrl).postJson(data).asMapModel();
-				    LOGGER.info("Res schedule -cancel:"+JsonUtil.toJson(resp)+"\n cancelUrl :"+cancelUrl);
-				    if (resp != null && resp.get("status") != null) {
-				    	Map<String, Object> dataMap = (Map<String, Object>) resp.get("status");
-				    	String key =(String)dataMap.get("key");
-				    	int code =(int)dataMap.get("code"); 
-				    	if(key.equalsIgnoreCase("SUCCESS") || code==200) {
-				    		 return chronoTask;
-				    	}
-				    }
-				    }
-				    return null;
+
+						resp = restService.ajax(cancelUrl).postJson(data).asMapModel();
+						LOGGER.info("Res schedule -cancel:" + JsonUtil.toJson(resp) + "\n cancelUrl :" + cancelUrl);
+						if (resp != null && resp.get("status") != null) {
+							Map<String, Object> dataMap = (Map<String, Object>) resp.get("status");
+							String key = (String) dataMap.get("key");
+							int code = (int) dataMap.get("code");
+							if (key.equalsIgnoreCase("SUCCESS") || code == 200) {
+								return chronoTask;
+							}
+						}
+					}
+					return null;
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Error while cancelling schdulers", e);
 				}
 			}
 		}
 		return chronoTask;
 	}
-	
 
 }

@@ -51,6 +51,9 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 	AGENT_RM_USER(new ConfigMeta("Relationship Managment", "feature.agent.rm.user").optionsOnOff()
 			.group(ConfigConstants.GROUP_AGENT)),
 
+	EVENTS_TIMEOUT(new ConfigMeta("Events Timeout Managment", "feature.events.timeout").optionsOnOff()
+			.group(ConfigConstants.GROUP_AGENT)),
+
 	// Ends here
 	;
 

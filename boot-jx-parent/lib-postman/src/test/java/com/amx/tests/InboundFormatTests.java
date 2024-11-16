@@ -1,8 +1,6 @@
 package com.amx.tests;
 
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.boot.jx.postman.model.FormReply;
 import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
-import com.boot.model.MapModel;
 import com.boot.utils.FileUtil;
 import com.boot.utils.JsonUtil;
 

@@ -25,11 +25,8 @@ import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.TmplElement;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
-import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.boot.utils.Constants;
-import com.boot.utils.StringUtils;
 
 @Component
 public class TmplClient {
