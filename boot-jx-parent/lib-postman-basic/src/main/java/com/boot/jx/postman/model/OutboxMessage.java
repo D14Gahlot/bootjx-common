@@ -40,6 +40,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private String bulkSessionId;
 	/** use /resend with a flag 'cancelExisting'*/
 	public boolean cancelExisting;
+	private List<String> groups;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -218,6 +219,14 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public void setCancelExisting(boolean cancelExisting) {
 		this.cancelExisting = cancelExisting;
+	}
+
+	public List<String> getGroups() {
+		return groups;
+	}
+
+	public void setGroups(List<String> groups) {
+		this.groups = groups;
 	}
 
 }
