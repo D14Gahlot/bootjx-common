@@ -249,8 +249,8 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	public BulkSessionDoc sendToGroup(List<OutboxMessage> bulkMessages, ChronoScheduler scheduler)
 			throws NumberParseException {
-
-		OutboxMessage bulkMessage = bulkMessages.get(0);
+		
+		OutboxMessage bulkMessage = bulkMessages.get(bulkMessages.size()-1);
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
 		ChannelConfig channelConfig = enviroment.config().channel(channelId);
 		BulkSessionDoc session = new BulkSessionDoc();
@@ -266,6 +266,8 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setCampaignTitle(bulkMessage.getCampaignTitle());
 		session.setGroupName(bulkMessage.getGroupName());
 		session.setScheduler(scheduler);
+		session.setGroups(bulkMessage.getGroups());
+		List<String> toLst = bulkMessage.getTo();
 
 		auditDetailProvider.auditCreate(session);
 
@@ -274,9 +276,10 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
-		for (OutboxMessage bulkMsg : bulkMessages) {
-			MessageDoc doc = messageStore.createMessageDoc(bulkMsg);
-			String to = bulkMsg.getTo().get(0);
+		//for (OutboxMessage bulkMsg : bulkMessages) {
+		   for (String to : toLst) {
+			MessageDoc doc = messageStore.createMessageDoc(bulkMessage);
+			//String to = bulkMsg.getTo().get(0);
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
@@ -284,11 +287,11 @@ public class BulkMessageService extends BatchJobExecuter {
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().phone(to);
-			doc.setMessage(bulkMsg.getMessage());
-			doc.setHsm(bulkMsg.getHsm());
-			doc.setTemplateId(bulkMsg.templateId());
-			doc.setTemplate(bulkMsg.templateCode());
-			doc.setAttachments(bulkMsg.getAttachments());
+			doc.setMessage(bulkMessage.getMessage());
+			doc.setHsm(bulkMessage.getHsm());
+			doc.setTemplateId(bulkMessage.templateId());
+			doc.setTemplate(bulkMessage.templateCode());
+			doc.setAttachments(bulkMessage.getAttachments());
 			doc.route().setQueueCode(adminApp.getQueue());
 			doc.route().setSendMode(adminApp.getAppMode());
 			doc.route().setSenderApp(adminApp.getAppType());
@@ -296,8 +299,9 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.route().setSenderCode(auditDetailProvider.getAuditUser());
 
 			docs.add(doc);
+			
 		}
-
+		   
 		session.setStatus("CREATED");
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
