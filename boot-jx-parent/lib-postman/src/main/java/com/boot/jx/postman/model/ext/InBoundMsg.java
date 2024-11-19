@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.postman.model.FormReply;
+import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageReplyTo;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.model.ext.CommonMsgText.InBoundMsgText;
@@ -54,7 +55,12 @@ public class InBoundMsg {
 	@ApiMockModelProperty(value = "Form (Button/List/Flows) selections by user")
 	public FormReply form = new FormReply();
 
+	@ApiMockModelProperty(hidden = true)
+	@Deprecated
 	public MessageReplyTo replyTo = new MessageReplyTo();
+
+	@ApiMockModelProperty(value = "Reference source of Inbound Message")
+	public MessageReferral referral = new MessageReferral();
 
 	@ApiMockModelProperty(hidden = true)
 	public Map<String, Object> input = new HashMap<String, Object>();

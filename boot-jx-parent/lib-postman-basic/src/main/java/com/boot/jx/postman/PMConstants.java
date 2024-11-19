@@ -65,12 +65,42 @@ public class PMConstants {
 		}
 	}
 
+	public static class MESSAGE_SOURCE_CATEGARY {
+		public static final String MESSAGE = "message";
+		public static final String SOCIAL = "social";
+		public static final String ADS = "ads";
+		public static final String CAMPAIGN = "campaign";
+	}
+
+	public static class MESSAGE_SOURCE_TYPE {
+		public static final String INBOUND = "inbound";
+		public static final String OUTBOUND = "outbound";
+		public static final String STORY = "story";
+		public static final String POST = "p̄ost";
+		public static final String FEEDBACK = "feedback";
+	}
+
 	public static class MESSAGE_BOUND_TYPE {
 		public static final String INBOUND = "I";
 		public static final String INBOUND_IMPORTED = "Ii";
 
 		public static final String OUTBOUND = "O";
 		public static final String OUTBOUND_IMPORTED = "Oi";
+
+		/**
+		 * Returns full type
+		 * 
+		 * @param typeSign
+		 * @return
+		 */
+		public static String typeToName(String typeSign) {
+			if (ArgUtil.is(typeSign, INBOUND)) {
+				return "inbound";
+			} else if (ArgUtil.is(typeSign, OUTBOUND)) {
+				return "outbound";
+			}
+			return null;
+		}
 	}
 
 	public final class CHANNEL_TYPE {

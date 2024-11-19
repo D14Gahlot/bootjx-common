@@ -177,7 +177,20 @@ public class MessageDefinitions {
 //			setTemplateId(message.getTemplateId());
 //			setTemplateCode(message.getTemplateCode());
 		}
+	}
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public interface IMessageWithReferral extends Serializable {
+		public MessageReferral getReferral();
+
+		public void setReferral(MessageReferral referral);
+
+		public default MessageReferral referral() {
+			if (this.getReferral() == null) {
+				this.setReferral(new MessageReferral());
+			}
+			return this.getReferral();
+		}
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -212,7 +225,8 @@ public class MessageDefinitions {
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	public interface IMessage extends IMessageExternal, IMessageInternal, SessionMessage, IMessageId {
+	public interface IMessage
+			extends IMessageExternal, IMessageInternal, SessionMessage, IMessageId, IMessageWithReferral {
 
 		public long getTimestamp();
 

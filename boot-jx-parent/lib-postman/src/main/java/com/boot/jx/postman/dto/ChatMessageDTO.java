@@ -12,6 +12,7 @@ import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.pbook.PBVCard;
+import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -45,11 +46,22 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 
 	private Map<String, Object> meta;
 	private Map<String, Object> options;
+
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
+	@ApiMockModelProperty(example = "",
+			value = "Information for reply to but deprecated in favor of referral() instead", required = false,
+			hidden = true)
 	private Map<String, Object> replyTo;
+
 	protected Map<String, Object> form;
 	private MessageRouter route;
 	private Map<String, Long> stamps;
 	public List<Object> logs;
+
 	private MessageReferral referral;
 
 	public MessageReferral getReferral() {
@@ -227,10 +239,20 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 		this.replyId = replyId;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public Map<String, Object> getReplyTo() {
 		return replyTo;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public void setReplyTo(Map<String, Object> replyTo) {
 		this.replyTo = replyTo;
 	}
@@ -305,4 +327,5 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 	public void setMessageIdResend(String messageIdResend) {
 		this.messageIdResend = messageIdResend;
 	}
+
 }

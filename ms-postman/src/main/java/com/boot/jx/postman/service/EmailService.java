@@ -285,7 +285,7 @@ public class EmailService {
 
 		InternetAddress fromInternetAddress = getInternetAddress(eParams.getFrom());
 
-		if (eParams.getReplyTo() == null || Constants.DEFAULT_STRING.equals(eParams.getReplyTo())) {
+		if (!ArgUtil.is(eParams.getReplyToEmail())) {
 			eParams.setReplyToEmail(eParams.getFrom());
 		}
 

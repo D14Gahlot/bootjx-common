@@ -24,6 +24,8 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.jx.postman.PMConstants.MESSAGE_BOUND_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_SOURCE_CATEGARY;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDocAbstract;
@@ -181,13 +183,17 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 				MessageDoc replyTo = findOneByMessageIdExt(doc.getReplyIdExt(),
 						inboxMessage.contact().getContactType());
 				if (ArgUtil.is(replyTo)) {
+					doc.referral().setSourceCategory(MESSAGE_SOURCE_CATEGARY.MESSAGE);
+					doc.referral().setSourceType(MESSAGE_BOUND_TYPE.typeToName(replyTo.getType()));
 					if (ArgUtil.is(replyTo.getMessageId())) {
 						doc.setReplyId(replyTo.getMessageId());
 						doc.replyTo().put("messageId", replyTo.getMessageId());
+						doc.referral().setMessageId(replyTo.getMessageId());
 					}
 					if (ArgUtil.is(replyTo.getMessageIdExt())) {
 						doc.setReplyIdExt(replyTo.getMessageIdExt());
 						doc.replyTo().put("messageIdExt", replyTo.getMessageIdExt());
+						doc.referral().setMessageIdExt(replyTo.getMessageIdExt());
 					}
 					if (ArgUtil.is(replyTo.getBulkSessionId())) {
 						doc.replyTo().put("bulkSessionId", replyTo.getBulkSessionId());
@@ -278,7 +284,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.meta().putAll(outMessage.meta());
 		doc.options().putAll(outMessage.options());
 
-		//Incase it was missed
+		// Incase it was missed
 		doc.setContactId(PostManUtil.createContactId(outMessage));
 
 		return doc;
@@ -307,7 +313,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.setTime(TimeStampIndex.now());
 
 		String to = CollectionUtil.getOne(outMessage.getTo());
-		//doc.setContactId(PostManUtil.createContactId(outMessage));
+		// doc.setContactId(PostManUtil.createContactId(outMessage));
 
 		ContactDetailDoc contact = new ContactDetailDoc();
 		contact.copyFrom(outMessage.contact());
