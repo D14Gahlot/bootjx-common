@@ -76,7 +76,7 @@ public class PMConstants {
 		public static final String INBOUND = "inbound";
 		public static final String OUTBOUND = "outbound";
 		public static final String STORY = "story";
-		public static final String POST = "p̄ost";
+		public static final String POST = "post";
 		public static final String FEEDBACK = "feedback";
 	}
 

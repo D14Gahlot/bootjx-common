@@ -96,8 +96,9 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
-	
-	@Autowired TunnelService tunnelService;
+
+	@Autowired
+	TunnelService tunnelService;
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
@@ -123,16 +124,16 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 			if (user_input_type.equals("name")) {
 				contactQuery.setInfoName(inboxMessage.getMessage());
 			}
-	
-				if (user_input_type.equals("email")) {
-					String email = inboxMessage.getMessage();
-					if (isValidEmail(email)) {
-						contactQuery.setInfoEmail(email);
-					} else {
-						return (OutboxMessage) inboxMessage.replyMessage("Please enter a valid email address.");
-					}
+
+			if (user_input_type.equals("email")) {
+				String email = inboxMessage.getMessage();
+				if (isValidEmail(email)) {
+					contactQuery.setInfoEmail(email);
+				} else {
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter a valid email address.");
 				}
-			
+			}
+
 			if (user_input_type.equals("phone")) {
 				contactQuery.setInfoPhone(inboxMessage.getMessage());
 			}
@@ -167,11 +168,13 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 
 		return null;
 	}
+
 	private boolean isValidEmail(String email) {
 		String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 		Pattern pattern = Pattern.compile(emailRegex);
-	    return pattern.matcher(email).matches();
+		return pattern.matcher(email).matches();
 	}
+
 	@Override
 	protected CustomerProfileDoc findProfile(ChatContactDoc chatContactDoc) {
 		return contactStore.findProfileByPhone(chatContactDoc.phone());
@@ -208,27 +211,35 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				String sourceId = map.pathEntry("messages/[0]/referral/source_id").asString();
 				String sourceType = map.pathEntry("messages/[0]/referral/source_type").asString();
 				String body = map.pathEntry("messages/[0]/referral/body").asString();
+				String headline = map.pathEntry("messages/[0]/referral/headline").asString();
+				String mediaType = map.pathEntry("messages/[0]/referral/media_type").asString();
 				msgReferral.setSourceUrl(sourceUrl);
 				msgReferral.setSourceId(sourceId);
 				msgReferral.setSourceType(sourceType);
+				msgReferral.setTitle(headline);
 				msgReferral.setBody(body);
+				msgReferral.setMediaType(mediaType);
+				msgReferral.setMediaUrl(map.pathEntry("messages/[0]/referral/image_url")
+						.orPathEntry("messages/[0]/referral/video_url").asString());
+				msgReferral.setThumbUrl(map.pathEntry("messages/[0]/referral/thumbnail_url").asString());
+				MapPathEntry ctwa_clid = map.pathEntry("messages/[0]/referral/ctwa_clid");
+				if (ctwa_clid.exists()) {
+					msgReferral.info().put("ctwa_clid", ctwa_clid.asString());
+				}
 				inboxMessage.setReferral(msgReferral);
 				commonMongoTemplate.save(inboxMessage);
 
-				   Map<String, String> messagePayload = new HashMap<>();
-				   messagePayload.put("channelId", channelConfig.getChannelType());
-				   messagePayload.put("contactType", channelConfig.getContactType().toString());
-				   messagePayload.put("messageId",inboxMessage.getMessageIdExt());
-				   messagePayload.put("sourceUrl", msgReferral.getSourceUrl());
-			        tunnelService.task("ON_REFERRAL_MESSAGE", messagePayload);
-			       
-			        
-				
+				Map<String, String> messagePayload = new HashMap<>();
+				messagePayload.put("channelId", channelConfig.getChannelType());
+				messagePayload.put("contactType", channelConfig.getContactType().toString());
+				messagePayload.put("messageId", inboxMessage.getMessageIdExt());
+				messagePayload.put("sourceUrl", msgReferral.getSourceUrl());
+				tunnelService.task("ON_REFERRAL_MESSAGE", messagePayload);
+
 				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.getReferral().toString() + " \n"
 						+ map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString()));
 			} else {
 				inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
-
 
 			}
 
@@ -253,7 +264,7 @@ public class WA360CloudConnector extends AbstractConnector<WA360CloudConfigDetai
 				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
 						.asString();
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
-				
+
 				inboxMessage.form().put("reply_json", replyJsonMap);
 				inboxMessage.form().put("reply_title",
 						map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_BODY).asString());
