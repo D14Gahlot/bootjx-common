@@ -245,6 +245,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		msg.tags = inboxMessage.getTags();
 		msg.input = inboxMessage.form();
 		msg.replyTo = JsonUtil.toObject(inboxMessage.replyTo(), MessageReplyTo.class);
+		msg.referral = inboxMessage.referral();
 
 		msg.form = JsonUtil.toObject(inboxMessage.form(), FormReply.class);
 

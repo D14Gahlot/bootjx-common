@@ -54,7 +54,13 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 
 	protected Map<String, Object> form = new HashMap<String, Object>();
 	protected Map<String, Object> data = new HashMap<String, Object>();
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	private Map<String, Object> replyTo = new HashMap<String, Object>();
+
 	private MessageReferral referral;
 
 	protected TagDocument tags;
@@ -209,14 +215,29 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 		return this.data;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public void setReplyTo(Map<String, Object> reply) {
 		this.replyTo = reply;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public Map<String, Object> getReplyTo() {
 		return this.replyTo;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public Map<String, Object> replyTo() {
 		if (replyTo == null) {
 			this.replyTo = new HashMap<String, Object>();
@@ -333,7 +354,8 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 
 	public void setReplyId(String replyId) {
 		this.replyId = replyId;
-		this.replyTo().put("messageId", replyIdExt);
+		this.replyTo().put("messageId", replyId);
+		this.referral().setMessageId(replyId);
 	}
 
 	@Override
@@ -344,6 +366,7 @@ public class InboxMessage implements Serializable, IMessageExtended, LogMessage,
 	public void setReplyIdExt(String replyIdExt) {
 		this.replyIdExt = replyIdExt;
 		this.replyTo().put("messageIdExt", replyIdExt);
+		this.referral().setMessageIdExt(replyIdExt);
 	}
 
 	public String getFormatType() {
