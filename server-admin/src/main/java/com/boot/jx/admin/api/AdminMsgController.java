@@ -421,7 +421,10 @@ public class AdminMsgController {
 						}
 						List<OutboxMessage> lstOutBoxMsg = getGroupDetailsV1(bulkMessage);
 						bulkMessageService.sendToGroup(lstOutBoxMsg, bulkMessage.getScheduler());
-					} else {
+					}else if(ArgUtil.is(bulkMessage.getFilters())) {
+						List<OutboxMessage> lstOutBoxMsg = getFilterDetails(bulkMessage);
+						bulkMessageService.sendToFilterGroup(lstOutBoxMsg, bulkMessage.getScheduler());
+					}else {
 						Query queryAll = new Query();
 						queryAll.addCriteria(Criteria.where("type").in("O"));
 						queryAll.addCriteria(Criteria.where("bulkSessionId").is(bulkDoc.getBulkSessionId()));
@@ -852,8 +855,11 @@ public class AdminMsgController {
 					List<List<ProfileSearchCriteria>> searCri = getSearchCriteria(filterCri);
 					ProfileSearchQuery profSerarch = new ProfileSearchQuery();
 					profSerarch.setSearchCriterias(searCri);
-
-					List<CustomerProfileDoc> docs = cusProfileService.getProfileSearch(profSerarch);
+					
+					List<CustomerProfileDoc> docs = null;
+					if(ArgUtil.is(searCri)){
+						docs =cusProfileService.getProfileSearch(profSerarch);
+					}
 					if (ArgUtil.is(docs)) {
 
 						if (concatFilterpNames.length() > 0) {
