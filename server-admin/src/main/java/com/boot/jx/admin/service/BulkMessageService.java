@@ -576,4 +576,73 @@ public class BulkMessageService extends BatchJobExecuter {
 		return session;
 	}
 
+	public BulkSessionDoc sendToFilterGroup(List<OutboxMessage> bulkMessages, ChronoScheduler scheduler) throws NumberParseException {
+		OutboxMessage bulkMessage = bulkMessages.get(bulkMessages.size()-1);
+		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
+		ChannelConfig channelConfig = enviroment.config().channel(channelId);
+		BulkSessionDoc session = new BulkSessionDoc();
+		session.setMessage(bulkMessage.getMessage());
+		session.setTemplateId(bulkMessage.templateId());
+		session.setTemplate(bulkMessage.templateCode());
+		session.setMessageCount(bulkMessage.getTo().size());
+		session.setContactType(bulkMessage.contact().getContactType());
+		session.setLane(bulkMessage.contact().getLane());
+		session.setChannelId(channelId);
+		session.setBulkSessionId(UniqueID.generateString62());
+		session.setCampaignTitle(bulkMessage.getCampaignTitle());
+		session.setGroupName(bulkMessage.getGroupName());
+		session.setScheduler(scheduler);
+		session.setFilters(bulkMessage.getFilters());
+		
+		List<String> toLst = bulkMessage.getTo();
+
+		auditDetailProvider.auditCreate(session);
+
+		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
+		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+
+		PhoneNumber phoneNumber = new PhoneNumber();
+		List<MessageDoc> docs = new ArrayList<MessageDoc>();
+		//for (OutboxMessage bulkMsg : bulkMessages) {
+		   for (String to : toLst) {
+			MessageDoc doc = messageStore.createMessageDoc(bulkMessage);
+			//String to = bulkMsg.getTo().get(0);
+			doc.setContactId(null);
+			doc.updateStatus(Status.SCHLD);
+			doc.setBulkSessionId(session.getBulkSessionId());
+			to = PhoneUtil.addPlusSign(to);
+			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
+			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+			doc.getContact().phone(to);
+			doc.setMessage(bulkMessage.getMessage());
+			doc.setHsm(bulkMessage.getHsm());
+			doc.setTemplateId(bulkMessage.templateId());
+			doc.setTemplate(bulkMessage.templateCode());
+			doc.setAttachments(bulkMessage.getAttachments());
+			doc.route().setQueueCode(adminApp.getQueue());
+			doc.route().setSendMode(adminApp.getAppMode());
+			doc.route().setSenderApp(adminApp.getAppType());
+			doc.route().setSenderType(MESSAGE_SENDER_TYPE.ADMIN);
+			doc.route().setSenderCode(auditDetailProvider.getAuditUser());
+
+			docs.add(doc);
+			
+		}
+		   
+		session.setStatus("CREATED");
+		mongoTemplate.save(session);
+		messageStore.insert(docs, bulkMessage.contact().type());
+		registerJob(JobTaskModel.newBatchJob()
+				// Set Unique Job Id
+				.jobId(session.getBulkSessionId())
+				// Contact Type for each message
+				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channelType", channelConfig.getChannelType())
+				// Lane for each message
+				.data("lane", session.getLane()), scheduler);
+
+		return session;
+	}
+
 }

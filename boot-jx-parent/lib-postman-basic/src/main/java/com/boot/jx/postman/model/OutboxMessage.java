@@ -41,6 +41,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 	/** use /resend with a flag 'cancelExisting'*/
 	public boolean cancelExisting;
 	private List<String> groups;
+	private List<String> filters;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -227,6 +228,14 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public void setGroups(List<String> groups) {
 		this.groups = groups;
+	}
+
+	public List<String> getFilters() {
+		return filters;
+	}
+
+	public void setFilters(List<String> filters) {
+		this.filters = filters;
 	}
 
 }

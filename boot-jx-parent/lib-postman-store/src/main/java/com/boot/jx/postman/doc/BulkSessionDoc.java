@@ -56,6 +56,7 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 	private Map<String, Object> campaignSummary;
 	
 	private List<String> groups;
+	private List<String> filters;
 
 	
 
@@ -248,6 +249,14 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	public void setGroups(List<String> groups) {
 		this.groups = groups;
+	}
+
+	public List<String> getFilters() {
+		return filters;
+	}
+
+	public void setFilters(List<String> filters) {
+		this.filters = filters;
 	}
 
 }
