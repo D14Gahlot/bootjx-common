@@ -2,6 +2,7 @@ package com.boot.jx.admin.api;
 
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
@@ -32,9 +34,12 @@ import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.PayloadDumpCollection;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.store.MessageStore;
+import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.utils.PostManUtil;
+import com.boot.model.MapModel;
 import com.boot.model.UtilityModels.PublicJsonProperty;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -50,9 +55,8 @@ public class AdminObjectsController {
 	@Autowired
 	private CommonHttpRequest commonHttpRequest;
 
-	@SuppressWarnings("unchecked")
 	public <T> List<T> getPaginatedBulk(Class<T> docClass, String collectionName, int pageNo, int pageSize,
-			String sortBy, String sortDir) {
+			String sortBy, String sortDir, MapModel extraParams) {
 		MQB<T> q = MongoQueryBuilder.select(docClass, collectionName).page(pageNo, pageSize);
 
 		Enumeration<String> params = commonHttpRequest.getRequest().getParameterNames();
@@ -72,12 +76,19 @@ public class AdminObjectsController {
 			default:
 				String paramValue = commonHttpRequest.getRequest().getParameter(param);
 				if (ArgUtil.is(paramValue)) {
-					if (paramValue.startsWith("*") && paramValue.endsWith("*")) {
-						q.search(param, StringUtils.trim(paramValue, '*'));
-					} else {
-						q.where(param).is(paramValue);
+					if (!extraParams.entry(param).exists()) {
+						extraParams.put(param, paramValue);
 					}
 				}
+			}
+		}
+
+		for (Entry<String, Object> entry : extraParams.map().entrySet()) {
+			String paramValue = ArgUtil.parseAsString(entry.getValue(), Constants.BLANK);
+			if (paramValue.startsWith("*") && paramValue.endsWith("*")) {
+				q.search(entry.getKey(), StringUtils.trim(paramValue, '*'));
+			} else {
+				q.where(entry.getKey()).is(paramValue);
 			}
 		}
 
@@ -87,6 +98,11 @@ public class AdminObjectsController {
 		ApiResponseUtil.addLog(q.build().getQuery().toString());
 		// System.out.println(q.build().getQuery().toString());
 		return comonMongoTemplate.find(q);
+	}
+
+	public <T> List<T> getPaginatedBulk(Class<T> docClass, String collectionName, int pageNo, int pageSize,
+			String sortBy, String sortDir) {
+		return getPaginatedBulk(docClass, collectionName, pageNo, pageSize, sortBy, sortDir, MapModel.createInstance());
 	}
 
 	@RequestMapping(value = "/api/objects/logs", method = { RequestMethod.GET })
@@ -175,7 +191,15 @@ public class AdminObjectsController {
 			@RequestParam(required = false, defaultValue = "desc") String sortDir,
 			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
 			@RequestParam(required = false) String channelId, @RequestParam(required = false) String domain,
-			@RequestParam(required = false) String lane) {
+			@RequestParam(required = false) String lane,
+			@RequestParam(required = false, defaultValue = "false") boolean local) {
+
+		MapModel extparams = MapModel.createInstance();
+		if (!local && !Tenants.isDefault(AppContextUtil.getTenant())) {
+			extparams.put("domain", AppContextUtil.getTenant());
+			AppContextUtil.switchTenant(Tenants.getDefault());
+		}
+
 		return ApiResponse.buildResults(
 				getPaginatedBulk(ChannelConfigLogger.class, "TEMP_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
 	}
