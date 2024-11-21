@@ -27,7 +27,9 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.Attachment;
@@ -47,6 +49,7 @@ import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
+import com.boot.jx.postman.model.ext.SessionBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -113,6 +116,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Autowired(required = false)
 	private MessageContext messageContext;
+
+	@Autowired
+	private CommonServiceClient commonServiceClient;
 
 	@Override
 	public MessageContext context() {
@@ -308,7 +314,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		ClientApp defaultClient = context().clientApp(messageReport.session().getQueue(), messageReport.contact());
 
 		if (ArgUtil.is(defaultClient)) {
-			if (ArgUtil.is(defaultClient.getAppType(), CHAT_MODE.WEBHOOK.toString(), CHAT_MODE.SCRIPTUS.toString())) {
+			if (ArgUtil.is(defaultClient.getAppType(), APP_TYPE.WEBHOOK.toString())) {
 				LOGGER.debug("Forwarding MessageReport to Xternal Service ");
 				try {
 					if (ArgUtil.is(defaultClient.getWebhook())) {
@@ -335,8 +341,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					logManager.error(messageReport, e);
 				}
 				return;
-			}
+			} else if (ArgUtil.is(defaultClient.getAppType(), APP_TYPE.APP_SCRIPT.toString(),
+					APP_TYPE.BOTFLOW.toString())) {
+				if (messageEvents != null) {
+					messageEvents.postMessageStatus(messageReport);
+				}
 
+			}
 		}
 		stompTunnelService.sendToAll("/message/update/status", messageReport);
 	}

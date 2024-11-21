@@ -8,14 +8,14 @@ import java.util.Map;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageLoggable;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;
 import com.boot.jx.tunnel.ChronoScheduler;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OutboxMessage extends Message<OutboxMessage>
-		implements WAMessageOptions, IMessage, LogMessage, IMessageExtended {
+		implements WAMessageOptions, IMessageLoggable, IMessageExtended {
 
 	private static final long serialVersionUID = 3115992767625612005L;
 
@@ -36,9 +36,9 @@ public class OutboxMessage extends Message<OutboxMessage>
 	private String campaignTitle;
 	private String groupName;
 	private ChronoScheduler scheduler;
-	/** for resend/cancel schedular API**/
+	/** for resend/cancel schedular API **/
 	private String bulkSessionId;
-	/** use /resend with a flag 'cancelExisting'*/
+	/** use /resend with a flag 'cancelExisting' */
 	public boolean cancelExisting;
 	private List<String> groups;
 	private List<String> filters;

@@ -97,6 +97,7 @@ public abstract class MessageDocAbstract
 	private String mediaReplyId;
 
 	private Map<String, Long> stamps;
+	private Map<String, Long> timeout;
 	public List<Object> logs;
 	public List<Object> trace;
 
@@ -570,6 +571,14 @@ public abstract class MessageDocAbstract
 
 	public void setMessageIdResend(String messageIdResend) {
 		this.messageIdResend = messageIdResend;
+	}
+
+	public Map<String, Long> getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(Map<String, Long> timeout) {
+		this.timeout = timeout;
 	}
 
 }

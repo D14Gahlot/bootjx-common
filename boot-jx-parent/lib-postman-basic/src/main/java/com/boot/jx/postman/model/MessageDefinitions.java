@@ -273,6 +273,10 @@ public class MessageDefinitions {
 		}
 	}
 
+	public static interface IMessageLoggable extends IMessage, LogMessage {
+
+	}
+
 	public interface TraceMessage extends SessionInfo {
 		public List<Object> getTrace();
 

@@ -94,7 +94,7 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	@Async
 	public void setChatOutIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
-		if (app != null && app.isAgentApp()) {
+		if (app != null && (app.isAgentApp() || app.isCustomApp())) {
 			boolean timeoutEnabled = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT)
 					.asBoolean(false);
 
@@ -110,7 +110,7 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	@Async
 	public void setChatInIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent outboundEvent) {
-		if (app != null) {
+		if (app != null && (app.isAgentApp() || app.isCustomApp())) {
 			boolean timeoutEnabledApp = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
 					.asBoolean(false);
 			if (timeoutEnabledApp) {
@@ -129,6 +129,16 @@ public class SessionEventTimer extends ATaskLimiter {
 					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
 							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 				}
+			}
+		}
+	}
+
+	@Async
+	public void setChatStatusTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
+		if (app != null && (app.isCustomApp())) {
+			if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
+				// Only if this feature is there use chrono servre to set timeouts
+				commonServiceClient.publishSessionBoundEvent(inBoundEvent);
 			}
 		}
 	}

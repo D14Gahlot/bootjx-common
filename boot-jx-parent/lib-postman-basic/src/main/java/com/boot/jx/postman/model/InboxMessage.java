@@ -10,7 +10,7 @@ import java.util.Map;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
-import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageLoggable;
 import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.utils.ArgUtil;
@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InboxMessage implements Serializable, IMessageExtended, LogMessage, TraceMessage {
+public class InboxMessage implements Serializable, IMessageLoggable, IMessageExtended, TraceMessage {
 
 	private static final long serialVersionUID = -4488174520614920589L;
 	public static final String REPLY_ID = "reply_id";
