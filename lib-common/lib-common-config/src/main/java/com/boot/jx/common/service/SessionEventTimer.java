@@ -78,6 +78,20 @@ public class SessionEventTimer extends ATaskLimiter {
 		return ArgUtil.isEqual(appConfig.getAppType(), "POSTMAN", "AGENT", "BOT");
 	}
 
+	private void debouncEvent(CONFIG_SETUP_KEY configSetupKey, String sessionid, SessionBoundEvent inBoundEvent,
+			String sessionEventName) {
+		long timeout = pmEnvironment.keyEntry(configSetupKey).asLong(0L);
+		if (timeout > 0L) {
+			if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
+				// Only if this feature is there use chrono servre to set timeouts
+				commonServiceClient.publishSessionBoundEvent(inBoundEvent);
+			} else {
+				TunnelTask task = new TunnelTask().name(sessionEventName).id(sessionid).intervalMinutes(timeout);
+				this.debounce(task);
+			}
+		}
+	}
+
 	@Async
 	public void setChatOutIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
 		if (app != null && app.isAgentApp()) {
@@ -88,37 +102,22 @@ public class SessionEventTimer extends ATaskLimiter {
 					.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
 
 			if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
-				long timeout = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL)
-						.asLong(0L);
-				if (timeout > 0L) {
-					if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
-						// Only if this feature is there use chrono servre to set timeouts
-						commonServiceClient.publishSessionBoundEvent(inBoundEvent);
-					} else {
-						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT).id(sessionid)
-								.intervalMinutes(timeout);
-						this.debounce(task);
-					}
-				}
+				debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL, sessionid, inBoundEvent,
+						SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT);
 			}
 		}
 	}
 
 	@Async
-	public void setChatInIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent inboundEVent) {
+	public void setChatInIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent outboundEvent) {
 		if (app != null) {
 			boolean timeoutEnabledApp = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
 					.asBoolean(false);
 			if (timeoutEnabledApp) {
 				MapPathEntry frwrdQueue = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 				if (frwrdQueue.not(app.getQueue())) {
-					long timeout = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
-							.asLong(0L);
-					if (timeout > 0L) {
-						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
-								.intervalMinutes(timeout);
-						this.debounce(task);
-					}
+					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
+							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 				}
 			} else if (app.isAgentApp()) {
 				boolean timeoutEnabled = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
@@ -127,13 +126,8 @@ public class SessionEventTimer extends ATaskLimiter {
 						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 
 				if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
-					long timeout = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
-							.asLong(0L);
-					if (timeout > 0L) {
-						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
-								.intervalMinutes(timeout);
-						this.debounce(task);
-					}
+					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
+							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 				}
 			}
 		}

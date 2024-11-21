@@ -11,12 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.AppConfig;
-import com.boot.jx.cdn.BootJxConfigService;
-import com.boot.jx.http.CommonHttpRequest;
-import com.boot.jx.postman.PMEnvironment;
-import com.boot.jx.postman.PMEnvironment.PMClientConfig;
-import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.model.ext.SessionBoundEvent;
 
@@ -25,27 +19,6 @@ import com.boot.jx.postman.model.ext.SessionBoundEvent;
 public class OutBoundController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OutBoundController.class);
-
-	@Autowired
-	private CommonHttpRequest commonHttpRequest;
-
-	@Autowired
-	private PMEnvironment pmEnvironment;
-
-	@Autowired(required = false)
-	private PMCommonConfig pmCommonConfig;
-
-	@Autowired(required = false)
-	private BootJxConfigService bootJxConfigService;
-
-	@Autowired
-	private AppConfig appConfig;
-
-	@Autowired
-	private MessageService messageService;
-
-	@Autowired
-	private PMClientConfig pmClientConfig;
 
 	@Autowired
 	private CommonServiceClient commonServiceClient;
