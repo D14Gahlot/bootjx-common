@@ -44,6 +44,7 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 	public String messageId;
 	public String eventId;
 	private String checksum;
+	private long timestamp;
 
 	@ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service",
 			allowableValues = "SESSION_INIT,INBOUND,OUTBOUND,ACTION,STATUS")
@@ -199,10 +200,19 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 	}
 
 	public void from(SessionMessage message) {
+		this.timestamp = message.getTimestamp();
 		this.messageId = message.getMessageId();
 		this.sessionId = message.getSessionId();
 		this.setSession(message.session());
 		this.contact().copyFrom(message.contact());
 		message.session();
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 }
