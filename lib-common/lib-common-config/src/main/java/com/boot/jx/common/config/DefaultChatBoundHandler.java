@@ -352,7 +352,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	@Override
 	public InBoundEvent onSessionEvent(InBoundEvent event, PMArgs pmArgs) {
 		context().setInBoundEvent(event);
-		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
+		if (InBoundEvent.EVENT_TYPE.SESSION_ROUTED.equals(event.type)) {
 			ChatSessionDoc sessionDoc = context().session().getDoc();
 			this.onSessionRouteSync(event, sessionDoc, pmArgs);
 		}
@@ -368,13 +368,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	public void afterSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
 		if (sessionEventTimer != null) {
 			ClientApp defaultClient = context().clientApp(inBoundEvent.sessionRouted.targetQueue);
-			sessionEventTimer.setChatOutIdleTimeout(inBoundEvent.getSessionId(), defaultClient);
+			sessionEventTimer.setChatOutIdleTimeout(inBoundEvent.getSessionId(), defaultClient, inBoundEvent);
 		}
 	}
 
 	@Override
 	public void onSessionRouteWrapper(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
+		if (InBoundEvent.EVENT_TYPE.SESSION_ROUTED.equals(event.type)) {
 			ClientApp targetAppQueue = context().clientApp(event.sessionRouted.targetQueue, null);
 			if (ArgUtil.is(targetAppQueue)) {
 				APP_TYPE appType = APP_TYPE.from(targetAppQueue.getAppType());

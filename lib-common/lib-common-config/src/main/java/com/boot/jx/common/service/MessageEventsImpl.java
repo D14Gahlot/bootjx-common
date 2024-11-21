@@ -9,6 +9,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
+import com.boot.jx.postman.model.ext.SessionBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.model.MapModel.NodeEntry;
 
@@ -27,7 +28,13 @@ public class MessageEventsImpl implements MessageEvents {
 	@Override
 	public NodeEntry<InBoundEvent> postMessageInBound(InboxMessage message) {
 		ClientApp app = messageContext.clientApp();
-		sessionEventTimer.setChatOutIdleTimeout(message.getSessionId(), app);
+
+		SessionBoundEvent inboundEVent = new SessionBoundEvent();
+		inboundEVent.setTriggerType(SessionBoundEvent.TRIGGER_TYPE.MESSAGE);
+		inboundEVent.setType(SessionBoundEvent.EVENT_TYPE.MESSAGE_INBOUND);
+		inboundEVent.from(message);
+
+		sessionEventTimer.setChatOutIdleTimeout(message.getSessionId(), app, inboundEVent);
 		sessionEventTimer.setMitelRoutingCheck(message.getSessionId(), app);
 		sessionEventTimer.setMitelClosingCheck(message.getSessionId(), app, false);
 		return null;
@@ -47,7 +54,13 @@ public class MessageEventsImpl implements MessageEvents {
 	@Override
 	public NodeEntry<InBoundEvent> postMessageOutBound(OutboxMessage message) {
 		ClientApp app = messageContext.clientApp();
-		sessionEventTimer.setChatInIdleTimeout(message.getSessionId(), app);
+
+		SessionBoundEvent inboundEVent = new SessionBoundEvent();
+		inboundEVent.setTriggerType(SessionBoundEvent.TRIGGER_TYPE.MESSAGE);
+		inboundEVent.setType(SessionBoundEvent.EVENT_TYPE.MESSAGE_OUTBOUND);
+		inboundEVent.from(message);
+
+		sessionEventTimer.setChatInIdleTimeout(message.getSessionId(), app, inboundEVent);
 		sessionEventTimer.setMitelClosingCheck(message.getSessionId(), app, false);
 		return null;
 	}

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
+import com.boot.jx.postman.model.ext.SessionBoundEvent;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.tunnel.ChronoScheduler;
 import com.boot.jx.tunnel.ITunnelService;
@@ -54,6 +55,16 @@ public class CommonServiceClient {
 				.toMap();
 		tunnelService.task("DOMAIN_CREATED", domainCreatedInfo);
 		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(null).asNone();
+	}
+
+	@Async
+	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+	public void publishSessionBoundEvent(SessionBoundEvent event) {
+		if (ArgUtil.is(event.getTriggerType(), SessionBoundEvent.TRIGGER_TYPE.STATUS)) {
+			restService.ajax(cronoJobUrl).path("/session-event-timer/api/v1/message/status").post(null).asNone();
+		} else if (ArgUtil.is(event.getTriggerType(), SessionBoundEvent.TRIGGER_TYPE.MESSAGE)) {
+			restService.ajax(cronoJobUrl).path("/session-event-timer/api/v1/message/in-out").post(null).asNone();
+		}
 	}
 
 	public ChronoScheduler schedule(ChronoScheduler chronoTask) {

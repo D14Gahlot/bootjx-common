@@ -15,10 +15,12 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
+import com.boot.jx.postman.model.ext.SessionBoundEvent;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -68,13 +70,16 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Autowired
 	private ChatSessionEvents chatSessionEvents;
 
+	@Autowired
+	private CommonServiceClient commonServiceClient;
+
 	@Override
 	public boolean isWorker() {
 		return ArgUtil.isEqual(appConfig.getAppType(), "POSTMAN", "AGENT", "BOT");
 	}
 
 	@Async
-	public void setChatOutIdleTimeout(String sessionid, ClientApp app) {
+	public void setChatOutIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
 		if (app != null && app.isAgentApp()) {
 			boolean timeoutEnabled = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT)
 					.asBoolean(false);
@@ -88,7 +93,7 @@ public class SessionEventTimer extends ATaskLimiter {
 				if (timeout > 0L) {
 					if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
 						// Only if this feature is there use chrono servre to set timeouts
-						
+						commonServiceClient.publishSessionBoundEvent(inBoundEvent);
 					} else {
 						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT).id(sessionid)
 								.intervalMinutes(timeout);
@@ -100,7 +105,7 @@ public class SessionEventTimer extends ATaskLimiter {
 	}
 
 	@Async
-	public void setChatInIdleTimeout(String sessionid, ClientApp app) {
+	public void setChatInIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent inboundEVent) {
 		if (app != null) {
 			boolean timeoutEnabledApp = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
 					.asBoolean(false);

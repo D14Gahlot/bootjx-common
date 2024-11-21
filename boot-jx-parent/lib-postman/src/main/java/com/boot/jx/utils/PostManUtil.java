@@ -149,7 +149,7 @@ public class PostManUtil {
 	}
 
 	public static String generateCheckSum(InBoundEvent event) {
-		String checkString = event.contact().getContactId() + event.getSessionId() + event.eventCode;
+		String checkString = event.contact().getContactId() + event.getSessionId() + event.type;
 		try {
 			return CryptoUtil.getMD5Hash(checkString);
 		} catch (NoSuchAlgorithmException e) {

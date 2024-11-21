@@ -6,6 +6,7 @@ import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LoggableEntity;
 import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
+import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.MessageSession;
@@ -14,6 +15,23 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEntity {
+
+	public static class TRIGGER_TYPE {
+		public static final String MESSAGE = "MESSAGE";
+		public static final String ACTION = "ACTION";
+		public static final String STATUS = "STATUS";
+	}
+
+	public static class EVENT_TYPE {
+		public static final String SESSION_ROUTED = "SESSION_ROUTED";
+		public static final String SESSION_INIT = "SESSION_INIT";
+		public static final String SESSION_CLOSED = "SESSION_CLOSED";
+		public static final String SESSION_STATUS = "SESSION_STATUS";
+		public static final String SESSION_ASSIGNED = "SESSION_ASSIGNED";
+		public static final String CONTACT_UPDATE = "CONTACT_UPDATE";
+		public static final String MESSAGE_INBOUND = "INBOUND";
+		public static final String MESSAGE_OUTBOUND = "OUTBOUND";
+	}
 
 	private static final long serialVersionUID = 5398462708633545227L;
 	private MessageSession session;
@@ -27,12 +45,13 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 	public String eventId;
 	private String checksum;
 
-	@ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service")
-	public String eventCode;
+	@ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service",
+			allowableValues = "SESSION_INIT,INBOUND,OUTBOUND,ACTION,STATUS")
+	public String type;
 
 	@ApiMockModelProperty(example = "INBOUND", value = "Bound Type of Event Triggered by App/Service",
-			allowableValues = "INBOUND,OUTBOUND,ACTION")
-	public String type;
+			allowableValues = "MESSAGE,ACTION,STATUS")
+	public String triggerType;
 
 	public MessageSession getSession() {
 		return session;
@@ -104,7 +123,7 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 
 	public String eventId() {
 		if (!ArgUtil.is(this.eventId)) {
-			this.eventId = String.format("%s/%s", this.messageId, this.eventCode);
+			this.eventId = String.format("%s/%s", this.messageId, this.type);
 		}
 		return this.eventId;
 	}
@@ -144,19 +163,11 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 	}
 
 	public String getEventCode() {
-		return eventCode;
-	}
-
-	public void setEventCode(String eventCode) {
-		this.eventCode = eventCode;
-	}
-
-	public String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setEventCode(String eventCode) {
+		this.type = eventCode;
 	}
 
 	public void setContactId(String contactId) {
@@ -169,5 +180,29 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 
 	public void setChecksum(String checksum) {
 		this.checksum = checksum;
+	}
+
+	public String getTriggerType() {
+		return triggerType;
+	}
+
+	public void setTriggerType(String triggerType) {
+		this.triggerType = triggerType;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void from(SessionMessage message) {
+		this.messageId = message.getMessageId();
+		this.sessionId = message.getSessionId();
+		this.setSession(message.session());
+		this.contact().copyFrom(message.contact());
+		message.session();
 	}
 }

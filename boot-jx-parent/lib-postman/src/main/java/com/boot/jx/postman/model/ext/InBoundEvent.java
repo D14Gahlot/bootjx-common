@@ -9,18 +9,8 @@ public class InBoundEvent extends SessionBoundEvent implements LoggableEntity, S
 
 	private static final long serialVersionUID = -8470839812429749401L;
 
-	public static final String SESSION_ROUTED = "SESSION_ROUTED";
-
-	public static final String SESSION_INIT = "SESSION_INIT";
-	public static final String SESSION_CLOSED = "SESSION_CLOSED";
-	public static final String SESSION_STATUS = "SESSION_STATUS";
-
-	public static final String SESSION_ASSIGNED = "SESSION_ASSIGNED";
-
-	public static final String CONTACT_UPDATE = "CONTACT_UPDATE";
-
 	public InBoundEvent eventCode(String eventCode) {
-		this.eventCode = eventCode;
+		this.type = eventCode;
 		return this;
 	}
 

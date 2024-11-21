@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.chat.ChatService;
-import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
+import com.boot.jx.common.config.DefaultChatBoundHandler;
 import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.inbound.InBound.SessionAssginHandler;
 import com.boot.jx.postman.ClientApp;
@@ -137,7 +137,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session) {
 		NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
 		InBoundEvent agentAssignEvent = new InBoundEvent();
-		agentAssignEvent.eventCode = InBoundEvent.SESSION_ASSIGNED;
+		agentAssignEvent.type = InBoundEvent.EVENT_TYPE.SESSION_ASSIGNED;
 		agentAssignEvent.sessionId = session.getSessionId();
 		agentAssignEvent.sessionAssigned().oldAgent = session.getAssignedToAgent();
 		agentAssignEvent.sessionAssigned().oldDept = session.getAssignedToDept();

@@ -66,18 +66,18 @@ public class PMConstants {
 	}
 
 	public static class MESSAGE_SOURCE_CATEGARY {
-		public static final String MESSAGE = "message";
-		public static final String SOCIAL = "social";
-		public static final String ADS = "ads";
-		public static final String CAMPAIGN = "campaign";
+		public static final String MESSAGE = "MESSAGE";
+		public static final String SOCIAL = "SOCIAL";
+		public static final String ADS = "ADS";
+		public static final String CAMPAIGN = "CAMPAIGN";
 	}
 
 	public static class MESSAGE_SOURCE_TYPE {
-		public static final String INBOUND = "inbound";
-		public static final String OUTBOUND = "outbound";
-		public static final String STORY = "story";
-		public static final String POST = "post";
-		public static final String FEEDBACK = "feedback";
+		public static final String INBOUND = "INBOUND";
+		public static final String OUTBOUND = "OUTBOUND";
+		public static final String STORY = "STORY";
+		public static final String POST = "POST";
+		public static final String FEEDBACK = "FEEDBACK";
 	}
 
 	public static class MESSAGE_BOUND_TYPE {
