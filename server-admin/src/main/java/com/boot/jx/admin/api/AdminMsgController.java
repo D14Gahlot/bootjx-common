@@ -366,7 +366,7 @@ public class AdminMsgController {
 				return ApiResponse.buildResult(bulkDoc).message("Bulk Message Job Failed");
 			}
 
-		} else if (ArgUtil.is(ArgUtil.is(bulkMessage.getFilters()))) {
+		} else if (ArgUtil.is(bulkMessage.getFilters())) {
 			List<OutboxMessage> lstOutBoxMsg = getFilterDetails(bulkMessage);
 			BulkSessionDoc bulkDoc = bulkMessageService.sendToFilterGroup(lstOutBoxMsg, bulkMessage.getScheduler());
 			if (ArgUtil.is(bulkDoc)) {
@@ -729,7 +729,6 @@ public class AdminMsgController {
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
 			String hsmTemplateCode = null;
-			String groupName = null;
 			StringBuilder concatGroupNames = new StringBuilder();
 			Set<String> uniquePhoneNumbers = new HashSet<>();
 			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
@@ -742,7 +741,6 @@ public class AdminMsgController {
 
 					if (ArgUtil.is(groupDoc)) {
 						OutboxMessage outboxMsg = new OutboxMessage();
-						groupName = groupDoc.getGroupName();
 						if (concatGroupNames.length() > 0) {
 							concatGroupNames.append(" , "); // Add a comma separator
 						}
