@@ -400,12 +400,12 @@ public class AdminMsgController {
 					bulkDoc.setScheduler(bulkMessage.getScheduler());
 					mongoTemplate.save(bulkDoc);
 				}
-				bulkMessageService.registerJob(bulkDoc.getJob(), bulkMessage.getScheduler());
-				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
+				//bulkMessageService.registerJob(bulkDoc.getJob(), bulkMessage.getScheduler());
+				//return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
 
-//				bulkMessageService.cancelScheduleJob(bulkDoc);
-//				bulkMessageService.reSchedule(bulkDoc, bulkMessage.getScheduler());
-//				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
+				bulkMessageService.cancelScheduleJob(bulkDoc);
+				bulkMessageService.reSchedule(bulkDoc, bulkMessage.getScheduler());
+				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
 			} else {
 				if (ArgUtil.is(bulkMessage.getScheduler())) {
 					bulkMessage.templateId(bulkDoc.getTemplateId());
