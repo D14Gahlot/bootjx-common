@@ -414,6 +414,8 @@ public class AdminMsgController {
 					bulkMessage.contact().setContactId(bulkDoc.getChannelId());
 					bulkMessage.contact().setContactType(bulkDoc.getContactType());
 					bulkMessage.setCampaignTitle(bulkDoc.getCampaignTitle());
+					
+					
 					if (ArgUtil.is(bulkDoc.getGroupId()) || ArgUtil.is(bulkDoc.getGroups())) {
 						bulkMessage.setGroupId(bulkDoc.getGroupId());
 						if (ArgUtil.isEmpty(bulkDoc.getGroups())) {
@@ -421,7 +423,8 @@ public class AdminMsgController {
 						}
 						List<OutboxMessage> lstOutBoxMsg = getGroupDetailsV1(bulkMessage);
 						bulkMessageService.sendToGroup(lstOutBoxMsg, bulkMessage.getScheduler());
-					}else if(ArgUtil.is(bulkMessage.getFilters())) {
+					}else if(ArgUtil.is(bulkDoc.getFilters())) {
+						bulkMessage.setFilters(bulkDoc.getFilters());
 						List<OutboxMessage> lstOutBoxMsg = getFilterDetails(bulkMessage);
 						bulkMessageService.sendToFilterGroup(lstOutBoxMsg, bulkMessage.getScheduler());
 					}else {
