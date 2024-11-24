@@ -396,15 +396,11 @@ public class AdminMsgController {
 			bulkDoc = CollectionUtil.getOne(mongoTemplate
 					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 			if (ArgUtil.is(bulkDoc) && ArgUtil.is(bulkDoc.getScheduler()) && bulkMessage.cancelExisting == true) {
-				if (ArgUtil.is(bulkMessage.getScheduler())) {
-					bulkDoc.setScheduler(bulkMessage.getScheduler());
-					mongoTemplate.save(bulkDoc);
-				}
-				//bulkMessageService.registerJob(bulkDoc.getJob(), bulkMessage.getScheduler());
-				//return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
-
+				
 				bulkMessageService.cancelScheduleJob(bulkDoc);
-				bulkMessageService.reSchedule(bulkDoc, bulkMessage.getScheduler());
+				bulkMessage.setScheduler(bulkMessage.getScheduler());
+				bulkMessageService.reSend(bulkMessage, bulkDoc);
+				//bulkMessageService.reSchedule(bulkDoc, bulkMessage.getScheduler());
 				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
 			} else {
 				if (ArgUtil.is(bulkMessage.getScheduler())) {
@@ -853,7 +849,7 @@ public class AdminMsgController {
 					OutboxMessage outboxMsg = new OutboxMessage();
 					List<List<Object>> filterCri = profileFilter.get_filterCriteria();
 
-					List<List<ProfileSearchCriteria>> searCri = getSearchCriteria(filterCri);
+					List<List<ProfileSearchCriteria>> searCri =bulkMessageService.getSearchCriteria(filterCri);
 					ProfileSearchQuery profSerarch = new ProfileSearchQuery();
 					profSerarch.setSearchCriterias(searCri);
 					
@@ -896,19 +892,6 @@ public class AdminMsgController {
 		return listOfOutboxMsg;
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<List<ProfileSearchCriteria>> getSearchCriteria(List<List<Object>> filterCri) {
-		return  filterCri.stream()
-                .map(innerList -> innerList.stream()
-                        .filter(obj -> obj instanceof Map) // Ensure the object is a Map
-                        .map(obj -> (Map<String, String>) obj) // Cast to Map<String, String>
-                        .map(map -> new ProfileSearchCriteria(
-                                map.get("key"),
-                                map.get("operator"),
-                                map.get("value")
-                        ))
-                        .collect(Collectors.toList())) // Collect as List<ProfileSearchCriteria>
-                .collect(Collectors.toList());
-	}
+	
 
 }

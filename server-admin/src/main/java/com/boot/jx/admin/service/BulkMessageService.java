@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -22,11 +26,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.amplify.model.JobStatus;
+import com.boot.jx.admin.dto.ProfileSearchCriteria;
+import com.boot.jx.admin.dto.ProfileSearchQuery;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.doc.GroupDoc;
+import com.boot.jx.common.dto.GroupSessionDto;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonTemplateMeta;
@@ -41,9 +49,12 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageDoc;
+import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.MessageStore;
@@ -83,6 +94,9 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	@Autowired
 	CommonServiceClient commonSerClient;
+	
+	@Autowired
+	CustomerProfileService cusProfileService;
 
 	public void registerJobAndTriggerSummary(BatchJob job) {
 		registerJob(job);
@@ -575,6 +589,46 @@ public class BulkMessageService extends BatchJobExecuter {
 				.data("lane", session.getLane()), schedular);
 		return session;
 	}
+	
+	public BulkSessionDoc reSend(OutboxMessage bulkMessage,BulkSessionDoc bulkDoc) throws Exception{
+		if (ArgUtil.is(bulkMessage.getScheduler())) {
+			bulkMessage.templateId(bulkDoc.getTemplateId());
+			bulkMessage.message(bulkDoc.getMessage());
+			bulkMessage.contact().setLane(bulkDoc.getLane());
+			bulkMessage.contact().setContactId(bulkDoc.getChannelId());
+			bulkMessage.contact().setContactType(bulkDoc.getContactType());
+			bulkMessage.setCampaignTitle(bulkDoc.getCampaignTitle());
+			if (ArgUtil.is(bulkDoc.getGroupId()) || ArgUtil.is(bulkDoc.getGroups())) {
+				bulkMessage.setGroupId(bulkDoc.getGroupId());
+				if (ArgUtil.isEmpty(bulkDoc.getGroups())) {
+					bulkMessage.setGroups(Arrays.asList(bulkDoc.getGroupId()));
+				}
+				List<OutboxMessage> lstOutBoxMsg = getGroupDetailsV1(bulkMessage);
+				return sendToGroup(lstOutBoxMsg, bulkMessage.getScheduler());
+			}else if(ArgUtil.is(bulkDoc.getFilters())) {
+				bulkMessage.setFilters(bulkDoc.getFilters());
+				List<OutboxMessage> lstOutBoxMsg = getFilterDetails(bulkMessage);
+				return sendToFilterGroup(lstOutBoxMsg, bulkMessage.getScheduler());
+			}else {
+				Query queryAll = new Query();
+				queryAll.addCriteria(Criteria.where("type").in("O"));
+				queryAll.addCriteria(Criteria.where("bulkSessionId").is(bulkDoc.getBulkSessionId()));
+				queryAll.fields().include("contact.phone").include("messageId");
+				List<MessageDoc> msgDoc = mongoTemplate.find(queryAll, MessageDoc.class,
+						MessageDoc.COLLECTION_NAME + "_" + bulkDoc.getContactType().toString());
+				List<String> to = new ArrayList<>();
+				if (ArgUtil.is(msgDoc)) {
+					msgDoc.forEach(doc -> to.add(doc.getContact().getPhone()));
+					bulkMessage.setTo(to);
+				}
+				return send(bulkMessage, bulkMessage.getScheduler());
+			}
+		}
+		return null;
+	}
+		
+		
+		
 
 	public BulkSessionDoc sendToFilterGroup(List<OutboxMessage> bulkMessages, ChronoScheduler scheduler) throws NumberParseException {
 		OutboxMessage bulkMessage = bulkMessages.get(bulkMessages.size()-1);
@@ -644,5 +698,152 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		return session;
 	}
+	
+	public List<OutboxMessage> getGroupDetailsV1(OutboxMessage outboxMessage) {
 
+		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
+
+		if (outboxMessage != null) {
+			List<String> groups = outboxMessage.getGroups();
+			if (ArgUtil.isEmpty(groups)) {
+				groups = new ArrayList<>();
+				groups.add(outboxMessage.getGroupId());
+			}
+			String groupTitle = outboxMessage.getCampaignTitle();
+			OutboxMessage otBoxMsg = outboxMessage;
+			String hsmId = otBoxMsg.getHsm().getId();
+			String hsmTemplateCode = null;
+			StringBuilder concatGroupNames = new StringBuilder();
+			Set<String> uniquePhoneNumbers = new HashSet<>();
+			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
+			if (ArgUtil.is(templateDoc)) {
+				hsmTemplateCode = templateDoc.getCode();
+			}
+			if (ArgUtil.is(groups)) {
+				for (String groupId : groups) {
+					GroupDoc groupDoc = mongoTemplate.findById(groupId, GroupDoc.class);
+
+					if (ArgUtil.is(groupDoc)) {
+						OutboxMessage outboxMsg = new OutboxMessage();
+						if (concatGroupNames.length() > 0) {
+							concatGroupNames.append(" , "); // Add a comma separator
+						}
+						concatGroupNames.append(groupDoc.getGroupName());
+
+						List<GroupSessionDto> lstDto = groupDoc.getSessions();
+						CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
+						hsmTemp.setId(hsmId);
+						hsmTemp.setCode(hsmTemplateCode);
+						hsmTemp.setData(otBoxMsg.getHsm().data());
+
+						outboxMsg.setGroupId(groupId);
+						outboxMsg.setCampaignTitle(groupTitle);
+						outboxMsg.setMessage(otBoxMsg.getMessage());
+
+						outboxMsg.setAttachments(otBoxMsg.getAttachments());
+						outboxMsg.setContact(otBoxMsg.getContact());
+						outboxMsg.setHsm(hsmTemp);
+						outboxMsg.setGroupName(concatGroupNames.toString());
+
+						for (GroupSessionDto dto : lstDto) {
+							outboxMsg.setTo(Arrays.asList(dto.getPhone()));
+							uniquePhoneNumbers.add(dto.getPhone());
+						}
+						List<String> toLst = new ArrayList<>(uniquePhoneNumbers);
+						outboxMsg.setTo(toLst);
+						outboxMsg.setGroups(otBoxMsg.getGroups());
+						listOfOutboxMsg.add(outboxMsg);
+					}
+
+				}
+
+			}
+
+		}
+		return listOfOutboxMsg;
+	}
+
+	private List<OutboxMessage> getFilterDetails(OutboxMessage outboxMessage) {
+
+		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
+
+		if (outboxMessage != null && ArgUtil.is(outboxMessage.getFilters())) {
+			List<String> filters = outboxMessage.getFilters();
+			String campTitle = outboxMessage.getCampaignTitle();
+			OutboxMessage otBoxMsg = outboxMessage;
+			String hsmId = otBoxMsg.getHsm().getId();
+			String hsmTemplateCode = null;
+			
+			StringBuilder concatFilterpNames = new StringBuilder();
+			Set<String> uniquePhoneNumbers = new HashSet<>();
+			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
+			if (ArgUtil.is(templateDoc)) {
+				hsmTemplateCode = templateDoc.getCode();
+			}
+
+			for (String filterId : filters) {
+				ProfileFilterMasterDoc profileFilter = mongoTemplate.findById(filterId, ProfileFilterMasterDoc.class);
+
+				if (ArgUtil.is(profileFilter) && ArgUtil.is(profileFilter.get_filterCriteria())) {
+					OutboxMessage outboxMsg = new OutboxMessage();
+					List<List<Object>> filterCri = profileFilter.get_filterCriteria();
+
+					List<List<ProfileSearchCriteria>> searCri = getSearchCriteria(filterCri);
+					ProfileSearchQuery profSerarch = new ProfileSearchQuery();
+					profSerarch.setSearchCriterias(searCri);
+					
+					List<CustomerProfileDoc> docs = null;
+					if(ArgUtil.is(searCri)){
+						docs =cusProfileService.getProfileSearch(profSerarch);
+					}
+					if (ArgUtil.is(docs)) {
+
+						if (concatFilterpNames.length() > 0) {
+							concatFilterpNames.append(" , "); // Add a comma separator
+						}
+						concatFilterpNames.append(profileFilter.getFilterName());
+						for (CustomerProfileDoc profielDoc : docs) {
+							Set<PBPhone> lstDto = profielDoc.getPhones();
+							CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
+							hsmTemp.setId(hsmId);
+							hsmTemp.setCode(hsmTemplateCode);
+							hsmTemp.setData(otBoxMsg.getHsm().data());
+
+							outboxMsg.setAttachments(otBoxMsg.getAttachments());
+							outboxMsg.setContact(otBoxMsg.getContact());
+							outboxMsg.setHsm(hsmTemp);
+							outboxMsg.setGroupName(concatFilterpNames.toString());
+							outboxMsg.setCampaignTitle(campTitle);
+							for (PBPhone dto : lstDto) {
+								outboxMsg.setTo(Arrays.asList(dto.getPhone()));
+								uniquePhoneNumbers.add(dto.getPhone());
+							}
+							List<String> toLst = new ArrayList<>(uniquePhoneNumbers);
+							outboxMsg.setTo(toLst);
+							outboxMsg.setFilters(filters);
+							listOfOutboxMsg.add(outboxMsg);
+						}
+					}
+				}
+			}
+
+		}
+		return listOfOutboxMsg;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<List<ProfileSearchCriteria>> getSearchCriteria(List<List<Object>> filterCri) {
+		return  filterCri.stream()
+                .map(innerList -> innerList.stream()
+                        .filter(obj -> obj instanceof Map) // Ensure the object is a Map
+                        .map(obj -> (Map<String, String>) obj) // Cast to Map<String, String>
+                        .map(map -> new ProfileSearchCriteria(
+                                map.get("key"),
+                                map.get("operator"),
+                                map.get("value")
+                        ))
+                        .collect(Collectors.toList())) // Collect as List<ProfileSearchCriteria>
+                .collect(Collectors.toList());
+	}
 }
