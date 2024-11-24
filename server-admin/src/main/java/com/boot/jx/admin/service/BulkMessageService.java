@@ -34,10 +34,12 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.GroupDoc;
+import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.common.dto.GroupSessionDto;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonTemplateMeta;
+import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
@@ -544,6 +546,13 @@ public class BulkMessageService extends BatchJobExecuter {
 			ChronoScheduler cSch = bulkDoc.getScheduler();
 			LOGGER.info("The interval is a valid future date." + cSch.getInterval());
 			cSch.setTopic("CANCELLED");
+			bulkDoc.setStatus(JobStatus.CANCELLED.toString());
+			
+			
+			MongoQueryBuilder<BulkSessionDoc> builderU = MongoQueryBuilder.collection(BulkSessionDoc.class).whereId(bulkDoc.getBulkSessionId());
+			builderU.set("status", JobStatus.CANCELLED.toString());
+			mongoTemplate.upsert(builderU);
+			
 			registerJob(bulkDoc.getJob(), bulkDoc.getScheduler());
 			stopJob(bulkDoc.getJob().getJobId());
 			CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
