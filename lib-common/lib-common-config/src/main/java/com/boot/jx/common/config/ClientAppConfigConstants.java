@@ -49,8 +49,9 @@ public class ClientAppConfigConstants {
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
 				new ConfigMeta().title("When no agent is found in working hours").path("props.agent_notfound")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
-						new ConfigMeta().title("When no agent is found in non-working hours").path("props.agent_notfound")
+						new ConfigMeta().title("When no agent is found in non-working hours").path("props.org_offline")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
+						
 				new ConfigMeta().title("When chat is transferred").path("props.agent_transfer")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 						.group("Templates") });

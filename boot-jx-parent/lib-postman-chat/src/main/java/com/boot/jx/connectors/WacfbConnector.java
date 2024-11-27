@@ -356,9 +356,21 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			} else if ("nfm_reply".equals(interactiveType)) {
 				String responseJsonString = map.entry(InBoundWrapperPaths.INTERACTIVE_NFM_REPLY_RESPONSE_JSON)
 						.asString();
+				String flowId = null;
+
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
-				String flow_token = replyJsonMap.get("flow_token").toString();
-				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flow_token);
+				if (replyJsonMap.containsKey("wa_flow_response_params")) {
+				    Map<String, Object> responseParams = (Map<String, Object>) replyJsonMap.get("wa_flow_response_params");
+				    if (responseParams != null && responseParams.containsKey("flow_id")) {
+				        flowId = responseParams.get("flow_id").toString();
+				    }
+				}
+
+				if (flowId == null || flowId.isEmpty()) {
+				    flowId = replyJsonMap.get("flow_token").toString();
+				}
+				//String flowId = ((Map<String, Object>) replyJsonMap.get("wa_flow_response_params")).get("flow_id").toString();
+				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 				WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
 				if (flow != null) {
 					inboxMessage.form().put("field_meta", flow.getFieldMeta());
