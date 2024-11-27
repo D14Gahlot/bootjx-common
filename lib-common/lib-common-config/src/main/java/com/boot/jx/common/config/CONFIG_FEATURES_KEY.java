@@ -36,7 +36,9 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 			new ConfigMeta("Bot Flow Builder", "feature.bot.flow.builder").optionsOnOff().group(ConfigConstants.BOT)),
 
 	CAMPAIGN_SCHEDULER(new ConfigMeta("Campaign Scheduler", "feature.campaign.scheduler").optionsOnOff()
-			.group(ConfigConstants.BOT)),
+			.group(ConfigConstants.CAMPAIGN)),
+	CAMPAIGN_RESEND_FAILED(new ConfigMeta("Campaign Resend Failed Marketing Messages", "feature.campaign.resend.failed")
+			.optionsOnOff().group(ConfigConstants.CAMPAIGN)),
 
 	APP_MODULE_CALENDAR(new ConfigMeta("Calendar Module", "feature.app.module.calandar").optionsOnOff()
 			.group(ConfigConstants.APP_MODULES)),
