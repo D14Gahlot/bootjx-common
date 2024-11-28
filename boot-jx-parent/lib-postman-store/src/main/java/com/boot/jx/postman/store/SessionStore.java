@@ -611,7 +611,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	public ChatSessionDoc getPreviousSession(ChatSessionDoc session) {
 
 		Criteria criteria = QueryCriteria.whereIdNot(session.getSessionId()).and("contactId").is(session.getContactId())
-				.and("startSessionStamp").is(session.getStartSessionStamp());
+				.and("startSessionStamp").lt(session.getStartSessionStamp());
 
 		if (ArgUtil.is(session.getTicketHash())) {
 			criteria.and("ticketHash").is(session.getTicketHash());
@@ -621,6 +621,9 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1)
 				// .skip(1)
 				.skipDBRef();
+
+		//System.out.println("===" + cmqb.getQuery());
+
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}
 
