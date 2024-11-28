@@ -602,7 +602,19 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	public ChatSessionDoc getPreviousSession(Contactable contact, long timestamp) {
 		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.where(Criteria.where("contactId").is(contact.getContactId()).and("startSessionStamp").lt(timestamp));
-		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1).skip(1).skipDBRef();
+		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1)
+				// .skip(1)
+				.skipDBRef();
+		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
+	}
+
+	public ChatSessionDoc getPreviousSession(ChatSessionDoc session) {
+		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
+				.where(QueryCriteria.whereIdNot(session.getSessionId()).and("contactId").is(session.getContactId())
+						.and("startSessionStamp"));
+		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1)
+				// .skip(1)
+				.skipDBRef();
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}
 
