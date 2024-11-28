@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -272,6 +274,17 @@ public class EmpAuthService {
 			String domainId, String app, String event) throws NoSuchAlgorithmException {
 		UserAuthToken userLoginToken = new UserAuthToken();
 		AgentDoc agent = validateAgent(username, email, password);
+		
+		if(ArgUtil.is(password)) {
+			 String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
+			 Pattern pattern = Pattern.compile(regex);
+		     Matcher matcher = pattern.matcher(password);
+		     if (!matcher.matches()) {
+		    	 ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
+							.codeKey("ValidCredentials").description("Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols."));
+		     }
+		}
+		
 		if (ArgUtil.is(agent)) {
 			HashBuilder builder = getHashBuilder(agent.getAgent_code(), agent.getAgent_email(), domainName, domainId,
 					agent.getAuthKey());
