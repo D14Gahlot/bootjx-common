@@ -426,6 +426,7 @@ public class WacfbClient implements ChannelClient {
 						} else if ("FLOW".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
+									
 									String path = (String) buttonParameter.get("path");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
 									buttonComponent.parameter("action", MapModel.createInstance());
@@ -445,10 +446,29 @@ public class WacfbClient implements ChannelClient {
 								components.add(buttonComponent.build().map());
 							}
 						} else if ("FLOW".equals(buttonType)) {
+							if(ArgUtil.is(buttonParameterVar))
+							{
+							for(Map<String, Object> buttonParameter : buttonParameterVar)
+							{
+                                if (buttonParameter.containsKey("path")) {
+									
+									String path = (String) buttonParameter.get("path");
+
 							TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
 							buttonComponent.parameter("action",
 									MapModel.createInstance().put("flow_token", outboxMessage.getMessageId()));
 							components.add(buttonComponent.build().map());
+						}}}
+							else
+							{
+								Object flowIdObj = extTemplateComponentButton.get("flow_id"); // Get the value of "flow_id"
+						        String flow_id = flowIdObj != null ? String.valueOf(flowIdObj) : null;
+								//String flow_id= (String) extTemplateComponentButton.get("flow_id");
+								TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
+								buttonComponent.parameter("action",
+										MapModel.createInstance().put("flow_token", outboxMessage.getMessageId()+"/"+flow_id));
+								components.add(buttonComponent.build().map());
+							}
 						}
 					}
 				}
