@@ -68,46 +68,6 @@ public class CommonServiceClient {
 	}
 	
 	
-	public java.util.Map<String, Object> getScheduleStatus(String schedule){
-		 RestTemplate restTemplate = new RestTemplate();
-
-	        String url = UriComponentsBuilder
-	                .fromHttpUrl("https://demo.mehery.xyz/nexus/calendar/api/v1/orgSchedule/status"+schedule)
-	                .encode()
-	                .toUriString();
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.set("app-proxy-token", "iwPHDr0GZTuriUsijvf6g70AOFlPak541Y2fJQpSUhp8vYtT04gXQFSBCggkjFSR");
-	        headers.set("x-agent-code", "lt");
-
-	        HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
-
-	        Map<String, Object> responseMap = new HashMap<>();
-	        try {
-	            ResponseEntity<String> response = restTemplate.exchange(
-	                    url,
-	                    HttpMethod.GET,
-	                    requestEntity,
-	                    String.class
-	            );
-
-	            LOGGER.info("Response", response.getBody());
-
-	            ObjectMapper objectMapper = new ObjectMapper();
-	            JsonNode rootNode = objectMapper.readTree(response.getBody());
-	            rootNode.fields().forEachRemaining(entry -> {
-	                responseMap.put(entry.getKey(), entry.getValue());
-	            });
-
-	        } catch (HttpClientErrorException e) {
-	            LOGGER.error("Error", e.getResponseBodyAsString());
-	            responseMap.put("error", e.getResponseBodyAsString());
-	        } catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-	        return responseMap;
-	    }
 	
 	
 	
