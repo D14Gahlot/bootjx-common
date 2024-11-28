@@ -214,15 +214,6 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			new ConfigMeta("Message to customer when no agent available in working hours", "postman.agent.chat.autoreply.noagent")
 					.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 					.group(ConfigConstants.GROUP_AGENT)),
-	POSTMAN_AGENT_CHAT_AUTOREPLY_ORGOFFLINE(
-			new ConfigMeta("Message to customer when no agent available in non-working hours", "postman.agent.chat.autoreply.org_offline")
-					.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
-					.group(ConfigConstants.GROUP_AGENT)),
-	POSTMAN_AGENT_CHAT_SCHEDULE(
-			new ConfigMeta("List of shedules", "postman.agent.chat.schedule")
-			.optionsSource("getx:/nexus/calendar/api/v1/orgSchedule/list")
-			.optionsKey("code").optionsLabel("desc")
-			.group(ConfigConstants.GROUP_AGENT)),
 	
 
 	
