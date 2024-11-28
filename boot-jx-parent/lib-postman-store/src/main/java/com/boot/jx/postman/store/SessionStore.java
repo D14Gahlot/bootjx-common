@@ -611,7 +611,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	public ChatSessionDoc getPreviousSession(ChatSessionDoc session) {
 		MongoQueryBuilder<ChatSessionDoc> cmqb = MongoQueryBuilder.collection(ChatSessionDoc.class)
 				.where(QueryCriteria.whereIdNot(session.getSessionId()).and("contactId").is(session.getContactId())
-						.and("startSessionStamp"));
+						.and("startSessionStamp").is(session.getStartSessionStamp()));
 		cmqb.sortBy("startSessionStamp", Direction.DESC).limit(1)
 				// .skip(1)
 				.skipDBRef();
