@@ -115,43 +115,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 				}
 			} else if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
 					&& !ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
-				PMConfigurationObject schedule1 = pmEnvironment
-						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_SCHEDULE);
-				String schedule=schedule1.asString();
 				
-				Map apiResponse =(Map) commonServiceClient.getScheduleStatus(schedule);
-		        boolean isWorkingDay = false;
-
-		        try {
-		            if (((java.util.Map<String, Object>) apiResponse).containsKey("results")) {
-		                ObjectMapper objectMapper = new ObjectMapper();
-		                JsonNode resultsNode = objectMapper.convertValue(((java.util.Map<String, Object>)apiResponse).get("results"), JsonNode.class);
-
-		                if (resultsNode.isArray()) {
-		                    for (JsonNode result : resultsNode) {
-		                        JsonNode flagsNode = result.path("flags");
-
-		                        if (flagsNode.isObject()) {
-
-		                            if (flagsNode.has("isWorkingDayToday") && flagsNode.get("isWorkingDayToday").asBoolean()) {
-		                                isWorkingDay = true;
-		                                		                            } 
-
-		                        
-		                        }
-		                    }
-		                } else {
-		                    LOGGER.warn("No result is found.");
-		                }
-		            } else if (((java.util.Map<String, Object>) apiResponse).containsKey("error")) {
-		            } else {
-		            }
-		        } catch (Exception e) {
-		            LOGGER.error("Error recieved", e.getMessage(), e);
-		        }
-
-		        // Output based on working hours
-		        if (isWorkingDay) {
 		        	MapEntry templ = getTemplate(props, "agent_notfound",
     						CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
     				if (templ.exists()) {
@@ -160,20 +124,8 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
 		        } 
     				
-		        }else {
-		        	MapEntry templ = getTemplate(props, "agent_orgoffline",
-    						CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_ORGOFFLINE);
-    				if (templ.exists()) {
-    					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
-    					return;
-    				}
+			}
 
-		        }
-
-		    }
-				
-				
-				
 			
 			else {
 
