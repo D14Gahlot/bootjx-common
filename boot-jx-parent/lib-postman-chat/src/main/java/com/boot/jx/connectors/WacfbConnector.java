@@ -367,7 +367,10 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				}
 
 				if (flowId == null || flowId.isEmpty()) {
-				    flowId = replyJsonMap.get("flow_token").toString();
+					String flowToken = String.valueOf(replyJsonMap.get("flow_token"));				
+					if (flowToken.contains("/")) {
+						flowId = flowToken.substring(flowToken.lastIndexOf("/") + 1);
+				}
 				}
 				//String flowId = ((Map<String, Object>) replyJsonMap.get("wa_flow_response_params")).get("flow_id").toString();
 				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
