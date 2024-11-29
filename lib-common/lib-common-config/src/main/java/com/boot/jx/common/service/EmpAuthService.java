@@ -248,6 +248,17 @@ public class EmpAuthService {
 			throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
+		
+		LOGGER.info("agentSetPass :");
+		if(ArgUtil.is(password)) {
+			 String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
+			 Pattern pattern = Pattern.compile(regex);
+		     Matcher matcher = pattern.matcher(password);
+		     if (!matcher.matches()) {
+		    	 ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
+							.codeKey("ValidCredentials").description("Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols."));
+		     }
+		}
 		if (setPassword(username, password, newpassword)) {
 			x.setStatusKey("SUCCESS");
 		} else {
@@ -274,17 +285,6 @@ public class EmpAuthService {
 			String domainId, String app, String event) throws NoSuchAlgorithmException {
 		UserAuthToken userLoginToken = new UserAuthToken();
 		AgentDoc agent = validateAgent(username, email, password);
-		
-		if(ArgUtil.is(password)) {
-			 String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
-			 Pattern pattern = Pattern.compile(regex);
-		     Matcher matcher = pattern.matcher(password);
-		     if (!matcher.matches()) {
-		    	 ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
-							.codeKey("ValidCredentials").description("Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols."));
-		     }
-		}
-		
 		if (ArgUtil.is(agent)) {
 			HashBuilder builder = getHashBuilder(agent.getAgent_code(), agent.getAgent_email(), domainName, domainId,
 					agent.getAuthKey());
