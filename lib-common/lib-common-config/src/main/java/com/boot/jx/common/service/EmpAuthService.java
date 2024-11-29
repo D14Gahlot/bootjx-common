@@ -249,11 +249,11 @@ public class EmpAuthService {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
 		
-		LOGGER.info("agentSetPass :"+password);
+		LOGGER.info("agentSetPass :"+password+"\t newpassword :"+newpassword);
 		if(ArgUtil.is(password)) {
 			 String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
 			 Pattern pattern = Pattern.compile(regex);
-		     Matcher matcher = pattern.matcher(password);
+		     Matcher matcher = pattern.matcher(newpassword);
 		     LOGGER.info("agentSetPass :"+matcher.matches());
 		     if (!matcher.matches()) {
 		    	 ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
