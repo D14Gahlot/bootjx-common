@@ -2,6 +2,7 @@ package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
@@ -44,6 +45,7 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 	private Long completedStamp;
 
 	/** group key **/
+	@Deprecated
 	private String groupId;
 	private String campaignTitle;
 	private String groupName;
@@ -52,6 +54,9 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 	private BatchJob job;
 	
 	private Map<String, Object> campaignSummary;
+	
+	private List<String> groups;
+	private List<String> filters;
 
 	
 
@@ -236,6 +241,22 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	public void setCampaignSummary(Map<String, Object> campaignSummary) {
 		this.campaignSummary = campaignSummary;
+	}
+
+	public List<String> getGroups() {
+		return groups;
+	}
+
+	public void setGroups(List<String> groups) {
+		this.groups = groups;
+	}
+
+	public List<String> getFilters() {
+		return filters;
+	}
+
+	public void setFilters(List<String> filters) {
+		this.filters = filters;
 	}
 
 }

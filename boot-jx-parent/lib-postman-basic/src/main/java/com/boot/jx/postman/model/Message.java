@@ -64,7 +64,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private Map<String, Object> model = new HashMap<String, Object>();
 	protected Map<String, Object> options = new HashMap<String, Object>();
 	protected Map<String, Object> meta;
+
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	private Map<String, Object> replyTo = new HashMap<String, Object>();
+	private MessageReferral referral;
 
 	private List<PostManFile> files = null;
 	private List<Attachment> attachments = null;
@@ -663,6 +670,11 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.messageIdResend = messageIdResend;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public Map<String, Object> getReplyTo() {
 		return replyTo;
 	}
@@ -671,10 +683,23 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.replyTo = replyTo;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public Map<String, Object> replyTo() {
 		if (replyTo == null) {
 			this.replyTo = new HashMap<String, Object>();
 		}
 		return this.replyTo;
+	}
+
+	public MessageReferral getReferral() {
+		return referral;
+	}
+
+	public void setReferral(MessageReferral referral) {
+		this.referral = referral;
 	}
 }

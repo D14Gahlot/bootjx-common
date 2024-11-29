@@ -24,6 +24,8 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.jx.postman.PMConstants.MESSAGE_BOUND_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_SOURCE_CATEGARY;
 import com.boot.jx.postman.doc.ContactDetailDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDocAbstract;
@@ -33,6 +35,7 @@ import com.boot.jx.postman.doc.MessageHold.MessageHoldRejected;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageLoggable;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
@@ -159,7 +162,11 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		return mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 	}
 
-	private MessageDoc findMessageDoc(InboxMessage inboxMessage) {
+	MessageDoc findMessageDoc(IMessageLoggable inboxMessage) {
+		if (!ArgUtil.is(inboxMessage)) {
+			return null;
+		}
+
 		if (ArgUtil.is(inboxMessage.getMessageId())) {
 			return mongoTemplate.findById(inboxMessage.getMessageId(), MessageDoc.class,
 					getCollectionName(inboxMessage.contact().type()));
@@ -173,6 +180,14 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		}
 	}
 
+//	public MessageDoc findMessageDoc(OutboxMessage outMessage) {
+//		if (ArgUtil.is(outMessage.getMessageId())) {
+//			return mongoTemplate.findById(outMessage.getMessageId(), MessageDoc.class,
+//					getCollectionName(outMessage.contact().type()));
+//		}
+//		return null;
+//	}
+
 	public MessageDoc findOrCreateMessageDoc(InboxMessage inboxMessage) {
 		MessageDoc doc = findMessageDoc(inboxMessage);
 		if (!ArgUtil.is(doc)) {
@@ -181,13 +196,17 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 				MessageDoc replyTo = findOneByMessageIdExt(doc.getReplyIdExt(),
 						inboxMessage.contact().getContactType());
 				if (ArgUtil.is(replyTo)) {
+					doc.referral().setSourceCategory(MESSAGE_SOURCE_CATEGARY.MESSAGE);
+					doc.referral().setSourceType(MESSAGE_BOUND_TYPE.typeToName(replyTo.getType()));
 					if (ArgUtil.is(replyTo.getMessageId())) {
 						doc.setReplyId(replyTo.getMessageId());
 						doc.replyTo().put("messageId", replyTo.getMessageId());
+						doc.referral().setMessageId(replyTo.getMessageId());
 					}
 					if (ArgUtil.is(replyTo.getMessageIdExt())) {
 						doc.setReplyIdExt(replyTo.getMessageIdExt());
 						doc.replyTo().put("messageIdExt", replyTo.getMessageIdExt());
+						doc.referral().setMessageIdExt(replyTo.getMessageIdExt());
 					}
 					if (ArgUtil.is(replyTo.getBulkSessionId())) {
 						doc.replyTo().put("bulkSessionId", replyTo.getBulkSessionId());
@@ -278,6 +297,9 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.meta().putAll(outMessage.meta());
 		doc.options().putAll(outMessage.options());
 
+		// Incase it was missed
+		doc.setContactId(PostManUtil.createContactId(outMessage));
+
 		return doc;
 	}
 
@@ -304,7 +326,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.setTime(TimeStampIndex.now());
 
 		String to = CollectionUtil.getOne(outMessage.getTo());
-		doc.setContactId(PostManUtil.createContactId(outMessage));
+		// doc.setContactId(PostManUtil.createContactId(outMessage));
 
 		ContactDetailDoc contact = new ContactDetailDoc();
 		contact.copyFrom(outMessage.contact());
@@ -315,14 +337,6 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		updateMessageDoc(outMessage, doc);
 
 		return doc;
-	}
-
-	public MessageDoc findMessageDoc(OutboxMessage outMessage) {
-		if (ArgUtil.is(outMessage.getMessageId())) {
-			return mongoTemplate.findById(outMessage.getMessageId(), MessageDoc.class,
-					getCollectionName(outMessage.contact().type()));
-		}
-		return null;
 	}
 
 	private MessageDoc findOrCreateMessageDoc(OutboxMessage outMessage) {
@@ -403,13 +417,14 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 				getCollectionName(contactType));
 	}
 
-	public void updateStatus(MessageReport messageReport) {
+	public MessageDoc updateStatus(MessageReport messageReport) {
 
 		LOGGER.debug("updateStatus {} {} {}", messageReport.getMessageId(), messageReport.contact().getChannelType(),
 				messageReport.getStatus(), messageReport.getSessionId());
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
+		MessageDoc m = null;
 		boolean multi = false;
 		if (ArgUtil.is(messageReport.getMessageId())) {
 			builder.whereIdSafe(messageReport.getMessageId());
@@ -428,7 +443,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 									Criteria.where("timestamp").gt(TimeUtils.beforeTimeMillis("24hr"))));
 			multi = true;
 		} else {
-			return;
+			return m;
 		}
 
 		if (ArgUtil.is(messageReport.getStatus())) {
@@ -456,13 +471,16 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 			}
 
 			if (result.isModifiedCountAvailable() && result.getModifiedCount() > 1) {
-				builder.limit(result.getModifiedCount());
+				builder.sortBy("timestamp", Direction.ASC).limit(result.getModifiedCount());
 				List<MessageDoc> messsages = mongoTemplate.find(builder.getQuery(), MessageDoc.class, collectionName);
-				if (ArgUtil.is(messsages) && ArgUtil.is(messsages.get(0))) {
-					updateMessageReport(messageReport, messsages.get(0));
+				if (ArgUtil.is(messsages)) {
+					m = messsages.get(messsages.size() - 1);
+					if (ArgUtil.is(m)) {
+						updateMessageReport(messageReport, m);
+					}
 				}
 			} else {
-				MessageDoc m = mongoTemplate.findOne(builder.getQuery(), MessageDoc.class, collectionName);
+				m = mongoTemplate.findOne(builder.getQuery(), MessageDoc.class, collectionName);
 				if (ArgUtil.is(m)) {
 					updateMessageReport(messageReport, m);
 					/** added for session update **/
@@ -471,11 +489,10 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 				}
 
 			}
-
 			// LOGGER.info(JsonUtil.toJson(builder));
 			/** update session expiry timestamp **/
-
 		}
+		return m;
 	}
 
 	private void updateMessageReport(MessageReport messageReport, MessageDoc m) {
@@ -618,8 +635,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 
 		CommonMongoQueryBuilder builder2 = new CommonMongoQueryBuilder();
 		builder2.where(Criteria.where("contactId").is(contactId).and("sessionId")
-				.is(inboxMessageOriginal.getSessionId()).and("appType").is(appConfig.getAppType()))
-				.sortBy("timestamp");;
+				.is(inboxMessageOriginal.getSessionId()).and("appType").is(appConfig.getAppType())).sortBy("timestamp");
 		List<MessageHold> docs = mongoTemplate.findAllAndRemove(builder2.getQuery(), MessageHold.class);
 		List<InboxMessage> x = docs.stream().map(d -> d.getInboxMessage()).collect(Collectors.toList());
 		return x;

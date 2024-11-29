@@ -3,7 +3,6 @@ package com.boot.jx.postman.dto;
 import java.util.List;
 
 import com.boot.jx.postman.model.ContactMeta;
-import com.boot.jx.swagger.ApiMockModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 

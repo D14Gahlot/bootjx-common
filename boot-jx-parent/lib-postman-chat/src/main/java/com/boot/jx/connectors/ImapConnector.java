@@ -1,23 +1,14 @@
 package com.boot.jx.connectors;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.auth.AuthStateManager.AuthState;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.email.EmailReplyParser;
-import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
@@ -39,8 +30,8 @@ import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.nexus.NexusEmailClient;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
-import com.boot.jx.postman.plugin.GmailPlugin;
-import com.boot.jx.postman.plugin.GmailPlugin.GmailConfigDetails;
+import com.boot.jx.postman.plugin.ImapPlugin;
+import com.boot.jx.postman.plugin.ImapPlugin.ImapConfigDetails;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
@@ -48,33 +39,13 @@ import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
-import com.boot.utils.Urly;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 
 @Component
-@ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.GMAIL)
-public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailPlugin> {
+@ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.IMAP)
+public class ImapConnector extends AbstractConnector<ImapConfigDetails, ImapPlugin> {
 
-	private static Logger LOGGER = LoggerService.getLogger(GmailConnector.class);
-//	private static final String AUTHORITY = "https://login.microsoftonline.com";
-//	private static final String GRAPH_API = "https://graph.microsoft.com";
-//	private static final String AUTHORIZE_URL = AUTHORITY + "/common/oauth2/v2.0/authorize";
-//	private static final String AUTHORIZE_TOKEN = AUTHORITY + "/common/oauth2/v2.0/token";
-
-	private static final String GOOGLE = "https://accounts.google.com";
-	private static final String GOOGLE_OAUTH_URL = GOOGLE + "/o/oauth2/v2/auth";
-	private static final String FACEBOOK_GRAPHAPI = "https://oauth2.googleapis.com";
-	private static final String AUTHORIZE_TOKEN = FACEBOOK_GRAPHAPI + "/token";
-
-	private static final String[] SCOPES = { "https://www.googleapis.com/auth/gmail.modify", // Modify Gmail
-			"https://www.googleapis.com/auth/pubsub", // Pub/Sub access
-			"https://www.googleapis.com/auth/gmail.send", // Send emails
-			"openid", "email", "profile" };
+	private static Logger LOGGER = LoggerService.getLogger(ImapConnector.class);
 
 	@Autowired
 	private RestService restService;
@@ -90,110 +61,6 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 	@Autowired
 	private MessageStore messageStore;
-
-	@Override
-	public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigLogger, AuthState state)
-			throws URISyntaxException, MalformedURLException {
-		String redirectUri = String.format("%s%s/ext/setup/channel/callback/gmail", commonHttpRequest.getServerHost(),
-				appConfig.getAppPrefix(), environment.keyEntry("mry.prop.service.server").asString());
-		/// &state=fooobar&scope=r_liteprofile%20r_emailaddress%20w_member_social
-		state.setRedirectUrl(redirectUri);
-
-		return Urly.parse(GOOGLE_OAUTH_URL).queryParam("response_type", "code")
-				.queryParam("client_id", setup.getGmail().getMasterClientId()) // CLIENT_ID
-				.queryParam("access_type", "offline") // access_type
-				.queryParam("scope", String.join(" ", SCOPES)) //
-				.queryParam("redirect_uri", redirectUri) //
-				.queryParam("prompt", "consent") //
-				.queryParam("state", state.toString()) //
-				.queryParam("nonce", state.getNonce()).getURL();
-	}
-
-	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigLogger channelConfigLogger,
-			AuthState state) {
-		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
-		try {
-
-			MapModel resp = MapModel.from(channelConfigLogger.getResp());
-
-			MapPathEntry token = resp.pathEntry("authResponse.credential");
-			MapPathEntry stateStr = resp.pathEntry("authResponse.state");
-			MapPathEntry code = resp.pathEntry("authResponse.code");
-			MapPathEntry scope = resp.pathEntry("authResponse.scope");
-			MapPathEntry id_token = resp.pathEntry("authResponse.id_token");
-
-			String redirectUri = String.format("%s%s/ext/setup/channel/callback/gmail",
-					commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
-					environment.keyEntry("mry.prop.service.server").asString());
-			if (ArgUtil.is(state.getRedirectUrl())) {
-				redirectUri = state.getRedirectUrl();
-			} else if (ArgUtil.is(stateStr)) {
-				// AuthState newstate = AuthState.fromString(stateStr.toString());
-				// redirectUri = newstate.getRedirectUrl();
-			}
-
-			ChannelConfig channel = new ChannelConfig();
-			channel.setApiVersion("v3");
-			channel.setGmail(new GmailConfigDetails());
-			channel.getGmail().setMasterClientId(setup.getGmail().getMasterClientId());
-
-			if (code.exists()) {
-				MapModel tokenResponse = restService.ajax(AUTHORIZE_TOKEN)//
-						.field("code", code.asString())//
-						.field("client_id", setup.getGmail().getMasterClientId())//
-						.field("client_secret", setup.getGmail().getMasterClientSecret())//
-						.field("grant_type", "authorization_code")//
-						.field("redirect_uri", redirectUri)//
-						.submit().asMapModel();
-				channelConfigLogger.log("oauth2/v2.0/token", tokenResponse.toMap());
-				token = tokenResponse.keyEntry("access_token");
-				id_token = tokenResponse.keyEntry("id_token");
-
-				channel.getGmail().setAccessToken(token.asString());
-				channel.getGmail().setRefreshToken(tokenResponse.keyEntry("refresh_token").asString());
-			}
-
-			if (token.exists()) {
-				GsonFactory jacksonFactory = new GsonFactory();
-				NetHttpTransport netHttpTransport = new NetHttpTransport();
-
-				GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(netHttpTransport, jacksonFactory)
-						.setAudience(Collections.singletonList(setup.getGmail().getMasterClientId())).build();
-
-				GoogleIdToken idToken = null;
-				try {
-					idToken = verifier.verify(id_token.asString());
-					if (idToken != null) {
-						GoogleIdToken.Payload payload = idToken.getPayload();
-
-						channelConfigLogger.log("/me", JsonUtil.toJsonMap(payload));
-
-						// channel.getGmail().setAccessToken(accessToken);
-						// channel.getGmail().setRefreshToken(refreshToken);
-						channel.getGmail().setEmail(payload.getEmail());
-
-						channel.setName(ArgUtil.parseAsString(payload.get("name")));
-
-						channels.add(channel);
-
-					} else {
-						LOGGER.warn("Invalid Google ID token.");
-					}
-				} catch (GeneralSecurityException e) {
-					LOGGER.warn(e.getLocalizedMessage());
-				} catch (IOException e) {
-					LOGGER.warn(e.getLocalizedMessage());
-				}
-			}
-
-		} catch (ApiHttpException e) {
-			channelConfigLogger.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
-		} catch (Exception e) {
-			channelConfigLogger.log("exception", e);
-		}
-		commonMongoTemplate.save(channelConfigLogger);
-		return channels;
-	}
 
 	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {

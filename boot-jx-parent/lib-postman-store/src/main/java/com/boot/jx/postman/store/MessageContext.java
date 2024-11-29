@@ -14,9 +14,10 @@ import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatContextDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
-import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageLoggable;
 import com.boot.jx.postman.model.MessageDefinitions.SessionInfo;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundEvent;
@@ -61,6 +62,11 @@ public class MessageContext {
 	@Autowired
 	private SessionStore sessionStore;
 
+	@Autowired
+	private MessageStore messageStore;
+
+	private MessageDoc messageDoc;
+
 	public MessageContext from(MessageContext context) {
 		this.outboxMessage = context.getOutboxMessage();
 		this.inboxMessage = context.getInboxMessage();
@@ -84,7 +90,18 @@ public class MessageContext {
 		this.inboxMessage = inboxMessage;
 	}
 
-	public LogMessage getMessage() {
+	public void setMessageDoc(MessageDoc messageDoc) {
+		this.messageDoc = messageDoc;
+	}
+
+	public MessageDoc getMessageDoc() {
+		if (!ArgUtil.is(messageDoc)) {
+			this.messageDoc = messageStore.findMessageDoc(getMessage());
+		}
+		return messageDoc;
+	}
+
+	public IMessageLoggable getMessage() {
 		if (ArgUtil.is(this.inboxMessage)) {
 			return this.inboxMessage;
 		} else {

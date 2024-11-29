@@ -113,6 +113,8 @@ public class InBound {
 
 		public NodeEntry<InBoundEvent> postMessageInBound(InboxMessage message);
 
+		public NodeEntry<InBoundEvent> postMessageStatus(MessageReport messageReport);
+
 	}
 
 }

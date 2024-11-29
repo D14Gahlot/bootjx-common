@@ -32,7 +32,7 @@ public class ContactApiV1 {
 	@RequestMapping(value = "/api/v1/contact/prefs/lang", method = { RequestMethod.POST })
 	public ApiResultsMetaCompactResponse<InBoundEvent, Object> sessionRouting(@RequestBody ContactPrefsUpdate req) {
 		commonMongoTemplate.updateFirst(new ChatContactQuery(req.contactId).setLang(req.lang));
-		InBoundEvent event = new InBoundEvent().eventCode(InBoundEvent.CONTACT_UPDATE);
+		InBoundEvent event = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.CONTACT_UPDATE);
 		event.contactId = req.contactId;
 		return ApiResponse.buildResults(event);
 	}

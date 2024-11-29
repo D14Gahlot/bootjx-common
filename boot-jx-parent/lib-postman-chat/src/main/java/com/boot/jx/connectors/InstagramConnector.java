@@ -182,10 +182,11 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 		return null;
 
 	}
+
 	private boolean isValidEmail(String email) {
-	    String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-	    Pattern pattern = Pattern.compile(emailRegex);
-	    return pattern.matcher(email).matches();
+		String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+		Pattern pattern = Pattern.compile(emailRegex);
+		return pattern.matcher(email).matches();
 	}
 
 	@Deprecated
@@ -262,6 +263,11 @@ public class InstagramConnector extends AbstractConnector<InstagramConfig, Insta
 					inboxMessage.replyTo().put("type", "story");
 					inboxMessage.replyTo().put("id", rt.entry(InBoundWrapperPaths.STORY_ID).asString());
 					inboxMessage.replyTo().put("url", rt.entry(InBoundWrapperPaths.STORY_URL).asString());
+
+					inboxMessage.referral().setSourceCategory("social");
+					inboxMessage.referral().setSourceType("story");
+					inboxMessage.referral().setSourceId(rt.entry(InBoundWrapperPaths.STORY_ID).asString());
+					inboxMessage.referral().setSourceUrl(rt.entry(InBoundWrapperPaths.STORY_URL).asString());
 				}
 			}
 		} else if (ArgUtil.is(m.getPostBack()) && ArgUtil.is(m.getPostBack().getTitle())) {

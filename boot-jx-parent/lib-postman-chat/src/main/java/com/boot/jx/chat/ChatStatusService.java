@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.inbound.InBound.InBoundHandler;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.stomp.StompTunnelService;
 import com.boot.jx.utils.PostManUtil;
@@ -45,6 +47,9 @@ public class ChatStatusService {
 
 	@Autowired
 	private ChatProxyManager proxyManager;
+
+	@Autowired(required = false)
+	private MessageContext messageContext;
 
 	public void offer(MessageReport e) {
 		queue.offer(e);
@@ -97,8 +102,11 @@ public class ChatStatusService {
 					AppContextUtil.init();
 				}
 			}
-			messageStore.updateStatus(messageReport);
+			MessageDoc m = messageStore.updateStatus(messageReport);
 			if (ArgUtil.is(inBoundHandler)) {
+				if (ArgUtil.is(messageContext) && ArgUtil.is(m)) {
+					messageContext.setMessageDoc(m);
+				}
 				inBoundHandler.doHandle(messageReport);
 			} else {
 				stompTunnelService.sendToAll("/message/update/status", messageReport);

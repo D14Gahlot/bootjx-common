@@ -6,8 +6,8 @@ import com.boot.jx.bot.ChatMapping;
 import com.boot.jx.bot.alex.AlexBotConstants;
 import com.boot.jx.bot.alex.CommonBotController;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
-import com.boot.jx.mongo.CommonMongoQueryBuilder.SimpleDocQueryBuilder;
 import com.boot.jx.postman.ClientApp;
+import com.boot.jx.postman.PMConstants.MESSAGE_SOURCE_TYPE;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.model.InboxMessage;
@@ -54,10 +54,12 @@ public class FeedbackController extends CommonBotController {
 	public void feedback(InboxMessage inboxMessage, StringMatcher matcher) {
 		String text = toReplyEnum(inboxMessage);
 		if (inboxMessage.form().get("reply_id") != null) {
-			inboxMessage.replyTo().put("type", "feedback");
+			inboxMessage.replyTo().put("type", MESSAGE_SOURCE_TYPE.FEEDBACK);
+			inboxMessage.referral().setSourceType(MESSAGE_SOURCE_TYPE.FEEDBACK);
 			sessionStore.updateFirst(
 					MQB.select(MessageDoc.class, MessageStore.getCollectionName(inboxMessage.contact().type()))
-							.whereIdSafe(inboxMessage.id()).set("replyTo.type", "feedback"));
+							.whereIdSafe(inboxMessage.id()).set("replyTo.type", MESSAGE_SOURCE_TYPE.FEEDBACK)
+							.set("referral.sourceType", MESSAGE_SOURCE_TYPE.FEEDBACK));
 		}
 		if (StringUtils.isNumeric(text)) {
 			context().session().set("feedback.score", ArgUtil.parseAsDouble(text));
