@@ -249,11 +249,12 @@ public class EmpAuthService {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
 		
-		LOGGER.info("agentSetPass :");
+		LOGGER.info("agentSetPass :"+password);
 		if(ArgUtil.is(password)) {
 			 String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
 			 Pattern pattern = Pattern.compile(regex);
 		     Matcher matcher = pattern.matcher(password);
+		     LOGGER.info("agentSetPass :"+matcher.matches());
 		     if (!matcher.matches()) {
 		    	 ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
 							.codeKey("ValidCredentials").description("Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols."));
