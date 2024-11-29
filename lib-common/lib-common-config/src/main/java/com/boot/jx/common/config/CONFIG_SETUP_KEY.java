@@ -37,9 +37,6 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 	POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 			.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
 
-	CAMPAIGN_RESEND_FAILED(new ConfigMeta("Resend Failed Marketing Messages", "feature.campaign.resend.failed")
-			.desc("check applied at time of campaign execution").optionsOnOff()),
-
 	POSTMAN_CHAT_WEB_CHANNEL(new ConfigMeta("Default Web Channel", PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL)
 			.desc("This channel will be connected your Page").optionsSource("getx:/api/options/channels")
 			.optionsKey("id").optionsLabel("name").filter("contactType", ContactType.WEBSITE)),
