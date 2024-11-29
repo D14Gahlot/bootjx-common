@@ -3,6 +3,8 @@ package com.boot.jx.admin.manager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -48,6 +50,9 @@ public class AdminManager {
 
 	@Value("${mry.duperadmin.email}")
 	private String duperAdminEmail;
+	
+	 String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
+
 
 	public List<AgentDoc> createOrUpdateAgent(AgentDoc agent) {
 
@@ -86,6 +91,15 @@ public class AdminManager {
 			agent.setOldVersions(null);
 		}
 		agent.setAgent_code(StringUtils.toLowerCase(agent.getAgent_code()));
+		
+		if(ArgUtil.is(agent.getAgent_password())) {
+		 Pattern pattern = Pattern.compile(regex);
+	     Matcher matcher = pattern.matcher(agent.getAgent_password());
+	     if (!matcher.matches()) {
+	    	 ApiResponseUtil.throwException("Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols.");
+	     }
+		}
+		
 		agentStore.save(agent);
 
 		return fetchAgentList(null);
