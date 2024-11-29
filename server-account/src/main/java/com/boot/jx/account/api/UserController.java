@@ -156,10 +156,8 @@ public class UserController {
 		if ("FORGOTPASS".equalsIgnoreCase(flow)) {
 			return empAuthService.agentResetPass(username, false);
 		}
-		System.out.println("User Controll :1");
 		UserAuthToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
 				app, "RESETPASS");
-		System.out.println("User Controll :2"+JsonUtil.toJson(loginToken));
 		if (ArgUtil.is(tokenId)) {
 			UserAuthTokenDoc loginDoc = mongoTemplate.findById(tokenId, UserAuthTokenDoc.class);
 			if (!new OTPDetails().yin(otpNounce).yang(loginDoc.getOtpNounce()).genrate(username, app).validate(otp,
@@ -167,11 +165,9 @@ public class UserController {
 				ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("otp")
 						.codeKey("ValidCredentials").description("Invalid OTP"));
 			}
-			System.out.println("User Controll :3"+JsonUtil.toJson(tokenId));
 			empAuthService.agentSetPass(username, password, newpassword);
 		} else {
 			if (!ArgUtil.is(loginToken.getDomainUserPhone()) || !empAuthService.sendOTP(loginToken)) {
-				System.out.println("User Controll :4"+JsonUtil.toJson(loginToken));
 				empAuthService.agentSetPass(username, password, newpassword);
 			}
 		}
