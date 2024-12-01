@@ -114,11 +114,17 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 							PMConstants.CHAT_SESSION_STICKY.STRICT)
 					.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(ConfigConstants.GROUP_AGENT)),
 
-	POSTMAN_AGENT_HEADER(new ConfigMeta("Header of Message Sent by agent", "postman.agent.chat.header")
-			.desc("Use {{agent}} for agent name").group(ConfigConstants.GROUP_AGENT)),
+	POSTMAN_AGENT_MESSAGE(new ConfigMeta("Custom Message Sent by agent", "postman.agent.chat.message")
+			.superKey("postman.agent.chat.message").desc("Custom header and Signature").optionsOnOff()
+			.group(ConfigConstants.GROUP_AGENT)),
 
-	POSTMAN_AGENT_SIGNATURE(new ConfigMeta("Signature of Message Sent by agent", "postman.agent.chat.signature")
-			.desc("Use {{agent}} for agent name").group(ConfigConstants.GROUP_AGENT)),
+	POSTMAN_AGENT_HEADER(new ConfigMeta("Header of Message Sent by agent", "postman.agent.chat.header")
+			.superKey("postman.agent.chat.message").desc("Use {{agent}} for agent name")
+			.group(ConfigConstants.GROUP_AGENT)),
+
+	POSTMAN_AGENT_SIGNATURE(new ConfigMeta("Signature of Message Sent by agent", "postman.agent.chat.message.signature")
+			.superKey("postman.agent.chat.message").desc("Use {{agent}} for agent name").inputType(INPUT_TYPE.TEXTAREA)
+			.group(ConfigConstants.GROUP_AGENT)),
 
 	POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
 			.inputType(INPUT_TYPE.COLOR).defaultValue("#4267b2").group(ConfigConstants.GROUP_AGENT)),
