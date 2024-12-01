@@ -366,8 +366,20 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		if (InBoundEvent.EVENT_TYPE.SESSION_ROUTED.equals(event.type)) {
 			ChatSessionDoc sessionDoc = context().session().getDoc();
 			this.onSessionRouteSync(event, sessionDoc, pmArgs);
+		} else if (InBoundEvent.TRIGGER_TYPE.TIMEOUT.equals(event.triggerType)) {
+			ChatSessionDoc sessionDoc = context().session().getDoc();
+			this.onTimeout(event, sessionDoc, pmArgs);
 		}
 		return event;
+	}
+
+	@Override
+	public void onTimeout(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		if (ArgUtil.is(event.type, InBoundEvent.EVENT_TYPE.REPLY_TIMEOUT, InBoundEvent.EVENT_TYPE.INBOUND_TIMEOUT)) {
+			sessionEventTimer.doChatInIdleTimeout(sessionDoc);
+		} else if (InBoundEvent.EVENT_TYPE.OUTBOUND_TIMEOUT.equals(event.type)) {
+			sessionEventTimer.doChatOutIdleTimeout(sessionDoc);
+		}
 	}
 
 	@Override

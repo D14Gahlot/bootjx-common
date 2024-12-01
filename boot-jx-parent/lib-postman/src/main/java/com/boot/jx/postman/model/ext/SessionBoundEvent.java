@@ -20,6 +20,8 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 		public static final String MESSAGE = "MESSAGE";
 		public static final String ACTION = "ACTION";
 		public static final String STATUS = "STATUS";
+		public static final String SYSTEM = "SYSTEM";
+		public static final String TIMEOUT = "TIMEOUT";
 	}
 
 	public static class EVENT_TYPE {
@@ -31,6 +33,9 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 		public static final String CONTACT_UPDATE = "CONTACT_UPDATE";
 		public static final String MESSAGE_INBOUND = "INBOUND";
 		public static final String MESSAGE_OUTBOUND = "OUTBOUND";
+		public static final String REPLY_TIMEOUT = "REPLY_TIMEOUT";
+		public static final String INBOUND_TIMEOUT = "INBOUND_TIMEOUT";
+		public static final String OUTBOUND_TIMEOUT = "OUTBOUND_TIMEOUT";
 	}
 
 	private static final long serialVersionUID = 5398462708633545227L;
