@@ -114,7 +114,7 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 							PMConstants.CHAT_SESSION_STICKY.STRICT)
 					.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(ConfigConstants.GROUP_AGENT)),
 
-	POSTMAN_AGENT_MESSAGE(new ConfigMeta("Custom Message Sent by agent", "postman.agent.chat.message")
+	POSTMAN_AGENT_MESSAGE(new ConfigMeta("Customize Message Sent by agent", "postman.agent.chat.message")
 			.superKey("postman.agent.chat.message").desc("Custom header and Signature").optionsOnOff()
 			.group(ConfigConstants.GROUP_AGENT)),
 
