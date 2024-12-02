@@ -44,6 +44,12 @@ public class CommonServiceClient {
 
 	@Value("${mry.chrono.url}")
 	private String cronoJobUrl;
+	
+	@Value("${bootjx.tunnel.calender}")
+	private String calenderApiUrl;
+	
+	@Value("${app.proxy.token}")
+	private String appProxyToken;
 
 	@Autowired
 	RestService restService;
@@ -81,10 +87,11 @@ public class CommonServiceClient {
 		RestTemplate restTemplate = new RestTemplate();
 
 		String url = UriComponentsBuilder
-				.fromHttpUrl("https://demo.mehery.xyz/nexus/calendar/api/v1/orgSchedule/status" + schedule).encode()
-				.toUriString();
+				.fromHttpUrl(calenderApiUrl).queryParam("scheduleName", schedule)
+                .encode()
+                .toUriString();
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("app-proxy-token", "iwPHDr0GZTuriUsijvf6g70AOFlPak541Y2fJQpSUhp8vYtT04gXQFSBCggkjFSR");
+		headers.set("app-proxy-token", appProxyToken);
 		headers.set("x-agent-code", "lt");
 
 		HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
@@ -105,13 +112,12 @@ public class CommonServiceClient {
 			LOGGER.error("Error", e.getResponseBodyAsString());
 			responseMap.put("error", e.getResponseBodyAsString());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return responseMap;
 	}
-
+   
 
 	public ChronoScheduler schedule(ChronoScheduler chronoTask) {
 		if (ArgUtil.is(scheduler)) {
