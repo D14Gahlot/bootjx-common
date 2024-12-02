@@ -187,6 +187,9 @@ public abstract class BatchJobExecuter {
 		return job;
 	}
 
+	
+	
+	
 	@Scheduled(fixedDelay = 50000)
 	public void reader() {
 		read();
@@ -225,6 +228,8 @@ public abstract class BatchJobExecuter {
 				currentBatchJob.setStatus(JOB_STATUS.COMPLETED);
 			} else if (JOB_STATUS.CANCELLED == currentBatchJob.getStatus()) {
 				currentBatchJob.setStatus(JOB_STATUS.CANCELLED);
+			} else if (JOB_STATUS.STOPPED == currentBatchJob.getStatus()) {
+				currentBatchJob.setStatus(JOB_STATUS.STOPPED);
 			}
 
 			try {

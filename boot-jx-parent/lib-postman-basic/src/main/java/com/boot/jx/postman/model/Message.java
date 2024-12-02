@@ -32,7 +32,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		CCWIN,
 
 		// INBOUND STATUS
-		RECEIVD, CONSUMED, FORWARDED, FORWARD_ERR, STATUS_FORWARD_ERR;
+		RECEIVD, CONSUMED, FORWARDED, FORWARD_ERR, STATUS_FORWARD_ERR,STOPPED;
 		;
 	}
 

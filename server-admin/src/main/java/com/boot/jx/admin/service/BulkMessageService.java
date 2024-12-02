@@ -364,6 +364,38 @@ public class BulkMessageService extends BatchJobExecuter {
 				// Lane for each message
 				.data("lane", session.getLane()));
 	}
+	
+	@Override
+	public BatchJob stopJob(String jobId) {
+		BatchJob oldJob = stopJob(jobId);
+		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
+		session.setStatus(Status.STOPPED.toString());
+		mongoTemplate.save(session);
+
+		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
+				PostManUtil.CHANNEL_ID(session.getContactType(), "", session.getLane()));
+
+		ChannelConfig channelConfig = enviroment.config().channel(channelId);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+
+		Query query = new Query().addCriteria(
+				QueryCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
+		builder.set("status", Status.STOPPED.toString());
+
+		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
+
+		return registerJob(JobTaskModel.newBatchJob()
+				// Set Unique Job Id
+				.jobId(session.getBulkSessionId())
+				// Contact Type for each message
+				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channelType", channelConfig.getChannelType())
+				// Lane for each message
+				.data("lane", session.getLane()));
+	}
+	
 
 	@Override
 	public boolean read(BatchJob currentBatchJob) {
