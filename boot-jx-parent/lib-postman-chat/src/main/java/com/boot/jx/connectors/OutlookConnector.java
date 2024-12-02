@@ -216,6 +216,14 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 				}
 			}
 
+			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
+				ChatMessageDTO lastMsg = chatSession.lastOutBoundMsg();
+				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
+					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
+					outboxMessage.setReplyId(lastMsg.getMessageId());
+				}
+			}
+
 		}
 
 		if (!ArgUtil.is(outboxMessage.getSubject())) {
