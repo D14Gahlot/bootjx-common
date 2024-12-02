@@ -52,11 +52,13 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 	private long timestamp;
 
 	@ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service",
-			allowableValues = "SESSION_INIT,INBOUND,OUTBOUND,ACTION,STATUS")
+			allowableValues = "SESSION_ROUTED,SESSION_INIT,SESSION_CLOSED,SESSION_STATUS,"
+					+ "SESSION_ASSIGNED,CONTACT_UPDATE,MESSAGE_INBOUND,MESSAGE_OUTBOUND,"
+					+ "REPLY_TIMEOUT,INBOUND_TIMEOUT,OUTBOUND_TIMEOUT")
 	public String type;
 
-	@ApiMockModelProperty(example = "INBOUND", value = "Bound Type of Event Triggered by App/Service",
-			allowableValues = "MESSAGE,ACTION,STATUS")
+	@ApiMockModelProperty(example = "MESSAGE", value = "Bound Type of Event Triggered by App/Service",
+			allowableValues = "MESSAGE,ACTION,STATUS,SYSTEM,TIMEOUT")
 	public String triggerType;
 
 	public MessageSession getSession() {
