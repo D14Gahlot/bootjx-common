@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,6 +231,19 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		}
 
 		tmplClient.process(outboxMessage);
+		 Map<String, Object> meta = outboxMessage.getMeta();
+		    if (meta != null) {
+		        if (meta.containsKey("categoryType")) {
+		            String categoryType = (String) meta.get("categoryType");
+		            System.out.println("Category Type: " + categoryType);
+		            if("AUTHENTICATION".equalsIgnoreCase(categoryType))
+		            {
+		            	outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
+						//outboxMessage.setTemplateExt();
+
+		            }
+		        }}
+		    
 
 		if (ArgUtil.is(outboxMessage.templateId())) {
 			List<HSMTemplate3rdParty> temps = null;
@@ -244,6 +258,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 								.is(channelConfig.getChannelId())));
 				LOGGER.debug(JsonUtil.toJson(temps));
 			}
+			
 
 			if (ArgUtil.is(temps)) {
 				HSMTemplate3rdParty resolvedTemplate = null;

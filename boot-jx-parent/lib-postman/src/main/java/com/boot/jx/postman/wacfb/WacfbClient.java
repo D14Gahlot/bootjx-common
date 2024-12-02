@@ -108,11 +108,7 @@ public class WacfbClient implements ChannelClient {
 				
                 
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);//null
-				List<Map<String, Object>> buttonList = options.entry("buttons").asListOfMap();
-				{
-					isButton=true;
-					buttonsCount++;
-				}
+				
 
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
