@@ -336,7 +336,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	@Override
 	public BatchJob resetJob(String jobId) {
-		BatchJob oldJob = stopJob(jobId);
+		//BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
 		session.setStatus("CREATED");
 		mongoTemplate.save(session);
@@ -349,7 +349,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
 		Query query = new Query().addCriteria(
-				QueryCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
+				QueryCriteria.where("bulkSessionId").is(jobId).and("stamps.SENT").exists(false));
 		builder.set("status", Status.SCHLD.toString());
 
 		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
@@ -367,7 +367,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	
 	@Override
 	public BatchJob stopJob(String jobId) {
-		BatchJob oldJob = stopJob(jobId);
+		//BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
 		session.setStatus(Status.STOPPED.toString());
 		mongoTemplate.save(session);
@@ -380,7 +380,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
 		Query query = new Query().addCriteria(
-				QueryCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
+				QueryCriteria.where("bulkSessionId").is(jobId).and("stamps.SENT").exists(false));
 		builder.set("status", Status.STOPPED.toString());
 
 		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
