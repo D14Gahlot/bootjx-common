@@ -22,6 +22,7 @@ import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.http.ApiRequest;
 import com.boot.jx.mongo.CommonMongoSource;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
@@ -33,6 +34,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Controller
 public class AgentMetaController {
@@ -134,4 +136,26 @@ public class AgentMetaController {
 
 		return ApiResponse.buildResults(mongoTemplate.findAll(HSMTemplateDoc.class));
 	}
+	@ApiRequest(rules = CommonMongoSource.READ_ONLY_DB)
+	@RequestMapping(value = "/api/options/contacts/v1", method = { RequestMethod.GET })
+	@ResponseBody
+	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestParam(required = false) String id,
+			@RequestParam(required = false) String contactId,
+			@RequestParam(required = false, value = "search.name") String searchName,
+			@RequestParam(required = false, value = "search.code") String searchCode,
+			@RequestParam(required = false, value = "search.phones") String searchPhone,
+			@RequestParam(required = false, value = "search.emails") String searchEmail) {
+		if (ArgUtil.is(contactId)) {
+			return ApiResponse.buildResults(contactStore.findProfileByContactId(contactId));
+		}else if(ArgUtil.is(searchPhone)) {
+			return ApiResponse.buildResults(contactStore.findProfileByPhone(searchPhone));
+		}else if(ArgUtil.is(searchEmail)) {
+			return ApiResponse.buildResults(contactStore.findProfileByEmail(searchEmail));
+		}else if(ArgUtil.is(searchCode)) {
+			return ApiResponse.buildResults(contactStore.findProfileByCode(searchCode));
+		}
+		return ApiResponse.buildResult(null);
+
+	}
+	
 }
