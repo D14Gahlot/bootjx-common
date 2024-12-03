@@ -130,7 +130,7 @@ public abstract class BatchJobExecuter {
 		}
 		return batchJob;
 	}
-	
+
 	public BatchJob cancelJob(BatchJob batchJob) {
 		try {
 			batchJob.setTenant(AppContextUtil.getTenant());
@@ -147,7 +147,6 @@ public abstract class BatchJobExecuter {
 		}
 		return batchJob;
 	}
-	
 
 	public BatchJob registerJob(String jobId) {
 		BatchJob job = new BatchJob();
@@ -187,9 +186,6 @@ public abstract class BatchJobExecuter {
 		return job;
 	}
 
-	
-	
-	
 	@Scheduled(fixedDelay = 50000)
 	public void reader() {
 		read();
@@ -207,7 +203,7 @@ public abstract class BatchJobExecuter {
 		}
 
 		BatchJob prevjob = jobStatus().get(currentBatchJob.jobUUID());
-	if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
+		if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
 			AppContextUtil.setTenant(currentBatchJob.getTenant());
 			String sessionId = UniqueID.generateString();
 			AppContextUtil.setSessionId(sessionId);
@@ -393,7 +389,7 @@ public abstract class BatchJobExecuter {
 					counter.incrementAndGet();
 					LOGGER.debug("Completed Task {} for NoJob {} {} ", tasklet.getTaskId(), tasklet.jobUUID(),
 							taskJob.getStatus());
-					
+
 				}
 			} else {
 				LOGGER.debug("Skipping Task {} for NoJob {}", tasklet.getTaskId(), tasklet.jobUUID());
@@ -413,8 +409,5 @@ public abstract class BatchJobExecuter {
 			this.execute();
 		}
 	}
-	
-	
+
 }
-
-
