@@ -461,9 +461,8 @@ public class WacfbClient implements ChannelClient {
 						}}}
 							else
 							{
-								Object flowIdObj = extTemplateComponentButton.get("flow_id"); // Get the value of "flow_id"
+								Object flowIdObj = extTemplateComponentButton.get("flow_id");
 						        String flow_id = flowIdObj != null ? String.valueOf(flowIdObj) : null;
-								//String flow_id= (String) extTemplateComponentButton.get("flow_id");
 								TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
 								buttonComponent.parameter("action",
 										MapModel.createInstance().put("flow_token", outboxMessage.getMessageId()+"/"+flow_id));

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,6 +248,15 @@ public class EmpAuthService {
 			throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
+		if(ArgUtil.is(password)) {
+			 String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
+			 Pattern pattern = Pattern.compile(regex);
+		     Matcher matcher = pattern.matcher(newpassword);
+		     if (!matcher.matches()) {
+		    	 ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
+							.codeKey("ValidCredentials").description("Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols."));
+		     }
+		}
 		if (setPassword(username, password, newpassword)) {
 			x.setStatusKey("SUCCESS");
 		} else {

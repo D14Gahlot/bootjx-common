@@ -28,6 +28,7 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.OTPUtils.OTPDetails;
 import com.boot.utils.UniqueID;
 
@@ -155,7 +156,6 @@ public class UserController {
 		if ("FORGOTPASS".equalsIgnoreCase(flow)) {
 			return empAuthService.agentResetPass(username, false);
 		}
-
 		UserAuthToken loginToken = empAuthService.createAgentLoginToken(username, username, password, tnt, domainId,
 				app, "RESETPASS");
 		if (ArgUtil.is(tokenId)) {

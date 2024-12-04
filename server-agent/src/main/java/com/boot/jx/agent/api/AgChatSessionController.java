@@ -58,9 +58,8 @@ import com.boot.utils.JsonUtil;
 
 @RestController
 public class AgChatSessionController {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(AgChatSessionController.class);
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(AgChatSessionController.class);
 
 	@Autowired
 	private SessionStore sessionStore;
@@ -136,7 +135,7 @@ public class AgChatSessionController {
 		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			outboxMessage.route().setQueueCode(sessionDoc.getAssignedToQueue());
 			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
-			
+
 			// Evaluate if required
 			messageDto.setName(agentSession.getAgentCode());
 			// messageDto.setType(outboxMessage.getType());
@@ -241,8 +240,7 @@ public class AgChatSessionController {
 			MessageDoc m = messageStore.findOneByMessageIdExt(messageIdExt, sessionDoc.contact().getContactType());
 			return resp.result(chatArchive.createMessageDTO(m, chatSessionDto)).meta(chatSessionDto);
 		} else if (previous) {
-			ChatSessionDoc prevSession = sessionStore.getPreviousSession(sessionDoc.contact(),
-					sessionDoc.getStartSessionStamp());
+			ChatSessionDoc prevSession = sessionStore.getPreviousSession(sessionDoc);
 			if (ArgUtil.is(prevSession)) {
 				ChatSessionDTO chatSessionDto = chatArchive.getChatSession(prevSession);
 				chatSessionDto = chatArchive.withContact(chatSessionDto);
@@ -286,7 +284,7 @@ public class AgChatSessionController {
 			@RequestParam PMConstants.CHAT_STATUS status) {
 		return ApiResponse.buildResult(agentChatHandlerImpl.updateChatSessionStatus(sessionId, status));
 	}
-	
+
 	@RequestMapping(value = "/api/upload/pofile", method = { RequestMethod.POST })
 	public ApiResponse<CommonFile, Object> uploadExcel(
 			@RequestParam(name = "file", required = false) MultipartFile file) {
@@ -296,6 +294,5 @@ public class AgChatSessionController {
 		return ApiResponse.buildResults(url);
 
 	}
-
 
 }
