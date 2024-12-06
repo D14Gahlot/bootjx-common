@@ -365,9 +365,9 @@ public class BulkMessageService extends BatchJobExecuter {
 				.data("lane", session.getLane()));
 	}
 
-	@Override
-	public BatchJob stopJob(String jobId) {
-		// BatchJob oldJob = stopJob(jobId);
+	
+	public BatchJob stopJobV1(String jobId) {
+		 BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
 		session.setStatus(Status.STOPPED.toString());
 		mongoTemplate.save(session);
