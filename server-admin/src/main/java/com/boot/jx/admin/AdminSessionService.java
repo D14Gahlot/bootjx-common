@@ -1,5 +1,7 @@
 package com.boot.jx.admin;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,6 +23,8 @@ import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthUser;
 import com.boot.jx.stomp.StompQuery;
 import com.boot.jx.stomp.StompTunnelSessionManager;
+import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -64,7 +68,7 @@ public class AdminSessionService implements LogoutHandler, AuditDetailProvider {
 		this.updateSession();
 	}
 
-	public void login(HttpServletRequest request, AgentResponseAuthDto agent, String passhash) {
+	public void login(HttpServletRequest request, AgentResponseAuthDto agent, String passhash, MapModel userDataModel) {
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(agent.getAgent_code(),
 				passhash);
 		token.setDetails(new WebAuthenticationDetails(request));
@@ -80,10 +84,23 @@ public class AdminSessionService implements LogoutHandler, AuditDetailProvider {
 			adminSessionBean.addRole(PMConstants.USER_ROLE.DUPER_USER);
 		}
 
+		if (ArgUtil.is(userDataModel)) {
+			MapPathEntry roles = userDataModel.keyEntry("roles");
+			if (roles.exists()) {
+				List<String> roleslist = roles.asListOfStrings();
+				for (String role : roleslist) {
+					adminSessionBean.addRole(role);
+				}
+			}
+		}
 		stompTunnelSessionManager.registerUser(agent.getAgent_code(), agent.getDept().getDept_code(), DEFAULT.NO_DEPT,
 				StompQuery.PING_TAG);
 
 		updateLogin(agent);
+	}
+
+	public void login(HttpServletRequest request, AgentResponseAuthDto agent, String passhash) {
+		this.login(request, agent, passhash, null);
 	}
 
 	@Autowired
