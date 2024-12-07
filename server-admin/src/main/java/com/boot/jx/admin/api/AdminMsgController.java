@@ -477,7 +477,7 @@ public class AdminMsgController {
 		} else if (ArgUtil.is(action, "restart")) {
 			bulkMessageService.resetJob(jobId);
 		} else if (ArgUtil.is(action, "stop")) {
-			bulkMessageService.stopJob(jobId);
+			bulkMessageService.stopJobV1(jobId);
 		} else if (ArgUtil.is(action, "tally")) {
 			BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
 			BatchJob job = session.getJob();

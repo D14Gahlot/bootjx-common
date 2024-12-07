@@ -130,8 +130,9 @@ public class AdminAuthController {
 	public String home(Model model, HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(required = false) String domainName, @RequestParam(required = false) String domainId,
 			@RequestParam(required = false) String domainUser, @RequestParam(required = false) String domainUserEmail,
-			@RequestParam(required = false) String domainToken, @RequestParam(required = false) String domainTokenValid,
-			@PathVariable(required = false) String subapp) throws NoSuchAlgorithmException {
+			@RequestParam(required = false) String domainUserData, @RequestParam(required = false) String domainToken,
+			@RequestParam(required = false) String domainTokenValid, @PathVariable(required = false) String subapp)
+			throws NoSuchAlgorithmException {
 
 		if (!isPanelActive()) {
 			return unauthorized(model);
@@ -143,7 +144,8 @@ public class AdminAuthController {
 					domainId, domainToken);
 
 			if (ArgUtil.is(agent) && agent.isAdmin()) {
-				sessionService.login(request, agent, domainToken);
+				MapModel userDataModel = authService.decodeUserData(domainUserData);
+				sessionService.login(request, agent, domainToken, userDataModel);
 				xRemSession = CryptoUtil.getEncoder()
 						.obzect(MapBuilder.map().put("domainUser", domainUser).put("domainUserEmail", domainUserEmail)
 								.put("domainName", domainName).put("domainId", domainId).put("domainToken", domainToken)
@@ -158,6 +160,7 @@ public class AdminAuthController {
 				model.addAttribute("FORM_URL", "/admin/auth/login/direct?_=" + System.currentTimeMillis());
 				model.addAttribute("DOMAIN_USER", domainUser);
 				model.addAttribute("DOMAIN_USER_EMAIL", domainUserEmail);
+				model.addAttribute("DOMAIN_USER_DATA", domainUserData);
 				model.addAttribute("DOMAIN_NAME", domainName);
 				model.addAttribute("DOMAIN_ID", domainId);
 				model.addAttribute("DOMAIN_TOKEN", domainToken);

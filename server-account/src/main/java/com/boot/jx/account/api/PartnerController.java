@@ -54,6 +54,7 @@ import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.scope.tnt.Tenants;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.CryptoUtil;
@@ -136,9 +137,11 @@ public class PartnerController {
 
 		if (userSessionBean.hasAdminAccesTo(domain)) {
 			UserAuthToken userLoginToken = empAuthService.createSuperLoginToken("superadmin",
-					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), panel);
+					userSessionBean.domainUser().contact().getEmail(), domain, domainDoc.getId(), panel,
+					MapModel.createInstance().put("roles", userSessionBean.domainUser().getRole()));
 			model.addAttribute("DOMAIN_USER", userLoginToken.getDomainUser());
 			model.addAttribute("DOMAIN_USER_EMAIL", userLoginToken.getDomainUserEmail());
+			model.addAttribute("DOMAIN_USER_DATA", userLoginToken.getDomainUserData());
 			model.addAttribute("DOMAIN_NAME", userLoginToken.getDomainName());
 			model.addAttribute("DOMAIN_ID", userLoginToken.getDomainId());
 			model.addAttribute("DOMAIN_TOKEN", userLoginToken.getDomainToken());
