@@ -127,10 +127,15 @@ public class ChannelPluginProvider {
 		public default ChannelConfig updateChannelConfig(ChannelConfig config, AChannelDetails details) {
 			updatePluginSpecs(config);
 			// Channel Specific Properties
-			config.setLane(ArgUtil.nonEmpty(details.getLane(), config.getLane()).replaceAll("[^a-zA-Z0-9\\_]+", ""));
+			String lane = laneTrimmed(ArgUtil.nonEmpty(details.getLane(), config.getLane()));
+			config.setLane(lane.replaceAll("[^a-zA-Z0-9\\_]+", ""));
 
 			setDetails(config, (C) details);
 			return config;
+		}
+
+		default public String laneTrimmed(String lane) {
+			return lane;
 		}
 
 		public default void updatePluginSpecs(ChannelConfig config) {

@@ -89,7 +89,6 @@ public class PMEnvironment {
 
 		@JsonView(PublicProperty.class)
 		public String getLane();
-
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
