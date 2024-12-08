@@ -359,21 +359,25 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				String flowId = null;
 
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
-				if (replyJsonMap.containsKey("wa_flow_response_params")) {
+				if(replyJsonMap.containsKey("flow_token"))
+				{
+					flowId=replyJsonMap.get("flow_token").toString();
+					if(flowId.contains("/"))
+					{
+						flowId = flowId.substring(flowId.lastIndexOf("/") + 1);
+
+					}
+				}
+				
+				else {
+					if((replyJsonMap.containsKey("wa_flow_response_params"))) {
 				    Map<String, Object> responseParams = (Map<String, Object>) replyJsonMap.get("wa_flow_response_params");
 				    if (responseParams != null && responseParams.containsKey("flow_id")) {
 				        flowId = responseParams.get("flow_id").toString();
 				    }
+					} 
 				}
 
-				if (flowId == null || flowId.isEmpty()) {
-					String flowToken = String.valueOf(replyJsonMap.get("flow_token"));				
-					if (flowToken.contains("/")) {
-						flowId = flowToken.substring(flowToken.lastIndexOf("/") + 1);
-				}
-					else
-						flowId=flowToken;
-				}
 				//String flowId = ((Map<String, Object>) replyJsonMap.get("wa_flow_response_params")).get("flow_id").toString();
 				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 				WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
