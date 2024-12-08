@@ -31,6 +31,7 @@ implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {
 	String conversation_type;
 	String conversation_category;
 	double cost;
+	String tenant;
 	public String getId() {
 		return id;
 	}
@@ -96,6 +97,12 @@ implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {
 	}
 	public void setCost(double cost) {
 		this.cost = cost;
+	}
+	public String getTenant() {
+		return tenant;
+	}
+	public void setTenant(String tenant) {
+		this.tenant = tenant;
 	}
 	
 	
