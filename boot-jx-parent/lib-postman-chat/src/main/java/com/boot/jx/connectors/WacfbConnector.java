@@ -90,6 +90,8 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
+	
+
 
 	@Autowired
 	private WacfbClient wacfbClient;
@@ -372,8 +374,8 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				else {
 					if((replyJsonMap.containsKey("wa_flow_response_params"))) {
 				    Map<String, Object> responseParams = (Map<String, Object>) replyJsonMap.get("wa_flow_response_params");
-				    if (responseParams != null && responseParams.containsKey("flow_token")) {
-				        flowId = responseParams.get("flow_token").toString();
+				    if (responseParams != null && responseParams.containsKey("flow_id")) {
+				        flowId = responseParams.get("flow_id").toString();
 				    }
 					} 
 				}
@@ -719,7 +721,23 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			return defaultRegion;
 		}
 	}
+	@Override//suggested by Lalit- we are not getting category here we , it get set at tmplClient.process(outboxMessage)-line 233 of abstract connector
+	public void beforeSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+		Map<String, Object> meta = outboxMessage.getMeta();
+	    if (meta != null) {
+	        if (meta.containsKey("categoryType")) {
+	            String categoryType = (String) meta.get("categoryType");
+	            System.out.println("Category Type: " + categoryType);
+	            if("AUTHENTICATION".equalsIgnoreCase(categoryType))
+	            {
+	            	outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
+					//outboxMessage.setTemplateExt();
 
+	            }
+	        }}
+        super.beforeSend(channelConfig, chatContactDoc, outboxMessage);
+	}
+	
 	// @Override
 	/*
 	 * public boolean optin(ChannelConfig channelConfig, ChatContactDoc

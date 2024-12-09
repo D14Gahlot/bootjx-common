@@ -212,7 +212,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		}
 	}
 
-	private OutboxMessage process(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+	public OutboxMessage process(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
 
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
@@ -230,8 +230,8 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 			outboxMessage.hsm().lang(chatContactDoc.prefs().getLang());
 		}
 
-		tmplClient.process(outboxMessage);
-		 Map<String, Object> meta = outboxMessage.getMeta();
+		tmplClient.process(outboxMessage);//here category is getting value
+		 Map<String, Object> meta = outboxMessage.getMeta();//this is my code which we need to decide 
 		    if (meta != null) {
 		        if (meta.containsKey("categoryType")) {
 		            String categoryType = (String) meta.get("categoryType");
