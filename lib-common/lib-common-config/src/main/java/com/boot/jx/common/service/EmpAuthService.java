@@ -385,6 +385,9 @@ public class EmpAuthService {
 	}
 
 	public MapModel decodeUserData(String domainUserData) {
+		if (!ArgUtil.is(domainUserData)) {
+			return null;
+		}
 		return MapModel.decoder(domainUserData).decodeBase64().detokenize().decrypt().toMapModel();
 	}
 

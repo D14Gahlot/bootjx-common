@@ -213,7 +213,7 @@ public class TmplHSMController {
 	@RequestMapping(value = "pub/api/tmpl/hsm/waba_flows", method = { RequestMethod.GET })
 	public ApiResponse<WABAFlows, Object> listFlows(@RequestParam String channelId,
 			@RequestParam(required = false, defaultValue = "false") boolean sync) {
-		ChannelConfig channelConfig = pmEnvironment.local().channel(channelId);
+		ChannelConfig channelConfig = pmEnvironment.config().domainProxy().channel(channelId);
 		if (!ArgUtil.is(channelConfig)) {
 			return ApiResponse.build();
 		}
