@@ -1629,12 +1629,15 @@ public class AccountDashBoardManager {
 			double deposiTamt=0.0;
 			if(ArgUtil.is(waAccBal)) {
 				deposiTamt=waAccBal.getDepositAmt();
+			dto.setCurrencyCode(waAccBal.getCurrencyCode());
+			dto.setId(waAccBal.getId());
 			}
 			dto.setDepostAmt(deposiTamt);
 			dto.setTotalCount(totalConvCnt);
 			dto.setTotalCost(totalConvCost);
 			dto.setBalanceAmt(deposiTamt-totalConvCost);
 			dto.setTnt(ArgUtil.parseAsString(tnt,AppContextUtil.getTenant()));
+			
 			lstList.add(dto);
 	        }
 		 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,9 +23,11 @@ import com.boot.jx.account.dto.TimeZoneOfSet;
 import com.boot.jx.account.dto.WabaBalanceDto;
 import com.boot.jx.account.dto.WabaSummary;
 import com.boot.jx.account.manager.AccountDashBoardManager;
+import com.boot.jx.account.manager.WabaAccountManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.http.CommonHttpRequest;
+import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 
 @Controller
 @RequestMapping("/partnerdashboard")
@@ -47,6 +50,9 @@ public class PartnerDashBoardController {
 
 	@Autowired
 	AccountDashBoardManager dashBMgr;
+	
+	@Autowired
+	WabaAccountManager waActMgr;
 
 	@ResponseBody
 	@RequestMapping(value = { "/pub/domain" }, method = { RequestMethod.GET })
@@ -158,6 +164,14 @@ public class PartnerDashBoardController {
 	public ApiResponse<WabaBalanceDto, Object> wabaDepositAddedit(@RequestParam long timeStamp) { 
 		WabaBalanceDto cost = dashBMgr.getWabaCostAnalyticsV1(timeStamp);
 		return ApiResponse.buildResult(cost);
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = { "/pub/api/add-edit-account" }, method = { RequestMethod.POST })
+	public ApiResponse<WabaAccountBalanceDoc, Object> wabaDepositAddedit(@RequestBody WabaAccountBalanceDoc reqDto) { 
+		WabaAccountBalanceDoc dto= waActMgr.addEditAccountBalance(reqDto);
+		
+		return ApiResponse.buildResult(dto);
 	}
 
 	
