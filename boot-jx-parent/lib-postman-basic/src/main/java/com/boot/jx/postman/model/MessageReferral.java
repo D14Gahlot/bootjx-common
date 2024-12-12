@@ -13,7 +13,7 @@ public class MessageReferral implements Serializable {
 
 	String messageId;
 	String messageIdExt;
-	String bulkdId;
+	String bulkId;
 
 	String sourceUrl;
 	String sourceId;
@@ -145,19 +145,19 @@ public class MessageReferral implements Serializable {
 		this.messageIdExt = messageIdExt;
 	}
 
-	public String getBulkdId() {
-		return bulkdId;
-	}
-
-	public void setBulkdId(String bulkdId) {
-		this.bulkdId = bulkdId;
-	}
-
 	public String getSourceCategory() {
 		return sourceCategory;
 	}
 
 	public void setSourceCategory(String sourceCategory) {
 		this.sourceCategory = sourceCategory;
+	}
+
+	public String getBulkId() {
+		return bulkId;
+	}
+
+	public void setBulkId(String bulkId) {
+		this.bulkId = bulkId;
 	}
 }
