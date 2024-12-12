@@ -246,7 +246,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		}
 
 		if (ArgUtil.is(outboxMessage.templateId())) {
-			HSMTemplate3rdParty tpTemplate = template3rdParty(channelConfig, chatContactDoc, outboxMessage);
+			HSMTemplate3rdParty tpTemplate = templateExt(channelConfig, chatContactDoc, outboxMessage);
 			if (ArgUtil.is(tpTemplate)) {
 				outboxMessage.setTemplateExt(tpTemplate);
 			}
@@ -254,7 +254,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		return outboxMessage;
 	}
 
-	public HSMTemplate3rdParty template3rdParty(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+	public HSMTemplate3rdParty templateExt(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
 		List<HSMTemplate3rdParty> temps = null;
 		if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
