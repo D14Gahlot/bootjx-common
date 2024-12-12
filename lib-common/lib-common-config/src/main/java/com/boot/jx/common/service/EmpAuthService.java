@@ -248,14 +248,15 @@ public class EmpAuthService {
 			throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
-		if(ArgUtil.is(password)) {
-			 String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
-			 Pattern pattern = Pattern.compile(regex);
-		     Matcher matcher = pattern.matcher(newpassword);
-		     if (!matcher.matches()) {
-		    	 ApiResponseUtil.throwInputException(new ApiFieldError().obzect("login").field("password")
-							.codeKey("ValidCredentials").description("Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols."));
-		     }
+		if (ArgUtil.is(password)) {
+			String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
+			Pattern pattern = Pattern.compile(regex);
+			Matcher matcher = pattern.matcher(newpassword);
+			if (!matcher.matches()) {
+				ApiResponseUtil.throwInputException(
+						new ApiFieldError().obzect("login").field("password").codeKey("ValidCredentials").description(
+								"Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols."));
+			}
 		}
 		if (setPassword(username, password, newpassword)) {
 			x.setStatusKey("SUCCESS");
@@ -302,7 +303,7 @@ public class EmpAuthService {
 	}
 
 	public UserAuthToken createSuperLoginToken(String username, String email, String domainName, String domainId,
-			String app) throws NoSuchAlgorithmException {
+			String app, MapModel userData) throws NoSuchAlgorithmException {
 		UserAuthToken userLoginToken = new UserAuthToken();
 		String authKey = appConfig.prop("mry.app.login.key");
 		HashBuilder builder = getHashBuilder(username, email, domainName, domainId, authKey);
@@ -312,6 +313,7 @@ public class EmpAuthService {
 		userLoginToken.setDomainUser(username);
 		userLoginToken.setDomainUserEmail(email);
 		userLoginToken.setApp(app);
+		userLoginToken.setDomainUserData(encodeUserData(userData));
 		return userLoginToken;
 	}
 
@@ -381,4 +383,16 @@ public class EmpAuthService {
 				.message(String.format("%s@%s:%s#%s=%s", username, domainName, domainId, authKey, email));
 		return builder;
 	}
+
+	public MapModel decodeUserData(String domainUserData) {
+		if (!ArgUtil.is(domainUserData)) {
+			return null;
+		}
+		return MapModel.decoder(domainUserData).decodeBase64().detokenize().decrypt().toMapModel();
+	}
+
+	public String encodeUserData(MapModel userData) {
+		return userData.encoder().encrypt().tokenize(30).encodeBase64().toString();
+	}
+
 }

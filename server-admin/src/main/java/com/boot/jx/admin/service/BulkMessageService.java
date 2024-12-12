@@ -96,7 +96,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	@Autowired
 	CommonServiceClient commonSerClient;
-	
+
 	@Autowired
 	CustomerProfileService cusProfileService;
 
@@ -265,8 +265,8 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	public BulkSessionDoc sendToGroup(List<OutboxMessage> bulkMessages, ChronoScheduler scheduler)
 			throws NumberParseException {
-		
-		OutboxMessage bulkMessage = bulkMessages.get(bulkMessages.size()-1);
+
+		OutboxMessage bulkMessage = bulkMessages.get(bulkMessages.size() - 1);
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
 		ChannelConfig channelConfig = enviroment.config().channel(channelId);
 		BulkSessionDoc session = new BulkSessionDoc();
@@ -292,10 +292,10 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
-		//for (OutboxMessage bulkMsg : bulkMessages) {
-		   for (String to : toLst) {
+		// for (OutboxMessage bulkMsg : bulkMessages) {
+		for (String to : toLst) {
 			MessageDoc doc = messageStore.createMessageDoc(bulkMessage);
-			//String to = bulkMsg.getTo().get(0);
+			// String to = bulkMsg.getTo().get(0);
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
@@ -315,9 +315,9 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.route().setSenderCode(auditDetailProvider.getAuditUser());
 
 			docs.add(doc);
-			
+
 		}
-		   
+
 		session.setStatus("CREATED");
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
@@ -336,7 +336,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	@Override
 	public BatchJob resetJob(String jobId) {
-		BatchJob oldJob = stopJob(jobId);
+		// BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
 		session.setStatus("CREATED");
 		mongoTemplate.save(session);
@@ -348,9 +348,40 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
-		Query query = new Query().addCriteria(
-				QueryCriteria.where("bulkSessionId").is(oldJob.getJobId()).and("stamps.SENT").exists(false));
+		Query query = new Query()
+				.addCriteria(QueryCriteria.where("bulkSessionId").is(jobId).and("stamps.SENT").exists(false));
 		builder.set("status", Status.SCHLD.toString());
+
+		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
+
+		return registerJob(JobTaskModel.newBatchJob()
+				// Set Unique Job Id
+				.jobId(session.getBulkSessionId())
+				// Contact Type for each message
+				.data("contactType", session.getContactType())
+				// Channel for each message
+				.data("channelType", channelConfig.getChannelType())
+				// Lane for each message
+				.data("lane", session.getLane()));
+	}
+
+	
+	public BatchJob stopJobV1(String jobId) {
+		 BatchJob oldJob = stopJob(jobId);
+		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
+		session.setStatus(Status.STOPPED.toString());
+		mongoTemplate.save(session);
+
+		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
+				PostManUtil.CHANNEL_ID(session.getContactType(), "", session.getLane()));
+
+		ChannelConfig channelConfig = enviroment.config().channel(channelId);
+
+		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
+
+		Query query = new Query()
+				.addCriteria(QueryCriteria.where("bulkSessionId").is(jobId).and("stamps.SENT").exists(false));
+		builder.set("status", Status.STOPPED.toString());
 
 		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
 
@@ -455,8 +486,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		QA list = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
 				QA.project("statuss", QA.objectToArray("stamps")), Aggregation.unwind("statuss"),
-				Aggregation.group("statuss.k").count().as("count"));
-		;
+				Aggregation.group("statuss.k").count().as("count"));;
 
 		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 //				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
@@ -547,12 +577,12 @@ public class BulkMessageService extends BatchJobExecuter {
 			LOGGER.info("The interval is a valid future date." + cSch.getInterval());
 			cSch.setTopic("CANCELLED");
 			bulkDoc.setStatus(JobStatus.CANCELLED.toString());
-			
-			
-			MongoQueryBuilder<BulkSessionDoc> builderU = MongoQueryBuilder.collection(BulkSessionDoc.class).whereId(bulkDoc.getBulkSessionId());
+
+			MongoQueryBuilder<BulkSessionDoc> builderU = MongoQueryBuilder.collection(BulkSessionDoc.class)
+					.whereId(bulkDoc.getBulkSessionId());
 			builderU.set("status", JobStatus.CANCELLED.toString());
 			mongoTemplate.upsert(builderU);
-			
+
 			registerJob(bulkDoc.getJob(), bulkDoc.getScheduler());
 			stopJob(bulkDoc.getJob().getJobId());
 			CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
@@ -566,11 +596,11 @@ public class BulkMessageService extends BatchJobExecuter {
 		}
 		return bulkDoc;
 	}
-	
-	public BulkSessionDoc reSchedule(BulkSessionDoc bulkDoc,ChronoScheduler schedular) {
+
+	public BulkSessionDoc reSchedule(BulkSessionDoc bulkDoc, ChronoScheduler schedular) {
 		BatchJob job = bulkDoc.getJob();
 		String jobId = job.getJobId();
-		//BatchJob oldJob = stopJob(jobId);
+		// BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
 		session.setStatus("CREATED");
 		session.setScheduler(schedular);
@@ -583,8 +613,8 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		CommonMongoQueryBuilder builder = new CommonMongoQueryBuilder();
 
-		Query query = new Query().addCriteria(
-				QueryCriteria.where("bulkSessionId").is(job.getJobId()).and("stamps.SENT").exists(false));
+		Query query = new Query()
+				.addCriteria(QueryCriteria.where("bulkSessionId").is(job.getJobId()).and("stamps.SENT").exists(false));
 		builder.set("status", Status.SCHLD.toString());
 		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
 		registerJob(JobTaskModel.newBatchJob()
@@ -598,8 +628,8 @@ public class BulkMessageService extends BatchJobExecuter {
 				.data("lane", session.getLane()), schedular);
 		return session;
 	}
-	
-	public BulkSessionDoc reSend(OutboxMessage bulkMessage,BulkSessionDoc bulkDoc) throws Exception{
+
+	public BulkSessionDoc reSend(OutboxMessage bulkMessage, BulkSessionDoc bulkDoc) throws Exception {
 		if (ArgUtil.is(bulkMessage.getScheduler())) {
 			bulkMessage.templateId(bulkDoc.getTemplateId());
 			bulkMessage.message(bulkDoc.getMessage());
@@ -614,11 +644,11 @@ public class BulkMessageService extends BatchJobExecuter {
 				}
 				List<OutboxMessage> lstOutBoxMsg = getGroupDetailsV1(bulkMessage);
 				return sendToGroup(lstOutBoxMsg, bulkMessage.getScheduler());
-			}else if(ArgUtil.is(bulkDoc.getFilters())) {
+			} else if (ArgUtil.is(bulkDoc.getFilters())) {
 				bulkMessage.setFilters(bulkDoc.getFilters());
 				List<OutboxMessage> lstOutBoxMsg = getFilterDetails(bulkMessage);
 				return sendToFilterGroup(lstOutBoxMsg, bulkMessage.getScheduler());
-			}else {
+			} else {
 				Query queryAll = new Query();
 				queryAll.addCriteria(Criteria.where("type").in("O"));
 				queryAll.addCriteria(Criteria.where("bulkSessionId").is(bulkDoc.getBulkSessionId()));
@@ -635,12 +665,10 @@ public class BulkMessageService extends BatchJobExecuter {
 		}
 		return null;
 	}
-		
-		
-		
 
-	public BulkSessionDoc sendToFilterGroup(List<OutboxMessage> bulkMessages, ChronoScheduler scheduler) throws NumberParseException {
-		OutboxMessage bulkMessage = bulkMessages.get(bulkMessages.size()-1);
+	public BulkSessionDoc sendToFilterGroup(List<OutboxMessage> bulkMessages, ChronoScheduler scheduler)
+			throws NumberParseException {
+		OutboxMessage bulkMessage = bulkMessages.get(bulkMessages.size() - 1);
 		String channelId = PostManUtil.CHANNEL_ID(bulkMessage.contact());
 		ChannelConfig channelConfig = enviroment.config().channel(channelId);
 		BulkSessionDoc session = new BulkSessionDoc();
@@ -656,7 +684,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setGroupName(bulkMessage.getGroupName());
 		session.setScheduler(scheduler);
 		session.setFilters(bulkMessage.getFilters());
-		
+
 		List<String> toLst = bulkMessage.getTo();
 
 		auditDetailProvider.auditCreate(session);
@@ -666,10 +694,10 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
-		//for (OutboxMessage bulkMsg : bulkMessages) {
-		   for (String to : toLst) {
+		// for (OutboxMessage bulkMsg : bulkMessages) {
+		for (String to : toLst) {
 			MessageDoc doc = messageStore.createMessageDoc(bulkMessage);
-			//String to = bulkMsg.getTo().get(0);
+			// String to = bulkMsg.getTo().get(0);
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
@@ -689,9 +717,9 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.route().setSenderCode(auditDetailProvider.getAuditUser());
 
 			docs.add(doc);
-			
+
 		}
-		   
+
 		session.setStatus("CREATED");
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
@@ -707,7 +735,7 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		return session;
 	}
-	
+
 	public List<OutboxMessage> getGroupDetailsV1(OutboxMessage outboxMessage) {
 
 		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
@@ -782,7 +810,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
 			String hsmTemplateCode = null;
-			
+
 			StringBuilder concatFilterpNames = new StringBuilder();
 			Set<String> uniquePhoneNumbers = new HashSet<>();
 			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
@@ -800,10 +828,10 @@ public class BulkMessageService extends BatchJobExecuter {
 					List<List<ProfileSearchCriteria>> searCri = getSearchCriteria(filterCri);
 					ProfileSearchQuery profSerarch = new ProfileSearchQuery();
 					profSerarch.setSearchCriterias(searCri);
-					
+
 					List<CustomerProfileDoc> docs = null;
-					if(ArgUtil.is(searCri)){
-						docs =cusProfileService.getProfileSearch(profSerarch);
+					if (ArgUtil.is(searCri)) {
+						docs = cusProfileService.getProfileSearch(profSerarch);
 					}
 					if (ArgUtil.is(docs)) {
 
@@ -839,20 +867,15 @@ public class BulkMessageService extends BatchJobExecuter {
 		}
 		return listOfOutboxMsg;
 	}
-	
-	
+
 	@SuppressWarnings("unchecked")
 	public List<List<ProfileSearchCriteria>> getSearchCriteria(List<List<Object>> filterCri) {
-		return  filterCri.stream()
-                .map(innerList -> innerList.stream()
-                        .filter(obj -> obj instanceof Map) // Ensure the object is a Map
-                        .map(obj -> (Map<String, String>) obj) // Cast to Map<String, String>
-                        .map(map -> new ProfileSearchCriteria(
-                                map.get("key"),
-                                map.get("operator"),
-                                map.get("value")
-                        ))
-                        .collect(Collectors.toList())) // Collect as List<ProfileSearchCriteria>
-                .collect(Collectors.toList());
+		return filterCri.stream().map(innerList -> innerList.stream().filter(obj -> obj instanceof Map) // Ensure the
+																										// object is a
+																										// Map
+				.map(obj -> (Map<String, String>) obj) // Cast to Map<String, String>
+				.map(map -> new ProfileSearchCriteria(map.get("key"), map.get("operator"), map.get("value")))
+				.collect(Collectors.toList())) // Collect as List<ProfileSearchCriteria>
+				.collect(Collectors.toList());
 	}
 }

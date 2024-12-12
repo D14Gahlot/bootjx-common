@@ -20,6 +20,8 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 		public static final String MESSAGE = "MESSAGE";
 		public static final String ACTION = "ACTION";
 		public static final String STATUS = "STATUS";
+		public static final String SYSTEM = "SYSTEM";
+		public static final String TIMEOUT = "TIMEOUT";
 	}
 
 	public static class EVENT_TYPE {
@@ -31,6 +33,9 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 		public static final String CONTACT_UPDATE = "CONTACT_UPDATE";
 		public static final String MESSAGE_INBOUND = "INBOUND";
 		public static final String MESSAGE_OUTBOUND = "OUTBOUND";
+		public static final String REPLY_TIMEOUT = "REPLY_TIMEOUT";
+		public static final String INBOUND_TIMEOUT = "INBOUND_TIMEOUT";
+		public static final String OUTBOUND_TIMEOUT = "OUTBOUND_TIMEOUT";
 	}
 
 	private static final long serialVersionUID = 5398462708633545227L;
@@ -47,11 +52,13 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 	private long timestamp;
 
 	@ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service",
-			allowableValues = "SESSION_INIT,INBOUND,OUTBOUND,ACTION,STATUS")
+			allowableValues = "SESSION_ROUTED,SESSION_INIT,SESSION_CLOSED,SESSION_STATUS,"
+					+ "SESSION_ASSIGNED,CONTACT_UPDATE,MESSAGE_INBOUND,MESSAGE_OUTBOUND,"
+					+ "REPLY_TIMEOUT,INBOUND_TIMEOUT,OUTBOUND_TIMEOUT")
 	public String type;
 
-	@ApiMockModelProperty(example = "INBOUND", value = "Bound Type of Event Triggered by App/Service",
-			allowableValues = "MESSAGE,ACTION,STATUS")
+	@ApiMockModelProperty(example = "MESSAGE", value = "Bound Type of Event Triggered by App/Service",
+			allowableValues = "MESSAGE,ACTION,STATUS,SYSTEM,TIMEOUT")
 	public String triggerType;
 
 	public MessageSession getSession() {

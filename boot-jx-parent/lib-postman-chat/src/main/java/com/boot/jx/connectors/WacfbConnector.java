@@ -362,6 +362,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
 
+
 				if (flowId == null || flowId.isEmpty()) {
 					String flowToken = String.valueOf(replyJsonMap.get("flow_token"));				
 					if (flowToken.contains("/")) {
@@ -371,6 +372,9 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 						flowId=flowToken;
 				}
 
+
+				
+				
 				//String flowId = ((Map<String, Object>) replyJsonMap.get("wa_flow_response_params")).get("flow_id").toString();
 				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 				WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);

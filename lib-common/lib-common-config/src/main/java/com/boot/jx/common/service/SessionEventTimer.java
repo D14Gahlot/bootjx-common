@@ -201,6 +201,10 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	private void doChatOutIdleTimeout(TunnelTask task) {
 		ChatSessionDoc session = sessionStore.getSession(task.getId());
+		doChatOutIdleTimeout(session);
+	}
+
+	public void doChatOutIdleTimeout(ChatSessionDoc session) {
 		if (sessionStore.isSessionValid(session)) {
 			ChatMessageDTO lastMsg = session.lastMsg();
 			ChatMessageDTO lastOutBoundMsg = session.lastOutBoundMsg();
@@ -222,6 +226,11 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	private void doChatInIdleTimeout(TunnelTask task) {
 		ChatSessionDoc session = sessionStore.getSession(task.getId());
+		doChatInIdleTimeout(session);
+
+	}
+
+	public void doChatInIdleTimeout(ChatSessionDoc session) {
 		if (sessionStore.isSessionValid(session)) {
 			ChatMessageDTO lastMsg = session.lastMsg();
 			ChatMessageDTO lastInBoundMsg = session.lastInBoundMsg();
@@ -240,7 +249,6 @@ public class SessionEventTimer extends ATaskLimiter {
 				}
 			}
 		}
-
 	}
 
 	private void doMitelClosing(TunnelTask task) {

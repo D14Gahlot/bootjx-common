@@ -35,6 +35,11 @@ public class PMConstants {
 		 * User who can create domains for clients and has Admin-Access to those domains
 		 */
 		public static final String BUSINESS_PARTNER = "BUSINESS_PARTNER";
+
+		/**
+		 * Internal Users, having access to manager profiles
+		 */
+		public static final String BUSINESS_MANAGER = "BUSINESS_MANAGER";
 		/**
 		 * User who can login to domain manager and has Admin-Access to that one domain
 		 */
@@ -42,7 +47,7 @@ public class PMConstants {
 
 		public static final String ADMIN = "ADMIN";
 		public static final String AGENT = "AGENT";
-		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,WABA_MANAGER,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
+		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_MANAGER,WABA_MANAGER,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
 	}
 
 	public final class USER_SHIP_TYPE {

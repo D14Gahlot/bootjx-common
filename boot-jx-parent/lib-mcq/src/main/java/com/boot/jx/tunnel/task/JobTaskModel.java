@@ -19,7 +19,7 @@ public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 	private static final long serialVersionUID = -8178126816683098712L;
 
 	public static enum JOB_STATUS {
-		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED, COMPLETED,CANCELLED
+		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED, COMPLETED,CANCELLED,STOPPED
 	}
 
 	private String tenant;
