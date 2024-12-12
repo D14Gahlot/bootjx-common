@@ -18,7 +18,7 @@ public class MessageReferral implements Serializable {
 	String sourceUrl;
 	String sourceId;
 
-	@ApiMockModelProperty(example = "feedback", value = "Category of Referral Source",
+	@ApiMockModelProperty(example = "campaign", value = "Category of Referral Source",
 			allowableValues = "message,social,ads,campaign")
 	String sourceCategory;
 
