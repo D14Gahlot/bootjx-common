@@ -90,8 +90,6 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Autowired
 	private PMFileStoreClient pmFileStoreClient;
-	
-
 
 	@Autowired
 	private WacfbClient wacfbClient;
@@ -196,7 +194,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			} else {
 				MapModel phoneNumbers = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
 						.path("/phone_numbers").authBearer(userAccessToken).get().asMapModel();
-				
+
 				channelConfigTemp.log("/phone_numbers", phoneNumbers.toMap());
 				final String assignedWaBaIdFinal = assignedWaBaId;
 
@@ -304,8 +302,8 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	private boolean isValidEmail(String email) {
 
 		String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-	    Pattern pattern = Pattern.compile(emailRegex);
-	    return pattern.matcher(email).matches();
+		Pattern pattern = Pattern.compile(emailRegex);
+		return pattern.matcher(email).matches();
 
 	}
 
@@ -362,20 +360,16 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
 
-
 				if (flowId == null || flowId.isEmpty()) {
-					String flowToken = String.valueOf(replyJsonMap.get("flow_token"));				
+					String flowToken = String.valueOf(replyJsonMap.get("flow_token"));
 					if (flowToken.contains("/")) {
 						flowId = flowToken.substring(flowToken.lastIndexOf("/") + 1);
-				}
-					else
-						flowId=flowToken;
+					} else
+						flowId = flowToken;
 				}
 
-
-				
-				
-				//String flowId = ((Map<String, Object>) replyJsonMap.get("wa_flow_response_params")).get("flow_id").toString();
+				// String flowId = ((Map<String, Object>)
+				// replyJsonMap.get("wa_flow_response_params")).get("flow_id").toString();
 				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 				WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
 				if (flow != null) {
@@ -715,23 +709,25 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			return defaultRegion;
 		}
 	}
-	@Override//suggested by Lalit- we are not getting category here we , it get set at tmplClient.process(outboxMessage)-line 233 of abstract connector
+
+	@Override // suggested by Lalit- we are not getting category here we , it get set at
+				// tmplClient.process(outboxMessage)-line 233 of abstract connector
 	public void beforeSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		Map<String, Object> meta = outboxMessage.getMeta();
-	    if (meta != null) {
-	        if (meta.containsKey("categoryType")) {
-	            String categoryType = (String) meta.get("categoryType");
-	            System.out.println("Category Type: " + categoryType);
-	            if("AUTHENTICATION".equalsIgnoreCase(categoryType))
-	            {
-	            	outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
-					//outboxMessage.setTemplateExt();
+		if (meta != null) {
+			if (meta.containsKey("categoryType")) {
+				String categoryType = (String) meta.get("categoryType");
+				System.out.println("Category Type: " + categoryType);
+				if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
+					outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
+					// outboxMessage.setTemplateExt();
 
-	            }
-	        }}
-        super.beforeSend(channelConfig, chatContactDoc, outboxMessage);
+				}
+			}
+		}
+		super.beforeSend(channelConfig, chatContactDoc, outboxMessage);
 	}
-	
+
 	// @Override
 	/*
 	 * public boolean optin(ChannelConfig channelConfig, ChatContactDoc

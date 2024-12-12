@@ -32,7 +32,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		CCWIN,
 
 		// INBOUND STATUS
-		RECEIVD, CONSUMED, FORWARDED, FORWARD_ERR, STATUS_FORWARD_ERR,STOPPED;
+		RECEIVD, CONSUMED, FORWARDED, FORWARD_ERR, STATUS_FORWARD_ERR, STOPPED;
 		;
 	}
 
@@ -223,7 +223,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	}
 
 	public String categoryType() {
-		return ArgUtil.parseAsString(meta().get("categoryType"));
+		return messageMetaWrapper().categoryType().asString();
 	}
 
 	public Status getStatus() {
@@ -531,10 +531,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	}
 
 	public MessageMetaWrapper messageMetaWrapper() {
-		if (this.meta == null) {
-			this.meta = new HashMap<String, Object>();
-		}
-		return new MessageMetaWrapper(this.meta);
+		return MessageMetaWrapper.from(this.meta());
 	}
 
 	@Override

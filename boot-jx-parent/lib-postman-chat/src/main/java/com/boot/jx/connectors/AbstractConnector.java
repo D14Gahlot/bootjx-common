@@ -230,55 +230,61 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 			outboxMessage.hsm().lang(chatContactDoc.prefs().getLang());
 		}
 
-		tmplClient.process(outboxMessage);//here category is getting value
-		 Map<String, Object> meta = outboxMessage.getMeta();//this is my code which we need to decide 
-		    if (meta != null) {
-		        if (meta.containsKey("categoryType")) {
-		            String categoryType = (String) meta.get("categoryType");
-		            System.out.println("Category Type: " + categoryType);
-		            if("AUTHENTICATION".equalsIgnoreCase(categoryType))
-		            {
-		            	outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
-						//outboxMessage.setTemplateExt();
+		tmplClient.process(outboxMessage);// here category is getting value
 
-		            }
-		        }}
-		    
+		Map<String, Object> meta = outboxMessage.getMeta();// this is my code which we need to decide
+		if (meta != null) {
+			if (meta.containsKey("categoryType")) {
+				String categoryType = (String) meta.get("categoryType");
+				System.out.println("Category Type: " + categoryType);
+				if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
+					outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
+					// outboxMessage.setTemplateExt();
+
+				}
+			}
+		}
 
 		if (ArgUtil.is(outboxMessage.templateId())) {
-			List<HSMTemplate3rdParty> temps = null;
-			if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
-				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
-						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
-								.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
-			} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
-					&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
-				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
-						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
-								.is(channelConfig.getChannelId())));
-				LOGGER.debug(JsonUtil.toJson(temps));
-			}
-			
-
-			if (ArgUtil.is(temps)) {
-				HSMTemplate3rdParty resolvedTemplate = null;
-				if (temps.size() > 1) {
-					for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-						if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
-							resolvedTemplate = hsmTemplate3rdParty;
-							break;
-						} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
-							resolvedTemplate = hsmTemplate3rdParty;
-						}
-					}
-				} else {
-					resolvedTemplate = temps.get(0);
-				}
-				outboxMessage.setTemplateExt(resolvedTemplate);
-				return outboxMessage;
+			HSMTemplate3rdParty tpTemplate = template3rdParty(channelConfig, outboxMessage);
+			if (ArgUtil.is(tpTemplate)) {
+				outboxMessage.setTemplateExt(tpTemplate);
 			}
 		}
 		return outboxMessage;
+	}
+
+	public HSMTemplate3rdParty template3rdParty(ChannelConfig channelConfig, OutboxMessage outboxMessage) {
+		List<HSMTemplate3rdParty> temps = null;
+		if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
+			temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+					.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+							.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
+		} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
+				&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
+			temps = commonMongoTemplate.find(
+					CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
+							.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
+			LOGGER.debug(JsonUtil.toJson(temps));
+		}
+
+		if (ArgUtil.is(temps)) {
+			HSMTemplate3rdParty resolvedTemplate = null;
+			if (temps.size() > 1) {
+				for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
+					if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
+						resolvedTemplate = hsmTemplate3rdParty;
+						break;
+					} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
+						resolvedTemplate = hsmTemplate3rdParty;
+					}
+				}
+			} else {
+				resolvedTemplate = temps.get(0);
+			}
+			return resolvedTemplate;
+		}
+		return null;
 	}
 
 	@Override
