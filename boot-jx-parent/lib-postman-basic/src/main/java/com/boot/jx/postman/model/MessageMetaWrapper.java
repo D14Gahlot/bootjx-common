@@ -47,12 +47,25 @@ public class MessageMetaWrapper extends MapModel {
 		return this;
 	}
 
+	public MessageMetaWrapper categoryType(String categoryType) {
+		this.put("categoryType", categoryType);
+		return this;
+	}
+
+	public MapPathEntry categoryType() {
+		return this.keyEntry("categoryType");
+	}
+
 	public boolean composeTypeIs(String composeType) {
 		return this.keyEntry("composeType").is(composeType);
 	}
 
 	public String sendType() {
 		return this.getString("sendType");
+	}
+
+	public static MessageMetaWrapper from(Map<String, Object> meta) {
+		return new MessageMetaWrapper(meta);
 	}
 
 }

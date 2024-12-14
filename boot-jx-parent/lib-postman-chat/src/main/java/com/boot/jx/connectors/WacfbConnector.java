@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.auth.AuthStateManager.AuthState;
@@ -23,15 +24,18 @@ import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.WABAFlows;
@@ -194,7 +198,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			} else {
 				MapModel phoneNumbers = restService.ajax(WA360Constants.META_WA_CLOUD_URL).path(assignedWaBaId)
 						.path("/phone_numbers").authBearer(userAccessToken).get().asMapModel();
-				
+
 				channelConfigTemp.log("/phone_numbers", phoneNumbers.toMap());
 				final String assignedWaBaIdFinal = assignedWaBaId;
 
@@ -302,8 +306,8 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	private boolean isValidEmail(String email) {
 
 		String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-	    Pattern pattern = Pattern.compile(emailRegex);
-	    return pattern.matcher(email).matches();
+		Pattern pattern = Pattern.compile(emailRegex);
+		return pattern.matcher(email).matches();
 
 	}
 
@@ -359,26 +363,17 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 				String flowId = null;
 
 				Map<String, Object> replyJsonMap = JsonUtil.fromJsonToMap(responseJsonString);
-				if(replyJsonMap.containsKey("flow_token"))
-				{
-					flowId=replyJsonMap.get("flow_token").toString();
-					if(flowId.contains("/"))
-					{
-						flowId = flowId.substring(flowId.lastIndexOf("/") + 1);
 
-					}
-				}
-				
-				else {
-					if((replyJsonMap.containsKey("wa_flow_response_params"))) {
-				    Map<String, Object> responseParams = (Map<String, Object>) replyJsonMap.get("wa_flow_response_params");
-				    if (responseParams != null && responseParams.containsKey("flow_id")) {
-				        flowId = responseParams.get("flow_id").toString();
-				    }
-					} 
+				if (flowId == null || flowId.isEmpty()) {
+					String flowToken = String.valueOf(replyJsonMap.get("flow_token"));
+					if (flowToken.contains("/")) {
+						flowId = flowToken.substring(flowToken.lastIndexOf("/") + 1);
+					} else
+						flowId = flowToken;
 				}
 
-				//String flowId = ((Map<String, Object>) replyJsonMap.get("wa_flow_response_params")).get("flow_id").toString();
+				// String flowId = ((Map<String, Object>)
+				// replyJsonMap.get("wa_flow_response_params")).get("flow_id").toString();
 				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 				WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
 				if (flow != null) {
@@ -719,6 +714,50 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 	}
 
+	@Override 
+	public HSMTemplate3rdParty templateExt(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+			OutboxMessage outboxMessage) {
+		List<HSMTemplate3rdParty> temps = null;
+		Map<String, Object> meta = outboxMessage.getMeta();// this is my code which we need to decide
+		if (meta != null) {
+			if (meta.containsKey("categoryType")) {
+				String categoryType = (String) meta.get("categoryType");
+				    if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
+					outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
+
+				}
+			}
+		}
+		if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
+			temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+					.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+							.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
+		} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
+				&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
+			temps = commonMongoTemplate.find(
+					CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
+							.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
+			LOGGER.debug(JsonUtil.toJson(temps));
+		}
+
+		if (ArgUtil.is(temps)) {
+			HSMTemplate3rdParty resolvedTemplate = null;
+			if (temps.size() > 1) {
+				for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
+					if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
+						resolvedTemplate = hsmTemplate3rdParty;
+						break;
+					} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
+						resolvedTemplate = hsmTemplate3rdParty;
+					}
+				}
+			} else {
+				resolvedTemplate = temps.get(0);
+			}
+			return resolvedTemplate;
+		}
+		return null;
+	}
 	// @Override
 	/*
 	 * public boolean optin(ChannelConfig channelConfig, ChatContactDoc

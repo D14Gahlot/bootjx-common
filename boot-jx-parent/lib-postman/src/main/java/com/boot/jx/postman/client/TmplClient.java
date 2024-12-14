@@ -20,6 +20,7 @@ import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
 import com.boot.jx.postman.PostmanPackages.Text2Media;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.PostManFile;
 import com.boot.jx.postman.model.TmplElement;
@@ -68,10 +69,10 @@ public class TmplClient {
 		file = this.process(file, outboxMessage.contact().type()).getResult();
 		outboxMessage.setMessage(file.getContent());
 
-		Object categoryType = file.meta().get("categoryType");
+		MessageMetaWrapper messageMeta = MessageMetaWrapper.from(file.meta());
 
-		if (ArgUtil.is(categoryType)) {
-			outboxMessage.meta().put("categoryType", categoryType);
+		if (ArgUtil.is(messageMeta.categoryType().exists())) {
+			outboxMessage.messageMetaWrapper().categoryType(messageMeta.categoryType().asString());
 		}
 
 		if (!ArgUtil.is(outboxMessage.getSubject())) {

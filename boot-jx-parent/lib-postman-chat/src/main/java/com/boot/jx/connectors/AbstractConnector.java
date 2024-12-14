@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,7 +212,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		}
 	}
 
-	private OutboxMessage process(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+	public OutboxMessage process(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
 
 		outboxMessage.model().put("contact", ChatDTOUtil.getContactMeta(chatContactDoc));
@@ -230,40 +231,47 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		}
 
 		tmplClient.process(outboxMessage);
-
 		if (ArgUtil.is(outboxMessage.templateId())) {
-			List<HSMTemplate3rdParty> temps = null;
-			if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
-				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
-						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
-								.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
-			} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
-					&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
-				temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
-						.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
-								.is(channelConfig.getChannelId())));
-				LOGGER.debug(JsonUtil.toJson(temps));
-			}
-
-			if (ArgUtil.is(temps)) {
-				HSMTemplate3rdParty resolvedTemplate = null;
-				if (temps.size() > 1) {
-					for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-						if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
-							resolvedTemplate = hsmTemplate3rdParty;
-							break;
-						} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
-							resolvedTemplate = hsmTemplate3rdParty;
-						}
-					}
-				} else {
-					resolvedTemplate = temps.get(0);
-				}
-				outboxMessage.setTemplateExt(resolvedTemplate);
-				return outboxMessage;
+			HSMTemplate3rdParty tpTemplate = templateExt(channelConfig, chatContactDoc, outboxMessage);
+			if (ArgUtil.is(tpTemplate)) {
+				outboxMessage.setTemplateExt(tpTemplate);
 			}
 		}
 		return outboxMessage;
+	}
+
+	public HSMTemplate3rdParty templateExt(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+			OutboxMessage outboxMessage) {
+		List<HSMTemplate3rdParty> temps = null;
+		if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
+			temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+					.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+							.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
+		} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
+				&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
+			temps = commonMongoTemplate.find(
+					CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
+							.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
+			LOGGER.debug(JsonUtil.toJson(temps));
+		}
+
+		if (ArgUtil.is(temps)) {
+			HSMTemplate3rdParty resolvedTemplate = null;
+			if (temps.size() > 1) {
+				for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
+					if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
+						resolvedTemplate = hsmTemplate3rdParty;
+						break;
+					} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
+						resolvedTemplate = hsmTemplate3rdParty;
+					}
+				}
+			} else {
+				resolvedTemplate = temps.get(0);
+			}
+			return resolvedTemplate;
+		}
+		return null;
 	}
 
 	@Override
