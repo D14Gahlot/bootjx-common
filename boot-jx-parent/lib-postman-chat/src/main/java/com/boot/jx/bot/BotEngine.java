@@ -317,7 +317,7 @@ public class BotEngine {
 	public void invokeMethods(ChatSessionDoc sessionDoc, InBoundEvent assignEvent) {
 		try {
 
-			if (InBoundEvent.SESSION_ROUTED.equals(assignEvent.eventCode)) {
+			if (InBoundEvent.EVENT_TYPE.SESSION_ROUTED.equals(assignEvent.type)) {
 				String botCodePrefix = pmEnvironment.keyEntry("postman.bot.code").asString(AppContextUtil.getTenant());
 				ClientApp app = messageContext.clientApp(assignEvent.sessionRouted.targetQueue, sessionDoc.contact());
 				String botCode = botCodePrefix;

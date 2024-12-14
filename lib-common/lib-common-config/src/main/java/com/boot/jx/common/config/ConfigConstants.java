@@ -28,6 +28,7 @@ public class ConfigConstants {
 	public static final String GROUP_DEV = "DEVELOPMENT";
 	public static final String CHANNELS = "CHANNELS";
 	public static final String BOT = "BOT";
+	public static final String CAMPAIGN = "CAMPAIGN";
 	public static final String APP_MODULES = "APP_MODULES";
 
 	public static enum APP_KEY implements EntryMeta {

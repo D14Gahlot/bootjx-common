@@ -17,6 +17,7 @@ import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
+import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.rest.RestService;
@@ -46,9 +47,11 @@ public class AppScriptController {
 
 		ClientApp app = pmEnvironment.local().clientApiKey(appId);
 		if (!ArgUtil.is(app) || !(APP_TYPE.APP_SCRIPT.name().equals(app.getAppType())
-				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType()))) {
+				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType())
+				|| CHAT_MODE.SCRIPTUS.name().equals(app.getAppMode()))) {
 			ApiResponseUtil.throwAccessDeniedException("App Not found");
 		}
+
 		MapModel meta = MapModel.createInstance().put("appId", app.getId()).put("appQueue", app.getQueue())
 				.put("appName", app.getKeyName()).put("appMode", app.getAppMode()).put("appType", app.getAppType());
 
@@ -70,7 +73,8 @@ public class AppScriptController {
 		ClientApp app = pmEnvironment.local().clientApiKey(appId);
 
 		if (!ArgUtil.is(app) || !(APP_TYPE.APP_SCRIPT.name().equals(app.getAppType())
-				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType()))) {
+				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType())
+				|| CHAT_MODE.SCRIPTUS.name().equals(app.getAppMode()))) {
 			ApiResponseUtil.throwAccessDeniedException("App Not found");
 		}
 
@@ -96,7 +100,8 @@ public class AppScriptController {
 
 		ClientApp app = pmEnvironment.local().clientApiKey(appId);
 		if (!ArgUtil.is(app) || !(APP_TYPE.APP_SCRIPT.name().equals(app.getAppType())
-				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType()))) {
+				|| APP_TYPE.WEBHOOK.name().equals(app.getAppType())
+				|| CHAT_MODE.SCRIPTUS.name().equals(app.getAppMode()))) {
 			ApiResponseUtil.throwAccessDeniedException("App Not found");
 		}
 

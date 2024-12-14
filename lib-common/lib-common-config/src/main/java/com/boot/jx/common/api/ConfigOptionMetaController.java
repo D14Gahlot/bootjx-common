@@ -3,6 +3,7 @@ package com.boot.jx.common.api;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,10 +22,10 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.config.CDNBuilder;
+import com.boot.jx.common.config.CONFIG_FEATURES_KEY;
 import com.boot.jx.common.config.ClientAppConfigConstants;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.config.ConfigManagerImpl;
-import com.boot.jx.common.config.CONFIG_FEATURES_KEY;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.dict.ContactType;
@@ -152,7 +153,7 @@ public class ConfigOptionMetaController {
 			return ApiResponse.buildResults(pmEnvironment.config().listChannels().stream()
 					.filter(channel -> channel.equals(contactType)).collect(Collectors.toList()));
 		}
-		List<AChannelConfig> x = pmEnvironment.config().listChannels();
+		Set<AChannelConfig> x = pmEnvironment.config().listChannels();
 		// System.out.println(JsonUtil.toJson(x));
 		return ApiResponse.buildResults(x);
 	}
@@ -303,7 +304,8 @@ public class ConfigOptionMetaController {
 
 	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_SUPERDEV })
 	@RequestMapping(value = "/api/feature", method = { RequestMethod.DELETE })
-	public ApiResponse<Map<String, Object>, Object> deleteFeature(@RequestParam(required = false) CONFIG_FEATURES_KEY key) {
+	public ApiResponse<Map<String, Object>, Object> deleteFeature(
+			@RequestParam(required = false) CONFIG_FEATURES_KEY key) {
 		configManager.deletePerm(key);
 		return ApiResponse.buildResults(configManager.getFeature());
 	}

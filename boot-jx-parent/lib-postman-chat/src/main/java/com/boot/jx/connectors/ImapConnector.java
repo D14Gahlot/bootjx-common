@@ -1,22 +1,14 @@
 package com.boot.jx.connectors;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
-import com.boot.jx.auth.AuthStateManager.AuthState;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.email.EmailReplyParser;
-import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
@@ -38,8 +30,8 @@ import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.nexus.NexusEmailClient;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
-import com.boot.jx.postman.plugin.OutlookPlugin;
-import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
+import com.boot.jx.postman.plugin.ImapPlugin;
+import com.boot.jx.postman.plugin.ImapPlugin.ImapConfigDetails;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
@@ -47,20 +39,13 @@ import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
-import com.boot.utils.DateUtil;
 import com.boot.utils.StringUtils;
-import com.boot.utils.TimeUtils.TimePeriod;
-import com.boot.utils.Urly;
 
 @Component
-@ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.OUTLOOK)
-public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, OutlookPlugin> {
+@ConnectorMapping(contactType = ContactType.EMAIL, channel = CHANNEL_TYPE.IMAP)
+public class ImapConnector extends AbstractConnector<ImapConfigDetails, ImapPlugin> {
 
-	private static Logger LOGGER = LoggerService.getLogger(OutlookConnector.class);
-	private static final String AUTHORITY = "https://login.microsoftonline.com";
-	private static final String GRAPH_API = "https://graph.microsoft.com";
-	private static final String AUTHORIZE_URL = AUTHORITY + "/common/oauth2/v2.0/authorize";
-	private static final String AUTHORIZE_TOKEN = AUTHORITY + "/common/oauth2/v2.0/token";
+	private static Logger LOGGER = LoggerService.getLogger(ImapConnector.class);
 
 	@Autowired
 	private RestService restService;
@@ -78,117 +63,8 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 	private MessageStore messageStore;
 
 	@Override
-	public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigLogger, AuthState state)
-			throws URISyntaxException, MalformedURLException {
-		String redirectUri = String.format("%s%s/ext/setup/channel/callback/outlook", commonHttpRequest.getServerHost(),
-				appConfig.getAppPrefix(), environment.keyEntry("mry.prop.service.server").asString());
-		/// &state=fooobar&scope=r_liteprofile%20r_emailaddress%20w_member_social
-		state.setRedirectUrl(redirectUri);
-
-		return Urly.parse(AUTHORIZE_URL).queryParam("response_type", "code") //
-				.queryParam("client_id", setup.getOutlook().getMasterClientId()) //
-				.queryParam("redirect_uri", redirectUri).queryParam("state", state.toString()) // State
-				.queryParam("nonce", state.getNonce()) //
-				.queryParam("scope", "offline_access user.read mail.read mail.send Mail.ReadWrite") //
-				.queryParam("response_mode", "form_post") //
-				.getURL();
-	}
-
-	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigLogger channelConfigLogger,
-			AuthState state) {
-		List<ChannelConfig> channels = new ArrayList<ChannelConfig>();
-		try {
-
-			MapModel resp = MapModel.from(channelConfigLogger.getResp());
-			MapModel tokenResponse = restService.ajax(AUTHORIZE_TOKEN)//
-					.field("grant_type", "authorization_code")//
-					.field("code", resp.pathEntry("authResponse.code").asString())//
-					.field("client_id", setup.getOutlook().getMasterClientId())//
-					.field("client_secret", setup.getOutlook().getMasterClientSecret())//
-					.field("redirect_uri", state.getRedirectUrl()).submit().asMapModel();
-
-			channelConfigLogger.log("oauth2/v2.0/token", tokenResponse.toMap());
-
-			String accessToken = tokenResponse.keyEntry("access_token").asString();
-			String refreshToken = tokenResponse.keyEntry("refresh_token").asString();
-
-			MapModel profileResponse = restService.ajax("https://graph.microsoft.com/v1.0/me")
-					.header("Authorization", "Bearer " + accessToken).get().asMapModel();
-
-			channelConfigLogger.log("/me", profileResponse.toMap());
-
-			ChannelConfig channel = new ChannelConfig();
-			channel.setApiVersion("v3");
-			channel.setOutlook(new OutlookConfigDetails());
-			channel.getOutlook().setAccessToken(accessToken);
-			channel.getOutlook().setRefreshToken(refreshToken);
-			channel.getOutlook().setEmail(profileResponse.keyEntry("mail").orKeyEntry("userPrincipalName").asString());
-			channel.getOutlook().setMasterClientId(setup.getOutlook().getMasterClientId());
-			channel.setName(profileResponse.keyEntry("displayName").asString());
-
-			channels.add(channel);
-		} catch (ApiHttpException e) {
-			channelConfigLogger.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
-		}
-		commonMongoTemplate.save(channelConfigLogger);
-		return channels;
-	}
-
-	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 		nexusEmailClient.subscribe(channelConfig);
-	}
-
-	@Deprecated
-	public void onChannelUpdateFallback(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
-		Map<String, Object> meta = channelConfig.getMeta();
-		if (!ArgUtil.is(channelConfig.getMeta())) {
-			meta = new HashMap<String, Object>();
-		}
-
-		try {
-			String webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, "nexus/email/api/v1",
-					MapModel.createInstance().put("folder", "inbox").toMap());
-			MapModel inbox = restService.ajax(GRAPH_API).path("/v1.0/subscriptions")
-					.authBearer(channelConfig.getOutlook().getAccessToken())
-					.postJson(MapModel.createInstance().put("changeType", "created").put("notificationUrl", webhookUrl)
-							.put("lifecycleNotificationUrl", webhookUrl)
-							.put("resource", "/me/mailFolders('inbox')/messages")
-							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1hour")))
-							.put("clientState", channelConfig.getOutlook().getMasterClientId())
-							.put("latestSupportedTlsVersion", "v1_2").toMap())
-					.asMapModel();
-
-			channelConfigLogger.log("/subscriptions?inbox", inbox.toMap());
-
-			if (inbox.containsKey("data")) {
-				meta.put("inbox_subscription", inbox.keyEntry("data").value());
-			}
-
-			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, "nexus/email/api/v1",
-					MapModel.createInstance().put("folder", "SentItems").toMap());
-
-			MapModel sentItems = restService.ajax(GRAPH_API).path("/v1.0/subscriptions")
-					.authBearer(channelConfig.getOutlook().getAccessToken())
-					.postJson(MapModel.createInstance().put("changeType", "created").put("notificationUrl", webhookUrl)
-							.put("lifecycleNotificationUrl", webhookUrl)
-							.put("resource", "/me/mailFolders('SentItems')/messages")
-							.put("expirationDateTime", DateUtil.toISOString(TimePeriod.of("1hour")))
-							.put("clientState", channelConfig.getOutlook().getMasterClientId())
-							.put("latestSupportedTlsVersion", "v1_2").toMap())
-					.asMapModel();
-
-			channelConfigLogger.log("/subscriptions?SentItems", sentItems.toMap());
-
-			if (sentItems.containsKey("data")) {
-				meta.put("sent_subscription", sentItems.keyEntry("data").value());
-			}
-		} catch (ApiHttpException e) {
-			LOGGER.error("onChannelUpdate", e);
-			channelConfigLogger.log("exception", MapModel.from(e.getResponse().getBody()).toMap());
-		}
-
-		channelConfig.setMeta(meta);
 	}
 
 	@Override

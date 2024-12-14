@@ -18,6 +18,7 @@ public class UserAuthToken implements Serializable {
 	private String domainToken;
 	private String domainUserEmail;
 	private String domainUserPhone;
+	private String domainUserData;
 	private String app;
 	private String event;
 	private String ssoToken;
@@ -151,6 +152,14 @@ public class UserAuthToken implements Serializable {
 
 	public void setInvalid(boolean invalid) {
 		this.invalid = invalid;
+	}
+
+	public String getDomainUserData() {
+		return domainUserData;
+	}
+
+	public void setDomainUserData(String domainUserData) {
+		this.domainUserData = domainUserData;
 	}
 
 }

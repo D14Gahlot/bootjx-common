@@ -89,6 +89,8 @@ public class InBound {
 
 		public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session);
 
+		void onTimeout(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs);
+
 	}
 
 	public interface SessionAssginHandler {
@@ -112,6 +114,8 @@ public class InBound {
 		public NodeEntry<InBoundEvent> postMessageOutBound(OutboxMessage message);
 
 		public NodeEntry<InBoundEvent> postMessageInBound(InboxMessage message);
+
+		public NodeEntry<InBoundEvent> postMessageStatus(MessageReport messageReport);
 
 	}
 

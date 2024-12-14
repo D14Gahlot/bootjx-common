@@ -9,6 +9,8 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 	BUILD_VERSION(
 			new ConfigMeta("BUILD_VERSION", "feature.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
 	CONTACT_CENTER(new ConfigMeta("Customer Profile", "feature.contact.center").optionsOnOff()),
+	AUTH_2FA(new ConfigMeta("2FA Auth for login", "feature.auth.2fa").optionsOnOff()),
+
 	CHANNEL_AUTOCONFIGURE_FACEBOOK(new ConfigMeta("AutoConfigure Facebook", "feature.channel.autoconfigure.facebook")
 			.optionsOnOff().group(ConfigConstants.CHANNELS)),
 	CHANNEL_AUTOCONFIGURE_WHATSAPP(new ConfigMeta("AutoConfigure WhatsApp", "feature.channel.autoconfigure.whatsapp")
@@ -34,7 +36,9 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 			new ConfigMeta("Bot Flow Builder", "feature.bot.flow.builder").optionsOnOff().group(ConfigConstants.BOT)),
 
 	CAMPAIGN_SCHEDULER(new ConfigMeta("Campaign Scheduler", "feature.campaign.scheduler").optionsOnOff()
-			.group(ConfigConstants.BOT)),
+			.group(ConfigConstants.CAMPAIGN)),
+	CAMPAIGN_RESEND_FAILED(new ConfigMeta("Campaign Resend Failed Marketing Messages", "feature.campaign.resend.failed")
+			.optionsOnOff().group(ConfigConstants.CAMPAIGN)),
 
 	APP_MODULE_CALENDAR(new ConfigMeta("Calendar Module", "feature.app.module.calandar").optionsOnOff()
 			.group(ConfigConstants.APP_MODULES)),
@@ -49,6 +53,9 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 			.group(ConfigConstants.APP_MODULES)),
 
 	AGENT_RM_USER(new ConfigMeta("Relationship Managment", "feature.agent.rm.user").optionsOnOff()
+			.group(ConfigConstants.GROUP_AGENT)),
+
+	EVENTS_TIMEOUT(new ConfigMeta("Events Timeout Managment", "feature.events.timeout").optionsOnOff()
 			.group(ConfigConstants.GROUP_AGENT)),
 
 	// Ends here

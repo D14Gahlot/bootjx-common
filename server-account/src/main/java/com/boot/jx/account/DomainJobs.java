@@ -58,14 +58,13 @@ public class DomainJobs {
 		String serviceDomain = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 
 		MongoQueryBuilder<ChannelConfigDupsDoc> emailChannelsQuery = MongoQueryBuilder
-				.collection(ChannelConfigDupsDoc.class)
-				.where(Criteria.where("contactType").is(ContactType.EMAIL.name()).and("server").is(serviceDomain));
+				.collection(ChannelConfigDupsDoc.class).where(Criteria.where("contactType").is(ContactType.EMAIL.name())
+						.and("channelType").is(CHANNEL_TYPE.EMAIL).and("server").is(serviceDomain));
 		List<ChannelConfigDupsDoc> emailChannels = configMaster.find(emailChannelsQuery);
 
 		for (ChannelConfigDupsDoc emailChannel : emailChannels) {
 			LOGGER.debug("Searching Config {}", emailChannel.getId());
-			if (!emailChannel.isDisabled() && !emailChannel.isDeleted()
-					&& !CHANNEL_TYPE.OUTLOOK.equalsIgnoreCase(emailChannel.getChannelType())) {
+			if (!emailChannel.isDisabled() && !emailChannel.isDeleted()) {
 				AppContextUtil.clear();
 				AppContextUtil.setTenant(emailChannel.getDomain());
 				AppContextUtil.init();

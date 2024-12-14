@@ -225,6 +225,11 @@ public class ClientAppConfigDoc
 	}
 
 	@Override
+	public boolean isCustomApp() {
+		return ArgUtil.isEqual(getAppType(), APP_TYPE.APP_SCRIPT, APP_TYPE.BOTFLOW);
+	}
+
+	@Override
 	public boolean equals(CHAT_MODE mode) {
 		return mode.toString().equals(getAppMode());
 	}

@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,8 +105,10 @@ public class WacfbClient implements ChannelClient {
 			checkFlowButton(options);
 
 			if (options.containsKey("buttons")) {
-
-				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);
+				
+                
+				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);//null
+				
 
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
@@ -445,7 +448,47 @@ public class WacfbClient implements ChannelClient {
 								buttonComponent.parameter("payload", "reply_id:" + button.getCode());
 								components.add(buttonComponent.build().map());
 							}
-						} else if ("FLOW".equals(buttonType)) {
+						} else if ("URL".equalsIgnoreCase(buttonType)) {
+							HashMap<String, Object> model1 = (HashMap<String, Object>) outboxMessage.getModel(); // Assuming 'getModel()' returns your map
+							Map<String, Object> data = (Map<String, Object>) model1.get("data");
+
+							String code = "";
+							if (data != null && data.containsKey("1")) {
+							    code = String.valueOf(data.get("1")); 
+							    
+							}
+
+							Map<String, Object> bodyComponent = new HashMap<>();
+							bodyComponent.put("type", "body");
+
+							List<Map<String, Object>> bodyParameters = new ArrayList<>();
+							Map<String, Object> bodyParameter = new HashMap<>();
+							bodyParameter.put("type", "text");
+							bodyParameter.put("text", code); 
+							bodyParameters.add(bodyParameter);
+
+							bodyComponent.put("parameters", bodyParameters);
+							components.add(bodyComponent);
+
+						
+							Map<String, Object> buttonComponent = new HashMap<>();
+							buttonComponent.put("type", "button");
+							buttonComponent.put("sub_type", "url");
+							buttonComponent.put("index", i); 
+
+							List<Map<String, Object>> buttonParameters = new ArrayList<>();
+							Map<String, Object> buttonParameter = new HashMap<>();
+							buttonParameter.put("type", "text");
+							buttonParameter.put("text", code); 
+							buttonParameters.add(buttonParameter);
+
+							buttonComponent.put("parameters", buttonParameters);
+							components.add(buttonComponent);
+
+
+						}
+
+						else if ("FLOW".equals(buttonType)) {
 							if(ArgUtil.is(buttonParameterVar))
 							{
 							for(Map<String, Object> buttonParameter : buttonParameterVar)
@@ -461,7 +504,7 @@ public class WacfbClient implements ChannelClient {
 						}}}
 							else
 							{
-								Object flowIdObj = extTemplateComponentButton.get("flow_id"); // Get the value of "flow_id"
+								Object flowIdObj = extTemplateComponentButton.get("flow_id");
 						        String flow_id = flowIdObj != null ? String.valueOf(flowIdObj) : null;
 								TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
 								buttonComponent.parameter("action",
@@ -526,6 +569,9 @@ public class WacfbClient implements ChannelClient {
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
 		req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY,
 				StringUtils.wrap("*", outboxMessage.getSubject(), "*\n") + outboxMessage.getMessage());
+	
+		
+
 		return send(req, channelConfig);
 	}
 

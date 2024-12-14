@@ -116,16 +116,18 @@ public class ChatDTOUtil {
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
 		messageDto.setForm(messageDoc.getForm());
+
 		messageDto.setReferral(messageDoc.getReferral());
-		if (ArgUtil.is(messageDoc.getOptions())) {
-			messageDto.setOptions(messageDoc.getOptions());
-		} else {
-			messageDto.setOptions(getDefaultMap(messageDoc.options()));
-		}
 		if (ArgUtil.is(messageDoc.getReplyTo())) {
 			messageDto.setReplyTo(messageDoc.getReplyTo());
 		} else {
 			messageDto.setReplyTo(getDefaultMap(messageDoc.replyTo()));
+		}
+
+		if (ArgUtil.is(messageDoc.getOptions())) {
+			messageDto.setOptions(messageDoc.getOptions());
+		} else {
+			messageDto.setOptions(getDefaultMap(messageDoc.options()));
 		}
 
 		if (ArgUtil.is(messageDoc.getContact())) {

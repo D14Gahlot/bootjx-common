@@ -212,8 +212,9 @@ public class ChatService {
 
 	public MessageDoc send(ChatSessionDoc sessionDoc, OutboxMessage outboxMessage) {
 		LOGGER.debug("send(ChatSessionDoc {}, OutboxMessage {})", sessionDoc, outboxMessage);
-		
-		//LOGGER.info("send ---"+JsonUtil.toJson(outboxMessage)); TODO:- @Rabil not to leave these info statements
+
+		// LOGGER.info("send ---"+JsonUtil.toJson(outboxMessage)); TODO:- @Rabil not to
+		// leave these info statements
 
 		context().session(sessionDoc);
 

@@ -7,17 +7,20 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.chat.ChatSessionService;
-import com.boot.jx.common.config.ConfigConstants;
+import com.boot.jx.common.config.CONFIG_FEATURES_KEY;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
+import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.inbound.InBound.ChatSessionEvents;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
+import com.boot.jx.postman.model.ext.SessionBoundEvent;
 import com.boot.jx.postman.query.ChatSessionQuery;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -67,64 +70,75 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Autowired
 	private ChatSessionEvents chatSessionEvents;
 
+	@Autowired
+	private CommonServiceClient commonServiceClient;
+
 	@Override
 	public boolean isWorker() {
 		return ArgUtil.isEqual(appConfig.getAppType(), "POSTMAN", "AGENT", "BOT");
 	}
 
+	private void debouncEvent(CONFIG_SETUP_KEY configSetupKey, String sessionid, SessionBoundEvent inBoundEvent,
+			String sessionEventName) {
+		long timeout = pmEnvironment.keyEntry(configSetupKey).asLong(0L);
+		if (timeout > 0L) {
+			if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
+				// Only if this feature is there use chrono servre to set timeouts
+				commonServiceClient.publishSessionBoundEvent(inBoundEvent);
+			} else {
+				TunnelTask task = new TunnelTask().name(sessionEventName).id(sessionid).intervalMinutes(timeout);
+				this.debounce(task);
+			}
+		}
+	}
+
 	@Async
-	public void setChatOutIdleTimeout(String sessionid, ClientApp app) {
-		if (app != null && app.isAgentApp()) {
-			boolean timeoutEnabled = pmEnvironment
-					.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT).asBoolean(false);
+	public void setChatOutIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
+		if (app != null && (app.isAgentApp() || app.isCustomApp())) {
+			boolean timeoutEnabled = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT)
+					.asBoolean(false);
 
 			PMConfigurationObject frwrdQueue = pmEnvironment
 					.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
 
 			if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
-				long timeout = pmEnvironment
-						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL).asLong(0L);
-				if (timeout > 0L) {
-					TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT).id(sessionid)
-							.intervalMinutes(timeout);
-					this.debounce(task);
+				debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL, sessionid, inBoundEvent,
+						SessionEventTimer.CHAT_OUT_IDLE_TIMEOUT);
+			}
+		}
+	}
+
+	@Async
+	public void setChatInIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent outboundEvent) {
+		if (app != null && (app.isAgentApp() || app.isCustomApp())) {
+			boolean timeoutEnabledApp = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
+					.asBoolean(false);
+			if (timeoutEnabledApp) {
+				MapPathEntry frwrdQueue = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+				if (frwrdQueue.not(app.getQueue())) {
+					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
+							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
+				}
+			} else if (app.isAgentApp()) {
+				boolean timeoutEnabled = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
+						.asBoolean(false);
+				PMConfigurationObject frwrdQueue = pmEnvironment
+						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+
+				if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
+					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
+							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 				}
 			}
 		}
 	}
 
 	@Async
-	public void setChatInIdleTimeout(String sessionid, ClientApp app) {
-		if (app != null) {
-			boolean timeoutEnabledApp = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
-					.asBoolean(false);
-			if (timeoutEnabledApp) {
-				MapPathEntry frwrdQueue = app
-						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
-				if (frwrdQueue.not(app.getQueue())) {
-					long timeout = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
-							.asLong(0L);
-					if (timeout > 0L) {
-						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
-								.intervalMinutes(timeout);
-						this.debounce(task);
-					}
-				}
-			} else if (app.isAgentApp()) {
-				boolean timeoutEnabled = pmEnvironment
-						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
-				PMConfigurationObject frwrdQueue = pmEnvironment
-						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
-
-				if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
-					long timeout = pmEnvironment
-							.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L);
-					if (timeout > 0L) {
-						TunnelTask task = new TunnelTask().name(SessionEventTimer.CHAT_IN_IDLE_TIMEOUT).id(sessionid)
-								.intervalMinutes(timeout);
-						this.debounce(task);
-					}
-				}
+	public void setChatStatusTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
+		if (app != null && (app.isCustomApp())) {
+			if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
+				// Only if this feature is there use chrono servre to set timeouts
+				commonServiceClient.publishSessionBoundEvent(inBoundEvent);
 			}
 		}
 	}
@@ -187,11 +201,15 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	private void doChatOutIdleTimeout(TunnelTask task) {
 		ChatSessionDoc session = sessionStore.getSession(task.getId());
+		doChatOutIdleTimeout(session);
+	}
+
+	public void doChatOutIdleTimeout(ChatSessionDoc session) {
 		if (sessionStore.isSessionValid(session)) {
 			ChatMessageDTO lastMsg = session.lastMsg();
 			ChatMessageDTO lastOutBoundMsg = session.lastOutBoundMsg();
-			long timeout = pmEnvironment
-					.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL).asLong(0L);
+			long timeout = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL)
+					.asLong(0L);
 			if (ArgUtil.is(lastMsg) && PostManUtil.isInBound(lastMsg.getType()) // last message is also inbound
 					&& (!ArgUtil.is(lastOutBoundMsg) // And ther is no outbound
 							|| TimeUtils.isExpired(lastOutBoundMsg.getTimestamp(), timeout * 60000) // OR is older than
@@ -208,15 +226,18 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	private void doChatInIdleTimeout(TunnelTask task) {
 		ChatSessionDoc session = sessionStore.getSession(task.getId());
+		doChatInIdleTimeout(session);
+
+	}
+
+	public void doChatInIdleTimeout(ChatSessionDoc session) {
 		if (sessionStore.isSessionValid(session)) {
 			ChatMessageDTO lastMsg = session.lastMsg();
 			ChatMessageDTO lastInBoundMsg = session.lastInBoundMsg();
 
 			ClientApp clientApp = pmEnvironment.config().clientApiKey(session.getAssignedToQueue());
-			long timeout = clientApp.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
-					.asLong(pmEnvironment
-							.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
-							.asLong(0L));
+			long timeout = clientApp.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(
+					pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L));
 			if (ArgUtil.is(lastMsg) && PostManUtil.isOutBound(lastMsg.getType()) // last message is also outbound
 					&& (!ArgUtil.is(lastInBoundMsg) // And ther is no inbound
 							|| TimeUtils.isExpired(lastInBoundMsg.getTimestamp(), timeout * 60000) // OR is older than
@@ -228,7 +249,6 @@ public class SessionEventTimer extends ATaskLimiter {
 				}
 			}
 		}
-
 	}
 
 	private void doMitelClosing(TunnelTask task) {

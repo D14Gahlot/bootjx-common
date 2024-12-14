@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.SimpleDocument;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
+import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBName;
@@ -40,6 +41,8 @@ public class CustomerProfileDoc extends TimeStampDoc
 	public Set<PBWebsite> urls;
 	public Set<PBWork> works;
 	public Map<String, Object> additionalInfo = new HashMap<>();
+
+	public Set<ContactMeta> linked;
 
 	public String rmCode;
 
@@ -72,7 +75,13 @@ public class CustomerProfileDoc extends TimeStampDoc
 		return this.phones;
 	}
 
-	
+	public Set<ContactMeta> linked() {
+		if (linked == null) {
+			this.linked = new TreeSet<ContactMeta>();
+		}
+		return this.linked;
+	}
+
 	public String getCode() {
 		return code;
 	}
@@ -134,7 +143,7 @@ public class CustomerProfileDoc extends TimeStampDoc
 	}
 
 	public void setAdditionalInfo(Map<String, Object> additionalInfo) {
-				 this.additionalInfo = additionalInfo;
+		this.additionalInfo = additionalInfo;
 	}
 
 	public Set<PBWork> getWorks() {
@@ -151,7 +160,7 @@ public class CustomerProfileDoc extends TimeStampDoc
 		}
 		return this.works;
 	}
-	
+
 	public Set<PBEmail> emails() {
 		if (emails == null) {
 			this.emails = new TreeSet<PBEmail>();
@@ -159,11 +168,16 @@ public class CustomerProfileDoc extends TimeStampDoc
 		return this.emails;
 	}
 
-
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
 
-	
+	public Set<ContactMeta> getLinked() {
+		return linked;
+	}
+
+	public void setLinked(Set<ContactMeta> linked) {
+		this.linked = linked;
+	}
 
 }

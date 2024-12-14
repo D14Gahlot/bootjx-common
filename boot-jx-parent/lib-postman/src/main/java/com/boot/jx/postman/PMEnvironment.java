@@ -3,6 +3,7 @@ package com.boot.jx.postman;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -97,7 +98,7 @@ public class PMEnvironment {
 	}
 
 	public static abstract class AChannelConfig extends AChannelDetails
-			implements ChannelTypeSpecificProps, AuditIdentifier {
+			implements ChannelTypeSpecificProps, AuditIdentifier, Comparable<AChannelConfig> {
 
 		private static final long serialVersionUID = 1950315645271368433L;
 
@@ -181,6 +182,7 @@ public class PMEnvironment {
 			this.webhookUrl = webhookUrl;
 		}
 
+		@Override
 		public String toString() {
 			return this.getChannelId();
 		}
@@ -276,6 +278,19 @@ public class PMEnvironment {
 
 		public void setApiVersion(String apiVersion) {
 			this.apiVersion = apiVersion;
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 31).append(this.toString()).toHashCode();
+		}
+
+		@Override
+		public int compareTo(AChannelConfig o) {
+			if (o == null) {
+				return 1;
+			}
+			return this.toString().compareTo(o.toString());
 		}
 
 	}

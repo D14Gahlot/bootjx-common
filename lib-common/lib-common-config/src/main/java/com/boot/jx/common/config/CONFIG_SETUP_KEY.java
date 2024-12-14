@@ -37,9 +37,6 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 	POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 			.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
 
-	POSTMAN_RESEND_FAILED_MESSAGES(new ConfigMeta("Resend Failed Messages", "postman.resend.failed.messages")
-			.desc("enable to resend failed messages by schedular").optionsOnOff()),
-
 	POSTMAN_CHAT_WEB_CHANNEL(new ConfigMeta("Default Web Channel", PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL)
 			.desc("This channel will be connected your Page").optionsSource("getx:/api/options/channels")
 			.optionsKey("id").optionsLabel("name").filter("contactType", ContactType.WEBSITE)),
@@ -82,7 +79,7 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 	POSTMAN_AGENT_CHAT_INIT_CONTACT(
 			new ConfigMeta("Agent can initiate chat with new contact", "postman.agent.chat.init.contact").optionsOnOff()
 					.group(ConfigConstants.GROUP_AGENT)),
-    
+
 	POSTMAN_AGENT_CHAT_PICK_BOT(
 			new ConfigMeta("Agent can INTERRUPT existing chat with bot", "postman.agent.chat.pick.bot").optionsOnOff()
 					.group(ConfigConstants.GROUP_AGENT)),
@@ -117,8 +114,17 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 							PMConstants.CHAT_SESSION_STICKY.STRICT)
 					.defaultValue(PMConstants.CHAT_SESSION_STICKY.NONE).group(ConfigConstants.GROUP_AGENT)),
 
+	POSTMAN_AGENT_MESSAGE(new ConfigMeta("Customize Message Sent by agent", "postman.agent.chat.message")
+			.superKey("postman.agent.chat.message").desc("Custom header and Signature").optionsOnOff()
+			.group(ConfigConstants.GROUP_AGENT)),
+
 	POSTMAN_AGENT_HEADER(new ConfigMeta("Header of Message Sent by agent", "postman.agent.chat.header")
-			.desc("Use {{agent}} for agent name").group(ConfigConstants.GROUP_AGENT)),
+			.superKey("postman.agent.chat.message").desc("Use {{agent}} for agent name")
+			.group(ConfigConstants.GROUP_AGENT)),
+
+	POSTMAN_AGENT_SIGNATURE(new ConfigMeta("Signature of Message Sent by agent", "postman.agent.chat.message.signature")
+			.superKey("postman.agent.chat.message").desc("Use {{agent}} for agent name").inputType(INPUT_TYPE.TEXTAREA)
+			.group(ConfigConstants.GROUP_AGENT)),
 
 	POSTMAN_AGENT_SCHEME_COLOR(new ConfigMeta("Agent Panel Color Scheme", "postman.agent.scheme.color")
 			.inputType(INPUT_TYPE.COLOR).defaultValue("#4267b2").group(ConfigConstants.GROUP_AGENT)),
@@ -185,7 +191,6 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 	POSTMAN_AGENT_TAB_NONAGENT(new ConfigMeta("Agent can see Non-Agent Chats", PROPERTIES.POSTMAN_AGENT_TAB_NONAGENT)
 			.desc("Agents will see Bot and Webhook chats under Org tabs ").optionsOnOff()
 			.group(ConfigConstants.GROUP_AGENT)),
-	
 
 	POSTMAN_AGENT_TAB_HISTORY_LIMIT(new ConfigMeta("Show Chat Count Limit", "postman.agent.tab.history.limit")
 			.options(new ConfigOption(100).label("100 Chats"), new ConfigOption(150).label("150 Chats"),
@@ -210,13 +215,22 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			PROPERTIES.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED).optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
 					.optionsLabel("desc").group(ConfigConstants.GROUP_AGENT)),
 
+
 	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
 			new ConfigMeta("Message to customer when no agent available in working hours", "postman.agent.chat.autoreply.noagent")
 					.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 					.group(ConfigConstants.GROUP_AGENT)),
+	POSTMAN_AGENT_CHAT_AUTOREPLY_ORGOFFLINE(
+			new ConfigMeta("Message to customer when no agent available in non-working hours", "postman.agent.chat.autoreply.org_offline")
+					.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
+					.group(ConfigConstants.GROUP_AGENT)),
+	POSTMAN_AGENT_CHAT_SCHEDULE(
+			new ConfigMeta("List of shedules", "postman.agent.chat.schedule")
+			.optionsSource("getx:/nexus/calendar/api/v1/orgSchedule/list")
+			.optionsKey("code").optionsLabel("desc")
+			.group(ConfigConstants.GROUP_AGENT)),
 	
 
-	
 
 	// NLP
 	POSTMAN_NLP_LANGUAGE(new ConfigMeta("Enable Detect Language", "postman.nlp.detect.lang").optionsOnOff()

@@ -27,7 +27,9 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
+import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.mitel.MitelClient;
 import com.boot.jx.postman.model.Attachment;
@@ -47,6 +49,7 @@ import com.boot.jx.postman.model.ext.InBoundMsgMedia;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.ext.InBoundWrapper;
 import com.boot.jx.postman.model.ext.MsgSession;
+import com.boot.jx.postman.model.ext.SessionBoundEvent;
 import com.boot.jx.postman.store.MessageContext;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.MessageStore.EVENTS;
@@ -113,6 +116,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Autowired(required = false)
 	private MessageContext messageContext;
+
+	@Autowired
+	private CommonServiceClient commonServiceClient;
 
 	@Override
 	public MessageContext context() {
@@ -245,6 +251,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		msg.tags = inboxMessage.getTags();
 		msg.input = inboxMessage.form();
 		msg.replyTo = JsonUtil.toObject(inboxMessage.replyTo(), MessageReplyTo.class);
+		msg.referral = inboxMessage.referral();
 
 		msg.form = JsonUtil.toObject(inboxMessage.form(), FormReply.class);
 
@@ -307,7 +314,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		ClientApp defaultClient = context().clientApp(messageReport.session().getQueue(), messageReport.contact());
 
 		if (ArgUtil.is(defaultClient)) {
-			if (ArgUtil.is(defaultClient.getAppType(), CHAT_MODE.WEBHOOK.toString(), CHAT_MODE.SCRIPTUS.toString())) {
+			if (ArgUtil.is(defaultClient.getAppType(), APP_TYPE.WEBHOOK.toString())) {
 				LOGGER.debug("Forwarding MessageReport to Xternal Service ");
 				try {
 					if (ArgUtil.is(defaultClient.getWebhook())) {
@@ -334,8 +341,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					logManager.error(messageReport, e);
 				}
 				return;
-			}
+			} else if (ArgUtil.is(defaultClient.getAppType(), APP_TYPE.APP_SCRIPT.toString(),
+					APP_TYPE.BOTFLOW.toString())) {
+				if (messageEvents != null) {
+					messageEvents.postMessageStatus(messageReport);
+				}
 
+			}
 		}
 		stompTunnelService.sendToAll("/message/update/status", messageReport);
 	}
@@ -351,11 +363,23 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	@Override
 	public InBoundEvent onSessionEvent(InBoundEvent event, PMArgs pmArgs) {
 		context().setInBoundEvent(event);
-		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
+		if (InBoundEvent.EVENT_TYPE.SESSION_ROUTED.equals(event.type)) {
 			ChatSessionDoc sessionDoc = context().session().getDoc();
 			this.onSessionRouteSync(event, sessionDoc, pmArgs);
+		} else if (InBoundEvent.TRIGGER_TYPE.TIMEOUT.equals(event.triggerType)) {
+			ChatSessionDoc sessionDoc = context().session().getDoc();
+			this.onTimeout(event, sessionDoc, pmArgs);
 		}
 		return event;
+	}
+
+	@Override
+	public void onTimeout(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		if (ArgUtil.is(event.type, InBoundEvent.EVENT_TYPE.REPLY_TIMEOUT, InBoundEvent.EVENT_TYPE.INBOUND_TIMEOUT)) {
+			sessionEventTimer.doChatInIdleTimeout(sessionDoc);
+		} else if (InBoundEvent.EVENT_TYPE.OUTBOUND_TIMEOUT.equals(event.type)) {
+			sessionEventTimer.doChatOutIdleTimeout(sessionDoc);
+		}
 	}
 
 	@Override
@@ -367,13 +391,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 	public void afterSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
 		if (sessionEventTimer != null) {
 			ClientApp defaultClient = context().clientApp(inBoundEvent.sessionRouted.targetQueue);
-			sessionEventTimer.setChatOutIdleTimeout(inBoundEvent.getSessionId(), defaultClient);
+			sessionEventTimer.setChatOutIdleTimeout(inBoundEvent.getSessionId(), defaultClient, inBoundEvent);
 		}
 	}
 
 	@Override
 	public void onSessionRouteWrapper(InBoundEvent event, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-		if (InBoundEvent.SESSION_ROUTED.equals(event.eventCode)) {
+		if (InBoundEvent.EVENT_TYPE.SESSION_ROUTED.equals(event.type)) {
 			ClientApp targetAppQueue = context().clientApp(event.sessionRouted.targetQueue, null);
 			if (ArgUtil.is(targetAppQueue)) {
 				APP_TYPE appType = APP_TYPE.from(targetAppQueue.getAppType());

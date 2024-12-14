@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.CDNBuilder;
+import com.boot.jx.common.config.CONFIG_FEATURES_KEY;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.doc.UserAuthTokenDoc;
@@ -245,6 +248,16 @@ public class EmpAuthService {
 			throws NoSuchAlgorithmException {
 		ApiResponse<Map<String, Object>, String> x = ApiResponse
 				.buildData(MapBuilder.map().put("success", true).toMap(), "success");
+		if (ArgUtil.is(password)) {
+			String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#])[A-Za-z\\d@$!%*?&#]{8,}$";
+			Pattern pattern = Pattern.compile(regex);
+			Matcher matcher = pattern.matcher(newpassword);
+			if (!matcher.matches()) {
+				ApiResponseUtil.throwInputException(
+						new ApiFieldError().obzect("login").field("password").codeKey("ValidCredentials").description(
+								"Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols."));
+			}
+		}
 		if (setPassword(username, password, newpassword)) {
 			x.setStatusKey("SUCCESS");
 		} else {
@@ -290,7 +303,7 @@ public class EmpAuthService {
 	}
 
 	public UserAuthToken createSuperLoginToken(String username, String email, String domainName, String domainId,
-			String app) throws NoSuchAlgorithmException {
+			String app, MapModel userData) throws NoSuchAlgorithmException {
 		UserAuthToken userLoginToken = new UserAuthToken();
 		String authKey = appConfig.prop("mry.app.login.key");
 		HashBuilder builder = getHashBuilder(username, email, domainName, domainId, authKey);
@@ -300,10 +313,17 @@ public class EmpAuthService {
 		userLoginToken.setDomainUser(username);
 		userLoginToken.setDomainUserEmail(email);
 		userLoginToken.setApp(app);
+		userLoginToken.setDomainUserData(encodeUserData(userData));
 		return userLoginToken;
 	}
 
 	public boolean sendOTP(UserAuthToken loginToken) {
+
+		PMConfigurationObject auth2Fa = pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.AUTH_2FA);
+
+		if (!auth2Fa.exists() || !auth2Fa.asBoolean()) {
+			return false;
+		}
 
 		PMConfigurationObject mfaEnabled = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_ENABLED);
 
@@ -363,4 +383,16 @@ public class EmpAuthService {
 				.message(String.format("%s@%s:%s#%s=%s", username, domainName, domainId, authKey, email));
 		return builder;
 	}
+
+	public MapModel decodeUserData(String domainUserData) {
+		if (!ArgUtil.is(domainUserData)) {
+			return null;
+		}
+		return MapModel.decoder(domainUserData).decodeBase64().detokenize().decrypt().toMapModel();
+	}
+
+	public String encodeUserData(MapModel userData) {
+		return userData.encoder().encrypt().tokenize(30).encodeBase64().toString();
+	}
+
 }

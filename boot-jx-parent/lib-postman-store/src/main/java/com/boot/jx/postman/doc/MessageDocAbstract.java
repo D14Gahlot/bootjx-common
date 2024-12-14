@@ -16,6 +16,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
+import com.boot.jx.postman.model.MessageDefinitions.IMessageWithReferral;
 import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.TagDocument;
@@ -25,7 +26,8 @@ import com.boot.utils.ArgUtil;
 @CompoundIndexes({ @CompoundIndex(name = "route_queueCode", def = "{ 'route.queueCode': 1 }"),
 		@CompoundIndex(name = "route_sendMode", def = "{ 'route.sendMode': 1 }"),
 		@CompoundIndex(name = "route_senderCode", def = "{ 'route.senderCode': 1 }") })
-public abstract class MessageDocAbstract implements Serializable, Patchable<MessageDoc>, IMessageId {
+public abstract class MessageDocAbstract
+		implements Serializable, Patchable<MessageDoc>, IMessageId, IMessageWithReferral {
 	private static final long serialVersionUID = 3983687776318251181L;
 
 	@Indexed
@@ -77,19 +79,39 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 	private List<Attachment> attachments;
 	private List<PBVCard> vccards;
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	@Indexed
 	private String replyIdExt;
+
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	private String replyId;
 	private String quickReplyId;
 	private String mediaReplyId;
 
 	private Map<String, Long> stamps;
+	private Map<String, Long> timeout;
 	public List<Object> logs;
 	public List<Object> trace;
+
+	/**
+	 * 
+	 * @deprecated - use referral to store info
+	 */
+	@Deprecated
 	private Map<String, Object> replyTo;
+
+	public MessageReferral referral;
+
 	private String appType;
 	private String appVenv;
-	public MessageReferral referral;
 
 	public MessageReferral getReferral() {
 		return referral;
@@ -340,10 +362,20 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 		this.replyIdExt = replyIdExt;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public String getReplyId() {
 		return replyId;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public void setReplyId(String replyId) {
 		this.replyId = replyId;
 	}
@@ -380,14 +412,29 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 		this.queue = queue;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public void setReplyTo(Map<String, Object> replyTo) {
 		this.replyTo = replyTo;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public Map<String, Object> getReplyTo() {
 		return this.replyTo;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public Map<String, Object> replyTo() {
 		if (this.replyTo == null) {
 			this.replyTo = new HashMap<String, Object>();
@@ -524,6 +571,14 @@ public abstract class MessageDocAbstract implements Serializable, Patchable<Mess
 
 	public void setMessageIdResend(String messageIdResend) {
 		this.messageIdResend = messageIdResend;
+	}
+
+	public Map<String, Long> getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(Map<String, Long> timeout) {
+		this.timeout = timeout;
 	}
 
 }

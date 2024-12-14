@@ -1,6 +1,7 @@
 package com.boot.jx.xms.api;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -89,7 +90,7 @@ public class ConfigApiV1 {
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResultsMetaCompactResponse<MsgChannel, Object> getChannels(
 			@RequestParam(required = false, defaultValue = "false") boolean sabdnox) {
-		List<AChannelConfig> list = pmEnvironment.config().listChannels();
+		Set<AChannelConfig> list = pmEnvironment.config().listChannels();
 		List<MsgChannel> newList = CollectionUtil.getList(MsgChannel.class);
 		for (AChannelConfig channelConfig : list) {
 			MsgChannel channel = new MsgChannel();

@@ -88,7 +88,7 @@ public class ChatSessionManager {
 			return null;
 		}
 
-		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_STATUS);
+		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.SESSION_STATUS);
 		inBoundEvent.sessionRouted = new SessionRouted();
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
@@ -107,7 +107,7 @@ public class ChatSessionManager {
 		}
 
 		session = sessionStore.resolveSession(session);
-		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_STATUS);
+		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.SESSION_STATUS);
 		inBoundEvent.sessionRouted = new SessionRouted();
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
@@ -123,7 +123,7 @@ public class ChatSessionManager {
 			return null;
 		}
 
-		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_CLOSED);
+		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.SESSION_CLOSED);
 		inBoundEvent.sessionRouted = new SessionRouted();
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
@@ -462,7 +462,7 @@ public class ChatSessionManager {
 	}
 
 	public InBoundEvent initSession(InboxMessage inboxMessage, ChatSessionDoc session) {
-		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_INIT);
+		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.SESSION_INIT);
 		inBoundEvent.sessionId = session.getSessionId();
 		inBoundEvent.contactId = session.getContactId();
 		session = sessionStore.initSession(session);
@@ -471,7 +471,7 @@ public class ChatSessionManager {
 
 	public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, String queueCode) {
 
-		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.SESSION_ROUTED);
+		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.SESSION_ROUTED);
 		inBoundEvent.sessionRouted = new SessionRouted();
 		inBoundEvent.sessionId = chatSessionDoc.getSessionId();
 		inBoundEvent.contactId = chatSessionDoc.getContactId();

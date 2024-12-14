@@ -29,6 +29,7 @@ import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoQueryBuilder.SimpleDocQuery;
 import com.boot.jx.mongo.CommonMongoQueryBuilder.SimpleDocQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
@@ -37,6 +38,7 @@ import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
+import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.pbook.PBAddress;
 import com.boot.jx.postman.pbook.PBEmail;
@@ -174,29 +176,58 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 	}
 
-	public void linkProfile(ChatContactQuery contactQuery, CustomerProfileDoc profile) {
+	public void linkProfile(ChatContactQuery contactQuery, SimpleDocQuery<CustomerProfileDoc> profileQuery) {
 		ChatContactDoc contact = contactQuery.getDoc();
+		CustomerProfileDoc profile = profileQuery.getDoc();
+
+		// Update Contact
 		contact.profile().setId(profile.getId());
 		contact.profile().setCode(profile.code);
 		contact.profile().setName(profile.name.getFormattedName());
 		contactQuery.set("profile", contact.profile());
+
+		// Update Profile
+		ContactMeta connected = new ContactMeta();
+		connected.copyFrom(contact);
+		profileQuery.setunset("linked", patch(ModelPatchCommand.ADD, profile.linked(), connected));
+
+	}
+
+	public void linkProfile(ChatContactQuery contactQuery, CustomerProfileDoc profile) {
+		SimpleDocQuery<CustomerProfileDoc> profileQuery = SimpleDocQuery.doc(profile);
+		linkProfile(contactQuery, profileQuery);
+		update(profileQuery);
 	}
 
 	public ChatContactDoc linkProfile(String contactId, String profileId) {
-		CustomerProfileDoc profile = findById(profileId, CustomerProfileDoc.class);
 		ChatContactDoc contact = findById(contactId, ChatContactDoc.class);
-		ChatContactQuery query = new ChatContactQuery(contact);
-		linkProfile(query, profile);
-		update(query);
+		ChatContactQuery contactQuery = new ChatContactQuery(contact);
+		CustomerProfileDoc profile = findById(profileId, CustomerProfileDoc.class);
+		linkProfile(contactQuery, profile);
+		update(contactQuery);
 		return contact;
 	}
 
 	public ChatContactDoc delinkProfile(String contactId) {
 		ChatContactDoc contact = findById(contactId, ChatContactDoc.class);
+
+		// Update Contact
 		ChatContactQuery query = new ChatContactQuery(contact);
+		String profileId = contact.profile().getId();
 		query.unset("profile");
 		contact.setProfile(null);
 		update(query);
+
+		if (ArgUtil.is(profileId)) {
+			CustomerProfileDoc profile = findById(profileId, CustomerProfileDoc.class);
+			SimpleDocQuery<CustomerProfileDoc> profileQuery = SimpleDocQuery.doc(profile);
+			ContactMeta connected = new ContactMeta();
+			connected.copyFrom(contact);
+			profileQuery.setunset("linked", patch(ModelPatchCommand.REMOVE, profile.linked(), connected));
+			update(profileQuery);
+
+		}
+
 		return contact;
 	}
 
@@ -481,11 +512,13 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 							LOGGER.info("Json Util else  :" + JsonUtil.toJson(object) + "\t key-value :"
 									+ entry.getKey() + "-" + JsonUtil.toJson(entry.getValue()));
 						} else {
-							//addInfoMap.put(entry.getKey(), entry.getValue());
+							// addInfoMap.put(entry.getKey(), entry.getValue());
 							// Convert the string to a List using split and Arrays.asList
-							if(ArgUtil.is(entry.getValue())) {
-							//List<Object> listOfType = Arrays.asList(entry.getValue().toString().split(","));
-							//addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType, null, false));
+							if (ArgUtil.is(entry.getValue())) {
+								// List<Object> listOfType =
+								// Arrays.asList(entry.getValue().toString().split(","));
+								// addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType,
+								// null, false));
 								addInfoMap.put(entry.getKey(), entry.getValue());
 							}
 						}
@@ -552,33 +585,30 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 		if (req.getPhones() != null && !req.getPhones().isEmpty()) {
 			Set<PBPhone> reqPhones = req.getPhones();
-			// Convert the request objects to a Set of UUIDs (to identify which are new or missing)
-			Set<String> reqPhoneUuids = reqPhones.stream()
-			    .map(PBPhone::getUuid)
-			    .collect(Collectors.toSet());
-			
+			// Convert the request objects to a Set of UUIDs (to identify which are new or
+			// missing)
+			Set<String> reqPhoneUuids = reqPhones.stream().map(PBPhone::getUuid).collect(Collectors.toSet());
+
 			// Find phones in DB that are not in the request (to be deleted)
 			List<PBPhone> phonesToDelete = doc.getPhones().stream()
-			    .filter(phone -> !reqPhoneUuids.contains(phone.getUuid()))
-			    .collect(Collectors.toList());
-			
-			 // Remove the phones from the document that are not present in the request
-	        doc.getPhones().removeAll(phonesToDelete);
-			
+					.filter(phone -> !reqPhoneUuids.contains(phone.getUuid())).collect(Collectors.toList());
+
+			// Remove the phones from the document that are not present in the request
+			doc.getPhones().removeAll(phonesToDelete);
+
 			for (PBPhone reqph : reqPhones) {
 				Optional<PBPhone> found = Optional.empty();
 				String uuid = reqph.getUuid();
-				String ph =reqph.getPhone(); 
-				CustomerProfileDoc dupPh=findProfileByPhone(ph);
+				String ph = reqph.getPhone();
+				CustomerProfileDoc dupPh = findProfileByPhone(ph);
 				if (ArgUtil.is(dupPh) && !dupPh.getId().equalsIgnoreCase(doc.getId())) {
 					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("phone").field("phone")
 							.codeKey("ValidPhoneDuplicate").description(ph + " already exists"));
 				}
-		
-				
+
 				found = doc.getPhones().stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
 				if (found.isPresent()) {
-					String upPh=reqph.getPhone();
+					String upPh = reqph.getPhone();
 					PBPhone phu = parsePhone(new PBPhone().phone(upPh));
 					phu.setUuid(reqph.getUuid());
 					found.get().update(phu);
@@ -592,26 +622,23 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 		if (req.getEmails() != null && !req.getEmails().isEmpty()) {
 			Set<PBEmail> reqPbEmails = req.getEmails();
-			
-			
-			// Convert the request objects to a Set of UUIDs (to identify which are new or missing)
-			Set<String> reqEmailUuids = reqPbEmails.stream()
-			    .map(PBEmail::getUuid)
-			    .collect(Collectors.toSet());
-			
+
+			// Convert the request objects to a Set of UUIDs (to identify which are new or
+			// missing)
+			Set<String> reqEmailUuids = reqPbEmails.stream().map(PBEmail::getUuid).collect(Collectors.toSet());
+
 			// Find phones in DB that are not in the request (to be deleted)
 			List<PBEmail> eMailToDelete = doc.getEmails().stream()
-			    .filter(email -> !reqEmailUuids.contains(email.getUuid()))
-			    .collect(Collectors.toList());
-			
-			 // Remove the phones from the document that are not present in the request
-	        doc.getEmails().removeAll(eMailToDelete);
-			
+					.filter(email -> !reqEmailUuids.contains(email.getUuid())).collect(Collectors.toList());
+
+			// Remove the phones from the document that are not present in the request
+			doc.getEmails().removeAll(eMailToDelete);
+
 			for (PBEmail reqEm : reqPbEmails) {
 				Optional<PBEmail> found = Optional.empty();
 				String uuid = reqEm.getUuid();
-				String em =reqEm.getEmail(); 
-				CustomerProfileDoc dupEm=findProfileByEmail(em);
+				String em = reqEm.getEmail();
+				CustomerProfileDoc dupEm = findProfileByEmail(em);
 				if (ArgUtil.is(dupEm) && !dupEm.getId().equalsIgnoreCase(doc.getId())) {
 					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("email").field("Email")
 							.codeKey("ValidEmailDuplicate").description(em + " already exists"));
@@ -660,7 +687,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					List<PBEmail> pbEmails = objectMapper.convertValue(entry.getValue(),
 							new TypeReference<List<PBEmail>>() {
 							});
-					Set<PBEmail> spbmails = addUpdateEmail(pbEmails, doc,entry.getKey().toString());
+					Set<PBEmail> spbmails = addUpdateEmail(pbEmails, doc, entry.getKey().toString());
 					addInfoMap.put(entry.getKey(), spbmails);
 					break;
 				case "phone":
@@ -668,8 +695,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					List<PBPhone> pbPhones = objectMapper.convertValue(entry.getValue(),
 							new TypeReference<List<PBPhone>>() {
 							});
-					
-					Set<PBPhone> spbPhone = addUpdatePhone(pbPhones, doc,entry.getKey().toString());
+
+					Set<PBPhone> spbPhone = addUpdatePhone(pbPhones, doc, entry.getKey().toString());
 					addInfoMap.put(entry.getKey(), spbPhone);
 					break;
 
@@ -679,13 +706,15 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 						LOGGER.info("Json Util else  :" + JsonUtil.toJson(object) + "\t key-value :" + entry.getKey()
 								+ "-" + JsonUtil.toJson(entry.getValue()));
 					} else {
-				
-						if(ArgUtil.is(entry.getValue())) {
-						//List<Object> listOfType = Arrays.asList(entry.getValue().toString().split(","));
-						//addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType, null, false));
+
+						if (ArgUtil.is(entry.getValue())) {
+							// List<Object> listOfType =
+							// Arrays.asList(entry.getValue().toString().split(","));
+							// addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType,
+							// null, false));
 							addInfoMap.put(entry.getKey(), entry.getValue());
 						}
-						
+
 					}
 				}
 			}
@@ -697,37 +726,35 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		mongoTemplate.save(doc);
 	}
 
-	private Set<PBPhone> addUpdatePhone(List<PBPhone> reqPhones, CustomerProfileDoc doc,String entryKey) {
+	private Set<PBPhone> addUpdatePhone(List<PBPhone> reqPhones, CustomerProfileDoc doc, String entryKey) {
 		Set<PBPhone> setPbPhone = new TreeSet<>();
 		ObjectMapper objectMapper = new ObjectMapper();
-		// Convert the request objects to a Set of UUIDs (to identify which are new or missing)
-		Set<String> reqPhoneUuids = reqPhones.stream()
-		    .map(PBPhone::getUuid)
-		    .collect(Collectors.toSet());
-		
+		// Convert the request objects to a Set of UUIDs (to identify which are new or
+		// missing)
+		Set<String> reqPhoneUuids = reqPhones.stream().map(PBPhone::getUuid).collect(Collectors.toSet());
+
 		// Find phones in DB that are not in the request (to be deleted)
-		List<PBPhone> pbPhoneDbList=objectMapper.convertValue(doc.getAdditionalInfo().get(entryKey),
+		List<PBPhone> pbPhoneDbList = objectMapper.convertValue(doc.getAdditionalInfo().get(entryKey),
 				new TypeReference<List<PBPhone>>() {
 				});
-		if(ArgUtil.isNotEmpty(pbPhoneDbList)) {
-		List<PBPhone> phonesToDelete =pbPhoneDbList.stream()
-		    .filter(phone -> !reqPhoneUuids.contains(phone.getUuid()))
-		    .collect(Collectors.toList());
-		// Remove phones that are not in the request from the document
-		pbPhoneDbList.removeAll(phonesToDelete);
+		if (ArgUtil.isNotEmpty(pbPhoneDbList)) {
+			List<PBPhone> phonesToDelete = pbPhoneDbList.stream()
+					.filter(phone -> !reqPhoneUuids.contains(phone.getUuid())).collect(Collectors.toList());
+			// Remove phones that are not in the request from the document
+			pbPhoneDbList.removeAll(phonesToDelete);
 		}
-		
-		
+
 		for (PBPhone reqph : reqPhones) {
 			Optional<PBPhone> found = Optional.empty();
 			String uuid = reqph.getUuid();
-			//found = doc.getPhones().stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
-			if(ArgUtil.isNotEmpty(pbPhoneDbList)) {
-			found = pbPhoneDbList.stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
+			// found = doc.getPhones().stream().filter(phone ->
+			// phone.getUuid().equals(uuid)).findFirst();
+			if (ArgUtil.isNotEmpty(pbPhoneDbList)) {
+				found = pbPhoneDbList.stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
 			}
-			
+
 			if (found.isPresent()) {
-				String upPh=reqph.getPhone();
+				String upPh = reqph.getPhone();
 				PBPhone phu = parsePhone(new PBPhone().phone(upPh));
 				phu.setUuid(reqph.getUuid());
 				found.get().update(phu);
@@ -741,32 +768,30 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		return setPbPhone;
 	}
 
-	private Set<PBEmail> addUpdateEmail(List<PBEmail> reqEmail, CustomerProfileDoc doc,String entryKey) {
+	private Set<PBEmail> addUpdateEmail(List<PBEmail> reqEmail, CustomerProfileDoc doc, String entryKey) {
 		Set<PBEmail> setPbEmail = new TreeSet<>();
 		ObjectMapper objectMapper = new ObjectMapper();
-		// Convert the request objects to a Set of UUIDs (to identify which are new or missing)
-		Set<String> reqEmailUuids = reqEmail.stream()
-		    .map(PBEmail::getUuid)
-		    .collect(Collectors.toSet());
-		
+		// Convert the request objects to a Set of UUIDs (to identify which are new or
+		// missing)
+		Set<String> reqEmailUuids = reqEmail.stream().map(PBEmail::getUuid).collect(Collectors.toSet());
+
 		// Find phones in DB that are not in the request (to be deleted)
-		List<PBEmail> pbEmailDbList=objectMapper.convertValue(doc.getAdditionalInfo().get(entryKey),
+		List<PBEmail> pbEmailDbList = objectMapper.convertValue(doc.getAdditionalInfo().get(entryKey),
 				new TypeReference<List<PBEmail>>() {
 				});
-		if(ArgUtil.isNotEmpty(pbEmailDbList)) {
-		List<PBEmail> eMailToDelete =pbEmailDbList.stream()
-		    .filter(phone -> !reqEmailUuids.contains(phone.getUuid()))
-		    .collect(Collectors.toList());
-		// Remove phones that are not in the request from the document
-		pbEmailDbList.removeAll(eMailToDelete);
-		}	
+		if (ArgUtil.isNotEmpty(pbEmailDbList)) {
+			List<PBEmail> eMailToDelete = pbEmailDbList.stream()
+					.filter(phone -> !reqEmailUuids.contains(phone.getUuid())).collect(Collectors.toList());
+			// Remove phones that are not in the request from the document
+			pbEmailDbList.removeAll(eMailToDelete);
+		}
 		for (PBEmail reqEm : reqEmail) {
 			Optional<PBEmail> found = Optional.empty();
 			String uuid = reqEm.getUuid();
-			if(ArgUtil.isNotEmpty(pbEmailDbList)) {
-			found = pbEmailDbList.stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
+			if (ArgUtil.isNotEmpty(pbEmailDbList)) {
+				found = pbEmailDbList.stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
 			}
-			
+
 			if (found.isPresent()) {
 				found.get().update(reqEm);
 				setPbEmail.add(found.get()); // Add the updated phone
@@ -780,12 +805,11 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		}
 		return setPbEmail;
 	}
-	
-	// Generic method to convert a string into a list of a specific type (String or Integer)
-    public static <T> List<T> convertStringToList(String input, String delimiter, Function<String, T> converter) {
-        return Arrays.stream(input.split(delimiter))
-                     .map(converter)
-                     .collect(Collectors.toList());
-    }
-	
+
+	// Generic method to convert a string into a list of a specific type (String or
+	// Integer)
+	public static <T> List<T> convertStringToList(String input, String delimiter, Function<String, T> converter) {
+		return Arrays.stream(input.split(delimiter)).map(converter).collect(Collectors.toList());
+	}
+
 }

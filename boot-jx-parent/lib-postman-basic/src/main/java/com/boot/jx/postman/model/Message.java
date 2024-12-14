@@ -32,7 +32,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		CCWIN,
 
 		// INBOUND STATUS
-		RECEIVD, CONSUMED, FORWARDED, FORWARD_ERR, STATUS_FORWARD_ERR;
+		RECEIVD, CONSUMED, FORWARDED, FORWARD_ERR, STATUS_FORWARD_ERR, STOPPED;
 		;
 	}
 
@@ -64,7 +64,14 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private Map<String, Object> model = new HashMap<String, Object>();
 	protected Map<String, Object> options = new HashMap<String, Object>();
 	protected Map<String, Object> meta;
+
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	private Map<String, Object> replyTo = new HashMap<String, Object>();
+	private MessageReferral referral;
 
 	private List<PostManFile> files = null;
 	private List<Attachment> attachments = null;
@@ -216,7 +223,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	}
 
 	public String categoryType() {
-		return ArgUtil.parseAsString(meta().get("categoryType"));
+		return messageMetaWrapper().categoryType().asString();
 	}
 
 	public Status getStatus() {
@@ -524,10 +531,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	}
 
 	public MessageMetaWrapper messageMetaWrapper() {
-		if (this.meta == null) {
-			this.meta = new HashMap<String, Object>();
-		}
-		return new MessageMetaWrapper(this.meta);
+		return MessageMetaWrapper.from(this.meta());
 	}
 
 	@Override
@@ -663,6 +667,11 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.messageIdResend = messageIdResend;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public Map<String, Object> getReplyTo() {
 		return replyTo;
 	}
@@ -671,10 +680,23 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 		this.replyTo = replyTo;
 	}
 
+	/**
+	 * @deprecated use referral() to store info
+	 * @return
+	 */
+	@Deprecated
 	public Map<String, Object> replyTo() {
 		if (replyTo == null) {
 			this.replyTo = new HashMap<String, Object>();
 		}
 		return this.replyTo;
+	}
+
+	public MessageReferral getReferral() {
+		return referral;
+	}
+
+	public void setReferral(MessageReferral referral) {
+		this.referral = referral;
 	}
 }

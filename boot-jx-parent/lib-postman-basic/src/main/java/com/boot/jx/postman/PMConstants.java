@@ -35,6 +35,11 @@ public class PMConstants {
 		 * User who can create domains for clients and has Admin-Access to those domains
 		 */
 		public static final String BUSINESS_PARTNER = "BUSINESS_PARTNER";
+
+		/**
+		 * Internal Users, having access to manager profiles
+		 */
+		public static final String BUSINESS_MANAGER = "BUSINESS_MANAGER";
 		/**
 		 * User who can login to domain manager and has Admin-Access to that one domain
 		 */
@@ -42,7 +47,7 @@ public class PMConstants {
 
 		public static final String ADMIN = "ADMIN";
 		public static final String AGENT = "AGENT";
-		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,WABA_MANAGER,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
+		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_MANAGER,WABA_MANAGER,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
 	}
 
 	public final class USER_SHIP_TYPE {
@@ -65,12 +70,42 @@ public class PMConstants {
 		}
 	}
 
+	public static class MESSAGE_SOURCE_CATEGARY {
+		public static final String MESSAGE = "MESSAGE";
+		public static final String SOCIAL = "SOCIAL";
+		public static final String ADS = "ADS";
+		public static final String CAMPAIGN = "CAMPAIGN";
+	}
+
+	public static class MESSAGE_SOURCE_TYPE {
+		public static final String INBOUND = "INBOUND";
+		public static final String OUTBOUND = "OUTBOUND";
+		public static final String STORY = "STORY";
+		public static final String POST = "POST";
+		public static final String FEEDBACK = "FEEDBACK";
+	}
+
 	public static class MESSAGE_BOUND_TYPE {
 		public static final String INBOUND = "I";
 		public static final String INBOUND_IMPORTED = "Ii";
 
 		public static final String OUTBOUND = "O";
 		public static final String OUTBOUND_IMPORTED = "Oi";
+
+		/**
+		 * Returns full type
+		 * 
+		 * @param typeSign
+		 * @return
+		 */
+		public static String typeToName(String typeSign) {
+			if (ArgUtil.is(typeSign, INBOUND)) {
+				return "inbound";
+			} else if (ArgUtil.is(typeSign, OUTBOUND)) {
+				return "outbound";
+			}
+			return null;
+		}
 	}
 
 	public final class CHANNEL_TYPE {
@@ -87,6 +122,7 @@ public class PMConstants {
 		public static final String FIREBASE = "firebase";
 		public static final String OUTLOOK = "outlook";
 		public static final String GMAIL = "gmail";
+		public static final String IMAP = "imap";
 
 		// WhatsApp Channels
 		public static final String WA_GUPSHUP = "wags";
@@ -99,7 +135,7 @@ public class PMConstants {
 	}
 
 	public enum CHANNEL_TYPE_ENUM {
-		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase, wacfb, outlook, gmail
+		tg, tw, fb, wags, wa360, web, ig, mailto, sms, wac360, oa, firebase, wacfb, outlook, gmail, imap
 	}
 
 	public static enum CHAT_STATUS {
@@ -142,17 +178,19 @@ public class PMConstants {
 
 		// Bot modes
 		TEAM_ROUTER(CHAT_MODE.BOT), APP_ROUTER(CHAT_MODE.BOT), APP_SWITCH(CHAT_MODE.BOT), QUICK_GALLERY(CHAT_MODE.BOT),
-		QUICK_MENU(CHAT_MODE.BOT), FEEDBACK(CHAT_MODE.BOT), AVAMO(CHAT_MODE.BOT),
+		QUICK_MENU(CHAT_MODE.BOT), FEEDBACK(CHAT_MODE.BOT), AVAMO(CHAT_MODE.BOT), FAQ(CHAT_MODE.BOT),
+
+		// WebHooks
+		APP_SCRIPT(CHAT_MODE.WEBHOOK),
 
 		// SCRIPTUS MODES
 		FEEDBACK_V2(CHAT_MODE.SCRIPTUS), BOTFLOW(CHAT_MODE.SCRIPTUS),
 
-		// Agent Mdoes
+		// Agent Modes
 		MITEL(CHAT_MODE.AGENT),
 
-		FAQ(CHAT_MODE.BOT), APP_SCRIPT(CHAT_MODE.WEBHOOK), MOENGAGE(CHAT_MODE.PUSH),
-
-		DEFAULT(CHAT_MODE.PUSH);
+		// Others
+		MOENGAGE(CHAT_MODE.PUSH), DEFAULT(CHAT_MODE.PUSH);
 
 		private CHAT_MODE chatMode;
 

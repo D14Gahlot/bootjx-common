@@ -13,6 +13,7 @@ import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
 import com.boot.jx.postman.PostmanPackages.TemplateResolver;
+import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
@@ -50,7 +51,7 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 	@Override
 	public CommonFile process(CommonFile file, ContactType contactType) {
 		if (ArgUtil.is(templateResolver) && ArgUtil.is(file.getTemplate())) {
-			BasicTemplate basicTemplate = templateResolver.get(file.getTemplate(),contactType);
+			BasicTemplate basicTemplate = templateResolver.get(file.getTemplate(), contactType);
 			if (ArgUtil.is(basicTemplate)) {
 				String content = this.process(basicTemplate.getTemplate(), file.getModel());
 				file.options().putAll(basicTemplate.options());
@@ -87,9 +88,8 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 					}
 					String categoryType = basicTemplate.getCategoryType();
 					if (ArgUtil.is(categoryType)) {
-						file.meta().put("categoryType", categoryType);
+						MessageMetaWrapper.from(file.meta()).categoryType(categoryType);
 					}
-
 				}
 				return file;
 			}

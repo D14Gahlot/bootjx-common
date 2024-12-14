@@ -7,9 +7,7 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +41,6 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.postman.plugin.GmailPlugin;
 import com.boot.jx.postman.plugin.GmailPlugin.GmailConfigDetails;
-import com.boot.jx.postman.plugin.OutlookPlugin.OutlookConfigDetails;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.rest.RestService;
 import com.boot.jx.utils.PostManUtil;
@@ -222,6 +219,14 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
 				ChatMessageDTO lastMsg = chatSession.lastInBoundMsg();
+				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
+					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
+					outboxMessage.setReplyId(lastMsg.getMessageId());
+				}
+			}
+
+			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
+				ChatMessageDTO lastMsg = chatSession.lastOutBoundMsg();
 				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
 					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
 					outboxMessage.setReplyId(lastMsg.getMessageId());
