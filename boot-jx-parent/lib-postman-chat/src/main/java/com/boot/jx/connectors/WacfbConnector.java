@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.auth.AuthStateManager.AuthState;
@@ -23,15 +24,18 @@ import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
+import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
+import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.WABAFlows;
@@ -710,24 +714,50 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 	}
 
-	@Override // suggested by Lalit- we are not getting category here we , it get set at
-				// tmplClient.process(outboxMessage)-line 233 of abstract connector
-	public void beforeSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
-		Map<String, Object> meta = outboxMessage.getMeta();
+	@Override 
+	public HSMTemplate3rdParty templateExt(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
+			OutboxMessage outboxMessage) {
+		List<HSMTemplate3rdParty> temps = null;
+		Map<String, Object> meta = outboxMessage.getMeta();// this is my code which we need to decide
 		if (meta != null) {
 			if (meta.containsKey("categoryType")) {
 				String categoryType = (String) meta.get("categoryType");
-				System.out.println("Category Type: " + categoryType);
-				if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
+				    if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
 					outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
-					// outboxMessage.setTemplateExt();
 
 				}
 			}
 		}
-		super.beforeSend(channelConfig, chatContactDoc, outboxMessage);
-	}
+		if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
+			temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+					.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
+							.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
+		} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
+				&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
+			temps = commonMongoTemplate.find(
+					CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
+							.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
+			LOGGER.debug(JsonUtil.toJson(temps));
+		}
 
+		if (ArgUtil.is(temps)) {
+			HSMTemplate3rdParty resolvedTemplate = null;
+			if (temps.size() > 1) {
+				for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
+					if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
+						resolvedTemplate = hsmTemplate3rdParty;
+						break;
+					} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
+						resolvedTemplate = hsmTemplate3rdParty;
+					}
+				}
+			} else {
+				resolvedTemplate = temps.get(0);
+			}
+			return resolvedTemplate;
+		}
+		return null;
+	}
 	// @Override
 	/*
 	 * public boolean optin(ChannelConfig channelConfig, ChatContactDoc
