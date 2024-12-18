@@ -3,6 +3,7 @@ package com.boot.jx.postman.doc;
 import java.io.Serializable;
 import java.util.List;
 
+import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -21,6 +22,8 @@ public class WabaAccountBalanceDoc extends TimeStampDoc implements Serializable,
 	private static final long serialVersionUID = -2604878253251388988L;
 	@Id
 	String id;
+	@Unique
+	String tenant;
 	String wabaId;
 	String currencyCode;
 	long timeStamp;
@@ -82,6 +85,12 @@ public class WabaAccountBalanceDoc extends TimeStampDoc implements Serializable,
 		WabaAccountBalanceDoc patch = new WabaAccountBalanceDoc();
 		patch.setId(this.getId());
 		return patch;
+	}
+	public String getTenant() {
+		return tenant;
+	}
+	public void setTenant(String tenant) {
+		this.tenant = tenant;
 	}
 	
 	

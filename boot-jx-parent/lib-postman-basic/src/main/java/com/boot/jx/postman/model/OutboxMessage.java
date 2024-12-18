@@ -42,6 +42,7 @@ public class OutboxMessage extends Message<OutboxMessage>
 	public boolean cancelExisting;
 	private List<String> groups;
 	private List<String> filters;
+	private String profileid;
 
 	public OutboxMessage(ContactType contactType) {
 		super(contactType);
@@ -236,6 +237,14 @@ public class OutboxMessage extends Message<OutboxMessage>
 
 	public void setFilters(List<String> filters) {
 		this.filters = filters;
+	}
+
+	public String getProfileid() {
+		return profileid;
+	}
+
+	public void setProfileid(String profileid) {
+		this.profileid = profileid;
 	}
 
 }

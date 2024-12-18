@@ -7,6 +7,7 @@ import java.util.Map;
 public class WabaDateWiseBalanceDto {
 	String tnt;
 	String month;
+	String currencyCode;
 	long dateTimeStamp;
 	double depostAmt=0;
 	Integer totalCount=0;
@@ -14,6 +15,7 @@ public class WabaDateWiseBalanceDto {
 	double balanceAmt=0;
 	String wabaId;
 	String number;
+	String id;
 	List<Map<String, Object>> countCostMap=new ArrayList<>();
 	
 	
@@ -78,6 +80,18 @@ public class WabaDateWiseBalanceDto {
 	}
 	public void setTnt(String tnt) {
 		this.tnt = tnt;
+	}
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
+	}
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
 	}
 	
 	

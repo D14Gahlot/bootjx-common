@@ -9,6 +9,7 @@ import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.DefaultChannelPlugin;
 import com.boot.jx.postman.plugin.WebPlugin.WebConfigDetails;
+import com.boot.utils.Constants;
 
 public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
@@ -26,22 +27,30 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 
 		private static final long serialVersionUID = 8692015716138195462L;
 
-		@ConfigMetaProperty(path = "web.site", title = "SiteName", createonly = true, desc = "Enter Website indeitifier, avoid special characters")
+		@ConfigMetaProperty(path = "web.site", title = "SiteName", createonly = true,
+				desc = "Enter Website indeitifier, avoid special characters")
 		private String site;
 
-		@ConfigMetaProperty(path = "web.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		@ConfigMetaProperty(path = "web.promptName", title = "Prompt Name", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptName;
 
-		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		@ConfigMetaProperty(path = "web.promptEmail", title = "Prompt Email", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptEmail;
 
-		@ConfigMetaProperty(path = "web.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS, dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
+		@ConfigMetaProperty(path = "web.promptPhone", title = "Prompt Phone", inputType = INPUT_TYPE.OPTIONS,
+				dataType = DATA_TYPE.SWITCH, converterType = CONVERT_TYPE.BOOLEAN, defaultValue = "true")
 		private boolean promptPhone;
 
-		@ConfigMetaProperty(path = "web.iceBreaker", title = "Ice Breaker Message", optional = true, inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code", optionsLabel = "desc")
+		@ConfigMetaProperty(path = "web.iceBreaker", title = "Ice Breaker Message", optional = true,
+				inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code",
+				optionsLabel = "desc")
 		private String iceBreaker;
 
-		@ConfigMetaProperty(path = "web.welcome", title = "Welcome Back Message", optional = true, inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code", optionsLabel = "desc")
+		@ConfigMetaProperty(path = "web.welcome", title = "Welcome Back Message", optional = true,
+				inputType = INPUT_TYPE.OPTIONS, optionsSource = "getx:/api/tmpl/hsm", optionsKey = "code",
+				optionsLabel = "desc")
 		private String welcomeBack;
 
 		@ConfigMetaProperty(path = "web.title", title = "ChatBox Title")
@@ -119,6 +128,11 @@ public class WebPlugin implements DefaultChannelPlugin<WebConfigDetails> {
 			this.title = title;
 		}
 
+	}
+
+	@Override
+	public String laneTrimmed(String lane) {
+		return lane.replace("https://", Constants.BLANK).replace("http://", Constants.BLANK);
 	}
 
 	@Override
