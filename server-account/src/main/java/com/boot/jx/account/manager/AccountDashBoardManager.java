@@ -77,6 +77,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
+import com.boot.jx.postman.doc.WabaAnalyticsDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
@@ -1519,16 +1520,18 @@ public class AccountDashBoardManager {
 			 domains.add(doc);
 		 }
 		 for(DomainDoc domDoc:domains) {
-		 List<ChannelConfigDoc>  chDocs=getListChannelCongigFowWa(domDoc.getDomain());
-		 for(ChannelConfigDoc chdoc:chDocs) {
+		 List<WabaAnalyticsDoc>  chDocs=getListChannelCongigFowWaV1(domDoc.getDomain());
+		 if(ArgUtil.is(chDocs)) {
+		 for(WabaAnalyticsDoc chdoc:chDocs) {
 			// Get the month, start, and end timestamp using your DateUtil utility
 	        String month = CommonUtils.monthNameByTimestamp(timestamp);
 	        long startTStamp = CommonUtils.startTStampForaMonth(timestamp);
 	        long endTStamp = CommonUtils.endTStampForaMonth(timestamp);
-	        if(ArgUtil.is(chdoc.getWacfb())) {
-	        String wabaId =chdoc.getWacfb().getWabaId();//"430589913462237";
-	        String number =chdoc.getWacfb().getNumber();
-	        String tnt=chdoc.getDomain();
+	        if(ArgUtil.is(chdoc.getWabaId())) {
+	        String wabaId =chdoc.getWabaId();//"430589913462237";
+	        String number =chdoc.getNumber();
+	        String tnt=chdoc.getTenant();
+	        System.out.println("chdoc :"+chdoc+"\t domDoc :"+domDoc.getDomain());
 	        
 	        
 	        WabaDateWiseBalanceDto dto = new WabaDateWiseBalanceDto();
@@ -1626,14 +1629,18 @@ public class AccountDashBoardManager {
 			double deposiTamt=0.0;
 			if(ArgUtil.is(waAccBal)) {
 				deposiTamt=waAccBal.getDepositAmt();
+			dto.setCurrencyCode(waAccBal.getCurrencyCode());
+			dto.setId(waAccBal.getId());
 			}
 			dto.setDepostAmt(deposiTamt);
 			dto.setTotalCount(totalConvCnt);
 			dto.setTotalCost(totalConvCost);
 			dto.setBalanceAmt(deposiTamt-totalConvCost);
 			dto.setTnt(ArgUtil.parseAsString(tnt,AppContextUtil.getTenant()));
+			
 			lstList.add(dto);
 	        }
+		 }
 		 }
 		 wDto.setDateWiseBaL(lstList);
 		 }
@@ -1664,6 +1671,34 @@ public class AccountDashBoardManager {
 		query.addCriteria(Criteria.where("domain").is(domain).and("isDisabled").is(false).and("contactType").is(ContactType.WHATSAPP.name()));
 		query.fields().include("domain").include("wacfb.number").include("wacfb.wabaId").include("contactType").include("isDisabled");
 		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
+		return cofigDocLst;
+	}
+	
+ 
+ public List<WabaAnalyticsDoc> getListChannelCongigFowWaV1(String domain) {
+	 List<WabaAnalyticsDoc> cofigDocLst =new ArrayList<>();
+		Query query = new Query();
+		query.addCriteria(Criteria.where("tenant").is(domain));
+		query.fields().include("tenant").include("number").include("wabaId").include("contactType").include("isDisabled");
+		//List<WabaAnalyticsDoc> cofigDocLst = mongoTemplate.findAll(WabaAnalyticsDoc.class, "TP_WABA_ANALYTICS");
+		
+		Aggregation aggregation = Aggregation.newAggregation(
+				Aggregation.match(Criteria.where("tenant").is(domain)), // Add filter for tenant
+			    Aggregation.group("tenant", "wabaId", "number") // Group by tenant, wabaId, and number
+			        .first(Aggregation.ROOT).as("uniqueRecord"), // Select the first document as representative
+			    Aggregation.replaceRoot("uniqueRecord") // Return the unique records as the root
+			);
+
+			List<Document> uniqueRecords = mongoTemplate.aggregate(aggregation, "TP_WABA_ANALYTICS", Document.class).getMappedResults();
+			// Process the unique records
+			uniqueRecords.forEach(System.out::println);
+			for(Document doc:uniqueRecords) {
+				WabaAnalyticsDoc wadoc =new WabaAnalyticsDoc();
+				wadoc.setTenant(doc.getString("tenant"));
+				wadoc.setWabaId(doc.getString("wabaId"));
+				wadoc.setNumber(doc.getString("number"));
+				cofigDocLst.add(wadoc);
+			}
 		return cofigDocLst;
 	}
 	
