@@ -29,7 +29,7 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 
 	CHANNEL_BROADCAST_TELEGRAM(new ConfigMeta("AutoConfigure Telegram", "feature.channel.broadcast.telegram")
 			.optionsOnOff().group(ConfigConstants.CHANNELS).defaultFalse()),
-	CHANNEL_BROADCAST_WHATSAPP(new ConfigMeta("Boradcast WhatsApp", "feature.channel.broadcast.whatsapp").optionsOnOff()
+	CHANNEL_BROADCAST_WHATSAPP(new ConfigMeta("Broadcast WhatsApp", "feature.channel.broadcast.whatsapp").optionsOnOff()
 			.group(ConfigConstants.CHANNELS).defaultTrue()),
 
 	BOT_FLOW_BUILDER(
