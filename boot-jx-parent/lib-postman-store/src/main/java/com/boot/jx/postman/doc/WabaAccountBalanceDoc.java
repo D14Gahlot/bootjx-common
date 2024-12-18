@@ -15,7 +15,7 @@ import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 
 @Document(collection ="WABA_ACCOUNT_BALANCE")
 @TypeAlias("WabaAccountBalanceDoc")
-public class WabaAccountBalanceDoc extends TimeStampDoc implements Serializable, Patchable<WabaAccountBalanceDoc>, IDocument, DocVersion {
+public class WabaAccountBalanceDoc extends TimeStampDoc implements Serializable,Patchable<WabaAccountBalanceDoc>, IDocument {
 	/**
 	 * 
 	 */
@@ -29,8 +29,9 @@ public class WabaAccountBalanceDoc extends TimeStampDoc implements Serializable,
 	long timeStamp;
 	double depositAmt=0.0;
 	double balanceAmt=0.0;
-	long totalMsgCost;
-	private List<DocVersion> oldVersions;
+	double totalMsgCost=0.0;
+	//private List<DocVersion> oldVersions;
+	private List<WabaAccountBalanceDoc> oldVersion;
 	
 	public String getId() {
 		return id;
@@ -68,18 +69,19 @@ public class WabaAccountBalanceDoc extends TimeStampDoc implements Serializable,
 	public void setBalanceAmt(double balanceAmt) {
 		this.balanceAmt = balanceAmt;
 	}
-	public long getTotalMsgCost() {
+	public double getTotalMsgCost() {
 		return totalMsgCost;
 	}
-	public void setTotalMsgCost(long totalMsgCost) {
+	public void setTotalMsgCost(double totalMsgCost) {
 		this.totalMsgCost = totalMsgCost;
 	}
-	public List<DocVersion> getOldVersions() {
-		return oldVersions;
-	}
-	public void setOldVersions(List<DocVersion> oldVersions) {
-		this.oldVersions = oldVersions;
-	}
+//	public List<DocVersion> getOldVersions() {
+//		return oldVersions;
+//	}
+//	
+//	public void setOldVersions(List<DocVersion> oldVersions) {
+//		this.oldVersions = oldVersions;
+//	}
 	@Override
 	public WabaAccountBalanceDoc patch() {
 		WabaAccountBalanceDoc patch = new WabaAccountBalanceDoc();
@@ -92,6 +94,13 @@ public class WabaAccountBalanceDoc extends TimeStampDoc implements Serializable,
 	public void setTenant(String tenant) {
 		this.tenant = tenant;
 	}
+	public List<WabaAccountBalanceDoc> getOldVersion() {
+		return oldVersion;
+	}
+	public void setOldVersion(List<WabaAccountBalanceDoc> oldVersion) {
+		this.oldVersion = oldVersion;
+	}
+	
 	
 	
 
