@@ -21,6 +21,11 @@ public class MessageMetaWrapper extends MapModel {
 		return this;
 	}
 
+	public MessageMetaWrapper isTemplateExt(boolean isTemplateExt) {
+		this.put("isTemplateExt", isTemplateExt);
+		return this;
+	}
+
 	/**
 	 * Value can differ from channel to channel
 	 * 
@@ -58,6 +63,10 @@ public class MessageMetaWrapper extends MapModel {
 
 	public boolean composeTypeIs(String composeType) {
 		return this.keyEntry("composeType").is(composeType);
+	}
+
+	public boolean isTemplateExt() {
+		return this.keyEntry("isTemplateExt").asBoolean();
 	}
 
 	public String sendType() {

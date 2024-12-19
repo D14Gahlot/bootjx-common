@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.auth.AuthStateManager.AuthState;
@@ -24,12 +23,10 @@ import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
-import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -732,66 +729,11 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			if (meta.containsKey("categoryType")) {
 				String categoryType = (String) meta.get("categoryType");
 				if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
-					outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
-
+					outboxMessage.messageMetaWrapper().isTemplateExt(true);
 				}
 			}
 		}
-		if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
-			temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
-					.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
-							.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
-		} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
-				&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
-			temps = commonMongoTemplate.find(
-					CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
-							.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
-			LOGGER.debug(JsonUtil.toJson(temps));
-		}
-
-		if (ArgUtil.is(temps)) {
-			HSMTemplate3rdParty resolvedTemplate = null;
-			if (temps.size() > 1) {
-				for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-					if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
-						resolvedTemplate = hsmTemplate3rdParty;
-						break;
-					} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
-						resolvedTemplate = hsmTemplate3rdParty;
-					}
-				}
-			} else {
-				resolvedTemplate = temps.get(0);
-			}
-			return resolvedTemplate;
-		}
-		return null;
+		return super.templateExt(channelConfig, chatContactDoc, outboxMessage);
 	}
-	// @Override
-	/*
-	 * public boolean optin(ChannelConfig channelConfig, ChatContactDoc
-	 * chatContactDoc) {
-	 * 
-	 * if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) { String
-	 * defaultRegion =
-	 * environment.keyEntry("postman.phonebook.region").asString("IN"); String phone
-	 * = chatContactDoc.getPhone(); try { phone = phone.replace(" ",
-	 * "").replaceAll("^[\\+0\\s]+(?!$)", "").trim(); PhoneNumber phoneNumber =
-	 * PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion); phone =
-	 * String.format("+%s%s", phoneNumber.getCountryCode(),
-	 * phoneNumber.getNationalNumber()); } catch (NumberParseException e) { phone =
-	 * String.format("+%s", phone); }
-	 * 
-	 * MapModel resp = waClient.fetchContact(phone, channelConfig); String waId
-	 * =resp.getString("wa_id"); String input = null;// resp.getString("input");
-	 * String status = "valid";// resp.getString("status");
-	 * 
-	 * if ("valid".equals(status)) { ChatContactQuery chatContactQuery = new
-	 * ChatContactQuery(chatContactDoc); chatContactQuery.updateLastOptInStamp();
-	 * commonMongoTemplate.updateFirst(chatContactQuery); return true; } }
-	 * 
-	 * //return ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp()); return
-	 * true; }
-	 */
 
 }
