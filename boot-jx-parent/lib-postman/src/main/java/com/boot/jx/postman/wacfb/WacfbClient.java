@@ -112,7 +112,11 @@ public class WacfbClient implements ChannelClient {
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);// null
 
 				for (TmplElement b : allbuttons) {
-					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
+					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)
+							|| ArgUtil.areEqual(b.getType(), TmplElement.TYPES.COPY)) {
+						if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.COPY)) {
+							b.setUrl("https://www.whatsapp.com/otp/code/?otp_type=COPY_CODE&code=otp" + b.getCode());
+						}
 						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
