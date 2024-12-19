@@ -39,6 +39,7 @@ import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.WABAFlows;
+import com.boot.jx.postman.doc.tpo.WABAUpdates;
 import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
@@ -671,7 +672,9 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		List<Map<String, Object>> changes = requestMap.path(FacebookConstants.WABAPaths.CHANGES).asListOfMap();
 
 		changes.forEach(change -> {
-			MapModel changeMap = MapModel.from(change).keyEntry("value").asMapModel();
+			MapModel changeModel = MapModel.from(change);
+			MapPathEntry field = changeModel.keyEntry("field");
+			MapModel changeMap = changeModel.keyEntry("value").asMapModel();
 
 			if (changeMap.containsKey("messages")) {
 				messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, changeMap));
@@ -698,6 +701,12 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 						}
 					}
 				}
+			} else {
+				WABAUpdates waBAUpdates = new WABAUpdates();
+				waBAUpdates.setChannelId(channelConfig.getChannelId());
+				waBAUpdates.setField(field.asString());
+				waBAUpdates.setValue(changeMap.map());
+				commonMongoTemplate.save(waBAUpdates);
 			}
 		});
 		return messageBoxEvent;
@@ -714,7 +723,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 	}
 
-	@Override 
+	@Override
 	public HSMTemplate3rdParty templateExt(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
 		List<HSMTemplate3rdParty> temps = null;
@@ -722,7 +731,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		if (meta != null) {
 			if (meta.containsKey("categoryType")) {
 				String categoryType = (String) meta.get("categoryType");
-				    if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
+				if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
 					outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
 
 				}
