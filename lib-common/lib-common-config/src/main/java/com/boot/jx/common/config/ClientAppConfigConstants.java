@@ -49,9 +49,9 @@ public class ClientAppConfigConstants {
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
 				new ConfigMeta().title("When no agent is found in working hours").path("props.agent_notfound")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
-						new ConfigMeta().title("When no agent is found in non-working hours").path("props.org_offline")
+				new ConfigMeta().title("When no agent is found in non-working hours").path("props.org_offline")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc").group("Templates"),
-						
+
 				new ConfigMeta().title("When chat is transferred").path("props.agent_transfer")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 						.group("Templates") });
@@ -209,6 +209,12 @@ public class ClientAppConfigConstants {
 								.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code")
 
 				});
+
+		APP_CONFIGS.put(APP_TYPE.AGENT_GPT, new ConfigMeta[] { new ConfigMeta()
+				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("AgentGPT").desc("This is your ChatGPT Agent"//
+				).group("About App"), //
+				new ConfigMeta().title("Introduction").path("props.context").group("About Me")//
+		});
 
 		APP_CONFIGS.put(APP_TYPE.APP_SCRIPT,
 				new ConfigMeta[] { new ConfigMeta().inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("App Script")
