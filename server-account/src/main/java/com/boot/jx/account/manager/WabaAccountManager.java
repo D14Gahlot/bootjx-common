@@ -22,10 +22,7 @@ public class WabaAccountManager extends CommonMongoTemplateAbstract<WabaAccountM
 	@Autowired
 	CommonMongoTemplate commonMongoTemplate;
 	
-	//@Autowired
-	//MongoTemplate mongoTemplate;
 	
-		//AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
 	public WabaAccountBalanceDoc addEditAccountBalance(WabaAccountBalanceDoc reqDto) {
 		WabaAccountBalanceDoc doc = new WabaAccountBalanceDoc(); 
 		
