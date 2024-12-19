@@ -8,11 +8,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
@@ -65,6 +66,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ConnectorMapping(contactType = ContactType.WHATSAPP, channel = CHANNEL_TYPE.WACFB)
 public class WacfbClient implements ChannelClient {
 
+	public static final Pattern VARIABLES = Pattern.compile("\\{\\{([a-zA-Z0-9_]+)\\}\\}");
+
 	@Autowired
 	private RestService restService;
 
@@ -105,10 +108,8 @@ public class WacfbClient implements ChannelClient {
 			checkFlowButton(options);
 
 			if (options.containsKey("buttons")) {
-				
-                
-				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);//null
-				
+
+				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);// null
 
 				for (TmplElement b : allbuttons) {
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)) {
@@ -393,6 +394,20 @@ public class WacfbClient implements ChannelClient {
 						bodyComponent.parameter("text", model.pathEntry(path).asString());
 					}
 					components.add(bodyComponent.build().map());
+				} else {
+					String extTemplateComponentText = (String) extTemplateComponent.get("text");
+					// Extract placeholders
+					if (ArgUtil.is(extTemplateComponentText)) {
+						List<String> placeholders = getVariablePlaceHolders(extTemplateComponentText);
+						if (placeholders.size() > 0) {
+							TmplComponent bodyComponent = TmplComponent.createInstance().body();
+							for (String variable : placeholders) {
+								bodyComponent.parameter("text", model.pathEntry("data." + variable).asString());
+							}
+							components.add(bodyComponent.build().map());
+						}
+					}
+
 				}
 			} else if ("BUTTONS".equals(extTemplateComponentType)) {
 				List<Map<String, Object>> extTemplateComponentButtons = MapModel.from(extTemplateComponent)
@@ -429,7 +444,7 @@ public class WacfbClient implements ChannelClient {
 						} else if ("FLOW".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
-									
+
 									String path = (String) buttonParameter.get("path");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
 									buttonComponent.parameter("action", MapModel.createInstance());
@@ -449,66 +464,40 @@ public class WacfbClient implements ChannelClient {
 								components.add(buttonComponent.build().map());
 							}
 						} else if ("URL".equalsIgnoreCase(buttonType)) {
-							HashMap<String, Object> model1 = (HashMap<String, Object>) outboxMessage.getModel(); // Assuming 'getModel()' returns your map
-							Map<String, Object> data = (Map<String, Object>) model1.get("data");
-
-							String code = "";
-							if (data != null && data.containsKey("1")) {
-							    code = String.valueOf(data.get("1")); 
-							    
+							String extTemplateComponentUrl = (String) extTemplateComponentButton.get("url");
+							// Extract placeholders
+							if (ArgUtil.is(extTemplateComponentUrl)) {
+								List<String> placeholders = getVariablePlaceHolders(extTemplateComponentUrl);
+								if (placeholders.size() > 0) {
+									TmplComponent buttonComponent = TmplComponent.createInstance().button("url", i);
+									for (String variable : placeholders) {
+										buttonComponent.parameter("text",
+												model.pathEntry("data." + variable).asString());
+									}
+									components.add(buttonComponent.build().map());
+								}
 							}
 
-							Map<String, Object> bodyComponent = new HashMap<>();
-							bodyComponent.put("type", "body");
+						} else if ("FLOW".equals(buttonType)) {
+							if (ArgUtil.is(buttonParameterVar)) {
+								for (Map<String, Object> buttonParameter : buttonParameterVar) {
+									if (buttonParameter.containsKey("path")) {
 
-							List<Map<String, Object>> bodyParameters = new ArrayList<>();
-							Map<String, Object> bodyParameter = new HashMap<>();
-							bodyParameter.put("type", "text");
-							bodyParameter.put("text", code); 
-							bodyParameters.add(bodyParameter);
+										String path = (String) buttonParameter.get("path");
 
-							bodyComponent.put("parameters", bodyParameters);
-							components.add(bodyComponent);
-
-						
-							Map<String, Object> buttonComponent = new HashMap<>();
-							buttonComponent.put("type", "button");
-							buttonComponent.put("sub_type", "url");
-							buttonComponent.put("index", i); 
-
-							List<Map<String, Object>> buttonParameters = new ArrayList<>();
-							Map<String, Object> buttonParameter = new HashMap<>();
-							buttonParameter.put("type", "text");
-							buttonParameter.put("text", code); 
-							buttonParameters.add(buttonParameter);
-
-							buttonComponent.put("parameters", buttonParameters);
-							components.add(buttonComponent);
-
-
-						}
-
-						else if ("FLOW".equals(buttonType)) {
-							if(ArgUtil.is(buttonParameterVar))
-							{
-							for(Map<String, Object> buttonParameter : buttonParameterVar)
-							{
-                                if (buttonParameter.containsKey("path")) {
-									
-									String path = (String) buttonParameter.get("path");
-
-							TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
-							buttonComponent.parameter("action",
-									MapModel.createInstance().put("flow_token", outboxMessage.getMessageId()));
-							components.add(buttonComponent.build().map());
-						}}}
-							else
-							{
+										TmplComponent buttonComponent = TmplComponent.createInstance().button("flow",
+												i);
+										buttonComponent.parameter("action", MapModel.createInstance().put("flow_token",
+												outboxMessage.getMessageId()));
+										components.add(buttonComponent.build().map());
+									}
+								}
+							} else {
 								Object flowIdObj = extTemplateComponentButton.get("flow_id");
-						        String flow_id = flowIdObj != null ? String.valueOf(flowIdObj) : null;
+								String flow_id = flowIdObj != null ? String.valueOf(flowIdObj) : null;
 								TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
-								buttonComponent.parameter("action",
-										MapModel.createInstance().put("flow_token", outboxMessage.getMessageId()+"/"+flow_id));
+								buttonComponent.parameter("action", MapModel.createInstance().put("flow_token",
+										outboxMessage.getMessageId() + "/" + flow_id));
 								components.add(buttonComponent.build().map());
 							}
 						}
@@ -521,6 +510,15 @@ public class WacfbClient implements ChannelClient {
 
 		req.put(OutBoundWrapperPaths.TEMPLATE_COMPONENTS, components.list());
 		return send(req, channelConfig);
+	}
+
+	private List<String> getVariablePlaceHolders(String extTemplateComponentText) {
+		Matcher matcher = VARIABLES.matcher(extTemplateComponentText);
+		List<String> placeholders = new ArrayList<>();
+		while (matcher.find()) {
+			placeholders.add(matcher.group(1)); // Group 1 contains the placeholder value
+		}
+		return placeholders;
 	}
 
 	private MapModel checkFlowButton(MapModel options) {
@@ -554,10 +552,10 @@ public class WacfbClient implements ChannelClient {
 
 	private WA360CloudOutBoundMedia createMedia(String mediaType, Attachment attachment) {
 		WA360CloudOutBoundMedia wa360OutBoundMedia = new WA360CloudOutBoundMedia();
-        wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
+		wa360OutBoundMedia.setFilename(ArgUtil.nonEmpty(attachment.getMediaCaption(), attachment.getMediaName()));
 		wa360OutBoundMedia.setCaption(attachment.getMediaName());
 		wa360OutBoundMedia.setLink(attachment.getMediaURL());
-		if (mediaType.equalsIgnoreCase("image")|| mediaType.equalsIgnoreCase("video")) {
+		if (mediaType.equalsIgnoreCase("image") || mediaType.equalsIgnoreCase("video")) {
 			wa360OutBoundMedia.setFilename(null);
 		}
 		return wa360OutBoundMedia;
@@ -569,8 +567,6 @@ public class WacfbClient implements ChannelClient {
 		req.put(OutBoundWrapperPaths.MESSAGE_TYPE, "text");
 		req.put(OutBoundWrapperPaths.MESSAGE_TEXT_BODY,
 				StringUtils.wrap("*", outboxMessage.getSubject(), "*\n") + outboxMessage.getMessage());
-	
-		
 
 		return send(req, channelConfig);
 	}
@@ -680,7 +676,8 @@ public class WacfbClient implements ChannelClient {
 				intr.put("image", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.VIDEO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "video");
-				wa360OutBoundMedia.setFilename(null);//filename not supported in meta-cloud for video/image. for refernce-https://developers.facebook.com/docs/messenger-platform/send-messages/template/media/
+				wa360OutBoundMedia.setFilename(null);// filename not supported in meta-cloud for video/image. for
+														// refernce-https://developers.facebook.com/docs/messenger-platform/send-messages/template/media/
 				intr.put("video", wa360OutBoundMedia);
 			} else if (ArgUtil.areEqual(attachment.getMediaType(), FileType.AUDIO.toString())) {
 				intr.put(OutBoundWrapperPaths.MESSAGE_TYPE, "audio");
@@ -962,8 +959,7 @@ public class WacfbClient implements ChannelClient {
 	}
 
 	private static byte[] downloadFile(String fileUrl) throws IOException {
-		try (InputStream in = new URL(fileUrl).openStream(); 
-			ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+		try (InputStream in = new URL(fileUrl).openStream(); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			byte[] buffer = new byte[1024];
 			int bytesRead;
 			while ((bytesRead = in.read(buffer)) != -1) {

@@ -247,8 +247,9 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 			temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 					.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
 							.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
-		} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
-				&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
+		} else if (outboxMessage.messageMetaWrapper().isTemplateExt()
+				|| (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
+						&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved())) {
 			temps = commonMongoTemplate.find(
 					CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
 							.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
