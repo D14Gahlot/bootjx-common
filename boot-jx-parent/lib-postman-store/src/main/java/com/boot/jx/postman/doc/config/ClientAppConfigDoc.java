@@ -225,6 +225,11 @@ public class ClientAppConfigDoc
 	}
 
 	@Override
+	public boolean isWebhookApp() {
+		return ArgUtil.isEqual(getAppType(), APP_TYPE.WEBHOOK);
+	}
+
+	@Override
 	public boolean isCustomApp() {
 		return ArgUtil.isEqual(getAppType(), APP_TYPE.APP_SCRIPT, APP_TYPE.BOTFLOW);
 	}

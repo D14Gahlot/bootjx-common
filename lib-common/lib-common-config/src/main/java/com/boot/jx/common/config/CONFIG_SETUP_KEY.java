@@ -34,6 +34,10 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			.desc("Default Feedback App").optionsSource("getx:/api/options/inbound_queue").optionsKey("code")
 			.optionsLabel("code").filter("feedbackApp", true)),
 
+	POSTMAN_CHAT_CLOSE_WEBOOK(new ConfigMeta("Sesison Close Webhook", "postman.chat.close.webhook")
+			.desc("Sesison Close Webhook").optionsSource("getx:/api/options/inbound_queue").optionsKey("code")
+			.optionsLabel("code").filter("webhookApp", true)),
+
 	POSTMAN_CHAT_CHANNEL_SANDBOX(new ConfigMeta("Enable Sandbox Channels", "postman.chat.channel.sandbox")
 			.desc("Sandbox channels are preconfigured communication channels").optionsOnOff()),
 
@@ -215,22 +219,16 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			PROPERTIES.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED).optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
 					.optionsLabel("desc").group(ConfigConstants.GROUP_AGENT)),
 
-
-	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(
-			new ConfigMeta("Message to customer when no agent available in working hours", "postman.agent.chat.autoreply.noagent")
-					.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
-					.group(ConfigConstants.GROUP_AGENT)),
+	POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT(new ConfigMeta("Message to customer when no agent available in working hours",
+			"postman.agent.chat.autoreply.noagent").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
+					.optionsLabel("desc").group(ConfigConstants.GROUP_AGENT)),
 	POSTMAN_AGENT_CHAT_AUTOREPLY_ORGOFFLINE(
-			new ConfigMeta("Message to customer when no agent available in non-working hours", "postman.agent.chat.autoreply.org_offline")
-					.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
-					.group(ConfigConstants.GROUP_AGENT)),
-	POSTMAN_AGENT_CHAT_SCHEDULE(
-			new ConfigMeta("List of shedules", "postman.agent.chat.schedule")
-			.optionsSource("getx:/nexus/calendar/api/v1/orgSchedule/list")
-			.optionsKey("code").optionsLabel("desc")
+			new ConfigMeta("Message to customer when no agent available in non-working hours",
+					"postman.agent.chat.autoreply.org_offline").optionsSource("getx:/api/tmpl/hsm").optionsKey("code")
+							.optionsLabel("desc").group(ConfigConstants.GROUP_AGENT)),
+	POSTMAN_AGENT_CHAT_SCHEDULE(new ConfigMeta("List of shedules", "postman.agent.chat.schedule")
+			.optionsSource("getx:/nexus/calendar/api/v1/orgSchedule/list").optionsKey("code").optionsLabel("desc")
 			.group(ConfigConstants.GROUP_AGENT)),
-	
-
 
 	// NLP
 	POSTMAN_NLP_LANGUAGE(new ConfigMeta("Enable Detect Language", "postman.nlp.detect.lang").optionsOnOff()
