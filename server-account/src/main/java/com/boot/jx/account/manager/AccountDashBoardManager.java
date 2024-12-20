@@ -1520,15 +1520,16 @@ public class AccountDashBoardManager {
 			 domains.add(doc);
 		 }
 		 for(DomainDoc domDoc:domains) {
+			// lstList = new ArrayList<>();
 		 List<WabaAnalyticsDoc>  chDocs=getListChannelCongigFowWaV1(domDoc.getDomain());
 		 if(ArgUtil.is(chDocs)) {
 		 for(WabaAnalyticsDoc chdoc:chDocs) {
 			// Get the month, start, and end timestamp using your DateUtil utility
 	        String month = CommonUtils.monthNameByTimestamp(timestamp);
-	        long startTStamp = CommonUtils.startTStampForaMonth(timestamp);
-	        long endTStamp = CommonUtils.endTStampForaMonth(timestamp);
+	        long startTStamp = CommonUtils.startTStampForaMonthV1(timestamp);
+	        long endTStamp = CommonUtils.endTStampForaMonthV1(timestamp);
 	        if(ArgUtil.is(chdoc.getWabaId())) {
-	        String wabaId =chdoc.getWabaId();//"430589913462237";
+	        String wabaId =chdoc.getWabaId();
 	        String number =chdoc.getNumber();
 	        String tnt=chdoc.getTenant();
 	        System.out.println("chdoc :"+chdoc+"\t domDoc :"+domDoc.getDomain());
@@ -1623,23 +1624,28 @@ public class AccountDashBoardManager {
 			dto.setWabaId(wabaId);
 			dto.setNumber(number);
 			WabaAccountBalanceDoc waAccBal=null;
-			if(ArgUtil.is(wabaId)) {
-			 waAccBal=getAccountBalance(wabaId);
-			}
 			double deposiTamt=0.0;
-			if(ArgUtil.is(waAccBal)) {
-				deposiTamt=waAccBal.getDepositAmt();
-			dto.setCurrencyCode(waAccBal.getCurrencyCode());
-			dto.setId(waAccBal.getId());
-			}
+			if(ArgUtil.is(wabaId)) {
+			 waAccBal=getAccountBalance(wabaId,tnt);
+			
+				
+				if(ArgUtil.is(waAccBal)) {
+					deposiTamt=waAccBal.getDepositAmt();
+				dto.setCurrencyCode(waAccBal.getCurrencyCode());
+				dto.setId(waAccBal.getId());
+				}
 			dto.setDepostAmt(deposiTamt);
+			}
 			dto.setTotalCount(totalConvCnt);
 			dto.setTotalCost(totalConvCost);
 			dto.setBalanceAmt(deposiTamt-totalConvCost);
+			
 			dto.setTnt(ArgUtil.parseAsString(tnt,AppContextUtil.getTenant()));
+			
 			
 			lstList.add(dto);
 	        }
+		 
 		 }
 		 }
 		 wDto.setDateWiseBaL(lstList);
@@ -1652,12 +1658,12 @@ public class AccountDashBoardManager {
 	    }
 
 	
- public WabaAccountBalanceDoc getAccountBalance(String wabaId) {
+ public WabaAccountBalanceDoc getAccountBalance(String wabaId,String tenant) {
 		List<WabaAccountBalanceDoc> docLst = null; 
 		WabaAccountBalanceDoc doc=null;
 		Query query=new Query();
 		if(ArgUtil.is(wabaId)) {
-			query.addCriteria(Criteria.where("wabaId").is(wabaId));
+			query.addCriteria(Criteria.where("wabaId").is(wabaId).and(tenant).is(tenant));
 			docLst =mongoTemplate.find(query, WabaAccountBalanceDoc.class);
 			if(ArgUtil.is(docLst)) {
 				doc=docLst.get(0);
@@ -1680,8 +1686,7 @@ public class AccountDashBoardManager {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("tenant").is(domain));
 		query.fields().include("tenant").include("number").include("wabaId").include("contactType").include("isDisabled");
-		//List<WabaAnalyticsDoc> cofigDocLst = mongoTemplate.findAll(WabaAnalyticsDoc.class, "TP_WABA_ANALYTICS");
-		
+
 		Aggregation aggregation = Aggregation.newAggregation(
 				Aggregation.match(Criteria.where("tenant").is(domain)), // Add filter for tenant
 			    Aggregation.group("tenant", "wabaId", "number") // Group by tenant, wabaId, and number

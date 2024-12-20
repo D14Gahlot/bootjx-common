@@ -24,8 +24,6 @@ public static String monthNameByTimestamp(long timestamp) {
         // Get the year
         int year = dateTime1.getYear();
         monthYear =month+" "+year;
-        System.out.println("monthYear v1:"+monthYear);
-        
         return monthYear;
 	}
 	
@@ -36,11 +34,12 @@ public static String monthNameByTimestamp(long timestamp) {
     LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(givenTimestamp), ZoneId.systemDefault());
     
     // Get the start of the month (1st day of that month at 00:00:00)
-    LocalDateTime startOfMonth = dateTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    LocalDateTime startOfMonth = dateTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);//.withNano(0);
     
     // Get the end of the month (Last day of that month at 23:59:59)
     LocalDateTime endOfMonth = dateTime.withDayOfMonth(dateTime.toLocalDate().lengthOfMonth())
-                                       .withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+                                       .withHour(23).withMinute(59).withSecond(59);
+    //.withNano(999999999);
     
     // Convert to timestamps (milliseconds since epoch)
     long startTimestamp = startOfMonth.toInstant(ZoneOffset.UTC).toEpochMilli();
@@ -51,17 +50,33 @@ public static String monthNameByTimestamp(long timestamp) {
 	}
 	
 	
+	
+	public static long startTStampForaMonthV1(long givenTimestamp) {
+        // Convert given timestamp (seconds) to milliseconds
+        givenTimestamp = givenTimestamp * 1000;
+
+        // Convert the given timestamp to LocalDateTime
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(givenTimestamp), ZoneId.systemDefault());
+
+        // Get the start of the month (1st day of that month at 00:00:00)
+        LocalDateTime startOfMonth = dateTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+
+        // Convert to timestamp (seconds since epoch)
+        return startOfMonth.toInstant(ZoneOffset.UTC).getEpochSecond();
+    }
+	
+	
 	public static long endTStampForaMonth(long givenTimestamp) {
-		
-		 // Convert the given timestamp to LocalDateTime
+		// Convert the given timestamp to LocalDateTime
 	    LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(givenTimestamp), ZoneId.systemDefault());
 	    
 	    // Get the start of the month (1st day of that month at 00:00:00)
-	    LocalDateTime startOfMonth = dateTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+	    LocalDateTime startOfMonth = dateTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);//.withNano(0);
 	    
 	    // Get the end of the month (Last day of that month at 23:59:59)
 	    LocalDateTime endOfMonth = dateTime.withDayOfMonth(dateTime.toLocalDate().lengthOfMonth())
-	                                       .withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+	                                       .withHour(23).withMinute(59).withSecond(59);
+	    //.withNano(999999999);
 	    
 	    // Convert to timestamps (milliseconds since epoch)
 	    long startTimestamp = startOfMonth.toInstant(ZoneOffset.UTC).toEpochMilli();
@@ -69,6 +84,28 @@ public static String monthNameByTimestamp(long timestamp) {
 	   
 	    return endTimestamp; 
 		}
+	
+	 public static long endTStampForaMonthV1(long givenTimestamp) {
+	        // Convert given timestamp (seconds) to milliseconds
+	        givenTimestamp = givenTimestamp * 1000;
 
+	        // Convert the given timestamp to LocalDateTime
+	        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(givenTimestamp), ZoneId.systemDefault());
 
+	        // Get the end of the month (Last day of that month at 23:59:59)
+	        LocalDateTime endOfMonth = dateTime.withDayOfMonth(dateTime.toLocalDate().lengthOfMonth())
+	                                           .withHour(23).withMinute(59).withSecond(59);
+
+	        // Convert to timestamp (seconds since epoch)
+	        return endOfMonth.toInstant(ZoneOffset.UTC).getEpochSecond();
+	    }
+
+	public static void main(String[] args)
+	{
+		long st = startTStampForaMonth(1726597800);
+		long et = endTStampForaMonth(1726597800);
+		long st1 =startTStampForaMonthV1(1726597800);
+		long et1 = endTStampForaMonthV1(1726597800);
+		System.out.println("st :"+st+"\t et:"+et+"\t et1 :"+st1+"\t et1:"+et1);
+	}
 }
