@@ -1629,8 +1629,8 @@ public class AccountDashBoardManager {
 			 waAccBal=getAccountBalance(wabaId,tnt);
 			
 				
-				if(ArgUtil.is(waAccBal)) {
-					deposiTamt=waAccBal.getDepositAmt();
+			if(ArgUtil.is(waAccBal)) {
+				deposiTamt=waAccBal.getDepositAmt();
 				dto.setCurrencyCode(waAccBal.getCurrencyCode());
 				dto.setId(waAccBal.getId());
 				}
@@ -1663,7 +1663,7 @@ public class AccountDashBoardManager {
 		WabaAccountBalanceDoc doc=null;
 		Query query=new Query();
 		if(ArgUtil.is(wabaId)) {
-			query.addCriteria(Criteria.where("wabaId").is(wabaId).and(tenant).is(tenant));
+			query.addCriteria(Criteria.where("wabaId").is(wabaId).and("tenant").is(tenant));
 			docLst =mongoTemplate.find(query, WabaAccountBalanceDoc.class);
 			if(ArgUtil.is(docLst)) {
 				doc=docLst.get(0);
