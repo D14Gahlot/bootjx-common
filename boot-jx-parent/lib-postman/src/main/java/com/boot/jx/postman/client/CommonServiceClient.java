@@ -1,6 +1,8 @@
 package com.boot.jx.postman.client;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -29,6 +31,7 @@ import com.boot.jx.tunnel.ITunnelService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -83,13 +86,15 @@ public class CommonServiceClient {
 		}
 	}
 
-	public java.util.Map<String, Object> getScheduleStatus(String schedule) {
+	@SuppressWarnings("unchecked")
+	public List<HashMap<String, Object>>  getScheduleStatus(String schedule) {
 		RestTemplate restTemplate = new RestTemplate();
 
 		String url = UriComponentsBuilder
 				.fromHttpUrl(calenderApiUrl).queryParam("scheduleName", schedule)
                 .encode()
                 .toUriString();
+		
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("app-proxy-token", appProxyToken);
 		headers.set("x-agent-code", "lt");
@@ -102,23 +107,26 @@ public class CommonServiceClient {
 
 			LOGGER.info("Response", response.getBody());
 
-			ObjectMapper objectMapper = new ObjectMapper();
-			JsonNode rootNode = objectMapper.readTree(response.getBody());
-			rootNode.fields().forEachRemaining(entry -> {
-				responseMap.put(entry.getKey(), entry.getValue());
-			});
+			 ObjectMapper objectMapper = new ObjectMapper();
+		        JsonNode rootNode = objectMapper.readTree(response.getBody());
 
-		} catch (HttpClientErrorException e) {
-			LOGGER.error("Error", e.getResponseBodyAsString());
-			responseMap.put("error", e.getResponseBodyAsString());
-		} catch (Exception e) {
-			e.printStackTrace();
+		        JsonNode resultsNode = rootNode.get("results");
+		        if (resultsNode != null && resultsNode.isArray()) {
+		            return objectMapper.convertValue(resultsNode, new TypeReference<List<HashMap<String, Object>>>() {});
+		        } else {
+		            LOGGER.warn("No result");
+		            return Collections.emptyList();
+		        }
+
+		    } catch (HttpClientErrorException e) {
+		        LOGGER.error("HTTP error: {}", e.getResponseBodyAsString());
+		        throw new RuntimeException("Error fetching schedule details: " + e.getResponseBodyAsString(), e);
+		    } catch (Exception e) {
+		        LOGGER.error("Error: ", e);
+		        throw new RuntimeException("error", e);
+		    }
 		}
-
-		return responseMap;
-	}
-   
-
+	
 	public ChronoScheduler schedule(ChronoScheduler chronoTask) {
 		if (ArgUtil.is(scheduler)) {
 			MapModel resp = null;

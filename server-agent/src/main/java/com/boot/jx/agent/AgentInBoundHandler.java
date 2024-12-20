@@ -98,8 +98,11 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 			ClientApp app = this.context().clientApp();
 
 			if (ArgUtil.not(app)) {
-				logManager.addTrace(assignEvent, "NoQueueFound", session.contact());
-				app = this.context().clientApp(PMConstants.DEFAULT.AGENT_QUEUE_CODE, session.contact());
+				logManager.addTrace(assignEvent, "NoQueueFound",
+						session.contact());
+				app = this.context().clientApp(
+						PMConstants.DEFAULT.AGENT_QUEUE_CODE,
+						session.contact());
 			}
 
 			MapModel props = MapModel.from(app.props());
@@ -115,73 +118,72 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 				MapEntry templ = getTemplate(props, "agent_connected",
 						CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 				if (templ.exists()) {
-					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
+					agentChatHandler.doReply(session,
+							oMsg.template(templ.asString()));
 					return;
 				}
 			} else if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
 					&& !ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
-				    
+
 				PMConfigurationObject schedule1 = pmEnvironment
 						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_SCHEDULE);
-				String schedule=schedule1.asString();
-				
-				Map apiResponse =(Map) commonServiceClient.getScheduleStatus(schedule);
-		        boolean isWorkingDay = false;
-		        try {
-		            if (((java.util.Map<String, Object>) apiResponse).containsKey("results")) {
-		                ObjectMapper objectMapper = new ObjectMapper();
-		                JsonNode resultsNode = objectMapper.convertValue(((java.util.Map<String, Object>)apiResponse).get("results"), JsonNode.class);
+				String schedule = schedule1.asString();
+				List<HashMap<String, Object>> apiResponse = commonServiceClient
+						.getScheduleStatus(schedule);
+				boolean isWorkingDay = false;
 
-		                if (resultsNode.isArray()) {
-		                    for (JsonNode result : resultsNode) {
-		                        JsonNode flagsNode = result.path("flags");
+				try {
+					if (apiResponse != null && !apiResponse.isEmpty()) {
+						for (HashMap<String, Object> responseItem : apiResponse) {
+							if (responseItem.containsKey("flags")) {
+								@SuppressWarnings("unchecked")
+								java.util.Map<String, Object> flags = (java.util.Map<String, Object>) responseItem
+										.get("flags");
 
-		                        if (flagsNode.isObject()) {
+								if (Boolean.TRUE.equals(
+										flags.get("isWorkingDayToday"))) {
+									isWorkingDay = true;
+									break;
+								}
+							}
+						}
+					} else {
+						LOGGER.warn("API response is empty or null.");
+					}
+				} catch (Exception e) {
+					LOGGER.error("Error received: {}", e.getMessage(), e);
+				}
 
-		                            if (flagsNode.has("isWorkingDayToday") && flagsNode.get("isWorkingDayToday").asBoolean()) {
-		                                isWorkingDay = true;
-		                            	                            } 
-		                        		                        }
-		                    }
-		                } else {
-		                    LOGGER.warn("No result is found.");
-		                }
-		            } else if (((java.util.Map<String, Object>) apiResponse).containsKey("error")) {
-		            } else {
-		            }
-		        } catch (Exception e) {
-		            LOGGER.error("Error recieved", e.getMessage(), e);
-		        }
+				if (isWorkingDay) {
+					MapEntry templ = getTemplate(props, "agent_notfound",
+							CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
+					if (templ.exists()) {
+						agentChatHandler.doReply(session,
+								oMsg.template(templ.asString()));
+						return;
 
-		        if (isWorkingDay) {
-		        	MapEntry templ = getTemplate(props, "agent_notfound",
-    						CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
-    				if (templ.exists()) {
-    					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
-    					return;
+					}
+				}
 
-		        } 
-		        }
+				else {
+					MapEntry templ = getTemplate(props, "agent_orgoffline",
+							CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_ORGOFFLINE);
+					if (templ.exists()) {
+						agentChatHandler.doReply(session,
+								oMsg.template(templ.asString()));
+						return;
+					}
 
-else {
-		        	MapEntry templ = getTemplate(props, "agent_orgoffline",
-    						CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_ORGOFFLINE);
-    				if (templ.exists()) {
-    					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
-    					return;
-    				}
+				}
 
-		        }
-		        
-        	      				
 			}
 
-			
 			else {
 
 				MapEntry templ = props.keyEntry("agent_transfer");
 				if (templ.exists()) {
-					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
+					agentChatHandler.doReply(session,
+							oMsg.template(templ.asString()));
 					return;
 				}
 			}
