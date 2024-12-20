@@ -213,7 +213,8 @@ public class ClientAppConfigConstants {
 		APP_CONFIGS.put(APP_TYPE.AGENT_GPT, new ConfigMeta[] { new ConfigMeta()
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("AgentGPT").desc("This is your ChatGPT Agent"//
 				).group("About App"), //
-				new ConfigMeta().title("Introduction").path("props.context").group("About Me")//
+				new ConfigMeta().title("Introduction").path("props.context").inputType(INPUT_TYPE.TEXTAREA)
+						.group("About Me")//
 		});
 
 		APP_CONFIGS.put(APP_TYPE.APP_SCRIPT,
