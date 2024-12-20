@@ -225,7 +225,7 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 					.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("desc")
 					.group(ConfigConstants.GROUP_AGENT)),
 	POSTMAN_AGENT_CHAT_SCHEDULE(
-			new ConfigMeta("List of shedules", "postman.agent.chat.schedule")
+			new ConfigMeta("List of schedules", "postman.agent.chat.schedule")
 			.optionsSource("getx:/nexus/calendar/api/v1/orgSchedule/list")
 			.optionsKey("code").optionsLabel("desc")
 			.group(ConfigConstants.GROUP_AGENT)),
