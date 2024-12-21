@@ -89,9 +89,9 @@ public class CommonServiceClient {
 	@SuppressWarnings("unchecked")
 	public List<HashMap<String, Object>>  getScheduleStatus(String schedule) {
 		RestTemplate restTemplate = new RestTemplate();
-
+		String tnt=AppContextUtil.getTenant();
 		String url = UriComponentsBuilder
-				.fromHttpUrl(calenderApiUrl).queryParam("scheduleName", schedule)
+				.fromHttpUrl("https://"+tnt+"."+calenderApiUrl).queryParam("scheduleName", schedule)
                 .encode()
                 .toUriString();
 		
