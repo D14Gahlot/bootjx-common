@@ -106,4 +106,17 @@ public class AppProxyController {
 				.forwardRequestNoRetry("/pub/bot/", scriptusUrl, body, additioalHeaders, request, response).getBody());
 	}
 
+	@CrossOrigin(origins = "*")
+	// @ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Only for test")
+	@RequestMapping(value = { "/pub/scriptus/**" })
+	@ResponseBody
+	public MapModel proxch2ForScriptus(@RequestBody(required = false) String body, HttpMethod method,
+			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
+		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
+		return MapModel.fromSafe(
+				service.forwardRequestNoRetry("/pub/scriptus/", scriptusUrl, body, additioalHeaders, request, response)
+						.getBody());
+	}
+
 }
