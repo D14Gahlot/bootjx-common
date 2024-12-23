@@ -91,7 +91,7 @@ public class CommonServiceClient {
 		RestTemplate restTemplate = new RestTemplate();
 		String tnt=AppContextUtil.getTenant();
 		String url = UriComponentsBuilder
-				.fromHttpUrl(calenderApiUrl).queryParam("scheduleName", schedule)
+				.fromHttpUrl(calenderApiUrl).queryParam("code", schedule)
                 .encode()
                 .toUriString();
 		
