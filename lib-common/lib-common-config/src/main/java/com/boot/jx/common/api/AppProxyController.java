@@ -39,6 +39,9 @@ public class AppProxyController {
 	@Value("${mry.nexus.url}")
 	private String nexusUrl;
 
+	@Value("${mry.scriptus.url}")
+	private String scriptusUrl;
+
 	@Autowired(required = false)
 	private AppAuthModels.AppCommonAuthUser appCommonAuthUser;
 
@@ -89,6 +92,18 @@ public class AppProxyController {
 
 		return MapModel.fromSafe(service
 				.forwardRequestNoRetry("/pub/nexus/", nexusUrl, body, additioalHeaders, request, response).getBody());
+	}
+
+	@CrossOrigin(origins = "*")
+	// @ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Only for test")
+	@RequestMapping(value = { "/pub/bot/**" })
+	@ResponseBody
+	public MapModel proxch2ForBot(@RequestBody(required = false) String body, HttpMethod method,
+			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
+		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
+		return MapModel.fromSafe(service
+				.forwardRequestNoRetry("/pub/bot/", scriptusUrl, body, additioalHeaders, request, response).getBody());
 	}
 
 }
