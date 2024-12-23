@@ -725,7 +725,8 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	public HSMTemplate3rdParty templateExt(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
 		MessageMetaWrapper meta = outboxMessage.messageMetaWrapper();// this is my code which we need to decide
-		if (ArgUtil.is(meta.categoryType(), "AUTHENTICATION") && ArgUtil.is(meta.categorySubType(), "OTP")) {
+		if (ArgUtil.is(meta.categoryType(), "AUTHENTICATION_OTP")
+				|| (ArgUtil.is(meta.categoryType(), "AUTHENTICATION") && ArgUtil.is(meta.categorySubType(), "OTP"))) {
 			outboxMessage.messageMetaWrapper().isTemplateExt(true);
 		}
 		return super.templateExt(channelConfig, chatContactDoc, outboxMessage);
