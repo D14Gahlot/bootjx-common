@@ -240,7 +240,7 @@ public class StarterDocKit {
 	}
 
 	public void domain() {
-		String domain_created_version = "v1";
+		String domain_created_version = "v2";
 		PMConfigurationObject version = pmEnvironment.local().keyEntry("domain.created.version");
 		if (!version.is(domain_created_version)) {
 			version.setValue(domain_created_version);

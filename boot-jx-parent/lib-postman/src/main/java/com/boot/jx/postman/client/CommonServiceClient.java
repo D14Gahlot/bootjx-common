@@ -47,10 +47,10 @@ public class CommonServiceClient {
 
 	@Value("${mry.chrono.url}")
 	private String cronoJobUrl;
-	
+
 	@Value("${bootjx.tunnel.calender}")
 	private String calenderApiUrl;
-	
+
 	@Value("${app.proxy.token}")
 	private String appProxyToken;
 
@@ -72,9 +72,8 @@ public class CommonServiceClient {
 				.put("version", version) //
 				.toMap();
 		tunnelService.task("DOMAIN_CREATED", domainCreatedInfo);
-		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(null).asNone();
+		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(domainCreatedInfo).asNone();
 	}
-
 
 	@Async
 	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
@@ -87,14 +86,12 @@ public class CommonServiceClient {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<HashMap<String, Object>>  getScheduleStatus(String schedule) {
+	public List<HashMap<String, Object>> getScheduleStatus(String schedule) {
 		RestTemplate restTemplate = new RestTemplate();
-		String tnt=AppContextUtil.getTenant();
-		String url = UriComponentsBuilder
-				.fromHttpUrl(calenderApiUrl).queryParam("code", schedule)
-                .encode()
-                .toUriString();
-		
+		String tnt = AppContextUtil.getTenant();
+		String url = UriComponentsBuilder.fromHttpUrl(calenderApiUrl).queryParam("code", schedule).encode()
+				.toUriString();
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("app-proxy-token", appProxyToken);
 		headers.set("x-agent-code", "lt");
@@ -107,26 +104,27 @@ public class CommonServiceClient {
 
 			LOGGER.info("Response", response.getBody());
 
-			 ObjectMapper objectMapper = new ObjectMapper();
-		        JsonNode rootNode = objectMapper.readTree(response.getBody());
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode rootNode = objectMapper.readTree(response.getBody());
 
-		        JsonNode resultsNode = rootNode.get("results");
-		        if (resultsNode != null && resultsNode.isArray()) {
-		            return objectMapper.convertValue(resultsNode, new TypeReference<List<HashMap<String, Object>>>() {});
-		        } else {
-		            LOGGER.warn("No result");
-		            return Collections.emptyList();
-		        }
+			JsonNode resultsNode = rootNode.get("results");
+			if (resultsNode != null && resultsNode.isArray()) {
+				return objectMapper.convertValue(resultsNode, new TypeReference<List<HashMap<String, Object>>>() {
+				});
+			} else {
+				LOGGER.warn("No result");
+				return Collections.emptyList();
+			}
 
-		    } catch (HttpClientErrorException e) {
-		        LOGGER.error("HTTP error: {}", e.getResponseBodyAsString());
-		        throw new RuntimeException("Error fetching schedule details: " + e.getResponseBodyAsString(), e);
-		    } catch (Exception e) {
-		        LOGGER.error("Error: ", e);
-		        throw new RuntimeException("error", e);
-		    }
+		} catch (HttpClientErrorException e) {
+			LOGGER.error("HTTP error: {}", e.getResponseBodyAsString());
+			throw new RuntimeException("Error fetching schedule details: " + e.getResponseBodyAsString(), e);
+		} catch (Exception e) {
+			LOGGER.error("Error: ", e);
+			throw new RuntimeException("error", e);
 		}
-	
+	}
+
 	public ChronoScheduler schedule(ChronoScheduler chronoTask) {
 		if (ArgUtil.is(scheduler)) {
 			MapModel resp = null;
