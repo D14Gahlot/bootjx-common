@@ -72,7 +72,19 @@ public class CommonServiceClient {
 				.put("version", version) //
 				.toMap();
 		tunnelService.task("DOMAIN_CREATED", domainCreatedInfo);
-		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(domainCreatedInfo).asNone();
+		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(null).asNone();
+	}
+
+	@Async
+	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+	public void publishTimezoneUpdatedEvent(String version) {
+		Map<String, Object> domainCreatedInfo = MapModel.createInstance() //
+				.put("domain", AppContextUtil.getTenant()) //
+				.put("env", AppContextUtil.getEnv()) //
+				.put("version", version) //
+				.toMap();
+		tunnelService.task("TIMEZONE_CREATED", domainCreatedInfo);
+		restService.ajax(cronoJobUrl).path("/api/v1/on/timezone/updated").post(domainCreatedInfo).asNone();
 	}
 
 	@Async
