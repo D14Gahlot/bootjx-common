@@ -42,6 +42,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -723,15 +724,9 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	@Override
 	public HSMTemplate3rdParty templateExt(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
-		List<HSMTemplate3rdParty> temps = null;
-		Map<String, Object> meta = outboxMessage.getMeta();// this is my code which we need to decide
-		if (meta != null) {
-			if (meta.containsKey("categoryType")) {
-				String categoryType = (String) meta.get("categoryType");
-				if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
-					outboxMessage.messageMetaWrapper().isTemplateExt(true);
-				}
-			}
+		MessageMetaWrapper meta = outboxMessage.messageMetaWrapper();// this is my code which we need to decide
+		if (ArgUtil.is(meta.categoryType(), "AUTHENTICATION") && ArgUtil.is(meta.categorySubType(), "OTP")) {
+			outboxMessage.messageMetaWrapper().isTemplateExt(true);
 		}
 		return super.templateExt(channelConfig, chatContactDoc, outboxMessage);
 	}

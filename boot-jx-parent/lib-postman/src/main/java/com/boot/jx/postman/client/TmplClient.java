@@ -75,6 +75,10 @@ public class TmplClient {
 			outboxMessage.messageMetaWrapper().categoryType(messageMeta.categoryType().asString());
 		}
 
+		if (ArgUtil.is(messageMeta.categorySubType().exists())) {
+			outboxMessage.messageMetaWrapper().categorySubType(messageMeta.categorySubType().asString());
+		}
+
 		if (!ArgUtil.is(outboxMessage.getSubject())) {
 			outboxMessage.setSubject(ArgUtil.parseAsString(file.getOptions().get("subject"), file.getTitle()));
 		}

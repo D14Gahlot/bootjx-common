@@ -27,6 +27,9 @@ public class ITemplates {
 			return null;
 		}
 
+		default public String getCategorySubType() {
+			return null;
+		}
 	}
 
 	public interface BasicExternalTemplate {

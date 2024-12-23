@@ -61,6 +61,15 @@ public class MessageMetaWrapper extends MapModel {
 		return this.keyEntry("categoryType");
 	}
 
+	public MessageMetaWrapper categorySubType(String categorySubType) {
+		this.put("categorySubType", categorySubType);
+		return this;
+	}
+
+	public MapPathEntry categorySubType() {
+		return this.keyEntry("categorySubType");
+	}
+
 	public boolean composeTypeIs(String composeType) {
 		return this.keyEntry("composeType").is(composeType);
 	}
