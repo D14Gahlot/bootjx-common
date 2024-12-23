@@ -44,10 +44,10 @@ public class CommonServiceClient {
 
 	@Value("${mry.chrono.url}")
 	private String cronoJobUrl;
-	
+
 	@Value("${bootjx.tunnel.calender}")
 	private String calenderApiUrl;
-	
+
 	@Value("${app.proxy.token}")
 	private String appProxyToken;
 
@@ -72,6 +72,17 @@ public class CommonServiceClient {
 		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(null).asNone();
 	}
 
+	@Async
+	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+	public void publishTimezoneUpdatedEvent(String version) {
+		Map<String, Object> domainCreatedInfo = MapModel.createInstance() //
+				.put("domain", AppContextUtil.getTenant()) //
+				.put("env", AppContextUtil.getEnv()) //
+				.put("version", version) //
+				.toMap();
+		tunnelService.task("TIMEZONE_CREATED", domainCreatedInfo);
+		restService.ajax(cronoJobUrl).path("/api/v1/on/timezone/updated").post(domainCreatedInfo).asNone();
+	}
 
 	@Async
 	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
@@ -86,10 +97,8 @@ public class CommonServiceClient {
 	public java.util.Map<String, Object> getScheduleStatus(String schedule) {
 		RestTemplate restTemplate = new RestTemplate();
 
-		String url = UriComponentsBuilder
-				.fromHttpUrl(calenderApiUrl).queryParam("scheduleName", schedule)
-                .encode()
-                .toUriString();
+		String url = UriComponentsBuilder.fromHttpUrl(calenderApiUrl).queryParam("scheduleName", schedule).encode()
+				.toUriString();
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("app-proxy-token", appProxyToken);
 		headers.set("x-agent-code", "lt");
@@ -117,7 +126,6 @@ public class CommonServiceClient {
 
 		return responseMap;
 	}
-   
 
 	public ChronoScheduler schedule(ChronoScheduler chronoTask) {
 		if (ArgUtil.is(scheduler)) {
