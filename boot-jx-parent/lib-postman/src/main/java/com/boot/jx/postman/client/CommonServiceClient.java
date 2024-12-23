@@ -70,7 +70,7 @@ public class CommonServiceClient {
 				.put("value", AppContextUtil.getTenant()) //
 				.toMap();
 		tunnelService.task("DOMAIN_CREATED", domainCreatedInfo);
-		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(null).asNone();
+		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(domainCreatedInfo).asNone();
 	}
 
 	@Async
