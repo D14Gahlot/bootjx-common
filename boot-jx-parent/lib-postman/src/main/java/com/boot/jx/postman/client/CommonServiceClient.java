@@ -47,10 +47,10 @@ public class CommonServiceClient {
 
 	@Value("${mry.chrono.url}")
 	private String cronoJobUrl;
-	
+
 	@Value("${bootjx.tunnel.calender}")
 	private String calenderApiUrl;
-	
+
 	@Value("${app.proxy.token}")
 	private String appProxyToken;
 
@@ -72,81 +72,78 @@ public class CommonServiceClient {
 				.put("version", version) //
 				.toMap();
 		tunnelService.task("DOMAIN_CREATED", domainCreatedInfo);
-		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created").post(null).asNone();
+		restService.ajax(cronoJobUrl).path("/api/v1/on/domain/created")
+				.post(null).asNone();
 	}
-
 
 	@Async
 	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
 	public void publishSessionBoundEvent(SessionBoundEvent event) {
-		if (ArgUtil.is(event.getTriggerType(), SessionBoundEvent.TRIGGER_TYPE.STATUS)) {
-			restService.ajax(cronoJobUrl).path("/session-event-timer/api/v1/message/status").post(null).asNone();
-		} else if (ArgUtil.is(event.getTriggerType(), SessionBoundEvent.TRIGGER_TYPE.MESSAGE)) {
-			restService.ajax(cronoJobUrl).path("/session-event-timer/api/v1/message/in-out").post(null).asNone();
+		if (ArgUtil.is(event.getTriggerType(),
+				SessionBoundEvent.TRIGGER_TYPE.STATUS)) {
+			restService.ajax(cronoJobUrl)
+					.path("/session-event-timer/api/v1/message/status")
+					.post(null).asNone();
+		} else if (ArgUtil.is(event.getTriggerType(),
+				SessionBoundEvent.TRIGGER_TYPE.MESSAGE)) {
+			restService.ajax(cronoJobUrl)
+					.path("/session-event-timer/api/v1/message/in-out")
+					.post(null).asNone();
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<HashMap<String, Object>>  getScheduleStatus(String schedule) {
-		RestTemplate restTemplate = new RestTemplate();
-		String tnt=AppContextUtil.getTenant();
-		String url = UriComponentsBuilder
-				.fromHttpUrl(calenderApiUrl).queryParam("code", schedule)
-                .encode()
-                .toUriString();
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("app-proxy-token", appProxyToken);
-		headers.set("x-agent-code", "lt");
-
-		HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
-
-		Map<String, Object> responseMap = new HashMap<>();
+	public List<HashMap<String, Object>> getScheduleStatus(String schedule) {
 		try {
-			ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+			Map<String, Object> response = restService.ajax(calenderApiUrl)
+					.queryParam("code", schedule)
+					.header("app-proxy-token", appProxyToken)
+					.header("x-agent-code", "lt").get().asMap();
 
-			LOGGER.info("Response", response.getBody());
+			@SuppressWarnings("unchecked")
+			List<HashMap<String, Object>> apiResponse = (List<HashMap<String, Object>>) response
+					.get("results");
 
-			 ObjectMapper objectMapper = new ObjectMapper();
-		        JsonNode rootNode = objectMapper.readTree(response.getBody());
+			if (apiResponse != null && !apiResponse.isEmpty()) {
+				LOGGER.info("Response of Api", apiResponse);
+			} else {
+				LOGGER.warn("No resposne found");
+			}
 
-		        JsonNode resultsNode = rootNode.get("results");
-		        if (resultsNode != null && resultsNode.isArray()) {
-		            return objectMapper.convertValue(resultsNode, new TypeReference<List<HashMap<String, Object>>>() {});
-		        } else {
-		            LOGGER.warn("No result");
-		            return Collections.emptyList();
-		        }
-
-		    } catch (HttpClientErrorException e) {
-		        LOGGER.error("HTTP error: {}", e.getResponseBodyAsString());
-		        throw new RuntimeException("Error fetching schedule details: " + e.getResponseBodyAsString(), e);
-		    } catch (Exception e) {
-		        LOGGER.error("Error: ", e);
-		        throw new RuntimeException("error", e);
-		    }
+			return apiResponse != null ? apiResponse : Collections.emptyList();
+		} catch (Exception e) {
+			LOGGER.error("Error: ", e.getMessage(), e);
+			return Collections.emptyList();
 		}
-	
+	}
+
 	public ChronoScheduler schedule(ChronoScheduler chronoTask) {
 		if (ArgUtil.is(scheduler)) {
 			MapModel resp = null;
-			if (ArgUtil.is(chronoTask.getTopic()) && chronoTask.getTopic().equalsIgnoreCase("CANCELLED")) {
+			if (ArgUtil.is(chronoTask.getTopic())
+					&& chronoTask.getTopic().equalsIgnoreCase("CANCELLED")) {
 				String cancelUrl = null;
 				try {
-					cancelUrl = cronoJobUrl + "/scheduler/api/v1/job/tunnel/cancel";
+					cancelUrl = cronoJobUrl
+							+ "/scheduler/api/v1/job/tunnel/cancel";
 					String instanceId = null;
 					Map<String, Object> data = new HashMap<>();
 					if (ArgUtil.is(chronoTask.getData())) {
 						instanceId = (String) chronoTask.getData().get("jobId");
 						data.put("instanceId", instanceId);
 
-						resp = restService.ajax(cancelUrl).postJson(data).asMapModel();
-						LOGGER.info("Res schedule -cancel:" + JsonUtil.toJson(resp) + "\n cancelUrl :" + cancelUrl);
+						resp = restService.ajax(cancelUrl).postJson(data)
+								.asMapModel();
+						LOGGER.info(
+								"Res schedule -cancel:" + JsonUtil.toJson(resp)
+										+ "\n cancelUrl :" + cancelUrl);
 						if (resp != null && resp.get("status") != null) {
-							Map<String, Object> dataMap = (Map<String, Object>) resp.get("status");
+							Map<String, Object> dataMap = (Map<String, Object>) resp
+									.get("status");
 							String key = (String) dataMap.get("key");
 							int code = (int) dataMap.get("code");
-							if (key.equalsIgnoreCase("SUCCESS") || code == 200) {
+							if (key.equalsIgnoreCase("SUCCESS")
+									|| code == 200) {
 								return chronoTask;
 							}
 						}
