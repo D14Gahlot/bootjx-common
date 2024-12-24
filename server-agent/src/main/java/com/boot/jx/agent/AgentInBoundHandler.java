@@ -2,11 +2,11 @@ package com.boot.jx.agent;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.aggregation.VariableOperators.Map;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
@@ -137,7 +137,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 						for (HashMap<String, Object> responseItem : apiResponse) {
 							if (responseItem.containsKey("flags")) {
 								@SuppressWarnings("unchecked")
-								java.util.Map<String, Object> flags = (java.util.Map<String, Object>) responseItem
+								Map<String, Object> flags = (Map<String, Object>) responseItem
 										.get("flags");
 
 								if (Boolean.TRUE.equals(
@@ -147,11 +147,9 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 								}
 							}
 						}
-					} else {
-						LOGGER.warn("API response is empty or null.");
 					}
 				} catch (Exception e) {
-					LOGGER.error("Error received: {}", e.getMessage(), e);
+					LOGGER.error("Error: ", e.getMessage(), e);
 				}
 
 				if (isWorkingDay) {
