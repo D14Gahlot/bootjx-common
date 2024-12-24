@@ -1,0 +1,45 @@
+# EditorConfig file for Java projects
+root = true
+
+[*.java]
+indent_style = tab
+indent_size = 4
+tab_width = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = false
+
+# Max line length for wrapping
+max_line_length = 120
+
+# Spaces around operators
+space_before_assignment_operator = true
+space_after_assignment_operator = true
+
+# Blank lines
+insert_blank_lines_after_imports = true
+insert_blank_lines_before_class_body_declarations = true
+
+# Parentheses and braces
+brace_style = end_of_line
+space_after_opening_paren = false
+space_before_closing_paren = false
+space_before_opening_brace = true
+
+# Imports
+separate_import_groups = true
+
+# Alignment
+align_enum_constants = false
+align_variable_declarations = false
+align_type_members = false
+align_assignment_statements = false
+align_method_parameters = false
+align_annotations = false
+align_array_initializers = false
+
+# Comments
+format_javadoc = true
+format_block_comments = true
+wrap_comments = true

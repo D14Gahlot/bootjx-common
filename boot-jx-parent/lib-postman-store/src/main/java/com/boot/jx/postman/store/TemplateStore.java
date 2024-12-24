@@ -73,8 +73,8 @@ public class TemplateStore implements TemplateResolver {
 							}
 						}
 
-						resolvedTemplate = ArgUtil.anyOf(exactTemp, noLangTemp, engLangTemp, wildCardTemp,
-								noContactTemp);
+						resolvedTemplate = ArgUtil.anyOf(exactTemp, noLangTemp, noContactTemp, engLangTemp,
+								wildCardTemp);
 
 					} else {
 						resolvedTemplate = temps.get(0);

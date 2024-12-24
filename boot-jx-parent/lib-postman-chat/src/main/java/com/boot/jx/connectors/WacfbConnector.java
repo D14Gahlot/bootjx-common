@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.auth.AuthStateManager.AuthState;
@@ -24,12 +23,10 @@ import com.boot.jx.exception.AmxApiException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.model.CommonFileStream;
-import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_COMPOSE_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_FORMAT_TYPE;
-import com.boot.jx.postman.PMConstants.MESSAGE_SEND_TYPE;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.client.PMFileStoreClient;
 import com.boot.jx.postman.doc.ChatContactDoc;
@@ -39,11 +36,13 @@ import com.boot.jx.postman.doc.HSMTemplate3rdParty;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.doc.tpo.WABAFlows;
+import com.boot.jx.postman.doc.tpo.WABAUpdates;
 import com.boot.jx.postman.fb.FacebookConstants;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
+import com.boot.jx.postman.model.MessageMetaWrapper;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -671,7 +670,9 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		List<Map<String, Object>> changes = requestMap.path(FacebookConstants.WABAPaths.CHANGES).asListOfMap();
 
 		changes.forEach(change -> {
-			MapModel changeMap = MapModel.from(change).keyEntry("value").asMapModel();
+			MapModel changeModel = MapModel.from(change);
+			MapPathEntry field = changeModel.keyEntry("field");
+			MapModel changeMap = changeModel.keyEntry("value").asMapModel();
 
 			if (changeMap.containsKey("messages")) {
 				messageBoxEvent.addInboxMessage(toInboxMessage(channelConfig, changeMap));
@@ -698,6 +699,12 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 						}
 					}
 				}
+			} else {
+				WABAUpdates waBAUpdates = new WABAUpdates();
+				waBAUpdates.setChannelId(channelConfig.getChannelId());
+				waBAUpdates.setField(field.asString());
+				waBAUpdates.setValue(changeMap.map());
+				commonMongoTemplate.save(waBAUpdates);
 			}
 		});
 		return messageBoxEvent;
@@ -714,75 +721,15 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 	}
 
-	@Override 
+	@Override
 	public HSMTemplate3rdParty templateExt(ChannelConfig channelConfig, ChatContactDoc chatContactDoc,
 			OutboxMessage outboxMessage) {
-		List<HSMTemplate3rdParty> temps = null;
-		Map<String, Object> meta = outboxMessage.getMeta();// this is my code which we need to decide
-		if (meta != null) {
-			if (meta.containsKey("categoryType")) {
-				String categoryType = (String) meta.get("categoryType");
-				    if ("AUTHENTICATION".equalsIgnoreCase(categoryType)) {
-					outboxMessage.hsm().setLinked(outboxMessage.getHsm().getCode());
-
-				}
-			}
+		MessageMetaWrapper meta = outboxMessage.messageMetaWrapper();// this is my code which we need to decide
+		if (ArgUtil.is(meta.categoryType(), "AUTHENTICATION_OTP")
+				|| (ArgUtil.is(meta.categoryType(), "AUTHENTICATION") && ArgUtil.is(meta.categorySubType(), "OTP"))) {
+			outboxMessage.messageMetaWrapper().isTemplateExt(true);
 		}
-		if (ArgUtil.is(outboxMessage.hsm().getLinked())) {
-			temps = commonMongoTemplate.find(CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class)
-					.where(Criteria.where("hsmTemplateId").is(outboxMessage.templateId()).and("channelId")
-							.is(channelConfig.getChannelId()).and("code").is(outboxMessage.hsm().getLinked())));
-		} else if (MESSAGE_SEND_TYPE.PUSH_MESSAGE.equals(outboxMessage.messageMetaWrapper().sendType())
-				&& channelConfig.isPushAllowed() && channelConfig.isPushOnlyApproved()) {
-			temps = commonMongoTemplate.find(
-					CommonMongoQueryBuilder.collection(HSMTemplate3rdParty.class).where(Criteria.where("hsmTemplateId")
-							.is(outboxMessage.templateId()).and("channelId").is(channelConfig.getChannelId())));
-			LOGGER.debug(JsonUtil.toJson(temps));
-		}
-
-		if (ArgUtil.is(temps)) {
-			HSMTemplate3rdParty resolvedTemplate = null;
-			if (temps.size() > 1) {
-				for (HSMTemplate3rdParty hsmTemplate3rdParty : temps) {
-					if (ArgUtil.areEqual(hsmTemplate3rdParty.getLang(), outboxMessage.hsm().getLang())) {
-						resolvedTemplate = hsmTemplate3rdParty;
-						break;
-					} else if (ArgUtil.is(hsmTemplate3rdParty.getLang())) {
-						resolvedTemplate = hsmTemplate3rdParty;
-					}
-				}
-			} else {
-				resolvedTemplate = temps.get(0);
-			}
-			return resolvedTemplate;
-		}
-		return null;
+		return super.templateExt(channelConfig, chatContactDoc, outboxMessage);
 	}
-	// @Override
-	/*
-	 * public boolean optin(ChannelConfig channelConfig, ChatContactDoc
-	 * chatContactDoc) {
-	 * 
-	 * if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) { String
-	 * defaultRegion =
-	 * environment.keyEntry("postman.phonebook.region").asString("IN"); String phone
-	 * = chatContactDoc.getPhone(); try { phone = phone.replace(" ",
-	 * "").replaceAll("^[\\+0\\s]+(?!$)", "").trim(); PhoneNumber phoneNumber =
-	 * PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion); phone =
-	 * String.format("+%s%s", phoneNumber.getCountryCode(),
-	 * phoneNumber.getNationalNumber()); } catch (NumberParseException e) { phone =
-	 * String.format("+%s", phone); }
-	 * 
-	 * MapModel resp = waClient.fetchContact(phone, channelConfig); String waId
-	 * =resp.getString("wa_id"); String input = null;// resp.getString("input");
-	 * String status = "valid";// resp.getString("status");
-	 * 
-	 * if ("valid".equals(status)) { ChatContactQuery chatContactQuery = new
-	 * ChatContactQuery(chatContactDoc); chatContactQuery.updateLastOptInStamp();
-	 * commonMongoTemplate.updateFirst(chatContactQuery); return true; } }
-	 * 
-	 * //return ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp()); return
-	 * true; }
-	 */
 
 }

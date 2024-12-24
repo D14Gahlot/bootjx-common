@@ -46,23 +46,29 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 
 	public WabaAccountBalanceDoc addEditAccountBalance(WabaAccountBalanceDoc reqDto) {
 		WabaAccountBalanceDoc doc = new WabaAccountBalanceDoc(); 
-		WabaAccountBalanceDoc oldDoc=null;
 		if(ArgUtil.is(reqDto.getId())){
-			doc = commonMongoTemplate.findByIdString(reqDto.getId(), WabaAccountBalanceDoc.class);
-			 oldDoc=doc;
-			 if(ArgUtil.is(doc.getOldVersions())) {
-				 doc.oldVersion(oldDoc);
-			 }else {
-				 List<WabaAccountBalanceDoc> lstList=new ArrayList<>();
-				 lstList.add(oldDoc);
-				// doc.setOldVersions(lstList);
-			 }
-			
+			 if(ArgUtil.is(doc)) {
+				 WabaAccountBalanceDoc oldDoc=getOldDoc(doc, reqDto);
+				 if(ArgUtil.is(doc.getOldVersion())) {
+					 List<WabaAccountBalanceDoc> lstList =doc.getOldVersion();
+							 lstList.add(oldDoc);
+							 doc.setOldVersion(lstList);
+				 }else {
+					 List<WabaAccountBalanceDoc> lstList=new ArrayList<>();
+					 lstList.add(oldDoc);
+					 doc.setOldVersion(lstList);
+				 }
+				
+
+			doc.setTenant(reqDto.getTenant()==null?doc.getTenant():reqDto.getTenant());
 			doc.setDepositAmt(doc.getDepositAmt()+reqDto.getDepositAmt());
 			doc.setCurrencyCode(reqDto.getCurrencyCode());
 			doc.setTimeStamp(System.currentTimeMillis());
+			doc.setWabaId(reqDto.getWabaId());
 			doc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			commonMongoTemplate.save(doc);
+			 }
+
 		}else {
 			doc.setDepositAmt(reqDto.getDepositAmt());
 			doc.setCurrencyCode(reqDto.getCurrencyCode());
@@ -228,6 +234,23 @@ public class WabaAccountManeger extends CommonMongoTemplateAbstract<WabaAccountM
 		query.fields().include("domain").include("wacfb.number").include("wacfb.wabaId").include("contactType").include("isDisabled");
 		List<ChannelConfigDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDoc.class, "CONFIG_CHANNEL");
 		return cofigDocLst;
+	}
+	
+	
+	private WabaAccountBalanceDoc getOldDoc(WabaAccountBalanceDoc doc,WabaAccountBalanceDoc reqDto) {
+		double d =0d;
+		WabaAccountBalanceDoc oldDoc=new WabaAccountBalanceDoc();
+		 oldDoc.setId(doc.getId());
+		 oldDoc.setBalanceAmt(ArgUtil.parseAsDouble(doc.getBalanceAmt(),reqDto.getBalanceAmt()));
+		 oldDoc.setCurrencyCode(doc.getCurrencyCode());
+		 oldDoc.setDepositAmt(ArgUtil.parseAsDouble(doc.getDepositAmt(),reqDto.getDepositAmt()));
+		 oldDoc.setCreated(doc.getCreated());
+		 oldDoc.setUpdated(doc.getUpdated());
+		 oldDoc.setTotalMsgCost(ArgUtil.parseAsDouble(doc.getTotalMsgCost(),reqDto.getTotalMsgCost()));
+		 oldDoc.setTenant(doc.getTenant());
+		 oldDoc.setWabaId(doc.getWabaId());
+		 
+		 return oldDoc;
 	}
 
 }

@@ -33,6 +33,7 @@ import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.AChannelDetails;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
+import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
@@ -77,6 +78,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
 	@Autowired
 	private PMCommonConfigImpl pmCommonConfig;
+
+	@Autowired
+	private CommonServiceClient commonServiceClient;
 
 	public <T> T findById(Object id, Class<T> entityClass) {
 		return configStore.findById(id, entityClass);
@@ -198,7 +202,9 @@ public class ConfigManagerImpl implements ConfigManager {
 			prefsConfigDoc = EntityDtoUtil.dtoToEntity(configObject, prefsConfigDoc);
 			configStore.savePrefsConfig(prefsConfigDoc);
 
-			break;
+			if (ArgUtil.is(config.getKey(), CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET.getKey())) {
+				commonServiceClient.publishTimezoneUpdatedEvent(prefsConfigDoc.asString());
+			}
 		}
 		configStore.saveConfiguration(doc);
 		this.refresh();
