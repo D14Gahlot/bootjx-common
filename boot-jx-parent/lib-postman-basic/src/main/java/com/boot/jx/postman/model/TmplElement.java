@@ -14,6 +14,7 @@ public class TmplElement implements Serializable {
 		public static final String QUICK_REPLY = "QUICK_REPLY";
 		public static final String URL = "URL";
 		public static final String PHONE_NUMBER = "PHONE_NUMBER";
+		public static final String COPY = "COPY";
 
 		public static final String LOCATION_REQUEST = "LOCATION_REQUEST";
 		public static final String FLOW = "FLOW";

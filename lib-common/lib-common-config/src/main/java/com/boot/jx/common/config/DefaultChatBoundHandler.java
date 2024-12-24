@@ -448,7 +448,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		ClientApp defaultClient = context().clientApp(sessionDoc.getAssignedToQueue(), null);
 		if (ArgUtil.is(defaultClient)) {
 			APP_TYPE appType = APP_TYPE.from(defaultClient.getAppType());
-			if (APP_TYPE.WEBHOOK.equals(appType)) {
+			if (APP_TYPE.WEBHOOK.equals(appType) || defaultClient.isWebhookApp()) {
 				sendEventWebhook(event, defaultClient);
 				return;
 			} else if (APP_TYPE.MITEL.equals(appType)) {
@@ -463,6 +463,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				}
 			}
 		}
+
+		PMConfigurationObject closingkWebhookQueue = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_CLOSE_WEBOOK);
+		if (closingkWebhookQueue.exists()) {
+			ClientApp closingkWebhookApp = context().clientApp(closingkWebhookQueue.asString(), null);
+			sendEventWebhook(event, closingkWebhookApp);
+		}
+
 		stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(sessionDoc.getAssignedToDept()),
 				chatArchiveBuilder.sessionDTO().from(sessionDoc).withContact()
 						.isAssigned(sessionDoc.getAssignedToAgent()).get());

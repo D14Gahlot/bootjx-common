@@ -45,6 +45,7 @@ public class HSMTemplateDoc implements Serializable, BasicTemplate, AuditCreateE
 
 	private String category;
 	private String categoryType;
+	private String categorySubType;
 
 	private String desc;
 
@@ -297,6 +298,14 @@ public class HSMTemplateDoc implements Serializable, BasicTemplate, AuditCreateE
 	@Override
 	public String getTitle() {
 		return this.desc;
+	}
+
+	public String getCategorySubType() {
+		return categorySubType;
+	}
+
+	public void setCategorySubType(String categorySubType) {
+		this.categorySubType = categorySubType;
 	}
 
 }

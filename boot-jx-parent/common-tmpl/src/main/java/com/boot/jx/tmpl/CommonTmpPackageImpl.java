@@ -90,6 +90,10 @@ public class CommonTmpPackageImpl implements ICommonTmplPackage {
 					if (ArgUtil.is(categoryType)) {
 						MessageMetaWrapper.from(file.meta()).categoryType(categoryType);
 					}
+					String categorySubType = basicTemplate.getCategorySubType();
+					if (ArgUtil.is(categorySubType)) {
+						MessageMetaWrapper.from(file.meta()).categorySubType(categorySubType);
+					}
 				}
 				return file;
 			}
