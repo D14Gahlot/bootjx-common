@@ -1,8 +1,6 @@
 package com.boot.jx.postman.client;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.postman.model.ext.SessionBoundEvent;
 import com.boot.jx.rest.RestService;
@@ -87,28 +86,11 @@ public class CommonServiceClient {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public List<HashMap<String, Object>> getScheduleStatus(String schedule) {
-
-		try {
-			Map<String, Object> response = restService.ajax(calenderApiUrl).queryParam("code", schedule)
-					.header("app-proxy-token", appProxyToken).header("x-agent-code", "lt").get().asMap();
-
-			@SuppressWarnings("unchecked")
-			List<HashMap<String, Object>> apiResponse = (List<HashMap<String, Object>>) response.get("results");
-
-			if (apiResponse != null && !apiResponse.isEmpty()) {
-				LOGGER.info("Response of Api", apiResponse);
-			} else {
-				LOGGER.warn("No resposne found");
-			}
-
-			return apiResponse != null ? apiResponse : Collections.emptyList();
-		} catch (Exception e) {
-			LOGGER.error("Error: ", e.getMessage(), e);
-			return Collections.emptyList();
-
-		}
+	public MapModel getScheduleStatus(String schedule) {
+		ApiResponse<Map<String, Object>, Object> response = restService.ajax(calenderApiUrl)
+				.queryParam("code", schedule).header("app-proxy-token", appProxyToken).header("x-agent-code", "lt")
+				.get().asApiResponseOfMap();
+		return MapModel.from(response.getResult());
 	}
 
 	public ChronoScheduler schedule(ChronoScheduler chronoTask) {

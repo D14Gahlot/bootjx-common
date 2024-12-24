@@ -1,9 +1,5 @@
 package com.boot.jx.agent;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,27 +109,14 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 			} else if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
 					&& !ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
 
-				PMConfigurationObject schedule1 = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_SCHEDULE);
-				String schedule = schedule1.asString();
-				List<HashMap<String, Object>> apiResponse = commonServiceClient.getScheduleStatus(schedule);
 				boolean isWorkingDay = false;
 
-				try {
-					if (apiResponse != null && !apiResponse.isEmpty()) {
-						for (HashMap<String, Object> responseItem : apiResponse) {
-							if (responseItem.containsKey("flags")) {
-								@SuppressWarnings("unchecked")
-								Map<String, Object> flags = (Map<String, Object>) responseItem.get("flags");
+				PMConfigurationObject agentSchedule = pmEnvironment
+						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_SCHEDULE);
 
-								if (Boolean.TRUE.equals(flags.get("isWorkingDayToday"))) {
-									isWorkingDay = true;
-									break;
-								}
-							}
-						}
-					}
-				} catch (Exception e) {
-					LOGGER.error("Error: ", e.getMessage(), e);
+				MapModel sceduleMap = commonServiceClient.getScheduleStatus(agentSchedule.asString());
+				if (sceduleMap.isEmpty() || sceduleMap.pathEntry("flags.isWorkingDayToday").asBoolean()) {
+					isWorkingDay = true;
 				}
 
 				if (isWorkingDay) {
@@ -159,7 +142,9 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 					return;
 				}
 			}
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			LOGGER.error("Error ONE while Connecting to Agent", e);
 			logManager.error(assignEvent, e);
 			try {
