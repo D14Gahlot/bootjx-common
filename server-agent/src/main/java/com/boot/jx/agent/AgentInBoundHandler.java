@@ -116,7 +116,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
 
 				MapModel sceduleMap = commonServiceClient.getScheduleStatus(agentSchedule.asString());
-				if (sceduleMap.isEmpty() || sceduleMap.pathEntry("flags.isWorkingDayToday").asBoolean()) {
+				if (sceduleMap.isEmpty() || sceduleMap.pathEntry("flags.isActive").asBoolean()) {
 					isWorkingDay = true;
 
 				}
