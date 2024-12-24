@@ -141,7 +141,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 										.get("flags");
 
 								if (Boolean.TRUE.equals(
-										flags.get("isWorkingDayToday"))) {
+										flags.get("isActive"))) {
 									isWorkingDay = true;
 									break;
 								}
