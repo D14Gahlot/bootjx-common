@@ -19,8 +19,8 @@ import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.PMConstants.MESSAGE_SENDER_TYPE;
-import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.client.CommonServiceClient;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.model.InboxMessage;
@@ -32,16 +32,11 @@ import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(AgentInBoundHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AgentInBoundHandler.class);
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
@@ -69,11 +64,9 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 	 */
 	@Override
 	public void onMessage(InboxMessage inboxMessage, ChatSessionDoc session) {
-		ClientApp defaultClient = context().clientApp(
-				inboxMessage.session().getQueue(), inboxMessage.contact());
+		ClientApp defaultClient = context().clientApp(inboxMessage.session().getQueue(), inboxMessage.contact());
 
-		if (ArgUtil.isEmpty(inboxMessage.session().getMode())
-				&& ArgUtil.isEmpty(inboxMessage.session().getQueue())) {
+		if (ArgUtil.isEmpty(inboxMessage.session().getMode()) && ArgUtil.isEmpty(inboxMessage.session().getQueue())) {
 			if (!ArgUtil.is(session)) {
 				session = sessionStore.getSession(inboxMessage.getSessionId());
 			}
@@ -83,8 +76,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		agentChatHandler.onMessageReceive(inboxMessage);
 	}
 
-	private MapEntry getTemplate(MapModel props, String propKey,
-			CONFIG_SETUP_KEY KEY) {
+	private MapEntry getTemplate(MapModel props, String propKey, CONFIG_SETUP_KEY KEY) {
 		MapEntry talk2agent = props.keyEntry(propKey);
 		if (talk2agent.exists()) {
 			return talk2agent;
@@ -98,11 +90,8 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 			ClientApp app = this.context().clientApp();
 
 			if (ArgUtil.not(app)) {
-				logManager.addTrace(assignEvent, "NoQueueFound",
-						session.contact());
-				app = this.context().clientApp(
-						PMConstants.DEFAULT.AGENT_QUEUE_CODE,
-						session.contact());
+				logManager.addTrace(assignEvent, "NoQueueFound", session.contact());
+				app = this.context().clientApp(PMConstants.DEFAULT.AGENT_QUEUE_CODE, session.contact());
 			}
 
 			MapModel props = MapModel.from(app.props());
@@ -118,18 +107,15 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 				MapEntry templ = getTemplate(props, "agent_connected",
 						CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_TALK2AGENT);
 				if (templ.exists()) {
-					agentChatHandler.doReply(session,
-							oMsg.template(templ.asString()));
+					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
 					return;
 				}
 			} else if (!ArgUtil.is(assignEvent.sessionAssigned().oldAgent)
 					&& !ArgUtil.is(assignEvent.sessionAssigned().newAgent)) {
 
-				PMConfigurationObject schedule1 = pmEnvironment
-						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_SCHEDULE);
+				PMConfigurationObject schedule1 = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_SCHEDULE);
 				String schedule = schedule1.asString();
-				List<HashMap<String, Object>> apiResponse = commonServiceClient
-						.getScheduleStatus(schedule);
+				List<HashMap<String, Object>> apiResponse = commonServiceClient.getScheduleStatus(schedule);
 				boolean isWorkingDay = false;
 
 				try {
@@ -137,11 +123,9 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 						for (HashMap<String, Object> responseItem : apiResponse) {
 							if (responseItem.containsKey("flags")) {
 								@SuppressWarnings("unchecked")
-								Map<String, Object> flags = (Map<String, Object>) responseItem
-										.get("flags");
+								Map<String, Object> flags = (Map<String, Object>) responseItem.get("flags");
 
-								if (Boolean.TRUE.equals(
-										flags.get("isWorkingDayToday"))) {
+								if (Boolean.TRUE.equals(flags.get("isWorkingDayToday"))) {
 									isWorkingDay = true;
 									break;
 								}
@@ -156,32 +140,22 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 					MapEntry templ = getTemplate(props, "agent_notfound",
 							CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_NOAGENT);
 					if (templ.exists()) {
-						agentChatHandler.doReply(session,
-								oMsg.template(templ.asString()));
+						agentChatHandler.doReply(session, oMsg.template(templ.asString()));
 						return;
 
 					}
-				}
-
-				else {
+				} else {
 					MapEntry templ = getTemplate(props, "agent_orgoffline",
 							CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_AUTOREPLY_ORGOFFLINE);
 					if (templ.exists()) {
-						agentChatHandler.doReply(session,
-								oMsg.template(templ.asString()));
+						agentChatHandler.doReply(session, oMsg.template(templ.asString()));
 						return;
 					}
-
 				}
-
-			}
-
-			else {
-
+			} else {
 				MapEntry templ = props.keyEntry("agent_transfer");
 				if (templ.exists()) {
-					agentChatHandler.doReply(session,
-							oMsg.template(templ.asString()));
+					agentChatHandler.doReply(session, oMsg.template(templ.asString()));
 					return;
 				}
 			}
@@ -202,22 +176,17 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 	 * METHODS/ACTION
 	 */
 	@Override
-	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params,
-			ChatSessionDoc session) {
+	public NodeEntry<InBoundEvent> assignSessionToAgent(PMArgs params, ChatSessionDoc session) {
 		NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
 		InBoundEvent agentAssignEvent = new InBoundEvent();
 		agentAssignEvent.type = InBoundEvent.EVENT_TYPE.SESSION_ASSIGNED;
 		agentAssignEvent.sessionId = session.getSessionId();
-		agentAssignEvent.sessionAssigned().oldAgent = session
-				.getAssignedToAgent();
-		agentAssignEvent.sessionAssigned().oldDept = session
-				.getAssignedToDept();
+		agentAssignEvent.sessionAssigned().oldAgent = session.getAssignedToAgent();
+		agentAssignEvent.sessionAssigned().oldDept = session.getAssignedToDept();
 		params = agentChatHandler.doAssign(session, params);
 		if (ArgUtil.is(params)) {
-			agentAssignEvent.sessionAssigned().newDept = params
-					.getAssignToDeptCode();
-			agentAssignEvent.sessionAssigned().newAgent = params
-					.getAssignToAgentCode();
+			agentAssignEvent.sessionAssigned().newDept = params.getAssignToDeptCode();
+			agentAssignEvent.sessionAssigned().newAgent = params.getAssignToAgentCode();
 		}
 		onAssign(session, agentAssignEvent);
 		return eventEntry.value(agentAssignEvent);
@@ -229,22 +198,15 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 	}
 
 	@Override
-	public void onSessionRoute(InBoundEvent inBoundEvent,
-			ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-		ClientApp targetAppQueue = context()
-				.clientApp(inBoundEvent.sessionRouted.targetQueue, null);
+	public void onSessionRoute(InBoundEvent inBoundEvent, ChatSessionDoc sessionDoc, PMArgs pmArgs) {
+		ClientApp targetAppQueue = context().clientApp(inBoundEvent.sessionRouted.targetQueue, null);
 		MapModel props = new MapModel(targetAppQueue.props());
 		AppContextUtil.setActorId(targetAppQueue.getQueue());
 		assignSessionToAgent(new PMArgs().contact(pmArgs.contact())
-				.assignToDeptCode(ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(),
-						props.getString("deptCode")))
-				.assignToAgentCode(
-						ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(),
-								props.getString("agentCode")))
-				.assignToSkillCodes(pmArgs.getAssignToSkillCodes()),
-				sessionDoc);
-		sessionEventTimer.setMitelRoutingCheck(sessionDoc.getSessionId(),
-				targetAppQueue);
+				.assignToDeptCode(ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
+				.assignToAgentCode(ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode")))
+				.assignToSkillCodes(pmArgs.getAssignToSkillCodes()), sessionDoc);
+		sessionEventTimer.setMitelRoutingCheck(sessionDoc.getSessionId(), targetAppQueue);
 	}
 
 }
