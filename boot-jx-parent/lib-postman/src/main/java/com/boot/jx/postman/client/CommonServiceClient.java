@@ -87,10 +87,15 @@ public class CommonServiceClient {
 	}
 
 	public MapModel getScheduleStatus(String schedule) {
-		ApiResponse<Map<String, Object>, Object> response = restService.ajax(calenderApiUrl)
-				.queryParam("code", schedule).header("app-proxy-token", appProxyToken).header("x-agent-code", "lt")
-				.get().asApiResponseOfMap();
-		return MapModel.from(response.getResult());
+		try {
+			ApiResponse<Map<String, Object>, Object> response = restService.ajax(calenderApiUrl)
+					.queryParam("code", schedule).header("app-proxy-token", appProxyToken).header("x-agent-code", "lt")
+					.get().asApiResponseOfMap();
+			return MapModel.from(response.getResult());
+		} catch (Exception e) {
+			LOGGER.error("Error ONE while fetching Schedule for to Agent", e);
+		}
+		return MapModel.createInstance();
 	}
 
 	public ChronoScheduler schedule(ChronoScheduler chronoTask) {
