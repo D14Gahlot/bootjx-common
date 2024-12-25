@@ -93,6 +93,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	@Indexed
 	private long startSessionStamp;
+	@Indexed
 	private long fistResponseStamp;
 
 	@Indexed
@@ -106,12 +107,17 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	@Indexed
 	private long lastOutGoingStamp;
 
+	@Indexed
 	private long assignedDeptStamp;
 	@Indexed
 	private long assignedAgentStamp;
 
+	@Indexed
 	private long lastResponseStamp;
+
 	private long resolveSessionStamp;
+
+	@Indexed
 	private long closeSessionStamp;
 
 	/**
