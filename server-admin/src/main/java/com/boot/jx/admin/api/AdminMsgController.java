@@ -45,6 +45,8 @@ import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
+import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.mongo.CommonMongoTemplate.PaginatedQuery;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -97,16 +99,16 @@ public class AdminMsgController {
 	private ChatSessionService chatSessionService;
 
 	@Autowired
-	public StarterDocKit starterDocKit;
+	private CSVService fileService;
 
 	@Autowired
-	public CSVService fileService;
+	private ChatSessionManager chatSessionManager;
 
 	@Autowired
-	public ChatSessionManager chatSessionManager;
+	private CustomerProfileService cusProfileService;
 
 	@Autowired
-	CustomerProfileService cusProfileService;
+	private CommonMongoTemplate comonMongoTemplate;
 
 	@RequestMapping(value = "/api/message/session", method = { RequestMethod.GET })
 	public ApiResponse<ChatSessionDoc, Object> fetchSession(@RequestParam String startStamp,
@@ -395,11 +397,11 @@ public class AdminMsgController {
 			bulkDoc = CollectionUtil.getOne(mongoTemplate
 					.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
 			if (ArgUtil.is(bulkDoc) && ArgUtil.is(bulkDoc.getScheduler()) && bulkMessage.cancelExisting == true) {
-				
+
 				bulkMessageService.cancelScheduleJob(bulkDoc);
 				bulkMessage.setScheduler(bulkMessage.getScheduler());
 				bulkMessageService.reSend(bulkMessage, bulkDoc);
-				//bulkMessageService.reSchedule(bulkDoc, bulkMessage.getScheduler());
+				// bulkMessageService.reSchedule(bulkDoc, bulkMessage.getScheduler());
 				return ApiResponse.buildResult(bulkDoc).message("The bulk message job has been rescheduled");
 			} else {
 				if (ArgUtil.is(bulkMessage.getScheduler())) {
@@ -409,8 +411,7 @@ public class AdminMsgController {
 					bulkMessage.contact().setContactId(bulkDoc.getChannelId());
 					bulkMessage.contact().setContactType(bulkDoc.getContactType());
 					bulkMessage.setCampaignTitle(bulkDoc.getCampaignTitle());
-					
-					
+
 					if (ArgUtil.is(bulkDoc.getGroupId()) || ArgUtil.is(bulkDoc.getGroups())) {
 						bulkMessage.setGroupId(bulkDoc.getGroupId());
 						if (ArgUtil.isEmpty(bulkDoc.getGroups())) {
@@ -418,11 +419,11 @@ public class AdminMsgController {
 						}
 						List<OutboxMessage> lstOutBoxMsg = getGroupDetailsV1(bulkMessage);
 						bulkMessageService.sendToGroup(lstOutBoxMsg, bulkMessage.getScheduler());
-					}else if(ArgUtil.is(bulkDoc.getFilters())) {
+					} else if (ArgUtil.is(bulkDoc.getFilters())) {
 						bulkMessage.setFilters(bulkDoc.getFilters());
 						List<OutboxMessage> lstOutBoxMsg = getFilterDetails(bulkMessage);
 						bulkMessageService.sendToFilterGroup(lstOutBoxMsg, bulkMessage.getScheduler());
-					}else {
+					} else {
 						Query queryAll = new Query();
 						queryAll.addCriteria(Criteria.where("type").in("O"));
 						queryAll.addCriteria(Criteria.where("bulkSessionId").is(bulkDoc.getBulkSessionId()));
@@ -534,6 +535,22 @@ public class AdminMsgController {
 
 		if (ArgUtil.is(session)) {
 			List<MessageDoc> msgs = messageStore.findByBulkSessionId(session.getBulkSessionId(), session.contactType());
+			resp.results(ChatDTOUtil.getChatMessageDTO(msgs, null, session.getCreatedBy()));
+		}
+		return resp;
+	}
+
+	@RequestMapping(value = "/api/message/bulk/push/messages", method = { RequestMethod.GET })
+	public ApiResponse<ChatMessageDTO, BulkSessionDoc> getBulkMessagesGet(@RequestParam String bulkSessionId)
+			throws NumberParseException {
+		ApiResponse<ChatMessageDTO, BulkSessionDoc> resp = ApiResponse.instance(ChatMessageDTO.class,
+				BulkSessionDoc.class);
+		BulkSessionDoc session = CollectionUtil.getOne(mongoTemplate
+				.find(new Query().addCriteria(QueryCriteria.whereId(bulkSessionId)), BulkSessionDoc.class));
+		resp.setMeta(session);
+		if (ArgUtil.is(session)) {
+			List<MessageDoc> msgs = messageStore.findByBulkSessionIdPaged(session.getBulkSessionId(),
+					session.contactType());
 			resp.results(ChatDTOUtil.getChatMessageDTO(msgs, null, session.getCreatedBy()));
 		}
 		return resp;
@@ -833,7 +850,7 @@ public class AdminMsgController {
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
 			String hsmTemplateCode = null;
-			
+
 			StringBuilder concatFilterpNames = new StringBuilder();
 			Set<String> uniquePhoneNumbers = new HashSet<>();
 			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
@@ -848,13 +865,13 @@ public class AdminMsgController {
 					OutboxMessage outboxMsg = new OutboxMessage();
 					List<List<Object>> filterCri = profileFilter.get_filterCriteria();
 
-					List<List<ProfileSearchCriteria>> searCri =bulkMessageService.getSearchCriteria(filterCri);
+					List<List<ProfileSearchCriteria>> searCri = bulkMessageService.getSearchCriteria(filterCri);
 					ProfileSearchQuery profSerarch = new ProfileSearchQuery();
 					profSerarch.setSearchCriterias(searCri);
-					
+
 					List<CustomerProfileDoc> docs = null;
-					if(ArgUtil.is(searCri)){
-						docs =cusProfileService.getProfileSearch(profSerarch);
+					if (ArgUtil.is(searCri)) {
+						docs = cusProfileService.getProfileSearch(profSerarch);
 					}
 					if (ArgUtil.is(docs)) {
 
@@ -890,7 +907,5 @@ public class AdminMsgController {
 		}
 		return listOfOutboxMsg;
 	}
-
-	
 
 }
