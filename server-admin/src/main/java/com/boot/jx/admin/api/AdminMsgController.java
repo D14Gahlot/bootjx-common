@@ -46,6 +46,7 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
+import com.boot.jx.postman.PMEnvironment.SummaryView;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
@@ -72,6 +73,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
 import com.boot.utils.JsonUtil;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.i18n.phonenumbers.NumberParseException;
 
 @RestController
@@ -147,6 +149,7 @@ public class AdminMsgController {
 		return ApiResponse.buildResults(messages);
 	}
 
+	@JsonView(SummaryView.class)
 	@RequestMapping(value = "/api/message/v2/session", method = { RequestMethod.POST })
 	public ApiResponse<ChatSessionDoc, Object> fetchSessionV2(@RequestBody SessionSearchQuery query) {
 

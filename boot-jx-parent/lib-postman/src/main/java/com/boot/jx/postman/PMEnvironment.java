@@ -34,6 +34,15 @@ public class PMEnvironment {
 
 	private static final Logger LOGGER = LoggerService.getLogger(PMEnvironment.class);
 
+	public static interface TinyView {
+	}
+
+	public static interface SummaryView extends TinyView {
+	}
+
+	public static interface FullView extends SummaryView {
+	}
+
 	public static interface PublicProperty {
 	}
 
