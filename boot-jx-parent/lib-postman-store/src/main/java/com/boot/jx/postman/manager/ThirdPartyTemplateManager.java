@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -71,8 +70,7 @@ public class ThirdPartyTemplateManager {
 	}
 
 	private HSMTemplate3rdParty toHSM3rdParty(ChannelConfig channelConfig, WA360Template wa360Template) {
-		String id = String.format("%s/%s/%s", channelConfig.getChannelId(), wa360Template.getName(),
-				wa360Template.getLanguage());
+		String id = createTemplateId(channelConfig, wa360Template);
 		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(id, HSMTemplate3rdParty.class);// coming
 																												// null
 		if (!ArgUtil.is(thirdPartyTemplate)) {
@@ -90,6 +88,16 @@ public class ThirdPartyTemplateManager {
 
 		thirdPartyTemplate.setTemplate(JsonUtil.toMap(wa360Template));
 		return thirdPartyTemplate;
+	}
+
+	private String createTemplateId(ChannelConfig channelConfig, WA360Template wa360Template) {
+		String id = String.format("%s/%s/%s", channelConfig.getChannelId(), wa360Template.getName(),
+				wa360Template.getLanguage());
+		return id;
+	}
+
+	private String createTemplateId(HSMTemplate3rdParty newTemp) {
+		return String.format("%s/%s/%s", newTemp.getChannelId(), newTemp.getCode(), newTemp.getLang());
 	}
 
 	public HSMTemplate3rdParty createhWA360Templates(ChannelConfig channelConfig,
@@ -129,6 +137,7 @@ public class ThirdPartyTemplateManager {
 		newTemp.setChannelId(toChannelId);
 		newTemp.setChannelType(channelInfo.getChannelType());
 		newTemp.setContactType(channelInfo.getContactType());
+		newTemp.setId(createTemplateId(newTemp));
 		return newTemp;
 	}
 
@@ -159,8 +168,9 @@ public class ThirdPartyTemplateManager {
 	public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig) {
 		return this.getTemplates(channelConfig, null);
 	}
+
 	public List<WABAFlows> getFlows(ChannelConfig channelConfig, String code) {
-		
+
 		MongoQueryBuilder<WABAFlows> q = MongoQueryBuilder.collection(WABAFlows.class)
 				.where(Criteria.where("wabaId").is(channelConfig.getWacfb().getWabaId()));
 
@@ -170,11 +180,11 @@ public class ThirdPartyTemplateManager {
 
 		return commonMongoTemplate.find(q);
 	}
-	
 
 	public List<WABAFlows> getFlows(ChannelConfig channelConfig) {
 		return this.getFlows(channelConfig, null);
 	}
+
 	public HSMTemplate3rdParty link(String thirdPartyTemplateId, String hsmTemplateId) {
 		HSMTemplate3rdParty thirdPartyTemplate = commonMongoTemplate.findById(thirdPartyTemplateId,
 				HSMTemplate3rdParty.class);
@@ -220,7 +230,7 @@ public class ThirdPartyTemplateManager {
 
 		for (Map<String, Object> flowData : flows) {
 			String flowId = (String) flowData.get("id");
-			
+
 			String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 			WABAFlows flowDoc = commonMongoTemplate.findById(id, WABAFlows.class);
 			if (!ArgUtil.is(flowDoc)) {
