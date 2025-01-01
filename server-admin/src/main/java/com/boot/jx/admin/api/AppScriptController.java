@@ -117,6 +117,10 @@ public class AppScriptController {
 			contactId = commonHttpRequest.getRequestParam("contactId");
 		}
 
+		if (!ArgUtil.is(contactId)) {
+			return new ApiResponse<Map<String, Object>, Object>();
+		}
+
 		return restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getLogs").queryParam("app_id", appId)
 				.queryParam("contact_id", contactId).queryParam("domain", AppContextUtil.getTenant()).get()
 				.asAmxApiResponseOfMap();
