@@ -8,11 +8,13 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
+import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
 import com.boot.jx.postman.model.ITemplates.BasicExternalTemplate;
 
 @Document(collection = HSMTemplate3rdParty.COLLECTION_NAME)
 @TypeAlias("HSMTemplate3rdParty")
-public class HSMTemplate3rdParty implements Serializable, AuditCreateEntity, BasicExternalTemplate {
+public class HSMTemplate3rdParty implements Serializable, AuditCreateEntity, BasicExternalTemplate, UpdatedTimeStampIndexSupport {
 
 	public static final String COLLECTION_NAME = "DICT_HSM_TEMPLATES_3RD";
 	public static final String COLLECTION_NAME_TRASH = "TRASH_DICT_HSM_TEMPLATES_3RD";
@@ -38,6 +40,7 @@ public class HSMTemplate3rdParty implements Serializable, AuditCreateEntity, Bas
 
 	private String createdBy;
 	private Long createdStamp;
+	private TimeStampIndex updated;
 
 	public String getId() {
 		return id;
@@ -134,5 +137,14 @@ public class HSMTemplate3rdParty implements Serializable, AuditCreateEntity, Bas
 	public void setCategory(String category) {
 		this.category = category;
 	}
+
+	public TimeStampIndex getUpdated() {
+		return updated;
+	}
+
+	public void setUpdated(TimeStampIndex updated) {
+		this.updated = updated;
+	}
+
 
 }

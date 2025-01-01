@@ -305,7 +305,7 @@ public class PartnerController {
 		BusinessUserDoc domainUser = currentUser;
 		Collection<DomainDoc> domainDocs = domainUser.getDomains();
 
-		if (userSessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.CAN_ACCESS_ALL_DOMAINS)) {
 			if (ArgUtil.is(user)) {
 				domainUser = accountStore.findUserByEmail(user);
 				domainDocs = domainUser.getDomains();
@@ -411,7 +411,7 @@ public class PartnerController {
 		BusinessUserDoc domainUser = userSessionBean.domainUser();
 
 		Optional<DomainDoc> domaiNational = Optional.empty();
-		if (userSessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.CAN_ACCESS_ALL_DOMAINS)) {
 			DomainDoc domainDoc = accountStore.findDomainByName(domain);
 			if (ArgUtil.is(domainDoc)) {
 				domaiNational = Optional.of(domainDoc);
@@ -482,7 +482,7 @@ public class PartnerController {
 		BusinessUserDoc domainUser = userSessionBean.domainUser();
 
 		Optional<DomainDoc> domaiNational = Optional.empty();
-		if (userSessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.CAN_ACCESS_ALL_DOMAINS)) {
 			DomainDoc domainDoc = accountStore.findDomainByName(domain);
 			if (ArgUtil.is(domainDoc)) {
 				domaiNational = Optional.of(domainDoc);

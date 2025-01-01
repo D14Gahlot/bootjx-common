@@ -293,7 +293,7 @@ public class WabaPartnerController {
 		Collection<String> allowedChannels = domainUser.wabaChannels();
 		List<WabaChannelDoc> channelDocs = new ArrayList<WabaChannelDoc>();
 
-		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.DUPER_USER, PMConstants.USER_ROLE.SUPER_DEV)) {
+		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.CAN_ACCESS_ALL_DOMAINS)) {
 			if (refresh) {
 				String wabaserver = wabaServer();
 				WabaPartnerDoc partner = masterDomainStore.getPartnerWabaDoc();
@@ -342,7 +342,7 @@ public class WabaPartnerController {
 		BusinessUserDoc domainUser = currentUser;
 		Collection<String> allowedChannels = domainUser.wabaChannels();
 
-		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.DUPER_USER, PMConstants.USER_ROLE.SUPER_DEV)
+		if (userSessionBean.hasRoleAny(PMConstants.USER_ROLE.CAN_ACCESS_ALL_DOMAINS)
 				|| allowedChannels.contains(channelId)) {
 			String wabaserver = wabaServer();
 			WabaPartnerDoc partner = masterDomainStore.getPartnerWabaDoc();

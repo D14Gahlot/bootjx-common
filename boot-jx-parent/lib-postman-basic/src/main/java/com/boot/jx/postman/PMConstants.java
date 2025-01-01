@@ -16,7 +16,7 @@ public class PMConstants {
 		public static final String FEEDBACK_QUEUE_CODE = "feedback";
 	}
 
-	public final class USER_ROLE {
+	public final static class USER_ROLE {
 
 		/**
 		 * Internal User, having full access to all domains
@@ -24,9 +24,22 @@ public class PMConstants {
 		public static final String DUPER_USER = "DUPER_USER";
 
 		/**
-		 * Internal Users, having Admin-Access to assigned/created domains
+		 * Internal Users, having access to all domains, equals to DUPER_USER but no
+		 * access to assign roles
+		 */
+		public static final String SUPER_MANAGER = "SUPER_MANAGER";
+
+		/**
+		 * Internal DEV Users, having access to all domains, equals to DUPER_USER but no
+		 * access to assign roles
 		 */
 		public static final String SUPER_DEV = "SUPER_DEV";
+
+		/**
+		 * Internal Users, having access to limited domain with all features.
+		 */
+		public static final String BUSINESS_MANAGER = "BUSINESS_MANAGER";
+
 		/**
 		 * Internal Users, having WABA-Access to assigned/created waba channels
 		 */
@@ -37,10 +50,6 @@ public class PMConstants {
 		public static final String BUSINESS_PARTNER = "BUSINESS_PARTNER";
 
 		/**
-		 * Internal Users, having access to manager profiles
-		 */
-		public static final String BUSINESS_MANAGER = "BUSINESS_MANAGER";
-		/**
 		 * User who can login to domain manager and has Admin-Access to that one domain
 		 */
 		public static final String BUSINESS_USER = "BUSINESS_USER";
@@ -48,6 +57,9 @@ public class PMConstants {
 		public static final String ADMIN = "ADMIN";
 		public static final String AGENT = "AGENT";
 		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_MANAGER,WABA_MANAGER,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
+
+		public static final String[] CAN_ACCESS_ALL_DOMAINS = { DUPER_USER, SUPER_MANAGER, SUPER_DEV };
+
 	}
 
 	public final class USER_SHIP_TYPE {

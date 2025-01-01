@@ -59,7 +59,7 @@ public class ThirdPartyTemplateManager {
 		MongoQueryBuilder<HSMTemplate3rdParty> cmqb = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 				.where(Criteria.where("channelId").is(channelConfig.getChannelId())).set("template.status", "deleted");
 
-		commonMongoTemplate.update(cmqb);
+		commonMongoTemplate.update(cmqb.skipStampUpdate());
 
 		for (WA360Template wa360Template : wabaTemplates) {
 			HSMTemplate3rdParty thirdPartyTemplate = toHSM3rdParty(channelConfig, wa360Template);
