@@ -15,6 +15,7 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
+import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
@@ -36,6 +37,9 @@ public class AppScriptController {
 
 	@Autowired
 	private PMEnvironment pmEnvironment;
+
+	@Autowired
+	private CommonHttpRequest commonHttpRequest;
 
 	@RequestMapping(value = "/api/objects/appscript/{appId}", method = { RequestMethod.GET })
 	@JsonView(PMEnvironment.PublicProperty.class)
@@ -107,6 +111,10 @@ public class AppScriptController {
 
 		if (!ArgUtil.is(contactId)) {
 			contactId = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).asString();
+		}
+
+		if (!ArgUtil.is(contactId)) {
+			contactId = commonHttpRequest.getRequestParam("contactId");
 		}
 
 		return restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getLogs").queryParam("app_id", appId)
