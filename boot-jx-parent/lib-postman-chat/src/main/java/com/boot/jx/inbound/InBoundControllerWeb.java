@@ -245,6 +245,8 @@ public class InBoundControllerWeb {
 			}
 		}
 
+		commonHttpRequest.setCookie(new Kooky().name("contactId").value(contactId));
+
 		Contactable contact = PostManUtil.getContactMeta(msg.contact());
 		contact.setName(userName);
 		contact.setEmail(userEmail);

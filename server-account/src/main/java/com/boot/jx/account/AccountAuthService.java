@@ -120,7 +120,7 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 
 	public Optional<DomainDoc> getDomainAsOwner(String domain) {
 		Optional<DomainDoc> domaiNational = Optional.empty();
-		if (sessionBean.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+		if (sessionBean.hasRoleAny(PMConstants.USER_ROLE.CAN_ACCESS_ALL_DOMAINS)) {
 			DomainDoc domainDoc = accountStore.findDomainByName(domain);
 			if (ArgUtil.is(domainDoc)) {
 				domaiNational = Optional.of(domainDoc);
@@ -163,10 +163,8 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.server").asString())
 				.put("contactName", accountDoc.getContact().getName()).put("email", accountDoc.getContact().getEmail())
 				.put("products", JsonUtil.toJson(accountDoc.getContact().getProduct()))
-				.put("phone", accountDoc.getContact().getPhone())
-				.put("company", accountDoc.getContact().getCompany())
-				.put("role", accountDoc.getContact().getRole())
-				.put("country", accountDoc.getContact().getCountry())));
+				.put("phone", accountDoc.getContact().getPhone()).put("company", accountDoc.getContact().getCompany())
+				.put("role", accountDoc.getContact().getRole()).put("country", accountDoc.getContact().getCountry())));
 	}
 
 	public static Authentication getAuthentication() {
