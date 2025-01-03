@@ -19,6 +19,7 @@ import com.boot.jx.dict.FileType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.doc.KnowBase;
 import com.boot.jx.postman.doc.QuickAction;
 import com.boot.jx.postman.doc.QuickLabel;
 import com.boot.jx.postman.doc.QuickLocation;
@@ -249,5 +250,28 @@ public class TmplQuickController {
 		QuickLocation quickTag = quickStore.createGalleryItem(req, new QuickLocation());
 		return ApiResponse.buildResults(mongoTemplate.findAll(QuickLocation.class)).data(quickTag)
 				.message("QuickLocations Saved");
+	}
+
+	// KnowledgeBase
+	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.GET })
+	public ApiResponse<KnowBase, Object> listKnowBase() {
+		return ApiResponse.buildResults(mongoTemplate.findAll(KnowBase.class));
+	}
+
+	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.DELETE })
+	public ApiResponse<KnowBase, Object> deleteKnowBase(@RequestParam String id) {
+		KnowBase qr = mongoTemplate.removeAndAudit(id, KnowBase.class);
+		return ApiResponse.buildResults(mongoTemplate.findAll(KnowBase.class)).data(qr).message("KnowBase deleted");
+	}
+
+	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.POST })
+	public ApiResponse<KnowBase, Object> createKnowBase(@RequestBody KnowBase req) {
+		KnowBase newVersion = mongoTemplate.findByIdOrDefault(req.getId(), new KnowBase());
+		newVersion.setCategory(req.getCategory());
+		newVersion.setTitle(req.getTitle());
+		newVersion.setContent(req.getContent());
+		mongoTemplate.saveAndAudit(newVersion, ArgUtil.is(newVersion.getId()));
+		return ApiResponse.buildResults(mongoTemplate.findAll(KnowBase.class)).data(newVersion)
+				.message("KnowBase Saved");
 	}
 }
