@@ -50,9 +50,9 @@ public class Text2MediaImpl implements Text2Media {
 				.accept("image/*")//
 				.postJson(MapModel.createInstance().put("htmlContent", text)//
 						// .put("text", text)//
-						.put("height", "400")//
-						.put("width", "400")//
-						.put("jsonData", MapModel.createInstance().toMap())//
+						.put("height", 400)//
+						.put("width", 400)//
+						.put("jsonData", MapModel.createInstance().toJson())//
 						.put("style", style).toMap())
 				.asByteArray();
 //		if (image == null) {
