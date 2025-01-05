@@ -324,9 +324,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			assignToAgent(chatSessionDoc, params.getAssignToDeptCode(), params.getAssignToAgentCode());
 			logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_AGENT, params.getAssignToDeptCode(),
 					params.getAssignToAgentCode());
-			if (ArgUtil.is(params.getNote())) {
-				logManager.note(chatSessionDoc, new OutboxMessage().message(params.getNote()));
-			}
 		} else {
 			String agentCode = null;
 			String agentDept = null;
@@ -347,6 +344,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				logManager.event(chatSessionDoc, MessageStore.EVENTS.ASGND_TO_DEPT, params.getAssignToDeptCode());
 			}
 
+		}
+
+		if (ArgUtil.is(params.getNote())) {
+			logManager.note(chatSessionDoc, new OutboxMessage().message(params.getNote()));
 		}
 
 		stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(params.getAssignToDeptCode()), chatArchiveBuilder
