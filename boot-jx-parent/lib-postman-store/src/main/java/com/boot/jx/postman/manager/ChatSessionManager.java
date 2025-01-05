@@ -41,6 +41,8 @@ import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.model.InboxMessage;
+import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.PMArgs;
 import com.boot.jx.postman.model.SessionSearchQuery;
 import com.boot.jx.postman.model.ext.InBoundEvent;
 import com.boot.jx.postman.model.ext.InBoundEvent.SessionRouted;
@@ -469,7 +471,14 @@ public class ChatSessionManager {
 		return inBoundEvent;
 	}
 
-	public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, String queueCode) {
+	/**
+	 * 
+	 * @param chatSessionDoc
+	 * @param pmArgs         { assignedToQueue, note}
+	 * @return
+	 */
+	public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, PMArgs pmArgs) {
+		String queueCode = pmArgs.getAssignToQueueCode();
 
 		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.SESSION_ROUTED);
 		inBoundEvent.sessionRouted = new SessionRouted();
@@ -521,6 +530,10 @@ public class ChatSessionManager {
 		builder.set("status", chatSessionDoc.getStatus());
 		sessionStore.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
 
+		if (ArgUtil.is(pmArgs.getNote())) {
+			logManager.note(chatSessionDoc, new OutboxMessage().message(pmArgs.getNote()));
+		}
+
 		logManager.event(chatSessionDoc, EVENTS.ASGND_TO_QUEUE, queueCode);
 
 		if (ArgUtil.not(sourceQueue) || !ArgUtil.is(chatStatus)) {
@@ -544,7 +557,10 @@ public class ChatSessionManager {
 		}
 
 		return inBoundEvent;
+	}
 
+	public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, String queueCode) {
+		return this.assignToQueue(chatSessionDoc, new PMArgs().assignToQueueCode(queueCode));
 	}
 
 	public InBoundEvent assignToQueue(String sessionId, String queueCode) {

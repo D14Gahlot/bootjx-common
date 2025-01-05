@@ -346,9 +346,9 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 		}
 
-		if (ArgUtil.is(params.getNote())) {
-			logManager.note(chatSessionDoc, new OutboxMessage().message(params.getNote()));
-		}
+//		if (ArgUtil.is(params.getNote())) {
+//			logManager.note(chatSessionDoc, new OutboxMessage().message(params.getNote()));
+//		}
 
 		stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(params.getAssignToDeptCode()), chatArchiveBuilder
 				.sessionDTO().from(chatSessionDoc).withContact().isAssigned(params.getAssignToAgentCode()).get());
