@@ -1,8 +1,6 @@
 package com.boot.jx.admin.api;
 
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
@@ -18,11 +16,11 @@ import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.UserActivityLogDoc;
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.mongo.CommonMongoTemplate.PaginatedQuery;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -39,8 +37,6 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.UtilityModels.PublicJsonProperty;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.Constants;
-import com.boot.utils.StringUtils;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
@@ -52,52 +48,11 @@ public class AdminObjectsController {
 	@Autowired
 	private MessageStore messageStore;
 
-	@Autowired
-	private CommonHttpRequest commonHttpRequest;
-
 	public <T> List<T> getPaginatedBulk(Class<T> docClass, String collectionName, int pageNo, int pageSize,
 			String sortBy, String sortDir, MapModel extraParams) {
-		MQB<T> q = MongoQueryBuilder.select(docClass, collectionName).page(pageNo, pageSize);
-
-		Enumeration<String> params = commonHttpRequest.getRequest().getParameterNames();
-
-		while (params.hasMoreElements()) {
-			String param = (String) params.nextElement();
-			switch (param) {
-			case "pageSize":
-			case "pageNo":
-			case "sortBy":
-			case "sortDir":
-				break;
-			case "id":
-				String idValue = commonHttpRequest.getRequest().getParameter("id");
-				q.whereId(idValue);
-				break;
-			default:
-				String paramValue = commonHttpRequest.getRequest().getParameter(param);
-				if (ArgUtil.is(paramValue)) {
-					if (!extraParams.entry(param).exists()) {
-						extraParams.put(param, paramValue);
-					}
-				}
-			}
-		}
-
-		for (Entry<String, Object> entry : extraParams.map().entrySet()) {
-			String paramValue = ArgUtil.parseAsString(entry.getValue(), Constants.BLANK);
-			if (paramValue.startsWith("*") && paramValue.endsWith("*")) {
-				q.search(entry.getKey(), StringUtils.trim(paramValue, '*'));
-			} else {
-				q.where(entry.getKey()).is(paramValue);
-			}
-		}
-
-		if (ArgUtil.is(sortBy)) {
-			q = q.sortBy(sortBy, Direction.fromString(sortDir));
-		}
-		ApiResponseUtil.addLog(q.build().getQuery().toString());
-		// System.out.println(q.build().getQuery().toString());
-		return comonMongoTemplate.find(q);
+		return comonMongoTemplate.getPages(PaginatedQuery.select(docClass, collectionName).pageNo(pageNo)
+				.pageSize(pageSize).pageSize(pageSize).sortBy(sortBy).sortDir(sortDir).extraParams(extraParams))
+				.getResults();
 	}
 
 	public <T> List<T> getPaginatedBulk(Class<T> docClass, String collectionName, int pageNo, int pageSize,

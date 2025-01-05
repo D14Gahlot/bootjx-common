@@ -23,6 +23,7 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.mongo.CommonMongoTemplate.PaginatedQuery;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMConstants.MESSAGE_BOUND_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_SOURCE_CATEGARY;
@@ -384,6 +385,14 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 				.with(new Sort(Direction.ASC, "timestamp"));
 		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 		return messages;
+	}
+
+	public List<MessageDoc> findByBulkSessionIdPaged(String bulkSessionId, ContactType contactType) {
+		PaginatedQuery<MessageDoc> query = commonMongoTemplate
+				.getPages(PaginatedQuery.select(MessageDoc.class, getCollectionName(contactType))//
+						.where("bulkSessionId", bulkSessionId) //
+						.sort(Direction.ASC, "timestamp").count());
+		return query.getResults();
 	}
 
 	public List<MessageDoc> findByBulkSessionIdWithRplyCount(String bulkSessionId, ContactType contactType) {
