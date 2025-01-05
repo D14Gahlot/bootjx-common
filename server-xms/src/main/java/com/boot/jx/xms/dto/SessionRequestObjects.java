@@ -26,6 +26,10 @@ public final class SessionRequestObjects {
 				value = "Agent Code, applicable only if queue type is Agent")
 		public String agent;
 
+		@ApiMockModelProperty(example = "This small note briefing conversation so far", required = false,
+				value = "Routing Note")
+		public String note;
+
 		@ApiMockModelProperty(example = "[\"dental\",\"ortho\"]", required = false,
 				value = "Agent Skills, applicable only if queue type is Agent")
 		public List<String> skills;

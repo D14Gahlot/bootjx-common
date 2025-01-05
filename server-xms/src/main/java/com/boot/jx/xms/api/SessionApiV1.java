@@ -65,7 +65,7 @@ public class SessionApiV1 {
 	public ApiResultsMetaCompactResponse<InBoundEvent, Object> sessionRouting(@RequestBody SessionQueueAssignment req) {
 		InBoundEvent event = chatSessionService.routeSession(req.sessionId,
 				new PMArgs().assignToQueueCode(req.queue).assignToAgentCode(req.agent).assignToDeptCode(req.team)
-						.assignToSkillCode(CollectionUtil.asArray(req.skills)).params(req.params));
+						.assignToSkillCode(CollectionUtil.asArray(req.skills)).note(req.note).params(req.params));
 		return ApiResponse.buildResults(event);
 	}
 
