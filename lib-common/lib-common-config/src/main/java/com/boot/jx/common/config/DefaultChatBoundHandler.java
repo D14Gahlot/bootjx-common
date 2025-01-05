@@ -357,7 +357,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		return new NodeEntry<InBoundEvent>().value(
 				chatClient.assignToAgentV2(new PMArgs().sessionId(session.getSessionId()).contact(session.contact())
 						.assignToDeptCode(params.getAssignToDeptCode()).assignToAgentCode(params.getAssignToAgentCode())
-						.assignToSkillCodes(params.getAssignToSkillCodes())));
+						.note(params.getNote()).assignToSkillCodes(params.getAssignToSkillCodes())));
 	}
 
 	@Override
