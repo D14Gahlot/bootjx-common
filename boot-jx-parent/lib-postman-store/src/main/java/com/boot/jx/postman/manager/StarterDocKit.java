@@ -241,7 +241,7 @@ public class StarterDocKit {
 		createPredefinedMstField();
 	}
 
-	public boolean isFlag(String flagKey, String flagValue) {
+	public boolean isFlagUpdated(String flagKey, String flagValue) {
 		PMConfigurationObject version = pmEnvironment.local().keyEntry(flagKey);
 		if (!version.is(flagValue)) {
 			version.setValue(flagValue);
@@ -252,14 +252,14 @@ public class StarterDocKit {
 	}
 
 	public void domain() {
-		if (!isFlag("domain.created.version", "v3")) {
+		if (isFlagUpdated("domain.created.version", "v3")) {
 			onlyOncePerDomain();
 			commonServiceClient.publishDomainCreatedEvent("v3");
 			if (ArgUtil.is(configManager)) {
 				configManager.refresh();
 			}
 		}
-		if (!isFlag("domain.indexes.session", "v1")) {
+		if (isFlagUpdated("domain.indexes.session", "v1")) {
 			MongoUtils.cleanupIndexes(commonMongoTemplate, "CHAT_SESSION", ChatSessionDoc.class);
 		}
 	}
