@@ -252,7 +252,6 @@ public class StarterDocKit {
 	}
 
 	public void domain() {
-
 		if (!isFlag("domain.created.version", "v3")) {
 			onlyOncePerDomain();
 			commonServiceClient.publishDomainCreatedEvent("v3");
@@ -260,11 +259,9 @@ public class StarterDocKit {
 				configManager.refresh();
 			}
 		}
-
 		if (!isFlag("domain.indexes.session", "v1")) {
 			MongoUtils.cleanupIndexes(commonMongoTemplate, "CHAT_SESSION", ChatSessionDoc.class);
 		}
-
 	}
 
 	@PostConstruct
