@@ -243,8 +243,8 @@ public class StarterDocKit {
 
 	public boolean isFlag(String flagKey, String flagValue) {
 		PMConfigurationObject version = pmEnvironment.local().keyEntry(flagKey);
-		if (!version.is(flagKey)) {
-			version.setValue(flagKey);
+		if (!version.is(flagValue)) {
+			version.setValue(flagValue);
 			configManager.save(version);
 			return true;
 		}
