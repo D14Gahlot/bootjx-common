@@ -68,7 +68,6 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	private String lane;
 
 	@Deprecated
-	@Indexed
 	private String contactName;
 
 	private ContactDetailDoc contact;
