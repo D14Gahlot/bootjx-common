@@ -1,6 +1,8 @@
 package com.boot.jx.admin.manager;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -531,7 +533,6 @@ public class CustomerMasterFldMgr {
 	                case "name.formattedName":
 	                    orCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
 	                    break;
-
 	                case "code":
 	                    orCriteriaList.add(createCriteria("code", src.getOperator(), src.getValue()));
 	                    break;
@@ -568,8 +569,92 @@ public class CustomerMasterFldMgr {
 	    return contactStore.find(qb);
 	}
 
-
+	
 	private Criteria createCriteria(String key, String operation, Object value) {
+	    switch (operation) {
+	        case "=":
+	        case "EQ":
+	        	if(value instanceof List<?>) {
+	        		String valueStr = value.toString().replaceAll("[\\[\\]]", "");
+	        		return Criteria.where(key).is(valueStr);
+	        	}else {
+	        		return Criteria.where(key).is(value);
+	        	}
+	        case ">":
+	        case "GT":
+	            return Criteria.where(key).gt(value);
+	        case "<":
+	        case "LT":
+	            return Criteria.where(key).lt(value);
+	        case ">=":
+	        case "GTE":
+	            return Criteria.where(key).gte(value);
+	        case "<=":
+	        case "LTE":
+	            return Criteria.where(key).lte(value);
+	        case "!=":
+	        case "NE":
+	            return Criteria.where(key).ne(value);
+	        case "STARTS_WITH": // Criteria for name starts with a specific prefix
+	            return Criteria.where(key).regex("^" + value, "i"); // Case-insensitive search
+	        case "END_WITH": // Criteria for name ends with a specific suffix
+	            return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
+	        case "ne": // Criteria for field is not empty
+	            return Criteria.where(key).ne("").and(key).ne(null);
+	        case "IN": // Criteria for matching any or all elements
+	            return Criteria.where(key).in(value);
+	        case "ALL_MATCH": // Criteria for matching all elements
+	            return Criteria.where(key).all(value);
+	        case "ANY_MATCH":
+	            return Criteria.where(key).regex(".*" + value + ".*", "i"); // Case-insensitive search
+	        case "BEFORE": // Criteria for dates before a certain date
+	            if (value instanceof Date) {
+	                return Criteria.where(key).lt(value);
+	            }else {
+	            	return Criteria.where(key).lt(getDate((String)value));
+	            }
+	        case "ON_OR_BEFORE": // Criteria for dates before a certain date
+	            if (value instanceof Date) {
+	                return Criteria.where(key).lte(value);
+	            }else {
+	            	return Criteria.where(key).lte(value);
+	            }   
+	        case "AFTER": // Criteria for dates after a certain date
+	            if (value instanceof Date) {
+	                return Criteria.where(key).gt(value);
+	            }else {
+	            	return Criteria.where(key).gt(value);
+	            }
+	        case "ON_OR_AFTER": // Criteria for dates after a certain date
+	            if (value instanceof Date) {
+	                return Criteria.where(key).gte(value);
+	            }else {
+	            	return Criteria.where(key).gte(value);
+	            } 
+	        case "BETWEEN": // Criteria for dates between two dates
+	            if (value instanceof List<?> && ((List<?>) value).size() == 2) {
+	                List<?> dateRange = (List<?>) value;
+	                Object startDate = dateRange.get(0);
+	                Object endDate = dateRange.get(1);
+	                if (startDate instanceof Date && endDate instanceof Date) {
+	                    return Criteria.where(key).gte(startDate).lte(endDate);
+	                }else if(startDate instanceof String && endDate instanceof String) {
+	                	 return Criteria.where(key).gte(startDate).lte(endDate);
+	                	 //return Criteria.where(key).gte(getDate((String)startDate)).lte(getDate((String)endDate));
+	                }else {	                
+	                    throw new IllegalArgumentException("Both start and end dates in 'BETWEEN' must be Date objects");
+	                }
+	            } else {
+	                throw new IllegalArgumentException("Value for 'BETWEEN' must be a List containing two Date objects");
+	            }
+	        default:
+	            throw new IllegalArgumentException("Invalid operation: " + operation);
+	    }
+	   
+	}
+
+
+	private Criteria createCriteriaV1(String key, String operation, Object value) {
 		switch (operation) {
 		case "=":
 		case "EQ":
@@ -659,6 +744,16 @@ public class CustomerMasterFldMgr {
 			return contactStore.find(qb);
 	}
 
-	
+private Date getDate(String value) {
+	try {
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		 // Parse the string to a Date object
+        Date date = sdf.parse(value);
+        return date;
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+	return new Date();
+}
 
 }
