@@ -611,7 +611,7 @@ public class CustomerMasterFldMgr {
 	            if (value instanceof Date) {
 	                return Criteria.where(key).lt(value);
 	            }else {
-	            	return Criteria.where(key).lt(getDate((String)value));
+	            	return Criteria.where(key).lt(value);
 	            }
 	        case "ON_OR_BEFORE": // Criteria for dates before a certain date
 	            if (value instanceof Date) {
