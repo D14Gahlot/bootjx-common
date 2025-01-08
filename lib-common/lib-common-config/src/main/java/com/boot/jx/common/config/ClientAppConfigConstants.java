@@ -214,7 +214,10 @@ public class ClientAppConfigConstants {
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("AgentGPT").desc("This is your ChatGPT Agent"//
 				).group("About App"), //
 				new ConfigMeta().title("Introduction").path("props.context").inputType(INPUT_TYPE.TEXTAREA)
-						.group("About Me")//
+						.group("About Me"), //
+				new ConfigMeta().title("Before Transfer Template").path("props.before_transfer").group("TEMPLATES")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+				//
 		});
 
 		APP_CONFIGS.put(APP_TYPE.APP_SCRIPT,
