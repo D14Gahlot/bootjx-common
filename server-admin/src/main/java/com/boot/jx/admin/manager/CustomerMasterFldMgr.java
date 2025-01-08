@@ -2,6 +2,7 @@ package com.boot.jx.admin.manager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -46,6 +47,7 @@ import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.utils.CommonUtils;
 import com.boot.model.MapModel;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
@@ -536,9 +538,26 @@ public class CustomerMasterFldMgr {
 	                case "code":
 	                    orCriteriaList.add(createCriteria("code", src.getOperator(), src.getValue()));
 	                    break;
-
 	                default:
-	                    orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
+	                	String fldType =checkFieldType(src.getKey());
+	                	if(fldType!=null && fldType.equalsIgnoreCase("date")) {
+	                		String valueStr =src.getValue().toString();
+	                		if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 1) {
+	        	        		 valueStr = src.getValue().toString().replaceAll("[\\[\\]]", "");
+	        	        		 orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), CommonUtils.getDateWithTS(valueStr)));
+	                		}else {
+	                			List<?> dateRange = (List<?>) src.getValue();
+	        	                Object startDate = CommonUtils.getDateWithTS(dateRange.get(0).toString());
+	        	                Object endDate = CommonUtils.getDateWithTS(dateRange.get(1).toString());
+	        	                List<Object> lst =new ArrayList<>();
+	        	                lst.add(startDate);
+	        	                lst.add(endDate);
+	                			orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), lst));
+	                		}
+	                		
+	                	}else {
+	                		orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
+	                	}
 	                    break;
 	            }
 	        }
@@ -640,8 +659,11 @@ public class CustomerMasterFldMgr {
 	                    return Criteria.where(key).gte(startDate).lte(endDate);
 	                }else if(startDate instanceof String && endDate instanceof String) {
 	                	 return Criteria.where(key).gte(startDate).lte(endDate);
-	                	 //return Criteria.where(key).gte(getDate((String)startDate)).lte(getDate((String)endDate));
-	                }else {	                
+	                    //return Criteria.where(key).gte(getDate((String)startDate)).lte(getDate((String)endDate));
+	                }else if(startDate instanceof Number && endDate instanceof Number) {
+	                	 return Criteria.where(key).gte(startDate).lte(endDate);
+		                   
+		              }else {	                
 	                    throw new IllegalArgumentException("Both start and end dates in 'BETWEEN' must be Date objects");
 	                }
 	            } else {
@@ -754,6 +776,29 @@ private Date getDate(String value) {
 		e.printStackTrace();
 	}
 	return new Date();
+}
+
+private String getFileName(String additionalInfo) {
+	String fldCode = Arrays.stream(additionalInfo.split("\\.")).skip(1).findFirst().orElse(additionalInfo);
+	return fldCode;
+}
+
+public String checkFieldType(String code) {
+	String objType = null;
+	code = getFileName(code);
+	if (ArgUtil.is(code)) {
+		Query qryQuery = new Query();
+		qryQuery.addCriteria(Criteria.where("code").is(code).and("active").is(true));
+		List<CustomerFieldMasterDoc> cmFieldDoc = commonMongoTemplate.find(qryQuery, CustomerFieldMasterDoc.class);
+		if (cmFieldDoc != null && !cmFieldDoc.isEmpty()) {
+			Object fldType = cmFieldDoc.get(0).getType();
+			if (ArgUtil.is(fldType)) {
+				objType = ArgUtil.parseAsT(fldType, new String(), false);
+			}
+		}
+		return objType;
+	}
+	return objType;
 }
 
 }
