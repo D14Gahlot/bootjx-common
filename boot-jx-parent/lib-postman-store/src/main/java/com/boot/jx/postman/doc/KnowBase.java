@@ -23,6 +23,9 @@ public class KnowBase extends TimeStampDoc implements Serializable, QuickGallery
 	@Indexed
 	private String parentId;
 
+	@Indexed
+	private String type;
+
 	private String title;
 	private String category;
 	private String content;
@@ -73,6 +76,14 @@ public class KnowBase extends TimeStampDoc implements Serializable, QuickGallery
 
 	public void setParentId(String parentId) {
 		this.parentId = parentId;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 }
