@@ -18,6 +18,7 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.KnowBase;
 import com.boot.jx.postman.doc.QuickAction;
@@ -254,8 +255,13 @@ public class TmplQuickController {
 
 	// KnowledgeBase
 	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.GET })
-	public ApiResponse<KnowBase, Object> listKnowBase() {
-		return ApiResponse.buildResults(mongoTemplate.findAll(KnowBase.class));
+	public ApiResponse<KnowBase, Object> listKnowBase(@RequestParam(required = false) String parentId) {
+		if (ArgUtil.is(parentId)) {
+			return ApiResponse
+					.buildResults(mongoTemplate.find(MQB.collection(KnowBase.class).where("parentId", parentId)));
+		} else {
+			return ApiResponse.buildResults(mongoTemplate.find(MQB.collection(KnowBase.class).without("parentId")));
+		}
 	}
 
 	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.DELETE })
