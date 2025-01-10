@@ -258,7 +258,8 @@ public class TmplQuickController {
 	public ApiResponse<KnowBase, Object> listKnowBase(@RequestParam(required = false) String parentId) {
 		if (ArgUtil.is(parentId)) {
 			return ApiResponse
-					.buildResults(mongoTemplate.find(MQB.collection(KnowBase.class).where("parentId", parentId)));
+					.buildResults(mongoTemplate.find(MQB.collection(KnowBase.class).where("parentId", parentId)))
+					.meta(mongoTemplate.findById(parentId, KnowBase.class));
 		} else {
 			return ApiResponse.buildResults(mongoTemplate.find(MQB.collection(KnowBase.class).without("parentId")));
 		}
