@@ -274,6 +274,8 @@ public class TmplQuickController {
 	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.POST })
 	public ApiResponse<KnowBase, Object> createKnowBase(@RequestBody KnowBase req) {
 		KnowBase newVersion = mongoTemplate.findByIdOrDefault(req.getId(), new KnowBase());
+		newVersion.setParentId(req.getParentId());
+		newVersion.setType(req.getType());
 		newVersion.setCategory(req.getCategory());
 		newVersion.setTitle(req.getTitle());
 		newVersion.setContent(req.getContent());
