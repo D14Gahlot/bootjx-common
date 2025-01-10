@@ -1,5 +1,6 @@
 package com.boot.jx.postman.doc;
 
+import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,6 +20,7 @@ public class ProfileFilterMasterDoc extends TimeStampDoc implements Serializable
 	
 	@Id
 	String id;
+	@Unique
 	String filterName;
 	String filterCriteria;
 	List<List<Object>> _filterCriteria =new ArrayList<>();
