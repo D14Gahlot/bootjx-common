@@ -30,6 +30,7 @@ import com.boot.jx.postman.doc.QuickSkill;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.store.QuickStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.UniqueID;
 
 @RestController
 public class TmplQuickController {
@@ -275,10 +276,33 @@ public class TmplQuickController {
 	public ApiResponse<KnowBase, Object> createKnowBase(@RequestBody KnowBase req) {
 		KnowBase newVersion = mongoTemplate.findByIdOrDefault(req.getId(), new KnowBase());
 		newVersion.setParentId(req.getParentId());
+		newVersion.setCode(req.getCode());
 		newVersion.setType(req.getType());
 		newVersion.setCategory(req.getCategory());
+
 		newVersion.setTitle(req.getTitle());
 		newVersion.setContent(req.getContent());
+
+		if (ArgUtil.is(newVersion.getParentId())) { // It is a Page
+			KnowBase parent = mongoTemplate.findById(newVersion.getParentId(), KnowBase.class);
+			if (ArgUtil.is(parent)) {
+				newVersion.setCode(parent.getCode());
+				newVersion.setType(parent.getType());
+				newVersion.setCategory(parent.getCategory());
+			}
+		} else {
+			if (!ArgUtil.is(newVersion.getCode())) { // Add code
+				newVersion.setCode(UniqueID.generateString62());
+			}
+
+			if (ArgUtil.is(newVersion.getId())) { // Update Knowledge requires all pages to be updated
+				mongoTemplate.updateMulti(MQB.collection(KnowBase.class).where("parentId", newVersion.getId())//
+						.set("code", newVersion.getCode())//
+						.set("type", newVersion.getType())//
+						.set("category", newVersion.getCategory()));
+			}
+
+		}
 		mongoTemplate.saveAndAudit(newVersion, ArgUtil.is(newVersion.getId()));
 		return ApiResponse.buildResults(mongoTemplate.findAll(KnowBase.class)).data(newVersion)
 				.message("KnowBase Saved");
