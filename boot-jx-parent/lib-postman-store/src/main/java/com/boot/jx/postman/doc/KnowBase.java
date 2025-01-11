@@ -17,7 +17,8 @@ public class KnowBase extends TimeStampDoc implements Serializable, QuickGallery
 
 	@Id
 	private String id;
-	
+
+	@Indexed
 	private String code;
 
 	@Indexed
