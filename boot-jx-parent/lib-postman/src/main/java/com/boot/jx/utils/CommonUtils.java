@@ -107,7 +107,7 @@ public static String monthNameByTimestamp(long timestamp) {
 	 
 	 public static Date getDate(String value) {
 			try {
-				SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 				 // Parse the string to a Date object
 		        Date date = sdf.parse(value);
 		        return date;
@@ -118,7 +118,7 @@ public static String monthNameByTimestamp(long timestamp) {
 		}
 	 
 	 public static long getDateWithTS(String dateString) {
-		 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+		 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	        // Parse the date
 	        LocalDate localDate = LocalDate.parse(dateString, formatter);
 	        // Convert to Date object and get timestamp

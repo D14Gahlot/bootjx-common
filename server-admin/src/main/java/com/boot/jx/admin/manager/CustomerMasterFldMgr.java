@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -741,9 +742,14 @@ public class CustomerMasterFldMgr {
 
 	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
 		if (ArgUtil.is(reqDto.getId())) {
-			MongoQueryBuilder<ProfileFilterMasterDoc> builder = MongoQueryBuilder
-					.collection(ProfileFilterMasterDoc.class).whereId(reqDto.getId());
-			commonMongoTemplate.remove(builder.getQuery(), ProfileFilterMasterDoc.class);
+			
+			 List<String> idList = Arrays.stream(reqDto.getId().split(","))
+	                 .collect(Collectors.toList());
+			for(String str :idList) {
+				MongoQueryBuilder<ProfileFilterMasterDoc> builder = MongoQueryBuilder
+						.collection(ProfileFilterMasterDoc.class).whereId(str);
+				commonMongoTemplate.remove(builder.getQuery(), ProfileFilterMasterDoc.class);
+			}
 		}
 		return fetchProfileFilterGroup(null,null,10,0,null,null);
 	}
@@ -768,7 +774,7 @@ public class CustomerMasterFldMgr {
 
 private Date getDate(String value) {
 	try {
-		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		 // Parse the string to a Date object
         Date date = sdf.parse(value);
         return date;
