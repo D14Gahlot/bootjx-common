@@ -53,6 +53,7 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel.NodeEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -478,6 +479,7 @@ public class ChatSessionManager {
 	 * @return
 	 */
 	public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, PMArgs pmArgs) {
+		
 		String queueCode = pmArgs.getAssignToQueueCode();
 
 		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.SESSION_ROUTED);
