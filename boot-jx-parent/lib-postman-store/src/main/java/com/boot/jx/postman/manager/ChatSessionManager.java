@@ -479,7 +479,7 @@ public class ChatSessionManager {
 	 * @return
 	 */
 	public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, PMArgs pmArgs) {
-		
+
 		String queueCode = pmArgs.getAssignToQueueCode();
 
 		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.SESSION_ROUTED);
@@ -563,11 +563,6 @@ public class ChatSessionManager {
 
 	public InBoundEvent assignToQueue(ChatSessionDoc chatSessionDoc, String queueCode) {
 		return this.assignToQueue(chatSessionDoc, new PMArgs().assignToQueueCode(queueCode));
-	}
-
-	public InBoundEvent assignToQueue(String sessionId, String queueCode) {
-		ChatSessionDoc sessionDoc = sessionStore.getSession(sessionId);
-		return this.assignToQueue(sessionDoc, queueCode);
 	}
 
 }
