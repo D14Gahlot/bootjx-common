@@ -201,7 +201,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
 					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
 					outboxMessage.setReplyId(lastMsg.getMessageId());
-				} else if (ArgUtil.is(lastMsg.getMessageId())) {
+				} else if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageId())) {
 					MessageDoc lastMsgDoc = messageStore.findById(lastMsg.getMessageId(), ContactType.EMAIL);
 					outboxMessage.setReplyIdExt(lastMsgDoc.getMessageIdExt());
 					outboxMessage.setReplyId(lastMsg.getMessageId());
