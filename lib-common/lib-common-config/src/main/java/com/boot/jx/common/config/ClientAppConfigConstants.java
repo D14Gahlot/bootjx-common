@@ -219,8 +219,10 @@ public class ClientAppConfigConstants {
 						.optionsSource("getx:/api/tmpl/knowbase").optionsKey("code").optionsLabel("title"),
 				new ConfigMeta().group("About Me").title("Instructions").path("props.instructions")
 						.inputType(INPUT_TYPE.TEXTAREA), //
-				new ConfigMeta().group("TEMPLATES").title("Before Transfer Template").path("props.before_transfer")
+				new ConfigMeta().group("Config").title("Before Transfer Template").path("props.before_transfer")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+				new ConfigMeta().group("Config").title("Credentials").path("props.creds")
+						.optionsSource("getx:/api/config/tokenkey").optionsKey("key").optionsLabel("description"), //
 				//
 		});
 
