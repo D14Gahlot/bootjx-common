@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppContextUtil;
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.http.ProxyService;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
@@ -54,7 +56,7 @@ public class NativeProxyController {
 	// @ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Native proxy API", notes = "${swagger.OutboundApiV1.sendMessage.description}",
 			authorizations = @Authorization("X_API_KEY"))
-	@RequestMapping(value = { "/native/{channelid}/**" },
+	@RequestMapping(value = { "/native/{channelId}/**" },
 			method = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
 	@XMSClientAuth
 	@ResponseBody
@@ -64,6 +66,12 @@ public class NativeProxyController {
 
 		String destUrl = "https://google.com";
 		ChannelConfig channel = pmEnvironment.config().channel(channelId);
+
+		if (!ArgUtil.is(channel)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("channelId").obzect("OutBoundMsg")
+					.codeKey("CHANNEL_NOT_FOUND").description("Channel : " + channelId + " is Not Setup"));
+		}
+
 		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>(), channel);
 		String channelType = channel.getChannelType();
 
