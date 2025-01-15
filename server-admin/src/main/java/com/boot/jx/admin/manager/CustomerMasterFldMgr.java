@@ -502,9 +502,18 @@ public class CustomerMasterFldMgr {
 	/** profile search **/
 
 	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
-	    int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
+	   // int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
 	    String sortBy = ArgUtil.parseAsString(searchQry.getSortBy(), "created.stamp");
 	    String sortdir = ArgUtil.parseAsString(searchQry.getSortDir(), "DESC");
+	    
+	    
+	    
+	    int pageNo = searchQry.getPageNo() > 0 ? searchQry.getPageNo() : 0; // Default to 0 if page number is not set
+	    int limit = searchQry.getPageSize() > 0 ? searchQry.getPageSize() : 25; // Default page size
+	    int skip = pageNo * limit; // Calculate skip for pagination
+	    
+	    
+	    
 	    List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
 	    
 	    //Direction.fromString(sortDir)
@@ -571,17 +580,21 @@ public class CustomerMasterFldMgr {
 	        }
 	    }
 
+	  
 	    // Build the final Mongo query with AND criteria
 	    MongoQueryBuilder<CustomerProfileDoc> qb = null;
 	    if (ArgUtil.is(andCriteriaList)) {
 	        qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
 	            .where(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])))
 	            .sortBy(sortBy,Direction.fromString(sortdir))
-	            .limit(limit);
+	            .limit(limit)
+	            .skip(skip);
 	    } else {
 	        qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
 	            .sortBy(sortBy,Direction.fromString(sortdir))
-	            .page(searchQry.getPageNo(), searchQry.getPageSize());
+	            .limit(limit) // Apply limit for page size
+	            .skip(skip); // Apply skip for the correct page
+	           // .page(searchQry.getPageNo(), searchQry.getPageSize());
 	         
 	    }
 
