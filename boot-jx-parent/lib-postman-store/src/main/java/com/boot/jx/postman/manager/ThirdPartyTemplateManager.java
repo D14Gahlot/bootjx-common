@@ -25,6 +25,7 @@ import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.tpo.WABAFlows;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelBasedFactory;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Template;
 import com.boot.jx.postman.wacfb.WacfbClient;
@@ -307,7 +308,7 @@ public class ThirdPartyTemplateManager {
 				Map<String, Object> jsonResponse = objectMapper.readValue(jsonResponseString,
 						new TypeReference<Map<String, Object>>() {
 						});
-		        Map<String, Object> lastOnClickAction = fetchLastOnClickAction(jsonResponse);
+		       // Map<String, Object> lastOnClickAction = fetchLastOnClickAction(jsonResponse);
 
 				List<Map<String, String>> fieldMe = fetchFieldMeta(jsonResponse);
 
@@ -347,13 +348,22 @@ public class ThirdPartyTemplateManager {
 	                if (children != null) {
 	                    // Iterate through the children to find the Footer type
 	                    for (Map<String, Object> child : children) {
-	                        if ("Footer".equals(child.get("type"))) {
+	                    	System.out.print("child"+child);
+	                    	//String s=children.get("Footer");
+	                    	String type=(String) child.get("");
+	                    	System.out.println("type"+type);
+	                    	
+	                        if ("Form".equals(child.get("type"))) {
 	                            // Extract the on-click-action field
+	        					Object childChildren = child.get("children");
+                                  if("Footer".equals(((ChannelBasedFactory<ChannelClient>) childChildren).get("type")))
+                                  {
 	                            Map<String, Object> onClickAction = (Map<String, Object>) child.get("on-click-action");
 	                            if (onClickAction != null) {
 	                                // Get the payload field from the on-click-action
 	                                lastPayload = (Map<String, Object>) onClickAction.get("payload");
-	                            }
+	                                break;
+	                            }}
 	                        }
 	                    }
 	                }
@@ -392,7 +402,24 @@ public class ThirdPartyTemplateManager {
 					if (childChildren instanceof List) {
 						fetchChildren((List<Map<String, Object>>) childChildren, fieldMeta, screenIndex);
 					}
-				} else if (isFieldType(type)) {
+				}
+				else if ("Footer".equals(type)) {
+                    // Fetch payload from "on-click-action"
+                    Map<String, Object> onClickAction = (Map<String, Object>) child.get("on-click-action");
+                    if (onClickAction != null) {
+                        Map<String, Object> payload = (Map<String, Object>) onClickAction.get("payload");
+                        if (payload != null) {
+                            for (Map.Entry<String, Object> entry : payload.entrySet()) {
+                                Map<String, String> meta2 = new HashMap<>();
+                                meta2.put("key", entry.getKey());
+                                meta2.put("value", String.valueOf(entry.getValue()));
+                                meta2.put("type", "Payload");
+                                fieldMeta.add(meta2);
+                            }
+                        }
+                    }
+                } 
+				else if (isFieldType(type)) {
 					String label = (String) child.get("label");
 					label = label.replace(" ", "_");
 					String key = "screen_" + screenIndex + "_" + type + "_" + inputIndex;
