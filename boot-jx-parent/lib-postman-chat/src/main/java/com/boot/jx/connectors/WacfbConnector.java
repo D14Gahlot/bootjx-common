@@ -43,6 +43,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
 import com.boot.jx.postman.model.MessageMetaWrapper;
+import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -67,6 +68,7 @@ import com.boot.jx.postman.wa360.WA360Constants.InBoundWrapperPaths;
 import com.boot.jx.postman.wacfb.WacfbClient;
 import com.boot.jx.postman.wacfb.WacfbInboundMedia;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
@@ -102,6 +104,10 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
+	
+	@Autowired
+	TunnelService tunnelService;
+
 
 	@Override
 	public List<ChannelConfig> onRegister(ChannelConfig setup, ChannelConfigLogger channelConfigTemp, AuthState state) {
@@ -340,6 +346,43 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 
 		if ("text".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
+			if (map.entry(InBoundWrapperPaths.REFERRAL).exists()) {
+				MessageReferral msgReferral = new MessageReferral();
+				String sourceUrl = map.pathEntry("messages/[0]/referral/source_url").asString();
+				String sourceId = map.pathEntry("messages/[0]/referral/source_id").asString();
+				String sourceType = map.pathEntry("messages/[0]/referral/source_type").asString();
+				String body = map.pathEntry("messages/[0]/referral/body").asString();
+				String headline = map.pathEntry("messages/[0]/referral/headline").asString();
+				String mediaType = map.pathEntry("messages/[0]/referral/media_type").asString();
+				msgReferral.setSourceUrl(sourceUrl);
+				msgReferral.setSourceId(sourceId);
+				msgReferral.setSourceType(sourceType);
+				msgReferral.setTitle(headline);
+				msgReferral.setBody(body);
+				msgReferral.setMediaType(mediaType);
+				msgReferral.setMediaUrl(map.pathEntry("messages/[0]/referral/image_url")
+						.orPathEntry("messages/[0]/referral/video_url").asString());
+				msgReferral.setThumbUrl(map.pathEntry("messages/[0]/referral/thumbnail_url").asString());
+				MapPathEntry ctwa_clid = map.pathEntry("messages/[0]/referral/ctwa_clid");
+				if (ctwa_clid.exists()) {
+					msgReferral.info().put("ctwa_clid", ctwa_clid.asString());
+				}
+				inboxMessage.setReferral(msgReferral);
+				commonMongoTemplate.save(inboxMessage);
+
+				Map<String, String> messagePayload = new HashMap<>();
+				messagePayload.put("channelId", channelConfig.getChannelType());
+				messagePayload.put("contactType", channelConfig.getContactType().toString());
+				messagePayload.put("messageId", inboxMessage.getMessageIdExt());
+				messagePayload.put("sourceUrl", msgReferral.getSourceUrl());
+				tunnelService.task("ON_REFERRAL_MESSAGE", messagePayload);
+
+				inboxMessage.setMessage(ArgUtil.parseAsString(inboxMessage.getReferral().toString() + " \n"
+						+ map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString()));
+			} else {
+				inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
+
+			}
 			inboxMessage.setMessage(map.entry(InBoundWrapperPaths.MESSAGE_TEXT).asString());
 		} else if ("interactive".equals(messageType)) {
 			inboxMessage.setFormatType(MESSAGE_FORMAT_TYPE.TEXT);
