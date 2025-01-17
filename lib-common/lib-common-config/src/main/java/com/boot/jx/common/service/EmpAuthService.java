@@ -114,7 +114,10 @@ public class EmpAuthService {
 		AgentDoc agent = validateAgent(username, username, passsword);
 		if (ArgUtil.is(agent)) {
 			fixAppModules(agent);
-			DepartmentDoc dept = agentStore.findDepartmentById(agent.getDept_id());
+			DepartmentDoc dept = DepartmentDoc.NO_DEPT;
+			if (ArgUtil.is(agent.getDept_id()) && !ArgUtil.is(agent.getDept_id(), DEFAULT.NO_DEPT)) {
+				dept = agentStore.findDepartmentById(agent.getDept_id());
+			}
 			return new AgentResponseAuthDto().importFrom(agent).dept(new DepartmentResponseAuthDto().importFrom(dept));
 		}
 		return null;
