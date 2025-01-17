@@ -33,6 +33,7 @@ import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMConstants.DEFAULT;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.channel.OAClient;
 import com.boot.jx.postman.client.PostManClient;
@@ -192,6 +193,7 @@ public class EmpAuthService {
 			AgentDoc agentLocal = new AgentDoc();
 			agentLocal.setAgent_code(username);
 			agentLocal.setAgent_email(email);
+			agentLocal.setDept_id(DEFAULT.NO_DEPT);
 			agentLocal.setAgent_password(superAdminPass);
 			agentLocal.setAuthKey(appConfig.prop("mry.app.login.key"));
 
