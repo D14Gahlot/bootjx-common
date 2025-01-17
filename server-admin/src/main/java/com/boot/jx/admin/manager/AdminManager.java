@@ -79,6 +79,14 @@ public class AdminManager {
 				|| ArgUtil.isEmpty(agent.getAgent_name())) {
 			ApiResponseUtil.throwException("All Inputs Required");
 		}
+		
+		if(ArgUtil.is(agent.getAgent_password())) {
+			 Pattern pattern = Pattern.compile(regex);
+		     Matcher matcher = pattern.matcher(agent.getAgent_password());
+		     if (!matcher.matches()) {
+		    	 ApiResponseUtil.throwException("Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols.");
+		     }
+		}
 
 		AgentDoc oldAgent = commonMongoTemplate.findByIdString(agent.getId(), AgentDoc.class);
 		if (ArgUtil.is(oldAgent)) {
@@ -91,14 +99,6 @@ public class AdminManager {
 			agent.setOldVersions(null);
 		}
 		agent.setAgent_code(StringUtils.toLowerCase(agent.getAgent_code()));
-		
-		if(ArgUtil.is(agent.getAgent_password())) {
-		 Pattern pattern = Pattern.compile(regex);
-	     Matcher matcher = pattern.matcher(agent.getAgent_password());
-	     if (!matcher.matches()) {
-	    	 ApiResponseUtil.throwException("Password must be at least 8 characters long and include uppercase, lowercase, numbers and symbols.");
-	     }
-		}
 		
 		agentStore.save(agent);
 
