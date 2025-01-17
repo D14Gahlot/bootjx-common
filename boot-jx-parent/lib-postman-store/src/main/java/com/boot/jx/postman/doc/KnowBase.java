@@ -29,7 +29,9 @@ public class KnowBase extends TimeStampDoc implements Serializable, QuickGallery
 
 	private String title;
 	private String category;
+	private String startnote;
 	private String content;
+	private String endnote;
 
 	public String getCategory() {
 		return category;
@@ -85,6 +87,22 @@ public class KnowBase extends TimeStampDoc implements Serializable, QuickGallery
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getEndnote() {
+		return endnote;
+	}
+
+	public void setEndnote(String endnote) {
+		this.endnote = endnote;
+	}
+
+	public String getStartnote() {
+		return startnote;
+	}
+
+	public void setStartnote(String startnote) {
+		this.startnote = startnote;
 	}
 
 }
