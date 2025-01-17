@@ -215,10 +215,10 @@ public class ClientAppConfigConstants {
 				).group("About App"), //
 				new ConfigMeta().group("About Me").title("Introduction").path("props.context")
 						.inputType(INPUT_TYPE.TEXTAREA), //
-				new ConfigMeta().group("About Me").title("Knowledge Base").path("props.knowbase")
-						.optionsSource("getx:/api/tmpl/knowbase").optionsKey("code").optionsLabel("title"),
 				new ConfigMeta().group("About Me").title("Instructions").path("props.instructions")
 						.inputType(INPUT_TYPE.TEXTAREA), //
+				new ConfigMeta().group("About Me").title("Knowledge Base").path("props.knowbase")
+						.optionsSource("getx:/api/tmpl/knowbase").optionsKey("code").optionsLabel("title"),
 				new ConfigMeta().group("Config").title("Before Transfer Template").path("props.before_transfer")
 						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
 				new ConfigMeta().group("Config").title("Credentials").path("props.creds")
