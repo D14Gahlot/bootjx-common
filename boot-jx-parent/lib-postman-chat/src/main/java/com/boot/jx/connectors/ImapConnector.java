@@ -77,14 +77,14 @@ public class ImapConnector extends AbstractConnector<ImapConfigDetails, ImapPlug
 				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
 					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
 					outboxMessage.setReplyId(lastMsg.getMessageId());
-				} else if (ArgUtil.is(lastMsg.getMessageId())) {
+				} else if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageId())) {
 					MessageDoc lastMsgDoc = messageStore.findById(lastMsg.getMessageId(), ContactType.EMAIL);
 					outboxMessage.setReplyIdExt(lastMsgDoc.getMessageIdExt());
 					outboxMessage.setReplyId(lastMsg.getMessageId());
 				}
 			}
 
-			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
+			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) { 
 				ChatMessageDTO lastMsg = chatSession.lastInBoundMsg();
 				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
 					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
