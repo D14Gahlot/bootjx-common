@@ -536,11 +536,14 @@ public class CustomerMasterFldMgr {
 
 	                case "email":
 	                case "emails":
-	                    // When dealing with email, we will directly add to the AND list
-	                    //andCriteriaList.add(Criteria.where("emails").elemMatch(Criteria.where("email").is(src.getValue())));
 	                	orCriteriaList.add(createCriteria("emails.email", src.getOperator(), src.getValue()));
 	                    break;
-
+	                case "additionalInfo.alt_emails":
+	                	orCriteriaList.add(createCriteria("additionalInfo.alt_emails.email", src.getOperator(), src.getValue()));
+	                    break;
+	                case "additionalInfo.alt_phones":
+	                	orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(), src.getValue()));
+	                    break;       
 	                case "name":
 	                case "name.formattedName":
 	                    orCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
