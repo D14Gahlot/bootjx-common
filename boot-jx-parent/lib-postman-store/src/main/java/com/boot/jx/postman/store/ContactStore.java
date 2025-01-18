@@ -680,11 +680,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				case "dob":
 				case "DOB":
 					addInfoMap.put(entry.getKey(),CommonUtils.getDateWithTS(entry.getValue().toString()));
-					
-					
-							//ArgUtil.parseAsLong(CommonUtils.getDateWithTS(entry.getValue().toString()),
-								//	doc.getAdditionalInfo().get(entry.getKey()) == null ?0
-									//		: doc.getAdditionalInfo().get(entry.getKey()).toString()));
 					break;
 				case "emails":
 				case "alt_emails":
@@ -710,13 +705,16 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 						LOGGER.info("Json Util else  :" + JsonUtil.toJson(object) + "\t key-value :" + entry.getKey()
 								+ "-" + JsonUtil.toJson(entry.getValue()));
 					} else {
-
 						if (ArgUtil.is(entry.getValue())) {
-							// List<Object> listOfType =
-							// Arrays.asList(entry.getValue().toString().split(","));
-							// addInfoMap.put(entry.getKey(),ArgUtil.parseAsListOfT(listOfType, listOfType,
-							// null, false));
+							if(ArgUtil.isNotEmpty(object) &&  object.toString().equalsIgnoreCase("date")) {
+								String valueStr =entry.getValue().toString();
+		                		if(entry.getValue() instanceof List<?>) {
+		        	        		 valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
+		                		}
+								addInfoMap.put(entry.getKey(), CommonUtils.getDateWithTS(valueStr));
+							}else {
 							addInfoMap.put(entry.getKey(), entry.getValue());
+							}
 						}
 
 					}

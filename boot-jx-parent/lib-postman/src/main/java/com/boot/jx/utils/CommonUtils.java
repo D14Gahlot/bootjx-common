@@ -11,6 +11,8 @@ import java.time.format.TextStyle;
 import java.util.Date;
 import java.util.Locale;
 
+import com.boot.utils.ArgUtil;
+
 public final class CommonUtils {
 
 	
@@ -118,12 +120,21 @@ public static String monthNameByTimestamp(long timestamp) {
 		}
 	 
 	 public static long getDateWithTS(String dateString) {
+		 long timestamp =0;
+		 
+		try {
 		 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	        // Parse the date
 	        LocalDate localDate = LocalDate.parse(dateString, formatter);
 	        // Convert to Date object and get timestamp
-	        long timestamp = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime();
+	         timestamp = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime();
 	        return timestamp;
+		}catch(Exception e) {
+			if(ArgUtil.is(dateString)) {
+				timestamp =  Long.parseLong(dateString);
+			}
+		}
+		return timestamp;
 	 }
 
 
