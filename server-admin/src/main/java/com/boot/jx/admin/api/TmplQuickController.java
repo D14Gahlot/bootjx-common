@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,6 +29,7 @@ import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.QuickSkill;
 import com.boot.jx.postman.doc.QuickTag;
+import com.boot.jx.postman.doc.ticket.CustomerTicketType;
 import com.boot.jx.postman.store.QuickStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;

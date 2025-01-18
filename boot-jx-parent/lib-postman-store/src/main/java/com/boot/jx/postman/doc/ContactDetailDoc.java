@@ -7,12 +7,14 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@JsonDeserialize(as = ContactDetailDoc.class)
 @Document
-
 @CompoundIndexes({
 		// route indexs
 		@CompoundIndex(name = "email", def = "{ 'email': 1 }"), //
