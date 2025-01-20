@@ -1,4 +1,4 @@
-package com.boot.jx.admin.service;
+package com.boot.jx.common.tasks;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,8 +27,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.amplify.model.JobStatus;
-import com.boot.jx.admin.dto.ProfileSearchCriteria;
-import com.boot.jx.admin.dto.ProfileSearchQuery;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
@@ -36,6 +34,9 @@ import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.GroupDoc;
 import com.boot.jx.common.dto.GroupSessionDto;
+import com.boot.jx.common.dto.ProfileSearchCriteria;
+import com.boot.jx.common.dto.ProfileSearchQuery;
+import com.boot.jx.common.service.CustomerProfileService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonTemplateMeta;

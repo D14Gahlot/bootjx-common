@@ -1,4 +1,4 @@
-package com.boot.jx.admin.service;
+package com.boot.jx.common.tasks;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

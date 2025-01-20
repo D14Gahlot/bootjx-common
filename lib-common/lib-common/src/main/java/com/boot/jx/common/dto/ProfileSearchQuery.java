@@ -1,4 +1,4 @@
-package com.boot.jx.admin.dto;
+package com.boot.jx.common.dto;
 
 import java.util.ArrayList;
 import java.util.List;

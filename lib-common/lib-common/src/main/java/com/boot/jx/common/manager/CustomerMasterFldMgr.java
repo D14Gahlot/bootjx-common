@@ -1,4 +1,4 @@
-package com.boot.jx.admin.manager;
+package com.boot.jx.common.manager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,15 +23,16 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.admin.dto.CustomerContactDto;
-import com.boot.jx.admin.dto.JobsResponseDto;
-import com.boot.jx.admin.dto.ProfileSearchCriteria;
-import com.boot.jx.admin.dto.ProfileSearchQuery;
-import com.boot.jx.admin.dto.SearchCustomerProfileDto;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.common.doc.JobsOutPutDoc;
+import com.boot.jx.common.dto.CustomerContactDto;
+import com.boot.jx.common.dto.JobsResponseDto;
+import com.boot.jx.common.dto.ProfileSearchCriteria;
+import com.boot.jx.common.dto.ProfileSearchQuery;
+import com.boot.jx.common.dto.SearchCustomerProfileDto;
+import com.boot.jx.common.helper.ExcelHelper;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;

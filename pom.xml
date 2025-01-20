@@ -86,6 +86,7 @@
 		<module>lib-tmpl</module>
 		<module>lib-common/lib-common-mongo</module>
 		<module>lib-common/lib-common-config</module>
+		<module>lib-common/lib-common</module>
 		<module>ms-bot</module>		
 		<module>ms-postman</module>
 		<module>server-agent</module>

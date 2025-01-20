@@ -1,4 +1,4 @@
-package com.boot.jx.admin.dto;
+package com.boot.jx.common.dto;
 
 public class SearchCustomerProfileDto {
 	String id;

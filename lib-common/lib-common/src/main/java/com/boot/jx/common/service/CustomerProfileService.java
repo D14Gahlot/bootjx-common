@@ -1,4 +1,4 @@
-package com.boot.jx.admin.service;
+package com.boot.jx.common.service;
 
 import java.util.List;
 import java.util.Map;
@@ -7,14 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
-import com.boot.jx.admin.dto.CustomerContactDto;
-import com.boot.jx.admin.dto.JobsResponseDto;
-import com.boot.jx.admin.dto.ProfileSearchQuery;
-import com.boot.jx.admin.dto.SearchCustomerProfileDto;
-import com.boot.jx.admin.manager.CustomerMasterFldMgr;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.JobScheduledDoc;
+import com.boot.jx.common.dto.CustomerContactDto;
+import com.boot.jx.common.dto.JobsResponseDto;
+import com.boot.jx.common.dto.ProfileSearchQuery;
+import com.boot.jx.common.dto.SearchCustomerProfileDto;
+import com.boot.jx.common.manager.CustomerMasterFldMgr;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
