@@ -264,7 +264,7 @@ public class StarterDocKit {
 			}
 		}
 		if (isFlagUpdated("domain.indexes.session", "v1")) {
-			MongoUtils.cleanupIndexes(commonMongoTemplate, "CHAT_SESSION", ChatSessionDoc.class);
+	//		MongoUtils.cleanupIndexes(commonMongoTemplate, "CHAT_SESSION", ChatSessionDoc.class);
 		}
 
 		if (isFlagUpdated("version.ticket.meta", "v1")) {
