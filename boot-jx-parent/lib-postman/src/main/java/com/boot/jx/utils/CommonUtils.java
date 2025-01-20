@@ -1,11 +1,17 @@
 package com.boot.jx.utils;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.util.Date;
 import java.util.Locale;
+
+import com.boot.utils.ArgUtil;
 
 public final class CommonUtils {
 
@@ -99,6 +105,38 @@ public static String monthNameByTimestamp(long timestamp) {
 	        // Convert to timestamp (seconds since epoch)
 	        return endOfMonth.toInstant(ZoneOffset.UTC).getEpochSecond();
 	    }
+	 
+	 
+	 public static Date getDate(String value) {
+			try {
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+				 // Parse the string to a Date object
+		        Date date = sdf.parse(value);
+		        return date;
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			return new Date();
+		}
+	 
+	 public static long getDateWithTS(String dateString) {
+		 long timestamp =0;
+		 
+		try {
+		 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	        // Parse the date
+	        LocalDate localDate = LocalDate.parse(dateString, formatter);
+	        // Convert to Date object and get timestamp
+	         timestamp = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime();
+	        return timestamp;
+		}catch(Exception e) {
+			if(ArgUtil.is(dateString)) {
+				timestamp =  Long.parseLong(dateString);
+			}
+		}
+		return timestamp;
+	 }
+
 
 	public static void main(String[] args)
 	{
@@ -107,5 +145,7 @@ public static String monthNameByTimestamp(long timestamp) {
 		long st1 =startTStampForaMonthV1(1726597800);
 		long et1 = endTStampForaMonthV1(1726597800);
 		System.out.println("st :"+st+"\t et:"+et+"\t et1 :"+st1+"\t et1:"+et1);
+		String dt ="05/23/1984";
+		System.out.println("Date :"+getDate(dt)+"\t ts :"+getDateWithTS(dt));
 	}
 }

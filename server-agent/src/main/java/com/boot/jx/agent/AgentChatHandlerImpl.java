@@ -314,7 +314,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	@Override
 	public PMArgs doAssign(ChatSessionDoc chatSessionDoc, PMArgs params) {
 
-		if (!ArgUtil.is(chatSessionDoc.getAssignedToQueue())) {
+		if (!ArgUtil.is(chatSessionDoc.getAssignedToQueue()) && !ArgUtil.is(params.getAssignToQueueCode())) {
 			chatSessionManager.assignToQueue(chatSessionDoc,
 					environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
 							.asString(PMConstants.DEFAULT.AGENT_QUEUE_CODE));

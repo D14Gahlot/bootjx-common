@@ -1,5 +1,6 @@
 package com.boot.jx.postman.store;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,10 +12,12 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.doc.QuickLocation;
 import com.boot.jx.postman.doc.QuickMedia;
+import com.boot.jx.postman.doc.ticket.CustomerTicketStatus;
 import com.boot.model.UtilityModels.JsonIgnoreUnknown;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.EntityDtoUtil;
@@ -27,7 +30,7 @@ import com.mongodb.client.MongoCursor;
 @Component
 public class QuickStore extends CommonMongoTemplateAbstract<QuickStore> {
 
-	public static interface QuickGalleryItem extends JsonIgnoreUnknown {
+	public static interface QuickGalleryItem extends JsonIgnoreUnknown, IDocument {
 		String getId();
 
 		void setId(String id);
@@ -38,6 +41,9 @@ public class QuickStore extends CommonMongoTemplateAbstract<QuickStore> {
 
 		String getTitle();
 
+		default boolean isReadonly() {
+			return false;
+		}
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuickStore.class);
@@ -109,6 +115,30 @@ public class QuickStore extends CommonMongoTemplateAbstract<QuickStore> {
 		quickTag.setId(id);
 		saveAndAudit(quickTag, ArgUtil.is(quickTag.getId()));
 		return dest;
+	}
+
+	public <T extends IDocument> T saveOnSubmit(T quickGalleryItem, Class<T> entityClass) {
+		if (quickGalleryItem instanceof QuickGalleryItem) {
+			try {
+				// Create a new instance of entityClass safely
+				T newInstance = entityClass.getDeclaredConstructor().newInstance();
+				createGalleryItem((QuickGalleryItem) quickGalleryItem, (QuickGalleryItem) newInstance);
+				return newInstance;
+			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+					| InvocationTargetException e) {
+				throw new RuntimeException("Failed to create a new instance of " + entityClass.getName(), e);
+			}
+		} else {
+			save(quickGalleryItem);
+		}
+		return quickGalleryItem;
+	}
+
+	public void createTicketMeta() {
+		save(CustomerTicketStatus.OPEN);
+		save(CustomerTicketStatus.IN_PROGRESS);
+		save(CustomerTicketStatus.RESOLVED);
+		save(CustomerTicketStatus.CLOSED);
 	}
 
 }

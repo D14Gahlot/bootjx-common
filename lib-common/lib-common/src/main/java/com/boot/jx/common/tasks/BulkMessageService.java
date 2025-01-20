@@ -1,4 +1,4 @@
-package com.boot.jx.admin.service;
+package com.boot.jx.common.tasks;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +18,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -26,16 +27,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.amplify.model.JobStatus;
-import com.boot.jx.admin.dto.ProfileSearchCriteria;
-import com.boot.jx.admin.dto.ProfileSearchQuery;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.config.ConfigConstants;
 import com.boot.jx.common.doc.GroupDoc;
-import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.common.dto.GroupSessionDto;
+import com.boot.jx.common.dto.ProfileSearchCriteria;
+import com.boot.jx.common.dto.ProfileSearchQuery;
+import com.boot.jx.common.service.CustomerProfileService;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonTemplateMeta;
@@ -56,8 +57,8 @@ import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.model.Message.Status;
-import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.tunnel.ChronoScheduler;
@@ -77,6 +78,7 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.mongodb.client.MongoCursor;
 
 @Component
+@ConditionalOnProperty(name = "mry.jobs.bulk.message.task", havingValue = "true", matchIfMissing = false)
 public class BulkMessageService extends BatchJobExecuter {
 
 	@Autowired
@@ -365,9 +367,8 @@ public class BulkMessageService extends BatchJobExecuter {
 				.data("lane", session.getLane()));
 	}
 
-	
 	public BatchJob stopJobV1(String jobId) {
-		 BatchJob oldJob = stopJob(jobId);
+		BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
 		session.setStatus(Status.STOPPED.toString());
 		mongoTemplate.save(session);

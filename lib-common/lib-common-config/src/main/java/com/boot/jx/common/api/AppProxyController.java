@@ -115,7 +115,7 @@ public class AppProxyController {
 			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
 		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
 		return MapModel.fromSafe(service
-				.forwardRequestNoRetry("/pub/scriptus/pub/", scriptusUrl, body, additioalHeaders, request, response)
+				.forwardRequestNoRetry("/pub/", scriptusUrl, body, additioalHeaders, request, response)
 				.getBody());
 	}
 

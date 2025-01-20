@@ -86,6 +86,7 @@ public class ChatLogger {
 		doc.setAction(ArgUtil.parseAsString(eventName));
 		doc.setSessionId(inboxMessage.getSessionId());
 		doc.setAgent(ArgUtil.nonEmpty(actorAgent, AppContextUtil.getActorId()));
+		doc.setTraceId(AppContextUtil.getTraceId());
 		messageStore.save(doc, inboxMessage.contact().type());
 		return doc;
 	}

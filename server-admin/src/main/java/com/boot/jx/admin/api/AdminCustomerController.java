@@ -1,6 +1,8 @@
 package com.boot.jx.admin.api;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
@@ -10,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.boot.jx.admin.dto.ProfileSearchQuery;
-import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.dto.ProfileSearchQuery;
+import com.boot.jx.common.service.CustomerProfileService;
 import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.postman.PMEnvironment;
@@ -77,8 +79,13 @@ public class AdminCustomerController {
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> deleteProfiles(@RequestParam String id) {
 		CustomerProfileDoc req = new CustomerProfileDoc();
-		req.setId(id);
-		contactStore.remove(req);
+		  // Split the string by comma and collect into a list
+        List<String> idList = Arrays.stream(id.split(","))
+                                    .collect(Collectors.toList());
+        for(String ids:idList) {
+        	req.setId(ids);
+			contactStore.remove(req);
+        }
 		return ApiResponse.buildResult(req);
 	}
 

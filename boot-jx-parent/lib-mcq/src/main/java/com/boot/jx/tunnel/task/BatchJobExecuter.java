@@ -40,7 +40,7 @@ public abstract class BatchJobExecuter {
 
 	private String getJobName() {
 		if (this.jobName == null) {
-			this.jobName = ClazzUtil.getUltimateClassName(this) + "V7";
+			this.jobName = ClazzUtil.getUltimateClassName(this) + "V8";
 		}
 		return this.jobName;
 	}
@@ -117,8 +117,7 @@ public abstract class BatchJobExecuter {
 	public BatchJob registerJob(BatchJob batchJob) {
 		try {
 			batchJob.setTenant(AppContextUtil.getTenant());
-			batchJob.setStatus(JOB_STATUS.CREATED);
-			batchJob.setOpenStamp(System.currentTimeMillis());
+			batchJob.updateStatus(JOB_STATUS.CREATED);
 			batchJob.setDonePercent(0L);
 			batchJob.setDoneTaskCount(0L);
 			batchJob.setPushedTaskCount(0L);
@@ -134,7 +133,7 @@ public abstract class BatchJobExecuter {
 	public BatchJob cancelJob(BatchJob batchJob) {
 		try {
 			batchJob.setTenant(AppContextUtil.getTenant());
-			batchJob.setStatus(JOB_STATUS.CANCELLED);
+			batchJob.updateStatus(JOB_STATUS.CANCELLED);
 			batchJob.setOpenStamp(System.currentTimeMillis());
 			batchJob.setDonePercent(0L);
 			batchJob.setDoneTaskCount(0L);
@@ -189,6 +188,7 @@ public abstract class BatchJobExecuter {
 	@Scheduled(fixedDelay = 50000)
 	public void reader() {
 		read();
+
 	}
 
 	protected void read() {
@@ -217,15 +217,15 @@ public abstract class BatchJobExecuter {
 			currentBatchJob.setDoneTaskCount(pushedDoneCounter.get());
 			// Moving to next Step
 			if (JOB_STATUS.CREATED == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.READING);
+				currentBatchJob.updateStatus(JOB_STATUS.READING);
 			} else if (JOB_STATUS.READING_DONE == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.EXECUTING);
+				currentBatchJob.updateStatus(JOB_STATUS.EXECUTING);
 			} else if (JOB_STATUS.CLOSED == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.COMPLETED);
+				currentBatchJob.updateStatus(JOB_STATUS.COMPLETED);
 			} else if (JOB_STATUS.CANCELLED == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.CANCELLED);
+				currentBatchJob.updateStatus(JOB_STATUS.CANCELLED);
 			} else if (JOB_STATUS.STOPPED == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.STOPPED);
+				currentBatchJob.updateStatus(JOB_STATUS.STOPPED);
 			}
 
 			try {
@@ -238,7 +238,7 @@ public abstract class BatchJobExecuter {
 						try {
 							boolean readCompleted = this.read(currentBatchJob);
 							if (readCompleted) {
-								currentBatchJob.setStatus(JOB_STATUS.READING_DONE);
+								currentBatchJob.updateStatus(JOB_STATUS.READING_DONE);
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -256,8 +256,7 @@ public abstract class BatchJobExecuter {
 					// JOB GOT RESOLVED
 					boolean justGotResolved = false;
 					if (JOB_STATUS.RESOLVED != currentBatchJob.getStatus() && currentBatchJob.getDonePercent() == 100) {
-						currentBatchJob.setStatus(JOB_STATUS.RESOLVED);
-						currentBatchJob.setResolveStamp(System.currentTimeMillis());
+						currentBatchJob.updateStatus(JOB_STATUS.RESOLVED);
 						justGotResolved = true;
 					}
 
@@ -277,7 +276,7 @@ public abstract class BatchJobExecuter {
 						currentBatchJob.setTallyStamp(System.currentTimeMillis());
 						if (tallyCompleted || (currentBatchJob.getDonePercent() == 100
 								&& TimeUtils.isExpired(currentBatchJob.getResolveStamp(), JOB_RESOLVE_EXPIRY))) {
-							currentBatchJob.setStatus(JOB_STATUS.CLOSED);
+							currentBatchJob.updateStatus(JOB_STATUS.CLOSED);
 						}
 
 					}

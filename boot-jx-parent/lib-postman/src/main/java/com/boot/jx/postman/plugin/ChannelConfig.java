@@ -296,6 +296,10 @@ public class ChannelConfig extends AChannelConfig {
 			return this.getTelegram();
 		case CHANNEL_TYPE.OUTLOOK:
 			return this.getOutlook();
+		case CHANNEL_TYPE.IMAP:
+			return this.getImap();	
+		case CHANNEL_TYPE.GMAIL:
+			return this.getGmail();		
 		default:
 			return null;
 		}

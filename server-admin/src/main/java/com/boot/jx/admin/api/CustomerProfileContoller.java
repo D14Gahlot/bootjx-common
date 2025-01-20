@@ -15,16 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.admin.dto.JobsResponseDto;
-import com.boot.jx.admin.dto.ProfileSearchQuery;
-import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.doc.JobScheduledDoc;
+import com.boot.jx.common.dto.JobsResponseDto;
+import com.boot.jx.common.dto.ProfileSearchQuery;
+import com.boot.jx.common.service.CustomerProfileService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
-import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.fasterxml.jackson.annotation.JsonView;
 

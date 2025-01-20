@@ -18,6 +18,7 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.KnowBase;
 import com.boot.jx.postman.doc.QuickAction;
@@ -29,6 +30,7 @@ import com.boot.jx.postman.doc.QuickSkill;
 import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.store.QuickStore;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.UniqueID;
 
 @RestController
 public class TmplQuickController {
@@ -254,8 +256,14 @@ public class TmplQuickController {
 
 	// KnowledgeBase
 	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.GET })
-	public ApiResponse<KnowBase, Object> listKnowBase() {
-		return ApiResponse.buildResults(mongoTemplate.findAll(KnowBase.class));
+	public ApiResponse<KnowBase, Object> listKnowBase(@RequestParam(required = false) String parentId) {
+		if (ArgUtil.is(parentId)) {
+			return ApiResponse
+					.buildResults(mongoTemplate.find(MQB.collection(KnowBase.class).where("parentId", parentId)))
+					.meta(mongoTemplate.findById(parentId, KnowBase.class));
+		} else {
+			return ApiResponse.buildResults(mongoTemplate.find(MQB.collection(KnowBase.class).without("parentId")));
+		}
 	}
 
 	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.DELETE })
@@ -267,9 +275,36 @@ public class TmplQuickController {
 	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.POST })
 	public ApiResponse<KnowBase, Object> createKnowBase(@RequestBody KnowBase req) {
 		KnowBase newVersion = mongoTemplate.findByIdOrDefault(req.getId(), new KnowBase());
+		newVersion.setParentId(req.getParentId());
+		newVersion.setCode(req.getCode());
+		newVersion.setType(req.getType());
 		newVersion.setCategory(req.getCategory());
+
 		newVersion.setTitle(req.getTitle());
+		newVersion.setStartnote(req.getStartnote());
 		newVersion.setContent(req.getContent());
+		newVersion.setEndnote(req.getEndnote());
+
+		if (ArgUtil.is(newVersion.getParentId())) { // It is a Page
+			KnowBase parent = mongoTemplate.findById(newVersion.getParentId(), KnowBase.class);
+			if (ArgUtil.is(parent)) {
+				newVersion.setCode(parent.getCode());
+				newVersion.setType(parent.getType());
+				newVersion.setCategory(parent.getCategory());
+			}
+		} else {
+			if (!ArgUtil.is(newVersion.getCode())) { // Add code
+				newVersion.setCode(UniqueID.generateString62());
+			}
+
+			if (ArgUtil.is(newVersion.getId())) { // Update Knowledge requires all pages to be updated
+				mongoTemplate.updateMulti(MQB.collection(KnowBase.class).where("parentId", newVersion.getId())//
+						.set("code", newVersion.getCode())//
+						.set("type", newVersion.getType())//
+						.set("category", newVersion.getCategory()));
+			}
+
+		}
 		mongoTemplate.saveAndAudit(newVersion, ArgUtil.is(newVersion.getId()));
 		return ApiResponse.buildResults(mongoTemplate.findAll(KnowBase.class)).data(newVersion)
 				.message("KnowBase Saved");
