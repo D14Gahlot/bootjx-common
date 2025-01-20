@@ -7,8 +7,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.reflections.util.FilterBuilder.Matcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -308,7 +310,6 @@ public class ThirdPartyTemplateManager {
 				Map<String, Object> jsonResponse = objectMapper.readValue(jsonResponseString,
 						new TypeReference<Map<String, Object>>() {
 						});
-		       // Map<String, Object> lastOnClickAction = fetchLastOnClickAction(jsonResponse);
 
 				List<Map<String, String>> fieldMe = fetchFieldMeta(jsonResponse);
 
@@ -331,47 +332,7 @@ public class ThirdPartyTemplateManager {
 		}
 	}
 
-	  public static Map<String, Object> fetchLastOnClickAction(Map<String, Object> jsonResponse) {
-	        Map<String, Object> lastPayload = null;
-
-	        // Navigate to the layout field
-	        
-	        List<Map<String, Object>> screens = (List<Map<String, Object>>) jsonResponse.get("screens");
-	        if (screens != null && !screens.isEmpty()) {
-	            // Get the last screen
-	            Map<String, Object> lastScreen = screens.get(screens.size() - 1);
-
-	            // Navigate to the layout field
-	            Map<String, Object> layout = (Map<String, Object>) lastScreen.get("layout");
-	            if (layout != null) {
-	                List<Map<String, Object>> children = (List<Map<String, Object>>) layout.get("children");
-	                if (children != null) {
-	                    // Iterate through the children to find the Footer type
-	                    for (Map<String, Object> child : children) {
-	                    	System.out.print("child"+child);
-	                    	//String s=children.get("Footer");
-	                    	String type=(String) child.get("");
-	                    	System.out.println("type"+type);
-	                    	
-	                        if ("Form".equals(child.get("type"))) {
-	                            // Extract the on-click-action field
-	        					Object childChildren = child.get("children");
-                                  if("Footer".equals(((ChannelBasedFactory<ChannelClient>) childChildren).get("type")))
-                                  {
-	                            Map<String, Object> onClickAction = (Map<String, Object>) child.get("on-click-action");
-	                            if (onClickAction != null) {
-	                                // Get the payload field from the on-click-action
-	                                lastPayload = (Map<String, Object>) onClickAction.get("payload");
-	                                break;
-	                            }}
-	                        }
-	                    }
-	                }
-	            }
-	        }
-
-	        return lastPayload;
-	    }
+	
 	
 	public static List<Map<String, String>> fetchFieldMeta(Map<String, Object> jsonResponse) throws IOException {
 		List<Map<String, String>> fieldMeta = new ArrayList<>();
@@ -380,6 +341,11 @@ public class ThirdPartyTemplateManager {
 		if (screens != null) {
 			for (int i = 0; i < screens.size(); i++) {
 				Map<String, Object> screen = screens.get(i);
+				boolean lastScreen=false;
+				if(i==screen.size()-1)
+				{
+					lastScreen=true;
+				}
 				Map<String, Object> layout = (Map<String, Object>) screen.get("layout");
 				if (layout != null) {
 					fetchChildren((List<Map<String, Object>>) layout.get("children"), fieldMeta, i);
@@ -404,22 +370,34 @@ public class ThirdPartyTemplateManager {
 					}
 				}
 				else if ("Footer".equals(type)) {
-                    // Fetch payload from "on-click-action"
                     Map<String, Object> onClickAction = (Map<String, Object>) child.get("on-click-action");
                     if (onClickAction != null) {
                         Map<String, Object> payload = (Map<String, Object>) onClickAction.get("payload");
                         if (payload != null) {
+                        	
                             for (Map.Entry<String, Object> entry : payload.entrySet()) {
-                                Map<String, String> meta2 = new HashMap<>();
-                                meta2.put("key", entry.getKey());
-                                meta2.put("value", String.valueOf(entry.getValue()));
-                                meta2.put("type", "Payload");
-                                fieldMeta.add(meta2);
+                            	if (!String.valueOf(entry.getValue()).contains("data.")) {
+                                Map<String, String> meta = new HashMap<>();
+
+                            	Pattern pattern = Pattern.compile("screen_\\d+_(\\w+)_\\d+");
+                                java.util.regex.Matcher matcher = pattern.matcher(entry.getKey());
+                                while (matcher.find()) {
+                                    String key = matcher.group(1); 
+                                    meta.put("label",key);
+                                }
+
+
+                                meta.put("key", entry.getKey());
+                                meta.put("value", String.valueOf(entry.getValue()));
+                                meta.put("type", "Payload");
+                                fieldMeta.add(meta);
+                            }
                             }
                         }
                     }
+				
                 } 
-				else if (isFieldType(type)) {
+				/*else if (isFieldType(type)) {
 					String label = (String) child.get("label");
 					label = label.replace(" ", "_");
 					String key = "screen_" + screenIndex + "_" + type + "_" + inputIndex;
@@ -427,7 +405,7 @@ public class ThirdPartyTemplateManager {
 
 					Map<String, String> meta = new HashMap<>();
 					meta.put("key", key);
-					meta.put("key2", key2);
+					//meta.put("key2", key2);
 					meta.put("label", label);
 					meta.put("type", type);
 					if (child.containsKey("data-source")) {
@@ -437,15 +415,15 @@ public class ThirdPartyTemplateManager {
 
 					fieldMeta.add(meta);
 					inputIndex++;
-				}
+				}*/
 			}
 		}
 	}
 
-	private static boolean isFieldType(String type) {
+	/*private static boolean isFieldType(String type) {
 		return "TextInput".equals(type) || "RadioButtonsGroup".equals(type) || "DatePicker".equals(type)
 				|| "Dropdown".equals(type) || "CheckBoxGroup".equalsIgnoreCase(type) || "OptIn".equalsIgnoreCase(type)
 				|| "textArea".equalsIgnoreCase(type);
-	}
+	}*/
 
 }
