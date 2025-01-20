@@ -83,7 +83,7 @@ public class TmplHSMController {
 		if (sync) {
 			thirdPartyTmplManager.refreshWA360Templates(channelConfig);
 		}
-		List<HSMTemplate3rdParty> templates = thirdPartyTmplManager.getTemplates(channelConfig, templateCode);
+		//List<HSMTemplate3rdParty> templates = thirdPartyTmplManager.getTemplates(channelConfig, templateCode);
 
 		if (channelConfig.getChannelType().equalsIgnoreCase("wacfb")) {
 			listFlows(channelId, sync);

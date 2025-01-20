@@ -21,6 +21,7 @@ public class PMArgs implements SessionId, Serializable {
 	private Contactable contact;
 	private MapModel data;
 	private Object params;
+	private String note;
 
 	public MapModel data() {
 		if (this.data == null) {
@@ -36,6 +37,11 @@ public class PMArgs implements SessionId, Serializable {
 
 	public PMArgs sessionId(String sessionId) {
 		this.sessionId = sessionId;
+		return this;
+	}
+
+	public PMArgs note(String note) {
+		this.note = note;
 		return this;
 	}
 
@@ -169,5 +175,13 @@ public class PMArgs implements SessionId, Serializable {
 	public PMArgs assignToSkillCodes(List<String> skillCodes) {
 		this.assignToSkillCodes = skillCodes;
 		return this;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
 	}
 }

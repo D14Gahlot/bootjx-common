@@ -1,4 +1,4 @@
-package com.boot.jx.common.api;
+package com.boot.jx.test.api;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -19,18 +19,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.http.ProxyService;
 import com.boot.jx.logger.LoggerService;
 import com.boot.model.MapModel;
-import com.boot.utils.ArgUtil;
 
 import io.swagger.annotations.ApiOperation;
 
 @Controller
-public class AppProxyController {
+public class TestProxyController {
 
-	private static final Logger LOGGER = LoggerService.getLogger(AppProxyController.class);
+	private static final Logger LOGGER = LoggerService.getLogger(TestProxyController.class);
 
 	// private final RestTemplate restTemplate;
 	@Autowired
@@ -42,20 +40,7 @@ public class AppProxyController {
 	@Value("${mry.scriptus.url}")
 	private String scriptusUrl;
 
-	@Autowired(required = false)
-	private AppAuthModels.AppCommonAuthUser appCommonAuthUser;
-
 	private Map<String, String> addHeaders(Map<String, String> headers) {
-		if (ArgUtil.is(appCommonAuthUser)) {
-			if (ArgUtil.is(appCommonAuthUser.getProfile())) {
-				headers.put("x-agent-code", appCommonAuthUser.getProfile().code());
-			} else {
-				LOGGER.warn("appCommonAuthUser.getProfile() is null");
-			}
-			headers.put("x-agent-user", appCommonAuthUser.getAuthUser());
-		} else {
-			LOGGER.warn("appCommonAuthUser is null");
-		}
 		headers.put("tnt", AppContextUtil.getTenant());
 		return headers;
 	}
@@ -115,8 +100,7 @@ public class AppProxyController {
 			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
 		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
 		return MapModel.fromSafe(service
-				.forwardRequestNoRetry("/pub/", scriptusUrl, body, additioalHeaders, request, response)
-				.getBody());
+				.forwardRequestNoRetry("/pub/", scriptusUrl, body, additioalHeaders, request, response).getBody());
 	}
 
 }

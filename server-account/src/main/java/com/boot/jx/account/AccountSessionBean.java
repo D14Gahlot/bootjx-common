@@ -16,7 +16,8 @@ import com.boot.utils.ArgUtil;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class AccountSessionBean extends AppAuthModels.AppCommonAuthUser implements Serializable, JsonIgnoreUnknown, JsonIgnoreNull {
+public class AccountSessionBean extends AppAuthModels.AppCommonAuthUser
+		implements Serializable, JsonIgnoreUnknown, JsonIgnoreNull {
 
 	private static final long serialVersionUID = 3090820592497487481L;
 	private BusinessUserDoc account;
@@ -43,7 +44,7 @@ public class AccountSessionBean extends AppAuthModels.AppCommonAuthUser implemen
 			return false;
 		}
 
-		if (this.role().contains(PMConstants.USER_ROLE.DUPER_USER)) {
+		if (this.hasRoleAny(PMConstants.USER_ROLE.CAN_ACCESS_ALL_DOMAINS)) {
 			return true;
 		}
 

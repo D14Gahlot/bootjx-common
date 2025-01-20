@@ -1,12 +1,16 @@
 package com.boot.jx.admin.manager;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,6 +48,7 @@ import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.store.ContactStore;
 import com.boot.jx.rest.RestService;
+import com.boot.jx.utils.CommonUtils;
 import com.boot.model.MapModel;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
@@ -497,9 +502,18 @@ public class CustomerMasterFldMgr {
 	/** profile search **/
 
 	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
-	    int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
+	   // int limit = searchQry.getPageSize() == 0 ? 25 : searchQry.getPageSize();
 	    String sortBy = ArgUtil.parseAsString(searchQry.getSortBy(), "created.stamp");
 	    String sortdir = ArgUtil.parseAsString(searchQry.getSortDir(), "DESC");
+	    
+	    
+	    
+	    int pageNo = searchQry.getPageNo() > 0 ? searchQry.getPageNo() : 0; // Default to 0 if page number is not set
+	    int limit = searchQry.getPageSize() > 0 ? searchQry.getPageSize() : 25; // Default page size
+	    int skip = pageNo * limit; // Calculate skip for pagination
+	    
+	    
+	    
 	    List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
 	    
 	    //Direction.fromString(sortDir)
@@ -531,13 +545,29 @@ public class CustomerMasterFldMgr {
 	                case "name.formattedName":
 	                    orCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
 	                    break;
-
 	                case "code":
 	                    orCriteriaList.add(createCriteria("code", src.getOperator(), src.getValue()));
 	                    break;
-
 	                default:
-	                    orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
+	                	String fldType =checkFieldType(src.getKey());
+	                	if(fldType!=null && fldType.equalsIgnoreCase("date")) {
+	                		String valueStr =src.getValue().toString();
+	                		if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 1) {
+	        	        		 valueStr = src.getValue().toString().replaceAll("[\\[\\]]", "");
+	        	        		 orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), CommonUtils.getDateWithTS(valueStr)));
+	                		}else {
+	                			List<?> dateRange = (List<?>) src.getValue();
+	        	                Object startDate = CommonUtils.getDateWithTS(dateRange.get(0).toString());
+	        	                Object endDate = CommonUtils.getDateWithTS(dateRange.get(1).toString());
+	        	                List<Object> lst =new ArrayList<>();
+	        	                lst.add(startDate);
+	        	                lst.add(endDate);
+	                			orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), lst));
+	                		}
+	                		
+	                	}else {
+	                		orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
+	                	}
 	                    break;
 	            }
 	        }
@@ -550,17 +580,21 @@ public class CustomerMasterFldMgr {
 	        }
 	    }
 
+	  
 	    // Build the final Mongo query with AND criteria
 	    MongoQueryBuilder<CustomerProfileDoc> qb = null;
 	    if (ArgUtil.is(andCriteriaList)) {
 	        qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
 	            .where(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])))
 	            .sortBy(sortBy,Direction.fromString(sortdir))
-	            .limit(limit);
+	            .limit(limit)
+	            .skip(skip);
 	    } else {
 	        qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
 	            .sortBy(sortBy,Direction.fromString(sortdir))
-	            .page(searchQry.getPageNo(), searchQry.getPageSize());
+	            .limit(limit) // Apply limit for page size
+	            .skip(skip); // Apply skip for the correct page
+	           // .page(searchQry.getPageNo(), searchQry.getPageSize());
 	         
 	    }
 
@@ -568,8 +602,95 @@ public class CustomerMasterFldMgr {
 	    return contactStore.find(qb);
 	}
 
-
+	
 	private Criteria createCriteria(String key, String operation, Object value) {
+	    switch (operation) {
+	        case "=":
+	        case "EQ":
+	        	if(value instanceof List<?>) {
+	        		String valueStr = value.toString().replaceAll("[\\[\\]]", "");
+	        		return Criteria.where(key).is(valueStr);
+	        	}else {
+	        		return Criteria.where(key).is(value);
+	        	}
+	        case ">":
+	        case "GT":
+	            return Criteria.where(key).gt(value);
+	        case "<":
+	        case "LT":
+	            return Criteria.where(key).lt(value);
+	        case ">=":
+	        case "GTE":
+	            return Criteria.where(key).gte(value);
+	        case "<=":
+	        case "LTE":
+	            return Criteria.where(key).lte(value);
+	        case "!=":
+	        case "NE":
+	            return Criteria.where(key).ne(value);
+	        case "STARTS_WITH": // Criteria for name starts with a specific prefix
+	            return Criteria.where(key).regex("^" + value, "i"); // Case-insensitive search
+	        case "END_WITH": // Criteria for name ends with a specific suffix
+	            return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
+	        case "ne": // Criteria for field is not empty
+	            return Criteria.where(key).ne("").and(key).ne(null);
+	        case "IN": // Criteria for matching any or all elements
+	            return Criteria.where(key).in(value);
+	        case "ALL_MATCH": // Criteria for matching all elements
+	            return Criteria.where(key).all(value);
+	        case "ANY_MATCH":
+	            return Criteria.where(key).regex(".*" + value + ".*", "i"); // Case-insensitive search
+	        case "BEFORE": // Criteria for dates before a certain date
+	            if (value instanceof Date) {
+	                return Criteria.where(key).lt(value);
+	            }else {
+	            	return Criteria.where(key).lt(value);
+	            }
+	        case "ON_OR_BEFORE": // Criteria for dates before a certain date
+	            if (value instanceof Date) {
+	                return Criteria.where(key).lte(value);
+	            }else {
+	            	return Criteria.where(key).lte(value);
+	            }   
+	        case "AFTER": // Criteria for dates after a certain date
+	            if (value instanceof Date) {
+	                return Criteria.where(key).gt(value);
+	            }else {
+	            	return Criteria.where(key).gt(value);
+	            }
+	        case "ON_OR_AFTER": // Criteria for dates after a certain date
+	            if (value instanceof Date) {
+	                return Criteria.where(key).gte(value);
+	            }else {
+	            	return Criteria.where(key).gte(value);
+	            } 
+	        case "BETWEEN": // Criteria for dates between two dates
+	            if (value instanceof List<?> && ((List<?>) value).size() == 2) {
+	                List<?> dateRange = (List<?>) value;
+	                Object startDate = dateRange.get(0);
+	                Object endDate = dateRange.get(1);
+	                if (startDate instanceof Date && endDate instanceof Date) {
+	                    return Criteria.where(key).gte(startDate).lte(endDate);
+	                }else if(startDate instanceof String && endDate instanceof String) {
+	                	 return Criteria.where(key).gte(startDate).lte(endDate);
+	                    //return Criteria.where(key).gte(getDate((String)startDate)).lte(getDate((String)endDate));
+	                }else if(startDate instanceof Number && endDate instanceof Number) {
+	                	 return Criteria.where(key).gte(startDate).lte(endDate);
+		                   
+		              }else {	                
+	                    throw new IllegalArgumentException("Both start and end dates in 'BETWEEN' must be Date objects");
+	                }
+	            } else {
+	                throw new IllegalArgumentException("Value for 'BETWEEN' must be a List containing two Date objects");
+	            }
+	        default:
+	            throw new IllegalArgumentException("Invalid operation: " + operation);
+	    }
+	   
+	}
+
+
+	private Criteria createCriteriaV1(String key, String operation, Object value) {
 		switch (operation) {
 		case "=":
 		case "EQ":
@@ -634,9 +755,14 @@ public class CustomerMasterFldMgr {
 
 	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
 		if (ArgUtil.is(reqDto.getId())) {
-			MongoQueryBuilder<ProfileFilterMasterDoc> builder = MongoQueryBuilder
-					.collection(ProfileFilterMasterDoc.class).whereId(reqDto.getId());
-			commonMongoTemplate.remove(builder.getQuery(), ProfileFilterMasterDoc.class);
+			
+			 List<String> idList = Arrays.stream(reqDto.getId().split(","))
+	                 .collect(Collectors.toList());
+			for(String str :idList) {
+				MongoQueryBuilder<ProfileFilterMasterDoc> builder = MongoQueryBuilder
+						.collection(ProfileFilterMasterDoc.class).whereId(str);
+				commonMongoTemplate.remove(builder.getQuery(), ProfileFilterMasterDoc.class);
+			}
 		}
 		return fetchProfileFilterGroup(null,null,10,0,null,null);
 	}
@@ -659,6 +785,39 @@ public class CustomerMasterFldMgr {
 			return contactStore.find(qb);
 	}
 
-	
+private Date getDate(String value) {
+	try {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		 // Parse the string to a Date object
+        Date date = sdf.parse(value);
+        return date;
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+	return new Date();
+}
+
+private String getFileName(String additionalInfo) {
+	String fldCode = Arrays.stream(additionalInfo.split("\\.")).skip(1).findFirst().orElse(additionalInfo);
+	return fldCode;
+}
+
+public String checkFieldType(String code) {
+	String objType = null;
+	code = getFileName(code);
+	if (ArgUtil.is(code)) {
+		Query qryQuery = new Query();
+		qryQuery.addCriteria(Criteria.where("code").is(code).and("active").is(true));
+		List<CustomerFieldMasterDoc> cmFieldDoc = commonMongoTemplate.find(qryQuery, CustomerFieldMasterDoc.class);
+		if (cmFieldDoc != null && !cmFieldDoc.isEmpty()) {
+			Object fldType = cmFieldDoc.get(0).getType();
+			if (ArgUtil.is(fldType)) {
+				objType = ArgUtil.parseAsT(fldType, new String(), false);
+			}
+		}
+		return objType;
+	}
+	return objType;
+}
 
 }

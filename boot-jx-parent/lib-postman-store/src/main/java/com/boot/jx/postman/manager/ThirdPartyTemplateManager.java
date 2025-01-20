@@ -3,9 +3,14 @@ package com.boot.jx.postman.manager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import org.reflections.util.FilterBuilder.Matcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -22,6 +27,7 @@ import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.tpo.WABAFlows;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelBasedFactory;
 import com.boot.jx.postman.wa360.WA360Client;
 import com.boot.jx.postman.wa360.WA360Template;
 import com.boot.jx.postman.wacfb.WacfbClient;
@@ -142,9 +148,53 @@ public class ThirdPartyTemplateManager {
 		}
 		MongoQueryBuilder<HSMTemplate3rdParty> q2 = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 				.where(Criteria.where("channelId").is(toChannelId));
+	
 		return commonMongoTemplate.find(q2);
 	}
+    /*
+	public HSMTemplate3rdParty migrateWABATemplate(HSMTemplate3rdParty fromTemplate, String toChannelId) {
+	    Contactable channelInfo = PostManUtil.parseChannelId(toChannelId);
+	    HSMTemplate3rdParty newTemp = JsonUtil.deepCopy(fromTemplate, HSMTemplate3rdParty.class);
+	    newTemp.setChannelId(toChannelId);
+	    newTemp.setChannelType(channelInfo.getChannelType());
+	    newTemp.setContactType(channelInfo.getContactType());
 
+	    if (fromTemplate.getVarMap() != null) {
+	        newTemp.setVarMap(new HashMap<>(fromTemplate.getVarMap()));
+	    } else {
+	        newTemp.setVarMap(null);
+	    }
+
+	    return newTemp;
+	}
+
+	public List<HSMTemplate3rdParty> migrateWABATemplate(String fromChannelId, String toChannelId) {
+	    MongoQueryBuilder<HSMTemplate3rdParty> fromQuery = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+	            .where(Criteria.where("channelId").is(fromChannelId));
+	    List<HSMTemplate3rdParty> fromTemplates = commonMongoTemplate.find(fromQuery);
+
+	    MongoQueryBuilder<HSMTemplate3rdParty> toQuery = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
+	            .where(Criteria.where("channelId").is(toChannelId));
+	    List<HSMTemplate3rdParty> toTemplates = commonMongoTemplate.find(toQuery);
+
+	    List<String> toTemplateIds = new ArrayList<>();
+	    for (HSMTemplate3rdParty template : toTemplates) {
+	        toTemplateIds.add(template.getTemplate() + "_" + template.getLang());
+	    }
+
+        for (HSMTemplate3rdParty fromTemplate : fromTemplates) {
+	        String fromTemplateIds = fromTemplate.getTemplate() + "_" + fromTemplate.getLang();
+
+	        if (!toTemplateIds.contains(fromTemplateIds)) {
+	            HSMTemplate3rdParty newTemp = migrateWABATemplate(fromTemplate, toChannelId);
+	            commonMongoTemplate.save(newTemp);
+	        }
+	    }
+//if template is there not varmap- copy varmap
+	    
+	    return commonMongoTemplate.find(toQuery);
+	}
+*/
 	public List<HSMTemplate3rdParty> getTemplates(ChannelConfig channelConfig, String code) {
 		MongoQueryBuilder<HSMTemplate3rdParty> q = MongoQueryBuilder.collection(HSMTemplate3rdParty.class)
 				.where(Criteria.where("channelId").is(channelConfig.getChannelId()));
@@ -260,7 +310,9 @@ public class ThirdPartyTemplateManager {
 				Map<String, Object> jsonResponse = objectMapper.readValue(jsonResponseString,
 						new TypeReference<Map<String, Object>>() {
 						});
+
 				List<Map<String, String>> fieldMe = fetchFieldMeta(jsonResponse);
+
 
 				String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 				WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
@@ -280,6 +332,8 @@ public class ThirdPartyTemplateManager {
 		}
 	}
 
+	
+	
 	public static List<Map<String, String>> fetchFieldMeta(Map<String, Object> jsonResponse) throws IOException {
 		List<Map<String, String>> fieldMeta = new ArrayList<>();
 		List<Map<String, Object>> screens = (List<Map<String, Object>>) jsonResponse.get("screens");
@@ -287,6 +341,11 @@ public class ThirdPartyTemplateManager {
 		if (screens != null) {
 			for (int i = 0; i < screens.size(); i++) {
 				Map<String, Object> screen = screens.get(i);
+				boolean lastScreen=false;
+				if(i==screen.size()-1)
+				{
+					lastScreen=true;
+				}
 				Map<String, Object> layout = (Map<String, Object>) screen.get("layout");
 				if (layout != null) {
 					fetchChildren((List<Map<String, Object>>) layout.get("children"), fieldMeta, i);
@@ -309,12 +368,44 @@ public class ThirdPartyTemplateManager {
 					if (childChildren instanceof List) {
 						fetchChildren((List<Map<String, Object>>) childChildren, fieldMeta, screenIndex);
 					}
-				} else if (isFieldType(type)) {
+				}
+				else if ("Footer".equals(type)) {
+                    Map<String, Object> onClickAction = (Map<String, Object>) child.get("on-click-action");
+                    if (onClickAction != null) {
+                        Map<String, Object> payload = (Map<String, Object>) onClickAction.get("payload");
+                        if (payload != null) {
+                        	
+                            for (Map.Entry<String, Object> entry : payload.entrySet()) {
+                            	if (!String.valueOf(entry.getValue()).contains("data.")) {
+                                Map<String, String> meta = new HashMap<>();
+
+                            	Pattern pattern = Pattern.compile("screen_\\d+_(\\w+)_\\d+");
+                                java.util.regex.Matcher matcher = pattern.matcher(entry.getKey());
+                                while (matcher.find()) {
+                                    String key = matcher.group(1); 
+                                    meta.put("label",key);
+                                }
+
+
+                                meta.put("key", entry.getKey());
+                                meta.put("value", String.valueOf(entry.getValue()));
+                                meta.put("type", "Payload");
+                                fieldMeta.add(meta);
+                            }
+                            }
+                        }
+                    }
+				
+                } 
+				/*else if (isFieldType(type)) {
 					String label = (String) child.get("label");
+					label = label.replace(" ", "_");
 					String key = "screen_" + screenIndex + "_" + type + "_" + inputIndex;
+					String key2 = "screen_" + screenIndex + "_" + label + "_" + inputIndex;
 
 					Map<String, String> meta = new HashMap<>();
 					meta.put("key", key);
+					//meta.put("key2", key2);
 					meta.put("label", label);
 					meta.put("type", type);
 					if (child.containsKey("data-source")) {
@@ -324,15 +415,15 @@ public class ThirdPartyTemplateManager {
 
 					fieldMeta.add(meta);
 					inputIndex++;
-				}
+				}*/
 			}
 		}
 	}
 
-	private static boolean isFieldType(String type) {
+	/*private static boolean isFieldType(String type) {
 		return "TextInput".equals(type) || "RadioButtonsGroup".equals(type) || "DatePicker".equals(type)
 				|| "Dropdown".equals(type) || "CheckBoxGroup".equalsIgnoreCase(type) || "OptIn".equalsIgnoreCase(type)
 				|| "textArea".equalsIgnoreCase(type);
-	}
+	}*/
 
 }

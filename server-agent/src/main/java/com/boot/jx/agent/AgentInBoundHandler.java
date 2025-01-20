@@ -114,7 +114,6 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 				PMConfigurationObject agentSchedule = pmEnvironment
 						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_SCHEDULE);
 
-
 				MapModel sceduleMap = commonServiceClient.getScheduleStatus(agentSchedule.asString());
 				if (sceduleMap.isEmpty() || sceduleMap.pathEntry("flags.isActive").asBoolean()) {
 					isWorkingDay = true;
@@ -190,7 +189,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		assignSessionToAgent(new PMArgs().contact(pmArgs.contact())
 				.assignToDeptCode(ArgUtil.nonEmpty(pmArgs.getAssignToDeptCode(), props.getString("deptCode")))
 				.assignToAgentCode(ArgUtil.nonEmpty(pmArgs.getAssignToAgentCode(), props.getString("agentCode")))
-				.assignToSkillCodes(pmArgs.getAssignToSkillCodes()), sessionDoc);
+				.note(pmArgs.getNote()).assignToSkillCodes(pmArgs.getAssignToSkillCodes()), sessionDoc);
 		sessionEventTimer.setMitelRoutingCheck(sessionDoc.getSessionId(), targetAppQueue);
 	}
 

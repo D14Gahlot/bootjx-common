@@ -280,8 +280,9 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 	public ChatSessionDoc saveSession(ChatSessionDoc chatSessionDoc) {
 		try {
+			ChatSessionQuery query = new ChatSessionQuery(chatSessionDoc);
 			if (ArgUtil.isEmpty(chatSessionDoc.getStartSessionStamp()) || chatSessionDoc.getStartSessionStamp() == 0L) {
-				chatSessionDoc.setStartSessionStamp(System.currentTimeMillis());
+				query.setStartSessionStamp(System.currentTimeMillis());
 			}
 			super.save(chatSessionDoc);
 		} catch (Exception e) {
@@ -340,16 +341,23 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	}
 
 	public ChatSessionDoc closeSession(ChatSessionDoc chatSessionDoc) {
-		chatSessionDoc.setCloseSessionStamp(System.currentTimeMillis());
-		chatSessionDoc.setActive(false);
 
-		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
-				.whereId(chatSessionDoc.getSessionId());
-		builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
-		builder.set("active", chatSessionDoc.isActive());
-		builder.set("status", PMConstants.CHAT_STATUS.CLOSED);
-		builder.set("summary.assignedToAtClose", chatSessionDoc.getAssignedToAgent());
-		super.updateFirst(builder.getQuery(), builder.getUpdate(), ChatSessionDoc.class);
+		ChatSessionQuery query = new ChatSessionQuery(chatSessionDoc);
+
+		// chatSessionDoc.setCloseSessionStamp(System.currentTimeMillis())
+		// chatSessionDoc.setActive(false);
+
+//		MongoQueryBuilder<ChatSessionDoc> builder = MongoQueryBuilder.collection(ChatSessionDoc.class)
+//				.whereId(chatSessionDoc.getSessionId());
+		// builder.set("closeSessionStamp", chatSessionDoc.getCloseSessionStamp());
+		query.setCloseSessionStamp(System.currentTimeMillis());
+		// builder.set("active", chatSessionDoc.isActive());
+		query.setActive(false);
+		// query.set("status", PMConstants.CHAT_STATUS.CLOSED);
+		query.setStatus(PMConstants.CHAT_STATUS.CLOSED);
+		// query.set("summary.assignedToAtClose", chatSessionDoc.getAssignedToAgent());
+		query.setSummary("assignedToAtClose", chatSessionDoc.getAssignedToAgent());
+		super.updateFirst(query.getQuery(), query.getUpdate(), ChatSessionDoc.class);
 
 		return chatSessionDoc;
 	}
@@ -413,25 +421,29 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 	public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 
+		ChatSessionQuery builder = new ChatSessionQuery(chatSessionDoc);
+		
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
-			chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
+			//chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
+			builder.setAssignedDeptStamp(System.currentTimeMillis());
 		}
 		chatSessionDoc.setMode(PMConstants.CHAT_MODE.AGENT.toString());
 		chatSessionDoc.setAssignedToDept(agentDept);
-		chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
+		//chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
+		builder.setAssignedAgentStamp(System.currentTimeMillis());
 		chatSessionDoc.setAssignedToAgent(agentCode);
 		// chatSessionDoc.setAssignedToQueue(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 		if (chatSessionDoc.getAgentSessionStamp() == 0L) {
 			chatSessionDoc.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
 		}
 
-		ChatSessionQuery builder = new ChatSessionQuery(chatSessionDoc.getSessionId());
+		//ChatSessionQuery builder = new ChatSessionQuery(chatSessionDoc.getSessionId());
 		// builder.set("mode", chatSessionDoc.getMode());
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
-		builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
+		//builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
-		builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
+		//builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
 		builder.set("agentSessionStamp", chatSessionDoc.getAgentSessionStamp());
 		updateFirst(builder);
 	}
@@ -622,7 +634,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 				// .skip(1)
 				.skipDBRef();
 
-		//System.out.println("===" + cmqb.getQuery());
+		// System.out.println("===" + cmqb.getQuery());
 
 		return super.findOne(cmqb.getQuery(), ChatSessionDoc.class);
 	}

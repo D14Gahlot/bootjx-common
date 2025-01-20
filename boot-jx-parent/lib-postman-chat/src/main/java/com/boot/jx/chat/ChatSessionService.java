@@ -201,7 +201,7 @@ public class ChatSessionService {
 	}
 
 	public InBoundEvent routeSession(ChatSessionDoc sessionDoc, PMArgs pmArgs) {
-		InBoundEvent event = chatSessionManager.assignToQueue(sessionDoc, pmArgs.getAssignToQueueCode());
+		InBoundEvent event = chatSessionManager.assignToQueue(sessionDoc, pmArgs);
 		event.sessionRouted.params = pmArgs.getParams();
 		if (ArgUtil.is(inBoundHandler)) {
 			inBoundHandler.onSessionRouteAsync(event, sessionDoc, pmArgs);

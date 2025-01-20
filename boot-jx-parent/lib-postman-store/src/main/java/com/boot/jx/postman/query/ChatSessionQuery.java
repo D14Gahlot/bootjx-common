@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.mongo.CommonMongoQueryBuilder.DocQueryBuilder;
+import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
@@ -62,9 +63,21 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 		return this;
 	}
 
+	public ChatSessionQuery setStatus(CHAT_STATUS status) {
+		this.doc.setStatus(status.toString());
+		this.set("status", status.toString());
+		return this;
+	}
+
 	public ChatSessionQuery setStamp(String key, long object) {
 		this.doc.stamps().put(key, object);
 		this.set("stamps." + key, object);
+		return this;
+	}
+
+	public ChatSessionQuery setSummary(String key, Object object) {
+		this.doc.summary().put(key, object);
+		this.set("summary." + key, object);
 		return this;
 	}
 
@@ -174,6 +187,30 @@ public class ChatSessionQuery extends DocQueryBuilder<ChatSessionDoc> {
 	public ChatSessionQuery setTpMeta(Map<String, Object> tpMeta) {
 		this.doc.setTpMeta(tpMeta);
 		this.set("tpMeta", tpMeta);
+		return this;
+	}
+
+	public ChatSessionQuery setStartSessionStamp(long currentTimeMillis) {
+		this.doc.setStartSessionStamp(currentTimeMillis);
+		this.doc.stamps().put("sessionStart", currentTimeMillis);
+		return this;
+	}
+
+	public ChatSessionQuery setCloseSessionStamp(long currentTimeMillis) {
+		this.doc.setCloseSessionStamp(currentTimeMillis);
+		this.doc.stamps().put("sessionClose", currentTimeMillis);
+		return this;
+	}
+
+	public ChatSessionQuery setAssignedDeptStamp(long currentTimeMillis) {
+		this.doc.setAssignedDeptStamp(currentTimeMillis);
+		this.doc.stamps().put("assignedDept", currentTimeMillis);
+		return this;
+	}
+
+	public ChatSessionQuery setAssignedAgentStamp(long currentTimeMillis) {
+		this.doc.setAssignedAgentStamp(currentTimeMillis);
+		this.doc.stamps().put("assignedAgent", currentTimeMillis);
 		return this;
 	}
 

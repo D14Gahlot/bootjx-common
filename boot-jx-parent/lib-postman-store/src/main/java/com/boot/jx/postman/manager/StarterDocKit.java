@@ -18,11 +18,13 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.mongo.MongoUtils;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMConstants.APP_TYPE;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.client.CommonServiceClient;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
@@ -239,19 +241,27 @@ public class StarterDocKit {
 		createPredefinedMstField();
 	}
 
-	public void domain() {
-		String domain_created_version = "v3";
-		PMConfigurationObject version = pmEnvironment.local().keyEntry("domain.created.version");
-		if (!version.is(domain_created_version)) {
-			version.setValue(domain_created_version);
+	public boolean isFlagUpdated(String flagKey, String flagValue) {
+		PMConfigurationObject version = pmEnvironment.local().keyEntry(flagKey);
+		if (!version.is(flagValue)) {
+			version.setValue(flagValue);
 			configManager.save(version);
+			return true;
+		}
+		return false;
+	}
+
+	public void domain() {
+		if (isFlagUpdated("domain.created.version", "v3")) {
 			onlyOncePerDomain();
-			commonServiceClient.publishDomainCreatedEvent(domain_created_version);
+			commonServiceClient.publishDomainCreatedEvent("v3");
 			if (ArgUtil.is(configManager)) {
 				configManager.refresh();
 			}
 		}
-
+		if (isFlagUpdated("domain.indexes.session", "v1")) {
+	//		MongoUtils.cleanupIndexes(commonMongoTemplate, "CHAT_SESSION", ChatSessionDoc.class);
+		}
 	}
 
 	@PostConstruct

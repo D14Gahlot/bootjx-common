@@ -16,11 +16,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampDoc;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.UpdatedTimeStampIndexSupport;
+import com.boot.jx.postman.PMEnvironment.FullView;
+import com.boot.jx.postman.PMEnvironment.SummaryView;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "CHAT_SESSION")
 @TypeAlias("ChatSessionDoc")
@@ -65,7 +68,6 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	private String lane;
 
 	@Deprecated
-	@Indexed
 	private String contactName;
 
 	private ContactDetailDoc contact;
@@ -93,6 +95,7 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 
 	@Indexed
 	private long startSessionStamp;
+	@Indexed
 	private long fistResponseStamp;
 
 	@Indexed
@@ -106,12 +109,17 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	@Indexed
 	private long lastOutGoingStamp;
 
+	@Indexed
 	private long assignedDeptStamp;
 	@Indexed
 	private long assignedAgentStamp;
 
+	@Indexed
 	private long lastResponseStamp;
+
 	private long resolveSessionStamp;
+
+	@Indexed
 	private long closeSessionStamp;
 
 	/**
@@ -136,7 +144,9 @@ public class ChatSessionDoc extends UpdatedTimeStampDoc implements Serializable 
 	private Map<String, Object> meta;
 	private Map<String, Object> summary;
 
+	@JsonView(FullView.class)
 	private Map<String, ChatMessageDTO> msg;
+
 	private Map<String, Long> stamps;
 	private Map<String, Long> read;
 	private Map<String, Object> feedback;

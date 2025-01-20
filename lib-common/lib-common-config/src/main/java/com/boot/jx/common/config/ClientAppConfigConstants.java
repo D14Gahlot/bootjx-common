@@ -213,8 +213,17 @@ public class ClientAppConfigConstants {
 		APP_CONFIGS.put(APP_TYPE.AGENT_GPT, new ConfigMeta[] { new ConfigMeta()
 				.inputType(INPUT_TYPE.MESSAGE, MESSAGE_TYPE.INFO).title("AgentGPT").desc("This is your ChatGPT Agent"//
 				).group("About App"), //
-				new ConfigMeta().title("Introduction").path("props.context").inputType(INPUT_TYPE.TEXTAREA)
-						.group("About Me")//
+				new ConfigMeta().group("About Me").title("Introduction").path("props.context")
+						.inputType(INPUT_TYPE.TEXTAREA), //
+				new ConfigMeta().group("About Me").title("Knowledge Base").path("props.knowbase")
+						.optionsSource("getx:/api/tmpl/knowbase").optionsKey("code").optionsLabel("title"),
+				new ConfigMeta().group("About Me").title("Instructions").path("props.instructions")
+						.inputType(INPUT_TYPE.TEXTAREA), //
+				new ConfigMeta().group("Config").title("Before Transfer Template").path("props.before_transfer")
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+				new ConfigMeta().group("Config").title("Credentials").path("props.creds")
+						.optionsSource("getx:/api/config/tokenkey").optionsKey("key").optionsLabel("description"), //
+				//
 		});
 
 		APP_CONFIGS.put(APP_TYPE.APP_SCRIPT,

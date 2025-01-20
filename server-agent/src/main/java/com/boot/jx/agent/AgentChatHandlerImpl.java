@@ -314,7 +314,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	@Override
 	public PMArgs doAssign(ChatSessionDoc chatSessionDoc, PMArgs params) {
 
-		if (!ArgUtil.is(chatSessionDoc.getAssignedToQueue())) {
+		if (!ArgUtil.is(chatSessionDoc.getAssignedToQueue()) && !ArgUtil.is(params.getAssignToQueueCode())) {
 			chatSessionManager.assignToQueue(chatSessionDoc,
 					environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
 							.asString(PMConstants.DEFAULT.AGENT_QUEUE_CODE));
@@ -345,6 +345,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 			}
 
 		}
+
+//		if (ArgUtil.is(params.getNote())) {
+//			logManager.note(chatSessionDoc, new OutboxMessage().message(params.getNote()));
+//		}
 
 		stompTunnelService.sendToAll(PostManUtil.ON_DEPT_ASSIGN_TOPIC(params.getAssignToDeptCode()), chatArchiveBuilder
 				.sessionDTO().from(chatSessionDoc).withContact().isAssigned(params.getAssignToAgentCode()).get());
