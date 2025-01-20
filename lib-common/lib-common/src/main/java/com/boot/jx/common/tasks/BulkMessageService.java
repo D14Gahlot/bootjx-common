@@ -104,8 +104,8 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	public void registerJobAndTriggerSummary(BatchJob job) {
 		registerJob(job);
-		tunnelService.task("CAMPAIGN_CREATED",
-				MapModel.createInstance().putAll(job.data()).put("bulkSessionId", job.getJobId()).toMap());
+		//tunnelService.task("CAMPAIGN_CREATED",
+		//		MapModel.createInstance().putAll(job.data()).put("bulkSessionId", job.getJobId()).toMap());
 	}
 
 	public void registerJob(BatchJob job, ChronoScheduler scheduler) {
