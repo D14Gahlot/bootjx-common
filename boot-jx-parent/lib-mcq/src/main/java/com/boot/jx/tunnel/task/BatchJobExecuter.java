@@ -22,6 +22,7 @@ import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
 import com.boot.utils.TimeUtils;
@@ -315,6 +316,22 @@ public abstract class BatchJobExecuter {
 	 */
 	public abstract boolean read(BatchJob currentBatchJob);
 
+	public BatchJob job(String jobId) {
+		BatchJob currentBatchJob = JobTaskModel.newBatchJob().jobId(jobId);
+		return jobStatus().get(currentBatchJob.jobUUID());
+	}
+
+	public BatchJob job(String jobId, MapModel defaultData) {
+		BatchJob batchJob = JobTaskModel.newBatchJob().jobId(jobId);
+		BatchJob currentBatchJob2 = jobStatus().get(batchJob.jobUUID());
+		if (ArgUtil.is(currentBatchJob2)) {
+			return currentBatchJob2;
+		}
+		batchJob.setData(defaultData.toMap());
+		return batchJob;
+
+	}
+
 	/**
 	 * 
 	 * Can be used to track overall status of job
@@ -324,6 +341,11 @@ public abstract class BatchJobExecuter {
 	 *         tallying
 	 */
 	public abstract boolean tally(BatchJob currentBatchJob);
+
+	public boolean tally(String jobId) {
+		BatchJob currentBatchJob = job(jobId);
+		return this.tally(currentBatchJob);
+	}
 
 	public String push(Tasklet tasklet) {
 		if (!ArgUtil.is(tasklet.getTenant())) {

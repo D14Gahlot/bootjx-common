@@ -69,6 +69,7 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.tunnel.ChronoScheduler;
 import com.boot.jx.tunnel.task.JobTaskModel;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
@@ -484,15 +485,13 @@ public class AdminMsgController {
 			BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
 			BatchJob job = session.getJob();
 			if (ArgUtil.not(job)) {
-				job = JobTaskModel.newBatchJob()
-						// Set Unique Job Id
-						.jobId(session.getBulkSessionId())
+				job = bulkMessageService.job(jobId, MapModel.createInstance()
 						// Contact Type for each message
-						.data("contactType", session.getContactType())
+						.put("contactType", session.getContactType())
 						// Channel for each message
-						.data("channelType", session.getChannelId())
+						.put("channelType", session.getChannelId())
 						// Lane for each message
-						.data("lane", session.getLane());
+						.put("lane", session.getLane()));
 			}
 			bulkMessageService.tally(job);
 		}
