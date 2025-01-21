@@ -42,6 +42,7 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 	private Integer messageFailedCount;
 
 	private Map<String, Long> stats;
+	private Map<String, Long> errors;
 	private Long completedStamp;
 
 	/** group key **/
@@ -52,13 +53,11 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 	private ChronoScheduler scheduler;
 
 	private BatchJob job;
-	
+
 	private Map<String, Object> campaignSummary;
-	
+
 	private List<String> groups;
 	private List<String> filters;
-
-	
 
 	@Override
 	public String getCreatedBy() {
@@ -234,7 +233,7 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 	public void setScheduler(ChronoScheduler scheduler) {
 		this.scheduler = scheduler;
 	}
-	
+
 	public Map<String, Object> getCampaignSummary() {
 		return campaignSummary;
 	}
@@ -257,6 +256,21 @@ public class BulkSessionDoc implements AuditCreateEntity, Serializable {
 
 	public void setFilters(List<String> filters) {
 		this.filters = filters;
+	}
+
+	public Map<String, Long> getErrors() {
+		return errors;
+	}
+
+	public void setErrors(Map<String, Long> errors) {
+		this.errors = errors;
+	}
+
+	public Map<String, Long> errors() {
+		if (this.errors == null) {
+			this.errors = new HashMap<String, Long>();
+		}
+		return this.errors;
 	}
 
 }
