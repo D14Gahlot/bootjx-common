@@ -70,7 +70,7 @@ public class TunnelFilterManager {
 	@Async
 	public <T> void afterTaskPublish(String topic, T messagePayload, AppContext context) {
 		if (ArgUtil.is(tunnelFilter)) {
-			tunnelFilter.afterTaskPublic(topic, messagePayload, context);
+			tunnelFilter.afterTaskPublish(topic, messagePayload, context);
 		}
 	}
 

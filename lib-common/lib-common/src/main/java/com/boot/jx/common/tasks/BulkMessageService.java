@@ -524,6 +524,25 @@ public class BulkMessageService extends BatchJobExecuter {
 		boolean completed = (totalCount == doneCount);
 
 		if (completed) {
+			QA list2 = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
+					QA.project("firstLog", QA.arrayElemAt("logs", 0)), Aggregation.unwind("firstLog"),
+					Aggregation.group("firstLog").count().as("count"));
+			MongoCursor<Document> cursor2 = mongoTemplate.collection(MessageStore.getCollectionName(contactType))
+					.aggregate(list2).iterator();
+			while (cursor2.hasNext()) {
+				Document object = cursor2.next();
+				if (ArgUtil.is(object)) {
+					String error = ArgUtil.parseAsString(object.get("_id"));
+					if (ArgUtil.is(error)) {
+						long count = ArgUtil.parseAsLong(object.get("count"), 0L);
+						doc.errors().put(error, count);
+					}
+				}
+			}
+
+		}
+
+		if (completed) {
 			doc.setCompletedStamp(System.currentTimeMillis());
 		}
 		if (!ArgUtil.areEqual(currentBatchJob.getStatus(), doc.getStatus())
