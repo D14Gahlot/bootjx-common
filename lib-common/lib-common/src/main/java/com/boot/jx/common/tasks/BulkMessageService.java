@@ -71,6 +71,7 @@ import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -486,13 +487,13 @@ public class BulkMessageService extends BatchJobExecuter {
 //				Map.class);
 
 		QA list = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
-				QA.project("statuss", QA.objectToArray("stamps")), Aggregation.unwind("statuss"),
+				QA.project("statuss", QA.objectToArray("stamps")).build(), Aggregation.unwind("statuss"),
 				Aggregation.group("statuss.k").count().as("count"));;
 
 		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 //				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
 //				MongoCursor<Document> cursor = col.aggregate(list).iterator();
-//				System.out.println(JsonUtil.toJson(list.piplines()));
+				//System.out.println(JsonUtil.toJson(list.piplines()));
 
 		MongoCursor<Document> cursor = mongoTemplate.collection(MessageStore.getCollectionName(contactType))
 				.aggregate(list).iterator();
@@ -525,8 +526,9 @@ public class BulkMessageService extends BatchJobExecuter {
 
 		if (completed) {
 			QA list2 = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
-					QA.project("firstLog", QA.arrayElemAt("logs", 0)), Aggregation.unwind("firstLog"),
+					QA.project("firstLog", QA.arrayElemAt("logs", 0)).build(), Aggregation.unwind("firstLog"),
 					Aggregation.group("firstLog").count().as("count"));
+			//System.out.println(JsonUtil.toJson(list2.piplines()));
 			MongoCursor<Document> cursor2 = mongoTemplate.collection(MessageStore.getCollectionName(contactType))
 					.aggregate(list2).iterator();
 			while (cursor2.hasNext()) {
