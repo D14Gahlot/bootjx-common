@@ -529,8 +529,8 @@ public class BulkMessageService extends BatchJobExecuter {
 					Aggregation.group("firstLog").count().as("count"));
 			MongoCursor<Document> cursor2 = mongoTemplate.collection(MessageStore.getCollectionName(contactType))
 					.aggregate(list2).iterator();
-			while (cursor.hasNext()) {
-				Document object = cursor.next();
+			while (cursor2.hasNext()) {
+				Document object = cursor2.next();
 				if (ArgUtil.is(object)) {
 					String error = ArgUtil.parseAsString(object.get("_id"));
 					if (ArgUtil.is(error)) {
