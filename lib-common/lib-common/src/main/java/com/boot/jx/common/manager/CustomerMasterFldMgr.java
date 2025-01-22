@@ -533,10 +533,12 @@ public class CustomerMasterFldMgr {
 	                case "phones":
 	                case "mobile":
 	                case "mobiles":
-	                	if(src.getOperator().equalsIgnoreCase("END_WITH")) {
-	                		orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue().toString()));
+	                	if(src.getOperator().equalsIgnoreCase("EQ")) {
+	                		orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), PhoneUtil.addPlusSign(src.getValue().toString())));
+	                	}else if(src.getOperator().equalsIgnoreCase("STARTS_WITH")) {
+	                		orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), "\\"+PhoneUtil.addPlusSign(src.getValue().toString())));
 	                	}else {
-	                		orCriteriaList.add(createCriteria("phones.phone", "ANY_MATCH", src.getValue().toString()));
+	                		orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue().toString()));
 	                	}
 	                    break;
 	                case "email":
@@ -547,10 +549,12 @@ public class CustomerMasterFldMgr {
 	                	orCriteriaList.add(createCriteria("additionalInfo.alt_emails.email", src.getOperator(), src.getValue()));
 	                    break;
 	                case "additionalInfo.alt_phones":
-	                	if(src.getOperator().equalsIgnoreCase("END_WITH")) {
-	                	orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(), src.getValue()));
+	                	if(src.getOperator().equalsIgnoreCase("EQ")) {
+	                	orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(),  PhoneUtil.addPlusSign(src.getValue().toString())));
+	                	}else if(src.getOperator().equalsIgnoreCase("STARTS_WITH")) {
+	                		orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(), "\\"+PhoneUtil.addPlusSign(src.getValue().toString())));
 	                	}else {
-	                		orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", "ANY_MATCH", src.getValue()));
+	                		orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(), src.getValue()));
 	                	}
 	                    break;       
 	                case "name":
