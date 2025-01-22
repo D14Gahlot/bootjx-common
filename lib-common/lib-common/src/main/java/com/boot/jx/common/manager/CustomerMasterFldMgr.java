@@ -58,6 +58,7 @@ import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
+import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 
 @Component
@@ -532,9 +533,12 @@ public class CustomerMasterFldMgr {
 	                case "phones":
 	                case "mobile":
 	                case "mobiles":
-	                    orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue()));
+	                	if(src.getOperator().equalsIgnoreCase("END_WITH")) {
+	                		orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue().toString()));
+	                	}else {
+	                		orCriteriaList.add(createCriteria("phones.phone", "ANY_MATCH", src.getValue().toString()));
+	                	}
 	                    break;
-
 	                case "email":
 	                case "emails":
 	                	orCriteriaList.add(createCriteria("emails.email", src.getOperator(), src.getValue()));
@@ -543,7 +547,11 @@ public class CustomerMasterFldMgr {
 	                	orCriteriaList.add(createCriteria("additionalInfo.alt_emails.email", src.getOperator(), src.getValue()));
 	                    break;
 	                case "additionalInfo.alt_phones":
+	                	if(src.getOperator().equalsIgnoreCase("END_WITH")) {
 	                	orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(), src.getValue()));
+	                	}else {
+	                		orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", "ANY_MATCH", src.getValue()));
+	                	}
 	                    break;       
 	                case "name":
 	                case "name.formattedName":
@@ -568,9 +576,20 @@ public class CustomerMasterFldMgr {
 	        	                lst.add(endDate);
 	                			orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), lst));
 	                		}
-	                		
 	                	}else {
-	                		orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
+	                		if(src.getValue() instanceof List<?>  && ((List<?>) src.getValue()).size() > 1) {
+	                			List<?> valueLst = (List<?>)src.getValue();
+	                			List<Criteria> valueCriteriaList = new ArrayList<>();
+	                	        for (Object value : valueLst) {
+	                	            valueCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), ArgUtil.parseAsT(value, null, false)));
+	                	        }
+	                	        orCriteriaList.add(new Criteria().orOperator(valueCriteriaList.toArray(new Criteria[0])));
+	                		}else if(src.getValue() instanceof List<?>  && ((List<?>) src.getValue()).size()==1) {
+	                			List<?> lstvalue =(List<?>)src.getValue(); 
+	                			orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), ArgUtil.parseAsT(lstvalue.get(0), null, false)));
+	                		}else {
+	                			orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
+	                		}
 	                	}
 	                    break;
 	            }
