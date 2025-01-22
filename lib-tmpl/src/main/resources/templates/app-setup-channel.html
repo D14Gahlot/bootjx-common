@@ -165,7 +165,7 @@
 		<tr th:each="channel: ${channels}">
 			<td width="30%"></td>
 		    <td width="40%" style="text-align:center; height: 50px; background-color: rgb(254, 255, 255);" >
-				<a th:href="${'?masterChannelId=' + channel.id}">
+				<a th:href="${OPTIONS_URL+'?masterChannelId=' + channel.id + '&domain='+ domain}">
 					<span th:text="${channel.name}"></span>
 				</a>
 			</td>

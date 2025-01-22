@@ -162,6 +162,9 @@ public class ChannelSetupController {
 			state.setDomain(domainName);
 			model.addAttribute("AUTH_URL", connector.createAuthUrl(channel, null, state));
 		}
+		model.addAttribute("OPTIONS_URL", String.format("https://%s.%s%s/ext/setup/channel", domainName,
+				pmCommonConfig.getServiceServerByRequest(), appConfig.getAppPrefix()));
+
 		return "app-setup-channel";
 
 	}
