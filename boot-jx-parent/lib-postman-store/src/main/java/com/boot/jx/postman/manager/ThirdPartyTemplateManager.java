@@ -51,7 +51,6 @@ public class ThirdPartyTemplateManager {
 	@Autowired
 	private CommonMongoTemplate commonMongoTemplate;
 	
-    static Map<String, String> meta = new HashMap<>();
 
 
 	public void refreshWA360Templates(ChannelConfig channelConfig) {
@@ -305,7 +304,6 @@ public class ThirdPartyTemplateManager {
 	        if (data != null && !data.isEmpty()) {
 	            String downloadUrl = (String) data.get(0).get("download_url");
 
-	            // Fetching JSON from download URL
 	            RestTemplate restTemplate = new RestTemplate();
 	            String jsonResponseString = restTemplate.getForObject(downloadUrl, String.class);
 
@@ -313,10 +311,8 @@ public class ThirdPartyTemplateManager {
 	            Map<String, Object> jsonResponse = objectMapper.readValue(jsonResponseString,
 	                    new TypeReference<Map<String, Object>>() {});
 
-	            // Extracting field metadata
 	            List<Map<String, String>> fieldMe = fetchFieldMeta(jsonResponse);
 
-	            // Updating WABAFlows object in MongoDB
 	            String id = String.format("%s/%s", channelConfig.getWacfb().getWabaId(), flowId);
 	            WABAFlows flow = commonMongoTemplate.findById(id, WABAFlows.class);
 
@@ -339,7 +335,6 @@ public class ThirdPartyTemplateManager {
 	        for (int i = 0; i < screens.size(); i++) {
 	            Map<String, Object> screen = screens.get(i);
 
-	            // Check if it's the last screen (if needed in logic)
 	            boolean lastScreen = i == screens.size() - 1;
 
 	            Map<String, Object> layout = (Map<String, Object>) screen.get("layout");
@@ -357,7 +352,6 @@ public class ThirdPartyTemplateManager {
 	        for (Map<String, Object> child : children) {
 	            String type = (String) child.get("type");
 
-	            // Process "Form" type
 	            if ("Form".equals(type)) {
 	                Object childChildren = child.get("children");
 	                if (childChildren instanceof List) {
@@ -373,14 +367,9 @@ public class ThirdPartyTemplateManager {
 	                            if (!String.valueOf(entry.getValue()).contains("data.")) {
 	                                String payloadKey = entry.getKey();
 
-	                                String typeFromData= findPayloadType(String.valueOf(entry.getValue()), screens);
+	                                findPayloadType(String.valueOf(entry.getValue()),payloadKey, screens, fieldMeta);
 									
-	                                meta.put("key", payloadKey);
-	                                meta.put("value", String.valueOf(entry.getValue()));
-	                               meta.put("label",typeFromData.split("/")[1]);
-	                                meta.put("type", typeFromData.split("/")[0]);
-
-	                                fieldMeta.add(meta);
+	                                
 	                            }
 	                        }
 	                    }
@@ -392,10 +381,10 @@ public class ThirdPartyTemplateManager {
 	    }
 	}
 
-	private static String findPayloadType(String payloadKey, List<Map<String, Object>> screens) {
+	private static void findPayloadType(String payloadValue, String payloadKey,List<Map<String, Object>> screens,List<Map<String, String>> fieldMeta) {
 		String fieldName=null; 
-		if (payloadKey.contains("${form.")) {
-	      fieldName  =payloadKey.replace("${form.", "").replace("}", "");
+		if (payloadValue.contains("${form.")) {
+	      fieldName  =payloadValue.replace("${form.", "").replace("}", "");
 	    }
 
 	    for (Map<String, Object> screen : screens) {
@@ -403,42 +392,46 @@ public class ThirdPartyTemplateManager {
 	        if (layout != null) {
 	            List<Map<String, Object>> children = (List<Map<String, Object>>) layout.get("children");
 	            if (children != null) {
-	                String type = searchForFieldType(fieldName, children);
-	                if (type != null) {
-	                    return type;
-	                }
-	            }
+	                searchForFieldType(fieldName,payloadKey, children, fieldMeta);
+	                	            }
 	        }
 	    }
-	    return null; 
+	     
 	}
 
-	private static String searchForFieldType(String fieldName, List<Map<String, Object>> children) {
+	private static void searchForFieldType(String fieldName,String payloadKey, List<Map<String, Object>> children,List<Map<String, String>> fieldMeta) {
 	    for (Map<String, Object> child : children) {
 	        String name = (String) child.get("name");
 	        String type = (String) child.get("type");
 	        String label=(String)child.get("label");
+	        Map<String, String> meta = new HashMap<>();
 
 	        if (fieldName.equals(name)) 
-	            return type+"/"+label;
+	        {
+	        	meta.put("key", payloadKey);
+               meta.put("label",label);
+                meta.put("type", type);
+
+               
+	        	
+	            	if (child.containsKey("data-source")) {
+	                    List<Map<String, String>> dataSource = (List<Map<String, String>>) child.get("data-source");
+	                    meta.put("data-source", dataSource != null ? dataSource.toString() : "[]");
+	                }
+	            	 fieldMeta.add(meta);
+	           
+	        }
 	        
 	       
 	      
 
 	        List<Map<String, Object>> childChildren = (List<Map<String, Object>>) child.get("children");
 	        if (childChildren != null) {
-	            String nestedType = searchForFieldType(fieldName, childChildren);
-	            if (nestedType != null) {
-	            	
-	            	if (child.containsKey("data-source")) {
-	                    List<Map<String, String>> dataSource = (List<Map<String, String>>) child.get("data-source");
-	                    meta.put("data-source", dataSource != null ? dataSource.toString() : "[]");
-	                }
-	                return nestedType;
-	            }
+	             searchForFieldType(fieldName,payloadKey, childChildren, fieldMeta);
+	            
 	        }
 	    }
-	    return null; 
+	    
 	}
 
 }
