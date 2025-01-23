@@ -756,18 +756,18 @@ public class CustomerMasterFldMgr {
 	}
 
 	public List<ProfileFilterMasterDoc> addEditProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
-		ProfileFilterMasterDoc filDoc = new ProfileFilterMasterDoc();
+		
 		
 		if(ArgUtil.is(reqDto.getFilterName())) {
-			filDoc = commonMongoTemplate.findOne(new Query(Criteria.where("filterName").is(reqDto.getFilterName())),
+			ProfileFilterMasterDoc filDocD = commonMongoTemplate.findOne(new Query(Criteria.where("filterName").is(reqDto.getFilterName())),
 					ProfileFilterMasterDoc.class);
-			if (filDoc != null) {
+			if (filDocD != null) {
 			ApiResponseUtil.throwInputException(new ApiFieldError().field("filterName").codeKey("ValidNameDuplicate")
 					.description("Filter name  already exists"));
 			}
 		}
 		
-		
+		ProfileFilterMasterDoc filDoc = new ProfileFilterMasterDoc();
 		if (ArgUtil.is(reqDto.getId())) {
 			filDoc = commonMongoTemplate.findByIdString(reqDto.getId(), ProfileFilterMasterDoc.class);
 			if (ArgUtil.is(filDoc)) {
@@ -778,6 +778,7 @@ public class CustomerMasterFldMgr {
 			commonMongoTemplate.save(filDoc);
 			}
 		}else {
+			
 			filDoc.setFilterName(reqDto.getFilterName());
 			filDoc.setFilterCriteria(reqDto.getFilterCriteria());
 			filDoc.set_filterCriteria(reqDto.get_filterCriteria());
