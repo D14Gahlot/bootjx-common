@@ -71,7 +71,6 @@ import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.JsonUtil;
 import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -105,8 +104,8 @@ public class BulkMessageService extends BatchJobExecuter {
 
 	public void registerJobAndTriggerSummary(BatchJob job) {
 		registerJob(job);
-		//tunnelService.task("CAMPAIGN_CREATED",
-		//		MapModel.createInstance().putAll(job.data()).put("bulkSessionId", job.getJobId()).toMap());
+		tunnelService.task("CAMPAIGN_CREATED",
+				MapModel.createInstance().putAll(job.data()).put("bulkSessionId", job.getJobId()).toMap());
 	}
 
 	public void registerJob(BatchJob job, ChronoScheduler scheduler) {
@@ -181,7 +180,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			docs.add(doc);
 		}
 
-		session.setStatus("CREATED");
+		session.setStatus(JOB_STATUS.CREATED.toString());
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
 
@@ -341,7 +340,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	public BatchJob resetJob(String jobId) {
 		// BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
-		session.setStatus("CREATED");
+		session.setStatus(JOB_STATUS.CREATED.toString());
 		mongoTemplate.save(session);
 
 		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
@@ -371,7 +370,7 @@ public class BulkMessageService extends BatchJobExecuter {
 	public BatchJob stopJobV1(String jobId) {
 		BatchJob oldJob = stopJob(jobId);
 		BulkSessionDoc session = mongoTemplate.findById(jobId, BulkSessionDoc.class);
-		session.setStatus(Status.STOPPED.toString());
+		session.setStatus(JOB_STATUS.STOPPED.toString());
 		mongoTemplate.save(session);
 
 		String channelId = ArgUtil.nonEmpty(session.getChannelId(),
@@ -384,23 +383,22 @@ public class BulkMessageService extends BatchJobExecuter {
 		Query query = new Query()
 				.addCriteria(QueryCriteria.where("bulkSessionId").is(jobId).and("stamps.SENT").exists(false));
 		builder.set("status", Status.STOPPED.toString());
+		builder.set("stamps." + Status.STOPPED.toString(), System.currentTimeMillis());
 
 		messageStore.updateMulti(query, builder.update(), MessageStore.getCollectionName(session.getContactType()));
 
-		return registerJob(JobTaskModel.newBatchJob()
-				// Set Unique Job Id
-				.jobId(session.getBulkSessionId())
-				// Contact Type for each message
-				.data("contactType", session.getContactType())
-				// Channel for each message
-				.data("channelType", channelConfig.getChannelType())
-				// Lane for each message
-				.data("lane", session.getLane()));
+		return oldJob;
 	}
 
 	@Override
 	public boolean read(BatchJob currentBatchJob) {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
+
+		if (!ArgUtil.is(doc)
+				|| !ArgUtil.parseAsEnumT(doc.getStatus(), JOB_STATUS.class, JOB_STATUS.CLOSED).isReadable()) {
+			return true;
+		}
+
 		Query query = new Query().addCriteria(QueryCriteria.where("bulkSessionId").is(currentBatchJob.getJobId())
 				.and("status").is(Status.SCHLD.toString())).limit(25);
 
@@ -493,7 +491,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		// list.add(Aggregation.group("status").count().as("count").toDBObject(Aggregation.DEFAULT_CONTEXT));
 //				MongoCollection<Document> col = mongoTemplate.getCollection(MessageStore.getCollectionName(contactType));
 //				MongoCursor<Document> cursor = col.aggregate(list).iterator();
-				//System.out.println(JsonUtil.toJson(list.piplines()));
+		// System.out.println(JsonUtil.toJson(list.piplines()));
 
 		MongoCursor<Document> cursor = mongoTemplate.collection(MessageStore.getCollectionName(contactType))
 				.aggregate(list).iterator();
@@ -528,7 +526,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			QA list2 = new QA().add(Aggregation.match(Criteria.where("bulkSessionId").is((currentBatchJob.getJobId()))),
 					QA.project("firstLog", QA.arrayElemAt("logs", 0)).build(), Aggregation.unwind("firstLog"),
 					Aggregation.group("firstLog").count().as("count"));
-			//System.out.println(JsonUtil.toJson(list2.piplines()));
+			// System.out.println(JsonUtil.toJson(list2.piplines()));
 			MongoCursor<Document> cursor2 = mongoTemplate.collection(MessageStore.getCollectionName(contactType))
 					.aggregate(list2).iterator();
 			while (cursor2.hasNext()) {

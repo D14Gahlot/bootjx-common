@@ -363,7 +363,7 @@ public class WA360CloudClient implements ChannelClient {
 					TmplComponent bodyComponent = TmplComponent.createInstance().body();
 					for (Map<String, Object> bodyParameter : bodyParametersTemp) {
 						String path = (String) bodyParameter.get("path");
-						String originalText = model.pathEntry(path).asString();
+						String originalText = model.pathEntry(path).asString(Constants.BLANK);
 						originalText = originalText.replaceAll("\n", "\\\\n");
 						bodyComponent.parameter("text", originalText);
 

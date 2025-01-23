@@ -19,8 +19,34 @@ public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 
 	private static final long serialVersionUID = -8178126816683098712L;
 
+	public static enum JOB_STATUS_TYPES {
+		UNREADABLE;
+	}
+
 	public static enum JOB_STATUS {
-		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED, COMPLETED, CANCELLED, STOPPED
+		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED(JOB_STATUS_TYPES.UNREADABLE),
+		COMPLETED(JOB_STATUS_TYPES.UNREADABLE), CANCELLED(JOB_STATUS_TYPES.UNREADABLE),
+		STOPPED(JOB_STATUS_TYPES.UNREADABLE);
+
+		boolean readable;
+
+		JOB_STATUS(JOB_STATUS_TYPES... readable) {
+			this.readable = true;
+			for (JOB_STATUS_TYPES job_STATUS_TYPES : readable) {
+				switch (job_STATUS_TYPES) {
+				case UNREADABLE:
+					this.readable = false;
+					break;
+				default:
+					break;
+				}
+			}
+		}
+
+		public boolean isReadable() {
+			return readable;
+		}
+
 	}
 
 	private String tenant;

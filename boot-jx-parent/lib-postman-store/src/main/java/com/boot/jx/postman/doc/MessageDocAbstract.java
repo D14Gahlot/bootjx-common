@@ -63,6 +63,7 @@ public abstract class MessageDocAbstract
 	private String formatType;
 	private String formatSubType;
 
+	@Indexed
 	private String status;
 	private ContactDetailDoc contact;
 	private MessageRouter route;
