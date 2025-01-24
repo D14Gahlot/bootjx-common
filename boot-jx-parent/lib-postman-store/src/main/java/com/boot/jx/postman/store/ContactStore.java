@@ -1,5 +1,10 @@
 package com.boot.jx.postman.store;
 
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.ModelPatch;
 import com.boot.jx.model.ModelPatch.ModelPatchCommand;
@@ -77,6 +83,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 	@Autowired(required = false)
 	protected AuditDetailProvider auditDetailProvider;
+	
+	
 
 	public PBPhone parsePhone(PBPhone pbPhone) {
 		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
@@ -505,7 +513,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 						break;
 					case "dob":
 					case "DOB":
-						addInfoMap.put(entry.getKey(), CommonUtils.getDateWithTS(entry.getValue().toString()));
+						//addInfoMap.put(entry.getKey(), CommonUtils.getDateWithTS(entry.getValue().toString()));
+						addInfoMap.put(entry.getKey(), getDateWithTSM(entry.getValue().toString()));
 						break;
 					default:
 						Object object = checkFieldType(entry.getKey(), entry.getValue());
@@ -519,7 +528,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		                		if(entry.getValue() instanceof List<?>) {
 		        	        		 valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
 		                		}
-								addInfoMap.put(entry.getKey(), CommonUtils.getDateWithTS(valueStr));
+								addInfoMap.put(entry.getKey(), getDateWithTSM(valueStr));
 							}else {
 								addInfoMap.put(entry.getKey(), entry.getValue());
 							}
@@ -679,7 +688,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					break;
 				case "dob":
 				case "DOB":
-					addInfoMap.put(entry.getKey(),CommonUtils.getDateWithTS(entry.getValue().toString()));
+					addInfoMap.put(entry.getKey(),getDateWithTSM(entry.getValue().toString()));
 					break;
 				case "emails":
 				case "alt_emails":
@@ -711,7 +720,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		                		if(entry.getValue() instanceof List<?>) {
 		        	        		 valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
 		                		}
-								addInfoMap.put(entry.getKey(), CommonUtils.getDateWithTS(valueStr));
+								addInfoMap.put(entry.getKey(), getDateWithTSM(valueStr));
 							}else {
 							addInfoMap.put(entry.getKey(), entry.getValue());
 							}
@@ -812,6 +821,60 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	// Integer)
 	public static <T> List<T> convertStringToList(String input, String delimiter, Function<String, T> converter) {
 		return Arrays.stream(input.split(delimiter)).map(converter).collect(Collectors.toList());
+	}
+	
+	
+	public long getDateWithTSM(String dateString) {
+		 long timestamp =0;
+		 
+		try {
+			 // Define the date format
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+	        // Parse the input date string into a LocalDate
+	        LocalDate localDate = LocalDate.parse(dateString, formatter);
+
+	        // Get the timezone string from your setup
+	        String tz = getTimeZoneFromSetup();
+
+	        // Parse the timezone and handle invalid formats
+	        ZoneId zoneId = parseTimeZone(tz);
+
+	        // Combine LocalDate with ZoneId to get ZonedDateTime
+	        ZonedDateTime zonedDateTime = localDate.atStartOfDay(zoneId);
+
+	        // Convert ZonedDateTime to epoch milliseconds
+	        timestamp = zonedDateTime.toInstant().toEpochMilli();
+
+	        return timestamp;
+		}catch(Exception e) {
+			if(ArgUtil.is(dateString)) {
+				timestamp =  Long.parseLong(dateString);
+			}
+		}
+		return timestamp;
+	}
+
+
+
+	public  String getTimeZoneFromSetup() {
+		String offset = environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+				.asString("Asia/Kolkata::GMT+5:30");
+		return offset;
+	}
+
+
+	private ZoneId parseTimeZone(String tz) {
+	    // Extract the region part before "::"
+	    if (tz.contains("::")) {
+	        tz = tz.split("::")[0];
+	    }
+	    try {
+	        return ZoneId.of(tz); // Valid region-based ZoneId
+	    } catch (DateTimeException e) {
+	        System.err.println("Invalid timezone provided: " + tz + ". Falling back to default (Asia/Kolkata).");
+	        return ZoneId.of("Asia/Kolkata"); // Fallback to default
+	    }
 	}
 
 }

@@ -119,7 +119,7 @@ public static String monthNameByTimestamp(long timestamp) {
 			return new Date();
 		}
 	 
-	 public static long getDateWithTS(String dateString) {
+/*	 public static long getDateWithTS(String dateString) {
 		 long timestamp =0;
 		 
 		try {
@@ -136,16 +136,12 @@ public static String monthNameByTimestamp(long timestamp) {
 		}
 		return timestamp;
 	 }
-
+*/
 
 	public static void main(String[] args)
 	{
-		long st = startTStampForaMonth(1726597800);
-		long et = endTStampForaMonth(1726597800);
-		long st1 =startTStampForaMonthV1(1726597800);
-		long et1 = endTStampForaMonthV1(1726597800);
-		System.out.println("st :"+st+"\t et:"+et+"\t et1 :"+st1+"\t et1:"+et1);
+	
 		String dt ="05/23/1984";
-		System.out.println("Date :"+getDate(dt)+"\t ts :"+getDateWithTS(dt));
+		//System.out.println("Date :"+getDate(dt)+"\t ts :"+getDateWithTS(dt));
 	}
 }

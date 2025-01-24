@@ -1,6 +1,11 @@
 package com.boot.jx.common.manager;
 
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.common.doc.JobsOutPutDoc;
 import com.boot.jx.common.dto.CustomerContactDto;
@@ -304,9 +310,6 @@ public class CustomerMasterFldMgr {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
-				// saveCustomerContactProfile(id, maps);
-				// saveCustomerProfileMaster(id, lstCusProMap);
 				dtoLst.add(dto);
 			}
 		}
@@ -416,7 +419,7 @@ public class CustomerMasterFldMgr {
 		return lstDtos;
 
 	}
-	// PBPhone ph = parsePhone(new PBPhone().phone(phone));
+
 
 	public List<CustomerProfileDoc> deDeuplicateCheck(CustomerProfileRequest request) {
 		List<CustomerProfileDoc> cpLst = new ArrayList<>();
@@ -425,11 +428,7 @@ public class CustomerMasterFldMgr {
 		Set<PBPhone> setPbPhone = new TreeSet<PBPhone>();
 		Set<PBEmail> setPbEmail = new TreeSet<PBEmail>();
 		CustomerProfileDoc profileDoc = null;
-//		if (ArgUtil.is(refId)) {
-//			profileDoc = mongoTemplate.findOne(new Query(Criteria.where("contactIdRef").is(refId)),
-//					CustomerProfileDoc.class);
-//
-//		}
+
 		PBPhone ph = new PBPhone();
 		PBEmail pEmail = new PBEmail();
 		if (ArgUtil.is(request.getPhone())) {
@@ -570,11 +569,11 @@ public class CustomerMasterFldMgr {
 	                		String valueStr =src.getValue().toString();
 	                		if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 1) {
 	        	        		 valueStr = src.getValue().toString().replaceAll("[\\[\\]]", "");
-	        	        		 orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), CommonUtils.getDateWithTS(valueStr)));
+	        	        		 orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), getDateWithTSM(valueStr)));
 	                		}else {
 	                			List<?> dateRange = (List<?>) src.getValue();
-	        	                Object startDate = CommonUtils.getDateWithTS(dateRange.get(0).toString());
-	        	                Object endDate = CommonUtils.getDateWithTS(dateRange.get(1).toString());
+	        	                Object startDate = getDateWithTSM(dateRange.get(0).toString());
+	        	                Object endDate = getDateWithTSM(dateRange.get(1).toString());
 	        	                List<Object> lst =new ArrayList<>();
 	        	                lst.add(startDate);
 	        	                lst.add(endDate);
@@ -621,7 +620,7 @@ public class CustomerMasterFldMgr {
 	            .sortBy(sortBy,Direction.fromString(sortdir))
 	            .limit(limit) // Apply limit for page size
 	            .skip(skip); // Apply skip for the correct page
-	           // .page(searchQry.getPageNo(), searchQry.getPageSize());
+	          
 	         
 	    }
 
@@ -700,7 +699,6 @@ public class CustomerMasterFldMgr {
 	                    return Criteria.where(key).gte(startDate).lte(endDate);
 	                }else if(startDate instanceof String && endDate instanceof String) {
 	                	 return Criteria.where(key).gte(startDate).lte(endDate);
-	                    //return Criteria.where(key).gte(getDate((String)startDate)).lte(getDate((String)endDate));
 	                }else if(startDate instanceof Number && endDate instanceof Number) {
 	                	 return Criteria.where(key).gte(startDate).lte(endDate);
 		                   
@@ -717,43 +715,6 @@ public class CustomerMasterFldMgr {
 	}
 
 
-	private Criteria createCriteriaV1(String key, String operation, Object value) {
-		switch (operation) {
-		case "=":
-		case "EQ":
-			return Criteria.where(key).is(value);
-		case ">":
-		case "GT":
-			return Criteria.where(key).gt(value);
-		case "<":
-		case "LT":
-			return Criteria.where(key).lt(value);
-		case ">=":
-		case "GTE":
-			return Criteria.where(key).gte(value);
-		case "<=":
-		case "LTE":
-			return Criteria.where(key).lte(value);
-		case "!=":
-		case "NE":
-			return Criteria.where(key).ne(value);
-		case "STARTS_WITH": // Criteria for name starts with a specific prefix
-			return Criteria.where(key).regex("^" + value, "i"); // Case-insensitive search
-		case "END_WITH": // Criteria for name ends with a specific suffix
-			return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
-		case "ne": // Criteria for field is not empty
-			return Criteria.where(key).ne("").and(key).ne(null);
-		case "IN": // Criteria for matching any or all elements
-			 return Criteria.where(key).in(value);
-		case "ALL_MATCH": // Criteria for matching all elements
-			return Criteria.where(key).all(value);
-		case "ANY_MATCH":
-			return Criteria.where(key).regex(".*"+value+".*","i"); // Case-insensitive search
-		default:
-			throw new IllegalArgumentException("Invalid operation: " + operation);
-		}
-
-	}
 
 	public List<ProfileFilterMasterDoc> addEditProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
 		
@@ -856,6 +817,60 @@ public String checkFieldType(String code) {
 		return objType;
 	}
 	return objType;
+}
+
+
+public long getDateWithTSM(String dateString) {
+	 long timestamp =0;
+	 
+	try {
+		 // Define the date format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        // Parse the input date string into a LocalDate
+        LocalDate localDate = LocalDate.parse(dateString, formatter);
+
+        // Get the timezone string from your setup
+        String tz = getTimeZoneFromSetup();
+
+        // Parse the timezone and handle invalid formats
+        ZoneId zoneId = parseTimeZone(tz);
+
+        // Combine LocalDate with ZoneId to get ZonedDateTime
+        ZonedDateTime zonedDateTime = localDate.atStartOfDay(zoneId);
+
+        // Convert ZonedDateTime to epoch milliseconds
+        timestamp = zonedDateTime.toInstant().toEpochMilli();
+
+        return timestamp;
+	}catch(Exception e) {
+		if(ArgUtil.is(dateString)) {
+			timestamp =  Long.parseLong(dateString);
+		}
+	}
+	return timestamp;
+}
+
+
+
+public  String getTimeZoneFromSetup() {
+	String offset = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+			.asString("Asia/Kolkata::GMT+5:30");
+	return offset;
+}
+
+
+private ZoneId parseTimeZone(String tz) {
+    // Extract the region part before "::"
+    if (tz.contains("::")) {
+        tz = tz.split("::")[0];
+    }
+    try {
+        return ZoneId.of(tz); // Valid region-based ZoneId
+    } catch (DateTimeException e) {
+        System.err.println("Invalid timezone provided: " + tz + ". Falling back to default (Asia/Kolkata).");
+        return ZoneId.of("Asia/Kolkata"); // Fallback to default
+    }
 }
 
 }
