@@ -299,9 +299,7 @@ public class AdminMsgBulkController {
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
-			@RequestParam(required = false, defaultValue = "desc") String sortDir,
-			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
-			@RequestParam(required = false) String channelId, @RequestParam(required = false) String type) {
+			@RequestParam(required = false, defaultValue = "desc") String sortDir) {
 		return ApiResponse
 				.buildResults(
 						mongoTemplate
