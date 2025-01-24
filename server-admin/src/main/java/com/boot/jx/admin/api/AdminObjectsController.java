@@ -22,6 +22,7 @@ import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.mongo.CommonMongoTemplate.PaginatedQuery;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.MessageDoc.MessageDocLogs;
@@ -230,4 +231,5 @@ public class AdminObjectsController {
 		return ApiResponse.buildResults(
 				getPaginatedBulk(ChatSessionDoc.class, "CHAT_SESSION", pageNo, pageSize, sortBy, sortDir));
 	}
+
 }
