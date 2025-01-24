@@ -22,9 +22,9 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoStore;
+import com.boot.jx.mongo.CommonMongoStore.PaginatedQuery;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.mongo.CommonMongoTemplate.PaginatedQuery;
-import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMConstants.MESSAGE_BOUND_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_SOURCE_CATEGARY;
 import com.boot.jx.postman.doc.ContactDetailDoc;
@@ -51,7 +51,7 @@ import com.google.common.collect.Lists;
 import com.mongodb.client.result.UpdateResult;
 
 @Component
-public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
+public class MessageStore extends CommonMongoStore<MessageStore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageStore.class);
 

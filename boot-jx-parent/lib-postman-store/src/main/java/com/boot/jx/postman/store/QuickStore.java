@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
-import com.boot.jx.mongo.CommonMongoTemplateAbstract;
+import com.boot.jx.mongo.CommonMongoStore;
 import com.boot.jx.postman.doc.QuickLocation;
 import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.ticket.CustomerTicketStatus;
@@ -28,7 +28,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
 @Component
-public class QuickStore extends CommonMongoTemplateAbstract<QuickStore> {
+public class QuickStore extends CommonMongoStore<QuickStore> {
 
 	public static interface QuickGalleryItem extends JsonIgnoreUnknown, IDocument {
 		String getId();

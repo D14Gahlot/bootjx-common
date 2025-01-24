@@ -36,8 +36,10 @@ import com.boot.jx.common.service.CSVService;
 import com.boot.jx.common.service.CustomerProfileService;
 import com.boot.jx.common.store.ChatArchiveService;
 import com.boot.jx.common.tasks.BulkMessageService;
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
+import com.boot.jx.mongo.CommonMongoStore.PaginatedQuery;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
@@ -56,9 +58,11 @@ import com.boot.jx.postman.store.SessionStore;
 import com.boot.jx.tunnel.ChronoScheduler;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.model.MapModel;
+import com.boot.model.UtilityModels.PublicJsonProperty;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.i18n.phonenumbers.NumberParseException;
 
 @RestController
@@ -263,6 +267,7 @@ public class AdminMsgBulkController {
 		return ApiResponse.build().message("Bulk Message Job [" + action + "]");
 	}
 
+	@Deprecated
 	@RequestMapping(value = "/api/message/bulk/push/logs", method = { RequestMethod.GET })
 	public ApiResponse<BulkSessionDoc, Object> getBulkSession(@RequestParam String startStamp,
 			@RequestParam String endStamp, @RequestParam(required = false) String bulkSessionId)
@@ -286,6 +291,23 @@ public class AdminMsgBulkController {
 		lst = checkNull(lst);
 		return ApiResponse.buildResults(lst);
 
+	}
+
+	@RequestMapping(value = "/api/message/bulk/v2/logs", method = { RequestMethod.GET })
+	@JsonView(PublicJsonProperty.class)
+	public ApiResponse<ChatSessionDoc, Object> getSession(@RequestParam(required = false) String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir,
+			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
+			@RequestParam(required = false) String channelId, @RequestParam(required = false) String type) {
+		return ApiResponse
+				.buildResults(
+						mongoTemplate
+								.getPages(PaginatedQuery.select(ChatSessionDoc.class, "CHAT_SESSION").pageNo(pageNo)
+										.pageSize(pageSize).pageSize(pageSize).sortBy(sortBy).sortDir(sortDir))
+								.getResults());
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/messages", method = { RequestMethod.POST })
