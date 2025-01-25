@@ -295,17 +295,15 @@ public class AdminMsgBulkController {
 
 	@RequestMapping(value = "/api/message/bulk/v2/logs", method = { RequestMethod.GET })
 	@JsonView(PublicJsonProperty.class)
-	public ApiResponse<ChatSessionDoc, Object> getSession(@RequestParam(required = false) String id,
+	public ApiResponse<BulkSessionDoc, Object> getSession(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
 			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
 			@RequestParam(required = false, defaultValue = "desc") String sortDir) {
-		return ApiResponse
-				.buildResults(
-						mongoTemplate
-								.getPages(PaginatedQuery.select(ChatSessionDoc.class, "CHAT_SESSION").pageNo(pageNo)
-										.pageSize(pageSize).pageSize(pageSize).sortBy(sortBy).sortDir(sortDir))
-								.getResults());
+		return ApiResponse.buildResults(mongoTemplate
+				.getPages(PaginatedQuery.select(BulkSessionDoc.class, "BULK_SESSION") //
+						.pageNo(pageNo).pageSize(pageSize).pageSize(pageSize).sortBy(sortBy).sortDir(sortDir))
+				.getResults());
 	}
 
 	@RequestMapping(value = "/api/message/bulk/push/messages", method = { RequestMethod.POST })
