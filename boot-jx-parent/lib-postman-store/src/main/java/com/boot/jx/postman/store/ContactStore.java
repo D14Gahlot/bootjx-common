@@ -52,7 +52,6 @@ import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.utils.CommonUtils;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
