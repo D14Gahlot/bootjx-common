@@ -528,6 +528,8 @@ public class PMEnvironment {
 
 		PMConfigurationObject getAgentChatDisable();
 
+		String getTimeZoneFromSetup();
+
 	}
 
 	public interface PMClientConfig {
