@@ -159,7 +159,7 @@ public class InBoundControllerWA {
 		return null;
 	}
 
-	@RequestMapping(value = "/ext/status/gupshup/callback", method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = "/ext/status/gupshup/callback.json", method = { RequestMethod.POST, RequestMethod.GET })
 	public GupShupDeliveryResp onStatusMessage(@RequestBody GupShupDeliveryResp status) throws InterruptedException {
 		inBoundService.updateBatch(waGupShupConnector.updateDeliveryStatus(status));
 		return status;
