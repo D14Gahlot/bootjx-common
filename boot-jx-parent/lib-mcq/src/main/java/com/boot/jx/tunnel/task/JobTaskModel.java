@@ -12,12 +12,12 @@ import com.boot.utils.ArgUtil;
 
 public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 
+	private static final long serialVersionUID = -9032639894812626291L;
+
 	public JobTaskModel() {
 		super();
 		this.tenant = AppContextUtil.getTenant();
 	}
-
-	private static final long serialVersionUID = -8178126816683098712L;
 
 	public static enum JOB_STATUS_TYPES implements Serializable {
 		UNREADABLE;
