@@ -30,16 +30,25 @@ public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 
 		boolean readable;
 
-		JOB_STATUS(JOB_STATUS_TYPES... readable) {
+		JOB_STATUS() {
 			this.readable = true;
-			for (JOB_STATUS_TYPES job_STATUS_TYPES : readable) {
-				switch (job_STATUS_TYPES) {
-				case UNREADABLE:
-					this.readable = false;
-					break;
-				default:
-					break;
-				}
+		}
+
+		JOB_STATUS(JOB_STATUS_TYPES prop0, JOB_STATUS_TYPES... props) {
+			this();
+			set(prop0);
+			for (JOB_STATUS_TYPES job_STATUS_TYPES : props) {
+				set(job_STATUS_TYPES);
+			}
+		}
+
+		private void set(JOB_STATUS_TYPES job_STATUS_TYPES) {
+			switch (job_STATUS_TYPES) {
+			case UNREADABLE:
+				this.readable = false;
+				break;
+			default:
+				break;
 			}
 		}
 
