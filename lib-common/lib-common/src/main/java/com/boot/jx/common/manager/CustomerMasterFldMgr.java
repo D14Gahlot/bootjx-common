@@ -778,9 +778,6 @@ public class CustomerMasterFldMgr {
 			if (!StringUtils.isBlank(id)) {
 				qb = qb.whereId(id);
 			}
-//			if (ArgUtil.is(sortBy)) {
-//				qb = qb.sortBy(sortBy, Direction.fromString(sortDir));
-//			}
 			return contactStore.find(qb);
 	}
 

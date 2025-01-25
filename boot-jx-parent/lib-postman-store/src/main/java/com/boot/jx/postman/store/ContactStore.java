@@ -758,8 +758,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 		for (PBPhone reqph : reqPhones) {
 			Optional<PBPhone> found = Optional.empty();
 			String uuid = reqph.getUuid();
-			// found = doc.getPhones().stream().filter(phone ->
-			// phone.getUuid().equals(uuid)).findFirst();
 			if (ArgUtil.isNotEmpty(pbPhoneDbList)) {
 				found = pbPhoneDbList.stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
 			}
@@ -872,7 +870,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	    try {
 	        return ZoneId.of(tz); // Valid region-based ZoneId
 	    } catch (DateTimeException e) {
-	        System.err.println("Invalid timezone provided: " + tz + ". Falling back to default (Asia/Kolkata).");
+	      e.printStackTrace();
 	        return ZoneId.of("Asia/Kolkata"); // Fallback to default
 	    }
 	}
