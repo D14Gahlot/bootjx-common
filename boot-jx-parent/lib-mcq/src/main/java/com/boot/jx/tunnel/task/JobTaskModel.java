@@ -19,11 +19,11 @@ public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 
 	private static final long serialVersionUID = -8178126816683098712L;
 
-	public static enum JOB_STATUS_TYPES {
+	public static enum JOB_STATUS_TYPES implements Serializable {
 		UNREADABLE;
 	}
 
-	public static enum JOB_STATUS {
+	public static enum JOB_STATUS implements Serializable {
 		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED(JOB_STATUS_TYPES.UNREADABLE),
 		COMPLETED(JOB_STATUS_TYPES.UNREADABLE), CANCELLED(JOB_STATUS_TYPES.UNREADABLE),
 		STOPPED(JOB_STATUS_TYPES.UNREADABLE);
@@ -37,13 +37,18 @@ public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 		JOB_STATUS(JOB_STATUS_TYPES prop0, JOB_STATUS_TYPES... props) {
 			this();
 			set(prop0);
-			for (JOB_STATUS_TYPES job_STATUS_TYPES : props) {
-				set(job_STATUS_TYPES);
+			if (ArgUtil.is(props)) {
+				for (JOB_STATUS_TYPES job_STATUS_TYPES : props) {
+					set(job_STATUS_TYPES);
+				}
 			}
 		}
 
-		private void set(JOB_STATUS_TYPES job_STATUS_TYPES) {
-			switch (job_STATUS_TYPES) {
+		private void set(JOB_STATUS_TYPES prop) {
+			if (!ArgUtil.is(prop)) {
+				return;
+			}
+			switch (prop) {
 			case UNREADABLE:
 				this.readable = false;
 				break;
