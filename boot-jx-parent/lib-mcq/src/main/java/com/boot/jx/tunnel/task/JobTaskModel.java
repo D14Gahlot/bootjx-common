@@ -38,8 +38,8 @@ public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 			this();
 			set(prop0);
 			if (ArgUtil.is(props)) {
-				for (JOB_STATUS_TYPES job_STATUS_TYPES : props) {
-					set(job_STATUS_TYPES);
+				for (JOB_STATUS_TYPES prop : props) {
+					set(prop);
 				}
 			}
 		}
