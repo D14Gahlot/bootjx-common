@@ -110,8 +110,9 @@ public class WacfbClient implements ChannelClient {
 			if (options.containsKey("buttons")) {
 
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);// null
-
+				
 				for (TmplElement b : allbuttons) {
+										
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)
 							|| ArgUtil.areEqual(b.getType(), TmplElement.TYPES.COPY)) {
 						if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.COPY)) {
@@ -731,6 +732,11 @@ public class WacfbClient implements ChannelClient {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
 		} else if ("flow".equalsIgnoreCase(type)) {
 			TmplElement button = buttons.get(0);
+			if(button.getAction()==(null))
+			{
+				button=buttons.get(1);
+			}
+				
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "flow");
 
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS, MapModel.createInstance()
