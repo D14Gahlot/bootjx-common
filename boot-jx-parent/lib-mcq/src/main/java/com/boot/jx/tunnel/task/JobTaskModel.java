@@ -19,46 +19,23 @@ public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 		this.tenant = AppContextUtil.getTenant();
 	}
 
-	public static enum JOB_STATUS_TYPES implements Serializable {
+	public enum JOB_STATUS_TYPES {
 		UNREADABLE;
 	}
 
-	public static enum JOB_STATUS implements Serializable {
-		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED(JOB_STATUS_TYPES.UNREADABLE),
-		COMPLETED(JOB_STATUS_TYPES.UNREADABLE), CANCELLED(JOB_STATUS_TYPES.UNREADABLE),
-		STOPPED(JOB_STATUS_TYPES.UNREADABLE);
+	public enum JOB_STATUS {
+		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED, COMPLETED, CANCELLED, STOPPED;
 
-		boolean readable;
-
-		JOB_STATUS() {
-			this.readable = true;
-		}
-
-		JOB_STATUS(JOB_STATUS_TYPES prop0, JOB_STATUS_TYPES... props) {
-			this();
-			set(prop0);
-			if (ArgUtil.is(props)) {
-				for (JOB_STATUS_TYPES prop : props) {
-					set(prop);
-				}
-			}
-		}
-
-		private void set(JOB_STATUS_TYPES prop) {
-			if (!ArgUtil.is(prop)) {
-				return;
-			}
-			switch (prop) {
-			case UNREADABLE:
-				this.readable = false;
-				break;
+		public boolean readNext() {
+			switch (this) {
+			case CLOSED:
+			case COMPLETED:
+			case CANCELLED:
+			case STOPPED:
+				return false;
 			default:
-				break;
+				return true;
 			}
-		}
-
-		public boolean isReadable() {
-			return readable;
 		}
 
 	}

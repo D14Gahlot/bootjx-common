@@ -395,7 +395,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		BulkSessionDoc doc = mongoTemplate.findById(currentBatchJob.getJobId(), BulkSessionDoc.class);
 
 		if (!ArgUtil.is(doc)
-				|| !ArgUtil.parseAsEnumT(doc.getStatus(), JOB_STATUS.class, JOB_STATUS.CLOSED).isReadable()) {
+				|| !ArgUtil.parseAsEnumT(doc.getStatus(), JOB_STATUS.class, JOB_STATUS.CLOSED).readNext()) {
 			return true;
 		}
 

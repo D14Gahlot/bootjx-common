@@ -17,16 +17,21 @@ import com.boot.jx.dict.UserClient.DeviceType;
 import com.boot.jx.dict.UserClient.UserDeviceClient;
 import com.boot.jx.tunnel.DBEvent;
 import com.boot.jx.tunnel.TunnelMessage;
+import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.utils.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-public class App { // Noncompliant
+public class MCQTests { // Noncompliant
 
 	public static final Pattern pattern = Pattern.compile("^\\$\\{(.*)\\}$");
 
-	private static Logger LOGGER = LoggerFactory.getLogger(App.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(MCQTests.class);
 
 	public static void main(String[] args) {
+		System.out.println(JsonUtil.toJson(JOB_STATUS.values()));
+	}
+
+	public static void main3(String[] args) {
 		TunnelMessage<Object> t = new TunnelMessage<Object>(new HashMap<String, Object>());
 		t.setAppType("POSTMAN");
 		t.setContext(new AppContext());
