@@ -527,7 +527,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 		Query query = new Query();
 
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(fromStamp).lt(toStamp));
+		query.addCriteria(Criteria.where("agentSessionStamp").gt(fromStamp).lt(toStamp));
 
 		if (statusLst != null && !statusLst.isEmpty()) {
 			query.addCriteria(Criteria.where("status").in(statusLst));
@@ -535,7 +535,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		if (tagCategory != null && !tagCategory.isEmpty() && !tagCategory.contains(null) && !tagCategory.contains("")) {
 			query.addCriteria(Criteria.where("tagId").in(tagCategory));
 		}
-		query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
+		query.with(new Sort(new Order(Direction.DESC, "agentSessionStamp")));
 		removeMsgFields(query);
 		LOGGER.debug("query {===}" + query);
 		return super.find(query, ChatSessionDoc.class);
@@ -659,7 +659,8 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			fromStamp = DateUtil.todayStartTime();
 		}
 
-		primaryCriteria = primaryCriteria.and("assignedAgentStamp").gt(fromStamp).lt(toStamp);
+		//primaryCriteria = primaryCriteria.and("assignedAgentStamp").gt(fromStamp).lt(toStamp);
+		primaryCriteria = primaryCriteria.and("agentSessionStamp").gt(fromStamp).lt(toStamp);
 		criterias.add(primaryCriteria);
 
 		if (statusLst != null && !statusLst.isEmpty()) {
@@ -678,7 +679,7 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 
 		query.addCriteria(primaryCriteria.andOperator(criterias.toArray(new Criteria[criterias.size()])))
 				// Limit
-				.with(new Sort(Direction.DESC, "assignedAgentStamp"));
+				.with(new Sort(Direction.DESC, "agentSessionStamp"));
 		ApiResponseUtil.addLog(query.toString());
 		// query.with(new Sort(new Order(Direction.DESC, "assignedAgentStamp")));
 		removeMsgFields(query);
