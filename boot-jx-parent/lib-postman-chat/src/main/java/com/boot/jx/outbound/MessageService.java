@@ -71,7 +71,7 @@ public class MessageService {
 					.codeKey("CHANNEL_NOT_FOUND").description("Channel : " + message.getChannelId() + " is Not Setup"));
 		}
 
-		if (!ArgUtil.is(channel.isDisabled() || channel.isDeleted())) {
+		if (channel.isDisabled() || channel.isDeleted()) {
 			ApiResponseUtil.throwInputException(new ApiFieldError().field("channelId").obzect("OutBoundMsg")
 					.codeKey("CHANNEL_DISABLED").description("Channel : " + message.getChannelId() + " is Disabled"));
 		}
