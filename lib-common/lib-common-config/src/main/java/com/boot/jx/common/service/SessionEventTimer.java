@@ -80,18 +80,33 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	private void debouncEvent(CONFIG_SETUP_KEY configSetupKey, String sessionid, SessionBoundEvent inBoundEvent,
 			String sessionEventName) {
-		long timeout = pmEnvironment.keyEntry(configSetupKey).asLong(0L);
-		if (timeout > 0L) {
+		if (ArgUtil.is(configSetupKey)) {
+			long timeout = pmEnvironment.keyEntry(configSetupKey).asLong(0L);
+			if (timeout > 0L) {
+				if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
+					// Only if this feature is there use chrono servre to set timeouts
+					commonServiceClient.publishSessionBoundEvent(inBoundEvent);
+				} else {
+					TunnelTask task = new TunnelTask().name(sessionEventName).id(sessionid).intervalMinutes(timeout);
+					this.debounce(task);
+				}
+			}
+		} else {
 			if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
 				// Only if this feature is there use chrono servre to set timeouts
 				commonServiceClient.publishSessionBoundEvent(inBoundEvent);
-			} else {
-				TunnelTask task = new TunnelTask().name(sessionEventName).id(sessionid).intervalMinutes(timeout);
-				this.debounce(task);
 			}
 		}
 	}
 
+	/**
+	 * this should be called after each MessageInBound
+	 * 
+	 * 
+	 * @param sessionid
+	 * @param app
+	 * @param inBoundEvent
+	 */
 	@Async
 	public void setChatOutIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
 		if (app != null && (app.isAgentApp() || app.isCustomApp())) {
@@ -129,6 +144,8 @@ public class SessionEventTimer extends ATaskLimiter {
 					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
 							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 				}
+			} else if (app.isCustomApp() && ArgUtil.is(outboundEvent.getTimeout())) {
+				debouncEvent(null, sessionid, outboundEvent, SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 			}
 		}
 	}
@@ -137,7 +154,7 @@ public class SessionEventTimer extends ATaskLimiter {
 	public void setChatStatusTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
 		if (app != null && (app.isCustomApp())) {
 			if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
-				// Only if this feature is there use chrono servre to set timeouts
+				// Only if this feature is there use chrono server to set timeouts
 				commonServiceClient.publishSessionBoundEvent(inBoundEvent);
 			}
 		}

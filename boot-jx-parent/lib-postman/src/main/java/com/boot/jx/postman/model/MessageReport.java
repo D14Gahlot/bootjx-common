@@ -21,7 +21,6 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 	private String messageIdRef;
 	private String sessionId;
 	private Contactable contact;
-	
 
 	private long timestamp;
 	protected long changeStamp;
@@ -292,6 +291,12 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	@Override
+	public MessageTimeout getTimeout() {
+		// Not valid for Reports
+		return null;
 	}
 
 }

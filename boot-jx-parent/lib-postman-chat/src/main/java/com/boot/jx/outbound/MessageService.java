@@ -274,6 +274,8 @@ public class MessageService {
 			}
 		}
 
+		outboxMessage.setTimeout(message.getTimeout());
+
 		return send(channel, message.getToContact(), outboxMessage);
 	}
 

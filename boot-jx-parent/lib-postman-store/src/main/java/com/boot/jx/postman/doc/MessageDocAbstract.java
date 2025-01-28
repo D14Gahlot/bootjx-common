@@ -19,6 +19,7 @@ import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageWithReferral;
 import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageRouter;
+import com.boot.jx.postman.model.MessageTimeout;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.utils.ArgUtil;
@@ -98,7 +99,7 @@ public abstract class MessageDocAbstract
 	private String mediaReplyId;
 
 	private Map<String, Long> stamps;
-	private Map<String, Long> timeout;
+	private MessageTimeout timeout;
 	public List<Object> logs;
 	public List<Object> trace;
 
@@ -574,11 +575,11 @@ public abstract class MessageDocAbstract
 		this.messageIdResend = messageIdResend;
 	}
 
-	public Map<String, Long> getTimeout() {
+	public MessageTimeout getTimeout() {
 		return timeout;
 	}
 
-	public void setTimeout(Map<String, Long> timeout) {
+	public void setTimeout(MessageTimeout timeout) {
 		this.timeout = timeout;
 	}
 

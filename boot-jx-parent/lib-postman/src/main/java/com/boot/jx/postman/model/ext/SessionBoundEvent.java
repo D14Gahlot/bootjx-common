@@ -10,6 +10,7 @@ import com.boot.jx.postman.model.MessageDefinitions.SessionMessage;
 import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.postman.model.MessageRouter;
 import com.boot.jx.postman.model.MessageSession;
+import com.boot.jx.postman.model.MessageTimeout;
 import com.boot.jx.swagger.ApiMockModelProperty;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
@@ -50,6 +51,7 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 	public String eventId;
 	private String checksum;
 	private long timestamp;
+	private MessageTimeout timeout;
 
 	@ApiMockModelProperty(example = "SESSION_ROUTED", value = "Event Triggered by App/Service",
 			allowableValues = "SESSION_ROUTED,SESSION_INIT,SESSION_CLOSED,SESSION_STATUS,"
@@ -212,6 +214,7 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 		this.sessionId = message.getSessionId();
 		this.setSession(message.session());
 		this.contact().copyFrom(message.contact());
+		this.timeout =  message.getTimeout();
 		message.session();
 	}
 
@@ -222,4 +225,14 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
+
+	public MessageTimeout getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(MessageTimeout timeout) {
+		this.timeout = timeout;
+	}
+
+
 }

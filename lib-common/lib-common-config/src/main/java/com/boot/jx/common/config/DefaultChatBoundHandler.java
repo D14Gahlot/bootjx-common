@@ -339,8 +339,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					logManager.error(messageReport, e);
 				}
 				return;
-			} else if (ArgUtil.is(defaultClient.getAppType(), APP_TYPE.APP_SCRIPT.toString(),
-					APP_TYPE.BOTFLOW.toString())) {
+			} else if (defaultClient.isCustomApp()) {
 				if (messageEvents != null) {
 					messageEvents.postMessageStatus(messageReport);
 				}

@@ -297,6 +297,7 @@ public class MessageStore extends CommonMongoStore<MessageStore> {
 		doc.stamps().put("session", ArgUtil.parseAsLong(outMessage.session().getSessionStamp(), 0L));
 		doc.meta().putAll(outMessage.meta());
 		doc.options().putAll(outMessage.options());
+		doc.setTimeout(outMessage.getTimeout());
 
 		// Incase it was missed
 		doc.setContactId(PostManUtil.createContactId(outMessage));
