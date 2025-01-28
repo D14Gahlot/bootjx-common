@@ -304,5 +304,13 @@ public class ClientAppConfigDoc
 	public void setCustom(Map<String, Object> custom) {
 		this.custom = custom;
 	}
+	
+	@Override
+	public Map<String, Object> custom() {
+		if (this.custom == null) {
+			this.custom = new HashMap<String, Object>();
+		}
+		return custom;
+	}
 
 }

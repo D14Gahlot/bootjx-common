@@ -69,6 +69,8 @@ public interface ClientApp extends Serializable, AuditIdentifier {
 
 	public Map<String, Object> config();
 
+	public Map<String, Object> custom();
+
 	public default MapPathEntry keyEntry(EntryMeta metaKey) {
 		return new MapPathEntry().map(this.config()).key(metaKey.getUkey()).load(null);
 	}
