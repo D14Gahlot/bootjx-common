@@ -45,11 +45,13 @@ import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.model.ContactMeta;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.pbook.PBAddress;
+import com.boot.jx.postman.pbook.PBDate;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.query.ChatContactQuery;
+import com.boot.jx.utils.CommonUtils;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
@@ -373,6 +375,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 	@SuppressWarnings("unchecked")
 	public CustomerProfileDoc createprofile(CustomerProfileDoc req) {
+		ObjectMapper objectMapper = new ObjectMapper();
 		CustomerProfileDoc doc = findById(req.getId(), CustomerProfileDoc.class);
 		if (ArgUtil.is(doc)) {
 			updateProfile(req, doc);
@@ -505,9 +508,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 						break;
 					case "dob":
 					case "DOB":
-						// addInfoMap.put(entry.getKey(),
-						// CommonUtils.getDateWithTS(entry.getValue().toString()));
-						addInfoMap.put(entry.getKey(), getDateWithTSM(entry.getValue().toString()));
+						Set<PBDate> setPbDate = setDateFld(entry.getValue());
+						addInfoMap.put(entry.getKey(),setPbDate);
 						break;
 					default:
 						Object object = checkFieldType(entry.getKey(), entry.getValue());
@@ -521,7 +523,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 								if (entry.getValue() instanceof List<?>) {
 									valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
 								}
-								addInfoMap.put(entry.getKey(), getDateWithTSM(valueStr));
+								//addInfoMap.put(entry.getKey(), getDateWithTSM(valueStr));
+								addInfoMap.put(entry.getKey(),setDateFld(entry.getValue()));
 							} else {
 								addInfoMap.put(entry.getKey(), entry.getValue());
 							}
@@ -681,7 +684,12 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					break;
 				case "dob":
 				case "DOB":
-					addInfoMap.put(entry.getKey(), getDateWithTSM(entry.getValue().toString()));
+					List<PBDate> pbDate = objectMapper.convertValue(entry.getValue(),
+							new TypeReference<List<PBDate>>() {
+							});
+					Set<PBDate> spbDate = addUpdateDate(pbDate, doc, entry.getKey().toString());
+					addInfoMap.put(entry.getKey(),spbDate);
+					//addInfoMap.put(entry.getKey(), getDateWithTSM(entry.getValue().toString()));
 					break;
 				case "emails":
 				case "alt_emails":
@@ -856,6 +864,74 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			e.printStackTrace();
 			return ZoneId.of("Asia/Kolkata"); // Fallback to default
 		}
+	}
+	
+	private Set<PBDate> addUpdateDate(List<PBDate> reqDate, CustomerProfileDoc doc, String entryKey) {
+		
+		Set<PBDate> setPbDate = new TreeSet<>();
+		ObjectMapper objectMapper = new ObjectMapper();
+		// Convert the request objects to a Set of UUIDs (to identify which are new or
+		// missing)
+		Set<String> reqDateUuids = reqDate.stream().map(PBDate::getUuid).collect(Collectors.toSet());
+
+		// Find phones in DB that are not in the request (to be deleted)
+		List<PBDate> pbDateDbList = objectMapper.convertValue(doc.getAdditionalInfo().get(entryKey),
+				new TypeReference<List<PBDate>>() {
+				});
+		if (ArgUtil.isNotEmpty(pbDateDbList)) {
+			List<PBDate> dateToDelete = pbDateDbList.stream()
+					.filter(date -> !reqDateUuids.contains(date.getUuid())).collect(Collectors.toList());
+			// Remove phones that are not in the request from the document
+			pbDateDbList.removeAll(dateToDelete);
+		}
+		for (PBDate reqDt : reqDate) {
+			Optional<PBDate> found = Optional.empty();
+			String uuid = reqDt.getUuid();
+			if (ArgUtil.isNotEmpty(pbDateDbList)) {
+				found = pbDateDbList.stream().filter(date -> date.getUuid().equals(uuid)).findFirst();
+			}
+
+			if (found.isPresent()) {
+				PBDate pbDate  =found.get().update(reqDt);
+				pbDate.setStamp(CommonUtils.getDateWithTS(pbDate.getDate()));
+				pbDate.setStampLocal(getDateWithTSM(pbDate.getDate()));
+				setPbDate.add(pbDate);
+			} else {
+				PBDate pbDate = new PBDate();
+				pbDate.setUuid(ArgUtil.parseAsString(pbDate.getUuid(), UniqueID.generateString()));
+				pbDate.setDate(reqDt.getDate());
+				pbDate.setStamp(CommonUtils.getDateWithTS(pbDate.getDate()));
+				pbDate.setStampLocal(getDateWithTSM(pbDate.getDate()));
+				pbDate.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
+				setPbDate.add(pbDate);
+			}
+
+		}
+		return setPbDate;
+	}
+	
+	
+	private Set<PBDate> setDateFld(Object value){
+		Set<PBDate> setPbDate = new TreeSet<PBDate>();
+		List<Object> pbDate = (List<Object>)value;
+		
+		for (Object obj : pbDate) {
+			Map<String, Object> pMap = JsonUtil.toJsonMap(obj);
+			PBDate pbD = new PBDate();
+			for (Map.Entry<String, Object> eMapdate : pMap.entrySet()) {
+				if (eMapdate.getKey().contains("dob") || eMapdate.getKey().contains("date")) {
+					pbD.setDate((ArgUtil.parseAsString(eMapdate.getValue(), Constants.BLANK)));
+				}
+			}
+			pbD.setUuid(UniqueID.generateString());
+			pbD.setStamp(CommonUtils.getDateWithTS(pbD.getDate()));
+			pbD.setStampLocal(getDateWithTSM(pbD.getDate()));
+			pbD.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
+			
+			setPbDate.add(pbD);
+			
+		}
+		return setPbDate;
 	}
 
 }

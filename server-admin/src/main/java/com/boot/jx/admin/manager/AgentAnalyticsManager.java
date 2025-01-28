@@ -429,7 +429,7 @@ public class AgentAnalyticsManager implements Serializable {
 
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("agentSessionStamp").gt(dateRange1).lt(dateRange2));
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("agentSessionStamp");;
 		// System.out.println("QRY :"+agent+"\t "+JsonUtil.toJsonPrettyPrint(query));
 		// removeChatSessField(query);

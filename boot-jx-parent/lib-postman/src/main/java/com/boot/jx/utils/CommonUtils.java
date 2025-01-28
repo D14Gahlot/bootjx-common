@@ -119,7 +119,7 @@ public static String monthNameByTimestamp(long timestamp) {
 			return new Date();
 		}
 	 
-/*	 public static long getDateWithTS(String dateString) {
+	 public static long getDateWithTS(String dateString) {
 		 long timestamp =0;
 		 
 		try {
@@ -136,7 +136,7 @@ public static String monthNameByTimestamp(long timestamp) {
 		}
 		return timestamp;
 	 }
-*/
+
 
 	public static void main(String[] args)
 	{
