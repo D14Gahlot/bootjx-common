@@ -58,6 +58,7 @@ public class ClientAppConfigDoc
 	private Map<String, Object> secret;
 	private Map<String, Object> props;
 	private Map<String, Object> config;
+	private Map<String, Object> custom;
 
 	private String domain;
 	private boolean isShared;
@@ -294,6 +295,14 @@ public class ClientAppConfigDoc
 
 	public void setDisabled(boolean isDisabled) {
 		this.isDisabled = isDisabled;
+	}
+
+	public Map<String, Object> getCustom() {
+		return custom;
+	}
+
+	public void setCustom(Map<String, Object> custom) {
+		this.custom = custom;
 	}
 
 }
