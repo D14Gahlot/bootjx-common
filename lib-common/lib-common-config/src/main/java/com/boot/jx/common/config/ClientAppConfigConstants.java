@@ -222,7 +222,7 @@ public class ClientAppConfigConstants {
 				new ConfigMeta().group("About Me").title("Foot Note").path("props.footnote")
 						.inputType(INPUT_TYPE.TEXTAREA).desc("Foot note to mention at last of prompt"), //
 				new ConfigMeta().group("Config").title("Before Transfer Template").path("props.before_transfer")
-						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code"),
+						.optionsSource("getx:/api/tmpl/hsm").optionsKey("code").optionsLabel("code").optional(),
 				new ConfigMeta().group("Config").title("Credentials").path("props.creds")
 						.optionsSource("getx:/api/config/tokenkey").optionsKey("key").optionsLabel("description"), //
 				//
