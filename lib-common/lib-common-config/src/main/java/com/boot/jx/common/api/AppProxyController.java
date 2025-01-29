@@ -79,6 +79,23 @@ public class AppProxyController {
 
 	@CrossOrigin(origins = "*")
 	// @ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Only for Logged in user")
+	@RequestMapping(value = { "/api/nexus/**" })
+	@ResponseBody
+	public MapModel proxch2Api(@RequestBody(required = false) String body, HttpMethod method,
+			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
+		// String domain =
+		// CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
+		// URL url = new URL(domain);
+
+		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
+
+		return MapModel.fromSafe(service
+				.forwardRequestNoRetry("/api/nexus/", nexusUrl, body, additioalHeaders, request, response).getBody());
+	}
+
+	@CrossOrigin(origins = "*")
+	// @ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Only for test")
 	@RequestMapping(value = { "/pub/nexus/**" })
 	@ResponseBody
@@ -115,8 +132,7 @@ public class AppProxyController {
 			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
 		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
 		return MapModel.fromSafe(service
-				.forwardRequestNoRetry("/pub/", scriptusUrl, body, additioalHeaders, request, response)
-				.getBody());
+				.forwardRequestNoRetry("/pub/", scriptusUrl, body, additioalHeaders, request, response).getBody());
 	}
 
 }
