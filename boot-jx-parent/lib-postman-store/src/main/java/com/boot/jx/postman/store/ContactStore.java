@@ -689,7 +689,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 							});
 					Set<PBDate> spbDate = addUpdateDate(pbDate, doc, entry.getKey().toString());
 					addInfoMap.put(entry.getKey(),spbDate);
-					//addInfoMap.put(entry.getKey(), getDateWithTSM(entry.getValue().toString()));
+					
 					break;
 				case "emails":
 				case "alt_emails":
@@ -717,11 +717,17 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					} else {
 						if (ArgUtil.is(entry.getValue())) {
 							if (ArgUtil.isNotEmpty(object) && object.toString().equalsIgnoreCase("date")) {
-								String valueStr = entry.getValue().toString();
-								if (entry.getValue() instanceof List<?>) {
-									valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
+								ObjectMapper objectMapperDt = new ObjectMapper();
+								List<PBDate> pbDateU = objectMapperDt.convertValue(entry.getValue(),
+										new TypeReference<List<PBDate>>() {
+										});
+								Set<PBDate> spbDateU = addUpdateDate(pbDateU, doc, entry.getKey().toString());
+								if(ArgUtil.is(spbDateU)) {
+								addInfoMap.put(entry.getKey(),spbDateU);
 								}
-								addInfoMap.put(entry.getKey(), getDateWithTSM(valueStr));
+								
+								
+								
 							} else {
 								addInfoMap.put(entry.getKey(), entry.getValue());
 							}
@@ -867,6 +873,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	}
 	
 	private Set<PBDate> addUpdateDate(List<PBDate> reqDate, CustomerProfileDoc doc, String entryKey) {
+		try {
+		long ts=0l;
 		
 		Set<PBDate> setPbDate = new TreeSet<>();
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -893,27 +901,35 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 			if (found.isPresent()) {
 				PBDate pbDate  =found.get().update(reqDt);
-				pbDate.setStamp(CommonUtils.getDateWithTS(pbDate.getDate()));
-				pbDate.setStampLocal(getDateWithTSM(pbDate.getDate()));
+				ts = getDateWithTSM(pbDate.getDate());
+				pbDate.setStamp(ts);
+				pbDate.setStampLocal(TimeStampIndex.from(ts).getStamp());
+				pbDate.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
 				setPbDate.add(pbDate);
 			} else {
 				PBDate pbDate = new PBDate();
 				pbDate.setUuid(ArgUtil.parseAsString(pbDate.getUuid(), UniqueID.generateString()));
 				pbDate.setDate(reqDt.getDate());
-				pbDate.setStamp(CommonUtils.getDateWithTS(pbDate.getDate()));
-				pbDate.setStampLocal(getDateWithTSM(pbDate.getDate()));
+				ts = getDateWithTSM(pbDate.getDate());
+				pbDate.setStamp(ts);
+				pbDate.setStampLocal(TimeStampIndex.from(ts) .getStamp());
 				pbDate.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
 				setPbDate.add(pbDate);
 			}
 
 		}
 		return setPbDate;
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	
 	private Set<PBDate> setDateFld(Object value){
 		Set<PBDate> setPbDate = new TreeSet<PBDate>();
 		List<Object> pbDate = (List<Object>)value;
+		long ts = 0l;
 		
 		for (Object obj : pbDate) {
 			Map<String, Object> pMap = JsonUtil.toJsonMap(obj);
@@ -924,10 +940,10 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				}
 			}
 			pbD.setUuid(UniqueID.generateString());
-			pbD.setStamp(CommonUtils.getDateWithTS(pbD.getDate()));
-			pbD.setStampLocal(getDateWithTSM(pbD.getDate()));
+			ts = getDateWithTSM(pbD.getDate());
+			pbD.setStamp(ts);
+			pbD.setStampLocal(TimeStampIndex.from(ts) .getStamp());
 			pbD.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
-			
 			setPbDate.add(pbD);
 			
 		}
