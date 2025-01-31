@@ -3,6 +3,7 @@ package com.boot.jx.common.config;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
+import com.boot.jx.postman.PMConstants;
 import com.boot.model.MapModel.EntryMeta;
 
 public enum CONFIG_FEATURES_KEY implements EntryMeta {
@@ -18,7 +19,8 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 
 	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
 			.group(ConfigConstants.APP_MODULES)),
-	MSG_OUTBOUND(new ConfigMeta("Outbound Message", "feature.message.outbound").optionsOnOff().defaultTrue()),
+	MESSAGE_OUTBOUND(
+			new ConfigMeta("Outbound Message", PMConstants.FEATURES.MESSAGE_OUTBOUND).optionsOnOff().defaultTrue()),
 
 	AUTH_2FA(new ConfigMeta("2FA Auth for login", "feature.auth.2fa").optionsOnOff()),
 
