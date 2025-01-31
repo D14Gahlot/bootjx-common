@@ -11,7 +11,7 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 	BUILD_VERSION(
 			new ConfigMeta("BUILD_VERSION", "feature.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
 
-	PLAN(new ConfigMeta("Customer Profile", "feature.plan").options(//
+	PLAN(new ConfigMeta("Feature Plan", "feature.plan").options(//
 			new ConfigOption(PLANS.BLOCKED), //
 			new ConfigOption(PLANS.FREEMIUM), //
 			new ConfigOption(PLANS.CUSTOM) //
@@ -19,7 +19,7 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 
 	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
 			.group(ConfigConstants.APP_MODULES)),
-	MESSAGE_OUTBOUND(new ConfigMeta("Outbound Message", "feature.message.outbound").optionsOnOff().defaultTrue()),
+	MESSAGE_OUTBOUND(new ConfigMeta("Message Outbound", "feature.message.outbound").optionsOnOff().defaultTrue()),
 
 	MESSAGE_OUTBOUND_DAU_FREE(
 			new ConfigMeta("Outbound DAU (Free)", "feature.message.outbound.dau.free").defaultValue(10)),
