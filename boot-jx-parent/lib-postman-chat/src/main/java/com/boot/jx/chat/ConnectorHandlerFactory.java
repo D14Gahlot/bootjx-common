@@ -418,7 +418,7 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 		try {
 			if (!environment.gateKeeper().canSendMessage(outboxMessage)) {
-				outboxMessage.logs().add(String.format("Insufficient balance"));
+				//outboxMessage.logs().add(String.format("Insufficient Balance"));
 			} else if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
 				ConnectorHandler connector = get(channelConfig);
 				if (ArgUtil.is(connector)) {

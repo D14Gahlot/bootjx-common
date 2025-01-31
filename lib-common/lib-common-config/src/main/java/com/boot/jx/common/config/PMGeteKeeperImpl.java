@@ -24,7 +24,7 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 
 	@Autowired
 	private PMEnvironment environment;
-	
+
 	private ICacheBox<String> taskStatus;
 	private String jobName;
 
@@ -49,6 +49,7 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 	public boolean canSendMessage(OutboxMessage outboxMessage) {
 		if (!environment.featureEntry(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND)
 				.asBoolean(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND.getDefaultValue())) {
+			outboxMessage.logs().add("Outbound Restricted");
 			return false;
 		}
 
@@ -60,7 +61,7 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 			Integer freemiumDauLimit = environment.featureEntry(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND_DAU_FREEMIUM)
 					.asInteger(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND_DAU_FREEMIUM.getDefaultValue());
 
-			String key = "gklimiter:" + AppContextUtil.getTenant() + ":dau";
+			String key = "gklimiter:" + AppContextUtil.getTenant() + ":dau:" + freemiumDauLimit;
 			RSetCache<String> customerSet = redisson.getSetCache(key);
 
 			// Add customer with per-entry expiry (24 hours)
@@ -69,7 +70,10 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 
 			if (isNewCustomer) {
 				// Allow if total unique customers are within the limit
-				return customerSet.size() <= freemiumDauLimit;
+				if (customerSet.size() > freemiumDauLimit) {
+					outboxMessage.logs().add("Daily quota exceeded");
+					return false;
+				}
 			}
 
 		}
