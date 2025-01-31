@@ -562,7 +562,8 @@ public class PMEnvironment {
 	@Autowired(required = false)
 	private PMClientConfig pmClientConfig;
 
-	@Autowired(required = false)
+	@Autowired
+	@Lazy // Delays initialization to break circular dependency
 	private PMGateKeeper pmGateKeeper;
 
 	public PMCommonConfig commonConfig() {
