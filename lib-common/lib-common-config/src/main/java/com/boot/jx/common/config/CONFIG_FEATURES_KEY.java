@@ -18,7 +18,7 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 
 	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
 			.group(ConfigConstants.APP_MODULES)),
-	MSG_OUTBOUND(new ConfigMeta("Outbound Message", "feature.message.outbound").optionsOnOff()),
+	MSG_OUTBOUND(new ConfigMeta("Outbound Message", "feature.message.outbound").optionsOnOff().defaultTrue()),
 
 	AUTH_2FA(new ConfigMeta("2FA Auth for login", "feature.auth.2fa").optionsOnOff()),
 
