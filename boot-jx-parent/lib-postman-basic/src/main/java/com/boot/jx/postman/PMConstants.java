@@ -410,10 +410,6 @@ public class PMConstants {
 		public static final String POSTMAN_CHAT_WEB_QUEUE = "postman.chat.web.queue.enabled";
 		public static final String POSTMAN_AGENT_TAB_LEVEL = "postman.agent.tab.level";
 	}
-	
-	public static class FEATURES {
-		public static final String MESSAGE_OUTBOUND = "feature.message.outbound";
-	}
 
 	public static class ParamKeys {
 		public static final String X_API_CODE = "x-api-code";

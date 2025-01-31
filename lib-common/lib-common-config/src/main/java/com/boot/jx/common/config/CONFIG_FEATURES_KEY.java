@@ -19,8 +19,10 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 
 	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
 			.group(ConfigConstants.APP_MODULES)),
-	MESSAGE_OUTBOUND(
-			new ConfigMeta("Outbound Message", PMConstants.FEATURES.MESSAGE_OUTBOUND).optionsOnOff().defaultTrue()),
+	MESSAGE_OUTBOUND(new ConfigMeta("Outbound Message", "feature.message.outbound").optionsOnOff().defaultTrue()),
+
+	MESSAGE_OUTBOUND_DAU_FREE(
+			new ConfigMeta("Outbound DAU (Free)", "feature.message.outbound.dau.free").defaultValue(10)),
 
 	AUTH_2FA(new ConfigMeta("2FA Auth for login", "feature.auth.2fa").optionsOnOff()),
 
@@ -94,6 +96,7 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 		return key;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getDefaultValue() {
 		return (T) defaultValue;

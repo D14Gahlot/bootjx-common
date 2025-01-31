@@ -550,12 +550,19 @@ public class PMEnvironment {
 
 	}
 
+	public interface PMGateKeeper {
+		boolean canSendMessage();
+	}
+
 	@Autowired(required = false)
 	private PMCommonConfig pmCommonConfig;
 	@Autowired(required = false)
 	private PMDomainConfig pmDomainConfig;
 	@Autowired(required = false)
 	private PMClientConfig pmClientConfig;
+
+	@Autowired(required = false)
+	private PMGateKeeper pmGateKeeper;
 
 	public PMCommonConfig commonConfig() {
 		return pmCommonConfig;
@@ -567,5 +574,9 @@ public class PMEnvironment {
 
 	public PMClientConfig clientConfig() {
 		return pmClientConfig;
+	}
+
+	public PMGateKeeper gateKeeper() {
+		return pmGateKeeper;
 	}
 }
