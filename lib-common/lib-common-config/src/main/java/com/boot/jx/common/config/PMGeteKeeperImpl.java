@@ -56,6 +56,11 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 		String plan = environment.featureEntry(CONFIG_FEATURES_KEY.PLAN)
 				.asString(CONFIG_FEATURES_KEY.PLAN.getDefaultValue());
 
+		if (ArgUtil.is(plan, PLANS.BLOCKED)) {
+			outboxMessage.logs().add("Account Blocked");
+			return false;
+		}
+
 		if (ArgUtil.is(plan, PLANS.FREEMIUM)) {
 
 			Integer freemiumDauLimit = environment.featureEntry(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND_DAU_FREEMIUM)
