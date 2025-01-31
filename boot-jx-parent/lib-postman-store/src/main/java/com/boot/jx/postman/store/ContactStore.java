@@ -56,6 +56,7 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -519,11 +520,10 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 									+ entry.getKey() + "-" + JsonUtil.toJson(entry.getValue()));
 						} else {
 							if (object != null && object.toString().equalsIgnoreCase("date")) {
-								String valueStr = entry.getValue().toString();
-								if (entry.getValue() instanceof List<?>) {
-									valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
-								}
-								//addInfoMap.put(entry.getKey(), getDateWithTSM(valueStr));
+//								String valueStr = entry.getValue().toString();
+//								if (entry.getValue() instanceof List<?>) {
+//									valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
+//								}
 								addInfoMap.put(entry.getKey(),setDateFld(entry.getValue()));
 							} else {
 								addInfoMap.put(entry.getKey(), entry.getValue());
@@ -903,7 +903,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				PBDate pbDate  =found.get().update(reqDt);
 				ts = getDateWithTSM(pbDate.getDate());
 				pbDate.setStamp(ts);
-				pbDate.setStampLocal(TimeStampIndex.from(ts).getStamp());
+				pbDate.setStampLocal(DateUtil.parseDate(pbDate.getDate()).getTime());
 				pbDate.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
 				setPbDate.add(pbDate);
 			} else {
@@ -912,7 +912,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				pbDate.setDate(reqDt.getDate());
 				ts = getDateWithTSM(pbDate.getDate());
 				pbDate.setStamp(ts);
-				pbDate.setStampLocal(TimeStampIndex.from(ts) .getStamp());
+				pbDate.setStampLocal(DateUtil.parseDate(pbDate.getDate()).getTime());
 				pbDate.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
 				setPbDate.add(pbDate);
 			}
@@ -942,7 +942,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			pbD.setUuid(UniqueID.generateString());
 			ts = getDateWithTSM(pbD.getDate());
 			pbD.setStamp(ts);
-			pbD.setStampLocal(TimeStampIndex.from(ts) .getStamp());
+			pbD.setStampLocal(DateUtil.parseDate(pbD.getDate()).getTime());
 			pbD.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
 			setPbDate.add(pbD);
 			
