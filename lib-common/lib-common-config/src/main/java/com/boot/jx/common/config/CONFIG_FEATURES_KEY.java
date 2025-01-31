@@ -1,6 +1,7 @@
 package com.boot.jx.common.config;
 
 import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
 import com.boot.model.MapModel.EntryMeta;
 
@@ -8,8 +9,20 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 
 	BUILD_VERSION(
 			new ConfigMeta("BUILD_VERSION", "feature.build.version").inputType(INPUT_TYPE.NUMBER).defaultValue(3)),
-	CONTACT_CENTER(new ConfigMeta("Customer Profile", "feature.contact.center").optionsOnOff()),
+
+	PLAN(new ConfigMeta("Customer Profile", "feature.plan").options(//
+			new ConfigOption(PLANS.BLOCKED), //
+			new ConfigOption(PLANS.FREEMIUM), //
+			new ConfigOption(PLANS.CUSTOM) //
+	)),
+
+	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
+			.group(ConfigConstants.APP_MODULES)),
+	MSG_OUTBOUND(new ConfigMeta("Outbound Message", "feature.message.outbound").optionsOnOff()),
+
 	AUTH_2FA(new ConfigMeta("2FA Auth for login", "feature.auth.2fa").optionsOnOff()),
+
+	CONTACT_CENTER(new ConfigMeta("Customer Profile", "feature.contact.center").optionsOnOff()),
 
 	CHANNEL_AUTOCONFIGURE_FACEBOOK(new ConfigMeta("AutoConfigure Facebook", "feature.channel.autoconfigure.facebook")
 			.optionsOnOff().group(ConfigConstants.CHANNELS)),
@@ -49,9 +62,6 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 	APP_MODULE_SOCIAL(new ConfigMeta("Social Module", "feature.app.module.social").optionsOnOff()
 			.group(ConfigConstants.APP_MODULES)),
 
-	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
-			.group(ConfigConstants.APP_MODULES)),
-
 	AGENT_RM_USER(new ConfigMeta("Relationship Managment", "feature.agent.rm.user").optionsOnOff()
 			.group(ConfigConstants.GROUP_AGENT)),
 
@@ -60,6 +70,12 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 
 	// Ends here
 	;
+
+	public static class PLANS {
+		public static final String BLOCKED = "BLOCKED";
+		public static final String FREEMIUM = "FREEMIUM";
+		public static final String CUSTOM = "CUSTOM";
+	}
 
 	private String key;
 	private Object defaultValue;

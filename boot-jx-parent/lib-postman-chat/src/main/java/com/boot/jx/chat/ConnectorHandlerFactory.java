@@ -413,7 +413,9 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 		ChannelConfig channelConfig = environment.config().channel(channelId);
 
 		try {
-			if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
+			if (environment.featureEntry("MSG_OUTBOUND").asBoolean(true)) {
+				outboxMessage.logs().add(String.format("Insufficient balance"));
+			} else if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
 				ConnectorHandler connector = get(channelConfig);
 				if (ArgUtil.is(connector)) {
 					connector.message(channelConfig, messageType, chatContactDoc, outboxMessage, inboxMessage);
