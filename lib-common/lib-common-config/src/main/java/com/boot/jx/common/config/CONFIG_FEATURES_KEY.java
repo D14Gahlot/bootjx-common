@@ -3,7 +3,6 @@ package com.boot.jx.common.config;
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
-import com.boot.jx.postman.PMConstants;
 import com.boot.model.MapModel.EntryMeta;
 
 public enum CONFIG_FEATURES_KEY implements EntryMeta {
@@ -15,14 +14,14 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 			new ConfigOption(PLANS.BLOCKED), //
 			new ConfigOption(PLANS.FREEMIUM), //
 			new ConfigOption(PLANS.CUSTOM) //
-	)),
+	).defaultValue(PLANS.CUSTOM)),
 
 	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
 			.group(ConfigConstants.APP_MODULES)),
 	MESSAGE_OUTBOUND(new ConfigMeta("Message Outbound", "feature.message.outbound").optionsOnOff().defaultTrue()),
 
-	MESSAGE_OUTBOUND_DAU_FREE(
-			new ConfigMeta("Outbound DAU (Free)", "feature.message.outbound.dau.free").defaultValue(10)),
+	MESSAGE_OUTBOUND_DAU_FREEMIUM(
+			new ConfigMeta("Outbound DAU (Freemium)", "feature.message.outbound.dau.freemium").defaultValue(10)),
 
 	AUTH_2FA(new ConfigMeta("2FA Auth for login", "feature.auth.2fa").optionsOnOff()),
 

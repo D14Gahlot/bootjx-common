@@ -36,6 +36,10 @@ public class MultiTenantCacheBox<T> extends CacheBox<T> {
 		}
 	};
 
+	public LocalCachedMapOptions<String, T> options() {
+		return localCacheOptions;
+	}
+
 	private Cache<String, RLocalCachedMap<String, T>> perTenant = CacheBuilder.newBuilder().maximumSize(1000)
 			.removalListener(removalListener).build();
 

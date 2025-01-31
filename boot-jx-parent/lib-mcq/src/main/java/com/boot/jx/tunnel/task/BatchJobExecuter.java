@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.cache.CacheBox;
+import com.boot.jx.cache.MultiTenantCacheBox;
 import com.boot.jx.def.ICacheBox;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mcq.Candidate;
@@ -84,7 +85,7 @@ public abstract class BatchJobExecuter {
 
 	public ICacheBox<String> taskStatus() {
 		if (taskStatus == null) {
-			this.taskStatus = CacheBox.getInstance("QTE-TASK-M-" + getJobName(), redisson);
+			this.taskStatus = MultiTenantCacheBox.getInstance("QTE-TASK-M-" + getJobName(), redisson);
 		}
 		return this.taskStatus;
 	}
@@ -98,7 +99,7 @@ public abstract class BatchJobExecuter {
 
 	public ICacheBox<BatchJob> jobStatus() {
 		if (jobStatus == null) {
-			this.jobStatus = CacheBox.getInstance("QTE-BATCH-M" + getJobName(), redisson);
+			this.jobStatus = MultiTenantCacheBox.getInstance("QTE-BATCH-M" + getJobName(), redisson);
 		}
 		return this.jobStatus;
 	}
