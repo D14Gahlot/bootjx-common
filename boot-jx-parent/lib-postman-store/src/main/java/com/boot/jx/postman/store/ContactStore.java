@@ -7,7 +7,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -52,7 +51,6 @@ import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.utils.CommonUtils;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
@@ -686,17 +684,11 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				switch (entry.getKey()) {
 				case "title":
 				case "Title":
-					addInfoMap.put(entry.getKey(),
-							ArgUtil.parseAsString(entry.getValue(),
-									doc.getAdditionalInfo().get(entry.getKey()) == null ? Constants.BLANK
-											: doc.getAdditionalInfo().get(entry.getKey()).toString()));
+					addInfoMap.put(entry.getKey(),entry.getValue());
 					break;
 				case "gender":
 				case "Gender":
-					addInfoMap.put(entry.getKey(),
-							ArgUtil.parseAsString(entry.getValue(),
-									doc.getAdditionalInfo().get(entry.getKey()) == null ? Constants.BLANK
-											: doc.getAdditionalInfo().get(entry.getKey()).toString()));
+					addInfoMap.put(entry.getKey(),entry.getValue());
 					break;
 				case "dob":
 				case "DOB":
@@ -741,9 +733,6 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 								if(ArgUtil.is(spbDateU)) {
 								addInfoMap.put(entry.getKey(),spbDateU);
 								}
-								
-								
-								
 							} else {
 								addInfoMap.put(entry.getKey(), entry.getValue());
 							}
