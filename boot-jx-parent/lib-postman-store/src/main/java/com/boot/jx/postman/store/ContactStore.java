@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -597,11 +598,11 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			Set<String> reqPhoneUuids = reqPhones.stream().map(PBPhone::getUuid).collect(Collectors.toSet());
 
 			// Find phones in DB that are not in the request (to be deleted)
+			if(doc.getPhones()!=null) {
 			List<PBPhone> phonesToDelete = doc.getPhones().stream()
 					.filter(phone -> !reqPhoneUuids.contains(phone.getUuid())).collect(Collectors.toList());
-
-			// Remove the phones from the document that are not present in the request
 			doc.getPhones().removeAll(phonesToDelete);
+			}
 
 			for (PBPhone reqph : reqPhones) {
 				Optional<PBPhone> found = Optional.empty();
@@ -612,8 +613,9 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("phone").field("phone")
 							.codeKey("ValidPhoneDuplicate").description(ph + " already exists"));
 				}
-
+				if(doc.getPhones()!=null) {
 				found = doc.getPhones().stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
+				}
 				if (found.isPresent()) {
 					String upPh = reqph.getPhone();
 					PBPhone phu = parsePhone(new PBPhone().phone(upPh));
@@ -622,25 +624,30 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				} else {
 					PBPhone pb = parsePhone(reqph);
 					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
-					doc.getPhones().add(pb);
+					if(doc.getPhones()!=null) {
+						doc.getPhones().add(pb);
+					}else {
+						Set<PBPhone> phs= new HashSet<>();
+						phs.add(pb);
+						doc.setPhones(phs);
+					}
 				}
 
 			}
 		}
 		if (req.getEmails() != null && !req.getEmails().isEmpty()) {
 			Set<PBEmail> reqPbEmails = req.getEmails();
-
 			// Convert the request objects to a Set of UUIDs (to identify which are new or
 			// missing)
 			Set<String> reqEmailUuids = reqPbEmails.stream().map(PBEmail::getUuid).collect(Collectors.toSet());
-
-			// Find phones in DB that are not in the request (to be deleted)
-			List<PBEmail> eMailToDelete = doc.getEmails().stream()
-					.filter(email -> !reqEmailUuids.contains(email.getUuid())).collect(Collectors.toList());
-
-			// Remove the phones from the document that are not present in the request
-			doc.getEmails().removeAll(eMailToDelete);
-
+	
+			List<PBEmail> eMailToDelete = new ArrayList<>();
+			if (doc.getEmails() != null) {
+			    eMailToDelete = doc.getEmails().stream()
+			        .filter(email -> !reqEmailUuids.contains(email.getUuid()))
+			        .collect(Collectors.toList());
+			    doc.getEmails().removeAll(eMailToDelete);
+			}
 			for (PBEmail reqEm : reqPbEmails) {
 				Optional<PBEmail> found = Optional.empty();
 				String uuid = reqEm.getUuid();
@@ -650,14 +657,23 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("email").field("Email")
 							.codeKey("ValidEmailDuplicate").description(em + " already exists"));
 				}
-				found = doc.getEmails().stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
+				if(doc.getEmails()!=null) {
+					found = doc.getEmails().stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
+				}
 				if (found.isPresent()) {
 					found.get().update(reqEm);
 				} else {
 					PBEmail pbEm = new PBEmail();
 					pbEm.setUuid(ArgUtil.parseAsString(pbEm.getUuid(), UniqueID.generateString()));
 					pbEm.update(reqEm);
-					doc.getEmails().add(pbEm);
+					if(doc.getEmails()!=null) {
+						doc.getEmails().add(pbEm);
+					}else {
+					Set<PBEmail> emails = new HashSet<>();
+					emails.add(pbEm);
+					doc.setEmails(emails);
+					}
+					
 				}
 
 			}
