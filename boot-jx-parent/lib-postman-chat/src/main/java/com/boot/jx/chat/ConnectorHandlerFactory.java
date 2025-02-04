@@ -34,6 +34,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.dto.ChatMessageDTO;
+import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.MessageBoxEvent;
@@ -294,6 +295,9 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 	@Autowired(required = false)
 	private MessageEvents messageEvents;
 
+	@Autowired
+	protected ChatLogger logManager;
+
 	/**
 	 * 
 	 * @param channelType
@@ -413,7 +417,9 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 		ChannelConfig channelConfig = environment.config().channel(channelId);
 
 		try {
-			if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
+			if (!environment.gateKeeper().canSendMessage(outboxMessage)) {
+				//outboxMessage.logs().add(String.format("Insufficient Balance"));
+			} else if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
 				ConnectorHandler connector = get(channelConfig);
 				if (ArgUtil.is(connector)) {
 					connector.message(channelConfig, messageType, chatContactDoc, outboxMessage, inboxMessage);
@@ -425,7 +431,7 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 			}
 
 		} catch (Exception e) {
-			LOGGER.error(messageType, e);
+			logManager.error(outboxMessage, e);
 		}
 	}
 

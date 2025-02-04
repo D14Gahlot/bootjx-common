@@ -46,10 +46,12 @@ public class ConfigConstants {
 
 		private String key;
 		private String ukey;
+		private Object defaultValue;
 
 		APP_KEY(ConfigMeta defaultFalse) {
 			this.key = defaultFalse.getKey();
 			this.ukey = defaultFalse.getUkey();
+			this.defaultValue = defaultFalse.getDefaultValue();
 		}
 
 		public String getKey() {
@@ -59,6 +61,12 @@ public class ConfigConstants {
 		@Override
 		public String getUkey() {
 			return ukey;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> T getDefaultValue() {
+			return (T) defaultValue;
 		}
 	}
 

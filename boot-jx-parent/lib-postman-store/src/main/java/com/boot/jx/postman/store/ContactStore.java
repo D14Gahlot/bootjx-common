@@ -51,11 +51,11 @@ import com.boot.jx.postman.pbook.PBName;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.pbook.PBWebsite;
 import com.boot.jx.postman.query.ChatContactQuery;
-import com.boot.jx.utils.CommonUtils;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.UtilityModels.UniqueIndex;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.DateUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.UniqueID;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -519,11 +519,10 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 									+ entry.getKey() + "-" + JsonUtil.toJson(entry.getValue()));
 						} else {
 							if (object != null && object.toString().equalsIgnoreCase("date")) {
-								String valueStr = entry.getValue().toString();
-								if (entry.getValue() instanceof List<?>) {
-									valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
-								}
-								//addInfoMap.put(entry.getKey(), getDateWithTSM(valueStr));
+//								String valueStr = entry.getValue().toString();
+//								if (entry.getValue() instanceof List<?>) {
+//									valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
+//								}
 								addInfoMap.put(entry.getKey(),setDateFld(entry.getValue()));
 							} else {
 								addInfoMap.put(entry.getKey(), entry.getValue());
@@ -597,11 +596,11 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 			Set<String> reqPhoneUuids = reqPhones.stream().map(PBPhone::getUuid).collect(Collectors.toSet());
 
 			// Find phones in DB that are not in the request (to be deleted)
+			if(doc.getPhones()!=null) {
 			List<PBPhone> phonesToDelete = doc.getPhones().stream()
 					.filter(phone -> !reqPhoneUuids.contains(phone.getUuid())).collect(Collectors.toList());
-
-			// Remove the phones from the document that are not present in the request
 			doc.getPhones().removeAll(phonesToDelete);
+			}
 
 			for (PBPhone reqph : reqPhones) {
 				Optional<PBPhone> found = Optional.empty();
@@ -612,8 +611,9 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("phone").field("phone")
 							.codeKey("ValidPhoneDuplicate").description(ph + " already exists"));
 				}
-
+				if(doc.getPhones()!=null) {
 				found = doc.getPhones().stream().filter(phone -> phone.getUuid().equals(uuid)).findFirst();
+				}
 				if (found.isPresent()) {
 					String upPh = reqph.getPhone();
 					PBPhone phu = parsePhone(new PBPhone().phone(upPh));
@@ -622,25 +622,30 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				} else {
 					PBPhone pb = parsePhone(reqph);
 					pb.setUuid(ArgUtil.parseAsString(pb.getUuid(), UniqueID.generateString()));
-					doc.getPhones().add(pb);
+					if(doc.getPhones()!=null) {
+						doc.getPhones().add(pb);
+					}else {
+						Set<PBPhone> phs= new HashSet<>();
+						phs.add(pb);
+						doc.setPhones(phs);
+					}
 				}
 
 			}
 		}
 		if (req.getEmails() != null && !req.getEmails().isEmpty()) {
 			Set<PBEmail> reqPbEmails = req.getEmails();
-
 			// Convert the request objects to a Set of UUIDs (to identify which are new or
 			// missing)
 			Set<String> reqEmailUuids = reqPbEmails.stream().map(PBEmail::getUuid).collect(Collectors.toSet());
-
-			// Find phones in DB that are not in the request (to be deleted)
-			List<PBEmail> eMailToDelete = doc.getEmails().stream()
-					.filter(email -> !reqEmailUuids.contains(email.getUuid())).collect(Collectors.toList());
-
-			// Remove the phones from the document that are not present in the request
-			doc.getEmails().removeAll(eMailToDelete);
-
+	
+			List<PBEmail> eMailToDelete = new ArrayList<>();
+			if (doc.getEmails() != null) {
+			    eMailToDelete = doc.getEmails().stream()
+			        .filter(email -> !reqEmailUuids.contains(email.getUuid()))
+			        .collect(Collectors.toList());
+			    doc.getEmails().removeAll(eMailToDelete);
+			}
 			for (PBEmail reqEm : reqPbEmails) {
 				Optional<PBEmail> found = Optional.empty();
 				String uuid = reqEm.getUuid();
@@ -650,14 +655,23 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					ApiResponseUtil.throwInputException(new ApiFieldError().obzect("email").field("Email")
 							.codeKey("ValidEmailDuplicate").description(em + " already exists"));
 				}
-				found = doc.getEmails().stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
+				if(doc.getEmails()!=null) {
+					found = doc.getEmails().stream().filter(email -> email.getUuid().equals(uuid)).findFirst();
+				}
 				if (found.isPresent()) {
 					found.get().update(reqEm);
 				} else {
 					PBEmail pbEm = new PBEmail();
 					pbEm.setUuid(ArgUtil.parseAsString(pbEm.getUuid(), UniqueID.generateString()));
 					pbEm.update(reqEm);
-					doc.getEmails().add(pbEm);
+					if(doc.getEmails()!=null) {
+						doc.getEmails().add(pbEm);
+					}else {
+					Set<PBEmail> emails = new HashSet<>();
+					emails.add(pbEm);
+					doc.setEmails(emails);
+					}
+					
 				}
 
 			}
@@ -670,17 +684,11 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				switch (entry.getKey()) {
 				case "title":
 				case "Title":
-					addInfoMap.put(entry.getKey(),
-							ArgUtil.parseAsString(entry.getValue(),
-									doc.getAdditionalInfo().get(entry.getKey()) == null ? Constants.BLANK
-											: doc.getAdditionalInfo().get(entry.getKey()).toString()));
+					addInfoMap.put(entry.getKey(),entry.getValue());
 					break;
 				case "gender":
 				case "Gender":
-					addInfoMap.put(entry.getKey(),
-							ArgUtil.parseAsString(entry.getValue(),
-									doc.getAdditionalInfo().get(entry.getKey()) == null ? Constants.BLANK
-											: doc.getAdditionalInfo().get(entry.getKey()).toString()));
+					addInfoMap.put(entry.getKey(),entry.getValue());
 					break;
 				case "dob":
 				case "DOB":
@@ -689,7 +697,7 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 							});
 					Set<PBDate> spbDate = addUpdateDate(pbDate, doc, entry.getKey().toString());
 					addInfoMap.put(entry.getKey(),spbDate);
-					//addInfoMap.put(entry.getKey(), getDateWithTSM(entry.getValue().toString()));
+					
 					break;
 				case "emails":
 				case "alt_emails":
@@ -717,11 +725,14 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 					} else {
 						if (ArgUtil.is(entry.getValue())) {
 							if (ArgUtil.isNotEmpty(object) && object.toString().equalsIgnoreCase("date")) {
-								String valueStr = entry.getValue().toString();
-								if (entry.getValue() instanceof List<?>) {
-									valueStr = entry.getValue().toString().replaceAll("[\\[\\]]", "");
+								ObjectMapper objectMapperDt = new ObjectMapper();
+								List<PBDate> pbDateU = objectMapperDt.convertValue(entry.getValue(),
+										new TypeReference<List<PBDate>>() {
+										});
+								Set<PBDate> spbDateU = addUpdateDate(pbDateU, doc, entry.getKey().toString());
+								if(ArgUtil.is(spbDateU)) {
+								addInfoMap.put(entry.getKey(),spbDateU);
 								}
-								addInfoMap.put(entry.getKey(), getDateWithTSM(valueStr));
 							} else {
 								addInfoMap.put(entry.getKey(), entry.getValue());
 							}
@@ -867,6 +878,8 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 	}
 	
 	private Set<PBDate> addUpdateDate(List<PBDate> reqDate, CustomerProfileDoc doc, String entryKey) {
+		try {
+		long ts=0l;
 		
 		Set<PBDate> setPbDate = new TreeSet<>();
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -893,27 +906,35 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 
 			if (found.isPresent()) {
 				PBDate pbDate  =found.get().update(reqDt);
-				pbDate.setStamp(CommonUtils.getDateWithTS(pbDate.getDate()));
-				pbDate.setStampLocal(getDateWithTSM(pbDate.getDate()));
+				ts = getDateWithTSM(pbDate.getDate());
+				pbDate.setStamp(ts);
+				pbDate.setStampLocal(DateUtil.parseDate(pbDate.getDate()).getTime());
+				pbDate.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
 				setPbDate.add(pbDate);
 			} else {
 				PBDate pbDate = new PBDate();
 				pbDate.setUuid(ArgUtil.parseAsString(pbDate.getUuid(), UniqueID.generateString()));
 				pbDate.setDate(reqDt.getDate());
-				pbDate.setStamp(CommonUtils.getDateWithTS(pbDate.getDate()));
-				pbDate.setStampLocal(getDateWithTSM(pbDate.getDate()));
+				ts = getDateWithTSM(pbDate.getDate());
+				pbDate.setStamp(ts);
+				pbDate.setStampLocal(DateUtil.parseDate(pbDate.getDate()).getTime());
 				pbDate.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
 				setPbDate.add(pbDate);
 			}
 
 		}
 		return setPbDate;
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	
 	private Set<PBDate> setDateFld(Object value){
 		Set<PBDate> setPbDate = new TreeSet<PBDate>();
 		List<Object> pbDate = (List<Object>)value;
+		long ts = 0l;
 		
 		for (Object obj : pbDate) {
 			Map<String, Object> pMap = JsonUtil.toJsonMap(obj);
@@ -924,10 +945,10 @@ public class ContactStore extends CommonMongoTemplateAbstract<ContactStore> {
 				}
 			}
 			pbD.setUuid(UniqueID.generateString());
-			pbD.setStamp(CommonUtils.getDateWithTS(pbD.getDate()));
-			pbD.setStampLocal(getDateWithTSM(pbD.getDate()));
+			ts = getDateWithTSM(pbD.getDate());
+			pbD.setStamp(ts);
+			pbD.setStampLocal(DateUtil.parseDate(pbD.getDate()).getTime());
 			pbD.setTimeZone(environment.domainConfig().getTimeZoneFromSetup());
-			
 			setPbDate.add(pbD);
 			
 		}

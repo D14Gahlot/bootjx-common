@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -51,6 +52,7 @@ import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.jx.postman.model.Message.Status;
+import com.boot.jx.postman.pbook.PBDate;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.store.ContactStore;
@@ -64,19 +66,17 @@ import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 
 @Component
 public class CustomerMasterFldMgr {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerMasterFldMgr.class);
-//	@Autowired
-//	MongoTemplate mongoTemplate;
 
 	@Autowired
 	CommonMongoTemplate commonMongoTemplate;
-//	@Autowired
-//	AuditDetailProvider auditDetailProvider;
 
 	@Autowired
 	ExcelHelper excelHelper;
@@ -89,14 +89,12 @@ public class CustomerMasterFldMgr {
 
 	@Autowired
 	private RestService restService;
-	
+
 	@Autowired(required = false)
 	protected AuditDetailProvider auditDetailProvider;
-	
-	
+
 	@Value("${mry.chrono.url}")
 	private String cronoJobUrl;
-	
 
 	public List<CustomerFieldMasterDoc> addAndEditMasterfield(CustomerFieldMasterDoc reqDto) {
 
@@ -129,21 +127,20 @@ public class CustomerMasterFldMgr {
 			cmFieldDoc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			commonMongoTemplate.save(cmFieldDoc);
 		}
-		
 
-		return fetchCustomerMasfields(cmFieldDoc.getId(),true,0,0,null,null);
+		return fetchCustomerMasfields(cmFieldDoc.getId(), true, 0, 0, null, null);
 	}
 
-	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id,Boolean active,int pageSize,int pageNo,String sortBy,String sortDir) {
+	public List<CustomerFieldMasterDoc> fetchCustomerMasfields(String id, Boolean active, int pageSize, int pageNo,
+			String sortBy, String sortDir) {
 		List<CustomerFieldMasterDoc> dtoLst = new ArrayList<>();
 		CustomerFieldMasterDoc cmFieldDoc = null;
-		
-		
-		Query qryQuery=new Query();
-		
+
+		Query qryQuery = new Query();
+
 		if (ArgUtil.is(id)) {
 			qryQuery.addCriteria(Criteria.where("id").is(id));
-			if(ArgUtil.is(active)) {
+			if (ArgUtil.is(active)) {
 				qryQuery.addCriteria(Criteria.where("active").is(active));
 			}
 			cmFieldDoc = commonMongoTemplate.findByIdString(id, CustomerFieldMasterDoc.class);
@@ -152,20 +149,21 @@ public class CustomerMasterFldMgr {
 				dtoLst.add(dto);
 			}
 		} else {
-			
-			MongoQueryBuilder<CustomerFieldMasterDoc> qry = MongoQueryBuilder.collection(CustomerFieldMasterDoc.class).page(pageNo,pageSize);
-			
-			if(ArgUtil.is(active)) {
+
+			MongoQueryBuilder<CustomerFieldMasterDoc> qry = MongoQueryBuilder.collection(CustomerFieldMasterDoc.class)
+					.page(pageNo, pageSize);
+
+			if (ArgUtil.is(active)) {
 				qry.where("active", active);
 			}
 			if (ArgUtil.is(sortBy)) {
 				qry = qry.sortBy(sortBy, Direction.fromString(sortDir));
 			}
-			List<CustomerFieldMasterDoc> lstGropDocs=contactStore.find(qry);
-				for (CustomerFieldMasterDoc doc : lstGropDocs) {
+			List<CustomerFieldMasterDoc> lstGropDocs = contactStore.find(qry);
+			for (CustomerFieldMasterDoc doc : lstGropDocs) {
 				CustomerFieldMasterDoc dto = EntityDtoUtil.entityToDto(doc, new CustomerFieldMasterDoc());
-					dtoLst.add(dto);
-				
+				dtoLst.add(dto);
+
 			}
 		}
 
@@ -176,14 +174,13 @@ public class CustomerMasterFldMgr {
 		if (ArgUtil.is(reqDto.getId())) {
 			MongoQueryBuilder<CustomerFieldMasterDoc> builder = MongoQueryBuilder
 					.collection(CustomerFieldMasterDoc.class).whereId(reqDto.getId());
-			//builder.set("active", reqDto.isActive());
-			//commonMongoTemplate.upsert(builder);
+			// builder.set("active", reqDto.isActive());
+			// commonMongoTemplate.upsert(builder);
 			// Proceed to remove the documents
-            commonMongoTemplate.remove(builder.getQuery(), CustomerFieldMasterDoc.class);
+			commonMongoTemplate.remove(builder.getQuery(), CustomerFieldMasterDoc.class);
 
-			
 		}
-		return fetchCustomerMasfields(null,true,0,0,null,null);
+		return fetchCustomerMasfields(null, true, 0, 0, null, null);
 	}
 
 	public CustomerFieldMasterDoc toCheckDupFieldCode(String fieldCode) {
@@ -194,7 +191,7 @@ public class CustomerMasterFldMgr {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JobScheduledDoc uploadFile(CommonFile comfile) {
+	public JobScheduledDoc uploadFile(CommonFile comfile, String uploadType) {
 		JobScheduledDoc doc = new JobScheduledDoc();
 		Map<String, List<Object>> input = new HashMap<>();
 		List<Object> files = new ArrayList<>();
@@ -211,8 +208,8 @@ public class CustomerMasterFldMgr {
 
 			commonMongoTemplate.save(doc);
 			SafeKeyHashMap<Object> globalVars = pmEnvironment.local().globalVars();
-			String nodeUrl = cronoJobUrl+"/scheduler/api/v1/job/now";
-			//String nodeUrl =globalVars.keyEntry("cp_node_url").asString();
+			String nodeUrl = cronoJobUrl + "/scheduler/api/v1/job/now";
+			// String nodeUrl =globalVars.keyEntry("cp_node_url").asString();
 			LOGGER.info("isSchedular :" + nodeUrl);
 
 			/** to call node API **/
@@ -220,6 +217,7 @@ public class CustomerMasterFldMgr {
 			HashMap<String, Object> data = new HashMap<>();
 			BuilderMap mapBuilder = MapBuilder.map();
 			mapBuilder.put("id", doc.getId());
+			mapBuilder.put("uploadType", uploadType);
 
 			data.put("name", "cust_profiles_bulk_upload");
 			data.put("desc", "Deduplication and saving the bulk uploaded customer profiles to the database");
@@ -252,13 +250,13 @@ public class CustomerMasterFldMgr {
 		return null;
 	}
 
-	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id,int pagesize, int pageNo,String sortBy) {
+	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id, int pagesize, int pageNo, String sortBy) {
 		int limit = pagesize == 0 ? 10 : pagesize;
 		String sortby = ArgUtil.parseAsString(sortBy, "_id");
 		List<JobsResponseDto> dtoLst = new ArrayList<>();
 		JobScheduledDoc cmProfileDoc = null;
 		JobsResponseDto dto = null;
-		
+
 		if (ArgUtil.is(id)) {
 			cmProfileDoc = commonMongoTemplate.findByIdString(id, JobScheduledDoc.class);
 			if (ArgUtil.is(cmProfileDoc)) {
@@ -266,12 +264,12 @@ public class CustomerMasterFldMgr {
 				dtoLst.add(dto);
 			}
 		} else {
-			
-			 Query query = new Query()
-		                .with(Sort.by(Sort.Direction.DESC, sortby))  // Sorting by the specified field in descending order
-		                .skip((pageNo - 1) * pagesize)                 // Skipping records for pagination
-		                .limit(limit);                                  // Limiting the number of records to pageSize
-			 List<JobScheduledDoc> lstProfileDocs =commonMongoTemplate.find(query, JobScheduledDoc.class);
+
+			Query query = new Query().with(Sort.by(Sort.Direction.DESC, sortby)) // Sorting by the specified field in
+																					// descending order
+					.skip((pageNo - 1) * pagesize) // Skipping records for pagination
+					.limit(limit); // Limiting the number of records to pageSize
+			List<JobScheduledDoc> lstProfileDocs = commonMongoTemplate.find(query, JobScheduledDoc.class);
 			for (JobScheduledDoc doc : lstProfileDocs) {
 				dto = EntityDtoUtil.entityToDto(doc, new JobsResponseDto());
 				dtoLst.add(dto);
@@ -280,7 +278,6 @@ public class CustomerMasterFldMgr {
 
 		return dtoLst;
 	}
-
 
 	@Deprecated
 	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
@@ -314,7 +311,6 @@ public class CustomerMasterFldMgr {
 			}
 		}
 
-		
 		return dtoLst;
 
 	}
@@ -420,7 +416,6 @@ public class CustomerMasterFldMgr {
 
 	}
 
-
 	public List<CustomerProfileDoc> deDeuplicateCheck(CustomerProfileRequest request) {
 		List<CustomerProfileDoc> cpLst = new ArrayList<>();
 		List<Criteria> orOperator = new LinkedList<Criteria>();
@@ -470,8 +465,6 @@ public class CustomerMasterFldMgr {
 		cProfileDoc.setPhones(setPbPhone);
 		cProfileDoc.setEmails(setPbEmail);
 		cProfileDoc.setCode(request.getCode());
-		// cProfileDoc.setCreatedStamp(System.currentTimeMillis());
-		// cProfileDoc.setCreatedBy(auditDetailProvider.getAuditUser());
 		commonMongoTemplate.save(cProfileDoc);
 		cpLst.add(cProfileDoc);
 		return cpLst;
@@ -565,19 +558,33 @@ public class CustomerMasterFldMgr {
 	                    break;
 	                default:
 	                	String fldType =checkFieldType(src.getKey());
-	                	if(fldType!=null && fldType.equalsIgnoreCase("date")) {
-	                		String valueStr =src.getValue().toString();
-	                		if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 1) {
-	        	        		 valueStr = src.getValue().toString().replaceAll("[\\[\\]]", "");
-	        	        		 orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), getDateWithTSM(valueStr)));
-	                		}else {
-	                			List<?> dateRange = (List<?>) src.getValue();
-	        	                Object startDate = getDateWithTSM(dateRange.get(0).toString());
-	        	                Object endDate = getDateWithTSM(dateRange.get(1).toString());
-	        	                List<Object> lst =new ArrayList<>();
-	        	                lst.add(startDate);
-	        	                lst.add(endDate);
-	                			orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), lst));
+	                	if(fldType!=null && fldType.equalsIgnoreCase("date") && ArgUtil.is(src.getValue())) {
+	                		try {
+		                		ObjectMapper objectMapperDt = new ObjectMapper();
+		                		List<PBDate> pbDateU = null;
+		                		String key =src.getKey()+".stamp";
+		                		if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 1) {
+								    pbDateU = objectMapperDt.convertValue(src.getValue(),new TypeReference<List<PBDate>>() {});
+		                			PBDate pbd = pbDateU.get(0);
+		        	        		//String valueStr = pbd.getDate();
+		        	        		 // Ensure date is not null
+		                            String valueStr = Optional.ofNullable(pbd.getDate()).orElseThrow(() -> new IllegalArgumentException("Date value is null"));
+		                          
+		        	        		orCriteriaList.add(createCriteria(key, src.getOperator(), getDateWithTSM(valueStr)));
+		                		}else if(src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 2) {
+		                			pbDateU = objectMapperDt.convertValue(src.getValue(),new TypeReference<List<PBDate>>() {});
+		                			Object startDate =getDateWithTSM(pbDateU.get(0).getDate().toString());
+		        	                Object endDate = getDateWithTSM(pbDateU.get(1).getDate().toString());
+		        	                List<Object> lst =new ArrayList<>();
+		        	                lst.add(startDate);
+		        	                lst.add(endDate);
+		                			orCriteriaList.add(createCriteria(key, src.getOperator(), lst));
+		                		}else{
+		                            throw new IllegalArgumentException("Unexpected data format in the source list.");
+		                		}
+	                		}catch(Exception e) {
+	                			e.getMessage();
+	                			LOGGER.info("EXCEPTION "+JsonUtil.toJson(searchQry));
 	                		}
 	                	}else {
 	                		if(src.getValue() instanceof List<?>  && ((List<?>) src.getValue()).size() > 1) {
@@ -628,246 +635,236 @@ public class CustomerMasterFldMgr {
 	    return contactStore.find(qb);
 	}
 
-	
 	private Criteria createCriteria(String key, String operation, Object value) {
-	    switch (operation) {
-	        case "=":
-	        case "EQ":
-	        	if(value instanceof List<?>) {
-	        		String valueStr = value.toString().replaceAll("[\\[\\]]", "");
-	        		return Criteria.where(key).is(valueStr);
-	        	}else {
-	        		return Criteria.where(key).is(value);
-	        	}
-	        case ">":
-	        case "GT":
-	            return Criteria.where(key).gt(value);
-	        case "<":
-	        case "LT":
-	            return Criteria.where(key).lt(value);
-	        case ">=":
-	        case "GTE":
-	            return Criteria.where(key).gte(value);
-	        case "<=":
-	        case "LTE":
-	            return Criteria.where(key).lte(value);
-	        case "!=":
-	        case "NE":
-	            return Criteria.where(key).ne(value);
-	        case "STARTS_WITH": // Criteria for name starts with a specific prefix
-	            return Criteria.where(key).regex("^" + value, "i"); // Case-insensitive search
-	        case "END_WITH": // Criteria for name ends with a specific suffix
-	            return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
-	        case "ne": // Criteria for field is not empty
-	            return Criteria.where(key).ne("").and(key).ne(null);
-	        case "IN": // Criteria for matching any or all elements
-	            return Criteria.where(key).in(value);
-	        case "ALL_MATCH": // Criteria for matching all elements
-	            return Criteria.where(key).all(value);
-	        case "ANY_MATCH":
-	            return Criteria.where(key).regex(".*" + value + ".*", "i"); // Case-insensitive search
-	        case "BEFORE": // Criteria for dates before a certain date
-	            if (value instanceof Date) {
-	                return Criteria.where(key).lt(value);
-	            }else {
-	            	return Criteria.where(key).lt(value);
-	            }
-	        case "ON_OR_BEFORE": // Criteria for dates before a certain date
-	            if (value instanceof Date) {
-	                return Criteria.where(key).lte(value);
-	            }else {
-	            	return Criteria.where(key).lte(value);
-	            }   
-	        case "AFTER": // Criteria for dates after a certain date
-	            if (value instanceof Date) {
-	                return Criteria.where(key).gt(value);
-	            }else {
-	            	return Criteria.where(key).gt(value);
-	            }
-	        case "ON_OR_AFTER": // Criteria for dates after a certain date
-	            if (value instanceof Date) {
-	                return Criteria.where(key).gte(value);
-	            }else {
-	            	return Criteria.where(key).gte(value);
-	            } 
-	        case "BETWEEN": // Criteria for dates between two dates
-	            if (value instanceof List<?> && ((List<?>) value).size() == 2) {
-	                List<?> dateRange = (List<?>) value;
-	                Object startDate = dateRange.get(0);
-	                Object endDate = dateRange.get(1);
-	                if (startDate instanceof Date && endDate instanceof Date) {
-	                    return Criteria.where(key).gte(startDate).lte(endDate);
-	                }else if(startDate instanceof String && endDate instanceof String) {
-	                	 return Criteria.where(key).gte(startDate).lte(endDate);
-	                }else if(startDate instanceof Number && endDate instanceof Number) {
-	                	 return Criteria.where(key).gte(startDate).lte(endDate);
-		                   
-		              }else {	                
-	                    throw new IllegalArgumentException("Both start and end dates in 'BETWEEN' must be Date objects");
-	                }
-	            } else {
-	                throw new IllegalArgumentException("Value for 'BETWEEN' must be a List containing two Date objects");
-	            }
-	        default:
-	            throw new IllegalArgumentException("Invalid operation: " + operation);
-	    }
-	   
+		switch (operation) {
+		case "=":
+		case "EQ":
+			if (value instanceof List<?>) {
+				String valueStr = value.toString().replaceAll("[\\[\\]]", "");
+				return Criteria.where(key).is(valueStr);
+			} else {
+				return Criteria.where(key).is(value);
+			}
+		case ">":
+		case "GT":
+			return Criteria.where(key).gt(value);
+		case "<":
+		case "LT":
+			return Criteria.where(key).lt(value);
+		case ">=":
+		case "GTE":
+			return Criteria.where(key).gte(value);
+		case "<=":
+		case "LTE":
+			return Criteria.where(key).lte(value);
+		case "!=":
+		case "NE":
+			return Criteria.where(key).ne(value);
+		case "STARTS_WITH": // Criteria for name starts with a specific prefix
+			return Criteria.where(key).regex("^" + value, "i"); // Case-insensitive search
+		case "END_WITH": // Criteria for name ends with a specific suffix
+			return Criteria.where(key).regex(value + "$", "i"); // Case-insensitive search
+		case "ne": // Criteria for field is not empty
+			return Criteria.where(key).ne("").and(key).ne(null);
+		case "IN": // Criteria for matching any or all elements
+			return Criteria.where(key).in(value);
+		case "ALL_MATCH": // Criteria for matching all elements
+			return Criteria.where(key).all(value);
+		case "ANY_MATCH":
+			return Criteria.where(key).regex(".*" + value + ".*", "i"); // Case-insensitive search
+		case "BEFORE": // Criteria for dates before a certain date
+			if (value instanceof Date) {
+				return Criteria.where(key).lt(value);
+			} else {
+				return Criteria.where(key).lt(value);
+			}
+		case "ON_OR_BEFORE": // Criteria for dates before a certain date
+			if (value instanceof Date) {
+				return Criteria.where(key).lte(value);
+			} else {
+				return Criteria.where(key).lte(value);
+			}
+		case "AFTER": // Criteria for dates after a certain date
+			if (value instanceof Date) {
+				return Criteria.where(key).gt(value);
+			} else {
+				return Criteria.where(key).gt(value);
+			}
+		case "ON_OR_AFTER": // Criteria for dates after a certain date
+			if (value instanceof Date) {
+				return Criteria.where(key).gte(value);
+			} else {
+				return Criteria.where(key).gte(value);
+			}
+		case "BETWEEN": // Criteria for dates between two dates
+			if (value instanceof List<?> && ((List<?>) value).size() == 2) {
+				List<?> dateRange = (List<?>) value;
+				Object startDate = dateRange.get(0);
+				Object endDate = dateRange.get(1);
+				if (startDate instanceof Date && endDate instanceof Date) {
+					return Criteria.where(key).gte(startDate).lte(endDate);
+				} else if (startDate instanceof String && endDate instanceof String) {
+					return Criteria.where(key).gte(startDate).lte(endDate);
+				} else if (startDate instanceof Number && endDate instanceof Number) {
+					return Criteria.where(key).gte(startDate).lte(endDate);
+
+				} else {
+					throw new IllegalArgumentException("Both start and end dates in 'BETWEEN' must be Date objects");
+				}
+			} else {
+				throw new IllegalArgumentException("Value for 'BETWEEN' must be a List containing two Date objects");
+			}
+		default:
+			throw new IllegalArgumentException("Invalid operation: " + operation);
+		}
+
 	}
 
-
-
 	public List<ProfileFilterMasterDoc> addEditProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
-		
-		
-		if(ArgUtil.is(reqDto.getFilterName())) {
-			ProfileFilterMasterDoc filDocD = commonMongoTemplate.findOne(new Query(Criteria.where("filterName").is(reqDto.getFilterName())),
-					ProfileFilterMasterDoc.class);
+
+		if (ArgUtil.is(reqDto.getFilterName())) {
+			ProfileFilterMasterDoc filDocD = commonMongoTemplate.findOne(
+					new Query(Criteria.where("filterName").is(reqDto.getFilterName())), ProfileFilterMasterDoc.class);
 			if (filDocD != null) {
-			ApiResponseUtil.throwInputException(new ApiFieldError().field("filterName").codeKey("ValidNameDuplicate")
-					.description("Filter name  already exists"));
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("filterName")
+						.codeKey("ValidNameDuplicate").description("Filter name  already exists"));
 			}
 		}
-		
+
 		ProfileFilterMasterDoc filDoc = new ProfileFilterMasterDoc();
 		if (ArgUtil.is(reqDto.getId())) {
 			filDoc = commonMongoTemplate.findByIdString(reqDto.getId(), ProfileFilterMasterDoc.class);
 			if (ArgUtil.is(filDoc)) {
-			filDoc.setFilterName(reqDto.getFilterName());
-			filDoc.setFilterCriteria(reqDto.getFilterCriteria());
-			filDoc.set_filterCriteria(reqDto.get_filterCriteria());
-			filDoc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
-			commonMongoTemplate.save(filDoc);
+				filDoc.setFilterName(reqDto.getFilterName());
+				filDoc.setFilterCriteria(reqDto.getFilterCriteria());
+				filDoc.set_filterCriteria(reqDto.get_filterCriteria());
+				filDoc.setUpdated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
+				commonMongoTemplate.save(filDoc);
 			}
-		}else {
-			
+		} else {
+
 			filDoc.setFilterName(reqDto.getFilterName());
 			filDoc.setFilterCriteria(reqDto.getFilterCriteria());
 			filDoc.set_filterCriteria(reqDto.get_filterCriteria());
 			filDoc.setCreated(TimeStampIndex.now().by(auditDetailProvider.getAuditUser()));
 			commonMongoTemplate.save(filDoc);
 		}
-		List<ProfileFilterMasterDoc> lst =new ArrayList<>();
+		List<ProfileFilterMasterDoc> lst = new ArrayList<>();
 		lst.add(filDoc);
-		//return fetchProfileFilterGroup(filDoc.getId(),null,10,0,null,null);
+		// return fetchProfileFilterGroup(filDoc.getId(),null,10,0,null,null);
 		return lst;
 	}
 
 	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
 		if (ArgUtil.is(reqDto.getId())) {
-			
-			 List<String> idList = Arrays.stream(reqDto.getId().split(","))
-	                 .collect(Collectors.toList());
-			for(String str :idList) {
+
+			List<String> idList = Arrays.stream(reqDto.getId().split(",")).collect(Collectors.toList());
+			for (String str : idList) {
 				MongoQueryBuilder<ProfileFilterMasterDoc> builder = MongoQueryBuilder
 						.collection(ProfileFilterMasterDoc.class).whereId(str);
 				commonMongoTemplate.remove(builder.getQuery(), ProfileFilterMasterDoc.class);
 			}
 		}
-		return fetchProfileFilterGroup(null,null,10,0,null,null);
+		return fetchProfileFilterGroup(null, null, 10, 0, null, null);
 	}
 
 	public List<ProfileFilterMasterDoc> fetchProfileFilterGroup(String id, Boolean active, int pagesize, int pageNo,
 			String sortby, String sortdir) {
-		    int pageSize = pagesize == 0 ? 25 : pagesize;
-		    String sortBy = ArgUtil.parseAsString(sortby, "created.stamp");
-		    String sortDir = ArgUtil.parseAsString(sortdir, "DESC");
-		
-		    MongoQueryBuilder<ProfileFilterMasterDoc> qb = MongoQueryBuilder.collection(ProfileFilterMasterDoc.class)
-		    		 .sortBy(sortBy,Direction.fromString(sortDir))
-		    		 .page(pageNo,pageSize);
-			if (!StringUtils.isBlank(id)) {
-				qb = qb.whereId(id);
-			}
-			return contactStore.find(qb);
+		int pageSize = pagesize == 0 ? 25 : pagesize;
+		String sortBy = ArgUtil.parseAsString(sortby, "created.stamp");
+		String sortDir = ArgUtil.parseAsString(sortdir, "DESC");
+
+		MongoQueryBuilder<ProfileFilterMasterDoc> qb = MongoQueryBuilder.collection(ProfileFilterMasterDoc.class)
+				.sortBy(sortBy, Direction.fromString(sortDir)).page(pageNo, pageSize);
+		if (!StringUtils.isBlank(id)) {
+			qb = qb.whereId(id);
+		}
+		return contactStore.find(qb);
 	}
 
-private Date getDate(String value) {
-	try {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		 // Parse the string to a Date object
-        Date date = sdf.parse(value);
-        return date;
-	}catch(Exception e) {
-		e.printStackTrace();
+	private Date getDate(String value) {
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			// Parse the string to a Date object
+			Date date = sdf.parse(value);
+			return date;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new Date();
 	}
-	return new Date();
-}
 
-private String getFileName(String additionalInfo) {
-	String fldCode = Arrays.stream(additionalInfo.split("\\.")).skip(1).findFirst().orElse(additionalInfo);
-	return fldCode;
-}
+	private String getFileName(String additionalInfo) {
+		String fldCode = Arrays.stream(additionalInfo.split("\\.")).skip(1).findFirst().orElse(additionalInfo);
+		return fldCode;
+	}
 
-public String checkFieldType(String code) {
-	String objType = null;
-	code = getFileName(code);
-	if (ArgUtil.is(code)) {
-		Query qryQuery = new Query();
-		qryQuery.addCriteria(Criteria.where("code").is(code).and("active").is(true));
-		List<CustomerFieldMasterDoc> cmFieldDoc = commonMongoTemplate.find(qryQuery, CustomerFieldMasterDoc.class);
-		if (cmFieldDoc != null && !cmFieldDoc.isEmpty()) {
-			Object fldType = cmFieldDoc.get(0).getType();
-			if (ArgUtil.is(fldType)) {
-				objType = ArgUtil.parseAsT(fldType, new String(), false);
+	public String checkFieldType(String code) {
+		String objType = null;
+		code = getFileName(code);
+		if (ArgUtil.is(code)) {
+			Query qryQuery = new Query();
+			qryQuery.addCriteria(Criteria.where("code").is(code).and("active").is(true));
+			List<CustomerFieldMasterDoc> cmFieldDoc = commonMongoTemplate.find(qryQuery, CustomerFieldMasterDoc.class);
+			if (cmFieldDoc != null && !cmFieldDoc.isEmpty()) {
+				Object fldType = cmFieldDoc.get(0).getType();
+				if (ArgUtil.is(fldType)) {
+					objType = ArgUtil.parseAsT(fldType, new String(), false);
+				}
 			}
+			return objType;
 		}
 		return objType;
 	}
-	return objType;
-}
 
+	public long getDateWithTSM(String dateString) {
+		long timestamp = 0;
 
-public long getDateWithTSM(String dateString) {
-	 long timestamp =0;
-	 
-	try {
-		 // Define the date format
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		try {
+			// Define the date format
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        // Parse the input date string into a LocalDate
-        LocalDate localDate = LocalDate.parse(dateString, formatter);
+			// Parse the input date string into a LocalDate
+			LocalDate localDate = LocalDate.parse(dateString, formatter);
 
-        // Get the timezone string from your setup
-        String tz = getTimeZoneFromSetup();
+			// Get the timezone string from your setup
+			String tz = getTimeZoneFromSetup();
 
-        // Parse the timezone and handle invalid formats
-        ZoneId zoneId = parseTimeZone(tz);
+			// Parse the timezone and handle invalid formats
+			ZoneId zoneId = parseTimeZone(tz);
 
-        // Combine LocalDate with ZoneId to get ZonedDateTime
-        ZonedDateTime zonedDateTime = localDate.atStartOfDay(zoneId);
+			// Combine LocalDate with ZoneId to get ZonedDateTime
+			ZonedDateTime zonedDateTime = localDate.atStartOfDay(zoneId);
 
-        // Convert ZonedDateTime to epoch milliseconds
-        timestamp = zonedDateTime.toInstant().toEpochMilli();
+			// Convert ZonedDateTime to epoch milliseconds
+			timestamp = zonedDateTime.toInstant().toEpochMilli();
 
-        return timestamp;
-	}catch(Exception e) {
-		if(ArgUtil.is(dateString)) {
-			timestamp =  Long.parseLong(dateString);
+			return timestamp;
+		} catch (Exception e) {
+			if (ArgUtil.is(dateString)) {
+				timestamp = Long.parseLong(dateString);
+			}
+		}
+		return timestamp;
+	}
+
+	public String getTimeZoneFromSetup() {
+		String offset = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+				.asString("Asia/Kolkata::GMT+5:30");
+		return offset;
+	}
+
+	private ZoneId parseTimeZone(String tz) {
+		// Extract the region part before "::"
+		if (tz.contains("::")) {
+			tz = tz.split("::")[0];
+		}
+		try {
+			return ZoneId.of(tz); // Valid region-based ZoneId
+		} catch (DateTimeException e) {
+			System.err.println("Invalid timezone provided: " + tz + ". Falling back to default (Asia/Kolkata).");
+			return ZoneId.of("Asia/Kolkata"); // Fallback to default
 		}
 	}
-	return timestamp;
-}
-
-
-
-public  String getTimeZoneFromSetup() {
-	String offset = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
-			.asString("Asia/Kolkata::GMT+5:30");
-	return offset;
-}
-
-
-private ZoneId parseTimeZone(String tz) {
-    // Extract the region part before "::"
-    if (tz.contains("::")) {
-        tz = tz.split("::")[0];
-    }
-    try {
-        return ZoneId.of(tz); // Valid region-based ZoneId
-    } catch (DateTimeException e) {
-        System.err.println("Invalid timezone provided: " + tz + ". Falling back to default (Asia/Kolkata).");
-        return ZoneId.of("Asia/Kolkata"); // Fallback to default
-    }
-}
 
 }

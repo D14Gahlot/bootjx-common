@@ -53,8 +53,8 @@ public class CustomerProfileService {
 		}
 	}
 
-	public JobScheduledDoc uploadFile(CommonFile comfile) {
-		return cmFieldMgr.uploadFile(comfile);
+	public JobScheduledDoc uploadFile(CommonFile comfile,String uploadType) {
+		return cmFieldMgr.uploadFile(comfile,uploadType);
 
 	}
 

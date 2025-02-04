@@ -19,6 +19,7 @@ import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel.EntryMeta;
@@ -550,12 +551,20 @@ public class PMEnvironment {
 
 	}
 
+	public interface PMGateKeeper {
+		boolean canSendMessage(OutboxMessage outboxMessage);
+	}
+
 	@Autowired(required = false)
 	private PMCommonConfig pmCommonConfig;
 	@Autowired(required = false)
 	private PMDomainConfig pmDomainConfig;
 	@Autowired(required = false)
 	private PMClientConfig pmClientConfig;
+
+	@Autowired
+	@Lazy // Delays initialization to break circular dependency
+	private PMGateKeeper pmGateKeeper;
 
 	public PMCommonConfig commonConfig() {
 		return pmCommonConfig;
@@ -567,5 +576,9 @@ public class PMEnvironment {
 
 	public PMClientConfig clientConfig() {
 		return pmClientConfig;
+	}
+
+	public PMGateKeeper gateKeeper() {
+		return pmGateKeeper;
 	}
 }
