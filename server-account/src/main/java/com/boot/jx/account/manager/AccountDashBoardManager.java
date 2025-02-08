@@ -1427,9 +1427,6 @@ public class AccountDashBoardManager {
 		
 		
 		List<DomainDoc> domainDocLst =getAllDomainAccount();
-		//for(DomainDoc dom:domainDocLst) {
-		//	LOGGER.info("tnt :"+dom.getDomain());
-		//	AppContextUtil.setTenant(dom.getDomain());
 			List<AgentDoc> agentDocLst=agentStore.findAllAgents(false);
 			
 		
@@ -1532,8 +1529,6 @@ public class AccountDashBoardManager {
 	        String wabaId =chdoc.getWabaId();
 	        String number =chdoc.getNumber();
 	        String tnt=chdoc.getTenant();
-	        System.out.println("chdoc :"+chdoc+"\t domDoc :"+domDoc.getDomain());
-	        
 	        
 	        WabaDateWiseBalanceDto dto = new WabaDateWiseBalanceDto();
 	        Integer totalConvCnt=0;
@@ -1544,6 +1539,8 @@ public class AccountDashBoardManager {
 	        Aggregation aggregation = Aggregation.newAggregation(
 	            // $match stage to filter by wabaId, start, and end
 	            Aggregation.match(Criteria.where("wabaId").is(wabaId)
+	            	.and("number").is(number)
+	            	.and("tenant").is(tnt)
 	                .and("start").gt(startTStamp)
 	                .and("end").lt(endTStamp)),
 
@@ -1626,19 +1623,20 @@ public class AccountDashBoardManager {
 			WabaAccountBalanceDoc waAccBal=null;
 			double deposiTamt=0.0;
 			if(ArgUtil.is(wabaId)) {
-			 waAccBal=getAccountBalance(wabaId,tnt);
-			
-				
+			 waAccBal=getAccountBalance(wabaId,tnt,number);
 			if(ArgUtil.is(waAccBal)) {
 				deposiTamt=waAccBal.getDepositAmt();
 				dto.setCurrencyCode(waAccBal.getCurrencyCode());
 				dto.setId(waAccBal.getId());
+				dto.setDepostAmt(deposiTamt);
 				}
-			dto.setDepostAmt(deposiTamt);
+			
 			}
 			dto.setTotalCount(totalConvCnt);
 			dto.setTotalCost(totalConvCost);
-			dto.setBalanceAmt(deposiTamt-totalConvCost);
+			if(ArgUtil.is(dto.getDepostAmt())) {
+				dto.setBalanceAmt(deposiTamt-totalConvCost);
+			}
 			
 			dto.setTnt(ArgUtil.parseAsString(tnt,AppContextUtil.getTenant()));
 			
@@ -1658,12 +1656,12 @@ public class AccountDashBoardManager {
 	    }
 
 	
- public WabaAccountBalanceDoc getAccountBalance(String wabaId,String tenant) {
+ public WabaAccountBalanceDoc getAccountBalance(String wabaId,String tenant,String number) {
 		List<WabaAccountBalanceDoc> docLst = null; 
 		WabaAccountBalanceDoc doc=null;
 		Query query=new Query();
 		if(ArgUtil.is(wabaId)) {
-			query.addCriteria(Criteria.where("wabaId").is(wabaId).and("tenant").is(tenant));
+			query.addCriteria(Criteria.where("wabaId").is(wabaId).and("tenant").is(tenant).and("number").is(number));
 			docLst =mongoTemplate.find(query, WabaAccountBalanceDoc.class);
 			if(ArgUtil.is(docLst)) {
 				doc=docLst.get(0);
@@ -1696,7 +1694,6 @@ public class AccountDashBoardManager {
 
 			List<Document> uniqueRecords = mongoTemplate.aggregate(aggregation, "TP_WABA_ANALYTICS", Document.class).getMappedResults();
 			// Process the unique records
-			uniqueRecords.forEach(System.out::println);
 			for(Document doc:uniqueRecords) {
 				WabaAnalyticsDoc wadoc =new WabaAnalyticsDoc();
 				wadoc.setTenant(doc.getString("tenant"));
