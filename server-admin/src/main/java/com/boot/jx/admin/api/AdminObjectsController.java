@@ -38,6 +38,7 @@ import com.boot.model.MapModel;
 import com.boot.model.UtilityModels.PublicJsonProperty;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.mongodb.BasicDBObject;
 
 @RestController
 public class AdminObjectsController {
@@ -229,6 +230,20 @@ public class AdminObjectsController {
 			@RequestParam(required = false) String channelId, @RequestParam(required = false) String type) {
 		return ApiResponse.buildResults(
 				getPaginatedBulk(ChatSessionDoc.class, "CHAT_SESSION", pageNo, pageSize, sortBy, sortDir));
+	}
+
+	@RequestMapping(value = "/api/objects/session_summary", method = { RequestMethod.GET })
+	@JsonView(PublicJsonProperty.class)
+	public ApiResponse<BasicDBObject, Object> getSession(@RequestParam(required = false) String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir) {
+		List<BasicDBObject> x = comonMongoTemplate
+				.getPages(PaginatedQuery.select(BasicDBObject.class, "SESSION_SUMMARY") //
+						.pageNo(pageNo).pageSize(pageSize).sortBy(sortBy).sortDir(sortDir).count())
+				.getResults();
+		return ApiResponse.buildResults(x);
 	}
 
 }
