@@ -1541,8 +1541,8 @@ public class AccountDashBoardManager {
 	            Aggregation.match(Criteria.where("wabaId").is(wabaId)
 	            	.and("number").is(number)
 	            	.and("tenant").is(tnt)
-	                .and("start").gt(startTStamp)
-	                .and("end").lt(endTStamp)),
+	                .and("start").gte(startTStamp)
+	                .and("end").lte(endTStamp)),
 
 	            // $group stage to group by conversation_type and conversation_category
 	            Aggregation.group("conversation_type", "conversation_category")
