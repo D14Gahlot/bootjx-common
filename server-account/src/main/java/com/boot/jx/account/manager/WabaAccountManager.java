@@ -43,7 +43,7 @@ public class WabaAccountManager extends CommonMongoTemplateAbstract<WabaAccountM
 				
 
 			doc.setTenant(reqDto.getTenant()==null?doc.getTenant():reqDto.getTenant());
-			doc.setDepositAmt(doc.getDepositAmt()+reqDto.getDepositAmt());
+			doc.setDepositAmt(ArgUtil.parseAsDouble(reqDto.getDepositAmt(), doc.getDepositAmt()));
 			doc.setCurrencyCode(doc.getCurrencyCode()==null?reqDto.getCurrencyCode():doc.getCurrencyCode());
 			doc.setTimeStamp(System.currentTimeMillis());
 			doc.setWabaId(reqDto.getWabaId());
