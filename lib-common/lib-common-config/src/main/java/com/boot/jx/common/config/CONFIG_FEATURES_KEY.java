@@ -14,7 +14,9 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 			new ConfigOption(PLANS.BLOCKED), //
 			new ConfigOption(PLANS.FREEMIUM), //
 			new ConfigOption(PLANS.CUSTOM) //
-	).defaultValue(PLANS.CUSTOM)),
+	)
+	// .defaultValue(PLANS.CUSTOM) // because it shud be none till freemium launch
+	),
 
 	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
 			.group(ConfigConstants.APP_MODULES)),
