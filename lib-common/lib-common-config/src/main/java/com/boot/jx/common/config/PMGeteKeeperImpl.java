@@ -2,6 +2,7 @@ package com.boot.jx.common.config;
 
 import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.RAtomicLong;
 import org.redisson.api.RSetCache;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import com.boot.jx.common.config.CONFIG_FEATURES_KEY.PLANS;
 import com.boot.jx.def.ICacheBox;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMGateKeeper;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
@@ -62,7 +64,6 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 		}
 
 		if (ArgUtil.is(plan, PLANS.FREEMIUM)) {
-
 			Integer freemiumDauLimit = environment.featureEntry(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND_DAU_FREEMIUM)
 					.asInteger(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND_DAU_FREEMIUM.getDefaultValue());
 
@@ -76,9 +77,53 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 			if (isNewCustomer) {
 				// Allow if total unique customers are within the limit
 				if (customerSet.size() > freemiumDauLimit) {
-					outboxMessage.logs().add("Daily quota exceeded");
+					outboxMessage.logs().add("Daily quota (outbound) exceeded");
 					return false;
 				}
+			}
+
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean canSendTemplateMedia(OutboxMessage outboxMessage) {
+
+		if (!environment.featureEntry(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE)
+				.asBoolean(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE.getDefaultValue())) {
+			outboxMessage.logs().add("Templated Media Restricted");
+			outboxMessage.status(Status.BLCKD);
+			return false;
+		}
+
+		String plan = environment.featureEntry(CONFIG_FEATURES_KEY.PLAN)
+				.asString(CONFIG_FEATURES_KEY.PLAN.getDefaultValue());
+
+		if (ArgUtil.is(plan, PLANS.BLOCKED)) {
+			outboxMessage.logs().add("Account Blocked");
+			outboxMessage.status(Status.BLCKD);
+			return false;
+		}
+
+		if (ArgUtil.is(plan, PLANS.FREEMIUM)) {
+			Integer freemiumMediaLimit = environment.featureEntry(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE_FREEMIUM)
+					.asInteger(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE_FREEMIUM.getDefaultValue());
+
+			String key = "gklimiter:" + AppContextUtil.getTenant() + ":tmplmedia:" + freemiumMediaLimit;
+
+			RAtomicLong mediaCounter = redisson.getAtomicLong(key);
+			// If it's the first increment today, set an expiry for 24 hours
+			if (mediaCounter.get() == 0) {
+				mediaCounter.expire(EXPIRY_TIME, TimeUnit.HOURS);
+			}
+
+			// Increment count and check if it exceeds the limit
+			long currentCount = mediaCounter.incrementAndGet();
+			if (currentCount > freemiumMediaLimit) {
+				outboxMessage.logs().add("Daily quota (Template Media) exceeded");
+				outboxMessage.status(Status.LIMIT);
+				return false;
 			}
 
 		}

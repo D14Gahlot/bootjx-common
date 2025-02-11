@@ -40,6 +40,7 @@ import com.boot.jx.postman.manager.ChatLogger;
 import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
+import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.OutboxMessage;
@@ -179,8 +180,12 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 	}
 
 	@Override
-	public void beforeSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
+	public boolean beforeSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage) {
 		template(channelConfig, chatContactDoc, outboxMessage);
+		if (ArgUtil.is(outboxMessage.getStatus(), Status.BLCKD, Status.LIMIT)) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
