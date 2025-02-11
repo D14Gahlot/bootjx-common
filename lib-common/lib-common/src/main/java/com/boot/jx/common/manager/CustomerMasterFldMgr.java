@@ -62,6 +62,7 @@ import com.boot.model.MapModel;
 import com.boot.model.SafeKeyHashMap;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.DateUtil;
 import com.boot.utils.EntityDtoUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
@@ -224,9 +225,7 @@ public class CustomerMasterFldMgr {
 			data.put("data", mapBuilder.toMap());
 
 			String jsonStr = JsonUtil.toJson(data);
-			LOGGER.info("post data :" + jsonStr);
 			MapModel resp = restService.ajax(nodeUrl).postJson(data).asMapModel();
-			LOGGER.info("JSON UTIL:" + JsonUtil.toJsonPrettyPrint(resp));
 			if (resp != null && resp.get("data") != null) {
 				Map<String, Object> dataMap = (Map<String, Object>) resp.get("data");
 				Map<String, Object> innerDataMap = (Map<String, Object>) dataMap.get("data");
@@ -510,7 +509,6 @@ public class CustomerMasterFldMgr {
 	    
 	    List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
 	    
-	    //Direction.fromString(sortDir)
 
 	    // List to hold ANDed criteria
 	    List<Criteria> andCriteriaList = new ArrayList<>();
@@ -564,12 +562,16 @@ public class CustomerMasterFldMgr {
 		                		List<PBDate> pbDateU = null;
 		                		String key =src.getKey()+".stamp";
 		                		if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 1) {
+		                			String valueStr =null;
+		                			boolean boToday=checkToday(src.getValue());
+		                			if(boToday) {
+		                				valueStr =CommonUtils.getTodayDtAsStr();
+		                			}else {
 								    pbDateU = objectMapperDt.convertValue(src.getValue(),new TypeReference<List<PBDate>>() {});
 		                			PBDate pbd = pbDateU.get(0);
-		        	        		//String valueStr = pbd.getDate();
 		        	        		 // Ensure date is not null
-		                            String valueStr = Optional.ofNullable(pbd.getDate()).orElseThrow(() -> new IllegalArgumentException("Date value is null"));
-		                          
+		                            valueStr = Optional.ofNullable(pbd.getDate()).orElseThrow(() -> new IllegalArgumentException("Date value is null"));
+		                			}
 		        	        		orCriteriaList.add(createCriteria(key, src.getOperator(), getDateWithTSM(valueStr)));
 		                		}else if(src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 2) {
 		                			pbDateU = objectMapperDt.convertValue(src.getValue(),new TypeReference<List<PBDate>>() {});
@@ -864,6 +866,25 @@ public class CustomerMasterFldMgr {
 		} catch (DateTimeException e) {
 			System.err.println("Invalid timezone provided: " + tz + ". Falling back to default (Asia/Kolkata).");
 			return ZoneId.of("Asia/Kolkata"); // Fallback to default
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public boolean checkToday(Object value) {
+		boolean containsAliasToday = false;
+		try {
+			 List<?> outerList = (List<?>) value; // Treat it as a List
+			 containsAliasToday = outerList.stream()
+				        .filter(obj -> obj instanceof Map) // Ensure it's a Map
+				        .map(obj -> (Map<?, ?>) obj) // Cast to Map
+				        .anyMatch(map -> 
+				            map.containsKey("alias") && 
+				            "TODAY".equalsIgnoreCase(String.valueOf(map.get("alias"))) // Case-insensitive check
+				        );
+		    return containsAliasToday;
+		}catch(Exception e) {
+			e.printStackTrace();
+			return containsAliasToday;
 		}
 	}
 

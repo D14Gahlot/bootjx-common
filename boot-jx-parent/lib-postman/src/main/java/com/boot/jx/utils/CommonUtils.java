@@ -119,6 +119,22 @@ public static String monthNameByTimestamp(long timestamp) {
 			return new Date();
 		}
 	 
+	 public static String getTodayDtAsStr() {
+		   String formattedDate = null;
+			try {
+				 LocalDate today = LocalDate.now();
+			     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			     formattedDate = today.format(formatter);
+			    return formattedDate;
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			return formattedDate;
+		}
+	 
+	 
+	  
+	 
 	 public static long getDateWithTS(String dateString) {
 		 long timestamp =0;
 		 
