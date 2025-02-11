@@ -14,14 +14,19 @@ public enum CONFIG_FEATURES_KEY implements EntryMeta {
 			new ConfigOption(PLANS.BLOCKED), //
 			new ConfigOption(PLANS.FREEMIUM), //
 			new ConfigOption(PLANS.CUSTOM) //
-	).defaultValue(PLANS.CUSTOM)),
+	).defaultValue(PLANS.FREEMIUM) // because it shud be none till freemium launch
+	),
 
-	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
-			.group(ConfigConstants.APP_MODULES)),
 	MESSAGE_OUTBOUND(new ConfigMeta("Message Outbound", "feature.message.outbound").optionsOnOff().defaultTrue()),
 
 	MESSAGE_OUTBOUND_DAU_FREEMIUM(
-			new ConfigMeta("Outbound DAU (Freemium)", "feature.message.outbound.dau.freemium").defaultValue(10)),
+			new ConfigMeta("Outbound DAU (Freemium Quota)", "feature.message.outbound.dau.freemium").defaultValue(10)),
+
+	MSG_MEDIA_TEMPLATE(new ConfigMeta("Message Media Template", "feature.message.media.tmpl").optionsOnOff()
+			.group(ConfigConstants.APP_MODULES)),
+
+	MSG_MEDIA_TEMPLATE_FREEMIUM(
+			new ConfigMeta("Templated Media (Freemium Quota)", "feature.message.media.tmpl.freemium").defaultValue(10)),
 
 	AUTH_2FA(new ConfigMeta("2FA Auth for login", "feature.auth.2fa").optionsOnOff()),
 

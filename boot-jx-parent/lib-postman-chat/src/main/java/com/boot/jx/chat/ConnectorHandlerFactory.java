@@ -79,8 +79,9 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 			outboxMessage.addTo(inboxMessage.getFrom());
 			outboxMessage.contact().setLane(inboxMessage.contact().getLane());
-			this.beforeSend(channelConfig, chatContactDoc, outboxMessage);
-			this.onSend(channelConfig, chatContactDoc, outboxMessage);
+			if (this.beforeSend(channelConfig, chatContactDoc, outboxMessage)) {
+				this.onSend(channelConfig, chatContactDoc, outboxMessage);
+			}
 		}
 
 		/**
@@ -101,8 +102,9 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 			}
 			outboxMessage.addTo(chatContactDoc.getCsid());
 			outboxMessage.contact().setLane(chatContactDoc.getLane());
-			this.beforeSend(channelConfig, chatContactDoc, outboxMessage);
-			this.onSend(channelConfig, chatContactDoc, outboxMessage);
+			if (this.beforeSend(channelConfig, chatContactDoc, outboxMessage)) {
+				this.onSend(channelConfig, chatContactDoc, outboxMessage);
+			}
 		}
 
 		default public InboxMessage assignToAgent(InboxMessage inboxMessage) {
@@ -166,7 +168,7 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 			}
 		}
 
-		void beforeSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
+		boolean beforeSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
 		void onSend(ChannelConfig channelConfig, ChatContactDoc chatContactDoc, OutboxMessage outboxMessage);
 
@@ -418,7 +420,7 @@ public class ConnectorHandlerFactory extends ChannelBasedFactory<ConnectorHandle
 
 		try {
 			if (!environment.gateKeeper().canSendMessage(outboxMessage)) {
-				//outboxMessage.logs().add(String.format("Insufficient Balance"));
+				// outboxMessage.logs().add(String.format("Insufficient Balance"));
 			} else if (ArgUtil.is(channelConfig) || ContactType.WEBSITE.equals(outboxMessage.contact().type())) {
 				ConnectorHandler connector = get(channelConfig);
 				if (ArgUtil.is(connector)) {

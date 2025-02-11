@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.PMEnvironment.PMGateKeeper;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.PostmanPackages.ICommonTmplPackage;
 import com.boot.jx.postman.PostmanPackages.Text2Media;
@@ -49,6 +50,9 @@ public class TmplClient {
 
 	@Autowired
 	protected Text2Media text2Media;
+
+	@Autowired
+	protected PMGateKeeper pmGateKeeper;
 
 	public ApiResponse<CommonFile, Object> process(CommonFile file, ContactType contactType) throws PostManException {
 		if (ArgUtil.is(iCommonTmplPackage)) {
@@ -130,7 +134,11 @@ public class TmplClient {
 			try {
 				for (Attachment attach : outboxMessage.getAttachments()) {
 					if (ArgUtil.is(attach.getMediaTemplate())) {
-						attach.setMediaURL(toImage(attach, outboxMessage.getModel()));
+						if (pmGateKeeper.canSendTemplateMedia(outboxMessage)) {
+							attach.setMediaURL(toImage(attach, outboxMessage.getModel()));
+						} else {
+							return outboxMessage;
+						}
 					}
 				}
 			} catch (Exception e) {
@@ -138,7 +146,6 @@ public class TmplClient {
 				LOGGER.error("MediaTemplateException", e);
 			}
 		}
-
 		outboxMessage.options().putAll(options);
 		return outboxMessage;
 	}
@@ -151,6 +158,7 @@ public class TmplClient {
 	}
 
 	public String toImage(Attachment attach, Object model) throws IOException {
+
 		String attachFileStr = process(attach.getMediaTemplate(), model);
 		return text2Media.toImage(attachFileStr, attach.getMediaTemplateStyle(), attach.getAttachmentId());
 	}

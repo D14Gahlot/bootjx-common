@@ -553,6 +553,8 @@ public class PMEnvironment {
 
 	public interface PMGateKeeper {
 		boolean canSendMessage(OutboxMessage outboxMessage);
+
+		boolean canSendTemplateMedia(OutboxMessage outboxMessage);
 	}
 
 	@Autowired(required = false)
