@@ -650,6 +650,7 @@ public class AdminMsgBulkController {
 					List<List<ProfileSearchCriteria>> searCri = bulkMessageService.getSearchCriteria(filterCri);
 					ProfileSearchQuery profSerarch = new ProfileSearchQuery();
 					profSerarch.setSearchCriterias(searCri);
+					profSerarch.setPageSize(1000);
 
 					List<CustomerProfileDoc> docs = null;
 					if (ArgUtil.is(searCri)) {
