@@ -291,7 +291,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 				.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
-				.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode()) //
+				.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode())
+				.appVersion(defaultClient.getVersion()) //
 				.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
@@ -490,7 +491,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
 						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 						.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
-						.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode()) //
+						.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode())
+						.appVersion(defaultClient.getVersion())//
 						.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);

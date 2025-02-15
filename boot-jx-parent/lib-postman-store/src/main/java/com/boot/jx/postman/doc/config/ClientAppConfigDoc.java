@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -45,6 +46,9 @@ public class ClientAppConfigDoc
 
 	private String key;
 	private String keyVersion;
+
+	@Version
+	private Long version;
 
 	private String appMode;
 	private String appType;
@@ -304,13 +308,21 @@ public class ClientAppConfigDoc
 	public void setCustom(Map<String, Object> custom) {
 		this.custom = custom;
 	}
-	
+
 	@Override
 	public Map<String, Object> custom() {
 		if (this.custom == null) {
 			this.custom = new HashMap<String, Object>();
 		}
 		return custom;
+	}
+
+	public Long getVersion() {
+		return version;
+	}
+
+	public void setVersion(Long version) {
+		this.version = version;
 	}
 
 }
