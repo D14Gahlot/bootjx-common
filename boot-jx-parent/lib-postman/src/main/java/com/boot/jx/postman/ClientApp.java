@@ -32,6 +32,8 @@ public interface ClientApp extends Serializable, AuditIdentifier {
 
 	public String getKeyVersion();
 
+	public Long getVersion();
+	
 	public String getAppType();
 
 	public String getAppMode();

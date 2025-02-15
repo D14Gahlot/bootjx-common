@@ -22,10 +22,14 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.http.ProxyService;
+import com.boot.jx.http.ProxyService.ProxyRequest;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
 import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.postman.store.ConfigMaster;
 import com.boot.jx.postman.wa360.WA360Constants;
 import com.boot.jx.xms.XmsConstants.XMSClientAuth;
 import com.boot.model.MapModel;
@@ -48,6 +52,9 @@ public class NativeProxyController {
 	@Autowired
 	private PMEnvironment pmEnvironment;
 
+	@Autowired
+	public ConfigMaster configStore;
+
 	private Map<String, String> addHeaders(Map<String, String> headers, ChannelConfig channel) {
 		return headers;
 	}
@@ -56,11 +63,11 @@ public class NativeProxyController {
 	// @ApiRequest(type = RequestType.NO_TRACK_PING)
 	@ApiOperation(value = "Native proxy API", notes = "${swagger.OutboundApiV1.sendMessage.description}",
 			authorizations = @Authorization("X_API_KEY"))
-	@RequestMapping(value = { "/native/{channelId}/**" },
+	@RequestMapping(value = { "/channel/{channelId}/**" },
 			method = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
 	@XMSClientAuth
 	@ResponseBody
-	public MapModel proxch(@RequestBody(required = false) String body, HttpServletRequest request,
+	public MapModel notive(@RequestBody(required = false) String body, HttpServletRequest request,
 			HttpServletResponse response, @PathVariable(required = false) String channelId)
 			throws URISyntaxException, MalformedURLException {
 
@@ -85,10 +92,44 @@ public class NativeProxyController {
 			additioalHeaders.put("tnt", AppContextUtil.getTenant());
 			break;
 		}
-
 		return MapModel.fromSafe(service
-				.forwardRequestNoRetry("/native/" + channelId, destUrl, body, additioalHeaders, request, response)
+				.forwardRequestNoRetry("/channel/" + channelId, destUrl, body, additioalHeaders, request, response)
 				.getBody());
+	}
+
+	@CrossOrigin(origins = "*")
+	// @ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Native proxy API for Token", authorizations = @Authorization("X_API_KEY"))
+	@RequestMapping(value = { "/integration/{key}/**" },
+			method = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
+	@XMSClientAuth
+	@ResponseBody
+	public MapModel integration(@RequestBody(required = false) String body, HttpServletRequest request,
+			HttpServletResponse response, @PathVariable(required = false) String key)
+			throws URISyntaxException, MalformedURLException {
+
+		CompanyTokenKeyDoc companyTokenKey = configStore
+				.findOne(MQB.select(CompanyTokenKeyDoc.class).where("key", response));
+
+		if (!ArgUtil.is(companyTokenKey)) {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("key").obzect("CompanyTokenKeyDoc")
+					.codeKey("INTEGRATION_NOT_FOUND").description("Integration : " + key + " is Not Setup"));
+		}
+
+		if (ArgUtil.is(companyTokenKey.getType(), "gpt")) {
+			String destUrl = "https://api.openai.com";
+
+			ProxyRequest proxyRequest = new ProxyRequest().sourcePrefix("/integration/").targetUrl(destUrl).body(body);
+
+			proxyRequest.addheaders("Authorization", "Bearer " + companyTokenKey.secret().get("apiKey"));
+
+			return MapModel.fromSafe(service.forwardRequestNoRetry(proxyRequest, request, response).getBody());
+		} else {
+			ApiResponseUtil.throwInputException(new ApiFieldError().field("key").obzect("CompanyTokenKeyDoc")
+					.codeKey("INTEGRATION_INVALID").description("Integration : " + key + " is Not Valid"));
+		}
+		return MapModel.createInstance();
+
 	}
 
 }

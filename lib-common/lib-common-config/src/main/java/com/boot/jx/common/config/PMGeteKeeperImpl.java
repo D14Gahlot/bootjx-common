@@ -52,6 +52,7 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 		if (!environment.featureEntry(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND)
 				.asBoolean(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND.getDefaultValue())) {
 			outboxMessage.logs().add("Outbound Restricted");
+			outboxMessage.status(Status.BLCKD);
 			return false;
 		}
 
@@ -60,6 +61,7 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 
 		if (ArgUtil.is(plan, PLANS.BLOCKED)) {
 			outboxMessage.logs().add("Account Blocked");
+			outboxMessage.status(Status.BLCKD);
 			return false;
 		}
 
@@ -78,6 +80,7 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 				// Allow if total unique customers are within the limit
 				if (customerSet.size() > freemiumDauLimit) {
 					outboxMessage.logs().add("Daily quota (outbound) exceeded");
+					outboxMessage.status(Status.LIMIT);
 					return false;
 				}
 			}

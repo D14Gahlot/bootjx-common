@@ -657,7 +657,6 @@ public class AdminMsgBulkController {
 						docs = cusProfileService.getProfileSearch(profSerarch);
 					}
 					if (ArgUtil.is(docs)) {
-
 						if (concatFilterpNames.length() > 0) {
 							concatFilterpNames.append(" , "); // Add a comma separator
 						}
