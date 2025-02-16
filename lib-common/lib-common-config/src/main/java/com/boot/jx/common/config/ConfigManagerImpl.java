@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.chat.ConnectorHandlerFactory;
 import com.boot.jx.common.impl.ConfigMeta;
+import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.ModelPatch;
@@ -39,6 +41,7 @@ import com.boot.jx.postman.doc.config.ChannelConfigDoc;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
 import com.boot.jx.postman.doc.config.PrefsConfigDoc;
+import com.boot.jx.postman.doc.config.UserPrefsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.postman.manager.ConfigManager;
@@ -55,6 +58,7 @@ import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.MapBuilder;
 import com.boot.utils.MapBuilder.BuilderMap;
+import com.boot.utils.StringUtils;
 
 @Service
 public class ConfigManagerImpl implements ConfigManager {
@@ -456,6 +460,34 @@ public class ConfigManagerImpl implements ConfigManager {
 		change.setConfigId(configId);
 		change.setConfigType(configType);
 		sharedConfigManager.clear(change);
+	}
+
+	@Autowired(required = false)
+	private AppAuthModels.AppCommonAuthUser appCommonAuthUser;
+
+	public void saveUserPrefs(UserPrefsConfigDoc config, boolean domainLevel) {
+		if (!domainLevel) {
+			config.setUser("#");
+		} else {
+			config.setUser(ArgUtil.is(appCommonAuthUser) ? appCommonAuthUser.getAuthUser() : null);
+		}
+		if (ArgUtil.is(config.getUser())) {
+			config.setId(StringUtils.toLowerCase(config.getKey() + "." + config.getUser()));
+			UserPrefsConfigDoc configObject = configStore.findByIdOrDefault(config.getId(), config);
+			configObject.setKey(config.getKey());
+			configObject.setValue(config.getValue());
+			configObject.setShared(config.isShared());
+			configObject.setDomain(AppContextUtil.getTenant());
+			configObject.setServer(pmCommonConfig.getServiceServer());
+			configStore.save(configObject);
+		}
+	}
+
+	public List<UserPrefsConfigDoc> getUserPrefs() {
+		String authUser = ArgUtil.is(appCommonAuthUser) ? appCommonAuthUser.getAuthUser() : null;
+		List<UserPrefsConfigDoc> prefs = configStore.collection(UserPrefsConfigDoc.class)
+				.with(Criteria.where("user").in(authUser, "#")).find().asList();
+		return prefs;
 	}
 
 	@Autowired

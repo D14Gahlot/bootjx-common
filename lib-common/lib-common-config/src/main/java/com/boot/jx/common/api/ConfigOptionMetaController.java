@@ -50,6 +50,7 @@ import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
 import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
+import com.boot.jx.postman.doc.config.UserPrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
@@ -309,6 +310,30 @@ public class ConfigOptionMetaController {
 		configManager.deletePerm(key);
 		return ApiResponse.buildResults(configManager.getFeature());
 	}
+
+	/**************
+	 * UI Prefs
+	 ************/
+
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN })
+	@RequestMapping(value = "/api/uiprefs/domain", method = { RequestMethod.POST })
+	public ApiResponse<UserPrefsConfigDoc, Object> setUIPrefForAdmin(@RequestBody UserPrefsConfigDoc map) {
+		configManager.saveUserPrefs(map, true);
+		return ApiResponse.buildResults(configManager.getUserPrefs());
+	}
+
+	@RequestMapping(value = "/api/uiprefs/user", method = { RequestMethod.POST })
+	public ApiResponse<UserPrefsConfigDoc, Object> setUIPrefForUser(@RequestBody UserPrefsConfigDoc map) {
+		configManager.saveUserPrefs(map, false);
+		return ApiResponse.buildResults(configManager.getUserPrefs());
+	}
+
+	@RequestMapping(value = "/api/uiprefs", method = { RequestMethod.GET })
+	public ApiResponse<UserPrefsConfigDoc, Object> setUIPrefs(@RequestParam(required = false) CONFIG_FEATURES_KEY key) {
+		return ApiResponse.buildResults(configManager.getUserPrefs());
+	}
+
+	// Meta
 
 	@RequestMapping(value = "/api/meta/chat_states", method = { RequestMethod.GET })
 	public ApiResponse<CHAT_STATE, Object> chatStates() {
