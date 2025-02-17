@@ -6,9 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -161,10 +163,14 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
-			to = PhoneUtil.addPlusSign(to);
-			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
-			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-			doc.getContact().phone(to);
+			if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
+				to = PhoneUtil.addPlusSign(to);
+				ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
+				to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+				doc.getContact().phone(to);
+			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().setEmail(to);
+			}
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
 			doc.setHsm(hsmTemp);
@@ -230,10 +236,14 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
 			to = PhoneUtil.addPlusSign(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().phone(to);
+			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().setEmail(to);
+			}
 			doc.setMessage(bulkMsg.getMessage());
 			doc.setHsm(bulkMsg.getHsm());
 			doc.setTemplateId(bulkMsg.templateId());
@@ -301,10 +311,14 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
 			to = PhoneUtil.addPlusSign(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().phone(to);
+			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().setEmail(to);
+			}
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
 			doc.setTemplateId(bulkMessage.templateId());
@@ -721,10 +735,14 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
+			if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
 			to = PhoneUtil.addPlusSign(to);
 			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().phone(to);
+			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().setEmail(to);
+			}
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
 			doc.setTemplateId(bulkMessage.templateId());
@@ -897,5 +915,40 @@ public class BulkMessageService extends BatchJobExecuter {
 				.map(map -> new ProfileSearchCriteria(map.get("key"), map.get("operator"), map.get("value")))
 				.collect(Collectors.toList())) // Collect as List<ProfileSearchCriteria>
 				.collect(Collectors.toList());
+	}
+	
+	public Map<String,Object> getFilterContactCount(List<String> filters) {
+		int totalPhones=0;
+		int totalEmails=0;
+		Map<String,Object> map = new HashMap<>();
+		for (String filterId : filters) {
+			ProfileFilterMasterDoc profileFilter = mongoTemplate.findById(filterId, ProfileFilterMasterDoc.class);
+
+			if (ArgUtil.is(profileFilter) && ArgUtil.is(profileFilter.get_filterCriteria())) {
+				List<List<Object>> filterCri = profileFilter.get_filterCriteria();
+
+				List<List<ProfileSearchCriteria>> searCri = getSearchCriteria(filterCri);
+				ProfileSearchQuery profSerarch = new ProfileSearchQuery();
+				profSerarch.setSearchCriterias(searCri);
+				profSerarch.setBooSkipLmt(true);
+				List<CustomerProfileDoc> docs = null;
+				if (ArgUtil.is(searCri)) {
+				docs = cusProfileService.getProfileSearch(profSerarch);
+				}
+				if(ArgUtil.is(docs)) {
+					// Count total phones and emails across all profiles
+			         totalPhones += docs.stream()
+			                .mapToInt(doc -> Optional.ofNullable(doc.phones).map(Set::size).orElse(0))
+			                .sum();
+
+			         totalEmails += docs.stream()
+			                .mapToInt(doc -> Optional.ofNullable(doc.emails).map(Set::size).orElse(0))
+			                .sum();
+				}
+			}
+		}
+		map.put("phone", totalPhones);
+		map.put("email", totalEmails);
+		return map;
 	}
 }

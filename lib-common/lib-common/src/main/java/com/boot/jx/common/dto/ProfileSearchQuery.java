@@ -12,6 +12,7 @@ public class ProfileSearchQuery {
 	int pageSize;
 	String sortBy;
 	String sortDir;
+	boolean booSkipLmt=false; 
 	
 	public int getPageNo() {
 		return pageNo;
@@ -42,6 +43,12 @@ public class ProfileSearchQuery {
 	}
 	public void setSearchCriterias(List<List<ProfileSearchCriteria>> searchCriterias) {
 		this.searchCriterias = searchCriterias;
+	}
+	public boolean isBooSkipLmt() {
+		return booSkipLmt;
+	}
+	public void setBooSkipLmt(boolean booSkipLmt) {
+		this.booSkipLmt = booSkipLmt;
 	}
 	
 
