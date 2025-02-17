@@ -279,7 +279,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		inboxMessage.setSubject(m.keyEntry("subject").asString());
 		inboxMessage.setMessage(EmailReplyParser.parseReply(m.pathEntry("body.content").asString()));
 		inboxMessage.setMessageTrail(m.pathEntry("body.trail").asString());
-
+		
 		MapPathEntry conversationId = m.pathEntry("conversationId");
 		if (conversationId.exists()) {
 			inboxMessage.session().setTicketHash(conversationId.asString());
@@ -292,6 +292,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		}
 
 		inboxMessage.setAttachments(inbound.getAttachments());
+		inboxMessage.setReferral(inbound.getReferral());
 
 		return inboxMessage;
 	}
