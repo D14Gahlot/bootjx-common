@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 import com.boot.jx.postman.model.Attachment;
+import com.boot.jx.postman.model.MessageReferral;
 
 @Document(collection = MessageTempInbound.COLLECTION_NAME)
 @TypeAlias("MessageTempInbound")
@@ -29,6 +30,7 @@ public class MessageTempInbound extends TimeStampDoc implements Serializable {
 
 	private Map<String, Object> data;
 	private List<Attachment> attachments = null;
+	private MessageReferral referral;
 
 	private List<Object> logs;
 
@@ -77,6 +79,14 @@ public class MessageTempInbound extends TimeStampDoc implements Serializable {
 
 	public void setAttachments(List<Attachment> attachments) {
 		this.attachments = attachments;
+	}
+
+	public MessageReferral getReferral() {
+		return referral;
+	}
+
+	public void setReferral(MessageReferral referral) {
+		this.referral = referral;
 	}
 
 }
