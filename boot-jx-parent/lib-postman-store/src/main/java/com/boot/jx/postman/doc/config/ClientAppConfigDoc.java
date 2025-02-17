@@ -47,7 +47,6 @@ public class ClientAppConfigDoc
 	private String key;
 	private String keyVersion;
 
-	@Version
 	private Long version;
 
 	private String appMode;
