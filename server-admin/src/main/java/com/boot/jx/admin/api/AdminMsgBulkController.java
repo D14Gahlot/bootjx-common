@@ -51,6 +51,7 @@ import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
@@ -627,6 +628,7 @@ public class AdminMsgBulkController {
 		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
 
 		if (outboxMessage != null && ArgUtil.is(outboxMessage.getFilters())) {
+			String contactType = outboxMessage.getContact().getContactType();
 			List<String> filters = outboxMessage.getFilters();
 			String campTitle = outboxMessage.getCampaignTitle();
 			OutboxMessage otBoxMsg = outboxMessage;
@@ -650,7 +652,7 @@ public class AdminMsgBulkController {
 					List<List<ProfileSearchCriteria>> searCri = bulkMessageService.getSearchCriteria(filterCri);
 					ProfileSearchQuery profSerarch = new ProfileSearchQuery();
 					profSerarch.setSearchCriterias(searCri);
-					profSerarch.setPageSize(1000);
+					profSerarch.setBooSkipLmt(true);
 
 					List<CustomerProfileDoc> docs = null;
 					if (ArgUtil.is(searCri)) {
@@ -663,6 +665,10 @@ public class AdminMsgBulkController {
 						concatFilterpNames.append(profileFilter.getFilterName());
 						for (CustomerProfileDoc profielDoc : docs) {
 							Set<PBPhone> lstDto = profielDoc.getPhones();
+							Set<PBEmail> lstEmailDto =null;
+							if(ArgUtil.is(profielDoc.getEmails()) && contactType.equalsIgnoreCase(ContactType.EMAIL.name())) {
+								lstEmailDto =profielDoc.getEmails(); 
+							}
 							CommonTemplateMeta hsmTemp = new CommonTemplateMeta();
 							hsmTemp.setId(hsmId);
 							hsmTemp.setCode(hsmTemplateCode);
@@ -673,12 +679,24 @@ public class AdminMsgBulkController {
 							outboxMsg.setHsm(hsmTemp);
 							outboxMsg.setGroupName(concatFilterpNames.toString());
 							outboxMsg.setCampaignTitle(campTitle);
+							if(ArgUtil.is(lstDto) && contactType.equalsIgnoreCase(ContactType.WHATSAPP.name())) {
 							for (PBPhone dto : lstDto) {
 								outboxMsg.setTo(Arrays.asList(dto.getPhone()));
 								uniquePhoneNumbers.add(dto.getPhone());
 							}
 							List<String> toLst = new ArrayList<>(uniquePhoneNumbers);
 							outboxMsg.setTo(toLst);
+							}else if(lstEmailDto!=null && contactType.equalsIgnoreCase(ContactType.EMAIL.name())) {
+								for (PBEmail dto : lstEmailDto) {
+									outboxMsg.setTo(Arrays.asList(dto.getEmail()));
+									uniquePhoneNumbers.add(dto.getEmail());
+								}
+								List<String> toLst = new ArrayList<>(uniquePhoneNumbers);
+								outboxMsg.setTo(toLst);
+							}
+							
+							
+							
 							outboxMsg.setFilters(filters);
 							listOfOutboxMsg.add(outboxMsg);
 						}
@@ -689,5 +707,11 @@ public class AdminMsgBulkController {
 		}
 		return listOfOutboxMsg;
 	}
-
+	
+	@RequestMapping(value = "/api/filter/contact/count", method = { RequestMethod.GET })
+	public ApiResponse<Map, BulkSessionDoc> getFilterContactCount(@RequestParam(required = true) List<String> filterIds)
+	{ 
+	    Map map = bulkMessageService.getFilterContactCount(filterIds);	
+	    return ApiResponse.buildResult(map);
+	}
 }
