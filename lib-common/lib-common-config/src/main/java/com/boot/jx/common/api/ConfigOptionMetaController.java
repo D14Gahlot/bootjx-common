@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -148,15 +149,22 @@ public class ConfigOptionMetaController {
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@RequestMapping(value = { "/pub/options/channels", "/api/options/channels" }, method = { RequestMethod.GET })
 	@ResponseBody
-	public ApiResponse<AChannelConfig, Object> listActiveLanes(
-			@RequestParam(required = false) ContactType contactType) {
+	public ApiResponse<AChannelConfig, Object> listActiveLanes(@RequestParam(required = false) ContactType contactType,
+			@RequestParam(required = false, defaultValue = "true") boolean skipHidden) {
+		Set<AChannelConfig> channels = pmEnvironment.config().listChannels();
+
+		// Apply filters
+		Stream<AChannelConfig> stream = channels.stream();
+
 		if (ArgUtil.is(contactType)) {
-			return ApiResponse.buildResults(pmEnvironment.config().listChannels().stream()
-					.filter(channel -> channel.equals(contactType)).collect(Collectors.toList()));
+			stream = stream.filter(channel -> channel.getContactType().equals(contactType));
 		}
-		Set<AChannelConfig> x = pmEnvironment.config().listChannels();
-		// System.out.println(JsonUtil.toJson(x));
-		return ApiResponse.buildResults(x);
+
+		if (skipHidden) {
+			stream = stream.filter(channel -> !channel.isHidden());
+		}
+
+		return ApiResponse.buildResults(stream.collect(Collectors.toSet()));
 	}
 
 	@RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })
