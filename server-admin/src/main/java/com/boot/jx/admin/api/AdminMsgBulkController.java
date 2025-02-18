@@ -514,6 +514,7 @@ public class AdminMsgBulkController {
 	}
 
 	public List<OutboxMessage> getGroupDetailsV1(OutboxMessage outboxMessage) {
+		String contactType = outboxMessage.getContact().getContactType();
 
 		List<OutboxMessage> listOfOutboxMsg = new ArrayList<>();
 
@@ -558,10 +559,17 @@ public class AdminMsgBulkController {
 						outboxMsg.setContact(otBoxMsg.getContact());
 						outboxMsg.setHsm(hsmTemp);
 						outboxMsg.setGroupName(concatGroupNames.toString());
-
+						if(ArgUtil.is(lstDto) && contactType.equalsIgnoreCase(ContactType.WHATSAPP.name())) {
 						for (GroupSessionDto dto : lstDto) {
 							outboxMsg.setTo(Arrays.asList(dto.getPhone()));
 							uniquePhoneNumbers.add(dto.getPhone());
+						}
+						}else if(ArgUtil.is(lstDto) && contactType.equalsIgnoreCase(ContactType.EMAIL.name())) {
+							for (GroupSessionDto dto : lstDto) {
+								if(dto.getContactType()!=null && dto.getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+									uniquePhoneNumbers.add(dto.getPhone());
+								}
+							}
 						}
 						List<String> toLst = new ArrayList<>(uniquePhoneNumbers);
 						outboxMsg.setTo(toLst);
