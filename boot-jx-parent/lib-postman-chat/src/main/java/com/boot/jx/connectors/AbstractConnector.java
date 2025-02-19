@@ -42,7 +42,9 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
+import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.MessagePrompt;
+import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
@@ -343,6 +345,27 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		CommonFile dstFile = new CommonFile().url(attachment.getMediaURL()).path(fileb.getParent())
 				.fileType(ArgUtil.parseAsEnumT(attachment.getMediaType(), FileType.class));
 		return pmFileStoreClient.commitSessionFileSync(srcFile, dstFile);
+	}
+
+	public MessageReport toMessageReport(ChannelConfig channelConfig, InBoundMsgStatus status) {
+		MessageReport report = this.createMessageReport(channelConfig);
+		report.setMessageId(status.messageId);
+		report.setMessageIdExt(status.messageIdExt);
+		// report.setMessageIdRef(status.messageId);
+		report.setChangeStamp(status.timestamp);
+		report.contact().setContactId(status.contactId);
+		if (ArgUtil.is(status.contact)) {
+			report.contact().setEmail(status.contact.email);
+			report.contact().phone(status.contact.phone);
+			report.contact().setCsid(status.contact.csid);
+		}
+		Status st = ArgUtil.parseAsEnumT(status.status, Status.class);
+		report.setStatus(st);
+		if (ArgUtil.is(status.errors) && status.errors.size() > 0) {
+			report.setReason("Code:" + status.errors.get(0).toCode());
+			report.setErrors(status.errors);
+		}
+		return report;
 	}
 
 }

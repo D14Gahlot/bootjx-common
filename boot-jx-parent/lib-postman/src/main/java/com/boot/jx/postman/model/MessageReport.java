@@ -9,6 +9,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -166,6 +167,10 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 
 		public void setHref(String href) {
 			this.href = href;
+		}
+
+		public String toCode() {
+			return ArgUtil.nonEmpty(code, title, details, href);
 		}
 	}
 
