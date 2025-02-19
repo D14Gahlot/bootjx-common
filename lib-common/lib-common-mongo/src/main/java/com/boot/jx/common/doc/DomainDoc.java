@@ -1,4 +1,4 @@
-package com.boot.jx.account.doc;
+package com.boot.jx.common.doc;
 
 import java.io.Serializable;
 
@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
-import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex.TimeStampDoc;
 import com.boot.jx.validation.AlphaNumValidator.ValidAlphaNum;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.Constants;

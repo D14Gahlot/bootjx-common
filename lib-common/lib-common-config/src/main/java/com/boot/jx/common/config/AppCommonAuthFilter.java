@@ -1,5 +1,7 @@
 package com.boot.jx.common.config;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,7 @@ import com.boot.jx.postman.PMConstants;
 import com.boot.jx.rest.AppRequestInterfaces.AppAuthFilter;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.CollectionUtil;
 
 @Component
 public class AppCommonAuthFilter implements AppAuthFilter {
@@ -40,8 +43,11 @@ public class AppCommonAuthFilter implements AppAuthFilter {
 		} else if (apiRequest.getRules().contains(AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN)) {
 			return (appCommonAuthUserLocal != null)
 					&& appCommonAuthUserLocal.role().contains(PMConstants.USER_ROLE.ADMIN);
-		} else
-			return true;
+		} else if (apiRequest.getRules().contains(AppAuthModels.ACCESS_RULES.CAN_ACCESS_ALL_DOMAINS)) {
+			return (appCommonAuthUserLocal != null) && CollectionUtil.exists(appCommonAuthUserLocal.getRole(),
+					PMConstants.USER_ROLE.CAN_ACCESS_ALL_DOMAINS);
+		}
+		return true;
 	}
 
 }

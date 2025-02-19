@@ -7,6 +7,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.common.doc.BusinessUserDoc;
+import com.boot.jx.common.doc.DomainDoc;
+import com.boot.jx.common.doc.DomainLicenseDoc;
 import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;

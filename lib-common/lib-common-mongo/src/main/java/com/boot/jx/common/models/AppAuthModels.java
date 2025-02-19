@@ -124,6 +124,8 @@ public class AppAuthModels {
 		 * Only domain admin can do this
 		 */
 		public static final String ONLY_DOMAIN_ADMIN = "ONLY_DOMAIN_ADMIN";
+
+		public static final String CAN_ACCESS_ALL_DOMAINS = "CAN_ACCESS_ALL_DOMAINS";
 	}
 
 }

@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import com.boot.jx.account.doc.BusinessUserDoc;
-import com.boot.jx.account.doc.DomainDoc;
+import com.boot.jx.common.doc.BusinessUserDoc;
+import com.boot.jx.common.doc.DomainDoc;
 import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.postman.PMConstants;
 import com.boot.model.UtilityModels.JsonIgnoreNull;

@@ -14,7 +14,6 @@ import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
 import com.boot.jx.account.AccountSessionBean;
 import com.boot.jx.account.doc.AccountStore;
-import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.dto.AccountDashBoardResponseDto;
 import com.boot.jx.account.dto.AdminAgentAccountDto;
 import com.boot.jx.account.dto.ContactTypeSummaryDto;
@@ -26,6 +25,7 @@ import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.account.manager.WabaAccountManager;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.EventCountSummary;
+import com.boot.jx.common.doc.DomainDoc;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 

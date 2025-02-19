@@ -47,7 +47,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.account.doc.AccountStore;
-import com.boot.jx.account.doc.DomainDoc;
 import com.boot.jx.account.doc.DomainSummaryMessageDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaDoc;
 import com.boot.jx.account.doc.DomainSummaryMetaStore;
@@ -70,6 +69,7 @@ import com.boot.jx.api.EventCountDto;
 import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.DomainDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonMongoTemplate;

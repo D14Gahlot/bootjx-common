@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.boot.jx.account.AccountAuthService;
-import com.boot.jx.account.doc.AccountMeta;
 import com.boot.jx.account.doc.AccountStore;
-import com.boot.jx.account.doc.BusinessUserDoc;
-import com.boot.jx.account.doc.SignupContact;
 import com.boot.jx.api.ApiResponse;
+import com.boot.jx.common.doc.BusinessUserDoc;
+import com.boot.jx.common.dto.AccountMeta;
+import com.boot.jx.common.dto.SignupContact;
 import com.boot.jx.sso.service.CommonAuthenticator;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;

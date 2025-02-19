@@ -138,42 +138,6 @@ public class AdminObjectsController {
 				getPaginatedBulk(PayloadDumpCollection.class, "PAYLOAD_DUMP", pageNo, pageSize, sortBy, sortDir));
 	}
 
-	@RequestMapping(value = { "/api/objects/channel_setup_logs" }, method = { RequestMethod.GET })
-	@JsonView(PublicJsonProperty.class)
-	public ApiResponse<ChannelConfigLogger, Object> channelSetupLogs(@RequestParam(required = false) String id,
-			@RequestParam(required = false, defaultValue = "0") int pageNo,
-			@RequestParam(required = false, defaultValue = "25") int pageSize,
-			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
-			@RequestParam(required = false, defaultValue = "desc") String sortDir,
-			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
-			@RequestParam(required = false) String channelId, @RequestParam(required = false) String domain,
-			@RequestParam(required = false) String lane,
-			@RequestParam(required = false, defaultValue = "false") boolean local) {
-
-		MapModel extparams = MapModel.createInstance();
-		if (!local && !Tenants.isDefault(AppContextUtil.getTenant())) {
-			extparams.put("domain", AppContextUtil.getTenant());
-			AppContextUtil.switchTenant(Tenants.getDefault());
-		}
-
-		return ApiResponse.buildResults(
-				getPaginatedBulk(ChannelConfigLogger.class, "TEMP_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
-	}
-
-	@RequestMapping(value = { "/api/objects/archive/channel" }, method = { RequestMethod.GET })
-	@JsonView(PublicJsonProperty.class)
-	public ApiResponse<ChannelConfigDupsDoc, Object> channelArchive(@RequestParam(required = false) String id,
-			@RequestParam(required = false, defaultValue = "0") int pageNo,
-			@RequestParam(required = false, defaultValue = "25") int pageSize,
-			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
-			@RequestParam(required = false, defaultValue = "desc") String sortDir,
-			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
-			@RequestParam(required = false) String channelId, @RequestParam(required = false) String domain,
-			@RequestParam(required = false) String lane) {
-		return ApiResponse.buildResults(
-				getPaginatedBulk(ChannelConfigDupsDoc.class, "DUPS_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
-	}
-
 	@RequestMapping(value = { "/api/objects/messages/{messageQueueType}" }, method = { RequestMethod.GET })
 	@JsonView(PublicJsonProperty.class)
 	public ApiResponse<MessageHold, Object> queuedMessages(@RequestParam(required = false) String id,

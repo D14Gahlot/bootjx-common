@@ -95,6 +95,11 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(HSMLanguage.values());
 	}
 
+	@RequestMapping(value = "/api/meta/roles", method = { RequestMethod.GET })
+	public ApiResponse<String, Object> roles() {
+		return ApiResponse.buildResults(PMConstants.USER_ROLE.ALl_ROLES);
+	}
+
 	@RequestMapping(value = "/api/meta/channel_types", method = { RequestMethod.GET })
 	public ApiResponse<Object, Object> channel() {
 		return ApiResponse.buildResults(new ArrayList<Object>(ChannelPluginProvider.PLUGIN_MAPPING.values()));
