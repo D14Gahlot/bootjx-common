@@ -149,7 +149,7 @@ public class GmailPlugin implements DefaultChannelPlugin<GmailConfigDetails> {
 
 	@Override
 	public boolean isPushAllowed() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -159,12 +159,12 @@ public class GmailPlugin implements DefaultChannelPlugin<GmailConfigDetails> {
 
 	@Override
 	public boolean isPushFreeTextAllowed() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isPushToNewContactAllowed() {
-		return false;
+		return true;
 	}
 
 	@Override

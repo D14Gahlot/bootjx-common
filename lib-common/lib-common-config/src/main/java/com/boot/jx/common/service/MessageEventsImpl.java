@@ -63,12 +63,15 @@ public class MessageEventsImpl implements MessageEvents {
 		inboundEVent.setTriggerType(SessionBoundEvent.TRIGGER_TYPE.MESSAGE);
 		inboundEVent.setType(SessionBoundEvent.EVENT_TYPE.MESSAGE_OUTBOUND);
 		inboundEVent.from(message);
-
 		sessionEventTimer.setChatInIdleTimeout(message.getSessionId(), app, inboundEVent);
 		sessionEventTimer.setMitelClosingCheck(message.getSessionId(), app, false);
 		return null;
 	}
 
+	/**
+	 * After Status of Outbound Message has been Recieved
+	 * 
+	 */
 	@Override
 	public NodeEntry<InBoundEvent> postMessageStatus(MessageReport messageReport) {
 		ClientApp app = messageContext.clientApp();

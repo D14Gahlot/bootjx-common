@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.boot.jx.model.CommonTemplateMeta;
+import com.boot.jx.postman.model.MessageTimeout;
 import com.boot.jx.postman.model.ext.CommonMsgLocation;
 import com.boot.jx.postman.model.ext.CommonMsgOptions;
 import com.boot.jx.postman.model.ext.CommonMsgText.OutBoundMsgText;
@@ -65,6 +66,9 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 
 		@ApiMockModelProperty(required = false)
 		public CommonMsgOptions options;
+
+		@ApiMockModelProperty(required = false)
+		public MessageTimeout timeout;
 
 		public OutBoundMsgText getText() {
 			return text;
@@ -144,6 +148,14 @@ public class OutBoundMsgBasic implements Serializable, JsonIgnoreUnknown {
 
 		public void setMessageIdResend(String messageIdResend) {
 			this.messageIdResend = messageIdResend;
+		}
+
+		public MessageTimeout getTimeout() {
+			return timeout;
+		}
+
+		public void setTimeout(MessageTimeout timeout) {
+			this.timeout = timeout;
 		}
 	}
 

@@ -2,8 +2,6 @@ package com.boot.jx.common.api;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.http.ProxyService;
+import com.boot.jx.http.ProxyService.ProxyRequest;
 import com.boot.jx.logger.LoggerService;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
@@ -45,19 +44,21 @@ public class AppProxyController {
 	@Autowired(required = false)
 	private AppAuthModels.AppCommonAuthUser appCommonAuthUser;
 
-	private Map<String, String> addHeaders(Map<String, String> headers) {
+	private ProxyRequest addHeaders(ProxyRequest proxyRequest) {
 		if (ArgUtil.is(appCommonAuthUser)) {
 			if (ArgUtil.is(appCommonAuthUser.getProfile())) {
-				headers.put("x-agent-code", appCommonAuthUser.getProfile().code());
+				proxyRequest.addheaders("x-agent-code", appCommonAuthUser.getProfile().code());
+				proxyRequest.user(appCommonAuthUser.getProfile().code());
 			} else {
 				LOGGER.warn("appCommonAuthUser.getProfile() is null");
 			}
-			headers.put("x-agent-user", appCommonAuthUser.getAuthUser());
+			proxyRequest.addheaders("x-agent-user", appCommonAuthUser.getAuthUser());
+			proxyRequest.user(appCommonAuthUser.getAuthUser());
 		} else {
 			LOGGER.warn("appCommonAuthUser is null");
 		}
-		headers.put("tnt", AppContextUtil.getTenant());
-		return headers;
+		proxyRequest.addheaders("tnt", AppContextUtil.getTenant());
+		return proxyRequest;
 	}
 
 	@CrossOrigin(origins = "*")
@@ -67,14 +68,21 @@ public class AppProxyController {
 	@ResponseBody
 	public MapModel proxch(@RequestBody(required = false) String body, HttpServletRequest request,
 			HttpServletResponse response) throws URISyntaxException, MalformedURLException {
-		// String domain =
-		// CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
-		// URL url = new URL(domain);
-
-		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
-
 		return MapModel.fromSafe(service
-				.forwardRequestNoRetry("/nexus/", nexusUrl, body, additioalHeaders, request, response).getBody());
+				.forwardRequestNoRetry(addHeaders(ProxyRequest.from("/nexus/", nexusUrl, body)), request, response)
+				.getBody());
+	}
+
+	@CrossOrigin(origins = "*")
+	// @ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Only for Logged in user")
+	@RequestMapping(value = { "/api/nexus/**" })
+	@ResponseBody
+	public MapModel proxch2Api(@RequestBody(required = false) String body, HttpMethod method,
+			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
+		return MapModel.fromSafe(service
+				.forwardRequestNoRetry(addHeaders(ProxyRequest.from("/api/nexus/", nexusUrl, body)), request, response)
+				.getBody());
 	}
 
 	@CrossOrigin(origins = "*")
@@ -84,14 +92,9 @@ public class AppProxyController {
 	@ResponseBody
 	public MapModel proxch2(@RequestBody(required = false) String body, HttpMethod method, HttpServletRequest request,
 			HttpServletResponse response) throws URISyntaxException, MalformedURLException {
-		// String domain =
-		// CryptoUtil.getEncoder().message(domainHash).decodeBase64Hack().toString();
-		// URL url = new URL(domain);
-
-		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
-
-		return MapModel.fromSafe(service
-				.forwardRequestNoRetry("/pub/nexus/", nexusUrl, body, additioalHeaders, request, response).getBody());
+		return MapModel.fromSafe(service.forwardRequestNoRetry(
+				addHeaders(new ProxyRequest().sourcePrefix("/pub/nexus/").targetUrl(nexusUrl).body(body)), request,
+				response).getBody());
 	}
 
 	@CrossOrigin(origins = "*")
@@ -101,9 +104,9 @@ public class AppProxyController {
 	@ResponseBody
 	public MapModel proxch2ForBot(@RequestBody(required = false) String body, HttpMethod method,
 			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
-		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
-		return MapModel.fromSafe(service
-				.forwardRequestNoRetry("/pub/bot/", scriptusUrl, body, additioalHeaders, request, response).getBody());
+		return MapModel.fromSafe(service.forwardRequestNoRetry(
+				addHeaders(new ProxyRequest().sourcePrefix("/pub/bot/").targetUrl(scriptusUrl).body(body)), request,
+				response).getBody());
 	}
 
 	@CrossOrigin(origins = "*")
@@ -113,10 +116,9 @@ public class AppProxyController {
 	@ResponseBody
 	public MapModel proxch2ForScriptus(@RequestBody(required = false) String body, HttpMethod method,
 			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
-		Map<String, String> additioalHeaders = addHeaders(new HashMap<String, String>());
-		return MapModel.fromSafe(service
-				.forwardRequestNoRetry("/pub/", scriptusUrl, body, additioalHeaders, request, response)
-				.getBody());
+		return MapModel.fromSafe(service.forwardRequestNoRetry(
+				addHeaders(new ProxyRequest().sourcePrefix("/pub/").targetUrl(scriptusUrl).body(body)), request,
+				response).getBody());
 	}
 
 }

@@ -15,16 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.jx.AppContextUtil;
-import com.boot.jx.admin.dto.JobsResponseDto;
-import com.boot.jx.admin.dto.ProfileSearchQuery;
-import com.boot.jx.admin.service.CustomerProfileService;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.common.doc.JobScheduledDoc;
+import com.boot.jx.common.dto.JobsResponseDto;
+import com.boot.jx.common.dto.ProfileSearchQuery;
+import com.boot.jx.common.service.CustomerProfileService;
 import com.boot.jx.model.CommonFile;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
-import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -80,11 +79,12 @@ public class CustomerProfileContoller {
 
 	@RequestMapping(value = "/api/upload/pofile", method = { RequestMethod.POST })
 	public ApiResponse<JobScheduledDoc, Object> uploadExcel(
-			@RequestParam(name = "file", required = false) MultipartFile file) {
+			@RequestParam(name = "file", required = false) MultipartFile file,
+			@RequestParam(required = false) String uploadType) {
 		CommonFile url =fileStore.upload1(file,
 				String.format("%s/profileExcel/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
 				file.getOriginalFilename());
-		JobScheduledDoc jobSch = cusProfileService.uploadFile(url);
+		JobScheduledDoc jobSch = cusProfileService.uploadFile(url,uploadType);
 
 		return ApiResponse.buildResults(jobSch);
 

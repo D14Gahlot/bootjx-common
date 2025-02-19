@@ -72,6 +72,7 @@ public class InboxMessage implements Serializable, IMessageLoggable, IMessageExt
 	private String replyId;
 	private String replyIdExt;
 	private List<Object> trace;
+	private MessageTimeout timeout;
 
 	public InboxMessage() {
 		this.timestamp = System.currentTimeMillis();
@@ -495,6 +496,11 @@ public class InboxMessage implements Serializable, IMessageLoggable, IMessageExt
 
 	public void setMessageTrail(String messageTrail) {
 		this.messageTrail = messageTrail;
+	}
+
+	@Override
+	public MessageTimeout getTimeout() {
+		return this.timeout;
 	}
 
 }

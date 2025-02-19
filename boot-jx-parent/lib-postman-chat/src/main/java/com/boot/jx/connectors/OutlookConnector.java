@@ -279,7 +279,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		inboxMessage.setSubject(m.keyEntry("subject").asString());
 		inboxMessage.setMessage(EmailReplyParser.parseReply(m.pathEntry("body.content").asString()));
 		inboxMessage.setMessageTrail(m.pathEntry("body.trail").asString());
-
+		
 		MapPathEntry conversationId = m.pathEntry("conversationId");
 		if (conversationId.exists()) {
 			inboxMessage.session().setTicketHash(conversationId.asString());
@@ -292,25 +292,9 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		}
 
 		inboxMessage.setAttachments(inbound.getAttachments());
+		inboxMessage.setReferral(inbound.getReferral());
 
 		return inboxMessage;
-	}
-
-	private MessageReport toMessageReport(ChannelConfig channelConfig, InBoundMsgStatus status) {
-		MessageReport report = this.createMessageReport(channelConfig);
-		report.setMessageId(status.messageId);
-		report.setMessageIdExt(status.messageIdExt);
-		// report.setMessageIdRef(status.messageId);
-		report.setChangeStamp(status.timestamp);
-		report.contact().setContactId(status.contactId);
-		if (ArgUtil.is(status.contact)) {
-			report.contact().setEmail(status.contact.email);
-			report.contact().phone(status.contact.phone);
-			report.contact().setCsid(status.contact.csid);
-		}
-		Status st = ArgUtil.parseAsEnumT(status.status, Status.class);
-		report.setStatus(st);
-		return report;
 	}
 
 	@Override

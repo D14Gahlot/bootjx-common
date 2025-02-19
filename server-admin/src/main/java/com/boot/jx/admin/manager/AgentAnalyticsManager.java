@@ -379,7 +379,8 @@ public class AgentAnalyticsManager implements Serializable {
 
 	public List<String> getAgentList(long dateRange1, long dateRange2) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		//query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("agentSessionStamp").gt(dateRange1).lt(dateRange2));
 		List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION", "assignedToAgent", String.class);
 
 		if (distinceAgentList == null || distinceAgentList.isEmpty()) {
@@ -401,7 +402,7 @@ public class AgentAnalyticsManager implements Serializable {
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		query.addCriteria(Criteria.where("assignedToAgent").exists(false));
 		// removeChatSessField(query);
-		query.fields().include("assignedAgentStamp").include("contactId");
+		query.fields().include("assignedAgentStamp").include("contactId").include("agentSessionStamp");
 		// List<String> distinceAgentList = mongoTemplate.distinctValues("CHAT_SESSION",
 		// "contactId", String.class);
 
@@ -415,7 +416,7 @@ public class AgentAnalyticsManager implements Serializable {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("startSessionStamp").gt(dateRange1).lt(dateRange2));
 		query.addCriteria(Criteria.where("assignedToAgent").exists(false));
-		query.fields().include("assignedAgentStamp").include("contactId").include("contact");
+		query.fields().include("assignedAgentStamp").include("contactId").include("contact").include("agentSessionStamp");
 
 		// Fetch documents from MongoDB
 		List<ChatSessionDoc> chatSessDocLst = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
@@ -428,8 +429,8 @@ public class AgentAnalyticsManager implements Serializable {
 
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId");
+		query.addCriteria(Criteria.where("agentSessionStamp").gt(dateRange1).lt(dateRange2));
+		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("agentSessionStamp");;
 		// System.out.println("QRY :"+agent+"\t "+JsonUtil.toJsonPrettyPrint(query));
 		// removeChatSessField(query);
 		List<String> distinctIdList = new ArrayList<>();
@@ -451,11 +452,11 @@ public class AgentAnalyticsManager implements Serializable {
 		if (agent == null) {
 			return getDefaultDistinctContactV1(dateRange1, dateRange2);
 		}
-
+        /** assignedAgentStamp replaced with agentSessionStamp as per Lalit since assignedAgentStamp =0 from 25 dec 2024 **/
 		// Construct the query
 		Query query = new Query(
-				Criteria.where("assignedToAgent").is(agent).and("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
+				Criteria.where("assignedToAgent").is(agent).and("agentSessionStamp").gt(dateRange1).lt(dateRange2));
+		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact").include("agentSessionStamp");
 
 		// Execute the query and fetch results
 		long st = System.currentTimeMillis();
@@ -514,7 +515,8 @@ public class AgentAnalyticsManager implements Serializable {
 
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gte(dateRange1).lt(dateRange2));
+		//query.addCriteria(Criteria.where("assignedAgentStamp").gte(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("agentSessionStamp").gte(dateRange1).lt(dateRange2));
 		query.with(new Sort(new Order(Direction.ASC, "timestamp")));
 
 		List<ChatSessionDoc> totalMsgDoc = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
@@ -527,12 +529,13 @@ public class AgentAnalyticsManager implements Serializable {
 
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("active").is(true));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
+		//query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("agentSessionStamp").gt(dateRange1).lt(dateRange2));
+		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact").include("agentSessionStamp");
 		List<ChatSessionDoc> totalMsgDoc = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 
 		for (ChatSessionDoc chatDoc : totalMsgDoc) {
-			long assignToAgent = chatDoc.getAssignedAgentStamp();
+			long assignToAgent = chatDoc.getAssignedAgentStamp()==0?chatDoc.getAgentSessionStamp():chatDoc.getAssignedAgentStamp();
 			long diffInMilliSeconds = currentTimeStamp - assignToAgent;
 			int diffInHours = (int) (diffInMilliSeconds / (60 * 60 * 1000));
 			totalOpenMsgDoc.add(chatDoc);
@@ -543,8 +546,9 @@ public class AgentAnalyticsManager implements Serializable {
 	public long getAgentWiseOpenConversationV1(String agent, long dateRange1, long dateRange2) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("active").is(true));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
+		//query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("agentSessionStamp").gt(dateRange1).lt(dateRange2));
+		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact").include("agentSessionStamp");
 		long count = mongoTemplate.count(query, CHAT_SESSION);
 		return count;
 	}
@@ -553,8 +557,9 @@ public class AgentAnalyticsManager implements Serializable {
 		List<ChatSessionDoc> totalResolvedMsgDoc = new ArrayList<ChatSessionDoc>();
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("resolved").is(true));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
-		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact");
+		//query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("agentSessionStamp").gt(dateRange1).lt(dateRange2));
+		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact").include("agentSessionStamp");
 
 		List<ChatSessionDoc> totalMsgDoc = mongoTemplate.find(query, ChatSessionDoc.class, CHAT_SESSION);
 		for (ChatSessionDoc chatDoc : totalMsgDoc) {
@@ -567,9 +572,10 @@ public class AgentAnalyticsManager implements Serializable {
 
 		Query query = new Query();
 		query.addCriteria(Criteria.where("assignedToAgent").is(agent).and("resolved").is(true));
-		query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		//query.addCriteria(Criteria.where("assignedAgentStamp").gt(dateRange1).lt(dateRange2));
+		query.addCriteria(Criteria.where("agentSessionStamp").gt(dateRange1).lt(dateRange2));
 		query.fields().include("assignedToAgent").include("assignedAgentStamp").include("contactId").include("contact")
-				.include("resolved");
+				.include("resolved").include("agentSessionStamp");
 		long count = mongoTemplate.count(query, CHAT_SESSION);
 
 		return count;
@@ -695,10 +701,10 @@ public class AgentAnalyticsManager implements Serializable {
 	}
 
 	public PeakLoadDto getAgentPeakLoadMsgCountOld(String agent, long startTime, long endTime) {
-		Aggregation agg = newAggregation(match(Criteria.where("assignedAgentStamp").gt(startTime).lt(endTime)),
-				group("assignedAgentStamp").count().as("total"),
-				project("total").and("assignedAgentStamp").previousOperation(),
-				sort(Sort.Direction.DESC, "total", "assignedAgentStamp"));
+		Aggregation agg = newAggregation(match(Criteria.where("agentSessionStamp").gt(startTime).lt(endTime)),
+				group("agentSessionStamp").count().as("total"),
+				project("total").and("agentSessionStamp").previousOperation(),
+				sort(Sort.Direction.DESC, "total", "agentSessionStamp"));
 		// Convert the aggregation result into a List
 		AggregationResults<PeakLoadDto> groupResults = mongoTemplate.aggregate(agg, CHAT_SESSION, PeakLoadDto.class);
 		PeakLoadDto peakLoadResult = null;

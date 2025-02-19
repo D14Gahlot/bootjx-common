@@ -11,6 +11,8 @@ import java.time.format.TextStyle;
 import java.util.Date;
 import java.util.Locale;
 
+import com.boot.utils.ArgUtil;
+
 public final class CommonUtils {
 
 	
@@ -117,24 +119,45 @@ public static String monthNameByTimestamp(long timestamp) {
 			return new Date();
 		}
 	 
+	 public static String getTodayDtAsStr() {
+		   String formattedDate = null;
+			try {
+				 LocalDate today = LocalDate.now();
+			     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			     formattedDate = today.format(formatter);
+			    return formattedDate;
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			return formattedDate;
+		}
+	 
+	 
+	  
+	 
 	 public static long getDateWithTS(String dateString) {
+		 long timestamp =0;
+		 
+		try {
 		 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	        // Parse the date
 	        LocalDate localDate = LocalDate.parse(dateString, formatter);
 	        // Convert to Date object and get timestamp
-	        long timestamp = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime();
+	         timestamp = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime();
 	        return timestamp;
+		}catch(Exception e) {
+			if(ArgUtil.is(dateString)) {
+				timestamp =  Long.parseLong(dateString);
+			}
+		}
+		return timestamp;
 	 }
 
 
 	public static void main(String[] args)
 	{
-		long st = startTStampForaMonth(1726597800);
-		long et = endTStampForaMonth(1726597800);
-		long st1 =startTStampForaMonthV1(1726597800);
-		long et1 = endTStampForaMonthV1(1726597800);
-		System.out.println("st :"+st+"\t et:"+et+"\t et1 :"+st1+"\t et1:"+et1);
+	
 		String dt ="05/23/1984";
-		System.out.println("Date :"+getDate(dt)+"\t ts :"+getDateWithTS(dt));
+		//System.out.println("Date :"+getDate(dt)+"\t ts :"+getDateWithTS(dt));
 	}
 }

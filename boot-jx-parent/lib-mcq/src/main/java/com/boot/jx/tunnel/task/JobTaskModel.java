@@ -8,18 +8,36 @@ import com.boot.jx.AppContextUtil;
 import com.boot.jx.tunnel.ChronoScheduler;
 import com.boot.jx.tunnel.ITunnelDefs.Schedulable;
 import com.boot.model.MapModel;
+import com.boot.utils.ArgUtil;
 
 public abstract class JobTaskModel<T> implements Serializable, Schedulable {
+
+	private static final long serialVersionUID = -9032639894812626291L;
 
 	public JobTaskModel() {
 		super();
 		this.tenant = AppContextUtil.getTenant();
 	}
 
-	private static final long serialVersionUID = -8178126816683098712L;
+	public enum JOB_STATUS_TYPES {
+		UNREADABLE;
+	}
 
-	public static enum JOB_STATUS {
-		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED, COMPLETED,CANCELLED,STOPPED
+	public enum JOB_STATUS {
+		CREATED, READING, READING_DONE, EXECUTING, RESOLVED, TALLY, CLOSED, COMPLETED, CANCELLED, STOPPED;
+
+		public boolean readNext() {
+			switch (this) {
+			case CLOSED:
+			case COMPLETED:
+			case CANCELLED:
+			case STOPPED:
+				return false;
+			default:
+				return true;
+			}
+		}
+
 	}
 
 	private String tenant;
@@ -101,6 +119,7 @@ public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 		private long resolveStamp;
 		private long closeStamp;
 		private long tallyStamp;
+		private Map<String, Long> stamps;
 
 		public JOB_STATUS getStatus() {
 			return status;
@@ -164,6 +183,43 @@ public abstract class JobTaskModel<T> implements Serializable, Schedulable {
 
 		public void setCloseStamp(long closeStamp) {
 			this.closeStamp = closeStamp;
+		}
+
+		public Map<String, Long> getStamps() {
+			return stamps;
+		}
+
+		public void setStamps(Map<String, Long> stamps) {
+			this.stamps = stamps;
+		}
+
+		public Map<String, Long> stamps() {
+			if (stamps == null)
+				stamps = new HashMap<String, Long>();
+			return stamps;
+		}
+
+		public void updateStatus(JOB_STATUS status) {
+			long now = System.currentTimeMillis();
+			String statusStr = ArgUtil.parseAsString(status);
+			this.status = status;
+			this.stamps().put(statusStr, now);
+			switch (status) {
+			case CREATED:
+				this.openStamp = now;
+				break;
+			case RESOLVED:
+				this.resolveStamp = now;
+				break;
+			case CLOSED:
+				this.closeStamp = now;
+				break;
+			case TALLY:
+				this.tallyStamp = now;
+				break;
+			default:
+				break;
+			}
 		}
 
 	}

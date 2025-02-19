@@ -281,7 +281,9 @@ public class TmplQuickController {
 		newVersion.setCategory(req.getCategory());
 
 		newVersion.setTitle(req.getTitle());
+		newVersion.setStartnote(req.getStartnote());
 		newVersion.setContent(req.getContent());
+		newVersion.setEndnote(req.getEndnote());
 
 		if (ArgUtil.is(newVersion.getParentId())) { // It is a Page
 			KnowBase parent = mongoTemplate.findById(newVersion.getParentId(), KnowBase.class);

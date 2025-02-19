@@ -30,6 +30,7 @@ import com.boot.jx.postman.doc.QuickMedia;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
+import com.boot.jx.postman.store.QuickStore;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
@@ -49,6 +50,9 @@ public class StarterDocKit {
 
 	@Autowired(required = false)
 	private ConfigManager configManager;
+
+	@Autowired(required = false)
+	private QuickStore quickStore;
 
 	@Autowired(required = false)
 	private CommonServiceClient commonServiceClient;
@@ -241,11 +245,11 @@ public class StarterDocKit {
 		createPredefinedMstField();
 	}
 
-	public boolean isFlagUpdated(String flagKey, String flagValue) {
-		PMConfigurationObject version = pmEnvironment.local().keyEntry(flagKey);
-		if (!version.is(flagValue)) {
-			version.setValue(flagValue);
-			configManager.save(version);
+	public boolean isFlagUpdated(String flagKey, String latestVersion) {
+		PMConfigurationObject currentVersion = pmEnvironment.local().keyEntry(flagKey);
+		if (!currentVersion.is(latestVersion) && currentVersion.lessThan(latestVersion)) {
+			currentVersion.setValue(latestVersion);
+			configManager.save(currentVersion);
 			return true;
 		}
 		return false;
@@ -261,6 +265,10 @@ public class StarterDocKit {
 		}
 		if (isFlagUpdated("domain.indexes.session", "v1")) {
 			MongoUtils.cleanupIndexes(commonMongoTemplate, "CHAT_SESSION", ChatSessionDoc.class);
+		}
+
+		if (isFlagUpdated("version.ticket.meta", "v1")) {
+			quickStore.createTicketMeta();
 		}
 	}
 

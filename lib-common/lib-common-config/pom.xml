@@ -43,7 +43,6 @@
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-mcq</artifactId>
-
 		</dependency>
 
 		<dependency>

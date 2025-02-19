@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,6 +51,7 @@ import com.boot.jx.postman.doc.HSMMessageType;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.MessageHold.MESSAGE_QUEUE_TYPE;
 import com.boot.jx.postman.doc.config.FeaturesConfigDoc;
+import com.boot.jx.postman.doc.config.UserPrefsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelPluginProvider;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.utils.ArgUtil;
@@ -91,6 +93,11 @@ public class ConfigOptionMetaController {
 	@RequestMapping(value = "/api/meta/langs", method = { RequestMethod.GET })
 	public ApiResponse<HSMLanguage, Object> languages() {
 		return ApiResponse.buildResults(HSMLanguage.values());
+	}
+
+	@RequestMapping(value = "/api/meta/roles", method = { RequestMethod.GET })
+	public ApiResponse<String, Object> roles() {
+		return ApiResponse.buildResults(PMConstants.USER_ROLE.ALl_ROLES);
 	}
 
 	@RequestMapping(value = "/api/meta/channel_types", method = { RequestMethod.GET })
@@ -147,15 +154,22 @@ public class ConfigOptionMetaController {
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@RequestMapping(value = { "/pub/options/channels", "/api/options/channels" }, method = { RequestMethod.GET })
 	@ResponseBody
-	public ApiResponse<AChannelConfig, Object> listActiveLanes(
-			@RequestParam(required = false) ContactType contactType) {
+	public ApiResponse<AChannelConfig, Object> listActiveLanes(@RequestParam(required = false) ContactType contactType,
+			@RequestParam(required = false, defaultValue = "true") boolean skipHidden) {
+		Set<AChannelConfig> channels = pmEnvironment.config().listChannels();
+
+		// Apply filters
+		Stream<AChannelConfig> stream = channels.stream();
+
 		if (ArgUtil.is(contactType)) {
-			return ApiResponse.buildResults(pmEnvironment.config().listChannels().stream()
-					.filter(channel -> channel.equals(contactType)).collect(Collectors.toList()));
+			stream = stream.filter(channel -> channel.getContactType().equals(contactType));
 		}
-		Set<AChannelConfig> x = pmEnvironment.config().listChannels();
-		// System.out.println(JsonUtil.toJson(x));
-		return ApiResponse.buildResults(x);
+
+		if (skipHidden) {
+			stream = stream.filter(channel -> !channel.isHidden());
+		}
+
+		return ApiResponse.buildResults(stream.collect(Collectors.toSet()));
 	}
 
 	@RequestMapping(value = "/api/options/tmpl/hsm", method = { RequestMethod.GET })
@@ -309,6 +323,30 @@ public class ConfigOptionMetaController {
 		configManager.deletePerm(key);
 		return ApiResponse.buildResults(configManager.getFeature());
 	}
+
+	/**************
+	 * UI Prefs
+	 ************/
+
+	@ApiRequest(rules = { AppAuthModels.ACCESS_RULES.ONLY_DOMAIN_ADMIN })
+	@RequestMapping(value = "/api/uiprefs/domain", method = { RequestMethod.POST })
+	public ApiResponse<UserPrefsConfigDoc, Object> setUIPrefForAdmin(@RequestBody UserPrefsConfigDoc map) {
+		configManager.saveUserPrefs(map, true);
+		return ApiResponse.buildResults(configManager.getUserPrefs());
+	}
+
+	@RequestMapping(value = "/api/uiprefs/user", method = { RequestMethod.POST })
+	public ApiResponse<UserPrefsConfigDoc, Object> setUIPrefForUser(@RequestBody UserPrefsConfigDoc map) {
+		configManager.saveUserPrefs(map, false);
+		return ApiResponse.buildResults(configManager.getUserPrefs());
+	}
+
+	@RequestMapping(value = "/api/uiprefs", method = { RequestMethod.GET })
+	public ApiResponse<UserPrefsConfigDoc, Object> setUIPrefs(@RequestParam(required = false) CONFIG_FEATURES_KEY key) {
+		return ApiResponse.buildResults(configManager.getUserPrefs());
+	}
+
+	// Meta
 
 	@RequestMapping(value = "/api/meta/chat_states", method = { RequestMethod.GET })
 	public ApiResponse<CHAT_STATE, Object> chatStates() {

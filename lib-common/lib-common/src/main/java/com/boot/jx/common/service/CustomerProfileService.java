@@ -1,0 +1,131 @@
+package com.boot.jx.common.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Service;
+
+import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.common.doc.JobScheduledDoc;
+import com.boot.jx.common.dto.CustomerContactDto;
+import com.boot.jx.common.dto.JobsResponseDto;
+import com.boot.jx.common.dto.ProfileSearchQuery;
+import com.boot.jx.common.dto.SearchCustomerProfileDto;
+import com.boot.jx.common.manager.CustomerMasterFldMgr;
+import com.boot.jx.model.CommonFile;
+import com.boot.jx.postman.doc.CustomerProfileDoc;
+import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
+import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
+import com.boot.jx.postman.dto.CustomerProfileRequest;
+import com.boot.utils.ArgUtil;
+
+@Service
+public class CustomerProfileService {
+
+	@Autowired
+	MongoTemplate mongoTemplate;
+
+	@Autowired
+	CustomerMasterFldMgr cmFieldMgr;
+
+	public List<CustomerFieldMasterDoc> addEditCustomerMastFields(CustomerFieldMasterDoc req) {
+		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.addAndEditMasterfield(req);
+		return lstCmfields;
+	}
+
+	public List<CustomerFieldMasterDoc> fetchCustomerMstFields(String id,Boolean active,int pageSize,int pageNo,String sortBy,String sortDir) {
+
+		List<CustomerFieldMasterDoc> lstCmfields = cmFieldMgr.fetchCustomerMasfields(id,active,pageSize,pageNo,sortBy,sortDir);
+		return lstCmfields;
+	}
+
+	public void checkDupFieldCode(CustomerFieldMasterDoc req) {
+		if (ArgUtil.is(req.getId())) {
+			CustomerFieldMasterDoc groupDoc = cmFieldMgr.toCheckDupFieldCode(req.getCode());
+			if (ArgUtil.is(groupDoc)) {
+				ApiResponseUtil.throwInputException(new ApiFieldError().field("domain").codeKey("ValidNameDuplicate")
+						.description("Field code already exists"));
+
+			}
+		}
+	}
+
+	public JobScheduledDoc uploadFile(CommonFile comfile,String uploadType) {
+		return cmFieldMgr.uploadFile(comfile,uploadType);
+
+	}
+
+	public List<JobsResponseDto> fetchCustomerProfileMasterDoc(String id,int pageSize,int pageNo,String sortBy) {
+		return cmFieldMgr.fetchCustomerProfileMasterDoc(id,pageSize,pageNo,sortBy);
+
+	}
+//
+//	public List<JobsResponseDto> fetchCustomerContactProfile(String id) {
+//		return cmFieldMgr.fetchCustomerContactProfile(id);
+//
+//	}
+
+	@Deprecated
+	public List<CustomerContactDto> fetchCustomerContactDetails(String id) {
+		return cmFieldMgr.fetchCustomerContactDetails(id);
+
+	}
+
+	public List<CustomerProfileDoc> fetchCustomerContactInfo(String id, String customerId, String phoneno,
+			String emailid) {
+		return cmFieldMgr.fetchCustomerContactInfo(id, customerId, phoneno, emailid);
+
+	}
+
+	public List<JobsResponseDto> saveJobsOutPut(String id, Map<String, List<Object>> maps) {
+		return cmFieldMgr.saveJobsOutPut(id, maps);
+
+	}
+
+	public List<JobsResponseDto> fetchJobsOutPut(String id, String jobid) {
+		return cmFieldMgr.fetchJobsOutPut(id, jobid);
+
+	}
+
+	public List<CustomerProfileDoc> saveCustomerProfile(String id) {
+		return cmFieldMgr.saveCustomerProfileMaster(id);
+	}
+
+	public List<CustomerProfileDoc> deDeuplicateCheck(CustomerProfileRequest searQry) {
+		return cmFieldMgr.deDeuplicateCheck(searQry);
+	}
+
+	public List<CustomerProfileDoc> fetchCustomeProfile(SearchCustomerProfileDto search) {
+		return cmFieldMgr.fetchCustomeProfile(search);
+	}
+
+	public List<CustomerFieldMasterDoc> deleteCustmerMasterFiled(CustomerFieldMasterDoc reqDto) {
+		return cmFieldMgr.deleteCustmerMasterFiled(reqDto);
+	}
+
+	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
+		// TODO Auto-generated method stub
+		return cmFieldMgr.getProfileSearch(searchQry);
+	}
+	
+	
+	public List<ProfileFilterMasterDoc> addEditProfileFilterGroup(ProfileFilterMasterDoc searchQry) {
+		List<ProfileFilterMasterDoc> lstCmfields = cmFieldMgr.addEditProfileFilterGroup(searchQry);
+		return lstCmfields;
+	}
+
+	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
+		List<ProfileFilterMasterDoc> lstCmfields = cmFieldMgr.deleteProfileFilterGroup(reqDto);
+		return lstCmfields;
+	}
+
+	public  List<ProfileFilterMasterDoc> fetchProfileFilterGroup(String id, Boolean active, int pageSize, int pageNo, String sortBy,
+			String sortDir) {
+		List<ProfileFilterMasterDoc> lstCmfields = cmFieldMgr.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir);
+		return lstCmfields;
+	}
+
+}

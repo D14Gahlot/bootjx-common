@@ -1,3 +1,4 @@
+
 package com.boot.jx.postman;
 
 import java.io.Serializable;
@@ -19,6 +20,7 @@ import com.boot.jx.postman.PMConfiguration.PMConfigurationModel;
 import com.boot.jx.postman.PMConfiguration.PMConfigurationWrappper;
 import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
+import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel.EntryMeta;
@@ -34,12 +36,37 @@ public class PMEnvironment {
 
 	private static final Logger LOGGER = LoggerService.getLogger(PMEnvironment.class);
 
+	/**
+	 * Field will be visible in [TinyView,SummaryView,FullView] View
+	 * 
+	 * All the Fields with [TinyView,None] are going to be visible
+	 * 
+	 * @author lalittanwar
+	 *
+	 */
 	public static interface TinyView {
 	}
 
+	/**
+	 * Field will be visible in [SummaryView,FullView] View.
+	 * 
+	 * All the Fields with [SummaryView,TinyView,None] are going to be visible
+	 * 
+	 * @author lalittanwar
+	 *
+	 */
 	public static interface SummaryView extends TinyView {
 	}
 
+	/**
+	 * Field will be visible only in [FullView] View.
+	 * 
+	 * All the Fields with [FullView,SummaryView,TinyView,None] are going to be
+	 * visible
+	 * 
+	 * @author lalittanwar
+	 *
+	 */
 	public static interface FullView extends SummaryView {
 	}
 
@@ -528,6 +555,8 @@ public class PMEnvironment {
 
 		PMConfigurationObject getAgentChatDisable();
 
+		String getTimeZoneFromSetup();
+
 	}
 
 	public interface PMClientConfig {
@@ -548,12 +577,22 @@ public class PMEnvironment {
 
 	}
 
+	public interface PMGateKeeper {
+		boolean canSendMessage(OutboxMessage outboxMessage);
+
+		boolean canSendTemplateMedia(OutboxMessage outboxMessage);
+	}
+
 	@Autowired(required = false)
 	private PMCommonConfig pmCommonConfig;
 	@Autowired(required = false)
 	private PMDomainConfig pmDomainConfig;
 	@Autowired(required = false)
 	private PMClientConfig pmClientConfig;
+
+	@Autowired
+	@Lazy // Delays initialization to break circular dependency
+	private PMGateKeeper pmGateKeeper;
 
 	public PMCommonConfig commonConfig() {
 		return pmCommonConfig;
@@ -565,5 +604,9 @@ public class PMEnvironment {
 
 	public PMClientConfig clientConfig() {
 		return pmClientConfig;
+	}
+
+	public PMGateKeeper gateKeeper() {
+		return pmGateKeeper;
 	}
 }

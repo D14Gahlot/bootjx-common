@@ -363,7 +363,7 @@ public class WA360CloudClient implements ChannelClient {
 					TmplComponent bodyComponent = TmplComponent.createInstance().body();
 					for (Map<String, Object> bodyParameter : bodyParametersTemp) {
 						String path = (String) bodyParameter.get("path");
-						String originalText = model.pathEntry(path).asString();
+						String originalText = model.pathEntry(path).asString(Constants.BLANK);
 						originalText = originalText.replaceAll("\n", "\\\\n");
 						bodyComponent.parameter("text", originalText);
 
@@ -694,7 +694,7 @@ public class WA360CloudClient implements ChannelClient {
 	}
 
 	private String getMessageIdCloud(MapModel resp, String messageId, String errorCode) {
-		String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_MSG).asString();
+		String errorTitle = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_MSG).orKeyEntry("error").asString();
 		String errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_DETAILS).asString();
 
 		ApiFieldError error = new ApiFieldError();
@@ -705,6 +705,7 @@ public class WA360CloudClient implements ChannelClient {
 			error.setDescriptionKey(resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_USER_TITLE).asString());
 			errorDetails = resp.entry(OutBoundWrapperPaths.RESPONSE_ERROR_USER_MSG).asString();
 		}
+		
 
 		error.setDescription(String.format("%s : %s / %s / %s ", messageId, errorCode, errorTitle, errorDetails));
 		if ("1006".equals(errorCode) || "131026".equals(errorCode)) {

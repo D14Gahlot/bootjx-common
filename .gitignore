@@ -46,3 +46,4 @@ ext-resources
 *.log
 lib-common/lib-common-config/src/main/resources/application.branch.properties
 certs
+/config/

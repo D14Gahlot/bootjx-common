@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.cache.CacheBox;
+import com.boot.jx.cache.MultiTenantCacheBox;
 import com.boot.jx.def.ICacheBox;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.mcq.Candidate;
@@ -22,6 +23,7 @@ import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.task.JobTaskModel.BatchJob;
 import com.boot.jx.tunnel.task.JobTaskModel.JOB_STATUS;
 import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
+import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
 import com.boot.utils.TimeUtils;
@@ -40,7 +42,7 @@ public abstract class BatchJobExecuter {
 
 	private String getJobName() {
 		if (this.jobName == null) {
-			this.jobName = ClazzUtil.getUltimateClassName(this) + "V7";
+			this.jobName = ClazzUtil.getUltimateClassName(this) + "V13";
 		}
 		return this.jobName;
 	}
@@ -83,7 +85,7 @@ public abstract class BatchJobExecuter {
 
 	public ICacheBox<String> taskStatus() {
 		if (taskStatus == null) {
-			this.taskStatus = CacheBox.getInstance("QTE-TASK-M-" + getJobName(), redisson);
+			this.taskStatus = MultiTenantCacheBox.getInstance("QTE-TASK-M-" + getJobName(), redisson);
 		}
 		return this.taskStatus;
 	}
@@ -97,7 +99,7 @@ public abstract class BatchJobExecuter {
 
 	public ICacheBox<BatchJob> jobStatus() {
 		if (jobStatus == null) {
-			this.jobStatus = CacheBox.getInstance("QTE-BATCH-M" + getJobName(), redisson);
+			this.jobStatus = MultiTenantCacheBox.getInstance("QTE-BATCH-M" + getJobName(), redisson);
 		}
 		return this.jobStatus;
 	}
@@ -114,18 +116,23 @@ public abstract class BatchJobExecuter {
 		return LOCK_MAP.get(tenant);
 	}
 
+	public void console(String batchJobId, String message) {
+		LOGGER.debug("JOB[{}] : {}", batchJobId, message);
+	}
+
 	public BatchJob registerJob(BatchJob batchJob) {
 		try {
 			batchJob.setTenant(AppContextUtil.getTenant());
-			batchJob.setStatus(JOB_STATUS.CREATED);
-			batchJob.setOpenStamp(System.currentTimeMillis());
+			batchJob.updateStatus(JOB_STATUS.CREATED);
 			batchJob.setDonePercent(0L);
 			batchJob.setDoneTaskCount(0L);
 			batchJob.setPushedTaskCount(0L);
 			batchJob.setVersion(batchJob.getOpenStamp());
 			jobQueue().add(batchJob);
 			jobStatus().put(batchJob.jobUUID(), batchJob);
+			console(batchJob.getJobId(), "Registered");
 		} catch (Exception e) {
+			console(batchJob.getJobId(), "Registeration Failed " + e.getMessage());
 			e.printStackTrace();
 		}
 		return batchJob;
@@ -134,8 +141,7 @@ public abstract class BatchJobExecuter {
 	public BatchJob cancelJob(BatchJob batchJob) {
 		try {
 			batchJob.setTenant(AppContextUtil.getTenant());
-			batchJob.setStatus(JOB_STATUS.CANCELLED);
-			batchJob.setOpenStamp(System.currentTimeMillis());
+			batchJob.updateStatus(JOB_STATUS.CANCELLED);
 			batchJob.setDonePercent(0L);
 			batchJob.setDoneTaskCount(0L);
 			batchJob.setPushedTaskCount(0L);
@@ -189,119 +195,141 @@ public abstract class BatchJobExecuter {
 	@Scheduled(fixedDelay = 50000)
 	public void reader() {
 		read();
+
 	}
 
 	protected void read() {
 		if (redisson == null) {
 			LOGGER.error("No Redissson Client Instance Available");
 			return;
+		} else {
+			console("*","Reading after50000 ms delay");
 		}
 
-		BatchJob currentBatchJob = jobQueue().poll();
-		if (!ArgUtil.is(currentBatchJob)) {
-			return;
-		}
+		int retryCountLeft = 5; // Maximum number of retries
+		boolean readSuccess = false;
+		boolean continuePollingNexyJob = true;
 
-		BatchJob prevjob = jobStatus().get(currentBatchJob.jobUUID());
-		if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
-			AppContextUtil.setTenant(currentBatchJob.getTenant());
-			String sessionId = UniqueID.generateString();
-			AppContextUtil.setSessionId(sessionId);
-			AppContextUtil.getTraceId(true, true);
-			AppContextUtil.resetTraceTime();
-			AppContextUtil.init();
+		while (retryCountLeft > 0 && !readSuccess && continuePollingNexyJob) {
+			BatchJob currentBatchJob = jobQueue().poll();
 
-			RAtomicLong pushedTaskCounter = redisson.getAtomicLong("PUSHED." + currentBatchJob.jobUUID());
-			RAtomicLong pushedDoneCounter = redisson.getAtomicLong("DONE." + currentBatchJob.jobUUID());
-			currentBatchJob.setPushedTaskCount(Math.max(1, pushedTaskCounter.get()));
-			currentBatchJob.setDoneTaskCount(pushedDoneCounter.get());
-			// Moving to next Step
-			if (JOB_STATUS.CREATED == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.READING);
-			} else if (JOB_STATUS.READING_DONE == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.EXECUTING);
-			} else if (JOB_STATUS.CLOSED == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.COMPLETED);
-			} else if (JOB_STATUS.CANCELLED == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.CANCELLED);
-			} else if (JOB_STATUS.STOPPED == currentBatchJob.getStatus()) {
-				currentBatchJob.setStatus(JOB_STATUS.STOPPED);
+			if (!ArgUtil.is(currentBatchJob)) {
+				console(null,"Nothing Polled");
+				continuePollingNexyJob = false;
+				retryCountLeft--; // Decrement retry count for each polling attempt
+				continue; // Retry polling for a job
 			}
 
-			try {
-				// Reading & Writing Steps
-				if (JOB_STATUS.READING == currentBatchJob.getStatus()) {
-					currentBatchJob.setBatchId(UniqueID.generateString62());
-					long minDoneCount = currentBatchJob.getPushedTaskCount() / 2;
-					if (currentBatchJob.getDoneTaskCount() >= minDoneCount) {
+			console(currentBatchJob.getJobId(),"Found:" + currentBatchJob.getStatus());
 
-						try {
-							boolean readCompleted = this.read(currentBatchJob);
-							if (readCompleted) {
-								currentBatchJob.setStatus(JOB_STATUS.READING_DONE);
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
+			BatchJob prevjob = jobStatus().get(currentBatchJob.jobUUID());
+			if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
+				readSuccess = read(prevjob, currentBatchJob);
+			}
+			retryCountLeft--; // Decrement retry count after a failed read attempt
+		}
+	}
+
+	protected boolean read(BatchJob prevjob, BatchJob currentBatchJob) {
+		AppContextUtil.setTenant(currentBatchJob.getTenant());
+		String sessionId = UniqueID.generateString();
+		AppContextUtil.setSessionId(sessionId);
+		AppContextUtil.getTraceId(true, true);
+		AppContextUtil.resetTraceTime();
+		AppContextUtil.init();
+
+		RAtomicLong pushedTaskCounter = redisson.getAtomicLong("PUSHED." + currentBatchJob.jobUUID());
+		RAtomicLong pushedDoneCounter = redisson.getAtomicLong("DONE." + currentBatchJob.jobUUID());
+		currentBatchJob.setPushedTaskCount(Math.max(1, pushedTaskCounter.get()));
+		currentBatchJob.setDoneTaskCount(pushedDoneCounter.get());
+		// Moving to next Step
+		if (JOB_STATUS.CREATED == currentBatchJob.getStatus()) {
+			currentBatchJob.updateStatus(JOB_STATUS.READING);
+		} else if (JOB_STATUS.READING_DONE == currentBatchJob.getStatus()) {
+			currentBatchJob.updateStatus(JOB_STATUS.EXECUTING);
+		} else if (JOB_STATUS.CLOSED == currentBatchJob.getStatus()) {
+			currentBatchJob.updateStatus(JOB_STATUS.COMPLETED);
+		}
+
+		try {
+			// Reading & Writing Steps
+			if (JOB_STATUS.READING == currentBatchJob.getStatus()) {
+				currentBatchJob.setBatchId(UniqueID.generateString62());
+				long minDoneCount = currentBatchJob.getPushedTaskCount() / 2;
+				if (currentBatchJob.getDoneTaskCount() >= minDoneCount) {
+
+					try {
+						boolean readCompleted = this.read(currentBatchJob);
+						if (readCompleted) {
+							currentBatchJob.updateStatus(JOB_STATUS.READING_DONE);
 						}
-					}
-
-				} else if (JOB_STATUS.EXECUTING == currentBatchJob.getStatus()
-						|| JOB_STATUS.RESOLVED == currentBatchJob.getStatus()) {
-
-					// Calculate Progress
-					long percent = (currentBatchJob.getDoneTaskCount() * 100) / currentBatchJob.getPushedTaskCount();
-					long currentProgress = (percent - currentBatchJob.getDonePercent());
-					currentBatchJob.setDonePercent(percent);
-
-					// JOB GOT RESOLVED
-					boolean justGotResolved = false;
-					if (JOB_STATUS.RESOLVED != currentBatchJob.getStatus() && currentBatchJob.getDonePercent() == 100) {
-						currentBatchJob.setStatus(JOB_STATUS.RESOLVED);
-						currentBatchJob.setResolveStamp(System.currentTimeMillis());
-						justGotResolved = true;
-					}
-
-					// JOB is RESOLVED/TALLY =-------> Tally with Method
-					if (justGotResolved
-							// Tally Timeout has happened
-							|| TimeUtils.isExpired(currentBatchJob.getTallyStamp(), JOB_TALLY_TIMEOUT)
-							// Current Progress is more than 10%
-							|| (currentProgress > 0L)) {
-						boolean tallyCompleted = false;
-						try {
-							tallyCompleted = this.tally(currentBatchJob);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-
-						currentBatchJob.setTallyStamp(System.currentTimeMillis());
-						if (tallyCompleted || (currentBatchJob.getDonePercent() == 100
-								&& TimeUtils.isExpired(currentBatchJob.getResolveStamp(), JOB_RESOLVE_EXPIRY))) {
-							currentBatchJob.setStatus(JOB_STATUS.CLOSED);
-						}
-
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
-			} catch (Exception e) {
-				LOGGER.error("READING OR TALLY ERROR", e);
-			}
 
-			LOGGER.info("{} {} ... {}% = {}/{}", currentBatchJob.jobUUID(), currentBatchJob.getStatus(),
-					currentBatchJob.getDonePercent(), currentBatchJob.getDoneTaskCount(),
-					currentBatchJob.getPushedTaskCount());
+			} else if (JOB_STATUS.EXECUTING == currentBatchJob.getStatus()
+					|| JOB_STATUS.RESOLVED == currentBatchJob.getStatus()) {
 
-			// Check if Final Step of continue
-			if (JOB_STATUS.COMPLETED == currentBatchJob.getStatus()) {
-				jobStatus().remove(currentBatchJob.jobUUID());
-			} else {
-				prevjob = jobStatus().get(currentBatchJob.jobUUID());
-				if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
-					jobStatus().put(currentBatchJob.jobUUID(), currentBatchJob);
-					jobQueue().add(currentBatchJob);
+				// Calculate Progress
+				long percent = (currentBatchJob.getDoneTaskCount() * 100) / currentBatchJob.getPushedTaskCount();
+				long currentProgress = (percent - currentBatchJob.getDonePercent());
+				currentBatchJob.setDonePercent(percent);
+
+				// JOB GOT RESOLVED
+				boolean justGotResolved = false;
+				if (JOB_STATUS.RESOLVED != currentBatchJob.getStatus() && currentBatchJob.getDonePercent() == 100) {
+					currentBatchJob.updateStatus(JOB_STATUS.RESOLVED);
+					justGotResolved = true;
+				}
+
+				// JOB is RESOLVED/TALLY =-------> Tally with Method
+				if (justGotResolved
+						// Tally Timeout has happened
+						|| TimeUtils.isExpired(currentBatchJob.getTallyStamp(), JOB_TALLY_TIMEOUT)
+						// Current Progress is more than 10%
+						|| (currentProgress > 0L)) {
+					boolean tallyCompleted = false;
+					try {
+						tallyCompleted = this.tally(currentBatchJob);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					currentBatchJob.setTallyStamp(System.currentTimeMillis());
+					if (tallyCompleted || (currentBatchJob.getDonePercent() == 100
+							&& TimeUtils.isExpired(currentBatchJob.getResolveStamp(), JOB_RESOLVE_EXPIRY))) {
+						currentBatchJob.updateStatus(JOB_STATUS.CLOSED);
+					}
+
 				}
 			}
-
+		} catch (Exception e) {
+			LOGGER.error("READING OR TALLY ERROR", e);
 		}
+
+		LOGGER.info("{} {} ... {}% = {}/{}", currentBatchJob.jobUUID(), currentBatchJob.getStatus(),
+				currentBatchJob.getDonePercent(), currentBatchJob.getDoneTaskCount(),
+				currentBatchJob.getPushedTaskCount());
+
+		// Check if Final Step of continue
+		if (JOB_STATUS.COMPLETED == currentBatchJob.getStatus()) {
+			jobStatus().remove(currentBatchJob.jobUUID());
+			console(currentBatchJob.getJobId(),"Completed");
+			return false;
+		} else if (ArgUtil.is(currentBatchJob.getStatus(), JOB_STATUS.CANCELLED, JOB_STATUS.STOPPED)) {
+			// Remove jobs no longer needed
+			jobStatus().remove(currentBatchJob.jobUUID());
+			console(currentBatchJob.getJobId(),""+currentBatchJob.getStatus());
+			return false;
+		} else {
+			prevjob = jobStatus().get(currentBatchJob.jobUUID());
+			if (ArgUtil.is(prevjob) && ArgUtil.is(prevjob.getOpenStamp(), currentBatchJob.getOpenStamp())) {
+				jobStatus().put(currentBatchJob.jobUUID(), currentBatchJob);
+				jobQueue().add(currentBatchJob);
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -316,6 +344,22 @@ public abstract class BatchJobExecuter {
 	 */
 	public abstract boolean read(BatchJob currentBatchJob);
 
+	public BatchJob job(String jobId) {
+		BatchJob currentBatchJob = JobTaskModel.newBatchJob().jobId(jobId);
+		return jobStatus().get(currentBatchJob.jobUUID());
+	}
+
+	public BatchJob job(String jobId, MapModel defaultData) {
+		BatchJob batchJob = JobTaskModel.newBatchJob().jobId(jobId);
+		BatchJob currentBatchJob2 = jobStatus().get(batchJob.jobUUID());
+		if (ArgUtil.is(currentBatchJob2)) {
+			return currentBatchJob2;
+		}
+		batchJob.setData(defaultData.toMap());
+		return batchJob;
+
+	}
+
 	/**
 	 * 
 	 * Can be used to track overall status of job
@@ -325,6 +369,11 @@ public abstract class BatchJobExecuter {
 	 *         tallying
 	 */
 	public abstract boolean tally(BatchJob currentBatchJob);
+
+	public boolean tally(String jobId) {
+		BatchJob currentBatchJob = job(jobId);
+		return this.tally(currentBatchJob);
+	}
 
 	public String push(Tasklet tasklet) {
 		if (!ArgUtil.is(tasklet.getTenant())) {
@@ -359,6 +408,9 @@ public abstract class BatchJobExecuter {
 			LOGGER.error("No Redissson Client Instance Available");
 			return;
 		}
+		
+		//console("*","Executing...");
+		
 		Tasklet tasklet = taskQueue().poll();
 		if (ArgUtil.is(tasklet)) {
 			String taskUUID = tasklet.taskUUID();
@@ -367,10 +419,13 @@ public abstract class BatchJobExecuter {
 				LOGGER.debug("Skipping Task {} for AckMisMatch {} {}", tasklet.getTaskId(), ackId, tasklet.getAckId());
 				return;
 			}
-
+			
 			BatchJob taskJob = jobStatus().get(tasklet.jobUUID());
-
+			
 			if (ArgUtil.is(taskJob) && ArgUtil.is(taskJob.getVersion(), tasklet.getVersion())) {
+				
+				console(taskJob.getJobId(),"Executing Task " + tasklet.getTaskId());
+				
 				AppContextUtil.setTenant(tasklet.getTenant());
 				String sessionId = UniqueID.generateString();
 				AppContextUtil.setSessionId(sessionId);

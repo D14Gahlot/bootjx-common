@@ -19,8 +19,8 @@ import com.boot.jx.dict.ContactType;
 import com.boot.jx.mongo.CommonDocInterfaces.AuditActivityDoc;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoStore.PaginatedQuery;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.mongo.CommonMongoTemplate.PaginatedQuery;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.MessageDoc;
@@ -38,6 +38,7 @@ import com.boot.model.MapModel;
 import com.boot.model.UtilityModels.PublicJsonProperty;
 import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.mongodb.BasicDBObject;
 
 @RestController
 public class AdminObjectsController {
@@ -137,42 +138,6 @@ public class AdminObjectsController {
 				getPaginatedBulk(PayloadDumpCollection.class, "PAYLOAD_DUMP", pageNo, pageSize, sortBy, sortDir));
 	}
 
-	@RequestMapping(value = { "/api/objects/channel_setup_logs" }, method = { RequestMethod.GET })
-	@JsonView(PublicJsonProperty.class)
-	public ApiResponse<ChannelConfigLogger, Object> channelSetupLogs(@RequestParam(required = false) String id,
-			@RequestParam(required = false, defaultValue = "0") int pageNo,
-			@RequestParam(required = false, defaultValue = "25") int pageSize,
-			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
-			@RequestParam(required = false, defaultValue = "desc") String sortDir,
-			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
-			@RequestParam(required = false) String channelId, @RequestParam(required = false) String domain,
-			@RequestParam(required = false) String lane,
-			@RequestParam(required = false, defaultValue = "false") boolean local) {
-
-		MapModel extparams = MapModel.createInstance();
-		if (!local && !Tenants.isDefault(AppContextUtil.getTenant())) {
-			extparams.put("domain", AppContextUtil.getTenant());
-			AppContextUtil.switchTenant(Tenants.getDefault());
-		}
-
-		return ApiResponse.buildResults(
-				getPaginatedBulk(ChannelConfigLogger.class, "TEMP_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
-	}
-
-	@RequestMapping(value = { "/api/objects/archive/channel" }, method = { RequestMethod.GET })
-	@JsonView(PublicJsonProperty.class)
-	public ApiResponse<ChannelConfigDupsDoc, Object> channelArchive(@RequestParam(required = false) String id,
-			@RequestParam(required = false, defaultValue = "0") int pageNo,
-			@RequestParam(required = false, defaultValue = "25") int pageSize,
-			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
-			@RequestParam(required = false, defaultValue = "desc") String sortDir,
-			@RequestParam(required = false) ContactType contactType, @RequestParam(required = false) String channelType,
-			@RequestParam(required = false) String channelId, @RequestParam(required = false) String domain,
-			@RequestParam(required = false) String lane) {
-		return ApiResponse.buildResults(
-				getPaginatedBulk(ChannelConfigDupsDoc.class, "DUPS_CONFIG_CHANNEL", pageNo, pageSize, sortBy, sortDir));
-	}
-
 	@RequestMapping(value = { "/api/objects/messages/{messageQueueType}" }, method = { RequestMethod.GET })
 	@JsonView(PublicJsonProperty.class)
 	public ApiResponse<MessageHold, Object> queuedMessages(@RequestParam(required = false) String id,
@@ -230,4 +195,19 @@ public class AdminObjectsController {
 		return ApiResponse.buildResults(
 				getPaginatedBulk(ChatSessionDoc.class, "CHAT_SESSION", pageNo, pageSize, sortBy, sortDir));
 	}
+
+	@RequestMapping(value = "/api/objects/session_summary", method = { RequestMethod.GET })
+	@JsonView(PublicJsonProperty.class)
+	public ApiResponse<BasicDBObject, Object> getSession(@RequestParam(required = false) String id,
+			@RequestParam(required = false, defaultValue = "0") int pageNo,
+			@RequestParam(required = false, defaultValue = "25") int pageSize,
+			@RequestParam(required = false, defaultValue = "createdStamp") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir) {
+		List<BasicDBObject> x = comonMongoTemplate
+				.getPages(PaginatedQuery.select(BasicDBObject.class, "SESSION_SUMMARY") //
+						.pageNo(pageNo).pageSize(pageSize).sortBy(sortBy).sortDir(sortDir).count())
+				.getResults();
+		return ApiResponse.buildResults(x);
+	}
+
 }

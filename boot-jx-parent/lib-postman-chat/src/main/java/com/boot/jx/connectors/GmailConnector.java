@@ -210,7 +210,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
 					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
 					outboxMessage.setReplyId(lastMsg.getMessageId());
-				} else if (ArgUtil.is(lastMsg.getMessageId())) {
+				} else if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageId())) {
 					MessageDoc lastMsgDoc = messageStore.findById(lastMsg.getMessageId(), ContactType.EMAIL);
 					outboxMessage.setReplyIdExt(lastMsgDoc.getMessageIdExt());
 					outboxMessage.setReplyId(lastMsg.getMessageId());
@@ -301,25 +301,9 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 		}
 
 		inboxMessage.setAttachments(inbound.getAttachments());
+		inboxMessage.setReferral(inbound.getReferral());
 
 		return inboxMessage;
-	}
-
-	private MessageReport toMessageReport(ChannelConfig channelConfig, InBoundMsgStatus status) {
-		MessageReport report = this.createMessageReport(channelConfig);
-		report.setMessageId(status.messageId);
-		report.setMessageIdExt(status.messageIdExt);
-		// report.setMessageIdRef(status.messageId);
-		report.setChangeStamp(status.timestamp);
-		report.contact().setContactId(status.contactId);
-		if (ArgUtil.is(status.contact)) {
-			report.contact().setEmail(status.contact.email);
-			report.contact().phone(status.contact.phone);
-			report.contact().setCsid(status.contact.csid);
-		}
-		Status st = ArgUtil.parseAsEnumT(status.status, Status.class);
-		report.setStatus(st);
-		return report;
 	}
 
 	@Override

@@ -216,12 +216,16 @@ public class MessageDefinitions {
 		public List<Object> trace();
 
 		public MessageRouter route();
+
 	}
 
 	// External attributes
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public interface SessionMessage extends SessionInfo, SessionId, IMessageId {
 		public String getSubject();
+
+		public MessageTimeout getTimeout();
+
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)

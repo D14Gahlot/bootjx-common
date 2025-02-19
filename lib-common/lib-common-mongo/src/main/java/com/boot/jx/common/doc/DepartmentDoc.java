@@ -12,12 +12,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.boot.jx.mongo.CommonDocInterfaces.DocVersion;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
 import com.boot.jx.mongo.CommonDocInterfaces.Patchable;
+import com.boot.jx.postman.PMConstants.DEFAULT;
 
 @Document(collection = "DEPARTMENTS")
 @TypeAlias("DepartmentDoc")
 public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, IDocument, DocVersion {
 
 	private static final long serialVersionUID = -3381417310939635611L;
+
+	public static DepartmentDoc NO_DEPT = new DepartmentDoc().id(DEFAULT.NO_DEPT).code(DEFAULT.NO_DEPT);
 
 	@Id
 	private String dept_id;
@@ -39,6 +42,16 @@ public class DepartmentDoc implements Serializable, Patchable<DepartmentDoc>, ID
 
 	public String getDept_code() {
 		return dept_code;
+	}
+
+	private DepartmentDoc id(String id) {
+		this.setDept_id(id);
+		return this;
+	}
+
+	private DepartmentDoc code(String code) {
+		this.setDept_code(code);
+		return this;
 	}
 
 	public void setDept_code(String dept_code) {

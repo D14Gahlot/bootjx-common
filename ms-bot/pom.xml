@@ -69,7 +69,7 @@
 		<dependency>
 			<groupId>com.boot.jx</groupId>
 			<artifactId>lib-tmpl</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${jax.version}</version>
 		</dependency>
 
 		<dependency>
@@ -107,8 +107,8 @@
 
 		<dependency>
 			<groupId>com.boot.jx</groupId>
-			<artifactId>lib-common-config</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<artifactId>lib-common</artifactId>
+			<version>${jax.version}</version>
 		</dependency>
 
 		<!-- <dependency> <groupId>com.google</groupId> <artifactId>Ab</artifactId> 

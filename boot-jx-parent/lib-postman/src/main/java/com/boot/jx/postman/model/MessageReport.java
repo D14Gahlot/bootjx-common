@@ -9,6 +9,7 @@ import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.MessageDefinitions.LogMessage;
 import com.boot.jx.postman.model.MessageDefinitions.TraceMessage;
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.utils.ArgUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,7 +22,6 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 	private String messageIdRef;
 	private String sessionId;
 	private Contactable contact;
-	
 
 	private long timestamp;
 	protected long changeStamp;
@@ -168,6 +168,10 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 		public void setHref(String href) {
 			this.href = href;
 		}
+
+		public String toCode() {
+			return ArgUtil.nonEmpty(code, title, details, href);
+		}
 	}
 
 	public String getSessionId() {
@@ -292,6 +296,12 @@ public class MessageReport implements LogMessage, Serializable, TraceMessage {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	@Override
+	public MessageTimeout getTimeout() {
+		// Not valid for Reports
+		return null;
 	}
 
 }

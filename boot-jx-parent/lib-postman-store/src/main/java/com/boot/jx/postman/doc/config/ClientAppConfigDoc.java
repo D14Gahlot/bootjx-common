@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -46,6 +47,8 @@ public class ClientAppConfigDoc
 	private String key;
 	private String keyVersion;
 
+	private Long version;
+
 	private String appMode;
 	private String appType;
 	private String webhook;
@@ -58,6 +61,7 @@ public class ClientAppConfigDoc
 	private Map<String, Object> secret;
 	private Map<String, Object> props;
 	private Map<String, Object> config;
+	private Map<String, Object> custom;
 
 	private String domain;
 	private boolean isShared;
@@ -294,6 +298,30 @@ public class ClientAppConfigDoc
 
 	public void setDisabled(boolean isDisabled) {
 		this.isDisabled = isDisabled;
+	}
+
+	public Map<String, Object> getCustom() {
+		return custom;
+	}
+
+	public void setCustom(Map<String, Object> custom) {
+		this.custom = custom;
+	}
+
+	@Override
+	public Map<String, Object> custom() {
+		if (this.custom == null) {
+			this.custom = new HashMap<String, Object>();
+		}
+		return custom;
+	}
+
+	public Long getVersion() {
+		return version;
+	}
+
+	public void setVersion(Long version) {
+		this.version = version;
 	}
 
 }

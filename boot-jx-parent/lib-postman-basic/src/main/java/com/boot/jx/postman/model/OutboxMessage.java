@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.boot.jx.dict.ContactType;
-import com.boot.jx.postman.model.MessageDefinitions.IMessage;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageExtended;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageLoggable;
 import com.boot.jx.postman.model.MessageOptions.WAMessageOptions;

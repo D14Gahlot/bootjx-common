@@ -25,12 +25,12 @@ public class WabaAccountBalanceDoc extends TimeStampDoc implements Serializable,
 	@Unique
 	String tenant;
 	String wabaId;
+	String number;
 	String currencyCode;
 	long timeStamp;
 	double depositAmt=0.0;
 	double balanceAmt=0.0;
 	double totalMsgCost=0.0;
-	//private List<DocVersion> oldVersions;
 	private List<WabaAccountBalanceDoc> oldVersion;
 	
 	public String getId() {
@@ -99,6 +99,12 @@ public class WabaAccountBalanceDoc extends TimeStampDoc implements Serializable,
 	}
 	public void setOldVersion(List<WabaAccountBalanceDoc> oldVersion) {
 		this.oldVersion = oldVersion;
+	}
+	public String getNumber() {
+		return number;
+	}
+	public void setNumber(String number) {
+		this.number = number;
 	}
 	
 	

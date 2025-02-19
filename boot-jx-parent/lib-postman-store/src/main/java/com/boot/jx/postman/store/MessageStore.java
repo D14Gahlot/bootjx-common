@@ -22,9 +22,9 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.mongo.CommonDocInterfaces.TimeStampIndex;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
+import com.boot.jx.mongo.CommonMongoStore;
+import com.boot.jx.mongo.CommonMongoStore.PaginatedQuery;
 import com.boot.jx.mongo.CommonMongoTemplate;
-import com.boot.jx.mongo.CommonMongoTemplate.PaginatedQuery;
-import com.boot.jx.mongo.CommonMongoTemplateAbstract;
 import com.boot.jx.postman.PMConstants.MESSAGE_BOUND_TYPE;
 import com.boot.jx.postman.PMConstants.MESSAGE_SOURCE_CATEGARY;
 import com.boot.jx.postman.doc.ContactDetailDoc;
@@ -38,6 +38,7 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageLoggable;
 import com.boot.jx.postman.model.MessageReport;
+import com.boot.jx.postman.model.MessageReport.MessageReportError;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.query.ChatSessionQuery;
@@ -51,7 +52,7 @@ import com.google.common.collect.Lists;
 import com.mongodb.client.result.UpdateResult;
 
 @Component
-public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
+public class MessageStore extends CommonMongoStore<MessageStore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageStore.class);
 
@@ -297,6 +298,7 @@ public class MessageStore extends CommonMongoTemplateAbstract<MessageStore> {
 		doc.stamps().put("session", ArgUtil.parseAsLong(outMessage.session().getSessionStamp(), 0L));
 		doc.meta().putAll(outMessage.meta());
 		doc.options().putAll(outMessage.options());
+		doc.setTimeout(outMessage.getTimeout());
 
 		// Incase it was missed
 		doc.setContactId(PostManUtil.createContactId(outMessage));

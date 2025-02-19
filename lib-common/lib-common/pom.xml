@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>lib-common</artifactId>
+	<packaging>jar</packaging>
+	<name>lib-common</name>
+	<url>http://maven.apache.org</url>
+
+	<description>Common components</description>
+
+	<parent>
+		<groupId>com.boot.jx</groupId>
+		<artifactId>cherrybase</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<thymeleaf.version>3.0.2.RELEASE</thymeleaf.version>
+		<thymeleaf-layout-dialect.version>2.1.1</thymeleaf-layout-dialect.version>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-common-mongo</artifactId>
+			<version>${jax.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.boot.jx</groupId>
+			<artifactId>lib-common-config</artifactId>
+			<version>${jax.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.8</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>3.15</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-ooxml</artifactId>
+		    <version>3.15</version>
+	  </dependency>	
+
+	</dependencies>
+
+
+	<repositories>
+		<!-- <repository> <id>itext</id> <name>iText Repository - releases</name> 
+			<url>https://repo.itextsupport.com/releases</url> </repository> -->
+		<repository>
+			<id>Adobe</id>
+			<name>Adobe Repository - releases</name>
+			<url>https://repo.adobe.com/nexus/content/repositories/public/</url>
+		</repository>
+		<repository>
+			<id>jcenter</id>
+			<url>https://jcenter.bintray.com/</url>
+		</repository>
+	</repositories>
+
+</project>

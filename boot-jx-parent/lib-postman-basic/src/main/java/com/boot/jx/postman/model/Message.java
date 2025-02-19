@@ -64,6 +64,7 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 	private Map<String, Object> model = new HashMap<String, Object>();
 	protected Map<String, Object> options = new HashMap<String, Object>();
 	protected Map<String, Object> meta;
+	protected MessageTimeout timeout;
 
 	/**
 	 * @deprecated use referral() to store info
@@ -698,5 +699,13 @@ public class Message<T extends Message<T>> implements Serializable, MessageOptio
 
 	public void setReferral(MessageReferral referral) {
 		this.referral = referral;
+	}
+
+	public MessageTimeout getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(MessageTimeout timeout) {
+		this.timeout = timeout;
 	}
 }

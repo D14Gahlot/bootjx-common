@@ -27,6 +27,9 @@ public class InBoundMeta {
 
 	public boolean debug;
 
+	@ApiMockModelProperty(example = "1", value = "Client App Version changes after every update", required = false)
+	private Long appVersion;
+
 	public InBoundMeta domain(String domain) {
 		this.domain = domain;
 		return this;
@@ -59,6 +62,11 @@ public class InBoundMeta {
 
 	public InBoundMeta appMode(String appMode) {
 		this.appMode = appMode;
+		return this;
+	}
+
+	public InBoundMeta appVersion(Long appVersion) {
+		this.appVersion = appVersion;
 		return this;
 	}
 
