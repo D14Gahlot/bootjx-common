@@ -1,4 +1,4 @@
-	package com.boot.jx.agent.api;
+package com.boot.jx.agent.api;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,7 +68,7 @@ public class AgMainController {
 
 	@Autowired
 	private ChatSessionFactory chatSessionFactory;
-	
+
 	@Autowired
 	ContactStore contactStore;
 
@@ -248,13 +248,13 @@ public class AgMainController {
 		return ApiResponse.buildResults(chatSessionDtos,
 				MapBuilder.map().put("isOnline", agentSession.isOnline()).build());
 	}
-	
+
 	@RequestMapping(value = "/api/customer/profile", method = { RequestMethod.GET })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestParam(required = false) String id,
 			@RequestParam(required = false, defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "25") int pageSize,
-			@RequestParam(required = false ,defaultValue="created") String sortBy,
+			@RequestParam(required = false, defaultValue = "created") String sortBy,
 			@RequestParam(required = false, defaultValue = "desc") String sortDir,
 			@RequestParam(required = false) String contactId,
 
@@ -264,11 +264,11 @@ public class AgMainController {
 			@RequestParam(required = false, value = "search.emails") String searchEmail) {
 		if (ArgUtil.is(contactId)) {
 			return ApiResponse.buildResults(contactStore.findProfileByContactId(contactId));
-		}else if(ArgUtil.is(searchPhone)) {
+		} else if (ArgUtil.is(searchPhone)) {
 			return ApiResponse.buildResults(contactStore.findProfileByPhone(searchPhone));
-		}else if(ArgUtil.is(searchEmail)) {
+		} else if (ArgUtil.is(searchEmail)) {
 			return ApiResponse.buildResults(contactStore.findProfileByEmail(searchEmail));
-		}else if(ArgUtil.is(searchCode)) {
+		} else if (ArgUtil.is(searchCode)) {
 			return ApiResponse.buildResults(contactStore.findProfileByCode(searchCode));
 		}
 		return ApiResponse.buildResult(null);

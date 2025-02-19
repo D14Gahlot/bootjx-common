@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.boot.jx.swagger.ApiMockModelProperty;
+import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -13,6 +15,8 @@ public class MessageReferral implements Serializable {
 
 	String messageId;
 	String messageIdExt;
+
+	@JsonAlias({ "bulkId", "bulkSessionId" })
 	String bulkId;
 
 	String sourceUrl;
@@ -35,6 +39,17 @@ public class MessageReferral implements Serializable {
 	String imageUrl;
 
 	private Map<String, Object> info;
+
+	public void putAll(MessageReferral referral) {
+		this.messageId = ArgUtil.nonEmpty(referral.messageId, this.messageId);
+		this.messageIdExt = ArgUtil.nonEmpty(referral.messageIdExt, this.messageIdExt);
+		this.bulkId = ArgUtil.nonEmpty(referral.bulkId, this.bulkId);
+		this.sourceUrl = ArgUtil.nonEmpty(referral.sourceUrl, this.sourceUrl);
+		this.sourceId = ArgUtil.nonEmpty(referral.sourceId, this.sourceId);
+		this.sourceCategory = ArgUtil.nonEmpty(referral.sourceCategory, this.sourceCategory);
+		this.sourceType = ArgUtil.nonEmpty(referral.sourceType, this.sourceType);
+		this.sourceId = ArgUtil.nonEmpty(referral.sourceId, this.sourceId);
+	}
 
 	public String getImageUrl() {
 		return imageUrl;
@@ -160,4 +175,5 @@ public class MessageReferral implements Serializable {
 	public void setBulkId(String bulkId) {
 		this.bulkId = bulkId;
 	}
+
 }
