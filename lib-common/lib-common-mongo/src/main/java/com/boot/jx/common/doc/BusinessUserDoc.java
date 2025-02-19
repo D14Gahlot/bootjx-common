@@ -1,4 +1,4 @@
-package com.boot.jx.account.doc;
+package com.boot.jx.common.doc;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -10,10 +10,15 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.boot.jx.common.dto.AccountMeta;
+import com.boot.jx.common.dto.SignupContact;
 import com.boot.jx.model.AuditCreateEntity;
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.jx.postman.PMEnvironment.FullView;
 import com.boot.model.MapModel;
+import com.boot.model.UtilityModels.ProtectedJsonProperty;
 import com.boot.utils.ArgUtil;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Document(collection = "DOMAIN_USER")
 @TypeAlias("DomainUser")
@@ -25,6 +30,8 @@ public class BusinessUserDoc implements IDocument, AuditCreateEntity, Serializab
 	private String id;
 
 	private SignupContact contact;
+
+	@JsonView(ProtectedJsonProperty.class)
 	private AccountMeta meta;
 	private Set<String> role;
 
@@ -35,9 +42,11 @@ public class BusinessUserDoc implements IDocument, AuditCreateEntity, Serializab
 	private Boolean isActive;
 	private Set<String> wabaChannels;
 
+	@JsonView(FullView.class)
 	@DBRef
 	private Set<DomainDoc> domains;
 
+	@JsonView(FullView.class)
 	@DBRef
 	private Set<DomainLicenseDoc> domainLicense;
 

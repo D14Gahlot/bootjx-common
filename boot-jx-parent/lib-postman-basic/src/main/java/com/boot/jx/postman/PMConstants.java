@@ -56,6 +56,12 @@ public class PMConstants {
 
 		public static final String ADMIN = "ADMIN";
 		public static final String AGENT = "AGENT";
+
+		public static final String[] ALl_ROLES = { DUPER_USER, SUPER_DEV, BUSINESS_MANAGER, WABA_MANAGER, WABA_MANAGER,
+				BUSINESS_PARTNER, BUSINESS_USER, ADMIN, AGENT };
+
+		public static final String ALl_ROLES_STRING = ALl_ROLES.toString();
+
 		public static final String ALLOWED = "DUPER_USER,SUPER_DEV,BUSINESS_MANAGER,WABA_MANAGER,BUSINESS_PARTNER,BUSINESS_USER,ADMIN,AGENT";
 
 		public static final String[] CAN_ACCESS_ALL_DOMAINS = { DUPER_USER, SUPER_MANAGER, SUPER_DEV };

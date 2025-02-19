@@ -1,3 +1,4 @@
+
 package com.boot.jx.postman;
 
 import java.io.Serializable;
@@ -35,12 +36,37 @@ public class PMEnvironment {
 
 	private static final Logger LOGGER = LoggerService.getLogger(PMEnvironment.class);
 
+	/**
+	 * Field will be visible in [TinyView,SummaryView,FullView] View
+	 * 
+	 * All the Fields with [TinyView,None] are going to be visible
+	 * 
+	 * @author lalittanwar
+	 *
+	 */
 	public static interface TinyView {
 	}
 
+	/**
+	 * Field will be visible in [SummaryView,FullView] View.
+	 * 
+	 * All the Fields with [SummaryView,TinyView,None] are going to be visible
+	 * 
+	 * @author lalittanwar
+	 *
+	 */
 	public static interface SummaryView extends TinyView {
 	}
 
+	/**
+	 * Field will be visible only in [FullView] View.
+	 * 
+	 * All the Fields with [FullView,SummaryView,TinyView,None] are going to be
+	 * visible
+	 * 
+	 * @author lalittanwar
+	 *
+	 */
 	public static interface FullView extends SummaryView {
 	}
 

@@ -1,4 +1,4 @@
-package com.boot.jx.account.doc;
+package com.boot.jx.common.doc;
 
 import java.io.Serializable;
 
