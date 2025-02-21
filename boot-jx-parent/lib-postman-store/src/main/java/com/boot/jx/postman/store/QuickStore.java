@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.mongo.CommonDocInterfaces.IDocument;
+import com.boot.jx.mongo.CommonDocInterfaces.SimpleDocument;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoStore;
 import com.boot.jx.postman.doc.QuickLocation;
@@ -30,7 +31,7 @@ import com.mongodb.client.MongoCursor;
 @Component
 public class QuickStore extends CommonMongoStore<QuickStore> {
 
-	public static interface QuickGalleryItem extends JsonIgnoreUnknown, IDocument {
+	public static interface QuickGalleryItem extends JsonIgnoreUnknown, SimpleDocument {
 		String getId();
 
 		void setId(String id);
