@@ -297,9 +297,14 @@ public class CSVHelper {
 	}
 
 	private String getContactValue(String colmValue) {
-		int compare = Character.compare(colmValue.charAt(0), '+');
-		if (compare != 0) {
-			colmValue = PMConstants.PLUS_SYM.concat(colmValue);
+		
+		if (Pattern.compile("@").matcher(colmValue).find()) {
+			return colmValue;
+		}else {
+			int compare = Character.compare(colmValue.charAt(0), '+');
+			if (compare != 0) {
+				colmValue = PMConstants.PLUS_SYM.concat(colmValue);
+			}
 		}
 		return colmValue;
 	}
