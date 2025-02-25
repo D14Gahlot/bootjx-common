@@ -22,7 +22,9 @@ import com.boot.jx.postman.doc.config.ClientAppConfigDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyTokenKeyDoc;
 import com.boot.jx.postman.doc.config.VarsConfigDoc.CompanyVarsConfigDoc;
 import com.boot.jx.postman.plugin.ChannelConfig;
+import com.boot.jx.rest.RestService;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.Constants;
 import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
@@ -36,6 +38,9 @@ public class ConfigController {
 
 	@Autowired
 	public PMEnvironment pmEnvironment;
+
+	@Autowired
+	public RestService restService;
 
 	@ResponseBody
 	@RequestMapping(value = "/api/config/channel/{channelType}", method = { RequestMethod.POST })
@@ -180,6 +185,22 @@ public class ConfigController {
 	public ApiResponse<CompanyTokenKeyDoc, Object> updateTokeKeys(@RequestBody ModelPatches patch)
 			throws InstantiationException, IllegalAccessException {
 		return ApiResponse.buildResults(configManager.patch(patch, CompanyTokenKeyDoc.class));
+	}
+
+	@JsonView(PMEnvironment.PublicProperty.class)
+	@ResponseBody
+	@RequestMapping(value = { "/api/config/tokenkey/gpt/models" }, method = { RequestMethod.GET })
+	public ApiResponse<Map<String, Object>, Object> getCompanyTokenKeysGPTModels(@RequestParam String id,
+			@RequestParam String apiKey) {
+		if (!ArgUtil.is(apiKey) && ArgUtil.is(id)) {
+			CompanyTokenKeyDoc x = configManager.findById(id, CompanyTokenKeyDoc.class);
+			apiKey = ArgUtil.parseAsString(x.secret().getOrDefault("apiKey", Constants.DEFAULT_STRING));
+		}
+		if (ArgUtil.is(apiKey)) {
+			return ApiResponse.buildResults(restService.ajax("https://api.openai.com/v1/models").get().asMapModel()
+					.entry("data").asListOfMap());
+		}
+		return ApiResponse.build();
 	}
 
 }
