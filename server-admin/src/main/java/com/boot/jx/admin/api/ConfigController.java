@@ -197,8 +197,8 @@ public class ConfigController {
 			apiKey = ArgUtil.parseAsString(x.secret().getOrDefault("apiKey", Constants.DEFAULT_STRING));
 		}
 		if (ArgUtil.is(apiKey)) {
-			return ApiResponse.buildResults(restService.ajax("https://api.openai.com/v1/models").get().asMapModel()
-					.entry("data").asListOfMap());
+			return ApiResponse.buildResults(restService.ajax("https://api.openai.com/v1/models").authBearer(apiKey)
+					.get().asMapModel().entry("data").asListOfMap());
 		}
 		return ApiResponse.build();
 	}
