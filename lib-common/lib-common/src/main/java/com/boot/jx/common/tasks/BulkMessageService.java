@@ -73,6 +73,7 @@ import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -169,6 +170,7 @@ public class BulkMessageService extends BatchJobExecuter {
 				to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 				doc.getContact().phone(to);
 			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
 			}
 			doc.setMessage(bulkMessage.getMessage());
@@ -185,11 +187,11 @@ public class BulkMessageService extends BatchJobExecuter {
 
 			docs.add(doc);
 		}
-
+	
 		session.setStatus(JOB_STATUS.CREATED.toString());
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
-
+System.out.println("docs :"+JsonUtil.toJson(docs));
 		registerJob(// Create batch Job to pass
 				JobTaskModel.newBatchJob()
 						// Set Unique Job Id
@@ -242,6 +244,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().phone(to);
 			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
 			}
 			doc.setMessage(bulkMsg.getMessage());
@@ -317,6 +320,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().phone(to);
 			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
 			}
 			doc.setMessage(bulkMessage.getMessage());
@@ -741,6 +745,7 @@ public class BulkMessageService extends BatchJobExecuter {
 			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 			doc.getContact().phone(to);
 			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
 			}
 			doc.setMessage(bulkMessage.getMessage());
