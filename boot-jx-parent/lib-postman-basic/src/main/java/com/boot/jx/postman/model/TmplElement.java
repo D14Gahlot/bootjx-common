@@ -16,9 +16,15 @@ public class TmplElement implements Serializable {
 		public static final String PHONE_NUMBER = "PHONE_NUMBER";
 		public static final String COPY = "COPY";
 
+		public static final String ADDRESS_REQUEST = "ADDRESS_REQUEST";
 		public static final String LOCATION_REQUEST = "LOCATION_REQUEST";
 		public static final String FLOW = "FLOW";
 
+	}
+
+	public static class TmplElementParams implements Serializable {
+		private static final long serialVersionUID = -1815142053606687489L;
+		public String countryCode;
 	}
 
 	@ApiMockModelProperty(example = "occupation", value = "key to be used programmatically", required = false)
@@ -48,6 +54,8 @@ public class TmplElement implements Serializable {
 
 	@ApiMockModelProperty(example = "806799978207096", value = "Any UniqeId to be used", required = false)
 	private String uid;
+
+	private TmplElementParams params;
 
 	public String getCode() {
 		return code;
@@ -166,6 +174,21 @@ public class TmplElement implements Serializable {
 
 	public void setVariable(String variable) {
 		this.variable = variable;
+	}
+
+	public TmplElementParams getParams() {
+		return params;
+	}
+
+	public void setParams(TmplElementParams params) {
+		this.params = params;
+	}
+
+	public TmplElementParams params() {
+		if(this.params ==  null) {
+			this.params =  new TmplElementParams();
+		}
+		return params;
 	}
 
 }
