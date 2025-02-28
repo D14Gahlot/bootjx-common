@@ -172,6 +172,9 @@ public class BulkMessageService extends BatchJobExecuter {
 			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
 				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
+				if(templateDoc!=null && templateDoc.getHeader()!=null) {
+				 bulkMessage.setSubject(templateDoc.getHeader());
+				}
 			}
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
@@ -191,7 +194,6 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setStatus(JOB_STATUS.CREATED.toString());
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
-System.out.println("docs :"+JsonUtil.toJson(docs));
 		registerJob(// Create batch Job to pass
 				JobTaskModel.newBatchJob()
 						// Set Unique Job Id
@@ -246,6 +248,7 @@ System.out.println("docs :"+JsonUtil.toJson(docs));
 			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
 				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
+				doc.setSubject(bulkMessage.getSubject());
 			}
 			doc.setMessage(bulkMsg.getMessage());
 			doc.setHsm(bulkMsg.getHsm());
@@ -322,6 +325,7 @@ System.out.println("docs :"+JsonUtil.toJson(docs));
 			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
 				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
+				doc.setSubject(bulkMessage.getSubject());
 				
 			}
 			doc.setMessage(bulkMessage.getMessage());
@@ -750,6 +754,7 @@ System.out.println("docs :"+JsonUtil.toJson(docs));
 			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
 				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
+				doc.setSubject(bulkMessage.getSubject());
 			}
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
