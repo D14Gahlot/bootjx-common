@@ -1,6 +1,7 @@
 package com.boot.jx.utils;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Pattern;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,12 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CryptoUtil;
 import com.boot.utils.Random;
+import com.boot.utils.StringUtils;
 import com.boot.utils.UniqueID;
 
 public class PostManUtil {
+	public static final String SUBJECT_CLEANER_STR = "^([\\[\\(] *)?(?i)(RE?S?|REPLY|FYI|RIF|I|FS|VB|RV|ENC|ODP|PD|YNT|ILT|SV|VS|VL|AW|WG|ΑΠ|ΣΧΕΤ|ΠΡΘ|תגובה|הועבר|主题|转发|FWD|Forward?) *([-:;)\\]][ :;\\])-]*|$)|\\]+ *$";
+	public static final Pattern SUBJECT_CLEANER = Pattern.compile(SUBJECT_CLEANER_STR);
 
 	public static ResponseEntity<byte[]> download(CommonFile file) {
 		return ResponseEntity.ok().contentLength(file.getBody().length)
@@ -305,7 +309,8 @@ public class PostManUtil {
 	}
 
 	public static boolean IS_MULTI_THREAD(String channelType) {
-		if (PMConstants.CHANNEL_TYPE.EMAIL.equals(channelType)) {
+		if (ArgUtil.is(channelType, PMConstants.CHANNEL_TYPE.EMAIL, PMConstants.CHANNEL_TYPE.GMAIL,
+				PMConstants.CHANNEL_TYPE.OUTLOOK, PMConstants.CHANNEL_TYPE.IMAP)) {
 			return true;
 		}
 		return false;
@@ -313,6 +318,12 @@ public class PostManUtil {
 
 	public static boolean IS_SINGLE_THREAD(String channelType) {
 		return !IS_MULTI_THREAD(channelType);
+	}
+
+	public static String createTicketHash(IMessage inboxMessage) throws NoSuchAlgorithmException {
+		String subject = StringUtils.normalizeSpace(inboxMessage.getSubject().replaceFirst(SUBJECT_CLEANER_STR, ""));
+		String conatctid = PostManUtil.CONTACT_ID(inboxMessage.contact());
+		return CryptoUtil.getMD5Hash(conatctid + "-" + StringUtils.trim(subject));
 	}
 
 }

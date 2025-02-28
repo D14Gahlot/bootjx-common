@@ -84,7 +84,7 @@ public class ImapConnector extends AbstractConnector<ImapConfigDetails, ImapPlug
 				}
 			}
 
-			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) { 
+			if (!ArgUtil.is(outboxMessage.getReplyIdExt())) {
 				ChatMessageDTO lastMsg = chatSession.lastInBoundMsg();
 				if (ArgUtil.is(lastMsg) && ArgUtil.is(lastMsg.getMessageIdExt())) {
 					outboxMessage.setReplyIdExt(lastMsg.getMessageIdExt());
@@ -160,11 +160,7 @@ public class ImapConnector extends AbstractConnector<ImapConfigDetails, ImapPlug
 		if (conversationId.exists()) {
 			inboxMessage.session().setTicketHash(conversationId.asString());
 		} else if (ArgUtil.is(inboxMessage.getSubject())) {
-			String subject = StringUtils
-					.normalizeSpace(inboxMessage.getSubject().replaceFirst(EmailConnector.SUBJECT_CLEANER_STR, ""));
-			String conatctid = PostManUtil.CONTACT_ID(inboxMessage.contact());
-			subject = CryptoUtil.getMD5Hash(conatctid + "-" + StringUtils.trim(subject));
-			inboxMessage.session().setTicketHash(subject);
+			inboxMessage.session().setTicketHash(PostManUtil.createTicketHash(inboxMessage));
 		}
 
 		inboxMessage.setAttachments(inbound.getAttachments());
