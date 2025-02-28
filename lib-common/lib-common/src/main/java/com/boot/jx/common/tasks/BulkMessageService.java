@@ -322,6 +322,7 @@ System.out.println("docs :"+JsonUtil.toJson(docs));
 			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
 				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
+				
 			}
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
@@ -674,6 +675,8 @@ System.out.println("docs :"+JsonUtil.toJson(docs));
 			bulkMessage.contact().setLane(bulkDoc.getLane());
 			bulkMessage.contact().setContactId(bulkDoc.getChannelId());
 			bulkMessage.contact().setContactType(bulkDoc.getContactType());
+			ChannelConfig channelConfig = enviroment.config().channel(bulkDoc.getChannelId());
+			bulkMessage.contact().setChannelType(channelConfig.getChannelType());
 			bulkMessage.setCampaignTitle(bulkDoc.getCampaignTitle());
 			if (ArgUtil.is(bulkDoc.getGroupId()) || ArgUtil.is(bulkDoc.getGroups())) {
 				bulkMessage.setGroupId(bulkDoc.getGroupId());
