@@ -165,6 +165,7 @@ public class ImapConnector extends AbstractConnector<ImapConfigDetails, ImapPlug
 
 		inboxMessage.setAttachments(inbound.getAttachments());
 		inboxMessage.setReferral(inbound.getReferral());
+		inboxMessage.setForm(inbound.getForm());
 
 		return inboxMessage;
 	}
