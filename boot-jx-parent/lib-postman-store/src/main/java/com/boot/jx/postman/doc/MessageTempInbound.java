@@ -2,6 +2,7 @@ package com.boot.jx.postman.doc;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public class MessageTempInbound extends TimeStampDoc implements Serializable {
 	private Map<String, Object> data;
 	private List<Attachment> attachments = null;
 	private MessageReferral referral;
+	protected Map<String, Object> form = new HashMap<String, Object>();
 
 	private List<Object> logs;
 
@@ -87,6 +89,14 @@ public class MessageTempInbound extends TimeStampDoc implements Serializable {
 
 	public void setReferral(MessageReferral referral) {
 		this.referral = referral;
+	}
+
+	public Map<String, Object> getForm() {
+		return form;
+	}
+
+	public void setForm(Map<String, Object> form) {
+		this.form = form;
 	}
 
 }

@@ -285,6 +285,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 
 		inboxMessage.setAttachments(inbound.getAttachments());
 		inboxMessage.setReferral(inbound.getReferral());
+		inboxMessage.setForm(inbound.getForm());
 
 		return inboxMessage;
 	}

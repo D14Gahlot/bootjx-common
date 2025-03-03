@@ -294,6 +294,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 		inboxMessage.setAttachments(inbound.getAttachments());
 		inboxMessage.setReferral(inbound.getReferral());
+		inboxMessage.setForm(inbound.getForm());
 
 		return inboxMessage;
 	}
