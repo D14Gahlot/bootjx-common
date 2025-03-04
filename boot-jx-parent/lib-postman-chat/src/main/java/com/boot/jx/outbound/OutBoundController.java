@@ -23,15 +23,15 @@ public class OutBoundController {
 	@Autowired
 	private CommonServiceClient commonServiceClient;
 
-	@RequestMapping(value = "/chrono/session-event-timer/api/v1/message/status", method = RequestMethod.GET)
-	public SessionBoundEvent publishSessionBoundEventMessage(Model model, HttpServletRequest request,
+	@RequestMapping(value = "/chrono/session-event-timer/api/v1/message/status", method = RequestMethod.POST)
+	public SessionBoundEvent publishSessionBoundEventMessageMock(Model model, HttpServletRequest request,
 			@RequestBody SessionBoundEvent event) throws InterruptedException {
 		commonServiceClient.publishSessionBoundEvent(event);
 		return event;
 	}
 
-	@RequestMapping(value = "/chrono/session-event-timer/api/v1/message/in-out", method = RequestMethod.GET)
-	public SessionBoundEvent publishSessionBoundEventStatus(Model model, HttpServletRequest request,
+	@RequestMapping(value = "/chrono/session-event-timer/api/v1/message/in-out", method = RequestMethod.POST)
+	public SessionBoundEvent publishSessionBoundEventStatusMock(Model model, HttpServletRequest request,
 			@RequestBody SessionBoundEvent event) throws InterruptedException {
 		commonServiceClient.publishSessionBoundEvent(event);
 		return event;
