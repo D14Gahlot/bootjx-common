@@ -1180,11 +1180,19 @@ public class AccountDashBoardManager {
 		}
 
 		if (ArgUtil.is(offset)) {
+			try {
 			String hrStr = offset.substring(offset.indexOf('+') + 1);
 			String[] hrMin = hrStr.split(":");
-			int hr = Integer.parseInt(hrMin[0]);
-			int min = Integer.parseInt(hrMin[1]);
-			offsettimestamp = hr * DateUtil.ONE_HR + min * DateUtil.MIN;
+			if(hrMin!=null && hrMin.length>1) {
+				int hr = Integer.parseInt(hrMin[0]);
+				int min = Integer.parseInt(hrMin[1]);
+			    offsettimestamp = hr * DateUtil.ONE_HR + min * DateUtil.MIN;
+			}
+			}catch (Exception e) {
+				e.printStackTrace();
+	            // Handle the case where parsing fails
+	            System.err.println("Invalid timezone offset format: " + offset+"\t error"+e);
+	        }
 		}
 		return offsettimestamp;
 	}
