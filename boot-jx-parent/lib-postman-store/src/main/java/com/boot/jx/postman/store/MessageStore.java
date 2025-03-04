@@ -400,8 +400,14 @@ public class MessageStore extends CommonMongoStore<MessageStore> {
 	public List<MessageDoc> findByBulkSessionIdWithRplyCount(String bulkSessionId, ContactType contactType) {
 		Query query2 = new Query();
 		query2.addCriteria(Criteria.where("type").is('I'));
-		query2.addCriteria(Criteria.where("replyTo.bulkSessionId").is(bulkSessionId))
-				.with(new Sort(Direction.ASC, "timestamp"));
+		//query2.addCriteria(Criteria.where("replyTo.bulkSessionId").is(bulkSessionId))
+		query2.addCriteria(new Criteria().orOperator(
+			    Criteria.where("replyTo.bulkSessionId").is(bulkSessionId),
+			    Criteria.where("referral.bulkSessionId").is(bulkSessionId)
+			));
+		query2.with(new Sort(Direction.ASC, "timestamp"));
+		
+		
 		List<MessageDoc> messages = mongoTemplate.find(query2, MessageDoc.class, getCollectionName(contactType));
 		return messages;
 	}
