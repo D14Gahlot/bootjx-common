@@ -1162,7 +1162,7 @@ public class AccountDashBoardManager {
 		String lane = "";
 		if (ArgUtil.is(contactid)) {
 			String[] contactids = contactid.split("_");
-			if (contactids != null && contactids[1] != null) {
+			if (contactids != null && contactids.length>1 && contactids[1] != null) {
 				lane = contactids[1];
 			}
 		}
