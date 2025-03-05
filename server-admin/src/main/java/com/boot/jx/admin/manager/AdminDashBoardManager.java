@@ -1867,11 +1867,11 @@ public class AdminDashBoardManager {
 			String[] contactids = contactid.split("_");
 			if (contactids != null && contactids.length > 1) {
 				lane = contactids[1];
-			}
-		}else if(ArgUtil.is(contactid)) {
-			String[] contactids = contactid.split(":");
-			if (contactids != null && contactids.length > 1) {
-				lane = contactids[1];
+			}else {
+				contactids = contactid.split(":");
+				if (contactids != null && contactids.length > 1) {
+					lane = contactids[1];
+				}
 			}
 		}
 		return lane;
