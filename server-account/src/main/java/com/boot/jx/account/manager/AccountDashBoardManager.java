@@ -1538,10 +1538,14 @@ public class AccountDashBoardManager {
 	        String month = CommonUtils.monthNameByTimestamp(timestamp);
 	        long startTStamp = CommonUtils.startTStampForaMonthV1(timestamp);
 	        long endTStamp = CommonUtils.endTStampForaMonthV1(timestamp);
+	        int yearValue = CommonUtils.getYearFromTimestamp(timestamp);
+	        int monthValue =CommonUtils.getMonthFromTimestamp(timestamp);		
+	        
 	        if(ArgUtil.is(chdoc.getWabaId())) {
 	        String wabaId =chdoc.getWabaId();
 	        String number =chdoc.getNumber();
 	        String tnt=chdoc.getTenant();
+	        String currency = chdoc.getCurrency();
 	        
 	        WabaDateWiseBalanceDto dto = new WabaDateWiseBalanceDto();
 	        Integer totalConvCnt=0;
@@ -1554,8 +1558,8 @@ public class AccountDashBoardManager {
 	            Aggregation.match(Criteria.where("wabaId").is(wabaId)
 	            	.and("number").is(number)
 	            	.and("tenant").is(tnt)
-	                .and("start").gte(startTStamp)
-	                .and("end").lte(endTStamp)),
+	            	.and("date.monthOfYearLocal").is(monthValue)
+	        	    .and("date.yearLocal").is(yearValue)),
 
 	            // $group stage to group by conversation_type and conversation_category
 	            Aggregation.group("conversation_type", "conversation_category")
@@ -1633,13 +1637,14 @@ public class AccountDashBoardManager {
 			dto.setDateTimeStamp(timestamp);
 			dto.setWabaId(wabaId);
 			dto.setNumber(number);
+			dto.setCurrencyCode(currency);
 			WabaAccountBalanceDoc waAccBal=null;
 			double deposiTamt=0.0;
 			if(ArgUtil.is(wabaId)) {
 			 waAccBal=getAccountBalance(wabaId,tnt,number);
 			if(ArgUtil.is(waAccBal)) {
 				deposiTamt=waAccBal.getDepositAmt();
-				dto.setCurrencyCode(waAccBal.getCurrencyCode());
+				dto.setCurrencyCode(ArgUtil.parseAsString(dto.getCurrencyCode(), waAccBal.getCurrencyCode()));
 				dto.setId(waAccBal.getId());
 				dto.setDepostAmt(deposiTamt);
 				}
@@ -1696,7 +1701,7 @@ public class AccountDashBoardManager {
 	 List<WabaAnalyticsDoc> cofigDocLst =new ArrayList<>();
 		Query query = new Query();
 		query.addCriteria(Criteria.where("tenant").is(domain));
-		query.fields().include("tenant").include("number").include("wabaId").include("contactType").include("isDisabled");
+		query.fields().include("tenant").include("number").include("wabaId").include("contactType").include("isDisabled").include("currency");
 
 		Aggregation aggregation = Aggregation.newAggregation(
 				Aggregation.match(Criteria.where("tenant").is(domain)), // Add filter for tenant
@@ -1712,6 +1717,7 @@ public class AccountDashBoardManager {
 				wadoc.setTenant(doc.getString("tenant"));
 				wadoc.setWabaId(doc.getString("wabaId"));
 				wadoc.setNumber(doc.getString("number"));
+				wadoc.setCurrency(doc.getString("currency"));
 				cofigDocLst.add(wadoc);
 			}
 		return cofigDocLst;
