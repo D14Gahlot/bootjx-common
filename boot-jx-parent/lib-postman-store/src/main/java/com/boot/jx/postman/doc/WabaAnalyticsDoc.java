@@ -1,5 +1,6 @@
 package com.boot.jx.postman.doc;
 import java.io.Serializable;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -32,6 +33,8 @@ implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {
 	String conversation_category;
 	double cost;
 	String tenant;
+	String currency;
+	Map<String,Object> date ;
 	public String getId() {
 		return id;
 	}
@@ -103,6 +106,18 @@ implements Serializable, SimpleDocument, JsonIgnoreUnknown, JsonIgnoreNull {
 	}
 	public void setTenant(String tenant) {
 		this.tenant = tenant;
+	}
+	public String getCurrency() {
+		return currency;
+	}
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+	public Map<String, Object> getDate() {
+		return date;
+	}
+	public void setDate(Map<String, Object> date) {
+		this.date = date;
 	}
 	
 	

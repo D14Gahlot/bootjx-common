@@ -17,14 +17,10 @@ public final class CommonUtils {
 
 	
 public static String monthNameByTimestamp(long timestamp) {
-		
         String monthYear = null;
-        System.out.println("monthYear :"+monthYear);
-        
         // Convert the Unix timestamp to LocalDateTime
         LocalDateTime dateTime1 = LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault());
-
-        // Get the month name
+      // Get the month name
         String month = dateTime1.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
 
         // Get the year
@@ -152,12 +148,39 @@ public static String monthNameByTimestamp(long timestamp) {
 		}
 		return timestamp;
 	 }
+	 
+	 
+	 public static int getYearFromTimestamp(long timestamp) {
+	        String monthYear = null;
+	        // Convert the Unix timestamp to LocalDateTime
+	        LocalDateTime dateTime1 = LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault());
+	      // Get the month name
+	        String month = dateTime1.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+	        // Get the year
+	        int year = dateTime1.getYear();
+	       return year;
+		}
+	 
+	 
+	 public static int getMonthFromTimestamp(long timestamp) {
+	        String monthYear = null;
+	        // Convert the Unix timestamp to LocalDateTime
+	        LocalDateTime dateTime1 = LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault());
+	      // Get the month name
+	        String monthStr = dateTime1.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+	        // Get the year
+	        int month = dateTime1.getMonthValue();
+	       return month;
+		}
 
 
 	public static void main(String[] args)
 	{
 	
 		String dt ="05/23/1984";
-		//System.out.println("Date :"+getDate(dt)+"\t ts :"+getDateWithTS(dt));
+		long ts = 1733682600L;
+		System.out.println("Date :"+getYearFromTimestamp(ts)+"\t ts :"+getMonthFromTimestamp(ts));
 	}
 }
