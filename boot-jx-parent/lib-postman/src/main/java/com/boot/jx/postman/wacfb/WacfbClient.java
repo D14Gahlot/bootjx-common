@@ -1,10 +1,12 @@
 package com.boot.jx.postman.wacfb;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -396,7 +398,9 @@ public class WacfbClient implements ChannelClient {
 					TmplComponent bodyComponent = TmplComponent.createInstance().body();
 					for (Map<String, Object> bodyParameter : bodyParametersTemp) {
 						String path = (String) bodyParameter.get("path");
-						bodyComponent.parameter("text", model.pathEntry(path).asString());
+				        String[] pathParts = path.split("\\.");
+				        String variable = pathParts.length > 1 ? pathParts[1] : ""; 
+						bodyComponent.parameter("text", model.pathEntry("data." + variable).asString());
 					}
 					components.add(bodyComponent.build().map());
 				} else {
@@ -964,23 +968,22 @@ public class WacfbClient implements ChannelClient {
 				ApiResponseUtil.addError(((ApiHttpException) e));
 			throw e;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 
 	private static byte[] downloadFile(String fileUrl) throws IOException {
-		try (InputStream in = new URL(fileUrl).openStream(); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-			byte[] buffer = new byte[1024];
-			int bytesRead;
-			while ((bytesRead = in.read(buffer)) != -1) {
-				baos.write(buffer, 0, bytesRead);
-			}
-
-			return baos.toByteArray();
-		}
+				try (InputStream in = new URL(fileUrl).openStream(); ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+		           byte[] buffer = new byte[1024];
+					int bytesRead;
+					while ((bytesRead = in.read(buffer)) != -1) {
+						baos.write(buffer, 0, bytesRead);
+					}
+							return baos.toByteArray();
+				}
 	}
+	
 
 	private static String determineFileType(String fileUrl) throws IOException {
 		URLConnection connection = new URL(fileUrl).openConnection();

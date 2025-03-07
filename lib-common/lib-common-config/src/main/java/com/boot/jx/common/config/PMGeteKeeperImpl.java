@@ -94,8 +94,9 @@ public class PMGeteKeeperImpl implements PMGateKeeper {
 	public boolean canSendTemplateMedia(OutboxMessage outboxMessage) {
 	
 
-       Boolean defaultValue = Boolean.TRUE.equals(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE.getDefaultValue());
-       if (!environment.featureEntry(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE).asBoolean(defaultValue)) {
+     
+		Boolean defaultValue = Boolean.TRUE.equals(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE.getDefaultValue());
+		if (!environment.featureEntry(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE).asBoolean(defaultValue)) {
 
 			outboxMessage.logs().add("Templated Media Restricted");
 			outboxMessage.status(Status.BLCKD);
