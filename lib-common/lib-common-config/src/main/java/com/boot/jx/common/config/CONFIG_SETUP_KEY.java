@@ -1,7 +1,5 @@
 package com.boot.jx.common.config;
 
-import java.util.Map;
-
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
@@ -258,6 +256,10 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 
 	POSTMAN_DEBUG_CONTACT(new ConfigMeta("Debugging is enabled for Contact", "postman.debug.contact")
 			.group(ConfigConstants.GROUP_DEV).hidden()),
+
+	SCRIPTUS_VERSION(new ConfigMeta().title("Scriptus Version").path("props.scriptus_version").options(
+			new ConfigOption("v0").label("Version 0"), new ConfigOption("v1").label("Version 1"),
+			new ConfigOption("v2").label("Version 2")))
 
 	// Ends here
 	;

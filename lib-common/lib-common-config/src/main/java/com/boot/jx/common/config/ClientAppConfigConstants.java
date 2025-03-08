@@ -19,7 +19,8 @@ public class ClientAppConfigConstants {
 	public static final ConfigMeta[] APP_CONFIGS_COMMON = new ConfigMeta[] {
 			CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT.getConfigMeta(),
 			CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL.getConfigMeta(),
-			CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE.getConfigMeta() };
+			CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE.getConfigMeta(),
+			CONFIG_SETUP_KEY.SCRIPTUS_VERSION.getConfigMeta() };
 
 	static {
 
