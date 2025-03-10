@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,9 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMConstants.PROPERTIES;
+import com.boot.jx.postman.PMEnvironment;
+import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.model.Attachment;
@@ -56,6 +60,7 @@ import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.Constants;
+import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonPath;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.StringUtils;
@@ -71,6 +76,9 @@ public class WacfbClient implements ChannelClient {
 	@Autowired
 	private RestService restService;
 
+	@Autowired
+	PMEnvironment pmEnvironment;
+
 	public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
 		WACFBConfigDetails config = channelConfig.getWacfb();
 		String verifyToken = ArgUtil.nonEmpty(config.getMasterAppVerifyToken(), config.getVerifyToken());
@@ -78,6 +86,20 @@ public class WacfbClient implements ChannelClient {
 			return challenge;
 		} else {
 			return "Wrong Token";
+		}
+	}
+
+	private String createShortUrl(TmplElement button, OutboxMessage outboxMessage) {
+		PMConfigurationObject trackMessage = pmEnvironment.local().keyEntry(PROPERTIES.POSTMAN_TRACK_MESSAGE);
+		if (!trackMessage.exists() && trackMessage.asBoolean()) {
+			return button.getUrl();
+		}
+		PMConfigurationObject trackMessageUrl = pmEnvironment.config().keyEntry(PROPERTIES.POSTMAN_TRACK_MESSAGE_URL);
+		try {
+			return String.format("%s/nexus/link/short/wa/%s/%s", trackMessageUrl.asString(),
+					outboxMessage.getMessageId(), CryptoUtil.getMD5Hash(button.getUrl()));
+		} catch (NoSuchAlgorithmException e) {
+			return button.getUrl();
 		}
 	}
 
@@ -122,7 +144,7 @@ public class WacfbClient implements ChannelClient {
 						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
-								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
+								+ "\n" + createShortUrl(b) + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
 						urlCount++;
 						noButtons.add(b);
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
@@ -734,7 +756,7 @@ public class WacfbClient implements ChannelClient {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
 					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
-							.put("url", button.getUrl()).toMap());
+							.put("url", createShortUrl(button, outboxMessage)).toMap());
 		} else if ("location_request_message".equalsIgnoreCase(type)) {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
 		} else if ("address_message".equalsIgnoreCase(type)) {

@@ -43,10 +43,12 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			.desc("This channel will be connected your Page").optionsSource("getx:/api/options/channels")
 			.optionsKey("id").optionsLabel("name").filter("contactType", ContactType.WEBSITE)),
 
-	POSTMAN_TRACK_MESSAGE(new ConfigMeta("Message Tracker", "postman.track.message").superKey("postman.track.message")
-			.desc("Use Mehery's Tracker to track status for Channels (with no Status support)").optionsOnOff()),
+	POSTMAN_TRACK_MESSAGE(
+			new ConfigMeta("Message Tracker", PROPERTIES.POSTMAN_TRACK_MESSAGE).superKey("postman.track.message")
+					.desc("Use Mehery's Tracker to track status for Channels (with no Status support)").optionsOnOff()),
 
-	POSTMAN_TRACK_MESSAGE_URL(new ConfigMeta("Message Tracker", "postman.track.message.url").desc("Tracker URL")),
+	POSTMAN_TRACK_MESSAGE_URL(
+			new ConfigMeta("Message Tracker", PROPERTIES.POSTMAN_TRACK_MESSAGE_URL).desc("Tracker URL")),
 
 	POSTMAN_AGENT_2FA_ENABLED(new ConfigMeta("Enable 2FA Login", PROPERTIES.POSTMAN_AGENT_2FA_ENABLED)
 			.superKey(PROPERTIES.POSTMAN_AGENT_2FA_ENABLED).desc("You will need OA app").optionsOnOff()),
@@ -261,9 +263,6 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			.options(new ConfigOption("v0").label("Version 0"), new ConfigOption("v1").label("Version 1"),
 					new ConfigOption("v2").label("Version 2"))
 			.group(ConfigConstants.GROUP_DEV).hidden()),
-
-	SETUP_CLICK_PROXY_URL(
-			new ConfigMeta("Click Proxy URL", "setup.click.proxy.url").group(ConfigConstants.GROUP_DEV).hidden())
 
 	// Ends here
 	;

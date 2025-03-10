@@ -180,14 +180,6 @@ public interface PMConfiguration extends Serializable {
 			return this.keyEntry(entry.getKey());
 		}
 
-		public PMConfigurationObject featureEntry(String key) {
-			return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
-		}
-
-		public PMConfigurationObject featureEntry(EntryMeta entry) {
-			return this.featureEntry(entry.getKey());
-		}
-
 		public PMConfigurationObject getPref(String key, Object value) {
 			return prefs().getOrDefault(key, new PMConfigurationObject(key, value));
 		}
@@ -210,6 +202,14 @@ public interface PMConfiguration extends Serializable {
 				}
 			}
 			return this;
+		}
+
+		public PMConfigurationObject featureEntry(String key) {
+			return features().getOrDefault(key, new PMConfigurationObject(key, null));
+		}
+
+		public PMConfigurationObject featureEntry(EntryMeta entry) {
+			return this.featureEntry(entry.getKey());
 		}
 
 		public PMConfigurationObject getFeature(String key, Object value) {
