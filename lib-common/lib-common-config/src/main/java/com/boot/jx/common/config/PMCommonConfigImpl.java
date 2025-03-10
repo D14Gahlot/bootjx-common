@@ -144,7 +144,12 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 	private SafeKeyHashMap<Object> setupConfigAttributes() {
 		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
 		for (ConfigMeta config : ConfigConstants.SETUP_CONFIG_LIST) {
-			setup.put(config.getKey().toUpperCase(), pmEnvironment.keyEntry(config.getKey()).getValue());
+			if (ArgUtil.is(config.getKey())) {
+				PMConfigurationObject val = pmEnvironment.keyEntry(config.getKey());
+				if (val.exists()) {
+					setup.put(config.getKey().toUpperCase(), val.getValue());
+				}
+			}
 		}
 
 		// Default Web Channel
