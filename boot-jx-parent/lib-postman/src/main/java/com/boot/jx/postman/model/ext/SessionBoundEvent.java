@@ -47,6 +47,7 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 	protected List<Object> trace;
 
 	public String sessionId;
+	public List<String> sessionIds;
 	public String messageId;
 	public String eventId;
 	private String checksum;
@@ -214,7 +215,7 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 		this.sessionId = message.getSessionId();
 		this.setSession(message.session());
 		this.contact().copyFrom(message.contact());
-		this.timeout =  message.getTimeout();
+		this.timeout = message.getTimeout();
 		message.session();
 	}
 
@@ -234,5 +235,12 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 		this.timeout = timeout;
 	}
 
+	public List<String> getSessionIds() {
+		return sessionIds;
+	}
+
+	public void setSessionIds(List<String> sessionIds) {
+		this.sessionIds = sessionIds;
+	}
 
 }

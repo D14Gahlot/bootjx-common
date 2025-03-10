@@ -146,14 +146,20 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	public IMessageExtended toSessionMessage(ChatSessionDoc session) {
 		ChatContactDoc contact = getContact(session.getContactId());
 		InboxMessage inboxMessage = new InboxMessage();
-		inboxMessage.contact().copyFrom(contact);
-		inboxMessage.contact().setContactType(contact.getContactType());
-		inboxMessage.contact().setChannelType(contact.getChannelType());
-		inboxMessage.contact().setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
-		inboxMessage.setFrom(contact.getCsid());
-		inboxMessage.setFromName(contact.getName());
-		inboxMessage.setSessionId(contact.getSessionId());
-		inboxMessage.contact().setContactId(contact.getContactId());
+
+		if (ArgUtil.is(contact)) {
+			inboxMessage.contact().copyFrom(contact);
+			inboxMessage.contact().setContactType(contact.getContactType());
+			inboxMessage.contact().setChannelType(contact.getChannelType());
+			inboxMessage.contact().setLane(ArgUtil.nonEmpty(session.getLane(), contact.getLane()));
+			inboxMessage.setFrom(contact.getCsid());
+			inboxMessage.setFromName(contact.getName());
+			inboxMessage.setSessionId(contact.getSessionId());
+			inboxMessage.contact().setContactId(contact.getContactId());
+		} else {
+			ApiResponseUtil.addWarning("contact[" + session.getContactId() + "] does not exists from session["
+					+ session.getSessionId() + "]");
+		}
 
 		inboxMessage.session().setQueue(session.getAssignedToQueue());
 		inboxMessage.session().setMode(session.getMode());
@@ -422,14 +428,14 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 	public void assignToAgent(ChatSessionDoc chatSessionDoc, String agentDept, String agentCode) {
 
 		ChatSessionQuery builder = new ChatSessionQuery(chatSessionDoc);
-		
+
 		if (!ArgUtil.areEqual(chatSessionDoc.getAssignedToDept(), agentDept)) {
-			//chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
+			// chatSessionDoc.setAssignedDeptStamp(System.currentTimeMillis());
 			builder.setAssignedDeptStamp(System.currentTimeMillis());
 		}
 		chatSessionDoc.setMode(PMConstants.CHAT_MODE.AGENT.toString());
 		chatSessionDoc.setAssignedToDept(agentDept);
-		//chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
+		// chatSessionDoc.setAssignedAgentStamp(System.currentTimeMillis());
 		builder.setAssignedAgentStamp(System.currentTimeMillis());
 		chatSessionDoc.setAssignedToAgent(agentCode);
 		// chatSessionDoc.setAssignedToQueue(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
@@ -437,13 +443,14 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			chatSessionDoc.setAgentSessionStamp(chatSessionDoc.getAssignedAgentStamp());
 		}
 
-		//ChatSessionQuery builder = new ChatSessionQuery(chatSessionDoc.getSessionId());
+		// ChatSessionQuery builder = new
+		// ChatSessionQuery(chatSessionDoc.getSessionId());
 		// builder.set("mode", chatSessionDoc.getMode());
 		builder.set("assignedToQueue", chatSessionDoc.getAssignedToQueue());
 		builder.set("assignedToDept", chatSessionDoc.getAssignedToDept());
-		//builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
+		// builder.set("assignedDeptStamp", chatSessionDoc.getAssignedDeptStamp());
 		builder.set("assignedToAgent", chatSessionDoc.getAssignedToAgent());
-		//builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
+		// builder.set("assignedAgentStamp", chatSessionDoc.getAssignedAgentStamp());
 		builder.set("agentSessionStamp", chatSessionDoc.getAgentSessionStamp());
 		updateFirst(builder);
 	}
@@ -659,7 +666,8 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			fromStamp = DateUtil.todayStartTime();
 		}
 
-		//primaryCriteria = primaryCriteria.and("assignedAgentStamp").gt(fromStamp).lt(toStamp);
+		// primaryCriteria =
+		// primaryCriteria.and("assignedAgentStamp").gt(fromStamp).lt(toStamp);
 		primaryCriteria = primaryCriteria.and("agentSessionStamp").gt(fromStamp).lt(toStamp);
 		criterias.add(primaryCriteria);
 
