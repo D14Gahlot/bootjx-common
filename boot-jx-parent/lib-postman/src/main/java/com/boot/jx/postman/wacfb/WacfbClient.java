@@ -144,7 +144,8 @@ public class WacfbClient implements ChannelClient {
 						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
-								+ "\n" + createShortUrl(b) + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
+								+ "\n" + createShortUrl(b, outboxMessage) + "\n"
+								+ StringUtils.wrap(" _", b.getDesc(), "_\n");
 						urlCount++;
 						noButtons.add(b);
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
