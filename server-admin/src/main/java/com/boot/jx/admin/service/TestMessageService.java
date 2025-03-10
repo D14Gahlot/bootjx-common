@@ -84,7 +84,7 @@ public class TestMessageService {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -145,7 +145,7 @@ public class TestMessageService {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();

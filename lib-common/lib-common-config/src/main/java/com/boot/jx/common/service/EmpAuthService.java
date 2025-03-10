@@ -178,14 +178,14 @@ public class EmpAuthService {
 
 		postManClient.send(new MessageBox().push(new Email().to(agent.getAgent_email()).template("agent-reset-pass")
 				.put("otp", agent.getAgent_otp()).put("username", agent.getAgent_code())
-				.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
-				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
-				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
-				.put("serviceDomain", pmEnvironment.keyEntry("mry.prop.service.domain").asString())
+				.put("logo", pmEnvironment.config().prefsEntry("mry.prop.logo.bg-x-icon").asString())
+				.put("website", pmEnvironment.config().prefsEntry("mry.prop.service.website").asString())
+				.put("service", pmEnvironment.config().prefsEntry("mry.prop.service.name").asString())
+				.put("serviceDomain", pmEnvironment.config().prefsEntry("mry.prop.service.domain").asString())
 				.put("link", String.format(
 						"https://%s.%s/front/auth/resetpass?page=setpass&username=%s&token=%s&stamp=0&domain=%s",
-						domain, pmEnvironment.keyEntry("mry.prop.service.domain").asString(), agent.getAgent_code(),
-						agent.getAgent_otp(), domain))
+						domain, pmEnvironment.config().prefsEntry("mry.prop.service.domain").asString(),
+						agent.getAgent_code(), agent.getAgent_otp(), domain))
 				.put("tnt", domain).put("panel", app).put("contactName", agent.getAgent_name())));
 
 		return true;
@@ -324,13 +324,14 @@ public class EmpAuthService {
 
 	public boolean sendOTP(UserAuthToken loginToken) {
 
-		PMConfigurationObject auth2Fa = pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.AUTH_2FA);
+		PMConfigurationObject auth2Fa = pmEnvironment.config().featureEntry(CONFIG_FEATURES_KEY.AUTH_2FA);
 
 		if (!auth2Fa.exists() || !auth2Fa.asBoolean()) {
 			return false;
 		}
 
-		PMConfigurationObject mfaEnabled = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_ENABLED);
+		PMConfigurationObject mfaEnabled = pmEnvironment.config()
+				.prefsEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_ENABLED);
 
 		if (!mfaEnabled.exists() || !mfaEnabled.asBoolean()) {
 			return false;
@@ -338,7 +339,8 @@ public class EmpAuthService {
 
 		OTPDetails otpDetails = OTPUtils.genrateBasicOTP(loginToken.getDomainUser(), loginToken.getApp());
 
-		PMConfigurationObject otpChannel = pmEnvironment.keyEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_CHANNEL);
+		PMConfigurationObject otpChannel = pmEnvironment.config()
+				.prefsEntry(PMConstants.PROPERTIES.POSTMAN_AGENT_2FA_CHANNEL);
 		// .asString("oa:mehery");
 
 		if (!otpChannel.exists()) {

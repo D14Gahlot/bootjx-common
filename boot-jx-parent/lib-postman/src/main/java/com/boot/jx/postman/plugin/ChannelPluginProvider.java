@@ -171,7 +171,7 @@ public class ChannelPluginProvider {
 			list.add(new ConfigMeta().key("inboundQueue").title("Default Queue").optional()
 					.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").order(100));
 
-			String serviceDomain = pmEnvironment.keyEntry("mry.prop.service.domain").asString();
+			String serviceDomain = pmEnvironment.config().prefsEntry("mry.prop.service.domain").asString();
 			String clientDomain = AppContextUtil.getTenant();
 			list.add(new ConfigMeta().key("webhookUrl").title("Webhook URL").hidden()
 					.defaultValue(String.format("https://%s.%s/postman", clientDomain, serviceDomain)));

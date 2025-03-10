@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.boot.jx.AppConfig;
 import com.boot.jx.AppConfigPackage.AppCommonConfig;
-import com.boot.jx.AppContextUtil;
 import com.boot.jx.dict.ContactType;
 import com.boot.jx.logger.LoggerService;
 import com.boot.jx.model.AuditCreateEntity.AuditIdentifier;
@@ -22,7 +21,6 @@ import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.jx.scope.tnt.Tenants;
 import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.model.TimeModels.TimeStampSupportedModel;
@@ -452,51 +450,6 @@ public class PMEnvironment {
 	@Autowired
 	private AppConfig appConfig;
 
-	public PMConfigurationObject keyEntry(String key) {
-		PMConfigurationObject configObject = this.local().prefs().get(key);
-
-		String tnt = AppContextUtil.getTenant();
-		if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
-			PMConfigurationObject sharedConfigObject = this.shared().prefs().get(key);
-			if (ArgUtil.is(sharedConfigObject)) {
-				return sharedConfigObject;
-			}
-		}
-
-		if (ArgUtil.isEmpty(configObject)) {
-			String value = appConfig.prop(key);
-			configObject = new PMConfigurationObject(key, value);
-			// this.config().map().put(key, configObject);
-		}
-
-		return configObject;
-	}
-
-	public PMConfigurationObject keyEntry(EntryMeta entryMeta) {
-		return keyEntry(entryMeta.getKey());
-	}
-
-	public PMConfigurationObject featureEntry(String key) {
-		PMConfigurationObject configObject = this.local().features().get(key);
-		String tnt = AppContextUtil.getTenant();
-		if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
-			PMConfigurationObject sharedConfigObject = this.shared().features().get(key);
-			if (ArgUtil.is(sharedConfigObject)) {
-				return sharedConfigObject;
-			}
-		}
-		if (ArgUtil.isEmpty(configObject)) {
-			String value = appConfig.prop(key);
-			configObject = new PMConfigurationObject(key, value);
-			// this.config().map().put(key, configObject);
-		}
-		return configObject;
-	}
-
-	public PMConfigurationObject featureEntry(EntryMeta entryMeta) {
-		return featureEntry(entryMeta.getKey());
-	}
-
 	public void addChannel(ChannelConfig config) {
 		if (ArgUtil.is(provider)) {
 			provider.addChannel(config);
@@ -583,12 +536,20 @@ public class PMEnvironment {
 		boolean canSendTemplateMedia(OutboxMessage outboxMessage);
 	}
 
+	public interface MessageProcessor {
+		OutboxMessage beforeSend(OutboxMessage outboxMessage);
+	}
+
 	@Autowired(required = false)
 	private PMCommonConfig pmCommonConfig;
 	@Autowired(required = false)
 	private PMDomainConfig pmDomainConfig;
 	@Autowired(required = false)
 	private PMClientConfig pmClientConfig;
+
+	@Autowired
+	@Lazy // Delays initialization to break circular dependency
+	private MessageProcessor messageProcessor;
 
 	@Autowired
 	@Lazy // Delays initialization to break circular dependency
@@ -608,5 +569,9 @@ public class PMEnvironment {
 
 	public PMGateKeeper gateKeeper() {
 		return pmGateKeeper;
+	}
+
+	public MessageProcessor messageProcessor() {
+		return messageProcessor;
 	}
 }

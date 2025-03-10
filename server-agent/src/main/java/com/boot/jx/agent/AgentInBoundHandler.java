@@ -77,7 +77,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		if (talk2agent.exists()) {
 			return talk2agent;
 		}
-		return pmEnvironment.keyEntry(KEY);
+		return pmEnvironment.config().prefsEntry(KEY);
 	}
 
 	private void onAssign(ChatSessionDoc session, InBoundEvent assignEvent) {
@@ -111,8 +111,8 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 
 				boolean isWorkingDay = false;
 
-				PMConfigurationObject agentSchedule = pmEnvironment
-						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_SCHEDULE);
+				PMConfigurationObject agentSchedule = pmEnvironment.config()
+						.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_SCHEDULE);
 
 				MapModel sceduleMap = commonServiceClient.getScheduleStatus(agentSchedule.asString());
 				if (sceduleMap.isEmpty() || sceduleMap.pathEntry("flags.isActive").asBoolean()) {

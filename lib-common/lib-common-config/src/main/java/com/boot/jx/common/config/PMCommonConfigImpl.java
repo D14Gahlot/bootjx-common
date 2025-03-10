@@ -93,23 +93,23 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 	private PMEnvironment pmEnvironment;
 
 	public String cdnUrl(String cdnUrl) {
-		return pmEnvironment.keyEntry("mry.cdn.url").asString(cdnUrl);
+		return pmEnvironment.config().prefsEntry("mry.cdn.url").asString(cdnUrl);
 	}
 
 	public String getCdnServer() {
 
 		boolean isBeta = ArgUtil.parseAsBoolean(commonHttpRequest.get("postman.ui.beta"),
-				pmEnvironment.local().keyEntry("postman.ui.beta").asBoolean(Boolean.FALSE).booleanValue());
+				pmEnvironment.local().prefsEntry("postman.ui.beta").asBoolean(Boolean.FALSE).booleanValue());
 		if (isBeta) {
-			boolean betaEnabled = pmEnvironment.keyEntry("postman.ui.beta").asBoolean();
+			boolean betaEnabled = pmEnvironment.config().prefsEntry("postman.ui.beta").asBoolean();
 			if (betaEnabled) {
-				String betaCdn = pmEnvironment.keyEntry("mry.cdn.url.beta").asString();
+				String betaCdn = pmEnvironment.config().prefsEntry("mry.cdn.url.beta").asString();
 				if (ArgUtil.is(betaCdn)) {
 					return cdnBuilder.latest(betaCdn);
 				}
 			}
 		}
-		return cdnBuilder.latest(pmEnvironment.keyEntry("mry.cdn.url").asString(cdnUrl));
+		return cdnBuilder.latest(pmEnvironment.config().prefsEntry("mry.cdn.url").asString(cdnUrl));
 	}
 
 	public String getCdnServerDebug() {
@@ -127,7 +127,7 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 	public Map<String, Object> appConfigAttributes() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		for (Entry<String, String> entry : ConfigConstants.APP_CONFIG.entrySet()) {
-			map.put(entry.getValue(), pmEnvironment.keyEntry(entry.getKey()).asString());
+			map.put(entry.getValue(), pmEnvironment.config().prefsEntry(entry.getKey()).asString());
 		}
 		return map;
 	}
@@ -135,8 +135,8 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 	private SafeKeyHashMap<Object> featuresConfigAttributes() {
 		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
 		for (CONFIG_FEATURES_KEY config : CONFIG_FEATURES_KEY.values()) {
-			setup.put(config.name(),
-					ArgUtil.nonEmpty(pmEnvironment.featureEntry(config.getKey()).getValue(), config.getDefaultValue()));
+			setup.put(config.name(), ArgUtil.nonEmpty(pmEnvironment.config().featureEntry(config.getKey()).getValue(),
+					config.getDefaultValue()));
 		}
 		return setup;
 	}
@@ -145,7 +145,7 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 		SafeKeyHashMap<Object> setup = new SafeKeyHashMap<Object>();
 		for (ConfigMeta config : ConfigConstants.SETUP_CONFIG_LIST) {
 			if (ArgUtil.is(config.getKey())) {
-				PMConfigurationObject val = pmEnvironment.keyEntry(config.getKey());
+				PMConfigurationObject val = pmEnvironment.config().prefsEntry(config.getKey());
 				if (val.exists()) {
 					setup.put(config.getKey().toUpperCase(), val.getValue());
 				}
@@ -153,8 +153,8 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 		}
 
 		// Default Web Channel
-		PMConfigurationObject defaultWebChannel = pmEnvironment
-				.keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL);
+		PMConfigurationObject defaultWebChannel = pmEnvironment.config()
+				.prefsEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL);
 		ChannelConfig channelConfig = pmEnvironment.config()
 				.channel(defaultWebChannel.asString("web:" + getServiceServer()));
 		if (ArgUtil.is(channelConfig)) {
@@ -174,8 +174,8 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 
 	private Map<String, Object> commonAttributes() {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("AGENT_CHAT_INIT", pmEnvironment.keyEntry("postman.agent.chat.init").asBoolean());
-		map.put("CHAT_TAG_ENABLED", pmEnvironment.local().keyEntry("chat.tag.enabled").asBoolean());
+		map.put("AGENT_CHAT_INIT", pmEnvironment.config().prefsEntry("postman.agent.chat.init").asBoolean());
+		map.put("CHAT_TAG_ENABLED", pmEnvironment.local().prefsEntry("chat.tag.enabled").asBoolean());
 		map.put("chatIdleTimeout", pmDomainConfig.getChatIdleTimeout().asMillis());
 		map.put("agentSessionTimeout", chatClientConfig.getAgentSessionTimeout().toMillis());
 		map.put("chatSessionTimeout", TimeUtils.toMillis(chatClientConfig.getChatSessionTimeout()));
@@ -219,7 +219,8 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 		map.put("APP_CONTEXT", appConfig.getAppPrefix());
 		map.put("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 
-		map.put("POSTMAN_AGENT_SCHEME_COLOR", pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
+		map.put("POSTMAN_AGENT_SCHEME_COLOR",
+				pmEnvironment.config().prefsEntry("postman.agent.scheme.color").asString());
 		map.put("STAMP", System.currentTimeMillis());
 		map.put("APP_TITLE", appConfig.getAppTitle());
 		map.put("TENANT", AppContextUtil.getTenant());
@@ -246,12 +247,12 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 	}
 
 	public String getBotUrl() {
-		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_BOT_URL).asString(this.botUrl);
+		return pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_BOT_URL).asString(this.botUrl);
 	}
 
 	@Override
 	public String getAgentUrl() {
-		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_AGENT_URL).asString(this.agentUrl);
+		return pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_AGENT_URL).asString(this.agentUrl);
 	}
 
 	@Override
@@ -267,20 +268,20 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 	@Override
 	public String mainDomainRedirect() {
 		return "redirect:" + String.format("https://app.%s%s",
-				pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(),
+				pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(),
 				commonHttpRequest.getRequestURI());
 	}
 
 	@Override
 	public String mainDomainRedirect(String path) {
 		return "redirect:" + String.format("https://app.%s/%s",
-				pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(), path);
+				pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(), path);
 	}
 
 	@Override
 	public String getScriptusUrl() {
 		// return "http://localhost:8085/";
-		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SCRIPTUS_URL).asString(this.scriptusUrl);
+		return pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SCRIPTUS_URL).asString(this.scriptusUrl);
 	}
 
 	@Override
@@ -290,7 +291,7 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 
 	@Override
 	public String getServiceServer() {
-		return pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(serviceServer);
+		return pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString(serviceServer);
 	}
 
 	@Override

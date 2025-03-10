@@ -42,10 +42,10 @@ import com.boot.jx.postman.model.InboxMessage;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageDefinitions.IMessage;
-import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.model.MessagePrompt;
 import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
+import com.boot.jx.postman.model.ext.InBoundMsgStatus;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ChannelPlugin;
 import com.boot.jx.postman.query.ChatContactQuery;
@@ -187,6 +187,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		if (ArgUtil.is(outboxMessage.getStatus(), Status.BLCKD, Status.LIMIT)) {
 			return false;
 		}
+		environment.messageProcessor().beforeSend(outboxMessage);
 		return true;
 	}
 
@@ -243,6 +244,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 				outboxMessage.setTemplateExt(tpTemplate);
 			}
 		}
+
 		return outboxMessage;
 	}
 

@@ -125,7 +125,7 @@ public class AgChatSessionController {
 
 		// Session Stuff Logging <
 		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())
-				|| (environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean()
+				|| (environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean()
 						&& !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()))) {
 			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
 			agentChatHandlerImpl.onAssign(agent, sessionDoc);
