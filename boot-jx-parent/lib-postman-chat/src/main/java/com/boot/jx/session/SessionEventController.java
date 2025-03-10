@@ -18,9 +18,9 @@ import com.boot.jx.postman.model.ext.SessionBoundEvent;
 
 @RestController
 @RequestMapping("/events")
-public class EventController {
+public class SessionEventController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(EventController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SessionEventController.class);
 
 	@Autowired
 	private ChatSessionService chatSessionService;
