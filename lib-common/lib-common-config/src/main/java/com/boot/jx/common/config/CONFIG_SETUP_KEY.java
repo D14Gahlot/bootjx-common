@@ -257,10 +257,13 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 	POSTMAN_DEBUG_CONTACT(new ConfigMeta("Debugging is enabled for Contact", "postman.debug.contact")
 			.group(ConfigConstants.GROUP_DEV).hidden()),
 
-	SCRIPTUS_VERSION(new ConfigMeta("Scriptus Version", "props.scriptus.version")
+	SETUP_SCRIPTUS_VERSION(new ConfigMeta("Scriptus Version", "setup.scriptus.version")
 			.options(new ConfigOption("v0").label("Version 0"), new ConfigOption("v1").label("Version 1"),
 					new ConfigOption("v2").label("Version 2"))
-			.group(ConfigConstants.GROUP_DEV).hidden())
+			.group(ConfigConstants.GROUP_DEV).hidden()),
+
+	SETUP_CLICK_PROXY_URL(
+			new ConfigMeta("Click Proxy URL", "setup.click.proxy.url").group(ConfigConstants.GROUP_DEV).hidden())
 
 	// Ends here
 	;
