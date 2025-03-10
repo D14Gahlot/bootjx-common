@@ -55,7 +55,7 @@ public class DomainJobs {
 		detail.setRules(new String[] { CommonMongoSource.READ_ONLY_DB });
 		AppContextUtil.setApiRequestDetail(detail);
 
-		String serviceDomain = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
+		String serviceDomain = pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 
 		MongoQueryBuilder<ChannelConfigDupsDoc> emailChannelsQuery = MongoQueryBuilder
 				.collection(ChannelConfigDupsDoc.class).where(Criteria.where("contactType").is(ContactType.EMAIL.name())

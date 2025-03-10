@@ -122,10 +122,10 @@ public class DemoController {
 			@RequestParam(required = false) String version,
 			@RequestParam(required = false, defaultValue = "false") boolean beta) {
 
-		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
+		String domainServer = pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 		String key = beta ? "mry.cdn.url.beta" : "mry.cdn.url";
 
-		PMConfigurationObject config = pmEnvironment.keyEntry(key);
+		PMConfigurationObject config = pmEnvironment.config().prefsEntry(key);
 		config.setKey(key);
 
 		String oldUrl = config.asString();

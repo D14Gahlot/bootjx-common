@@ -81,9 +81,9 @@ public class SessionEventTimer extends ATaskLimiter {
 	private void debouncEvent(CONFIG_SETUP_KEY configSetupKey, String sessionid, SessionBoundEvent inBoundEvent,
 			String sessionEventName) {
 		if (ArgUtil.is(configSetupKey)) {
-			long timeout = pmEnvironment.keyEntry(configSetupKey).asLong(0L);
+			long timeout = pmEnvironment.config().prefsEntry(configSetupKey).asLong(0L);
 			if (timeout > 0L) {
-				if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
+				if (pmEnvironment.config().featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
 					// Only if this feature is there use chrono servre to set timeouts
 					commonServiceClient.publishSessionBoundEvent(inBoundEvent);
 				} else {
@@ -92,7 +92,7 @@ public class SessionEventTimer extends ATaskLimiter {
 				}
 			}
 		} else {
-			if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
+			if (pmEnvironment.config().featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
 				// Only if this feature is there use chrono servre to set timeouts
 				commonServiceClient.publishSessionBoundEvent(inBoundEvent);
 			}
@@ -110,11 +110,11 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Async
 	public void setChatOutIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
 		if (app != null && (app.isAgentApp() || app.isCustomApp())) {
-			boolean timeoutEnabled = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT)
-					.asBoolean(false);
+			boolean timeoutEnabled = pmEnvironment.config()
+					.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT).asBoolean(false);
 
-			PMConfigurationObject frwrdQueue = pmEnvironment
-					.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
+			PMConfigurationObject frwrdQueue = pmEnvironment.config()
+					.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
 
 			if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
 				debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL, sessionid, inBoundEvent,
@@ -135,10 +135,10 @@ public class SessionEventTimer extends ATaskLimiter {
 							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 				}
 			} else if (app.isAgentApp()) {
-				boolean timeoutEnabled = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
-						.asBoolean(false);
-				PMConfigurationObject frwrdQueue = pmEnvironment
-						.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+				boolean timeoutEnabled = pmEnvironment.config()
+						.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
+				PMConfigurationObject frwrdQueue = pmEnvironment.config()
+						.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 
 				if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
 					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
@@ -153,7 +153,7 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Async
 	public void setChatStatusTimeout(String sessionid, ClientApp app, SessionBoundEvent inBoundEvent) {
 		if (app != null && (app.isCustomApp())) {
-			if (pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
+			if (pmEnvironment.config().featureEntry(CONFIG_FEATURES_KEY.EVENTS_TIMEOUT).asBoolean()) {
 				// Only if this feature is there use chrono server to set timeouts
 				commonServiceClient.publishSessionBoundEvent(inBoundEvent);
 			}
@@ -184,7 +184,8 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	public void setMitelClosingCheck(String sessionid, ClientApp app, boolean now) {
 		if (app != null && app.equals(APP_TYPE.MITEL)) {
-			long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
+			long closeCheckTime = pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER)
+					.asLong(0L);
 			setMitelClosingCheck(sessionid, app, closeCheckTime, 0, now);
 		}
 	}
@@ -225,8 +226,8 @@ public class SessionEventTimer extends ATaskLimiter {
 		if (sessionStore.isSessionValid(session)) {
 			ChatMessageDTO lastMsg = session.lastMsg();
 			ChatMessageDTO lastOutBoundMsg = session.lastOutBoundMsg();
-			long timeout = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL)
-					.asLong(0L);
+			long timeout = pmEnvironment.config()
+					.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_INTERVAL).asLong(0L);
 			if (ArgUtil.is(lastMsg) && PostManUtil.isInBound(lastMsg.getType()) // last message is also inbound
 					&& (!ArgUtil.is(lastOutBoundMsg) // And ther is no outbound
 							|| TimeUtils.isExpired(lastOutBoundMsg.getTimestamp(), timeout * 60000) // OR is older than
@@ -253,8 +254,9 @@ public class SessionEventTimer extends ATaskLimiter {
 			ChatMessageDTO lastInBoundMsg = session.lastInBoundMsg();
 
 			ClientApp clientApp = pmEnvironment.config().clientApiKey(session.getAssignedToQueue());
-			long timeout = clientApp.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(
-					pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L));
+			long timeout = clientApp.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL)
+					.asLong(pmEnvironment.config()
+							.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL).asLong(0L));
 			if (ArgUtil.is(lastMsg) && PostManUtil.isOutBound(lastMsg.getType()) // last message is also outbound
 					&& (!ArgUtil.is(lastInBoundMsg) // And ther is no inbound
 							|| TimeUtils.isExpired(lastInBoundMsg.getTimestamp(), timeout * 60000) // OR is older than
@@ -285,7 +287,8 @@ public class SessionEventTimer extends ATaskLimiter {
 					&& mitel.keyEntry("conversationState").in("Ended", "Abandoned"))) {
 				chatSessionService.closeSession(session);
 			} else if (counter < 5) {
-				long closeCheckTime = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER).asLong(0L);
+				long closeCheckTime = pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.MITEL_SYNC_TIMER)
+						.asLong(0L);
 				this.setMitelClosingCheck(session.getSessionId(), defaultClient, closeCheckTime * 2, counter++, false);
 			}
 		}

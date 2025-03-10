@@ -113,16 +113,15 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 			if (user_input_type.equals("name")) {
 				contactQuery.setInfoName(inboxMessage.getMessage());
 			}
-		   if (user_input_type.equals("email")) {
-					String email = inboxMessage.getMessage();
-					if (isValidEmail(email)) {
-						contactQuery.setInfoEmail(email);
-					} else {
-						return (OutboxMessage) inboxMessage.replyMessage("Please enter a valid email address.");
-					}
+			if (user_input_type.equals("email")) {
+				String email = inboxMessage.getMessage();
+				if (isValidEmail(email)) {
+					contactQuery.setInfoEmail(email);
+				} else {
+					return (OutboxMessage) inboxMessage.replyMessage("Please enter a valid email address.");
 				}
-				
-			
+			}
+
 			if (user_input_type.equals("phone")) {
 				contactQuery.setInfoPhone(inboxMessage.getMessage());
 			}
@@ -158,10 +157,11 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 
 		return null;
 	}
+
 	private boolean isValidEmail(String email) {
-	    String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-	    Pattern pattern = Pattern.compile(emailRegex);
-	    return pattern.matcher(email).matches();
+		String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+		Pattern pattern = Pattern.compile(emailRegex);
+		return pattern.matcher(email).matches();
 	}
 
 	@Override
@@ -491,7 +491,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	}
 
 	public String getCountryCode(String phone) {
-		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
+		String defaultRegion = environment.config().prefsEntry("postman.phonebook.region").asString("IN");
 		PhoneNumber phoneNumber;
 		try {
 			phoneNumber = PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion);
@@ -505,7 +505,7 @@ public class WA360Connector extends AbstractConnector<WA360ConfigDetails, WA360P
 	public boolean optin(ChannelConfig channelConfig, ChatContactDoc chatContactDoc) {
 
 		if (ArgUtil.isEmptyValue(chatContactDoc.getLastOptInStamp())) {
-			String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
+			String defaultRegion = environment.config().prefsEntry("postman.phonebook.region").asString("IN");
 			String phone = chatContactDoc.phone();
 			try {
 				phone = phone.replace(" ", "").replaceAll("^[\\+0\\s]+(?!$)", "").trim();

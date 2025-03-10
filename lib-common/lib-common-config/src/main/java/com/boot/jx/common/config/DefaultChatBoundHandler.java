@@ -289,11 +289,11 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 		InBoundWrapper wrap = new InBoundWrapper().type("messages");
 		wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-				.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
+				.server(pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
 				.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
 				.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode())
 				.appVersion(defaultClient.getVersion()) //
-				.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
+				.debug(pmEnvironment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
 		wrap.contacts = CollectionUtil.asList(contact);
 		wrap.messages = CollectionUtil.asList(msg);
 
@@ -328,7 +328,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 						InBoundWrapper wrap = new InBoundWrapper().type("statuses");
 						wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-								.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
+								.server(pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER)
+										.asString())
 								.appId(defaultClient.getId()).appCode(defaultClient.getQueue())
 								.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode());
 						wrap.contacts = CollectionUtil.asList(contact);
@@ -427,12 +428,12 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 	@Override
 	public void onSessionResolve(InBoundEvent event, ChatSessionDoc chatSessionDoc) {
-		PMConfigurationObject feedbackQueue = pmEnvironment.keyEntry(PROPERTIES.POSTMAN_CHAT_FEEDBACK_QUEUE);
+		PMConfigurationObject feedbackQueue = pmEnvironment.config().prefsEntry(PROPERTIES.POSTMAN_CHAT_FEEDBACK_QUEUE);
 		if (feedbackQueue.exists()) {
 			chatSessionService.routeSession(chatSessionDoc, new PMArgs().assignToQueueCode(feedbackQueue.asString()));
 		} else {
-			PMConfigurationObject resolvedReply = pmEnvironment
-					.keyEntry(PROPERTIES.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
+			PMConfigurationObject resolvedReply = pmEnvironment.config()
+					.prefsEntry(PROPERTIES.POSTMAN_AGENT_CHAT_AUTOREPLY_RESOLVED);
 			if (resolvedReply.exists()) {
 				chatService.send(chatSessionDoc, new OutboxMessage().template(resolvedReply.asString()));
 			}
@@ -462,7 +463,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			}
 		}
 
-		PMConfigurationObject closingkWebhookQueue = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_CLOSE_WEBOOK);
+		PMConfigurationObject closingkWebhookQueue = pmEnvironment.config()
+				.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_CLOSE_WEBOOK);
 		if (closingkWebhookQueue.exists()) {
 			ClientApp closingkWebhookApp = context().clientApp(closingkWebhookQueue.asString(), null);
 			sendEventWebhook(event, closingkWebhookApp);
@@ -489,11 +491,13 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 
 				InBoundWrapper wrap = new InBoundWrapper().type("events");
 				wrap.meta = new InBoundMeta().domain(AppContextUtil.getTenant())
-						.server(pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString())
+						.server(pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER)
+								.asString())
 						.appId(defaultClient.getId()).appCode(defaultClient.getQueue()) //
 						.appType(defaultClient.getAppType()).appMode(defaultClient.getAppMode())
 						.appVersion(defaultClient.getVersion())//
-						.debug(pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).is(contact.contactId));
+						.debug(pmEnvironment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT)
+								.is(contact.contactId));
 				wrap.contacts = CollectionUtil.asList(contact);
 				wrap.events = CollectionUtil.asList(event);
 				(internalwebhook ? restService : restHookService).ajax(webhookUrl)

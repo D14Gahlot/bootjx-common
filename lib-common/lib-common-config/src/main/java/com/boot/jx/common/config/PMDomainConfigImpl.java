@@ -26,13 +26,13 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 
 	@Override
 	public String getDefaultInboundQueue() {
-		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_INBOUND_QUEUE).asString();
+		return environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_INBOUND_QUEUE).asString();
 	}
 
 	@Override
 	public String getDefaultInboundQueue(String channelId, CHAT_MODE mode) {
 		if (CHAT_MODE.AGENT.equals(mode)) {
-			return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
+			return environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
 					.asString(PMConstants.DEFAULT.AGENT_QUEUE_CODE);
 		} else {
 			ChannelConfig channel = environment.config().channel(channelId);
@@ -57,32 +57,32 @@ public class PMDomainConfigImpl implements PMDomainConfig {
 	@Override
 	public String getDomainUrl() {
 		return String.format("https://%s.%s", AppContextUtil.getTenant(),
-				environment.keyEntry("mry.prop.service.server").asString());
+				environment.config().prefsEntry("mry.prop.service.server").asString());
 	}
 
 	@Override
 	public PMConfigurationObject getAgentHistoryPeriod() {
-		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
+		return environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_PERIOD);
 	}
 
 	@Override
 	public PMConfigurationObject getAgentHistoryCount() {
-		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LIMIT);
+		return environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_TAB_HISTORY_LIMIT);
 	}
 
 	@Override
 	public PMConfigurationObject getChatIdleTimeout() {
-		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_IDLE_TIMEOUT);
+		return environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_IDLE_TIMEOUT);
 	}
 
 	@Override
 	public PMConfigurationObject getAgentChatDisable() {
-		return environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CUSTOMER_CHAT_DISABLE);
+		return environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CUSTOMER_CHAT_DISABLE);
 	}
 
 	@Override
 	public String getTimeZoneFromSetup() {
-		String offset = environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+		String offset = environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
 				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
 	}

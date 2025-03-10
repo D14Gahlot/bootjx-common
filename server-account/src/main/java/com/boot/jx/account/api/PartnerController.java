@@ -132,7 +132,7 @@ public class PartnerController {
 		model.addAttribute("FORM_URL", String.format("https://%s.%s/%s/auth/direct", domain,
 				// "local.com"
 				ArgUtil.anyOf(server, domainDoc.getServer(),
-						env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString()),
+						env.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString()),
 				panel));
 
 		if (userSessionBean.hasAdminAccesTo(domain)) {
@@ -388,7 +388,7 @@ public class PartnerController {
 		domainDoc.setDomain(domain.getDomain());
 		domainDoc.setCompany(domain.getCompany());
 		domainDoc.setSocial(domain.getSocial());
-		domainDoc.setServer(env.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString());
+		domainDoc.setServer(env.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString());
 		domainDoc.setTimeZoneOffSet(domain.getTimeZoneOffSet());
 		accountStore.save(domainDoc);
 

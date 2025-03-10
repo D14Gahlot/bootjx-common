@@ -400,11 +400,11 @@ public class ChatSessionManager {
 		}
 
 		// Agent Access level
-		CHAT_ASSIGN_GROUP accessLevel = pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_LEVEL)
+		CHAT_ASSIGN_GROUP accessLevel = pmEnvironment.config().prefsEntry(PROPERTIES.POSTMAN_AGENT_TAB_LEVEL)
 				.asEnum(CHAT_ASSIGN_GROUP.class);
 
 		if (!ArgUtil.is(accessLevel)) {
-			if (pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_ORG).asBoolean(false)) {
+			if (pmEnvironment.config().prefsEntry(PROPERTIES.POSTMAN_AGENT_TAB_ORG).asBoolean(false)) {
 				accessLevel = CHAT_ASSIGN_GROUP.ORG;
 			} else {
 				accessLevel = CHAT_ASSIGN_GROUP.TEAM;
@@ -438,7 +438,7 @@ public class ChatSessionManager {
 				query.add(CHAT_MODE.AGENT);
 			}
 		} else if (query.contains(CHAT_ASSIGN_GROUP.ORG)) {
-			if (!pmEnvironment.keyEntry(PROPERTIES.POSTMAN_AGENT_TAB_NONAGENT).asBoolean(false)) {
+			if (!pmEnvironment.config().prefsEntry(PROPERTIES.POSTMAN_AGENT_TAB_NONAGENT).asBoolean(false)) {
 				query.add(CHAT_MODE.AGENT);
 			}
 		}

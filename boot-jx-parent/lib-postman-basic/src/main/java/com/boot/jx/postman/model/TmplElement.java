@@ -46,6 +46,9 @@ public class TmplElement implements Serializable {
 	@ApiMockModelProperty(example = "http://url", value = "If type is set to URL", required = false)
 	private String url;
 
+	@ApiMockModelProperty(example = "http://url", value = "If type is set to URL", required = false)
+	private String shorturl;
+
 	@ApiMockModelProperty(example = "+91 9988776655", value = "If type is set to PHONE_NUMBER", required = false)
 	private String phone;
 
@@ -185,10 +188,18 @@ public class TmplElement implements Serializable {
 	}
 
 	public TmplElementParams params() {
-		if(this.params ==  null) {
-			this.params =  new TmplElementParams();
+		if (this.params == null) {
+			this.params = new TmplElementParams();
 		}
 		return params;
+	}
+
+	public String getShorturl() {
+		return shorturl;
+	}
+
+	public void setShorturl(String shorturl) {
+		this.shorturl = shorturl;
 	}
 
 }

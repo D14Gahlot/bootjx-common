@@ -52,7 +52,8 @@ public class InboundWebhooks {
 	@ApiCallbacktParams
 	@RequestMapping(value = "/api/v1/contact/info", method = { RequestMethod.POST })
 	public ContactInfoUpdate onProfileCallback(@RequestBody InBoundContact contactInfoRequest) {
-		PMConfigurationObject conatctUrlEntry = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_CONTACT_DETAILS_URL);
+		PMConfigurationObject conatctUrlEntry = pmEnvironment.config()
+				.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_CONTACT_DETAILS_URL);
 		if (conatctUrlEntry.exists()) {
 			return restService.ajax(conatctUrlEntry.asString()).post(contactInfoRequest).as(ContactInfoUpdate.class);
 		}

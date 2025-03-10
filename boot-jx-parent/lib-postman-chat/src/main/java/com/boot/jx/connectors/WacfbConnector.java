@@ -754,7 +754,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 	}
 
 	public String getCountryCode(String phone) {
-		String defaultRegion = environment.keyEntry("postman.phonebook.region").asString("IN");
+		String defaultRegion = environment.config().prefsEntry("postman.phonebook.region").asString("IN");
 		PhoneNumber phoneNumber;
 		try {
 			phoneNumber = PHONE_NUMBER_UTIL.parse("+" + phone, defaultRegion);

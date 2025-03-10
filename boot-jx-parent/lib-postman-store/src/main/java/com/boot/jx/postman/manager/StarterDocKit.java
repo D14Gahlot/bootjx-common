@@ -169,7 +169,7 @@ public class StarterDocKit {
 	}
 
 	private void createPredefinedMstField() {
-		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.customer.field.master");
+		PMConfigurationObject version = pmEnvironment.local().prefsEntry("version.customer.field.master");
 		String predefiend_customer_filed_version = "v1.7";
 		if (!version.is(predefiend_customer_filed_version)) {
 			createPredefinedMstField("title", "Title", "dropdown");
@@ -188,7 +188,7 @@ public class StarterDocKit {
 	 * @param contactType
 	 */
 	private void createMessageIndex() {
-		PMConfigurationObject version = pmEnvironment.local().keyEntry("version.message.index");
+		PMConfigurationObject version = pmEnvironment.local().prefsEntry("version.message.index");
 		String predefiend_customer_filed_version = "v1";
 		if (!version.is(predefiend_customer_filed_version)) {
 
@@ -246,7 +246,7 @@ public class StarterDocKit {
 	}
 
 	public boolean isFlagUpdated(String flagKey, String latestVersion) {
-		PMConfigurationObject currentVersion = pmEnvironment.local().keyEntry(flagKey);
+		PMConfigurationObject currentVersion = pmEnvironment.local().prefsEntry(flagKey);
 		if (!currentVersion.is(latestVersion) && currentVersion.lessThan(latestVersion)) {
 			currentVersion.setValue(latestVersion);
 			configManager.save(currentVersion);

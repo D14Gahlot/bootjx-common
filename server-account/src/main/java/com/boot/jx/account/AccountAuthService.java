@@ -142,13 +142,13 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 
 	public void sendResetMail(BusinessUserDoc accountDoc, String emailTemplate) {
 		postManClient.send(new MessageBox().push(new Email().to(accountDoc.getContact().getEmail())
-				.template(emailTemplate).put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
-				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
-				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
-				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.server").asString())
+				.template(emailTemplate).put("logo", pmEnvironment.config().prefsEntry("mry.prop.logo.bg-x-icon").asString())
+				.put("website", pmEnvironment.config().prefsEntry("mry.prop.service.website").asString())
+				.put("service", pmEnvironment.config().prefsEntry("mry.prop.service.name").asString())
+				.put("servicedomain", pmEnvironment.config().prefsEntry("mry.prop.service.server").asString())
 				.put("link",
 						String.format("https://app.%s/partner/auth/verify-link?code=%s&account=%s",
-								pmEnvironment.keyEntry("mry.prop.service.domain").asString(),
+								pmEnvironment.config().prefsEntry("mry.prop.service.domain").asString(),
 								accountDoc.getMeta().getEmailVerificationCode(), accountDoc.getId()))
 				.put("contactName", accountDoc.getContact().getName())));
 
@@ -156,11 +156,11 @@ public class AccountAuthService implements LogoutHandler, AuditDetailProvider {
 
 	public void sendMailToSalesTeam(BusinessUserDoc accountDoc, String emailTemplate) {
 		postManClient.send(new MessageBox().push(new Email()
-				.to(pmEnvironment.keyEntry("mry.prop.sales.email").asString()).template(emailTemplate)
-				.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
-				.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
-				.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
-				.put("servicedomain", pmEnvironment.keyEntry("mry.prop.service.server").asString())
+				.to(pmEnvironment.config().prefsEntry("mry.prop.sales.email").asString()).template(emailTemplate)
+				.put("logo", pmEnvironment.config().prefsEntry("mry.prop.logo.bg-x-icon").asString())
+				.put("website", pmEnvironment.config().prefsEntry("mry.prop.service.website").asString())
+				.put("service", pmEnvironment.config().prefsEntry("mry.prop.service.name").asString())
+				.put("servicedomain", pmEnvironment.config().prefsEntry("mry.prop.service.server").asString())
 				.put("contactName", accountDoc.getContact().getName()).put("email", accountDoc.getContact().getEmail())
 				.put("products", JsonUtil.toJson(accountDoc.getContact().getProduct()))
 				.put("phone", accountDoc.getContact().getPhone()).put("company", accountDoc.getContact().getCompany())

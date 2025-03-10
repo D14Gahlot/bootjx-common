@@ -27,9 +27,11 @@ public interface PMConfiguration extends Serializable {
 
 	public ChannelConfig channel(String channelId);
 
+	PMConfigurationObject prefsEntry(EntryMeta entry);
+
 	public ClientApp clientApiKey(String assignedQueue);
 
-	public NodeEntry<Object> keyEntry(String string);
+	public NodeEntry<Object> prefsEntry(String string);
 
 	public Set<AChannelConfig> listChannels();
 
@@ -172,12 +174,14 @@ public interface PMConfiguration extends Serializable {
 			return new SafeKeyHashMap<PMConfigurationObject>(perms);
 		}
 
-		public PMConfigurationObject keyEntry(String key) {
+		@Override
+		public PMConfigurationObject prefsEntry(String key) {
 			return prefs().getOrDefault(key, new PMConfigurationObject(key, null));
 		}
 
-		public PMConfigurationObject keyEntry(EntryMeta entry) {
-			return this.keyEntry(entry.getKey());
+		@Override
+		public PMConfigurationObject prefsEntry(EntryMeta entry) {
+			return this.prefsEntry(entry.getKey());
 		}
 
 		public PMConfigurationObject getPref(String key, Object value) {
@@ -353,7 +357,7 @@ public interface PMConfiguration extends Serializable {
 		}
 
 		@Override
-		public PMConfigurationObject keyEntry(String key) {
+		public PMConfigurationObject prefsEntry(String key) {
 			PMConfigurationObject configObject = this.local().prefs().get(key);
 			String tnt = AppContextUtil.getTenant();
 			if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
@@ -373,13 +377,39 @@ public interface PMConfiguration extends Serializable {
 		}
 
 		@Override
+		public PMConfigurationObject prefsEntry(EntryMeta entryMeta) {
+			return prefsEntry(entryMeta.getKey());
+		}
+
+		public PMConfigurationObject featureEntry(String key) {
+			PMConfigurationObject configObject = this.local().features().get(key);
+			String tnt = AppContextUtil.getTenant();
+			if (ArgUtil.isEmpty(configObject) && !Tenants.isDefault(tnt)) {
+				PMConfigurationObject sharedConfigObject = this.shared().features().get(key);
+				if (ArgUtil.is(sharedConfigObject)) {
+					return sharedConfigObject;
+				}
+			}
+			if (ArgUtil.isEmpty(configObject)) {
+				String value = appConfig.prop(key);
+				configObject = new PMConfigurationObject(key, value);
+				// this.config().map().put(key, configObject);
+			}
+			return configObject;
+		}
+
+		public PMConfigurationObject featureEntry(EntryMeta entryMeta) {
+			return featureEntry(entryMeta.getKey());
+		}
+
+		@Override
 		public Set<AChannelConfig> listChannels() {
 			Set<AChannelConfig> list = this.local().listChannels();
 			if (!Tenants.isDefault(AppContextUtil.getTenant())) {
 				Set<AChannelConfig> cs = this.shared().listChannels();
 				for (AChannelConfig aChannelConfig : cs) {
 					if (aChannelConfig.isShared()
-							|| (aChannelConfig.isSandbox() && keyEntry("postman.chat.channel.sandbox").asBoolean())) {
+							|| (aChannelConfig.isSandbox() && prefsEntry("postman.chat.channel.sandbox").asBoolean())) {
 						list.add(aChannelConfig);
 					}
 				}

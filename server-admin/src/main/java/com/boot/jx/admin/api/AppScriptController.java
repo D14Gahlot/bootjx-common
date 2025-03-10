@@ -110,7 +110,7 @@ public class AppScriptController {
 		}
 
 		if (!ArgUtil.is(contactId)) {
-			contactId = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).asString();
+			contactId = pmEnvironment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_DEBUG_CONTACT).asString();
 		}
 
 		if (!ArgUtil.is(contactId)) {

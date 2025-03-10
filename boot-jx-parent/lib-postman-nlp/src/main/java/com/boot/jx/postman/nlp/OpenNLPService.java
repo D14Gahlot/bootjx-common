@@ -134,13 +134,13 @@ public class OpenNLPService {
 
 	public TagDocument addTags(String userInput, TagDocument tagDocument) {
 
-		if (!initd || !pmEnvironment.keyEntry("postman.nlp.opennlp.enabled").asBoolean()) {
+		if (!initd || !pmEnvironment.config().prefsEntry("postman.nlp.opennlp.enabled").asBoolean()) {
 			return tagDocument;
 		}
 
 		try {
 
-			if (pmEnvironment.keyEntry("postman.nlp.detect.lang").asBoolean()) {
+			if (pmEnvironment.config().prefsEntry("postman.nlp.detect.lang").asBoolean()) {
 				LanguageDetectorME languageDetectorME = new LanguageDetectorME(languageDetectorModel);
 				Language[] langs = languageDetectorME.predictLanguages(userInput);
 
@@ -151,10 +151,10 @@ public class OpenNLPService {
 				}
 			}
 
-			boolean detectCategories = pmEnvironment.keyEntry("postman.nlp.detect.categories").asBoolean();
-			boolean detectPersons = pmEnvironment.keyEntry("postman.nlp.detect.persons").asBoolean();
-			boolean detectLocations = pmEnvironment.keyEntry("postman.nlp.detect.organizations").asBoolean();
-			boolean detectOrganizations = pmEnvironment.keyEntry("postman.nlp.detect.locations").asBoolean();
+			boolean detectCategories = pmEnvironment.config().prefsEntry("postman.nlp.detect.categories").asBoolean();
+			boolean detectPersons = pmEnvironment.config().prefsEntry("postman.nlp.detect.persons").asBoolean();
+			boolean detectLocations = pmEnvironment.config().prefsEntry("postman.nlp.detect.organizations").asBoolean();
+			boolean detectOrganizations = pmEnvironment.config().prefsEntry("postman.nlp.detect.locations").asBoolean();
 
 			if (ArgUtil.none(detectCategories, detectPersons, detectLocations, detectOrganizations)) {
 				return tagDocument;

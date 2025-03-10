@@ -495,156 +495,164 @@ public class CustomerMasterFldMgr {
 	/** profile search **/
 
 	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
-	 
-	    String sortBy = ArgUtil.parseAsString(searchQry.getSortBy(), "created.stamp");
-	    String sortdir = ArgUtil.parseAsString(searchQry.getSortDir(), "DESC");
-	    
-	    
-	    
-	    int pageNo = searchQry.getPageNo() > 0 ? searchQry.getPageNo() : 0; // Default to 0 if page number is not set
-	    int limit = searchQry.getPageSize() > 0 ? searchQry.getPageSize() : 25; // Default page size
-	    int skip = pageNo * limit; // Calculate skip for pagination
-	    
-	    
-	    
-	    List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
-	    
 
-	    // List to hold ANDed criteria
-	    List<Criteria> andCriteriaList = new ArrayList<>();
+		String sortBy = ArgUtil.parseAsString(searchQry.getSortBy(), "created.stamp");
+		String sortdir = ArgUtil.parseAsString(searchQry.getSortDir(), "DESC");
 
-	    for (List<ProfileSearchCriteria> srcLst : searchCriterias) {
-	        // Temporary list to hold OR criteria
-	        List<Criteria> orCriteriaList = new ArrayList<>();
+		int pageNo = searchQry.getPageNo() > 0 ? searchQry.getPageNo() : 0; // Default to 0 if page number is not set
+		int limit = searchQry.getPageSize() > 0 ? searchQry.getPageSize() : 25; // Default page size
+		int skip = pageNo * limit; // Calculate skip for pagination
 
-	        for (ProfileSearchCriteria src : srcLst) {
-	            switch (src.getKey()) {
-	                case "phone":
-	                case "phones":
-	                case "mobile":
-	                case "mobiles":
-	                	if(src.getOperator().equalsIgnoreCase("EQ")) {
-	                		orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), PhoneUtil.addPlusSign(src.getValue().toString())));
-	                	}else if(src.getOperator().equalsIgnoreCase("STARTS_WITH")) {
-	                		orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), "\\"+PhoneUtil.addPlusSign(src.getValue().toString())));
-	                	}else {
-	                		orCriteriaList.add(createCriteria("phones.phone", src.getOperator(), src.getValue().toString()));
-	                	}
-	                    break;
-	                case "email":
-	                case "emails":
-	                	orCriteriaList.add(createCriteria("emails.email", src.getOperator(), src.getValue()));
-	                    break;
-	                case "additionalInfo.alt_emails":
-	                	orCriteriaList.add(createCriteria("additionalInfo.alt_emails.email", src.getOperator(), src.getValue()));
-	                    break;
-	                case "additionalInfo.alt_phones":
-	                	if(src.getOperator().equalsIgnoreCase("EQ")) {
-	                	orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(),  PhoneUtil.addPlusSign(src.getValue().toString())));
-	                	}else if(src.getOperator().equalsIgnoreCase("STARTS_WITH")) {
-	                		orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(), "\\"+PhoneUtil.addPlusSign(src.getValue().toString())));
-	                	}else {
-	                		orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(), src.getValue()));
-	                	}
-	                    break;       
-	                case "name":
-	                case "name.formattedName":
-	                    orCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
-	                    break;
-	                case "code":
-	                    orCriteriaList.add(createCriteria("code", src.getOperator(), src.getValue()));
-	                    break;
-	                default:
-	                	String fldType =checkFieldType(src.getKey());
-	                	if(fldType!=null && fldType.equalsIgnoreCase("date") && ArgUtil.is(src.getValue())) {
-	                		try {
-		                		ObjectMapper objectMapperDt = new ObjectMapper();
-		                		List<PBDate> pbDateU = null;
-		                		String key =src.getKey()+".stamp";
-		                		if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 1) {
-		                			String valueStr =null;
-		                			boolean boToday=checkToday(src.getValue());
-		                			if(boToday) {
-		                				valueStr =CommonUtils.getTodayDtAsStr();
-		                			}else {
-								    pbDateU = objectMapperDt.convertValue(src.getValue(),new TypeReference<List<PBDate>>() {});
-		                			PBDate pbd = pbDateU.get(0);
-		        	        		 // Ensure date is not null
-		                            valueStr = Optional.ofNullable(pbd.getDate()).orElseThrow(() -> new IllegalArgumentException("Date value is null"));
-		                			}
-		        	        		orCriteriaList.add(createCriteria(key, src.getOperator(), getDateWithTSM(valueStr)));
-		                		}else if(src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 2) {
-		                			pbDateU = objectMapperDt.convertValue(src.getValue(),new TypeReference<List<PBDate>>() {});
-		                			Object startDate =getDateWithTSM(pbDateU.get(0).getDate().toString());
-		        	                Object endDate = getDateWithTSM(pbDateU.get(1).getDate().toString());
-		        	                List<Object> lst =new ArrayList<>();
-		        	                lst.add(startDate);
-		        	                lst.add(endDate);
-		                			orCriteriaList.add(createCriteria(key, src.getOperator(), lst));
-		                		}else{
-		                            throw new IllegalArgumentException("Unexpected data format in the source list.");
-		                		}
-	                		}catch(Exception e) {
-	                			e.getMessage();
-	                			LOGGER.info("EXCEPTION "+JsonUtil.toJson(searchQry));
-	                		}
-	                	}else {
-	                		if(src.getValue() instanceof List<?>  && ((List<?>) src.getValue()).size() > 1) {
-	                			List<?> valueLst = (List<?>)src.getValue();
-	                			List<Criteria> valueCriteriaList = new ArrayList<>();
-	                	        for (Object value : valueLst) {
-	                	            valueCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), ArgUtil.parseAsT(value, null, false)));
-	                	        }
-	                	        orCriteriaList.add(new Criteria().orOperator(valueCriteriaList.toArray(new Criteria[0])));
-	                		}else if(src.getValue() instanceof List<?>  && ((List<?>) src.getValue()).size()==1) {
-	                			List<?> lstvalue =(List<?>)src.getValue(); 
-	                			orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), ArgUtil.parseAsT(lstvalue.get(0), null, false)));
-	                		}else {
-	                			orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
-	                		}
-	                	}
-	                    break;
-	            }
-	        }
+		List<List<ProfileSearchCriteria>> searchCriterias = searchQry.getSearchCriterias();
 
-	        // If there are multiple conditions in the OR list, combine them using OR
-	        if (!orCriteriaList.isEmpty()) {
-	            Criteria orCriteria = new Criteria().orOperator(orCriteriaList.toArray(new Criteria[orCriteriaList.size()]));
-	            // Add the OR result to the AND list
-	            andCriteriaList.add(orCriteria);
-	        }
-	    }
+		// List to hold ANDed criteria
+		List<Criteria> andCriteriaList = new ArrayList<>();
 
-	  
-	    // Build the final Mongo query with AND criteria
-	    MongoQueryBuilder<CustomerProfileDoc> qb = null;
-	    
-	    if(searchQry.isBooSkipLmt()) {
-	    	 if (ArgUtil.is(andCriteriaList)) {
-	 	        qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
-	 	            .where(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])))
-	 	            .sortBy(sortBy,Direction.fromString(sortdir));
-	 	           
-	 	    } else {
-	 	        qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
-	 	            .sortBy(sortBy,Direction.fromString(sortdir));
-	 	    }
-	    }else {
-		    if (ArgUtil.is(andCriteriaList)) {
-		        qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
-		            .where(new Criteria().andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])))
-		            .sortBy(sortBy,Direction.fromString(sortdir))
-		            .limit(limit)
-		            .skip(skip);
-		    } else {
-		        qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
-		            .sortBy(sortBy,Direction.fromString(sortdir))
-		            .limit(limit) // Apply limit for page size
-		            .skip(skip); // Apply skip for the correct page
-		    }
-	    }
-	    LOGGER.info("QB {} " + JsonUtil.toJson(qb));
-	    return contactStore.find(qb);
+		for (List<ProfileSearchCriteria> srcLst : searchCriterias) {
+			// Temporary list to hold OR criteria
+			List<Criteria> orCriteriaList = new ArrayList<>();
+
+			for (ProfileSearchCriteria src : srcLst) {
+				switch (src.getKey()) {
+				case "phone":
+				case "phones":
+				case "mobile":
+				case "mobiles":
+					if (src.getOperator().equalsIgnoreCase("EQ")) {
+						orCriteriaList.add(createCriteria("phones.phone", src.getOperator(),
+								PhoneUtil.addPlusSign(src.getValue().toString())));
+					} else if (src.getOperator().equalsIgnoreCase("STARTS_WITH")) {
+						orCriteriaList.add(createCriteria("phones.phone", src.getOperator(),
+								"\\" + PhoneUtil.addPlusSign(src.getValue().toString())));
+					} else {
+						orCriteriaList
+								.add(createCriteria("phones.phone", src.getOperator(), src.getValue().toString()));
+					}
+					break;
+				case "email":
+				case "emails":
+					orCriteriaList.add(createCriteria("emails.email", src.getOperator(), src.getValue()));
+					break;
+				case "additionalInfo.alt_emails":
+					orCriteriaList
+							.add(createCriteria("additionalInfo.alt_emails.email", src.getOperator(), src.getValue()));
+					break;
+				case "additionalInfo.alt_phones":
+					if (src.getOperator().equalsIgnoreCase("EQ")) {
+						orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(),
+								PhoneUtil.addPlusSign(src.getValue().toString())));
+					} else if (src.getOperator().equalsIgnoreCase("STARTS_WITH")) {
+						orCriteriaList.add(createCriteria("additionalInfo.alt_phones.phone", src.getOperator(),
+								"\\" + PhoneUtil.addPlusSign(src.getValue().toString())));
+					} else {
+						orCriteriaList.add(
+								createCriteria("additionalInfo.alt_phones.phone", src.getOperator(), src.getValue()));
+					}
+					break;
+				case "name":
+				case "name.formattedName":
+					orCriteriaList.add(createCriteria("name.formattedName", src.getOperator(), src.getValue()));
+					break;
+				case "code":
+					orCriteriaList.add(createCriteria("code", src.getOperator(), src.getValue()));
+					break;
+				default:
+					String fldType = checkFieldType(src.getKey());
+					if (fldType != null && fldType.equalsIgnoreCase("date") && ArgUtil.is(src.getValue())) {
+						try {
+							ObjectMapper objectMapperDt = new ObjectMapper();
+							List<PBDate> pbDateU = null;
+							String key = src.getKey() + ".stamp";
+							if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 1) {
+								String valueStr = null;
+								boolean boToday = checkToday(src.getValue());
+								if (boToday) {
+									valueStr = CommonUtils.getTodayDtAsStr();
+								} else {
+									pbDateU = objectMapperDt.convertValue(src.getValue(),
+											new TypeReference<List<PBDate>>() {
+											});
+									PBDate pbd = pbDateU.get(0);
+									// Ensure date is not null
+									valueStr = Optional.ofNullable(pbd.getDate())
+											.orElseThrow(() -> new IllegalArgumentException("Date value is null"));
+								}
+								orCriteriaList.add(createCriteria(key, src.getOperator(), getDateWithTSM(valueStr)));
+							} else if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 2) {
+								pbDateU = objectMapperDt.convertValue(src.getValue(),
+										new TypeReference<List<PBDate>>() {
+										});
+								Object startDate = getDateWithTSM(pbDateU.get(0).getDate().toString());
+								Object endDate = getDateWithTSM(pbDateU.get(1).getDate().toString());
+								List<Object> lst = new ArrayList<>();
+								lst.add(startDate);
+								lst.add(endDate);
+								orCriteriaList.add(createCriteria(key, src.getOperator(), lst));
+							} else {
+								throw new IllegalArgumentException("Unexpected data format in the source list.");
+							}
+						} catch (Exception e) {
+							e.getMessage();
+							LOGGER.info("EXCEPTION " + JsonUtil.toJson(searchQry));
+						}
+					} else {
+						if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() > 1) {
+							List<?> valueLst = (List<?>) src.getValue();
+							List<Criteria> valueCriteriaList = new ArrayList<>();
+							for (Object value : valueLst) {
+								valueCriteriaList.add(createCriteria(src.getKey(), src.getOperator(),
+										ArgUtil.parseAsT(value, null, false)));
+							}
+							orCriteriaList.add(new Criteria().orOperator(valueCriteriaList.toArray(new Criteria[0])));
+						} else if (src.getValue() instanceof List<?> && ((List<?>) src.getValue()).size() == 1) {
+							List<?> lstvalue = (List<?>) src.getValue();
+							orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(),
+									ArgUtil.parseAsT(lstvalue.get(0), null, false)));
+						} else {
+							orCriteriaList.add(createCriteria(src.getKey(), src.getOperator(), src.getValue()));
+						}
+					}
+					break;
+				}
+			}
+
+			// If there are multiple conditions in the OR list, combine them using OR
+			if (!orCriteriaList.isEmpty()) {
+				Criteria orCriteria = new Criteria()
+						.orOperator(orCriteriaList.toArray(new Criteria[orCriteriaList.size()]));
+				// Add the OR result to the AND list
+				andCriteriaList.add(orCriteria);
+			}
+		}
+
+		// Build the final Mongo query with AND criteria
+		MongoQueryBuilder<CustomerProfileDoc> qb = null;
+
+		if (searchQry.isBooSkipLmt()) {
+			if (ArgUtil.is(andCriteriaList)) {
+				qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+						.where(new Criteria()
+								.andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])))
+						.sortBy(sortBy, Direction.fromString(sortdir));
+
+			} else {
+				qb = MongoQueryBuilder.collection(CustomerProfileDoc.class).sortBy(sortBy,
+						Direction.fromString(sortdir));
+			}
+		} else {
+			if (ArgUtil.is(andCriteriaList)) {
+				qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+						.where(new Criteria()
+								.andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])))
+						.sortBy(sortBy, Direction.fromString(sortdir)).limit(limit).skip(skip);
+			} else {
+				qb = MongoQueryBuilder.collection(CustomerProfileDoc.class)
+						.sortBy(sortBy, Direction.fromString(sortdir)).limit(limit) // Apply limit for page size
+						.skip(skip); // Apply skip for the correct page
+			}
+		}
+		LOGGER.info("QB {} " + JsonUtil.toJson(qb));
+		return contactStore.find(qb);
 	}
 
 	private Criteria createCriteria(String key, String operation, Object value) {
@@ -861,7 +869,7 @@ public class CustomerMasterFldMgr {
 	}
 
 	public String getTimeZoneFromSetup() {
-		String offset = pmEnvironment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+		String offset = pmEnvironment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
 				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
 	}
@@ -878,21 +886,19 @@ public class CustomerMasterFldMgr {
 			return ZoneId.of("Asia/Kolkata"); // Fallback to default
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public boolean checkToday(Object value) {
 		boolean containsAliasToday = false;
 		try {
-			 List<?> outerList = (List<?>) value; // Treat it as a List
-			 containsAliasToday = outerList.stream()
-				        .filter(obj -> obj instanceof Map) // Ensure it's a Map
-				        .map(obj -> (Map<?, ?>) obj) // Cast to Map
-				        .anyMatch(map -> 
-				            map.containsKey("alias") && 
-				            "TODAY".equalsIgnoreCase(String.valueOf(map.get("alias"))) // Case-insensitive check
-				        );
-		    return containsAliasToday;
-		}catch(Exception e) {
+			List<?> outerList = (List<?>) value; // Treat it as a List
+			containsAliasToday = outerList.stream().filter(obj -> obj instanceof Map) // Ensure it's a Map
+					.map(obj -> (Map<?, ?>) obj) // Cast to Map
+					.anyMatch(map -> map.containsKey("alias")
+							&& "TODAY".equalsIgnoreCase(String.valueOf(map.get("alias"))) // Case-insensitive check
+					);
+			return containsAliasToday;
+		} catch (Exception e) {
 			e.printStackTrace();
 			return containsAliasToday;
 		}

@@ -49,14 +49,14 @@ public class PMGateKeeperImpl implements PMGateKeeper {
 
 	@Override
 	public boolean canSendMessage(OutboxMessage outboxMessage) {
-		if (!environment.featureEntry(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND)
+		if (!environment.config().featureEntry(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND)
 				.asBoolean(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND.getDefaultValue())) {
 			outboxMessage.logs().add("Outbound Restricted");
 			outboxMessage.status(Status.BLCKD);
 			return false;
 		}
 
-		String plan = environment.featureEntry(CONFIG_FEATURES_KEY.PLAN)
+		String plan = environment.config().featureEntry(CONFIG_FEATURES_KEY.PLAN)
 				.asString(CONFIG_FEATURES_KEY.PLAN.getDefaultValue());
 
 		if (ArgUtil.is(plan, PLANS.BLOCKED)) {
@@ -66,7 +66,8 @@ public class PMGateKeeperImpl implements PMGateKeeper {
 		}
 
 		if (ArgUtil.is(plan, PLANS.FREEMIUM)) {
-			Integer freemiumDauLimit = environment.featureEntry(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND_DAU_FREEMIUM)
+			Integer freemiumDauLimit = environment.config()
+					.featureEntry(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND_DAU_FREEMIUM)
 					.asInteger(CONFIG_FEATURES_KEY.MESSAGE_OUTBOUND_DAU_FREEMIUM.getDefaultValue());
 
 			String key = "gklimiter:" + AppContextUtil.getTenant() + ":dau:" + freemiumDauLimit;
@@ -94,13 +95,13 @@ public class PMGateKeeperImpl implements PMGateKeeper {
 	public boolean canSendTemplateMedia(OutboxMessage outboxMessage) {
 
 		Boolean defaultValue = Boolean.TRUE.equals(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE.getDefaultValue());
-		if (!environment.featureEntry(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE).asBoolean(defaultValue)) {
+		if (!environment.config().featureEntry(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE).asBoolean(defaultValue)) {
 			outboxMessage.logs().add("Templated Media Restricted");
 			outboxMessage.status(Status.BLCKD);
 			return false;
 		}
 
-		String plan = environment.featureEntry(CONFIG_FEATURES_KEY.PLAN)
+		String plan = environment.config().featureEntry(CONFIG_FEATURES_KEY.PLAN)
 				.asString(CONFIG_FEATURES_KEY.PLAN.getDefaultValue());
 
 		if (ArgUtil.is(plan, PLANS.BLOCKED)) {
@@ -110,7 +111,8 @@ public class PMGateKeeperImpl implements PMGateKeeper {
 		}
 
 		if (ArgUtil.is(plan, PLANS.FREEMIUM)) {
-			Integer freemiumMediaLimit = environment.featureEntry(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE_FREEMIUM)
+			Integer freemiumMediaLimit = environment.config()
+					.featureEntry(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE_FREEMIUM)
 					.asInteger(CONFIG_FEATURES_KEY.MSG_MEDIA_TEMPLATE_FREEMIUM.getDefaultValue());
 
 			String key = "gklimiter:" + AppContextUtil.getTenant() + ":tmplmedia:" + freemiumMediaLimit;

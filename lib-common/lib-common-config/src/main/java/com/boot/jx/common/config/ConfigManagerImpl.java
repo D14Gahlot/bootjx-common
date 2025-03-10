@@ -100,7 +100,7 @@ public class ConfigManagerImpl implements ConfigManager {
 			case "postman.bot.name":
 			case "postman.default.sender":
 
-				PMConfigurationObject configObject = pmEnvironment.keyEntry("postman.bot.name");
+				PMConfigurationObject configObject = pmEnvironment.config().prefsEntry("postman.bot.name");
 
 				if (!ArgUtil.is(configObject.getValue())) {
 					configObject.setValue(pmEnvironment.local().agent().getDefaultBotName());
@@ -110,9 +110,10 @@ public class ConfigManagerImpl implements ConfigManager {
 
 				break;
 			default:
-				list.add(MapBuilder.map().put("meta", meta).put("domain", pmEnvironment.local().keyEntry(meta.getKey())) // Domain
-						.put("shared", pmEnvironment.shared().keyEntry(meta.getKey())) // Shared
-						.put("config", pmEnvironment.keyEntry(meta.getKey())) // Resolved
+				list.add(MapBuilder.map().put("meta", meta)
+						.put("domain", pmEnvironment.local().prefsEntry(meta.getKey())) // Domain
+						.put("shared", pmEnvironment.shared().prefsEntry(meta.getKey())) // Shared
+						.put("config", pmEnvironment.config().prefsEntry(meta.getKey())) // Resolved
 						.toMap());
 				break;
 			}
@@ -123,7 +124,7 @@ public class ConfigManagerImpl implements ConfigManager {
 	public List<Map<String, Object>> getAppConfigs() {
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		for (Entry<String, String> entry : ConfigConstants.APP_CONFIG.entrySet()) {
-			list.add(MapBuilder.map().put("config", pmEnvironment.keyEntry(entry.getKey())).toMap());
+			list.add(MapBuilder.map().put("config", pmEnvironment.config().prefsEntry(entry.getKey())).toMap());
 		}
 		return list;
 	}
@@ -143,9 +144,9 @@ public class ConfigManagerImpl implements ConfigManager {
 				mapBuilder.put("meta", meta);
 			}
 		}
-		mapBuilder.put("domain", this.pmEnvironment.local().keyEntry(key)) // Domain
-				.put("shared", this.pmEnvironment.shared().keyEntry(key)) // Shared
-				.put("config", this.pmEnvironment.keyEntry(key)) // Resolved
+		mapBuilder.put("domain", this.pmEnvironment.local().prefsEntry(key)) // Domain
+				.put("shared", this.pmEnvironment.shared().prefsEntry(key)) // Shared
+				.put("config", this.pmEnvironment.config().prefsEntry(key)) // Resolved
 		;
 
 		list.add(mapBuilder.toMap());
@@ -192,7 +193,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		case "postman.default.sender":
 			doc.agent().setDefaultBotName(config.asString());
 		default:
-			PMConfigurationObject configObject = doc.keyEntry(config.getKey());
+			PMConfigurationObject configObject = doc.prefsEntry(config.getKey());
 			configObject.setKey(config.getKey());
 			configObject.setValue(config.getValue());
 			configObject.setShared(config.isShared());
@@ -399,8 +400,8 @@ public class ConfigManagerImpl implements ConfigManager {
 	public List<Map<String, Object>> getFeature() {
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		for (ConfigMeta meta : ConfigConstants.PERMS_CONFIG_LIST) {
-			list.add(MapBuilder.map().put("meta", meta).put("config", pmEnvironment.featureEntry(meta.getKey()))
-					.toMap());
+			list.add(MapBuilder.map().put("meta", meta)
+					.put("config", pmEnvironment.config().featureEntry(meta.getKey())).toMap());
 		}
 		return list;
 	}
@@ -419,7 +420,7 @@ public class ConfigManagerImpl implements ConfigManager {
 		}
 		mapBuilder.put("domain", this.pmEnvironment.local().featureEntry(key)) // Domain
 				.put("shared", this.pmEnvironment.shared().featureEntry(key)) // Shared
-				.put("config", this.pmEnvironment.featureEntry(key)) // Resolved
+				.put("config", this.pmEnvironment.config().featureEntry(key)) // Resolved
 		;
 		list.add(mapBuilder.toMap());
 		return list;

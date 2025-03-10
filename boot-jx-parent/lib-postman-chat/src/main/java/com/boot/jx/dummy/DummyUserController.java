@@ -69,14 +69,14 @@ public class DummyUserController {
 		model.addAttribute("APP", "CUSTOMER");
 
 		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
-				pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
+				pmEnvironment.config().prefsEntry("postman.agent.scheme.color").asString());
 
 		if (pmCommonConfig != null) {
 			model.addAttribute("CDN_URL", pmCommonConfig.getCdnServerDebug());
 		}
 
-		PMConfigurationObject defaultWebChannel = pmEnvironment
-				.keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL);
+		PMConfigurationObject defaultWebChannel = pmEnvironment.config()
+				.prefsEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_WEB_CHANNEL);
 
 		ChannelConfig channelConfig = null;
 		if (defaultWebChannel.exists()) {
@@ -166,14 +166,14 @@ public class DummyUserController {
 		model.addAttribute("APP_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
-				pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
+				pmEnvironment.config().prefsEntry("postman.agent.scheme.color").asString());
 		return "customer.plugin.bubble";
 	}
 
 	@ApiOperation(value = "Try docs", hidden = true)
 	@RequestMapping(value = { "/docs" }, method = { RequestMethod.GET, RequestMethod.POST })
 	public String docs(Model model, @RequestParam(required = false) String path) {
-		return "redirect:" + pmEnvironment.keyEntry("mry.prop.service.docs.link").asString()
+		return "redirect:" + pmEnvironment.config().prefsEntry("mry.prop.service.docs.link").asString()
 				+ ArgUtil.nonEmpty(path, Constants.BLANK);
 	}
 
@@ -185,7 +185,7 @@ public class DummyUserController {
 		// + "/server-"+ xms
 		);
 		String path = paths.length > 1 ? paths[1] : Constants.BLANK;
-		return "redirect:" + pmEnvironment.keyEntry("mry.prop.service.docs.link").asString()
+		return "redirect:" + pmEnvironment.config().prefsEntry("mry.prop.service.docs.link").asString()
 				+ ArgUtil.nonEmpty(path, Constants.BLANK);
 	}
 }

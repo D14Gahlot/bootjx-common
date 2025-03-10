@@ -163,9 +163,9 @@ public class ContakAuthService implements LogoutHandler, AuditDetailProvider {
 	public void sendResetMail(ContakUserDoc accountDoc, String emailTemplate, String verifyCode) {
 		postManClient
 				.send(new MessageBox().push(new Email().to(accountDoc.getEmail()).template(emailTemplate)
-						.put("logo", pmEnvironment.keyEntry("mry.prop.logo.bg-x-icon").asString())
-						.put("website", pmEnvironment.keyEntry("mry.prop.service.website").asString())
-						.put("service", pmEnvironment.keyEntry("mry.prop.service.name").asString())
+						.put("logo", pmEnvironment.config().prefsEntry("mry.prop.logo.bg-x-icon").asString())
+						.put("website", pmEnvironment.config().prefsEntry("mry.prop.service.website").asString())
+						.put("service", pmEnvironment.config().prefsEntry("mry.prop.service.name").asString())
 						.put("servicedomain", pmEnvironment.commonConfig().getServiceServerByRequest())
 						.put("link", String.format("https://%s.%s/contak/panel/auth/verify-link?code=%s&account=%s",
 								AppContextUtil.getTenant(), pmEnvironment.commonConfig().getServiceServerByRequest(),

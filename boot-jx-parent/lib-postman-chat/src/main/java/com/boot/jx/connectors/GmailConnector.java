@@ -91,7 +91,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 	public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigLogger, AuthState state)
 			throws URISyntaxException, MalformedURLException {
 		String redirectUri = String.format("%s%s/ext/setup/channel/callback/gmail", commonHttpRequest.getServerHost(),
-				appConfig.getAppPrefix(), environment.keyEntry("mry.prop.service.server").asString());
+				appConfig.getAppPrefix(), environment.config().prefsEntry("mry.prop.service.server").asString());
 		/// &state=fooobar&scope=r_liteprofile%20r_emailaddress%20w_member_social
 		state.setRedirectUrl(redirectUri);
 
@@ -120,7 +120,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 			String redirectUri = String.format("%s%s/ext/setup/channel/callback/gmail",
 					commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
-					environment.keyEntry("mry.prop.service.server").asString());
+					environment.config().prefsEntry("mry.prop.service.server").asString());
 			if (ArgUtil.is(state.getRedirectUrl())) {
 				redirectUri = state.getRedirectUrl();
 			} else if (ArgUtil.is(stateStr)) {
