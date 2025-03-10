@@ -20,7 +20,7 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.ClazzUtil;
 
 @Component
-public class PMGeteKeeperImpl implements PMGateKeeper {
+public class PMGateKeeperImpl implements PMGateKeeper {
 
 	private static final long EXPIRY_TIME = 24;
 
