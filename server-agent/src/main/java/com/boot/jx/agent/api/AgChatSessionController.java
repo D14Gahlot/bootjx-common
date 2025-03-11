@@ -124,15 +124,18 @@ public class AgChatSessionController {
 		ChatSessionDoc sessionDoc = chatSessionFactory.linkSession(outboxMessage);
 
 		// Session Stuff Logging <
-		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())
-				|| (environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean()
-						&& !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()))) {
-			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
-			agentChatHandlerImpl.onAssign(agent, sessionDoc);
-		}
+			if (sessionDoc != null && 
+			    (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent()) ||
+			    (environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean() &&
+			    !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())))) {
+
+			    AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
+			    agentChatHandlerImpl.onAssign(agent, sessionDoc);
+			}
+
 
 		// Session Stuff Logging >
-		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
+		if (sessionDoc!=null && ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			outboxMessage.route().setQueueCode(sessionDoc.getAssignedToQueue());
 			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 
