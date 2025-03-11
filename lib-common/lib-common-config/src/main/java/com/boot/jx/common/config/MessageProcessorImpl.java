@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.boot.jx.dict.ContactType;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.MessageProcessor;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
@@ -33,11 +34,16 @@ public class MessageProcessorImpl implements MessageProcessor {
 
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);// null
 
+				String channelShortCode = ArgUtil
+						.parseAsEnumT(outboxMessage.contact().getContactType(), ContactType.WEBSITE, ContactType.class)
+						.getShortCode();
+
 				for (TmplElement button : allbuttons) {
 					try {
 						if (ArgUtil.areEqual(button.getType(), TmplElement.TYPES.URL)) {
-							button.setShorturl(String.format("%s/nexus/link/short/wa/%s/%s", trackMessageUrl.asString(),
-									outboxMessage.getMessageId(), CryptoUtil.getMD5Hash(button.getUrl())));;
+							button.setShorturl(String.format("%s/nexus/link/short/%s/%s/%s", trackMessageUrl.asString(),
+									channelShortCode, outboxMessage.getMessageId(),
+									CryptoUtil.getMD5Hash(button.getUrl())));;
 						}
 					} catch (NoSuchAlgorithmException e) {
 						outboxMessage.logs().add("ShortUrl not created");
