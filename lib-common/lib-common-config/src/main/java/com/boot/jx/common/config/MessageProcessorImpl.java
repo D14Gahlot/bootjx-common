@@ -33,7 +33,11 @@ public class MessageProcessorImpl implements MessageProcessor {
 		PMConfigurationObject trackMessage = pmEnvironment.local().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_TRACK_MESSAGE);
 		if (trackMessage.exists() && trackMessage.asBoolean()) {
 			String trackMessageUrl = pmEnvironment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_TRACK_MESSAGE_URL)
-					.asString(pmClientConfig.getWebhookBase(channelConfig, "nexus"));
+					.asString();
+
+			if (!ArgUtil.is(trackMessageUrl)) {
+				trackMessageUrl = pmClientConfig.getWebhookBase(channelConfig, "nexus");
+			}
 
 			MapModel options = MapModel.from(outboxMessage.options());
 
