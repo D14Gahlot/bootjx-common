@@ -187,7 +187,7 @@ public abstract class AbstractConnector<CD extends AChannelDetails, P extends Ch
 		if (ArgUtil.is(outboxMessage.getStatus(), Status.BLCKD, Status.LIMIT)) {
 			return false;
 		}
-		environment.messageProcessor().beforeSend(outboxMessage);
+		environment.messageProcessor().beforeSend(outboxMessage,channelConfig);
 		return true;
 	}
 
