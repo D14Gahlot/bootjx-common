@@ -537,7 +537,7 @@ public class PMEnvironment {
 	}
 
 	public interface MessageProcessor {
-		OutboxMessage beforeSend(OutboxMessage outboxMessage);
+		OutboxMessage beforeSend(OutboxMessage outboxMessage, ChannelConfig channelConfig);
 	}
 
 	@Autowired(required = false)
