@@ -2,7 +2,9 @@ package com.boot.jx.cache.test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
 import com.boot.jx.tunnel.ITunnelSubscriber;
 import com.boot.jx.tunnel.TunnelEventMapping;
@@ -14,10 +16,17 @@ public class RedisSampleSubscriber implements ITunnelSubscriber<RedisSampleData>
 
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
+	@Autowired
+	AppConfig appConfig;
+
 	@Override
 	public void onMessage(String channel, RedisSampleData msg) {
-		LOGGER.info("======onMessage1==={} ====  {}", channel,
-				JsonUtil.toJson(msg));
+		LOGGER.info("======onMessage1==={} ====  {}", channel, JsonUtil.toJson(msg));
+	}
+
+	@Override
+	public void poll(RedisSampleData message) {
+		LOGGER.info("=={}====onMessage1==={} ====", appConfig.getAppName(), JsonUtil.toJson(message));
 	}
 
 }
