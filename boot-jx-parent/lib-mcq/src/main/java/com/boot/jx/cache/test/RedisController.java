@@ -20,6 +20,8 @@ import com.boot.jx.api.BoolRespModel;
 import com.boot.jx.cache.test.RedisSampleTxCacheBox.RedisSampleData;
 import com.boot.jx.tunnel.ITunnelDefs.ITaskLimiter;
 import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
+import com.boot.jx.tunnel.TunnelMQ;
+import com.boot.jx.tunnel.TunnelMQ.TunnelMQEvent;
 import com.boot.jx.tunnel.TunnelMessage;
 import com.boot.jx.tunnel.TunnelService;
 import com.boot.jx.tunnel.sys.SharedConfigManager;
@@ -37,6 +39,9 @@ public class RedisController {
 
 	@Autowired
 	private TunnelService tunnelService;
+
+	@Autowired
+	private TunnelMQ tunnelMQ;
 
 	@Autowired(required = false)
 	private List<ITaskLimiter> dbEventLimiters;
@@ -74,6 +79,25 @@ public class RedisController {
 			}
 			return tunnelService.taskPublish(event.getTopic(), event.getData(), event.getContext());
 		}
+	}
+
+	@RequestMapping(value = "/pub/tunnel/mq", method = RequestMethod.POST)
+	public ApiResponse<Object, Object> tunnelMQ(@RequestBody TunnelMQEvent event,
+			@RequestParam(value = "type", defaultValue = "push") String mqType) throws IOException {
+
+		switch (mqType) {
+		case "task":
+			tunnelMQ.task(event);
+			break;
+		case "start":
+			tunnelMQ.start(event);
+			break;
+		case "push":
+		default:
+			tunnelMQ.push(event);
+			break;
+		}
+		return ApiResponse.build();
 	}
 
 	@RequestMapping(value = "/pub/redis/test/task/limiter", method = RequestMethod.POST)

@@ -12,8 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.boot.jx.AppConfig;
 import com.boot.jx.AppContext;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.AppParam;
@@ -38,6 +40,9 @@ public class TunnelService implements ITunnelService {
 
 	@Autowired
 	private TunnelFilterManager tunnelFilter;
+
+	@Autowired
+	private AppConfig appConfig;
 
 	@PostConstruct
 	public void init() {
@@ -265,5 +270,6 @@ public class TunnelService implements ITunnelService {
 				queueName);
 		return new TunnelQueueImpl<T>(redisson.getQueue(newQueue));
 	}
+
 
 }
