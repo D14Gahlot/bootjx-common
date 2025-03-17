@@ -116,12 +116,11 @@ public class AgChatSessionController {
 	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
 	public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 			throws InterruptedException {
-
 		outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
 		outboxMessage.route().setSenderCode(agentSession.getAgentCode());
 		outboxMessage.route().setSenderApp(APP_TYPE.AGENT.name());
 		outboxMessage.route().setSenderType(MESSAGE_SENDER_TYPE.AGENT);
-		ChatSessionDoc sessionDoc = chatSessionFactory.linkSession(outboxMessage);
+		ChatSessionDoc sessionDoc = chatSessionFactory.linkSessionSendNewOutBound(outboxMessage);
 
 		// Session Stuff Logging <
 			if (sessionDoc != null && 

@@ -1,5 +1,7 @@
 package com.boot.jx.chat;
 
+import java.security.NoSuchAlgorithmException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +101,7 @@ public class ChatSessionFactory {
 		}
 
 		Contactable contact = PostManUtil.getContactMeta(sessionMessage.contact());
+	
 
 		if (!ArgUtil.is(contact.getContactId())) {
 			// CONTACT CONNANOT BE FOUND
@@ -240,7 +243,27 @@ public class ChatSessionFactory {
 		ChatSessionDoc session = getChatSession(inboxMessage);
 		return linkSession(session, inboxMessage);
 	}
-
+	/**
+	 * this is equivalent to linksession for outbound message 
+	 * @param inboxMessage
+	 * @return
+	 */
+	public ChatSessionDoc linkSessionSendNewOutBound(IMessage inboxMessage) {
+		
+		if(PostManUtil.IS_MULTI_THREAD(inboxMessage.contact().getChannelType()) && ArgUtil.isNotEmpty(inboxMessage.getSubject())) {
+		String ticketHash=null;
+			try {
+				ticketHash = PostManUtil.createTicketHash(inboxMessage);
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+				inboxMessage.session().setTicketHash(ticketHash);
+		}
+		ChatSessionDoc session = getChatSession(inboxMessage);
+		return linkSession(session, inboxMessage);
+	}
+	
 	public void push(MessageDoc msgDoc, IMessage iMessage) {
 		if (PostManUtil.isInBound(msgDoc.getType()) || PostManUtil.isOutBound(msgDoc.getType())) {
 			try {
