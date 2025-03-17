@@ -148,9 +148,12 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					} else if (ArgUtil.is(defaultClient.getWebhook())) {
 						forward2Webhook(inboxMessage, defaultClient.getWebhook(), defaultClient, true);
 					} else {
+
 						// if (APP_TYPE.APP_SCRIPT.equals(appType)) {
-						forward2Webhook(inboxMessage, ArgUtil.anyOf(defaultClient.getWebhook(),
-								pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD), defaultClient);
+						forward2Webhook(inboxMessage,
+								ArgUtil.anyOf(defaultClient.getWebhook(),
+										pmCommonConfig.getScriptusUrl(defaultClient, PATH.APP_SCRIPT_FRWRD)),
+								defaultClient);
 						// } else {
 						// ApiResponseUtil.throwException("Forward URL missing");
 						// }
@@ -161,8 +164,10 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				}
 
 				if (CHAT_MODE.SCRIPTUS.equals(appType.getMode())) {
-					forward2Webhook(inboxMessage, ArgUtil.anyOf(defaultClient.getWebhook(),
-							pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD), defaultClient);
+					forward2Webhook(inboxMessage,
+							ArgUtil.anyOf(defaultClient.getWebhook(),
+									pmCommonConfig.getScriptusUrl(defaultClient, PATH.APP_SCRIPT_FRWRD)),
+							defaultClient);
 					return;
 				}
 
@@ -175,9 +180,9 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				}
 
 				// INTERNAL BOT HANDLING
-				if (CHAT_MODE.BOT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getBotUrl())) {
+				if (CHAT_MODE.BOT.equals(appType.getMode()) && ArgUtil.is(pmCommonConfig.getBotUrl(defaultClient))) {
 					LOGGER.debug("Forwarding InboxMessage to internal Bot ");
-					chatClient.forward(pmCommonConfig.getBotUrl()
+					chatClient.forward(pmCommonConfig.getBotUrl(defaultClient)
 							// "http://127.0.0.1:8084/bot"
 							+ PATH.INBOUND_FRWRD, inboxMessage);
 					return;
@@ -193,7 +198,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 				&& ArgUtil.isEmptyValue(inboxMessage.session().isResolved())) {
 			chatClient.forward(pmCommonConfig.getAgentUrl() + PATH.INBOUND_FRWRD, inboxMessage);
 		} else {
-			chatClient.forward(pmCommonConfig.getBotUrl() + PATH.INBOUND_FRWRD, inboxMessage);
+			chatClient.forward(pmCommonConfig.getBotUrl(null) + PATH.INBOUND_FRWRD, inboxMessage);
 		}
 	}
 
@@ -415,7 +420,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 					String agentUrl = ArgUtil.nonEmpty(targetAppQueue.getWebhook(), pmCommonConfig.getAgentUrl());
 					chatClient.sessionEvent(agentUrl, event, pmArgs);
 				} else if (appType.is(CHAT_MODE.BOT)) {
-					chatClient.sessionEvent(pmCommonConfig.getBotUrl(), event, pmArgs);
+					chatClient.sessionEvent(pmCommonConfig.getBotUrl(targetAppQueue), event, pmArgs);
 				}
 			}
 		}
@@ -483,7 +488,8 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			boolean internalwebhook = APP_TYPE.APP_SCRIPT.equals(appType) || CHAT_MODE.SCRIPTUS.equals(chatMode);
 
 			String webhookUrl = internalwebhook
-					? ArgUtil.anyOf(defaultClient.getWebhook(), pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD)
+					? ArgUtil.anyOf(defaultClient.getWebhook(),
+							pmCommonConfig.getScriptusUrl(defaultClient, PATH.APP_SCRIPT_FRWRD))
 					: defaultClient.getWebhook();
 
 			if (ArgUtil.is(webhookUrl)) {

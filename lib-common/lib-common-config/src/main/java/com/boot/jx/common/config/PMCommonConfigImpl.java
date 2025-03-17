@@ -19,12 +19,14 @@ import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.models.AppAuthModels;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.logger.LoggerService;
+import com.boot.jx.postman.ClientApp;
 import com.boot.jx.postman.PMConstants;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
 import com.boot.jx.postman.PMEnvironment.PMConfigurationObject;
 import com.boot.jx.postman.PMEnvironment.PMDomainConfig;
+import com.boot.jx.postman.PMEnvironment.UrlPath;
 import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.scope.tnt.Tenants;
 import com.boot.jx.scope.tnt.Tenants.TenantResolver;
@@ -79,6 +81,9 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 
 	@Value("${mry.scriptus.url}")
 	private String scriptusUrl;
+
+	@Value("${mry.scriptus2.url}")
+	private String scriptus2Url;
 
 	@Value("${mry.scriptus.secret}")
 	private String scriptusSecret;
@@ -246,7 +251,7 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 		return duperEmail;
 	}
 
-	public String getBotUrl() {
+	public String getBotUrl(ClientApp app) {
 		return pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_BOT_URL).asString(this.botUrl);
 	}
 
@@ -280,8 +285,20 @@ public class PMCommonConfigImpl extends BootJxConfigProvider implements PMCommon
 
 	@Override
 	public String getScriptusUrl() {
-		// return "http://localhost:8085/";
 		return pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SCRIPTUS_URL).asString(this.scriptusUrl);
+	}
+
+	@Override
+	public String getScriptusUrl(ClientApp app, UrlPath path) {
+		// return "http://localhost:8085/";
+		if (ArgUtil.is(app) && ArgUtil.is(path.v2)) {
+			if (app.keyEntry(CONFIG_SETUP_KEY.SETUP_SCRIPTUS_VERSION).is("v2")) {
+				return pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SCRIPTUS2_URL)
+						.asString(this.scriptus2Url) + path.v2;
+			}
+		}
+		return pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SCRIPTUS_URL).asString(this.scriptusUrl)
+				+ path.v1;
 	}
 
 	@Override

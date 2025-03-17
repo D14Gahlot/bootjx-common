@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.boot.jx.AppContextUtil;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
+import com.boot.jx.chat.ChatClient.PATH;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpClientException;
 import com.boot.jx.http.CommonHttpRequest;
@@ -61,7 +62,7 @@ public class AppScriptController {
 
 		Map<String, Object> mapp = null;
 		try {
-			mapp = restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getBot")
+			mapp = restService.ajax(pmCommonConfig.getScriptusUrl(app, PATH.APP_SCRIPT_GET_BOT))
 					.queryParam("id", appId + AppContextUtil.getTenant()).queryParam("appId", appId)
 					.queryParam("domain", AppContextUtil.getTenant()).get().asMap();
 		} catch (ApiHttpClientException e) {
@@ -88,8 +89,8 @@ public class AppScriptController {
 		data.put("appId", app.getId());
 		data.put("appKey", app.getKey());
 		data.put("id", appId + AppContextUtil.getTenant());
-		return ApiResponse.buildResults(
-				restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/setBot").postJson(data.toMap()).asMap());
+		return ApiResponse.buildResults(restService.ajax(pmCommonConfig.getScriptusUrl(app, PATH.APP_SCRIPT_SET_BOT))
+				.postJson(data.toMap()).asMap());
 
 	}
 
@@ -121,9 +122,9 @@ public class AppScriptController {
 			return new ApiResponse<Map<String, Object>, Object>();
 		}
 
-		return restService.ajax(pmCommonConfig.getScriptusUrl() + "/bot/getLogs").queryParam("app_id", appId)
-				.queryParam("contact_id", contactId).queryParam("domain", AppContextUtil.getTenant()).get()
-				.asAmxApiResponseOfMap();
+		return restService.ajax(pmCommonConfig.getScriptusUrl(app, PATH.APP_SCRIPT_GET_LOGS))
+				.queryParam("app_id", appId).queryParam("contact_id", contactId)
+				.queryParam("domain", AppContextUtil.getTenant()).get().asAmxApiResponseOfMap();
 	}
 
 }

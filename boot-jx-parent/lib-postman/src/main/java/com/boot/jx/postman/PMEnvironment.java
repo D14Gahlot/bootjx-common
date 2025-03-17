@@ -21,7 +21,6 @@ import com.boot.jx.postman.PMConstants.CHAT_MODE;
 import com.boot.jx.postman.model.MessageDefinitions.Contactable;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.plugin.ChannelConfig;
-import com.boot.model.MapModel.EntryMeta;
 import com.boot.model.MapModel.MapEntry;
 import com.boot.model.TimeModels.TimeStampSupportedModel;
 import com.boot.utils.ArgUtil;
@@ -406,6 +405,25 @@ public class PMEnvironment {
 
 	}
 
+	public static class UrlPath {
+		public String v1;
+		public String v2;
+
+		public UrlPath v1(String v1) {
+			this.v1 = v1;
+			return this;
+		}
+
+		public UrlPath v2(String v2) {
+			this.v2 = v2;
+			return this;
+		}
+
+		public String getV2orV1() {
+			return ArgUtil.anyOf(v2, v1);
+		}
+	}
+
 	@Lazy
 	@Autowired(required = false)
 	private PMEnvironmentProvider provider;
@@ -467,7 +485,7 @@ public class PMEnvironment {
 
 		public String getCdnServer();
 
-		public String getBotUrl();
+		public String getBotUrl(ClientApp app);
 
 		public String getAgentUrl();
 
@@ -476,6 +494,8 @@ public class PMEnvironment {
 		public String getServiceServerByRequest();
 
 		public String getScriptusUrl();
+
+		public String getScriptusUrl(ClientApp app, UrlPath path);
 
 		public String getScriptusSecret();
 
