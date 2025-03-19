@@ -69,7 +69,7 @@ public class TunnelSubscriberFactory {
 			});
 			ITunnelSubscriber<M> listenerTarget = (ITunnelSubscriber<M>) AopProxyUtils.getSingletonTarget(subscriber);
 			M obj = JsonUtil.parse(tm.getData(), pollParamType);
-			listenerTarget.poll(obj);
+			listenerTarget.onPush(obj);
 		}
 
 	}
