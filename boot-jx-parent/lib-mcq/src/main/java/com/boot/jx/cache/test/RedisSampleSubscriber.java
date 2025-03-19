@@ -25,7 +25,7 @@ public class RedisSampleSubscriber implements ITunnelSubscriber<RedisSampleData>
 	}
 
 	@Override
-	public void poll(RedisSampleData message) {
+	public void onPush(RedisSampleData message) {
 		LOGGER.info("=={}====onMessage1==={} ====", appConfig.getAppName(), JsonUtil.toJson(message));
 	}
 
