@@ -31,6 +31,7 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.model.Attachment;
@@ -72,6 +73,9 @@ public class WacfbClient implements ChannelClient {
 
 	@Autowired
 	private RestService restService;
+
+	@Autowired
+	PMEnvironment pmEnvironment;
 
 	public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
 		WACFBConfigDetails config = channelConfig.getWacfb();
@@ -124,7 +128,8 @@ public class WacfbClient implements ChannelClient {
 						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
-								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
+								+ "\n" + ArgUtil.anyOf(b.getShorturl(), b.getUrl()) + "\n"
+								+ StringUtils.wrap(" _", b.getDesc(), "_\n");
 						urlCount++;
 						noButtons.add(b);
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
@@ -738,7 +743,7 @@ public class WacfbClient implements ChannelClient {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
 					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
-							.put("url", button.getUrl()).toMap());
+							.put("url", ArgUtil.anyOf(button.getShorturl(), button.getUrl())).toMap());
 		} else if ("location_request_message".equalsIgnoreCase(type)) {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
 		} else if ("address_message".equalsIgnoreCase(type)) {

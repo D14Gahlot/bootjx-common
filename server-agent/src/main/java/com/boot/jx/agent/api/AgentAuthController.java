@@ -70,9 +70,9 @@ public class AgentAuthController {
 	private EmpAuthService authService;
 
 	private boolean isPanelActive() {
-		return pmEnvironment.keyEntry("mry.domain.active").asBoolean()
-				&& pmEnvironment.keyEntry("mry.domain.agent.active").asBoolean()
-				&& pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.APP_MODULE_AGENT).asBoolean(true);
+		return pmEnvironment.config().prefsEntry("mry.domain.active").asBoolean()
+				&& pmEnvironment.config().prefsEntry("mry.domain.agent.active").asBoolean()
+				&& pmEnvironment.config().featureEntry(CONFIG_FEATURES_KEY.APP_MODULE_AGENT).asBoolean(true);
 	}
 
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })

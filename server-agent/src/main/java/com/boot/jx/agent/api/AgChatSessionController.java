@@ -116,23 +116,25 @@ public class AgChatSessionController {
 	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
 	public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 			throws InterruptedException {
-
 		outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
 		outboxMessage.route().setSenderCode(agentSession.getAgentCode());
 		outboxMessage.route().setSenderApp(APP_TYPE.AGENT.name());
 		outboxMessage.route().setSenderType(MESSAGE_SENDER_TYPE.AGENT);
-		ChatSessionDoc sessionDoc = chatSessionFactory.linkSession(outboxMessage);
+		ChatSessionDoc sessionDoc = chatSessionFactory.linkSessionSendNewOutBound(outboxMessage);
 
 		// Session Stuff Logging <
-		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())
-				|| (environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean()
-						&& !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()))) {
-			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
-			agentChatHandlerImpl.onAssign(agent, sessionDoc);
-		}
+			if (sessionDoc != null && 
+			    (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent()) ||
+			    (environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean() &&
+			    !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())))) {
+
+			    AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
+			    agentChatHandlerImpl.onAssign(agent, sessionDoc);
+			}
+
 
 		// Session Stuff Logging >
-		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
+		if (sessionDoc!=null && ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			outboxMessage.route().setQueueCode(sessionDoc.getAssignedToQueue());
 			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 

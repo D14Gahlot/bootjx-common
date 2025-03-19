@@ -51,12 +51,12 @@ public class XmsVendorConfigurer implements TenantAuthFilter {
 			return false;
 		}
 
-		if (!pmEnvironment.config().keyEntry("mry.domain.active").asBoolean()) {
+		if (!pmEnvironment.config().prefsEntry("mry.domain.active").asBoolean()) {
 			ApiResponseUtil.addError("Domain not Active. Please contact support");
 			return false;
 		}
 
-		if (!pmEnvironment.config().keyEntry("mry.domain.xms.active").asBoolean()) {
+		if (!pmEnvironment.config().prefsEntry("mry.domain.xms.active").asBoolean()) {
 			ApiResponseUtil.addError("Messaging APIs not Active");
 			return false;
 		}

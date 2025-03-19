@@ -62,7 +62,7 @@ public class OutBoundControllerBot {
 			}
 		} else if (app.equals(CHAT_MODE.WEBHOOK)) {
 			String webhook = ArgUtil.is(app.getWebhook()) ? app.getWebhook()
-					: (pmCommonConfig.getScriptusUrl() + PATH.APP_SCRIPT_FRWRD_OUTBOUND);
+					: (pmCommonConfig.getScriptusUrl(app, PATH.APP_SCRIPT_FRWRD_OUTBOUND));
 
 			restService.ajax(webhook).post(data).asNone();
 		}

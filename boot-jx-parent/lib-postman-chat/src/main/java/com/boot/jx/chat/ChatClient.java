@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.postman.PMEnvironment.PMClientConfig;
 import com.boot.jx.postman.PMEnvironment.PMCommonConfig;
+import com.boot.jx.postman.PMEnvironment.UrlPath;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.dto.ChatProfileDTO;
 import com.boot.jx.postman.dto.ChatProfileDTO.ChatUserProfileRequest;
@@ -30,8 +31,14 @@ public class ChatClient {
 		public static final String ASSIGN_TO_AGENT_V2 = "/int/assign/v2/agent/";
 		public static final String INBOUND_FRWRD = "/int/inbound/callback";
 		public static final String SESSION_EVENT = "/int/session/event";
-		public static final String APP_SCRIPT_FRWRD = "/bot/sendMessage";
-		public static final String APP_SCRIPT_FRWRD_OUTBOUND = "/bot/outbound/message";
+
+		public static final UrlPath APP_SCRIPT_FRWRD = new UrlPath().v1("/bot/sendMessage")
+				.v2("/scriptus/inbound/message");
+		public static final UrlPath APP_SCRIPT_FRWRD_OUTBOUND = new UrlPath().v1("/bot/outbound/message");
+		public static final UrlPath APP_SCRIPT_GET_LOGS = new UrlPath().v1("/bot/getLogs");
+		public static final UrlPath APP_SCRIPT_SET_BOT = new UrlPath().v1("/bot/setBot");
+		public static final UrlPath APP_SCRIPT_GET_BOT = new UrlPath().v1("/bot/getBot");
+
 	}
 
 	@Autowired

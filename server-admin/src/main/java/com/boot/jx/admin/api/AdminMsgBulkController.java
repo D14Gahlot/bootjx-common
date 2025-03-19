@@ -41,6 +41,7 @@ import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoStore.PaginatedQuery;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -53,6 +54,7 @@ import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -93,6 +95,9 @@ public class AdminMsgBulkController {
 
 	@Autowired
 	private BulkMessageService bulkMessageService;
+	
+	@Autowired
+	private PMEnvironment enviroment;
 
 	@RequestMapping(value = "/api/message/test/push/send", method = { RequestMethod.POST })
 	public ApiResponse<BulkSessionDoc, Object> sendTestMessage(@RequestBody OutboxMessage bulkMessage)
@@ -182,6 +187,8 @@ public class AdminMsgBulkController {
 					bulkMessage.contact().setLane(bulkDoc.getLane());
 					bulkMessage.contact().setContactId(bulkDoc.getChannelId());
 					bulkMessage.contact().setContactType(bulkDoc.getContactType());
+					ChannelConfig channelConfig = enviroment.config().channel(bulkDoc.getChannelId());
+					bulkMessage.contact().setChannelType(channelConfig.getChannelType());
 					bulkMessage.setCampaignTitle(bulkDoc.getCampaignTitle());
 
 					if (ArgUtil.is(bulkDoc.getGroupId()) || ArgUtil.is(bulkDoc.getGroups())) {

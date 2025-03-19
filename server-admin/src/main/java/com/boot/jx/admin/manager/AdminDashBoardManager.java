@@ -700,7 +700,7 @@ public class AdminDashBoardManager {
 		List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class, contactType.toString());
 		return totalMsgDoc;
 	}
-	
+
 	public Integer getTotalMsgCountV1(Object contactType, long dateRange1, long dateRange2) {
 
 		Query queryAll = new Query();
@@ -708,13 +708,13 @@ public class AdminDashBoardManager {
 		queryAll.addCriteria(Criteria.where("type").in("I", "O"));
 		queryAll.with(new Sort(new Order(Direction.ASC, "timestamp")));
 		agentAnaMgr.removeMsgFields(queryAll);
-		//List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class, contactType.toString());
-		
-		Long totalMsgDoc= mongoTemplate.count(queryAll, contactType.toString());
+		// List<MessageDoc> totalMsgDoc = mongoTemplate.find(queryAll, MessageDoc.class,
+		// contactType.toString());
+
+		Long totalMsgDoc = mongoTemplate.count(queryAll, contactType.toString());
 		Integer integerValue = Math.toIntExact(totalMsgDoc);
 		return integerValue;
 	}
-	
 
 	// To fetch In msg records from a collection
 	public List<MessageDoc> getTotalInMsgCount(Object contactType, long dateRange1, long dateRange2) {
@@ -874,7 +874,6 @@ public class AdminDashBoardManager {
 
 		return mapLst;
 	}
-	
 
 	/** date wise count **/
 	public Map<Object, Object> getDateWiseCount(List<MessageDoc> msgLst) {
@@ -1295,7 +1294,7 @@ public class AdminDashBoardManager {
 		dayWiseMap = MapUtils.defaultValue(dayWiseCountMap, channelLst, dateRanMap, tnt);
 
 		dayWiseMap = sortMap(dayWiseMap);
-		dayWiseMap =removeSandBoxNumber(dayWiseMap);
+		dayWiseMap = removeSandBoxNumber(dayWiseMap);
 
 		summaryMap = lstSummDto.stream().collect(Collectors.groupingBy(SummaryDocDto::getType, Collectors.counting()));
 
@@ -1390,14 +1389,14 @@ public class AdminDashBoardManager {
 			List<ContactTypeCountDto> messageTypeLst = new ArrayList<ContactTypeCountDto>();
 
 			List<Document> list = getAggregationMatchForMsgStatus(lasthrTimeStmp, currentTs);
-		MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
+			MongoCursor<Document> cursor = mongoTemplate.collection(contactType).aggregate(list).iterator();
 			while (cursor.hasNext()) {
 				ContactTypeCountDto contactDto = new ContactTypeCountDto();
 				Document object = cursor.next();
 				if (ArgUtil.is(object)) {
 					JSONObject jsonObject = new JSONObject(JsonUtil.toJson(object));
 					String type = ArgUtil.parseAsString(jsonObject.get("_id"));
-					if (ArgUtil.is(type) && ArgUtil.is(type)){
+					if (ArgUtil.is(type) && ArgUtil.is(type)) {
 						Map<String, Object> mapValue = JsonUtil.fromJsonToMap(type);
 						long count = ArgUtil.parseAsLong(object.get("count"), 0L);
 						contactDto.setType(type);
@@ -1826,9 +1825,9 @@ public class AdminDashBoardManager {
 		long monthMinTimeStamp = DateUtil.getStartTimestamp(month, year).getTime();
 		long monthMaxTimeStamp = DateUtil.getEndTimestamp(month, year).getTime();
 		String offset = getTimeZoneFromSetup();
-		monthMinTimeStamp = monthMinTimeStamp+countryTimeZoneOffset(offset);
-		monthMaxTimeStamp = monthMaxTimeStamp+countryTimeZoneOffset(offset);
-		
+		monthMinTimeStamp = monthMinTimeStamp + countryTimeZoneOffset(offset);
+		monthMaxTimeStamp = monthMaxTimeStamp + countryTimeZoneOffset(offset);
+
 		List<WabaSummaryDocDto> wabaLst = new ArrayList<>();
 		Query query = new Query();
 		query.addCriteria(Criteria.where("created.stamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp));
@@ -1854,10 +1853,10 @@ public class AdminDashBoardManager {
 			wabaLst.add(dto);
 		}
 		wabasumm.setWabaSummaryCount(wabaLst);
-		
-		Map<String,Long> mediaTempCount = getMediaTemplateCountV1(monthMinTimeStamp,monthMaxTimeStamp);
+
+		Map<String, Long> mediaTempCount = getMediaTemplateCountV1(monthMinTimeStamp, monthMaxTimeStamp);
 		wabasumm.setMediaSummaryCount(mediaTempCount);
-		
+
 		return wabasumm;
 	}
 
@@ -1867,7 +1866,7 @@ public class AdminDashBoardManager {
 			String[] contactids = contactid.split("_");
 			if (contactids != null && contactids.length > 1) {
 				lane = contactids[1];
-			}else {
+			} else {
 				contactids = contactid.split(":");
 				if (contactids != null && contactids.length > 1) {
 					lane = contactids[1];
@@ -1898,7 +1897,7 @@ public class AdminDashBoardManager {
 	}
 
 	public String getTimeZoneFromSetup() {
-		String offset = environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+		String offset = environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
 				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
 	}
@@ -2110,8 +2109,8 @@ public class AdminDashBoardManager {
 		query.fields().include("form.reply_title").include("contactId").include("contact.contactType")
 				.include("timestamp");
 	}
-	
-	/** customer session count with  channel summary **/
+
+	/** customer session count with channel summary **/
 	public ContactTypeSummaryDto getCustomerSessionCountSummary(String dateRange1, String dateRange2, int days) {
 		String tnt = AppContextUtil.getTenant();
 		List<String> lst = getListOfContactType();
@@ -2122,8 +2121,8 @@ public class AdminDashBoardManager {
 
 		String offset = getTimeZoneFromSetup();
 
-		LOGGER.info("ADMIN getCustomerSessionCountSummary {}" + offset + "\t dateRange1:" + dateRange1 + "\t dateRange2 :"
-				+ dateRange2);
+		LOGGER.info("ADMIN getCustomerSessionCountSummary {}" + offset + "\t dateRange1:" + dateRange1
+				+ "\t dateRange2 :" + dateRange2);
 
 		long offsetts = countryTimeZoneOffset(offset);
 		String zone = DateUtil.getTimeZone(offset);
@@ -2153,40 +2152,38 @@ public class AdminDashBoardManager {
 		List<SummaryDocDto> lstSummDto = new ArrayList<>();
 		List<DateWiseHourCountDto> hourCntLst = new ArrayList<>();
 
-		
-			Query query = new Query();
-			query.addCriteria(Criteria.where("startSessionStamp").gt(lasDayTimeStmp).lt(currentTs));
-			query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
-			query.fields().include("startSessionStamp").include("contactType").include("channel").include("contact");
-			List<ChatSessionDoc> msgDocLst = mongoTemplate.find(query, ChatSessionDoc.class);
-			for (ChatSessionDoc doc : msgDocLst) {
-				SummaryDocDto dto = new SummaryDocDto();
-				DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
-				String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getStartSessionStamp(),
-						DateUtil.YYYYMMDD_DATE_FORMAT);
-				dto.setDate(yyyyMMdd);
-				dto.setType(doc.contact().getContactType());
-				dto.setChannel(doc.contact().getContactType());
-				////--dto.setMeta(doc.getMeta());
-				dto.setDomain(tnt);
-				dto.setLane(getLane(doc.contact().getContactId()));
-				String id = getSummaryId(dto);
-				dto.setId(id);
-				if (ArgUtil.is(dto.getId())) {
-					lstSummDto.add(dto);
+		Query query = new Query();
+		query.addCriteria(Criteria.where("startSessionStamp").gt(lasDayTimeStmp).lt(currentTs));
+		query.with(new Sort(new Order(Direction.DESC, "startSessionStamp")));
+		query.fields().include("startSessionStamp").include("contactType").include("channel").include("contact");
+		List<ChatSessionDoc> msgDocLst = mongoTemplate.find(query, ChatSessionDoc.class);
+		for (ChatSessionDoc doc : msgDocLst) {
+			SummaryDocDto dto = new SummaryDocDto();
+			DateWiseHourCountDto daySummDto = new DateWiseHourCountDto();
+			String yyyyMMdd = DateUtil.foramtTimeStampDateAsString(doc.getStartSessionStamp(),
+					DateUtil.YYYYMMDD_DATE_FORMAT);
+			dto.setDate(yyyyMMdd);
+			dto.setType(doc.contact().getContactType());
+			dto.setChannel(doc.contact().getContactType());
+			//// --dto.setMeta(doc.getMeta());
+			dto.setDomain(tnt);
+			dto.setLane(getLane(doc.contact().getContactId()));
+			String id = getSummaryId(dto);
+			dto.setId(id);
+			if (ArgUtil.is(dto.getId())) {
+				lstSummDto.add(dto);
+			}
+			String channelid = getSummaryWithChannelId(dto);
+			if (ArgUtil.is(channelid)) {
+				daySummDto.setDate(yyyyMMdd);
+				daySummDto.setChannel(channelid);
+				if (daySummDto != null) {
+					hourCntLst.add(daySummDto);
 				}
-				String channelid = getSummaryWithChannelId(dto);
-				if (ArgUtil.is(channelid)) {
-					daySummDto.setDate(yyyyMMdd);
-					daySummDto.setChannel(channelid);
-					if (daySummDto != null) {
-						hourCntLst.add(daySummDto);
-					}
-				}
-
 			}
 
-		
+		}
+
 		Map<Object, Long> summaryMap = new HashMap<>();
 
 		/** day wise count **/
@@ -2209,22 +2206,22 @@ public class AdminDashBoardManager {
 		return dto;
 	}
 
-
 	public Map<Object, Map<Object, Long>> removeSandBoxNumber(Map<Object, Map<Object, Long>> hourWiseCount) {
-		if (hourWiseCount!=null && !hourWiseCount.isEmpty()) {
-		// Remove entries with keys containing "wa_" and no characters after "wa_"
-        Iterator<Map.Entry<Object, Map<Object, Long>>> iterator = hourWiseCount.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Object, Map<Object, Long>> entry = iterator.next();
-            if (entry.getKey().toString().matches(".*wa_\\b")) {
-                iterator.remove();
-            }
-        }
+		if (hourWiseCount != null && !hourWiseCount.isEmpty()) {
+			// Remove entries with keys containing "wa_" and no characters after "wa_"
+			Iterator<Map.Entry<Object, Map<Object, Long>>> iterator = hourWiseCount.entrySet().iterator();
+			while (iterator.hasNext()) {
+				Map.Entry<Object, Map<Object, Long>> entry = iterator.next();
+				if (entry.getKey().toString().matches(".*wa_\\b")) {
+					iterator.remove();
+				}
+			}
 		}
-       return hourWiseCount;
+		return hourWiseCount;
 	}
-	//api for counting mediaTemp
-	public List<ChatSessionDoc> getMediaTemplateCount(long timestamp ) {
+
+	// api for counting mediaTemp
+	public List<ChatSessionDoc> getMediaTemplateCount(long timestamp) {
 		// List<MessageDoc> msgDocLst =null;
 		String tnt = AppContextUtil.getTenant();
 		Date dateTi = new Date(timestamp);
@@ -2238,54 +2235,52 @@ public class AdminDashBoardManager {
 		String offset = getTimeZoneFromSetup();
 		monthMinTimeStamp = monthMinTimeStamp + countryTimeZoneOffset(offset);
 		monthMaxTimeStamp = monthMaxTimeStamp + countryTimeZoneOffset(offset);
-		 Criteria criteria = Criteria.where("msg.lastMsg.timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp).and("msg.lastOutBoundMsg.options.attachment.mediaTemplate").exists(true);
-		 Query query = new Query(criteria);
+		Criteria criteria = Criteria.where("msg.lastMsg.timestamp").gt(monthMinTimeStamp).lt(monthMaxTimeStamp)
+				.and("msg.lastOutBoundMsg.options.attachment.mediaTemplate").exists(true);
+		Query query = new Query(criteria);
 		List<ChatSessionDoc> hsmDocLst = mongoTemplate.find(query, ChatSessionDoc.class);
 		System.out.println("Number of records found: " + hsmDocLst.size());
 		return hsmDocLst;
 	}
 
-	
 	/** api for counting mediaTemp **/
-	public Map<String,Long> getMediaTemplateCountV1(long monthMinTimeStamp,long monthMaxTimeStamp ) {
-			
-		// Match operation to filter based on format, timestamp range, and non-null mediaTemplate
-	        MatchOperation matchOperation = Aggregation.match(
-	                Criteria.where("msg.lastOutBoundMsg.options.attachment.mediaTemplate").ne(null)
-	                        .and("msg.lastMsg.options.waba.components.format").is("IMAGE")
-	                        .and("msg.lastMsg.timestamp").gte(monthMinTimeStamp).lte(monthMaxTimeStamp)
-	        );
+	public Map<String, Long> getMediaTemplateCountV1(long monthMinTimeStamp, long monthMaxTimeStamp) {
 
-	        // Group operation to group by categoryType and count total documents
-	        GroupOperation groupOperation = Aggregation.group("msg.lastMsg.meta.categoryType")
-	                .count().as("totalDocuments");
+		// Match operation to filter based on format, timestamp range, and non-null
+		// mediaTemplate
+		MatchOperation matchOperation = Aggregation
+				.match(Criteria.where("msg.lastOutBoundMsg.options.attachment.mediaTemplate").ne(null)
+						.and("msg.lastMsg.options.waba.components.format").is("IMAGE").and("msg.lastMsg.timestamp")
+						.gte(monthMinTimeStamp).lte(monthMaxTimeStamp));
 
-	        // Create aggregation pipeline
-	        Aggregation aggregation = Aggregation.newAggregation(
-	                matchOperation,   // Apply the match operation
-	                groupOperation    // Apply the group operation
-	        );
+		// Group operation to group by categoryType and count total documents
+		GroupOperation groupOperation = Aggregation.group("msg.lastMsg.meta.categoryType").count().as("totalDocuments");
 
-	        // Execute the aggregation query
-	        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "CHAT_SESSION", Document.class);
+		// Create aggregation pipeline
+		Aggregation aggregation = Aggregation.newAggregation(matchOperation, // Apply the match operation
+				groupOperation // Apply the group operation
+		);
 
-	        // Initialize a Map to store the result
-	        Map<String, Long> categoryCountMap = new HashMap<>();
+		// Execute the aggregation query
+		AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "CHAT_SESSION", Document.class);
 
-	        // Iterate over the results and populate the map
-	        for (Document document : results.getMappedResults()) {
-	            String categoryType = document.getString("_id");  // _id contains the categoryType
-	            Long count = Long.valueOf(document.getInteger("totalDocuments").longValue());  // totalDocuments contains the count 
-	            categoryCountMap.put(categoryType, count);
-	        }
-	        // List of all expected categories
-	        List<String> expectedKeys = Arrays.asList("MARKETING", "UTILITY", "SERVICE", "AUTHENTICATION");
-	        
-	        expectedKeys.forEach(key -> categoryCountMap.putIfAbsent(key, Long.valueOf(0)));
+		// Initialize a Map to store the result
+		Map<String, Long> categoryCountMap = new HashMap<>();
 
-	        // Return the map
-	        return categoryCountMap;
+		// Iterate over the results and populate the map
+		for (Document document : results.getMappedResults()) {
+			String categoryType = document.getString("_id"); // _id contains the categoryType
+			Long count = Long.valueOf(document.getInteger("totalDocuments").longValue()); // totalDocuments contains the
+																							// count
+			categoryCountMap.put(categoryType, count);
 		}
+		// List of all expected categories
+		List<String> expectedKeys = Arrays.asList("MARKETING", "UTILITY", "SERVICE", "AUTHENTICATION");
 
+		expectedKeys.forEach(key -> categoryCountMap.putIfAbsent(key, Long.valueOf(0)));
+
+		// Return the map
+		return categoryCountMap;
+	}
 
 }

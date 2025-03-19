@@ -1,7 +1,5 @@
 package com.boot.jx.common.config;
 
-import java.util.Map;
-
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
@@ -48,7 +46,8 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 	POSTMAN_TRACK_MESSAGE(new ConfigMeta("Message Tracker", "postman.track.message").superKey("postman.track.message")
 			.desc("Use Mehery's Tracker to track status for Channels (with no Status support)").optionsOnOff()),
 
-	POSTMAN_TRACK_MESSAGE_URL(new ConfigMeta("Message Tracker", "postman.track.message.url").desc("Tracker URL")),
+	POSTMAN_TRACK_MESSAGE_URL(new ConfigMeta("Message Tracker", "postman.track.message.url")
+			.superKey("postman.track.message").desc("Tracker URL")),
 
 	POSTMAN_AGENT_2FA_ENABLED(new ConfigMeta("Enable 2FA Login", PROPERTIES.POSTMAN_AGENT_2FA_ENABLED)
 			.superKey(PROPERTIES.POSTMAN_AGENT_2FA_ENABLED).desc("You will need OA app").optionsOnOff()),
@@ -257,6 +256,11 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
 
 	POSTMAN_DEBUG_CONTACT(new ConfigMeta("Debugging is enabled for Contact", "postman.debug.contact")
+			.group(ConfigConstants.GROUP_DEV).hidden()),
+
+	SETUP_SCRIPTUS_VERSION(new ConfigMeta("Scriptus Version", "setup.scriptus.version")
+			.options(new ConfigOption("v0").label("Version 0"), new ConfigOption("v1").label("Version 1"),
+					new ConfigOption("v2").label("Version 2"))
 			.group(ConfigConstants.GROUP_DEV).hidden()),
 
 	// Ends here
