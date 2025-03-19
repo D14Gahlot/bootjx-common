@@ -68,7 +68,7 @@ public class TunnelMQ {
 	 * @param data
 	 */
 
-	public void start(TunnelMQEvent event) {
+	public void run(TunnelMQEvent event) {
 
 	}
 
@@ -79,7 +79,7 @@ public class TunnelMQ {
 	 * @param job
 	 * @param data
 	 */
-	public void task(TunnelMQEvent event) {
+	public void execute(TunnelMQEvent event) {
 
 	}
 

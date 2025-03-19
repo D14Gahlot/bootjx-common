@@ -87,10 +87,10 @@ public class RedisController {
 
 		switch (mqType) {
 		case "task":
-			tunnelMQ.task(event);
+			tunnelMQ.execute(event);
 			break;
 		case "start":
-			tunnelMQ.start(event);
+			tunnelMQ.run(event);
 			break;
 		case "push":
 		default:
