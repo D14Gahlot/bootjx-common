@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -174,6 +175,7 @@ public class BulkMessageService extends BatchJobExecuter {
 				doc.getContact().setEmail(to);
 				if (templateDoc != null && templateDoc.getHeader() != null) {
 					bulkMessage.setSubject(templateDoc.getHeader());
+					doc.setSubject(bulkMessage.getSubject());
 				}
 			}
 			doc.setMessage(bulkMessage.getMessage());
@@ -483,8 +485,13 @@ public class BulkMessageService extends BatchJobExecuter {
 			outboxMessage.contact().phone(msg.getContact().phone());
 			outboxMessage.contact().setContactId(msg.getContact().getContactId());
 			outboxMessage.setRoute(msg.getRoute());
-
-			ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
+			outboxMessage.setSubject(msg.getSubject());
+			ChatSessionDoc chatSessionDoc =null;
+			if(PostManUtil.IS_MULTI_THREAD(channelType) && ArgUtil.is(outboxMessage.getSubject()) ) {
+				chatSessionDoc = chatSessionFactory.linkSessionSendNewOutBound(outboxMessage);
+			}else {
+			chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
+			}
 			if (ArgUtil.is(chatSessionDoc)) {
 				chatSessionService.initSession(outboxMessage, chatSessionDoc);
 				chatService.send(chatSessionDoc, outboxMessage);
@@ -962,4 +969,9 @@ public class BulkMessageService extends BatchJobExecuter {
 		map.put("email", totalEmails);
 		return map;
 	}
+	
+	
+		
+		
+		
 }
