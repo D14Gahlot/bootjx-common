@@ -79,6 +79,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 import com.boot.jx.postman.doc.WabaAnalyticsDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -1657,7 +1658,7 @@ public class AccountDashBoardManager {
 			}
 			
 			dto.setTnt(ArgUtil.parseAsString(tnt,AppContextUtil.getTenant()));
-			
+			dto.setActive(isNumberActive(dto.getTnt(), number));
 			
 			lstList.add(dto);
 	        }
@@ -1723,6 +1724,18 @@ public class AccountDashBoardManager {
 		return cofigDocLst;
 	}
 	
-
+public boolean isNumberActive(String domain,String number) {
+	boolean isactive=true;
+	
+	Query query = new Query();
+	query.addCriteria(Criteria.where("domain").is(domain).and("isDisabled").is(true).and("contactType").is(ContactType.WHATSAPP.name()).and("lane").is(number).and("isDeleted").is(true));
+	query.fields().include("domain").include("isDeleted").include("contactType").include("isDisabled");
+	List<ChannelConfigDupsDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDupsDoc.class, "DUPS_CONFIG_CHANNEL");
+	if(cofigDocLst!=null && !cofigDocLst.isEmpty()) {
+		return false;
+	}
+	return isactive;
+	
+}
 	
 }
