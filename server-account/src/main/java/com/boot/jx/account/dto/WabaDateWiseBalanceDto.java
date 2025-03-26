@@ -16,6 +16,7 @@ public class WabaDateWiseBalanceDto {
 	String wabaId;
 	String number;
 	String id;
+	boolean isActive=true;
 	List<Map<String, Object>> countCostMap=new ArrayList<>();
 	
 	
@@ -92,6 +93,12 @@ public class WabaDateWiseBalanceDto {
 	}
 	public void setId(String id) {
 		this.id = id;
+	}
+	public boolean isActive() {
+		return isActive;
+	}
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 	
 	

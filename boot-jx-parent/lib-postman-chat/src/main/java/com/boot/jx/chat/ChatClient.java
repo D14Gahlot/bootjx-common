@@ -33,7 +33,7 @@ public class ChatClient {
 		public static final String SESSION_EVENT = "/int/session/event";
 
 		public static final UrlPath APP_SCRIPT_FRWRD = new UrlPath().v1("/bot/sendMessage")
-				.v2("/scriptus/inbound/message");
+				.v2("/scriptus/api/message/inbound");
 		public static final UrlPath APP_SCRIPT_FRWRD_OUTBOUND = new UrlPath().v1("/bot/outbound/message");
 		public static final UrlPath APP_SCRIPT_GET_LOGS = new UrlPath().v1("/bot/getLogs");
 		public static final UrlPath APP_SCRIPT_SET_BOT = new UrlPath().v1("/bot/setBot");

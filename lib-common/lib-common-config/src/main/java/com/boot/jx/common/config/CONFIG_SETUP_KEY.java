@@ -166,14 +166,15 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			new ConfigMeta("Inbound Idle Timeout Interval", "postman.agent.chat.in.idle.timeout.interval")
 					.superKey("postman.agent.chat.in.idle.timeout")
 					.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
-					.inputType(INPUT_TYPE.NUMBER).min(5).group(ConfigConstants.GROUP_AGENT)),
+					.inputType(INPUT_TYPE.NUMBER).min(5).group(ConfigConstants.GROUP_AGENT)
+					.condition(POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT.getKey(), true)),
 
 	POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE(
 			new ConfigMeta("In-bound Idle Timeout Queue", "postman.agent.chat.in.idle.timeout.queue")
 					.superKey("postman.agent.chat.in.idle.timeout")
 					.desc("Timed-out chat gets re-assigned to this queue")
 					.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
-					.group(ConfigConstants.GROUP_AGENT)),
+					.group(ConfigConstants.GROUP_AGENT).condition(POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT.getKey(), true)),
 
 //	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
 //		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
@@ -261,7 +262,7 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 	SETUP_SCRIPTUS_VERSION(new ConfigMeta("Scriptus Version", "setup.scriptus.version")
 			.options(new ConfigOption("v0").label("Version 0"), new ConfigOption("v1").label("Version 1"),
 					new ConfigOption("v2").label("Version 2"))
-			.group(ConfigConstants.GROUP_DEV).hidden()),
+			.group(ConfigConstants.GROUP_DEV)),
 
 	// Ends here
 	;
