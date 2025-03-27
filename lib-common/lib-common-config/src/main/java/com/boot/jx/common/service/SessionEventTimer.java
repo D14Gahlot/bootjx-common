@@ -125,7 +125,7 @@ public class SessionEventTimer extends ATaskLimiter {
 
 	@Async
 	public void setChatInIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent outboundEvent) {
-		if (app != null && (app.isAgentApp() || app.isCustomApp())) {
+		if (app != null && (app.isAgentApp() || app.isCustomApp()) || app.isPreDefinedBot()) {
 			boolean timeoutEnabledApp = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
 					.asBoolean(false);
 			if (timeoutEnabledApp) {
@@ -144,7 +144,7 @@ public class SessionEventTimer extends ATaskLimiter {
 					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
 							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 				}
-			} else if (app.isCustomApp() && ArgUtil.is(outboundEvent.getTimeout())) {
+			} else if ((app.isCustomApp() && app.isPreDefinedBot()) && ArgUtil.is(outboundEvent.getTimeout())) {
 				debouncEvent(null, sessionid, outboundEvent, SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 			}
 		}
