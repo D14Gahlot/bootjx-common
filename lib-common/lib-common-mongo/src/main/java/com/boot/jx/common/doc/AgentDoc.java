@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -57,6 +58,17 @@ public class AgentDoc implements IDocument, DocVersion {
 	private List<ResourceDocument> quickskills;
 
 	private List<String> channels;
+	 @Transient //to not store in db
+	    private AgentSessionDoc agentSession;
+
+	  
+	    public AgentSessionDoc getAgentSession() {
+	        return agentSession;
+	    }
+
+	    public void setAgentSession(AgentSessionDoc agentSession) {
+	        this.agentSession = agentSession;
+	    }
 	private String dept_id;
 
 	private List<DocVersion> oldVersions;

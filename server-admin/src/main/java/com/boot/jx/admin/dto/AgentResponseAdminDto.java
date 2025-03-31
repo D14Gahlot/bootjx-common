@@ -1,5 +1,6 @@
 package com.boot.jx.admin.dto;
 
+import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.dto.AgentResponseDto;
 
 public class AgentResponseAdminDto extends AgentResponseDto<AgentResponseAdminDto> {
@@ -15,7 +16,13 @@ public class AgentResponseAdminDto extends AgentResponseDto<AgentResponseAdminDt
 	private String modified_by;
 
 	private DepartmentResponseAdminDto dept;
-
+	private AgentSessionDoc session;
+	public AgentSessionDoc getSession() {
+	    return session;
+	}
+	public void setSession(AgentSessionDoc session) {
+	    this.session = session;
+	}
 	public String getAgent_department() {
 		return agent_department;
 	}
