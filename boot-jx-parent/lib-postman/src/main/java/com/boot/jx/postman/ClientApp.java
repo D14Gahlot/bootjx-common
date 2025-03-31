@@ -33,7 +33,7 @@ public interface ClientApp extends Serializable, AuditIdentifier {
 	public String getKeyVersion();
 
 	public Long getVersion();
-	
+
 	public String getAppType();
 
 	public String getAppMode();
@@ -56,6 +56,8 @@ public interface ClientApp extends Serializable, AuditIdentifier {
 	boolean isReadOnly();
 
 	boolean isAgentApp();
+
+	boolean isPreDefinedBot();
 
 	boolean isFeedbackApp();
 
