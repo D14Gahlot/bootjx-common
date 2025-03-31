@@ -1,6 +1,7 @@
 package com.boot.jx.admin.manager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -21,6 +22,7 @@ import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.AuditDetailProvider;
@@ -101,21 +103,41 @@ public class AdminManager {
 		agent.setAgent_code(StringUtils.toLowerCase(agent.getAgent_code()));
 		
 		agentStore.save(agent);
-
 		return fetchAgentList(null);
 	}
 
+	
 	public List<AgentDoc> fetchAgentList(String agentId, boolean includeInActive) {
 		List<AgentDoc> agentList = new ArrayList<AgentDoc>();
-		if (ArgUtil.is(agentId)) {
-			AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
-			agentList.add(agent);
-		} else {
-			agentList = agentStore.findAllAgents(includeInActive);
-		}
-		return agentList;
+	    if (ArgUtil.is(agentId)) {
+	       	        AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
+	       	     agentList.add(agent);
+	        if (agent != null) {
+	           	            AgentSessionDoc session = fetchAgentSession(agent.getAgent_code()); 
+	            agent.setAgentSession(session);
+	            agentList = Collections.singletonList(agent);
+	        } else {
+	            agentList = new ArrayList<>();
+	        }
+	    } else {
+	       
+	        agentList = agentStore.findAllAgents(includeInActive);
+	        for (AgentDoc agent : agentList) {
+	            AgentSessionDoc session = fetchAgentSession(agent.getAgent_code());
+	            agent.setAgentSession(session);
+	        }
+	    }
+	    return agentList;
 	}
 
+	private AgentSessionDoc fetchAgentSession(String agentId) {
+		  AgentSessionDoc session = mongoTemplate.findOne(
+			        new Query(Criteria.where("_id").is(agentId)), 
+			        AgentSessionDoc.class
+			    );
+			    System.out.println("Fetched Session for " + agentId + ": " + session);
+			    return session;
+	}
 	private List<AgentDoc> fetchAgentList(String agentId) {
 		return fetchAgentList(agentId, true);
 	}
