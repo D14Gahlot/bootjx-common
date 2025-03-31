@@ -19,7 +19,6 @@ import com.boot.jx.agent.AgentChatHandlerImpl;
 import com.boot.jx.agent.AgentService;
 import com.boot.jx.agent.AgentSessionBean;
 import com.boot.jx.agent.AgentSessionService;
-import com.boot.jx.agent.api.ControllerRequestDTOs.ChatTagUpdateRequest;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.aws.AWSFileStore;
 import com.boot.jx.chat.ChatSessionFactory;
@@ -27,6 +26,7 @@ import com.boot.jx.chat.ChatSessionService;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.doc.AgentDoc;
 import com.boot.jx.common.doc.AgentSessionDoc;
+import com.boot.jx.common.dto.ControllerRequestDTOs.ChatTagUpdateRequest;
 import com.boot.jx.common.service.SessionEventTimer;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.ChatArchiveBuilder;
@@ -116,23 +116,25 @@ public class AgChatSessionController {
 	@RequestMapping(value = "/api/sessions/message/send", method = { RequestMethod.POST })
 	public ApiResponse<ChatMessageDTO, Object> sendSessionMessage(@RequestBody OutboxMessage outboxMessage)
 			throws InterruptedException {
-
 		outboxMessage.route().setSendMode(CHAT_MODE.AGENT.toString());
 		outboxMessage.route().setSenderCode(agentSession.getAgentCode());
 		outboxMessage.route().setSenderApp(APP_TYPE.AGENT.name());
 		outboxMessage.route().setSenderType(MESSAGE_SENDER_TYPE.AGENT);
-		ChatSessionDoc sessionDoc = chatSessionFactory.linkSession(outboxMessage);
+		ChatSessionDoc sessionDoc = chatSessionFactory.linkSessionSendNewOutBound(outboxMessage);
 
 		// Session Stuff Logging <
-		if (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent())
-				|| (environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean()
-						&& !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode()))) {
-			AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
-			agentChatHandlerImpl.onAssign(agent, sessionDoc);
-		}
+			if (sessionDoc != null && 
+			    (ArgUtil.isEmpty(sessionDoc.getAssignedToAgent()) ||
+			    (environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_ONSEND_ASSIGNED).asBoolean() &&
+			    !ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())))) {
+
+			    AgentSessionDoc agent = mongoTemplate.findById(agentSession.getAgentCode(), AgentSessionDoc.class);
+			    agentChatHandlerImpl.onAssign(agent, sessionDoc);
+			}
+
 
 		// Session Stuff Logging >
-		if (ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
+		if (sessionDoc!=null && ArgUtil.areEqual(sessionDoc.getAssignedToAgent(), agentSession.getAgentCode())) {
 			outboxMessage.route().setQueueCode(sessionDoc.getAssignedToQueue());
 			ChatMessageDTO messageDto = agentService.sendMessage(sessionDoc, outboxMessage);
 

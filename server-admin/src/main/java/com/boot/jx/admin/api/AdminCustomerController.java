@@ -84,7 +84,7 @@ public class AdminCustomerController {
                                     .collect(Collectors.toList());
         for(String ids:idList) {
         	req.setId(ids);
-			contactStore.remove(req);
+        	contactStore.removeAndAudit(id, CustomerProfileDoc.class);
         }
 		return ApiResponse.buildResult(req);
 	}

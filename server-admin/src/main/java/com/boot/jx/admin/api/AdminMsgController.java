@@ -118,7 +118,10 @@ public class AdminMsgController {
 						Criteria.where("assignedDeptStamp").lt(endStampLong)),
 				new Criteria().andOperator(Criteria.where("assignedAgentStamp").gt(startStampLong),
 						Criteria.where("assignedAgentStamp").lt(endStampLong)),
-
+				
+				new Criteria().andOperator(Criteria.where("agentSessionStamp").gt(startStampLong),
+						Criteria.where("agentSessionStamp").lt(endStampLong)),
+				
 				new Criteria().andOperator(Criteria.where("fistResponseStamp").gt(startStampLong),
 						Criteria.where("fistResponseStamp").lt(endStampLong)),
 				new Criteria().andOperator(Criteria.where("lastResponseStamp").gt(startStampLong),
@@ -126,6 +129,8 @@ public class AdminMsgController {
 
 				new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(startStampLong),
 						Criteria.where("lastInComingStamp").lt(endStampLong)));
+		
+		
 
 		if (ArgUtil.is(query.text)) {
 			dateCriteria.orOperator(

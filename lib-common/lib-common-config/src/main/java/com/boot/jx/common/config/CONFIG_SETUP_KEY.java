@@ -1,7 +1,5 @@
 package com.boot.jx.common.config;
 
-import java.util.Map;
-
 import com.boot.jx.common.impl.ConfigMeta;
 import com.boot.jx.common.impl.ConfigMeta.ConfigOption;
 import com.boot.jx.common.impl.ConfigMeta.INPUT_TYPE;
@@ -48,7 +46,8 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 	POSTMAN_TRACK_MESSAGE(new ConfigMeta("Message Tracker", "postman.track.message").superKey("postman.track.message")
 			.desc("Use Mehery's Tracker to track status for Channels (with no Status support)").optionsOnOff()),
 
-	POSTMAN_TRACK_MESSAGE_URL(new ConfigMeta("Message Tracker", "postman.track.message.url").desc("Tracker URL")),
+	POSTMAN_TRACK_MESSAGE_URL(new ConfigMeta("Message Tracker", "postman.track.message.url")
+			.superKey("postman.track.message").desc("Tracker URL")),
 
 	POSTMAN_AGENT_2FA_ENABLED(new ConfigMeta("Enable 2FA Login", PROPERTIES.POSTMAN_AGENT_2FA_ENABLED)
 			.superKey(PROPERTIES.POSTMAN_AGENT_2FA_ENABLED).desc("You will need OA app").optionsOnOff()),
@@ -167,14 +166,15 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			new ConfigMeta("Inbound Idle Timeout Interval", "postman.agent.chat.in.idle.timeout.interval")
 					.superKey("postman.agent.chat.in.idle.timeout")
 					.desc("Chat gets timed-out if customer does not respond for this interval in Minutes")
-					.inputType(INPUT_TYPE.NUMBER).min(5).group(ConfigConstants.GROUP_AGENT)),
+					.inputType(INPUT_TYPE.NUMBER).min(5).group(ConfigConstants.GROUP_AGENT)
+					.condition(POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT.getKey(), true)),
 
 	POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE(
 			new ConfigMeta("In-bound Idle Timeout Queue", "postman.agent.chat.in.idle.timeout.queue")
 					.superKey("postman.agent.chat.in.idle.timeout")
 					.desc("Timed-out chat gets re-assigned to this queue")
 					.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
-					.group(ConfigConstants.GROUP_AGENT)),
+					.group(ConfigConstants.GROUP_AGENT).condition(POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT.getKey(), true)),
 
 //	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
 //		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),
@@ -258,6 +258,11 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 
 	POSTMAN_DEBUG_CONTACT(new ConfigMeta("Debugging is enabled for Contact", "postman.debug.contact")
 			.group(ConfigConstants.GROUP_DEV).hidden()),
+
+	SETUP_SCRIPTUS_VERSION(new ConfigMeta("Scriptus Version", "setup.scriptus.version")
+			.options(new ConfigOption("v0").label("Version 0"), new ConfigOption("v1").label("Version 1"),
+					new ConfigOption("v2").label("Version 2"))
+			.group(ConfigConstants.GROUP_DEV)),
 
 	// Ends here
 	;

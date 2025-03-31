@@ -66,14 +66,14 @@ public class CoreNLPService {
 
 	public TagDocument addTags(String line, TagDocument tagDocument) {
 
-		if (!initd || !pmEnvironment.keyEntry("postman.nlp.corenlp.enabled").asBoolean()) {
+		if (!initd || !pmEnvironment.config().prefsEntry("postman.nlp.corenlp.enabled").asBoolean()) {
 			return tagDocument;
 		}
 
-		boolean detectSentiment = pmEnvironment.keyEntry("postman.nlp.detect.sentiment").asBoolean();
-		boolean detectPersons = pmEnvironment.keyEntry("postman.nlp.detect.persons").asBoolean();
-		boolean detectCountries = pmEnvironment.keyEntry("postman.nlp.detect.countries").asBoolean();
-		boolean detectCities = pmEnvironment.keyEntry("postman.nlp.detect.cities").asBoolean();
+		boolean detectSentiment = pmEnvironment.config().prefsEntry("postman.nlp.detect.sentiment").asBoolean();
+		boolean detectPersons = pmEnvironment.config().prefsEntry("postman.nlp.detect.persons").asBoolean();
+		boolean detectCountries = pmEnvironment.config().prefsEntry("postman.nlp.detect.countries").asBoolean();
+		boolean detectCities = pmEnvironment.config().prefsEntry("postman.nlp.detect.cities").asBoolean();
 
 		if (ArgUtil.none(detectSentiment, detectPersons, detectCountries, detectCities)) {
 			return tagDocument;

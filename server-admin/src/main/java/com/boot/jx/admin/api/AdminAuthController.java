@@ -68,8 +68,8 @@ public class AdminAuthController {
 	public StarterDocKit starterDocKit;
 
 	private boolean isPanelActive() {
-		return pmEnvironment.keyEntry("mry.domain.active").asBoolean()
-				&& pmEnvironment.featureEntry(CONFIG_FEATURES_KEY.APP_MODULE_ADMIN).asBoolean(true);
+		return pmEnvironment.config().prefsEntry("mry.domain.active").asBoolean()
+				&& pmEnvironment.config().featureEntry(CONFIG_FEATURES_KEY.APP_MODULE_ADMIN).asBoolean(true);
 	}
 
 	@ApiRequest(rules = { TenantClientResolver.CHECK_VALID_DOMAIN })

@@ -165,7 +165,8 @@ public class BotEngine {
 		String text = ArgUtil.nonEmpty(event.getMessage(), Constants.BLANK).toUpperCase();
 		StringMatcher matcher = new StringMatcher(text);
 
-		String botCodePrefix = pmEnvironment.keyEntry("postman.bot.code").asString(AppContextUtil.getTenant());
+		String botCodePrefix = pmEnvironment.config().prefsEntry("postman.bot.code")
+				.asString(AppContextUtil.getTenant());
 
 		ClientApp app = messageContext.clientApp();
 
@@ -318,7 +319,8 @@ public class BotEngine {
 		try {
 
 			if (InBoundEvent.EVENT_TYPE.SESSION_ROUTED.equals(assignEvent.type)) {
-				String botCodePrefix = pmEnvironment.keyEntry("postman.bot.code").asString(AppContextUtil.getTenant());
+				String botCodePrefix = pmEnvironment.config().prefsEntry("postman.bot.code")
+						.asString(AppContextUtil.getTenant());
 				ClientApp app = messageContext.clientApp(assignEvent.sessionRouted.targetQueue, sessionDoc.contact());
 				String botCode = botCodePrefix;
 

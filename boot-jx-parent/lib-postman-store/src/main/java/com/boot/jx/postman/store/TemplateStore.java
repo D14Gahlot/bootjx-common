@@ -12,7 +12,10 @@ import com.boot.jx.postman.PostmanPackages.TemplateResolver;
 import com.boot.jx.postman.doc.HSMTemplateDoc;
 import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.model.ITemplates.BasicTemplate;
+import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.EntityDtoUtil;
 
 @Component
 public class TemplateStore implements TemplateResolver {
@@ -20,20 +23,34 @@ public class TemplateStore implements TemplateResolver {
 	@Autowired
 	protected QuickStore commonMongoTemplate;
 
-	@Override
-	public BasicTemplate get(String templateId) {
+	private HSMTemplateDoc findById(String templateId) {
 		HSMTemplateDoc x = commonMongoTemplate.findById(templateId, HSMTemplateDoc.class);
 		return x;
 	}
 
-	public BasicTemplate resolve(CommonTemplateMeta template, ContactType contactType) {
+	public HSMTemplateDoc copied(HSMTemplateDoc template) {
+		if (ArgUtil.is(template.getHeader())) { // If needs cloning global condittion
+			HSMTemplateDoc copied = EntityDtoUtil.copyProperties(new HSMTemplateDoc(), template);
+			MapModel options = MapModel.from(copied.options());
+
+			MapPathEntry subject = options.entry("subject");
+			if (ArgUtil.is(template.getHeader()) && subject.isEmpty()) {
+				subject.save(template.getHeader());
+			}
+
+			return copied;
+		}
+		return template;
+	}
+
+	public HSMTemplateDoc resolve(CommonTemplateMeta template, ContactType contactType) {
 
 		if (ArgUtil.is(template.getId())) {
 			if (template.getId().startsWith("QR=")) {
 				QuickReply qr = commonMongoTemplate.findById(template.getId().split("QR=")[1], QuickReply.class);
 				return createTemplateDoc(template, qr);
 			} else {
-				return get(template.getId());
+				return findById(template.getId());
 			}
 		} else if (ArgUtil.is(template.getCode())) {
 
@@ -100,8 +117,14 @@ public class TemplateStore implements TemplateResolver {
 	}
 
 	@Override
+	public BasicTemplate get(String templateId) {
+		HSMTemplateDoc x = copied(findById(templateId));
+		return x;
+	}
+
+	@Override
 	public BasicTemplate get(CommonTemplateMeta template, ContactType contactType) {
-		BasicTemplate basicTemplate = resolve(template, contactType);
+		BasicTemplate basicTemplate = copied(resolve(template, contactType));
 		if (ArgUtil.is(basicTemplate)) {
 			template.setCode(basicTemplate.getCode());
 			template.setId(basicTemplate.getId());

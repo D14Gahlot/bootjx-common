@@ -79,6 +79,7 @@ import com.boot.jx.postman.doc.MessageDoc;
 import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
 import com.boot.jx.postman.doc.WabaAnalyticsDoc;
 import com.boot.jx.postman.doc.config.ChannelConfigDoc;
+import com.boot.jx.postman.doc.config.ChannelConfigDupsDoc;
 import com.boot.jx.postman.doc.tpo.WABAConversation;
 import com.boot.jx.postman.model.Message;
 import com.boot.jx.postman.plugin.ChannelConfig;
@@ -1162,8 +1163,13 @@ public class AccountDashBoardManager {
 		String lane = "";
 		if (ArgUtil.is(contactid)) {
 			String[] contactids = contactid.split("_");
-			if (contactids != null && contactids[1] != null) {
+			if (contactids != null && contactids.length>1 && contactids[1] != null) {
 				lane = contactids[1];
+			}else {
+				contactids = contactid.split(":");
+				if (contactids != null && contactids.length > 1) {
+					lane = contactids[1];
+				}
 			}
 		}
 		return lane;
@@ -1180,11 +1186,19 @@ public class AccountDashBoardManager {
 		}
 
 		if (ArgUtil.is(offset)) {
+			try {
 			String hrStr = offset.substring(offset.indexOf('+') + 1);
 			String[] hrMin = hrStr.split(":");
-			int hr = Integer.parseInt(hrMin[0]);
-			int min = Integer.parseInt(hrMin[1]);
-			offsettimestamp = hr * DateUtil.ONE_HR + min * DateUtil.MIN;
+			if(hrMin!=null && hrMin.length>1) {
+				int hr = Integer.parseInt(hrMin[0]);
+				int min = Integer.parseInt(hrMin[1]);
+			    offsettimestamp = hr * DateUtil.ONE_HR + min * DateUtil.MIN;
+			}
+			}catch (Exception e) {
+				e.printStackTrace();
+	            // Handle the case where parsing fails
+	            System.err.println("Invalid timezone offset format: " + offset+"\t error"+e);
+	        }
 		}
 		return offsettimestamp;
 	}
@@ -1262,7 +1276,7 @@ public class AccountDashBoardManager {
 	}
 
 	public String getTimeZoneFromSetup() {
-		String offset = environment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
+		String offset = environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_TIMEZONE_OFFSET)
 				.asString("Asia/Kolkata::GMT+5:30");
 		return offset;
 	}
@@ -1525,10 +1539,14 @@ public class AccountDashBoardManager {
 	        String month = CommonUtils.monthNameByTimestamp(timestamp);
 	        long startTStamp = CommonUtils.startTStampForaMonthV1(timestamp);
 	        long endTStamp = CommonUtils.endTStampForaMonthV1(timestamp);
+	        int yearValue = CommonUtils.getYearFromTimestamp(timestamp);
+	        int monthValue =CommonUtils.getMonthFromTimestamp(timestamp);		
+	        
 	        if(ArgUtil.is(chdoc.getWabaId())) {
 	        String wabaId =chdoc.getWabaId();
 	        String number =chdoc.getNumber();
 	        String tnt=chdoc.getTenant();
+	        String currency = chdoc.getCurrency();
 	        
 	        WabaDateWiseBalanceDto dto = new WabaDateWiseBalanceDto();
 	        Integer totalConvCnt=0;
@@ -1541,8 +1559,8 @@ public class AccountDashBoardManager {
 	            Aggregation.match(Criteria.where("wabaId").is(wabaId)
 	            	.and("number").is(number)
 	            	.and("tenant").is(tnt)
-	                .and("start").gte(startTStamp)
-	                .and("end").lte(endTStamp)),
+	            	.and("date.monthOfYearLocal").is(monthValue)
+	        	    .and("date.yearLocal").is(yearValue)),
 
 	            // $group stage to group by conversation_type and conversation_category
 	            Aggregation.group("conversation_type", "conversation_category")
@@ -1620,13 +1638,14 @@ public class AccountDashBoardManager {
 			dto.setDateTimeStamp(timestamp);
 			dto.setWabaId(wabaId);
 			dto.setNumber(number);
+			dto.setCurrencyCode(currency);
 			WabaAccountBalanceDoc waAccBal=null;
 			double deposiTamt=0.0;
 			if(ArgUtil.is(wabaId)) {
 			 waAccBal=getAccountBalance(wabaId,tnt,number);
 			if(ArgUtil.is(waAccBal)) {
 				deposiTamt=waAccBal.getDepositAmt();
-				dto.setCurrencyCode(waAccBal.getCurrencyCode());
+				dto.setCurrencyCode(ArgUtil.parseAsString(dto.getCurrencyCode(), waAccBal.getCurrencyCode()));
 				dto.setId(waAccBal.getId());
 				dto.setDepostAmt(deposiTamt);
 				}
@@ -1639,7 +1658,7 @@ public class AccountDashBoardManager {
 			}
 			
 			dto.setTnt(ArgUtil.parseAsString(tnt,AppContextUtil.getTenant()));
-			
+			dto.setActive(isNumberActive(dto.getTnt(), number));
 			
 			lstList.add(dto);
 	        }
@@ -1683,7 +1702,7 @@ public class AccountDashBoardManager {
 	 List<WabaAnalyticsDoc> cofigDocLst =new ArrayList<>();
 		Query query = new Query();
 		query.addCriteria(Criteria.where("tenant").is(domain));
-		query.fields().include("tenant").include("number").include("wabaId").include("contactType").include("isDisabled");
+		query.fields().include("tenant").include("number").include("wabaId").include("contactType").include("isDisabled").include("currency");
 
 		Aggregation aggregation = Aggregation.newAggregation(
 				Aggregation.match(Criteria.where("tenant").is(domain)), // Add filter for tenant
@@ -1699,11 +1718,24 @@ public class AccountDashBoardManager {
 				wadoc.setTenant(doc.getString("tenant"));
 				wadoc.setWabaId(doc.getString("wabaId"));
 				wadoc.setNumber(doc.getString("number"));
+				wadoc.setCurrency(doc.getString("currency"));
 				cofigDocLst.add(wadoc);
 			}
 		return cofigDocLst;
 	}
 	
-
+public boolean isNumberActive(String domain,String number) {
+	boolean isactive=true;
+	
+	Query query = new Query();
+	query.addCriteria(Criteria.where("domain").is(domain).and("isDisabled").is(true).and("contactType").is(ContactType.WHATSAPP.name()).and("lane").is(number).and("isDeleted").is(true));
+	query.fields().include("domain").include("isDeleted").include("contactType").include("isDisabled");
+	List<ChannelConfigDupsDoc> cofigDocLst = mongoTemplate.find(query, ChannelConfigDupsDoc.class, "DUPS_CONFIG_CHANNEL");
+	if(cofigDocLst!=null && !cofigDocLst.isEmpty()) {
+		return false;
+	}
+	return isactive;
+	
+}
 	
 }

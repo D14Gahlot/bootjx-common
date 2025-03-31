@@ -128,7 +128,7 @@ public class InBoundControllerWeb {
 		model.addAttribute("POSTMAN_CONTEXT", appConfig.getAppPrefix());
 		model.addAttribute("WEBAPP_BASE", appConfig.getAppPrefix() + path);
 		model.addAttribute("POSTMAN_AGENT_SCHEME_COLOR",
-				pmEnvironment.keyEntry("postman.agent.scheme.color").asString());
+				pmEnvironment.config().prefsEntry("postman.agent.scheme.color").asString());
 
 		if (pmCommonConfig != null) {
 			model.addAllAttributes(pmCommonConfig.appAttributes());

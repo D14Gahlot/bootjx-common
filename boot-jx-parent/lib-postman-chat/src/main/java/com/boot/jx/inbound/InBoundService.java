@@ -162,7 +162,7 @@ public class InBoundService extends ATaskLimiter {
 
 	private InboxMessage invokeMethodsInternal(InboxMessage inboxMessageOriginal, boolean asyncMode) {
 
-		PMConfigurationObject proxyConfig = pmEnvironment.keyEntry("mry.proxy.enabled");
+		PMConfigurationObject proxyConfig = pmEnvironment.config().prefsEntry("mry.proxy.enabled");
 		String contactId = PostManUtil.CONTACT_ID(inboxMessageOriginal.contact());
 
 		if ((AppContextUtil.getTenant().equals("app") || proxyConfig.asBoolean())) {

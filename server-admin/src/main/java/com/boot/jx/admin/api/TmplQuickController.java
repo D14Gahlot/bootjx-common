@@ -18,6 +18,7 @@ import com.boot.jx.dict.FileFormat;
 import com.boot.jx.dict.FileType;
 import com.boot.jx.logger.AuditDetailProvider;
 import com.boot.jx.model.CommonFile;
+import com.boot.jx.model.ModelPatch.ModelPatches;
 import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.doc.KnowBase;
@@ -31,6 +32,7 @@ import com.boot.jx.postman.doc.QuickTag;
 import com.boot.jx.postman.store.QuickStore;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.UniqueID;
+import com.mongodb.client.result.UpdateResult;
 
 @RestController
 public class TmplQuickController {
@@ -270,6 +272,14 @@ public class TmplQuickController {
 	public ApiResponse<KnowBase, Object> deleteKnowBase(@RequestParam String id) {
 		KnowBase qr = mongoTemplate.removeAndAudit(id, KnowBase.class);
 		return ApiResponse.buildResults(mongoTemplate.findAll(KnowBase.class)).data(qr).message("KnowBase deleted");
+	}
+
+	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.PATCH })
+	public ApiResponse<KnowBase, Object> patchKnowBase(@RequestBody ModelPatches req)
+			throws InstantiationException, IllegalAccessException {
+		UpdateResult qr = mongoTemplate.patch(req, KnowBase.class);
+		return ApiResponse.buildResults(mongoTemplate.findById(req.getId(), KnowBase.class))
+				.message("KnowBase updated");
 	}
 
 	@RequestMapping(value = "/api/tmpl/knowbase", method = { RequestMethod.POST })

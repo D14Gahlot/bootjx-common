@@ -127,6 +127,17 @@ public class ConfigOptionMetaController {
 		return ApiResponse.buildResults(ClientAppConfigConstants.APP_CONFIGS_COMMON);
 	}
 
+	@RequestMapping(value = "/api/meta/chat_states", method = { RequestMethod.GET })
+	public ApiResponse<CHAT_STATE, Object> chatStates() {
+		return ApiResponse.buildResults(PMConstants.CHAT_STATE.values());
+	}
+
+	@RequestMapping(value = "/api/meta/chat_status", method = { RequestMethod.GET })
+	public ApiResponse<CHAT_STATUS, Object> chatStatus() {
+		return ApiResponse.buildResults(PMConstants.CHAT_STATUS.values());
+
+	}
+
 	// Option APIS
 	@JsonView(PMEnvironment.PublicProperty.class)
 	@RequestMapping(value = { "/api/config/modules", "/pub/config/modules" }, method = { RequestMethod.GET })
@@ -142,7 +153,7 @@ public class ConfigOptionMetaController {
 			} else {
 				for (CONFIG_FEATURES_KEY featureKey : CONFIG_FEATURES_KEY.values()) {
 					if (featureKey.name().equals("APP_MODULE_" + appModule.name())
-							&& pmEnvironment.featureEntry(featureKey).asBoolean()) {
+							&& pmEnvironment.config().featureEntry(featureKey).asBoolean()) {
 						modules.add(appModule);
 					}
 				}
@@ -256,10 +267,10 @@ public class ConfigOptionMetaController {
 			@RequestParam(required = false) String version,
 			@RequestParam(required = false, defaultValue = "false") boolean beta) {
 
-		String domainServer = pmEnvironment.keyEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
+		String domainServer = pmEnvironment.config().prefsEntry(ConfigConstants.APP_KEY.PROP_SERVICE_SERVER).asString();
 		String key = beta ? "mry.cdn.url.beta" : "mry.cdn.url";
 
-		PMConfigurationObject config = pmEnvironment.keyEntry(key);
+		PMConfigurationObject config = pmEnvironment.config().prefsEntry(key);
 		config.setKey(key);
 
 		String oldUrl = config.asString();
@@ -344,19 +355,6 @@ public class ConfigOptionMetaController {
 	@RequestMapping(value = "/api/uiprefs", method = { RequestMethod.GET })
 	public ApiResponse<UserPrefsConfigDoc, Object> setUIPrefs(@RequestParam(required = false) CONFIG_FEATURES_KEY key) {
 		return ApiResponse.buildResults(configManager.getUserPrefs());
-	}
-
-	// Meta
-
-	@RequestMapping(value = "/api/meta/chat_states", method = { RequestMethod.GET })
-	public ApiResponse<CHAT_STATE, Object> chatStates() {
-		return ApiResponse.buildResults(PMConstants.CHAT_STATE.values());
-	}
-
-	@RequestMapping(value = "/api/meta/chat_status", method = { RequestMethod.GET })
-	public ApiResponse<CHAT_STATUS, Object> chatStatus() {
-		return ApiResponse.buildResults(PMConstants.CHAT_STATUS.values());
-
 	}
 
 	@Autowired

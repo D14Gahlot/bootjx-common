@@ -1,4 +1,4 @@
-package com.boot.jx.agent.api;
+package com.boot.jx.common.dto;
 
 import java.util.List;
 

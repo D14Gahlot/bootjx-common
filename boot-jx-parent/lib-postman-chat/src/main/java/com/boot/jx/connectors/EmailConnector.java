@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -56,8 +55,6 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
-import com.boot.utils.CryptoUtil;
-import com.boot.utils.StringUtils;
 import com.boot.utils.URLBuilder;
 import com.boot.utils.Urly;
 
@@ -66,9 +63,6 @@ import com.boot.utils.Urly;
 public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailPlugin> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmailConnector.class);
-
-	public static final String SUBJECT_CLEANER_STR = "^([\\[\\(] *)?(?i)(RE?S?|REPLY|FYI|RIF|I|FS|VB|RV|ENC|ODP|PD|YNT|ILT|SV|VS|VL|AW|WG|ΑΠ|ΣΧΕΤ|ΠΡΘ|תגובה|הועבר|主题|转发|FWD|Forward?) *([-:;)\\]][ :;\\])-]*|$)|\\]+ *$";
-	public static final Pattern SUBJECT_CLEANER = Pattern.compile(SUBJECT_CLEANER_STR);
 
 	@Autowired
 	private RestService restService;
@@ -158,11 +152,7 @@ public class EmailConnector extends AbstractConnector<EmailConfigDetails, EmailP
 		inboxMessage.setMessage(EmailReplyParser.parseReply(email.getPlainContent()));
 
 		if (ArgUtil.is(inboxMessage.getSubject())) {
-			String subject = StringUtils
-					.normalizeSpace(inboxMessage.getSubject().replaceFirst(SUBJECT_CLEANER_STR, ""));
-			String conatctid = PostManUtil.CONTACT_ID(inboxMessage.contact());
-			subject = CryptoUtil.getMD5Hash(conatctid + "-" + StringUtils.trim(subject));
-			inboxMessage.session().setTicketHash(subject);
+			inboxMessage.session().setTicketHash(PostManUtil.createTicketHash(inboxMessage));
 		}
 
 		List<DataSource> attc = email.getAttachmentList();

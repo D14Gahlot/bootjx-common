@@ -127,7 +127,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			} else if (environment.keyEntry(PROPERTIES.POSTMAN_CHAT_WEB_QUEUE).asBoolean()) {
+			} else if (environment.config().prefsEntry(PROPERTIES.POSTMAN_CHAT_WEB_QUEUE).asBoolean()) {
 				RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactId);
 				String x = messageQueue.poll(5, TimeUnit.SECONDS);
 				while (ArgUtil.is(x)) {
@@ -163,7 +163,7 @@ public class WebConnector extends DefaultConnector<WebConfigDetails, WebPlugin> 
 				e.printStackTrace();
 			}
 		} else {
-			if (!stompEnabled && environment.keyEntry(PROPERTIES.POSTMAN_CHAT_WEB_QUEUE).asBoolean()) {
+			if (!stompEnabled && environment.config().prefsEntry(PROPERTIES.POSTMAN_CHAT_WEB_QUEUE).asBoolean()) {
 				LOGGER.debug("sendReply to " + contactIdWeb);
 				RBlockingQueue<String> messageQueue = redisson.getBlockingQueue(WEB_USER_MESSAGE_STR + contactIdWeb);
 				messageQueue.add(JsonUtil.toJson(outboxMessage));

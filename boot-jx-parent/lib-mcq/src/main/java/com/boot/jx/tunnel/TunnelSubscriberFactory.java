@@ -6,6 +6,8 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +36,7 @@ import com.boot.jx.tunnel.sys.TunnelFilterManager;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Component
 public class TunnelSubscriberFactory {
@@ -51,6 +54,41 @@ public class TunnelSubscriberFactory {
 	private AppConfig appConfig;
 	private TunnelFilterManager tunnelFilter;
 	private List<String> eventTopics;
+
+	public static class TunnelSubscriberHolder<M> implements EventListener {
+		public ITunnelSubscriber<M> subscriber;
+		public Class<M> pollParamType;
+
+		public TunnelSubscriberHolder(ITunnelSubscriber<M> listener) {
+			this.subscriber = listener;
+		}
+
+		@SuppressWarnings("unchecked")
+		public void pushed(String message) {
+			TunnelMessage<M> tm = JsonUtil.parse(message, new TypeReference<TunnelMessage<M>>() {
+			});
+			ITunnelSubscriber<M> listenerTarget = (ITunnelSubscriber<M>) AopProxyUtils.getSingletonTarget(subscriber);
+			M obj = JsonUtil.parse(tm.getData(), pollParamType);
+			listenerTarget.onPush(obj);
+		}
+
+	}
+
+	private Map<String, TunnelSubscriberHolder<?>> subscriberHolders;
+
+	public Map<String, TunnelSubscriberHolder<?>> getSubscriberHolders() {
+		if (subscriberHolders == null) {
+			this.subscriberHolders = new HashMap<String, TunnelSubscriberHolder<?>>();
+		}
+		return subscriberHolders;
+	}
+
+	public List<String> getSubscriberList() {
+		if (eventTopics == null) {
+			this.eventTopics = new ArrayList<String>();
+		}
+		return eventTopics;
+	}
 
 	public static <A extends Annotation> A getAnnotationProxyReady(Class<?> clazz, Class<A> annotationClass) {
 		final A annotation = clazz.getAnnotation(annotationClass);
@@ -81,7 +119,7 @@ public class TunnelSubscriberFactory {
 		if (redisson == null) {
 			LOGGER.warn("Redisson Not avaiable for {} Listeners", listeners.size());
 		} else {
-			this.eventTopics = new ArrayList<String>();
+			this.eventTopics = this.getSubscriberList();
 
 			for (ITunnelSubscriber listener : listeners) {
 				if (listener == null) {
@@ -103,6 +141,8 @@ public class TunnelSubscriberFactory {
 					eventTopic = listenerTarget.getTopic();
 				}
 
+				TunnelSubscriberHolder tunnelSubscriberMap = new TunnelSubscriberHolder(listener);
+
 				Class<?> eventType = null;
 				Method[] m = c.getDeclaredMethods();
 				for (Method method : m) {
@@ -114,6 +154,9 @@ public class TunnelSubscriberFactory {
 							eventType = (Class<?>) paramater.getParameterizedType();
 						}
 
+					} else if (ArgUtil.is(method.getName(), "poll") && paramaters.length == 1) {
+						Parameter paramater = paramaters[0];
+						tunnelSubscriberMap.pollParamType = (Class<?>) paramater.getParameterizedType();
 					}
 				}
 
@@ -131,7 +174,8 @@ public class TunnelSubscriberFactory {
 				} else {
 					this.addShoutListener(eventTopic, redisson, listener, integrity, c.getName(), eventType);
 				}
-				eventTopics.add(eventTopic);
+				getSubscriberList().add(eventTopic);
+				getSubscriberHolders().put(eventTopic, tunnelSubscriberMap);
 			}
 
 		}
@@ -141,7 +185,7 @@ public class TunnelSubscriberFactory {
 	@PostConstruct
 	public void init() {
 		LOGGER.info("TunnelSubscriberFactory init");
-		tunnelFilter.postSubscriptions(eventTopics);
+		tunnelFilter.postSubscriptions(this.getSubscriberList());
 		tunnelFilter.onServiceInit();
 	}
 

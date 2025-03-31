@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -73,6 +74,7 @@ import com.boot.jx.tunnel.task.JobTaskModel.Tasklet;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.utils.ArgUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.PhoneUtil;
 import com.boot.utils.UniqueID;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -154,7 +156,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -163,13 +165,18 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
-			if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
+			if (bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
 				to = PhoneUtil.addPlusSign(to);
 				ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
 				to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
 				doc.getContact().phone(to);
-			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+			} else if (bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
+				if (templateDoc != null && templateDoc.getHeader() != null) {
+					bulkMessage.setSubject(templateDoc.getHeader());
+					doc.setSubject(bulkMessage.getSubject());
+				}
 			}
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
@@ -189,7 +196,6 @@ public class BulkMessageService extends BatchJobExecuter {
 		session.setStatus(JOB_STATUS.CREATED.toString());
 		mongoTemplate.save(session);
 		messageStore.insert(docs, bulkMessage.contact().type());
-
 		registerJob(// Create batch Job to pass
 				JobTaskModel.newBatchJob()
 						// Set Unique Job Id
@@ -226,7 +232,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -236,13 +242,15 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
-			if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
-			to = PhoneUtil.addPlusSign(to);
-			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
-			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-			doc.getContact().phone(to);
-			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+			if (bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
+				to = PhoneUtil.addPlusSign(to);
+				ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
+				to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+				doc.getContact().phone(to);
+			} else if (bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
+				doc.setSubject(bulkMessage.getSubject());
 			}
 			doc.setMessage(bulkMsg.getMessage());
 			doc.setHsm(bulkMsg.getHsm());
@@ -300,7 +308,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -311,13 +319,16 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
-			if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
-			to = PhoneUtil.addPlusSign(to);
-			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
-			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-			doc.getContact().phone(to);
-			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+			if (bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
+				to = PhoneUtil.addPlusSign(to);
+				ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
+				to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+				doc.getContact().phone(to);
+			} else if (bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
+				doc.setSubject(bulkMessage.getSubject());
+
 			}
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
@@ -474,8 +485,13 @@ public class BulkMessageService extends BatchJobExecuter {
 			outboxMessage.contact().phone(msg.getContact().phone());
 			outboxMessage.contact().setContactId(msg.getContact().getContactId());
 			outboxMessage.setRoute(msg.getRoute());
-
-			ChatSessionDoc chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
+			outboxMessage.setSubject(msg.getSubject());
+			ChatSessionDoc chatSessionDoc =null;
+			if(PostManUtil.IS_MULTI_THREAD(channelType) && ArgUtil.is(outboxMessage.getSubject()) ) {
+				chatSessionDoc = chatSessionFactory.linkSessionSendNewOutBound(outboxMessage);
+			}else {
+			chatSessionDoc = chatSessionFactory.linkSession(outboxMessage);
+			}
 			if (ArgUtil.is(chatSessionDoc)) {
 				chatSessionService.initSession(outboxMessage, chatSessionDoc);
 				chatService.send(chatSessionDoc, outboxMessage);
@@ -670,6 +686,8 @@ public class BulkMessageService extends BatchJobExecuter {
 			bulkMessage.contact().setLane(bulkDoc.getLane());
 			bulkMessage.contact().setContactId(bulkDoc.getChannelId());
 			bulkMessage.contact().setContactType(bulkDoc.getContactType());
+			ChannelConfig channelConfig = enviroment.config().channel(bulkDoc.getChannelId());
+			bulkMessage.contact().setChannelType(channelConfig.getChannelType());
 			bulkMessage.setCampaignTitle(bulkDoc.getCampaignTitle());
 			if (ArgUtil.is(bulkDoc.getGroupId()) || ArgUtil.is(bulkDoc.getGroups())) {
 				bulkMessage.setGroupId(bulkDoc.getGroupId());
@@ -724,7 +742,7 @@ public class BulkMessageService extends BatchJobExecuter {
 		auditDetailProvider.auditCreate(session);
 
 		ClientApp adminApp = enviroment.config().clientApiKey(PMConstants.DEFAULT.ADMIN_QUEUE_CODE);
-		String defaultRegion = enviroment.keyEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
+		String defaultRegion = enviroment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_PHONEBOOK_REGION).asString("IN");
 
 		PhoneNumber phoneNumber = new PhoneNumber();
 		List<MessageDoc> docs = new ArrayList<MessageDoc>();
@@ -735,13 +753,15 @@ public class BulkMessageService extends BatchJobExecuter {
 			doc.setContactId(null);
 			doc.updateStatus(Status.SCHLD);
 			doc.setBulkSessionId(session.getBulkSessionId());
-			if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
-			to = PhoneUtil.addPlusSign(to);
-			ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
-			to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
-			doc.getContact().phone(to);
-			}else if(bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+			if (bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.WHATSAPP.name())) {
+				to = PhoneUtil.addPlusSign(to);
+				ConfigConstants.PHONE_NUMBER_UTIL.parse(to, defaultRegion, phoneNumber);
+				to = String.format("%s%s", phoneNumber.getCountryCode(), phoneNumber.getNationalNumber());
+				doc.getContact().phone(to);
+			} else if (bulkMessage.contact().getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
+				doc.getContact().phone(to);
 				doc.getContact().setEmail(to);
+				doc.setSubject(bulkMessage.getSubject());
 			}
 			doc.setMessage(bulkMessage.getMessage());
 			doc.setHsm(bulkMessage.getHsm());
@@ -916,11 +936,11 @@ public class BulkMessageService extends BatchJobExecuter {
 				.collect(Collectors.toList())) // Collect as List<ProfileSearchCriteria>
 				.collect(Collectors.toList());
 	}
-	
-	public Map<String,Object> getFilterContactCount(List<String> filters) {
-		int totalPhones=0;
-		int totalEmails=0;
-		Map<String,Object> map = new HashMap<>();
+
+	public Map<String, Object> getFilterContactCount(List<String> filters) {
+		int totalPhones = 0;
+		int totalEmails = 0;
+		Map<String, Object> map = new HashMap<>();
 		for (String filterId : filters) {
 			ProfileFilterMasterDoc profileFilter = mongoTemplate.findById(filterId, ProfileFilterMasterDoc.class);
 
@@ -933,17 +953,15 @@ public class BulkMessageService extends BatchJobExecuter {
 				profSerarch.setBooSkipLmt(true);
 				List<CustomerProfileDoc> docs = null;
 				if (ArgUtil.is(searCri)) {
-				docs = cusProfileService.getProfileSearch(profSerarch);
+					docs = cusProfileService.getProfileSearch(profSerarch);
 				}
-				if(ArgUtil.is(docs)) {
+				if (ArgUtil.is(docs)) {
 					// Count total phones and emails across all profiles
-			         totalPhones += docs.stream()
-			                .mapToInt(doc -> Optional.ofNullable(doc.phones).map(Set::size).orElse(0))
-			                .sum();
+					totalPhones += docs.stream()
+							.mapToInt(doc -> Optional.ofNullable(doc.phones).map(Set::size).orElse(0)).sum();
 
-			         totalEmails += docs.stream()
-			                .mapToInt(doc -> Optional.ofNullable(doc.emails).map(Set::size).orElse(0))
-			                .sum();
+					totalEmails += docs.stream()
+							.mapToInt(doc -> Optional.ofNullable(doc.emails).map(Set::size).orElse(0)).sum();
 				}
 			}
 		}
@@ -951,4 +969,9 @@ public class BulkMessageService extends BatchJobExecuter {
 		map.put("email", totalEmails);
 		return map;
 	}
+	
+	
+		
+		
+		
 }

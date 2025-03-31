@@ -41,6 +41,9 @@ public class AppProxyController {
 	@Value("${mry.scriptus.url}")
 	private String scriptusUrl;
 
+	@Value("${mry.scriptus2.url}")
+	private String scriptus2Url;
+
 	@Autowired(required = false)
 	private AppAuthModels.AppCommonAuthUser appCommonAuthUser;
 
@@ -118,6 +121,18 @@ public class AppProxyController {
 			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
 		return MapModel.fromSafe(service.forwardRequestNoRetry(
 				addHeaders(new ProxyRequest().sourcePrefix("/pub/").targetUrl(scriptusUrl).body(body)), request,
+				response).getBody());
+	}
+
+	@CrossOrigin(origins = "*")
+	// @ApiRequest(type = RequestType.NO_TRACK_PING)
+	@ApiOperation(value = "Only for info")
+	@RequestMapping(value = { "/pub/scriptus/info/**" })
+	@ResponseBody
+	public MapModel proxch2ForScriptus2(@RequestBody(required = false) String body, HttpMethod method,
+			HttpServletRequest request, HttpServletResponse response) throws URISyntaxException, MalformedURLException {
+		return MapModel.fromSafe(service.forwardRequestNoRetry(
+				addHeaders(new ProxyRequest().sourcePrefix("/pub/").targetUrl(scriptus2Url).body(body)), request,
 				response).getBody());
 	}
 

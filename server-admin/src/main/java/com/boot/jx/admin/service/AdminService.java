@@ -4,9 +4,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.AppContextUtil;
@@ -18,6 +20,7 @@ import com.boot.jx.api.ApiFieldError;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.ConfigManagerImpl;
 import com.boot.jx.common.doc.AgentDoc;
+import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.doc.GroupDoc;
 import com.boot.jx.common.dto.GroupReqDto;
@@ -25,11 +28,12 @@ import com.boot.jx.common.manager.CustomerMasterFldMgr;
 import com.boot.jx.common.service.EmpAuthService;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.common.store.DocumentUpdateListner;
+import com.boot.jx.postman.doc.ChatSessionDoc;
 import com.boot.jx.postman.doc.PMConfigurationDoc;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
-
+import org.springframework.data.mongodb.core.query.Query;
 @Service
 public class AdminService {
 
@@ -59,6 +63,8 @@ public class AdminService {
 
 	public List<AgentResponseAdminDto> fetchAgents(String agentId, boolean includeInActive) {
 		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId, includeInActive);
+		
+	    // Add ChatSession object to each DTO
 		return buildAgentDto(lstOfAgent);
 	}
 
@@ -137,21 +143,39 @@ public class AdminService {
 	}
 
 	private List<AgentResponseAdminDto> buildAgentDto(List<AgentDoc> lstOfAgent) {
-		List<AgentResponseAdminDto> agentList = new AgentResponseAdminDto().importFrom(lstOfAgent);
-		List<DepartmentDoc> depts = adminManager.fetchDept(null, true);
-		Map<String, DepartmentDoc> deptMap = new HashMap<String, DepartmentDoc>();
-		for (DepartmentDoc departmentDoc : depts) {
-			deptMap.put(departmentDoc.getDept_id(), departmentDoc);
-		}
-		for (AgentResponseAdminDto agentResponseDto : agentList) {
-			agentResponseDto.setAgent_password(null);
-			if (ArgUtil.is(agentResponseDto.getId())) {
-				agentResponseDto.setDept(
-						new DepartmentResponseAdminDto().importFrom(deptMap.get(agentResponseDto.getDept_id())));
-			}
-		}
-		return agentList;
+	    List<AgentResponseAdminDto> agentList = new AgentResponseAdminDto().importFrom(lstOfAgent);
+	    List<DepartmentDoc> depts = adminManager.fetchDept(null, true);
+	    List<AgentSessionDoc> sessionDocs = mongoTemplate.find(
+	            new Query(Criteria.where("_id").in(lstOfAgent.stream()
+	                    .map(AgentDoc::getAgent_code)
+	                    .collect(Collectors.toList()))),
+	            AgentSessionDoc.class
+	    );
+	    Map<String, DepartmentDoc> deptMap = new HashMap<>();
+	    for (DepartmentDoc departmentDoc : depts) {
+	        deptMap.put(departmentDoc.getDept_id(), departmentDoc);
+	    }
+	    Map<String, AgentSessionDoc> sessionMap = new HashMap<>();
+	    for (AgentSessionDoc sessionDoc : sessionDocs) {
+	        sessionMap.put(sessionDoc.getAgentCode(), sessionDoc);
+	    }
+	    for (AgentResponseAdminDto agentResponseDto : agentList) {
+	        
+	        if (ArgUtil.is(agentResponseDto.getId())) {
+	            DepartmentDoc deptDoc = deptMap.get(agentResponseDto.getDept_id());
+	            if (deptDoc != null) {
+	                DepartmentResponseAdminDto deptResponse = new DepartmentResponseAdminDto().importFrom(deptDoc);
+	                agentResponseDto.setDept(deptResponse);
+	            }
+	        }
+	        AgentSessionDoc sessionDoc = sessionMap.get(agentResponseDto.getAgent_name());
+	        	        if (sessionDoc != null) {
+	            agentResponseDto.setSession(sessionDoc); 
+	        }
+	    }
+   	    return agentList;
 	}
+
 
 	public List<AgentResponseAdminDto> resetPassByAgentId(String agentId) throws NoSuchAlgorithmException {
 		AgentDoc agent = agentStore.findById(agentId);

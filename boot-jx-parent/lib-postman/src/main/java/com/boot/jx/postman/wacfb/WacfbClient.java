@@ -31,6 +31,7 @@ import com.boot.jx.exception.ApiHttpExceptions.ApiHttpException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiHttpServerException;
 import com.boot.jx.exception.ApiHttpExceptions.ApiStatusCodes;
 import com.boot.jx.postman.PMConstants.CHANNEL_TYPE;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PostManException;
 import com.boot.jx.postman.channel.ChannelClientFactory.ChannelClient;
 import com.boot.jx.postman.model.Attachment;
@@ -73,6 +74,9 @@ public class WacfbClient implements ChannelClient {
 	@Autowired
 	private RestService restService;
 
+	@Autowired
+	PMEnvironment pmEnvironment;
+
 	public String registerWebhook(ChannelConfig channelConfig, String token, String challenge) {
 		WACFBConfigDetails config = channelConfig.getWacfb();
 		String verifyToken = ArgUtil.nonEmpty(config.getMasterAppVerifyToken(), config.getVerifyToken());
@@ -98,6 +102,7 @@ public class WacfbClient implements ChannelClient {
 			boolean isButton = false;
 			boolean isCtaUrl = false;
 			boolean isLocationRequest = false;
+			boolean isAddressRequest = false;
 			boolean isFlow = false;
 			int buttonsCount = 0;
 			int urlCount = 0;
@@ -112,9 +117,9 @@ public class WacfbClient implements ChannelClient {
 			if (options.containsKey("buttons")) {
 
 				List<TmplElement> allbuttons = options.entry("buttons").asList(TmplElement.class);// null
-				
+
 				for (TmplElement b : allbuttons) {
-										
+
 					if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.URL)
 							|| ArgUtil.areEqual(b.getType(), TmplElement.TYPES.COPY)) {
 						if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.COPY)) {
@@ -123,7 +128,8 @@ public class WacfbClient implements ChannelClient {
 						bodyUrlAppend = bodyUrlAppend
 								+ StringUtils.wrap("\n" + WA360Constants.componentButtonSubTypesIconLink + " *",
 										StringUtils.trim(b.getLabel()), "*")
-								+ "\n" + b.getUrl() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
+								+ "\n" + ArgUtil.anyOf(b.getShorturl(), b.getUrl()) + "\n"
+								+ StringUtils.wrap(" _", b.getDesc(), "_\n");
 						urlCount++;
 						noButtons.add(b);
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.PHONE_NUMBER)) {
@@ -133,6 +139,9 @@ public class WacfbClient implements ChannelClient {
 								+ "\n" + b.getPhone() + "\n" + StringUtils.wrap(" _", b.getDesc(), "_\n");
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.LOCATION_REQUEST)) {
 						isLocationRequest = true;
+						noButtons.add(b);
+					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.ADDRESS_REQUEST)) {
+						isAddressRequest = true;
 						noButtons.add(b);
 					} else if (ArgUtil.areEqual(b.getType(), TmplElement.TYPES.FLOW)) {
 						isFlow = true;
@@ -214,6 +223,9 @@ public class WacfbClient implements ChannelClient {
 				msgIds.add(getMessageId(resp));
 			} else if (isLocationRequest) {
 				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "location_request_message");
+				msgIds.add(getMessageId(resp));
+			} else if (isAddressRequest) {
+				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "address_message");
 				msgIds.add(getMessageId(resp));
 			} else if (isFlow) {
 				MapModel resp = sendButton(channelConfig, outboxMessage, noButtons, "flow");
@@ -733,16 +745,20 @@ public class WacfbClient implements ChannelClient {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "cta_url");
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
 					MapModel.createInstance().put("display_text", ArgUtil.nonEmpty(button.getLabel(), "Visit"))
-							.put("url", button.getUrl()).toMap());
+							.put("url", ArgUtil.anyOf(button.getShorturl(), button.getUrl())).toMap());
 		} else if ("location_request_message".equalsIgnoreCase(type)) {
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "send_location");
+		} else if ("address_message".equalsIgnoreCase(type)) {
+			TmplElement button = buttons.get(0);
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "address_message");
+			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS,
+					MapModel.createInstance().put("country", button.params().countryCode));
 		} else if ("flow".equalsIgnoreCase(type)) {
 			TmplElement button = buttons.get(0);
-			if(button.getAction()==(null))
-			{
-				button=buttons.get(1);
+			if (button.getAction() == (null)) {
+				button = buttons.get(1);
 			}
-				
+
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_NAME, "flow");
 
 			req.put(OutBoundWrapperPaths.INTERACTIVE_ACTION_PARAMATERS, MapModel.createInstance()

@@ -41,6 +41,7 @@ import com.boot.jx.model.CommonTemplateMeta;
 import com.boot.jx.mongo.CommonMongoQB.QueryCriteria;
 import com.boot.jx.mongo.CommonMongoStore.PaginatedQuery;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.PMConstants.CHAT_STATUS;
 import com.boot.jx.postman.doc.BulkSessionDoc;
 import com.boot.jx.postman.doc.ChatSessionDoc;
@@ -53,6 +54,7 @@ import com.boot.jx.postman.dto.ChatSessionDTO;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.pbook.PBEmail;
 import com.boot.jx.postman.pbook.PBPhone;
+import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
@@ -93,6 +95,9 @@ public class AdminMsgBulkController {
 
 	@Autowired
 	private BulkMessageService bulkMessageService;
+	
+	@Autowired
+	private PMEnvironment enviroment;
 
 	@RequestMapping(value = "/api/message/test/push/send", method = { RequestMethod.POST })
 	public ApiResponse<BulkSessionDoc, Object> sendTestMessage(@RequestBody OutboxMessage bulkMessage)
@@ -182,6 +187,8 @@ public class AdminMsgBulkController {
 					bulkMessage.contact().setLane(bulkDoc.getLane());
 					bulkMessage.contact().setContactId(bulkDoc.getChannelId());
 					bulkMessage.contact().setContactType(bulkDoc.getContactType());
+					ChannelConfig channelConfig = enviroment.config().channel(bulkDoc.getChannelId());
+					bulkMessage.contact().setChannelType(channelConfig.getChannelType());
 					bulkMessage.setCampaignTitle(bulkDoc.getCampaignTitle());
 
 					if (ArgUtil.is(bulkDoc.getGroupId()) || ArgUtil.is(bulkDoc.getGroups())) {
@@ -429,11 +436,13 @@ public class AdminMsgBulkController {
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
 			String hsmTemplateCode = null;
+			String subject =null;
 			String groupTitle = outboxMessage.getCampaignTitle();
 			CsvDto csvDoc = mongoTemplate.findById(csvRefKeyId, CsvDto.class);
 			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
 			if (ArgUtil.is(templateDoc)) {
 				hsmTemplateCode = templateDoc.getCode();
+				subject = templateDoc.getHeader();
 			}
 			if (ArgUtil.is(csvDoc)) {
 				List<Map<Object, Object>> lstMap = csvDoc.getLstMap();
@@ -480,10 +489,13 @@ public class AdminMsgBulkController {
 			String hsmId = otBoxMsg.getHsm().getId();
 			String hsmTemplateCode = null;
 			String groupName = null;
+			String subject = null;
+			
 			GroupDoc groupDoc = mongoTemplate.findById(groupId, GroupDoc.class);
 			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
 			if (ArgUtil.is(templateDoc)) {
 				hsmTemplateCode = templateDoc.getCode();
+				subject = templateDoc.getHeader();
 			}
 			if (ArgUtil.is(groupDoc)) {
 				groupName = groupDoc.getGroupName();
@@ -528,11 +540,13 @@ public class AdminMsgBulkController {
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
 			String hsmTemplateCode = null;
+			String subject = null;
 			StringBuilder concatGroupNames = new StringBuilder();
 			Set<String> uniquePhoneNumbers = new HashSet<>();
 			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
 			if (ArgUtil.is(templateDoc)) {
 				hsmTemplateCode = templateDoc.getCode();
+				subject = templateDoc.getHeader();
 			}
 			if (ArgUtil.is(groups)) {
 				for (String groupId : groups) {
@@ -550,11 +564,12 @@ public class AdminMsgBulkController {
 						hsmTemp.setId(hsmId);
 						hsmTemp.setCode(hsmTemplateCode);
 						hsmTemp.setData(otBoxMsg.getHsm().data());
-
+						
+						
 						outboxMsg.setGroupId(groupId);
 						outboxMsg.setCampaignTitle(groupTitle);
 						outboxMsg.setMessage(otBoxMsg.getMessage());
-
+						
 						outboxMsg.setAttachments(otBoxMsg.getAttachments());
 						outboxMsg.setContact(otBoxMsg.getContact());
 						outboxMsg.setHsm(hsmTemp);
@@ -565,6 +580,7 @@ public class AdminMsgBulkController {
 							uniquePhoneNumbers.add(dto.getPhone());
 						}
 						}else if(ArgUtil.is(lstDto) && contactType.equalsIgnoreCase(ContactType.EMAIL.name())) {
+							outboxMsg.setSubject(subject);
 							for (GroupSessionDto dto : lstDto) {
 								if(dto.getContactType()!=null && dto.getContactType().equalsIgnoreCase(ContactType.EMAIL.name())) {
 									uniquePhoneNumbers.add(dto.getPhone());
@@ -642,12 +658,14 @@ public class AdminMsgBulkController {
 			OutboxMessage otBoxMsg = outboxMessage;
 			String hsmId = otBoxMsg.getHsm().getId();
 			String hsmTemplateCode = null;
+			String subject=null;
 
 			StringBuilder concatFilterpNames = new StringBuilder();
 			Set<String> uniquePhoneNumbers = new HashSet<>();
 			HSMTemplateDoc templateDoc = mongoTemplate.findById(hsmId, HSMTemplateDoc.class);
 			if (ArgUtil.is(templateDoc)) {
 				hsmTemplateCode = templateDoc.getCode();
+				subject = templateDoc.getHeader();
 			}
 
 			for (String filterId : filters) {
@@ -701,6 +719,7 @@ public class AdminMsgBulkController {
 								}
 								List<String> toLst = new ArrayList<>(uniquePhoneNumbers);
 								outboxMsg.setTo(toLst);
+								outboxMsg.setSubject(subject);
 							}
 							
 							

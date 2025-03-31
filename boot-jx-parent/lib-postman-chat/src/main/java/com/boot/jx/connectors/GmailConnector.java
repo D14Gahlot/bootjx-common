@@ -29,9 +29,7 @@ import com.boot.jx.postman.doc.MessageTempInbound;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
-import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
@@ -47,9 +45,7 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CryptoUtil;
 import com.boot.utils.JsonUtil;
-import com.boot.utils.StringUtils;
 import com.boot.utils.Urly;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -95,7 +91,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 	public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigLogger, AuthState state)
 			throws URISyntaxException, MalformedURLException {
 		String redirectUri = String.format("%s%s/ext/setup/channel/callback/gmail", commonHttpRequest.getServerHost(),
-				appConfig.getAppPrefix(), environment.keyEntry("mry.prop.service.server").asString());
+				appConfig.getAppPrefix(), environment.config().prefsEntry("mry.prop.service.server").asString());
 		/// &state=fooobar&scope=r_liteprofile%20r_emailaddress%20w_member_social
 		state.setRedirectUrl(redirectUri);
 
@@ -124,7 +120,7 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 
 			String redirectUri = String.format("%s%s/ext/setup/channel/callback/gmail",
 					commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
-					environment.keyEntry("mry.prop.service.server").asString());
+					environment.config().prefsEntry("mry.prop.service.server").asString());
 			if (ArgUtil.is(state.getRedirectUrl())) {
 				redirectUri = state.getRedirectUrl();
 			} else if (ArgUtil.is(stateStr)) {
@@ -293,15 +289,12 @@ public class GmailConnector extends AbstractConnector<GmailConfigDetails, GmailP
 		if (conversationId.exists()) {
 			inboxMessage.session().setTicketHash(conversationId.asString());
 		} else if (ArgUtil.is(inboxMessage.getSubject())) {
-			String subject = StringUtils
-					.normalizeSpace(inboxMessage.getSubject().replaceFirst(EmailConnector.SUBJECT_CLEANER_STR, ""));
-			String conatctid = PostManUtil.CONTACT_ID(inboxMessage.contact());
-			subject = CryptoUtil.getMD5Hash(conatctid + "-" + StringUtils.trim(subject));
-			inboxMessage.session().setTicketHash(subject);
+			inboxMessage.session().setTicketHash(PostManUtil.createTicketHash(inboxMessage));
 		}
 
 		inboxMessage.setAttachments(inbound.getAttachments());
 		inboxMessage.setReferral(inbound.getReferral());
+		inboxMessage.setForm(inbound.getForm());
 
 		return inboxMessage;
 	}

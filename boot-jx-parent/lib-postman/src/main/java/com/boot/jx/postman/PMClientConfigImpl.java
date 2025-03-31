@@ -64,18 +64,18 @@ public class PMClientConfigImpl implements PMClientConfig {
 
 	@Override
 	public String getDefaultSender() {
-		return environment.keyEntry("postman.bot.name")
+		return environment.config().prefsEntry("postman.bot.name")
 				.asString(ArgUtil.parseAsString(environment.local().agent().getDefaultBotName(), defaultSender));
 	}
 
 	@Override
 	public String getContactDetailsUrl() {
-		return environment.local().keyEntry("postman.contact.details.url").asString(contactDetailsUrl);
+		return environment.local().prefsEntry("postman.contact.details.url").asString(contactDetailsUrl);
 	}
 
 	@Override
 	public String getChatSessionTimeout() {
-		return environment.local().keyEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT)
+		return environment.local().prefsEntry(PMConstants.PROPERTIES.POSTMAN_CHAT_SESSION_TIMEOUT)
 				.asString(chatSessionTimeout);
 	}
 
@@ -93,10 +93,10 @@ public class PMClientConfigImpl implements PMClientConfig {
 				webhookUrl = publicUrl;
 			} else if (isLocalDummyBotEnabled()) {
 				webhookUrl = String.format("%s%s", commonHttpRequest.getServerHost(), appConfig.getAppPrefix(),
-						environment.keyEntry("mry.prop.service.server").asString());
+						environment.config().prefsEntry("mry.prop.service.server").asString());
 			} else {
 				webhookUrl = String.format("https://%s.%s/%s", AppContextUtil.getTenant(),
-						environment.keyEntry("mry.prop.service.server").asString(),
+						environment.config().prefsEntry("mry.prop.service.server").asString(),
 						ArgUtil.nonEmpty(appPrefix, "postman"));
 			}
 		}

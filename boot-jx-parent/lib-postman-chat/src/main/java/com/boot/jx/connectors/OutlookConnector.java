@@ -28,9 +28,7 @@ import com.boot.jx.postman.doc.MessageTempInbound;
 import com.boot.jx.postman.doc.config.ChannelConfigLogger;
 import com.boot.jx.postman.dto.ChatMessageDTO;
 import com.boot.jx.postman.model.InboxMessage;
-import com.boot.jx.postman.model.Message.Status;
 import com.boot.jx.postman.model.MessageBoxEvent;
-import com.boot.jx.postman.model.MessageReport;
 import com.boot.jx.postman.model.OutboxMessage;
 import com.boot.jx.postman.model.ext.InBoundMsg;
 import com.boot.jx.postman.model.ext.InBoundMsgStatus;
@@ -46,9 +44,7 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
-import com.boot.utils.CryptoUtil;
 import com.boot.utils.DateUtil;
-import com.boot.utils.StringUtils;
 import com.boot.utils.TimeUtils.TimePeriod;
 import com.boot.utils.Urly;
 
@@ -81,7 +77,7 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 	public String createAuthUrl(ChannelConfig setup, ChannelConfigLogger channelConfigLogger, AuthState state)
 			throws URISyntaxException, MalformedURLException {
 		String redirectUri = String.format("%s%s/ext/setup/channel/callback/outlook", commonHttpRequest.getServerHost(),
-				appConfig.getAppPrefix(), environment.keyEntry("mry.prop.service.server").asString());
+				appConfig.getAppPrefix(), environment.config().prefsEntry("mry.prop.service.server").asString());
 		/// &state=fooobar&scope=r_liteprofile%20r_emailaddress%20w_member_social
 		state.setRedirectUrl(redirectUri);
 
@@ -279,20 +275,17 @@ public class OutlookConnector extends AbstractConnector<OutlookConfigDetails, Ou
 		inboxMessage.setSubject(m.keyEntry("subject").asString());
 		inboxMessage.setMessage(EmailReplyParser.parseReply(m.pathEntry("body.content").asString()));
 		inboxMessage.setMessageTrail(m.pathEntry("body.trail").asString());
-		
+
 		MapPathEntry conversationId = m.pathEntry("conversationId");
 		if (conversationId.exists()) {
 			inboxMessage.session().setTicketHash(conversationId.asString());
 		} else if (ArgUtil.is(inboxMessage.getSubject())) {
-			String subject = StringUtils
-					.normalizeSpace(inboxMessage.getSubject().replaceFirst(EmailConnector.SUBJECT_CLEANER_STR, ""));
-			String conatctid = PostManUtil.CONTACT_ID(inboxMessage.contact());
-			subject = CryptoUtil.getMD5Hash(conatctid + "-" + StringUtils.trim(subject));
-			inboxMessage.session().setTicketHash(subject);
+			inboxMessage.session().setTicketHash(PostManUtil.createTicketHash(inboxMessage));
 		}
 
 		inboxMessage.setAttachments(inbound.getAttachments());
 		inboxMessage.setReferral(inbound.getReferral());
+		inboxMessage.setForm(inbound.getForm());
 
 		return inboxMessage;
 	}

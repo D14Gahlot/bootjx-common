@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +23,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.eval.NumberEval;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -155,8 +158,19 @@ public class CSVHelper {
 					switch (formulaEvaluator.evaluateInCell(cell).getCellType()) {
 					case Cell.CELL_TYPE_NUMERIC: // field that represents numeric cell type
 						// getting the value of the cell as a number
-						headerName = cell.getStringCellValue();
+						//headerName = cell.getStringCellValue();
+						//break;
+						if(DateUtil.isCellDateFormatted(cell)) {
+							Date dateValue = cell.getDateCellValue();
+							SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+							headerName = sdf.format(dateValue);
+							break;	
+						}else {
+						NumberEval tempValue = new NumberEval(cell.getNumericCellValue());
+						headerName = tempValue.getStringValue();
 						break;
+						}
+						
 					case Cell.CELL_TYPE_STRING: // field that represents string cell type
 						// getting the value of the cell as a string
 						headerName = cell.getStringCellValue();
@@ -178,8 +192,7 @@ public class CSVHelper {
 						}
 
 						map.put(columnName, headerName);
-						// LOGGER.info("i "+i+"\t j :"+j+"\t Temp value :"+templVarLst.get(j)+"\t
-						// headerName :"+headerName);
+						 LOGGER.info("i "+i+"\t j :"+j+"\t Temp value :"+templVarLst.get(j)+"\t headerName :"+headerName);
 					}
 					j++;
 				}
@@ -237,12 +250,20 @@ public class CSVHelper {
 						headerName = cell.getStringCellValue();
 						break;
 					case Cell.CELL_TYPE_NUMERIC: // field that represents number cell type
+						if(DateUtil.isCellDateFormatted(cell)) {
+							Date dateValue = cell.getDateCellValue();
+							SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+							headerName = sdf.format(dateValue);
+							break;	
+						}else {
 						NumberEval tempValue = new NumberEval(cell.getNumericCellValue());
 						headerName = tempValue.getStringValue();
 						break;
+						}
 					default:
 						headerName = String.valueOf(cell.getStringCellValue());
 					}
+					//&& DateUtil.isCellDateFormatted(cell)
 					if (i != 0) {
 						String columnName = templVarLst.get(j);
 						columnName = StringUtils.substring(columnName.trim(), (columnName.indexOf(".") + 1));
@@ -251,8 +272,7 @@ public class CSVHelper {
 						}
 
 						map.put(columnName, headerName);
-						// LOGGER.info("i "+i+"\t j :"+j+"\t Temp value :"+templVarLst.get(j)+"\t
-						// headerName :"+headerName);
+						 LOGGER.info("i "+i+"\t j :"+j+"\t Temp value :"+templVarLst.get(j)+"\t headerName :"+headerName);
 					}
 					j++;
 				}
@@ -297,9 +317,14 @@ public class CSVHelper {
 	}
 
 	private String getContactValue(String colmValue) {
-		int compare = Character.compare(colmValue.charAt(0), '+');
-		if (compare != 0) {
-			colmValue = PMConstants.PLUS_SYM.concat(colmValue);
+		
+		if (Pattern.compile("@").matcher(colmValue).find()) {
+			return colmValue;
+		}else {
+			int compare = Character.compare(colmValue.charAt(0), '+');
+			if (compare != 0) {
+				colmValue = PMConstants.PLUS_SYM.concat(colmValue);
+			}
 		}
 		return colmValue;
 	}
@@ -313,5 +338,11 @@ public class CSVHelper {
 		}
 		return combined;
 	}
+	
+	 // Validate text-based dates using regex
+    public static boolean isValidDateFormat(String date) {
+        String regex = "^(\\d{2}-\\d{2}-\\d{4})|(\\d{2}/\\d{2}/\\d{4})|(\\d{4}-\\d{2}-\\d{2})$";
+        return Pattern.matches(regex, date);
+    }
 
 }
