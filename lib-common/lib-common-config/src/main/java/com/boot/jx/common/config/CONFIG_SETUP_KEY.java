@@ -261,7 +261,7 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 	SETUP_SCRIPTUS_VERSION(new ConfigMeta("Scriptus Version", "setup.scriptus.version")
 			.options(new ConfigOption("v0").label("Version 0"), new ConfigOption("v1").label("Version 1"),
 					new ConfigOption("v2").label("Version 2"))
-			.group(ConfigConstants.GROUP_DEV).hidden()),
+			.group(ConfigConstants.GROUP_DEV)),
 
 	// Ends here
 	;
