@@ -45,6 +45,7 @@ import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.DateUtil;
 import com.boot.utils.EntityDtoUtil;
+import com.boot.utils.JsonUtil;
 import com.boot.utils.TimeUtils;
 
 @Component
@@ -255,7 +256,8 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 			orExpression.add(Criteria.where("contactId").is(contactId));
 		}
 		// Time Limit Criteria
-		Criteria tymCriteria = Criteria.where("updatedStamp");
+		//Criteria tymCriteria = Criteria.where("updatedStamp");
+		Criteria tymCriteria = Criteria.where("updated.stamp");
 		if (fromStamp > 0L) {
 			tymCriteria.gte(fromStamp);
 		}
@@ -268,7 +270,6 @@ public class SessionStore extends CommonMongoTemplateAbstract<SessionStore> {
 		}
 
 		query2.addCriteria(tymCriteria.orOperator(orExpression.toArray(new Criteria[orExpression.size()])));
-		// LOGGER.info(query2.toString());
 		removeMsgFields(query2);
 		return super.find(query2, ChatSessionDoc.class);
 	}
