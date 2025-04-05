@@ -16,6 +16,7 @@ import com.boot.jx.postman.plugin.ChannelConfig;
 import com.boot.jx.postman.plugin.ChannelPluginProvider.ConnectorMapping;
 import com.boot.jx.rest.RestService;
 import com.boot.model.MapModel;
+import com.boot.utils.JsonUtil;
 
 @Component
 @ConnectorMapping(contactType = ContactType.EMAIL, channel = { CHANNEL_TYPE.OUTLOOK, CHANNEL_TYPE.GMAIL })
@@ -38,7 +39,8 @@ public class NexusEmailClient implements ChannelClient {
 						.put("messageId", outboxMessage.getMessageId())
 						.put("messageIdRef", outboxMessage.getMessageIdRef())
 						.put("messageIdExt", outboxMessage.getMessageIdExt()).put("replyId", outboxMessage.getReplyId())
-						.put("replyIdExt", outboxMessage.getReplyIdExt()).put("id", outboxMessage.getId()))
+						.put("replyIdExt", outboxMessage.getReplyIdExt()).put("id", outboxMessage.getId())
+						.put("sessionId",outboxMessage.getSessionId()))
 				.asNone();
 		return outboxMessage;
 	}

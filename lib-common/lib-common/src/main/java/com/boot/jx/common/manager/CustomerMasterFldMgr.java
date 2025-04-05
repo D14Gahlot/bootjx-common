@@ -49,6 +49,7 @@ import com.boot.jx.mongo.CommonMongoTemplate;
 import com.boot.jx.postman.PMEnvironment;
 import com.boot.jx.postman.doc.CustomerProfileDoc;
 import com.boot.jx.postman.doc.ProfileFilterMasterDoc;
+import com.boot.jx.postman.doc.QuickReply;
 import com.boot.jx.postman.doc.config.CustomerFieldMasterDoc;
 import com.boot.jx.postman.dto.CustomerProfileRequest;
 import com.boot.jx.postman.model.Message.Status;
@@ -95,7 +96,11 @@ public class CustomerMasterFldMgr {
 	protected AuditDetailProvider auditDetailProvider;
 
 	@Value("${mry.chrono.url}")
-	private String cronoJobUrl;
+	private String cronoJobUrl; 
+	
+	
+	
+	
 
 	public List<CustomerFieldMasterDoc> addAndEditMasterfield(CustomerFieldMasterDoc reqDto) {
 
@@ -175,10 +180,7 @@ public class CustomerMasterFldMgr {
 		if (ArgUtil.is(reqDto.getId())) {
 			MongoQueryBuilder<CustomerFieldMasterDoc> builder = MongoQueryBuilder
 					.collection(CustomerFieldMasterDoc.class).whereId(reqDto.getId());
-			// builder.set("active", reqDto.isActive());
-			// commonMongoTemplate.upsert(builder);
-			// Proceed to remove the documents
-			commonMongoTemplate.remove(builder.getQuery(), CustomerFieldMasterDoc.class);
+			commonMongoTemplate.removeAndAudit(reqDto.getId(), CustomerFieldMasterDoc.class);
 
 		}
 		return fetchCustomerMasfields(null, true, 0, 0, null, null);
@@ -651,7 +653,7 @@ public class CustomerMasterFldMgr {
 						.skip(skip); // Apply skip for the correct page
 			}
 		}
-		LOGGER.info("QB {} " + JsonUtil.toJson(qb));
+		LOGGER.debug("QB {} " + JsonUtil.toJson(qb));
 		return contactStore.find(qb);
 	}
 
@@ -777,12 +779,9 @@ public class CustomerMasterFldMgr {
 
 	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
 		if (ArgUtil.is(reqDto.getId())) {
-
 			List<String> idList = Arrays.stream(reqDto.getId().split(",")).collect(Collectors.toList());
 			for (String str : idList) {
-				MongoQueryBuilder<ProfileFilterMasterDoc> builder = MongoQueryBuilder
-						.collection(ProfileFilterMasterDoc.class).whereId(str);
-				commonMongoTemplate.remove(builder.getQuery(), ProfileFilterMasterDoc.class);
+				commonMongoTemplate.removeAndAudit(str, ProfileFilterMasterDoc.class);
 			}
 		}
 		return fetchProfileFilterGroup(null, null, 10, 0, null, null);

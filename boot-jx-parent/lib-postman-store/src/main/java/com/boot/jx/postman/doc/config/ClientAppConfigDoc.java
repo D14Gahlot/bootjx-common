@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -236,6 +235,11 @@ public class ClientAppConfigDoc
 	@Override
 	public boolean isCustomApp() {
 		return ArgUtil.isEqual(getAppType(), APP_TYPE.APP_SCRIPT, APP_TYPE.BOTFLOW);
+	}
+
+	@Override
+	public boolean isPreDefinedBot() {
+		return ArgUtil.isEqual(getAppMode(), CHAT_MODE.BOT, CHAT_MODE.SCRIPTUS);
 	}
 
 	@Override
