@@ -118,8 +118,8 @@ public class AdminCustomerController {
 	@RequestMapping(value = "/profile/search", method = { RequestMethod.POST })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestBody ProfileSearchQuery searchQry) {
-		List<CustomerProfileDoc> docs = cusProfileService.getProfileSearch(searchQry);
-		return ApiResponse.buildResults(docs);
+		return cusProfileService.getProfileSearch(searchQry);
+		
 	}
 	
 	/** create profile group with custom filter**/
@@ -144,7 +144,7 @@ public class AdminCustomerController {
 			@RequestParam(required = false,defaultValue = "0") int pageNo,
 			@RequestParam(required = false, defaultValue = "created") String sortBy,
 			@RequestParam(required = false, defaultValue = "desc") String sortDir)  {
-	return ApiResponse.buildResults(cusProfileService.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir));
+	return cusProfileService.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir);
 }
 
 	@RequestMapping(value = "/profile/filter", method = { RequestMethod.DELETE })
@@ -152,7 +152,7 @@ public class AdminCustomerController {
 	public ApiResponse<ProfileFilterMasterDoc, Object> deleteProfileFilterGroup(@RequestParam(value = "id", required = true) String id) {
 		ProfileFilterMasterDoc reqDto=new ProfileFilterMasterDoc();
 		reqDto.setId(id);
-		return ApiResponse.buildResults(cusProfileService.deleteProfileFilterGroup(reqDto));
+		return cusProfileService.deleteProfileFilterGroup(reqDto);
 	}
 
 }
