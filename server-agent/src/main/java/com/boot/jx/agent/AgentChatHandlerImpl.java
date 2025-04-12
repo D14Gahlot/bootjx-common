@@ -132,7 +132,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 	private PushClient pushClient;
 
 	private AgentSessionDoc getAgentSessonAssigned(PMArgs params) {
-		LOGGER.info("getAgentSessonAssigned : Contact is Missing {MRU -----}", JsonUtil.toJson(params));
 
 		String stickyLogic = environment.local().prefsEntry("postman.agent.chat.stickysession")
 				.asString(PMConstants.CHAT_SESSION_STICKY.NONE);
@@ -151,25 +150,25 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				if (profile != null && ArgUtil.is(profile.rmCode)) {
 					rmCode = profile.rmCode;
 				} else {
-					LOGGER.info("CHAT_RM_STICKY : Profile Not Found");
+					LOGGER.debug("CHAT_RM_STICKY : Profile Not Found");
 				}
 			} else {
 				if (!ArgUtil.is(c)) {
-					LOGGER.info("CHAT_RM_STICKY : Contact is Missing {}", params.contact().getCsid());
+					LOGGER.debug("CHAT_RM_STICKY : Contact is Missing {}", params.contact().getCsid());
 				} else if (!ArgUtil.is(c.profile())) {
 					LOGGER.info("CHAT_RM_STICKY : Profile Link Missing");
 				} else if (!ArgUtil.is(c.profile().getId())) {
-					LOGGER.info("CHAT_RM_STICKY : Profile Id Missing {} {} {}", c.profile().getId(),
+					LOGGER.debug("CHAT_RM_STICKY : Profile Id Missing {} {} {}", c.profile().getId(),
 							c.profile().getProfileId(), c.profile().getCode());
 				}
 			}
 			if (ArgUtil.is(rmCode)) {
-				LOGGER.info("CHAT_RM_STICKY : lastAgent found {}", rmCode);
+				LOGGER.debug("CHAT_RM_STICKY : lastAgent found {}", rmCode);
 				AgentSessionDoc agent = sessionStore.findById(rmCode, AgentSessionDoc.class);
 				if (ArgUtil.is(agent)) {
-					LOGGER.info("CHAT_RM_STICKY : has session {}", agent);
+					LOGGER.debug("CHAT_RM_STICKY : has session {}", agent);
 					if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(rmStickyLogic)) {
-						LOGGER.info("CHAT_SESSION_STICKY : because its strictly {}", agent);
+						LOGGER.debug("CHAT_SESSION_STICKY : because its strictly {}", agent);
 						return agent;
 					}
 					if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(rmStickyLogic)) {
@@ -195,18 +194,18 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 		if (!PMConstants.CHAT_SESSION_STICKY.NONE.equals(lastStickyLogic)) {
 			lastAgent = sessionStore.getLastAssignedAgent(params.contact());
 			if (ArgUtil.is(lastAgent)) {
-				LOGGER.info("CHAT_SESSION_STICKY : lastAgent found {}", lastAgent);
+				LOGGER.debug("CHAT_SESSION_STICKY : lastAgent found {}", lastAgent);
 				AgentSessionDoc agent = sessionStore.findById(lastAgent, AgentSessionDoc.class);
 				if (ArgUtil.is(agent)) {
-					LOGGER.info("CHAT_SESSION_STICKY : has session {}", agent);
+					LOGGER.debug("CHAT_SESSION_STICKY : has session {}", agent);
 					if (PMConstants.CHAT_SESSION_STICKY.STRICT.equals(lastStickyLogic)) {
-						LOGGER.info("CHAT_SESSION_STICKY : because its strictly {}", agent);
+						LOGGER.debug("CHAT_SESSION_STICKY : because its strictly {}", agent);
 						return agent;
 					}
 					if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(lastStickyLogic)) {
 						if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())
 								&& (agent.getLastOnlineStamp() > timeThen)) {
-							LOGGER.info("CHAT_SESSION_STICKY : because its availanle {}", agent);
+							LOGGER.debug("CHAT_SESSION_STICKY : because its availanle {}", agent);
 							return agent;
 						}
 					}
@@ -222,12 +221,12 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				environment.local().agent().getDefaultTeamCode(), DEFAULT.NO_DEPT);
 		params.setAssignToDeptCode(assignedDept);
 
-		LOGGER.info("ASSIGNMENT_RULE : No Assignment {} {}", assignmentRule, assignedDept);
+		LOGGER.debug("ASSIGNMENT_RULE : No Assignment {} {}", assignmentRule, assignedDept);
 
 		if (PMConstants.ASSIGNMENT_RULE.STRICT_DEFAULT.equals(assignmentRule)) {
 			String defAgentCode = environment.local().agent().defaultAgent(assignedDept);
 			AgentSessionDoc agent = sessionStore.findById(defAgentCode, AgentSessionDoc.class);
-			LOGGER.info("ASSIGNMENT_RULE : Default {} : {}", defAgentCode, agent);
+			LOGGER.debug("ASSIGNMENT_RULE : Default {} : {}", defAgentCode, agent);
 			return agent;
 		}
 

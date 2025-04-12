@@ -128,7 +128,11 @@ public class AdminMsgController {
 						Criteria.where("lastResponseStamp").lt(endStampLong)),
 
 				new Criteria().andOperator(Criteria.where("lastInComingStamp").gt(startStampLong),
-						Criteria.where("lastInComingStamp").lt(endStampLong)));
+						Criteria.where("lastInComingStamp").lt(endStampLong)),
+				new Criteria().andOperator(Criteria.where("sessionExpiryStamp").gt(startStampLong),
+						Criteria.where("sessionExpiryStamp").lt(endStampLong))
+				
+				);
 		
 		
 
