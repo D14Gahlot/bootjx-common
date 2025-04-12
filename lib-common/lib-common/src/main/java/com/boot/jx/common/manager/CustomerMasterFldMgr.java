@@ -30,6 +30,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiPagination;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
@@ -663,11 +664,15 @@ public class CustomerMasterFldMgr {
 		LOGGER.debug("QB {} " + JsonUtil.toJson(qb));
 		List<CustomerProfileDoc> lst  =contactStore.find(qb);
 		int totalR=getTotalRecords(andCriteriaList);
-		
+		ApiPagination pagi = new ApiPagination();
 		resp.setResults(lst);
-		resp.setMeta(totalR);
+		pagi.setPageNo(pageNo);
+		pagi.setTotal(totalR);
+		pagi.setSortBy(sortBy);
+		pagi.setSortDir(sortdir);
+		pagi.setPageSize(searchQry.getPageSize());
+		resp.setPagination(pagi);
 		return resp;
-		//return contactStore.find(qb);
 	}
 
 	private Criteria createCriteria(String key, String operation, Object value) {
@@ -826,7 +831,14 @@ public class CustomerMasterFldMgr {
 			totalSize =lstTo.size();
 		}
 		resp.setResults(lst);
-		resp.setMeta(totalSize);
+		
+		ApiPagination pagi = new ApiPagination();
+		pagi.setTotal(totalSize);
+		pagi.setPageNo(pageNo);
+		pagi.setPageSize(pageSize);
+		pagi.setSortDir(sortDir);
+		pagi.setSortBy(sortBy);
+		resp.setPagination(pagi);
 		return resp;
 	}
 
