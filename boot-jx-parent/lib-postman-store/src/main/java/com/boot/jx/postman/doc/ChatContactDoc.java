@@ -84,6 +84,9 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 	private String createdBy;
 	
 	private ChatInfoDTO info;
+	
+	//new subscription object
+	private Map<String, Boolean> subscriptions;
 
 	public String getContactId() {
 		return contactId;
@@ -382,4 +385,21 @@ public class ChatContactDoc implements Serializable, Contactable, AuditCreateEnt
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
+	
+	//newly added 
+	public Map<String, Boolean> getSubscriptions(){
+		return subscriptions;
+	}
+	
+	public void setSubscriptions(Map<String, Boolean> subscriptions) {
+		this.subscriptions = subscriptions;
+	}
+	
+	public Map<String, Boolean> subscriptions(){
+		if (this.subscriptions == null) {
+			this.subscriptions = new HashMap<String, Boolean>();
+		}
+		return subscriptions;
+	}	
+	
 }
