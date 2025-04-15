@@ -33,8 +33,8 @@ public class ChatSessionEventsImpl implements ChatSessionEvents {
 
 	@Override
 	public NodeEntry<InBoundEvent> onSessionIdleOutBound(ChatSessionDoc session) {
-		PMConfigurationObject frwrdQueue = pmEnvironment
-				.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
+		PMConfigurationObject frwrdQueue = pmEnvironment.config()
+				.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_OUT_IDLE_TIMEOUT_QUEUE);
 		assignToQueue(session, frwrdQueue);
 		return null;
 	}
@@ -42,10 +42,14 @@ public class ChatSessionEventsImpl implements ChatSessionEvents {
 	@Override
 	public NodeEntry<InBoundEvent> onSessionIdleInBound(ChatSessionDoc session) {
 		ClientApp clientApp = pmEnvironment.config().clientApiKey(session.getAssignedToQueue());
-		MapEntry frwrdQueue = clientApp.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
-		if (!frwrdQueue.exists()) {
+
+		MapEntry frwrdQueue = null;
+		if (clientApp.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean()) {
+			frwrdQueue = clientApp.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+		} else {
 			frwrdQueue = pmEnvironment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 		}
+
 		assignToQueue(session, frwrdQueue);
 		return null;
 	}
