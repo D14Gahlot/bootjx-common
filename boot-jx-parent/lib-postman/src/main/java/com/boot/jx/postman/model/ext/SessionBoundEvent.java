@@ -19,6 +19,7 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 
 	public static class TRIGGER_TYPE {
 		public static final String MESSAGE = "MESSAGE";
+		public static final String SESSION = "SESSION";
 		public static final String ACTION = "ACTION";
 		public static final String STATUS = "STATUS";
 		public static final String SYSTEM = "SYSTEM";
@@ -241,6 +242,22 @@ public class SessionBoundEvent implements SessionInfo, TraceMessage, LoggableEnt
 
 	public void setSessionIds(List<String> sessionIds) {
 		this.sessionIds = sessionIds;
+	}
+
+	public void fixEvent() {
+		if (!ArgUtil.is(triggerType)) {
+			switch (type) {
+			case EVENT_TYPE.SESSION_ROUTED:
+			case EVENT_TYPE.SESSION_INIT:
+			case EVENT_TYPE.SESSION_CLOSED:
+			case EVENT_TYPE.SESSION_STATUS:
+			case EVENT_TYPE.SESSION_ASSIGNED:
+				this.triggerType = TRIGGER_TYPE.SESSION;
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 }

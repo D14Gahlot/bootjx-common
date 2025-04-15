@@ -374,6 +374,7 @@ public abstract class DefaultChatBoundHandler implements InBoundHandler {
 			ChatSessionDoc sessionDoc = context().session().getDoc();
 			this.onTimeout(event, sessionDoc, pmArgs);
 		}
+		commonServiceClient.publishSessionBoundEvent(event);
 		return event;
 	}
 
