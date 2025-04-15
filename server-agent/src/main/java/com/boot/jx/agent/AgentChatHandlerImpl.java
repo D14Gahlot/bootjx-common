@@ -171,9 +171,10 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 						LOGGER.debug("CHAT_SESSION_STICKY : because its strictly {}", agent);
 						return agent;
 					}
+				
 					if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(rmStickyLogic)) {
-						if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())
-								&& (agent.getLastOnlineStamp() > timeThen)) {
+						if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())){
+								//&& (agent.getLastOnlineStamp() > timeThen)) {
 							LOGGER.info("CHAT_RM_STICKY : because its availanle {}", agent);
 							return agent;
 						}
@@ -314,7 +315,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Override
 	public PMArgs doAssign(ChatSessionDoc chatSessionDoc, PMArgs params) {
-
 		if (!ArgUtil.is(chatSessionDoc.getAssignedToQueue()) && !ArgUtil.is(params.getAssignToQueueCode())) {
 			chatSessionManager.assignToQueue(chatSessionDoc,
 					environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)
