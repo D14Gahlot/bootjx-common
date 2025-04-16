@@ -173,8 +173,8 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 					}
 				
 					if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(rmStickyLogic)) {
-						if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())){
-								//&& (agent.getLastOnlineStamp() > timeThen)) {
+						if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())
+								&& (agent.getLastOnlineStamp() > timeThen)) {
 							LOGGER.info("CHAT_RM_STICKY : because its availanle {}", agent);
 							return agent;
 						}
