@@ -34,6 +34,8 @@ import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
 import com.boot.utils.EntityDtoUtil;
 import org.springframework.data.mongodb.core.query.Query;
+import java.util.function.Function;
+
 @Service
 public class AdminService {
 
@@ -64,7 +66,7 @@ public class AdminService {
 	public List<AgentResponseAdminDto> fetchAgents(String agentId, boolean includeInActive) {
 		List<AgentDoc> lstOfAgent = adminManager.fetchAgentList(agentId, includeInActive);
 		
-	    // Add ChatSession object to each DTO
+	    
 		return buildAgentDto(lstOfAgent);
 	}
 
@@ -144,23 +146,36 @@ public class AdminService {
 
 	private List<AgentResponseAdminDto> buildAgentDto(List<AgentDoc> lstOfAgent) {
 	    List<AgentResponseAdminDto> agentList = new AgentResponseAdminDto().importFrom(lstOfAgent);
+
 	    List<DepartmentDoc> depts = adminManager.fetchDept(null, true);
+
 	    List<AgentSessionDoc> sessionDocs = mongoTemplate.find(
-	            new Query(Criteria.where("_id").in(lstOfAgent.stream()
-	                    .map(AgentDoc::getAgent_code)
-	                    .collect(Collectors.toList()))),
-	            AgentSessionDoc.class
+	        new Query(Criteria.where("_id").in(
+	            lstOfAgent.stream()
+	                .map(AgentDoc::getAgent_code)
+	                .collect(Collectors.toList())
+	        )),
+	        AgentSessionDoc.class
 	    );
+
 	    Map<String, DepartmentDoc> deptMap = new HashMap<>();
 	    for (DepartmentDoc departmentDoc : depts) {
 	        deptMap.put(departmentDoc.getDept_id(), departmentDoc);
 	    }
+
 	    Map<String, AgentSessionDoc> sessionMap = new HashMap<>();
 	    for (AgentSessionDoc sessionDoc : sessionDocs) {
 	        sessionMap.put(sessionDoc.getAgentCode(), sessionDoc);
 	    }
+
+	    Map<String, AgentDoc> agentDocMap = new HashMap<>();
+	    for (AgentDoc agent : lstOfAgent) {
+	        agentDocMap.put(agent.getId(), agent);
+	    }
+
+
 	    for (AgentResponseAdminDto agentResponseDto : agentList) {
-	        
+
 	        if (ArgUtil.is(agentResponseDto.getId())) {
 	            DepartmentDoc deptDoc = deptMap.get(agentResponseDto.getDept_id());
 	            if (deptDoc != null) {
@@ -168,12 +183,17 @@ public class AdminService {
 	                agentResponseDto.setDept(deptResponse);
 	            }
 	        }
-	        AgentSessionDoc sessionDoc = sessionMap.get(agentResponseDto.getAgent_name());
-	        	        if (sessionDoc != null) {
-	            agentResponseDto.setSession(sessionDoc); 
+
+	        AgentDoc originalDoc = agentDocMap.get(agentResponseDto.getId());
+	        if (originalDoc != null) {
+	            AgentSessionDoc sessionDoc = sessionMap.get(originalDoc.getAgent_code());
+	            if (sessionDoc != null) {
+	                agentResponseDto.setSession(sessionDoc); 
+	            }
 	        }
 	    }
-   	    return agentList;
+
+	    return agentList;
 	}
 
 
