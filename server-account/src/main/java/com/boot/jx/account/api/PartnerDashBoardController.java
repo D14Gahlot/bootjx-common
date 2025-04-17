@@ -23,11 +23,13 @@ import com.boot.jx.account.dto.WabaBalanceDto;
 import com.boot.jx.account.dto.WabaSummary;
 import com.boot.jx.account.manager.AccountDashBoardManager;
 import com.boot.jx.account.manager.WabaAccountManager;
+import com.boot.jx.api.ApiPagination;
 import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.EventCountSummary;
 import com.boot.jx.common.doc.DomainDoc;
 import com.boot.jx.http.CommonHttpRequest;
 import com.boot.jx.postman.doc.WabaAccountBalanceDoc;
+import com.boot.utils.ArgUtil;
 
 @Controller
 @RequestMapping("/partnerdashboard")
@@ -163,7 +165,14 @@ public class PartnerDashBoardController {
 	@RequestMapping(value = { "/pub/fetch/balance/waba/summary" }, method = { RequestMethod.GET })
 	public ApiResponse<WabaBalanceDto, Object> wabaDepositAddedit(@RequestParam long timeStamp) { 
 		WabaBalanceDto cost = dashBMgr.getWabaCostAnalyticsV1(timeStamp);
-		return ApiResponse.buildResult(cost);
+		ApiResponse<WabaBalanceDto,Object> resp = new ApiResponse<>();
+		resp.addResult(cost);
+		ApiPagination apiPag = new ApiPagination();
+		if(ArgUtil.is(cost.getDateWiseBaL())){
+			apiPag.setTotal(cost.getDateWiseBaL().size());
+		}
+		resp.setPagination(apiPag);
+		return resp;
 	}
 	
 	@ResponseBody

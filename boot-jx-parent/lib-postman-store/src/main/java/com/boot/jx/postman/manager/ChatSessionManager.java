@@ -483,6 +483,7 @@ public class ChatSessionManager {
 		String queueCode = pmArgs.getAssignToQueueCode();
 
 		InBoundEvent inBoundEvent = new InBoundEvent().eventCode(InBoundEvent.EVENT_TYPE.SESSION_ROUTED);
+		inBoundEvent.triggerType = InBoundEvent.TRIGGER_TYPE.SESSION;
 		inBoundEvent.sessionRouted = new SessionRouted();
 		inBoundEvent.sessionId = chatSessionDoc.getSessionId();
 		inBoundEvent.contactId = chatSessionDoc.getContactId();

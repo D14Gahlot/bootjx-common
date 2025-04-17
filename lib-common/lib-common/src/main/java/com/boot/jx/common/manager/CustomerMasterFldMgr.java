@@ -30,6 +30,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiPagination;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.config.CONFIG_SETUP_KEY;
 import com.boot.jx.common.doc.JobScheduledDoc;
@@ -496,8 +498,10 @@ public class CustomerMasterFldMgr {
 
 	/** profile search **/
 
-	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
-
+	public ApiResponse<CustomerProfileDoc, Object>  getProfileSearch(ProfileSearchQuery searchQry) {
+		
+		ApiResponse<CustomerProfileDoc, Object> resp = new ApiResponse<CustomerProfileDoc, Object>();
+		
 		String sortBy = ArgUtil.parseAsString(searchQry.getSortBy(), "created.stamp");
 		String sortdir = ArgUtil.parseAsString(searchQry.getSortDir(), "DESC");
 
@@ -629,6 +633,8 @@ public class CustomerMasterFldMgr {
 
 		// Build the final Mongo query with AND criteria
 		MongoQueryBuilder<CustomerProfileDoc> qb = null;
+		
+
 
 		if (searchQry.isBooSkipLmt()) {
 			if (ArgUtil.is(andCriteriaList)) {
@@ -653,8 +659,20 @@ public class CustomerMasterFldMgr {
 						.skip(skip); // Apply skip for the correct page
 			}
 		}
+		
+		
 		LOGGER.debug("QB {} " + JsonUtil.toJson(qb));
-		return contactStore.find(qb);
+		List<CustomerProfileDoc> lst  =contactStore.find(qb);
+		int totalR=getTotalRecords(andCriteriaList);
+		ApiPagination pagi = new ApiPagination();
+		resp.setResults(lst);
+		pagi.setPageNo(pageNo);
+		pagi.setTotal(totalR);
+		pagi.setSortBy(sortBy);
+		pagi.setSortDir(sortdir);
+		pagi.setPageSize(searchQry.getPageSize());
+		resp.setPagination(pagi);
+		return resp;
 	}
 
 	private Criteria createCriteria(String key, String operation, Object value) {
@@ -777,7 +795,7 @@ public class CustomerMasterFldMgr {
 		return lst;
 	}
 
-	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
+	public ApiResponse<ProfileFilterMasterDoc, Object> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
 		if (ArgUtil.is(reqDto.getId())) {
 			List<String> idList = Arrays.stream(reqDto.getId().split(",")).collect(Collectors.toList());
 			for (String str : idList) {
@@ -787,8 +805,9 @@ public class CustomerMasterFldMgr {
 		return fetchProfileFilterGroup(null, null, 10, 0, null, null);
 	}
 
-	public List<ProfileFilterMasterDoc> fetchProfileFilterGroup(String id, Boolean active, int pagesize, int pageNo,
+	public ApiResponse<ProfileFilterMasterDoc, Object>  fetchProfileFilterGroup(String id, Boolean active, int pagesize, int pageNo,
 			String sortby, String sortdir) {
+		ApiResponse<ProfileFilterMasterDoc, Object> resp = new ApiResponse<ProfileFilterMasterDoc, Object>();
 		int pageSize = pagesize == 0 ? 25 : pagesize;
 		String sortBy = ArgUtil.parseAsString(sortby, "created.stamp");
 		String sortDir = ArgUtil.parseAsString(sortdir, "DESC");
@@ -798,7 +817,29 @@ public class CustomerMasterFldMgr {
 		if (!StringUtils.isBlank(id)) {
 			qb = qb.whereId(id);
 		}
-		return contactStore.find(qb);
+		List<ProfileFilterMasterDoc> lst = contactStore.find(qb);
+		int totalSize = 0;
+		MongoQueryBuilder<ProfileFilterMasterDoc> qbTot=null;
+		List<ProfileFilterMasterDoc> lstTo =null; 
+		if (!StringUtils.isBlank(id)) {
+			qbTot = MongoQueryBuilder.collection(ProfileFilterMasterDoc.class).whereId(id);
+			lstTo = contactStore.find(qbTot);
+		}else {
+			lstTo =commonMongoTemplate.findAll(ProfileFilterMasterDoc.class);
+		}
+		if(ArgUtil.is(lstTo)) {
+			totalSize =lstTo.size();
+		}
+		resp.setResults(lst);
+		
+		ApiPagination pagi = new ApiPagination();
+		pagi.setTotal(totalSize);
+		pagi.setPageNo(pageNo);
+		pagi.setPageSize(pageSize);
+		pagi.setSortDir(sortDir);
+		pagi.setSortBy(sortBy);
+		resp.setPagination(pagi);
+		return resp;
 	}
 
 	private Date getDate(String value) {
@@ -902,5 +943,26 @@ public class CustomerMasterFldMgr {
 			return containsAliasToday;
 		}
 	}
+	
+	private int getTotalRecords(List<Criteria> andCriteriaList) {
+		MongoQueryBuilder<CustomerProfileDoc> qb = null;
+		int tSize=0;
+		List<CustomerProfileDoc> docLst=null;
+		if(ArgUtil.is(andCriteriaList)) {
+			qb = CommonMongoQueryBuilder.collection(CustomerProfileDoc.class)
+					.where(new Criteria()
+							.andOperator(andCriteriaList.toArray(new Criteria[andCriteriaList.size()])));
+			 docLst= contactStore.find(qb);
+		}else {
+			
+			docLst =commonMongoTemplate.findAll(CustomerProfileDoc.class);
+		}
+			if(ArgUtil.is(docLst)) {
+				tSize =docLst.size();
+			}
+		
+		return tSize;
+	}
+	
 
 }

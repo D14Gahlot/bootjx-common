@@ -119,50 +119,16 @@ public class CustomerProfileContoller {
 			@RequestParam(value = "id", required = true) String id) {
 		return ApiResponse.buildResults(cusProfileService.saveCustomerProfile(id));
 	}
-//
-//	@RequestMapping(value = "/api/customer/de-duplicate/save", method = { RequestMethod.POST })
-//	public ApiResponse<CustomerProfileDoc, Object> deDeuplicateCheck(@RequestBody CustomerProfileRequest request) {
-//		return ApiResponse.buildResults(cusProfileService.deDeuplicateCheck(request));
-//	}
 
-//	@RequestMapping(value = "/api/search/customer/profile", method = { RequestMethod.POST })
-//	public ApiResponse<CustomerProfileDoc, Object> fetchCustomeProfile(@RequestBody SearchCustomerProfileDto search) {
-//		return ApiResponse.buildResults(cusProfileService.fetchCustomeProfile(search));
-//	}
 
 	@RequestMapping(value = "/api/profile/filter/search", method = { RequestMethod.POST })
 	@JsonView(PMEnvironment.PublicProperty.class)
 	public ApiResponse<CustomerProfileDoc, Object> getProfiles(@RequestBody ProfileSearchQuery searchQry) {
-		List<CustomerProfileDoc> docs = cusProfileService.getProfileSearch(searchQry);
-		return ApiResponse.buildResults(docs);
+		return  cusProfileService.getProfileSearch(searchQry);
+		
 	}
 	
-//	/** create profile group with custom filter**/
-//	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.POST })
-//	public ApiResponse<ProfileFilterMasterDoc, Object> addEditProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
-//		return ApiResponse.buildResults(cusProfileService.addEditProfileFilterGroup(reqDto));
-//	}
-//	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.PATCH })
-//	public ApiResponse<ProfileFilterMasterDoc, Object> updateProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
-//		return ApiResponse.buildResults(cusProfileService.addEditProfileFilterGroup(reqDto));
-//	}
-//	
-//	
-//	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.GET })
-//	public ApiResponse<ProfileFilterMasterDoc, Object> fetchProfileFilterGroup(
-//			@RequestParam(value = "id", required = false) String id,
-//			@RequestParam(value = "active", required = false) Boolean active,
-//			@RequestParam(required = false, defaultValue = "25") int pageSize,
-//			@RequestParam(required = false,defaultValue = "0") int pageNo,
-//			@RequestParam(required = false, defaultValue = "created") String sortBy,
-//			@RequestParam(required = false, defaultValue = "desc") String sortDir)  {
-//	return ApiResponse.buildResults(cusProfileService.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir));
-//}
-//
-//	@RequestMapping(value = "/api/profile/filter", method = { RequestMethod.DELETE })
-//	public ApiResponse<ProfileFilterMasterDoc, Object> deleteProfileFilterGroup(@RequestBody ProfileFilterMasterDoc reqDto) {
-//		return ApiResponse.buildResults(cusProfileService.deleteProfileFilterGroup(reqDto));
-//	}
+
 
 
 }

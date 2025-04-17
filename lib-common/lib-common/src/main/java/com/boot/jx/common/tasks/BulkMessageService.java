@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.amplify.model.JobStatus;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.chat.ChatService;
 import com.boot.jx.chat.ChatSessionFactory;
 import com.boot.jx.chat.ChatSessionService;
@@ -889,7 +890,10 @@ public class BulkMessageService extends BatchJobExecuter {
 
 					List<CustomerProfileDoc> docs = null;
 					if (ArgUtil.is(searCri)) {
-						docs = cusProfileService.getProfileSearch(profSerarch);
+						ApiResponse<CustomerProfileDoc, Object> resp = cusProfileService.getProfileSearch(profSerarch);
+						if(ArgUtil.is(resp)) {
+							docs =resp.getResults();
+						}
 					}
 					if (ArgUtil.is(docs)) {
 
@@ -953,7 +957,10 @@ public class BulkMessageService extends BatchJobExecuter {
 				profSerarch.setBooSkipLmt(true);
 				List<CustomerProfileDoc> docs = null;
 				if (ArgUtil.is(searCri)) {
-					docs = cusProfileService.getProfileSearch(profSerarch);
+					ApiResponse<CustomerProfileDoc, Object> resp = cusProfileService.getProfileSearch(profSerarch);
+					if(ArgUtil.is(resp)) {
+						docs =resp.getResults();
+					}
 				}
 				if (ArgUtil.is(docs)) {
 					// Count total phones and emails across all profiles

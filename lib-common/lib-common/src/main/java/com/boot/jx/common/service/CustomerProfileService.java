@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.boot.jx.api.ApiFieldError;
+import com.boot.jx.api.ApiResponse;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.JobScheduledDoc;
 import com.boot.jx.common.dto.CustomerContactDto;
@@ -106,8 +107,7 @@ public class CustomerProfileService {
 		return cmFieldMgr.deleteCustmerMasterFiled(reqDto);
 	}
 
-	public List<CustomerProfileDoc> getProfileSearch(ProfileSearchQuery searchQry) {
-		// TODO Auto-generated method stub
+	public ApiResponse<CustomerProfileDoc, Object>  getProfileSearch(ProfileSearchQuery searchQry) {
 		return cmFieldMgr.getProfileSearch(searchQry);
 	}
 	
@@ -117,15 +117,15 @@ public class CustomerProfileService {
 		return lstCmfields;
 	}
 
-	public List<ProfileFilterMasterDoc> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
-		List<ProfileFilterMasterDoc> lstCmfields = cmFieldMgr.deleteProfileFilterGroup(reqDto);
-		return lstCmfields;
+	public ApiResponse<ProfileFilterMasterDoc, Object> deleteProfileFilterGroup(ProfileFilterMasterDoc reqDto) {
+		 return cmFieldMgr.deleteProfileFilterGroup(reqDto);
+		
 	}
 
-	public  List<ProfileFilterMasterDoc> fetchProfileFilterGroup(String id, Boolean active, int pageSize, int pageNo, String sortBy,
+	public ApiResponse<ProfileFilterMasterDoc, Object>  fetchProfileFilterGroup(String id, Boolean active, int pageSize, int pageNo, String sortBy,
 			String sortDir) {
-		List<ProfileFilterMasterDoc> lstCmfields = cmFieldMgr.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir);
-		return lstCmfields;
+		ApiResponse<ProfileFilterMasterDoc, Object> resp= cmFieldMgr.fetchProfileFilterGroup(id,active,pageSize,pageNo,sortBy,sortDir);
+		return resp;
 	}
 
 }

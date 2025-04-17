@@ -174,7 +174,8 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 					.superKey("postman.agent.chat.in.idle.timeout")
 					.desc("Timed-out chat gets re-assigned to this queue")
 					.optionsSource("getx:/api/options/inbound_queue").optionsKey("code").optionsLabel("code")
-					.group(ConfigConstants.GROUP_AGENT).condition(POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT.getKey(), true)),
+					.group(ConfigConstants.GROUP_AGENT).condition(POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT.getKey(), true)
+					.clearable(true)),
 
 //	POSTMAN_UI_BETA(new ConfigMeta("Enable Beta UI", "postman.ui.beta").optionsOnOff()
 //		.defaultValue(ConfigOption.OFF).group(GROUP_AGENT)),

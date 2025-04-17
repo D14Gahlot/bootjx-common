@@ -21,6 +21,7 @@ import com.boot.jx.postman.dto.ContactDTO;
 import com.boot.jx.postman.service.ChatDTOUtil;
 import com.boot.jx.postman.store.MessageStore;
 import com.boot.jx.postman.store.SessionStore;
+import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
 @Component
@@ -58,6 +59,11 @@ public class ChatArchiveService {
 	public ChatSessionDTO withContact(ChatSessionDTO chatSessionDto) {
 
 		ContactDTO contact = getContact(chatSessionDto);
+		
+		if(PostManUtil.IS_MULTI_THREAD(contact.getChannelType())) {
+			contact.setPhone(null);
+		}
+		
 		chatSessionDto.setContact(contact);
 
 		chatSessionDto.setContactType(contact.getContactType());
@@ -65,6 +71,7 @@ public class ChatArchiveService {
 		chatSessionDto.setProfilePic(contact.getProfilePic());
 		chatSessionDto.setEmail(contact.getEmail());
 		chatSessionDto.setPhone(contact.phone());
+		
 		chatSessionDto.setContactId(contact.getContactId());
 
 		return chatSessionDto;

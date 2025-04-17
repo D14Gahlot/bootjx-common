@@ -55,11 +55,13 @@ public class SMSClient {
 		} else if (TWILIO.equalsIgnoreCase(sms.getProvider())) {
 			String sid = pub.entry("sid").asString();
 			String apiKey = secret.entry("apikey").asString();
+			String authToken = secret.entry("authToken").asString();
+			
 			MapModel resp = restService.ajax(TWILIO_URL).path("/Accounts/{sid}/Messages.json").pathParam("sid", sid)
 					.field("From", "+" + channelConfig.getSms().getNumber())
 					.field("To", "+" + outboxMessage.contact().getCsid()).field("Body", outboxMessage.getMessage())
 					.header("Authorization",
-							"Basic " + CryptoUtil.getEncoder().message(sid + ":" + apiKey).encodeBase64().toString())
+							"Basic " + CryptoUtil.getEncoder().message(sid + ":" + authToken).encodeBase64().toString())
 					.postForm().asMapModel();
 			outboxMessage.setMessageIdExt(resp.keyEntry("sid").asString());
 		} else {

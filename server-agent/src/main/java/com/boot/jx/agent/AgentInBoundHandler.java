@@ -143,6 +143,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 					return;
 				}
 			}
+
 		} catch (Exception e) {
 			LOGGER.error("Error ONE while Connecting to Agent", e);
 			logManager.error(assignEvent, e);
@@ -164,6 +165,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 		NodeEntry<InBoundEvent> eventEntry = new NodeEntry<InBoundEvent>();
 		InBoundEvent agentAssignEvent = new InBoundEvent();
 		agentAssignEvent.type = InBoundEvent.EVENT_TYPE.SESSION_ASSIGNED;
+		agentAssignEvent.triggerType = InBoundEvent.TRIGGER_TYPE.SESSION;
 		agentAssignEvent.sessionId = session.getSessionId();
 		agentAssignEvent.sessionAssigned().oldAgent = session.getAssignedToAgent();
 		agentAssignEvent.sessionAssigned().oldDept = session.getAssignedToDept();
@@ -173,6 +175,7 @@ public class AgentInBoundHandler extends DefaultChatBoundHandler {
 			agentAssignEvent.sessionAssigned().newAgent = params.getAssignToAgentCode();
 		}
 		onAssign(session, agentAssignEvent);
+		commonServiceClient.publishSessionBoundEvent(agentAssignEvent);
 		return eventEntry.value(agentAssignEvent);
 	}
 
