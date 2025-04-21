@@ -29,6 +29,7 @@ import com.boot.jx.tunnel.ITunnelDefs.TunnelTask;
 import com.boot.jx.tunnel.task.ATaskLimiter;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.model.MapModel;
+import com.boot.model.MapModel.MapEntry;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.TimeUtils;
@@ -126,28 +127,31 @@ public class SessionEventTimer extends ATaskLimiter {
 	@Async
 	public void setChatInIdleTimeout(String sessionid, ClientApp app, SessionBoundEvent outboundEvent) {
 		if (app != null && (app.isAgentApp() || app.isCustomApp()) || app.isPreDefinedBot()) {
-			boolean timeoutEnabledApp = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
-					.asBoolean(false);
-			if (timeoutEnabledApp) {
-				MapPathEntry frwrdQueue = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
-				if (frwrdQueue.not(app.getQueue())) {
-					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
-							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
-				}
-			} else if (app.isAgentApp()) {
-				boolean timeoutEnabled = pmEnvironment.config()
-						.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
-				PMConfigurationObject frwrdQueue = pmEnvironment.config()
-						.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
 
-				if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
+			if ((app.isCustomApp() && app.isPreDefinedBot()) && ArgUtil.is(outboundEvent.getTimeout())) {
+				debouncEvent(null, sessionid, outboundEvent, SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
+			} else {
+				boolean timeoutEnabledApp = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT)
+						.asBoolean(false);
+				MapEntry frwrdQueue = app.keyEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+
+				if (timeoutEnabledApp && frwrdQueue.not(app.getQueue())) {
 					debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid, outboundEvent,
 							SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
+				} else if (app.isAgentApp()) {
+					boolean timeoutEnabled = pmEnvironment.config()
+							.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT).asBoolean(false);
+					frwrdQueue = pmEnvironment.config()
+							.prefsEntry(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_QUEUE);
+
+					if (timeoutEnabled && frwrdQueue.not(app.getQueue())) {
+						debouncEvent(CONFIG_SETUP_KEY.POSTMAN_AGENT_CHAT_IN_IDLE_TIMEOUT_INTERVAL, sessionid,
+								outboundEvent, SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
+					}
 				}
-			} else if ((app.isCustomApp() && app.isPreDefinedBot()) && ArgUtil.is(outboundEvent.getTimeout())) {
-				debouncEvent(null, sessionid, outboundEvent, SessionEventTimer.CHAT_IN_IDLE_TIMEOUT);
 			}
 		}
+
 	}
 
 	@Async
