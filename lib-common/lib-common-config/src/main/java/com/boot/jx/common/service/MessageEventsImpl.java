@@ -69,7 +69,7 @@ public class MessageEventsImpl implements MessageEvents {
 	}
 
 	/**
-	 * After Status of Outbound Message has been Recieved
+	 * After Status of Outbound Message has been Received
 	 * 
 	 */
 	@Override
