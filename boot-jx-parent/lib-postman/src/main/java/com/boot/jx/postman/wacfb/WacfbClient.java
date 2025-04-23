@@ -11,8 +11,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -434,12 +436,101 @@ public class WacfbClient implements ChannelClient {
 				List<Map<String, Object>> extTemplateComponentButtons = MapModel.from(extTemplateComponent)
 						.keyEntry("buttons").asListOfMap();
 				List<List<Map<String, Object>>> buttonsParametersVars = varMap.entry("buttons").asListListOfMap();
+				
+
+				// First, create a map to store button to variable mapping based on content matching
+				Map<Map<String, Object>, List<Map<String, Object>>> buttonVarMap = new HashMap<>();
+				Set<String> usedVariables = new HashSet<>(); // Track used variables
+				Set<Map<String, Object>> mappedButtons = new HashSet<>();
+
+				// Create the mapping first
+				for (List<Map<String, Object>> varList : buttonsParametersVars) {
+					if (ArgUtil.is(varList)) {
+						for (Map<String, Object> button : extTemplateComponentButtons) {
+							
+							//skip if this button is already mapped 
+							if (mappedButtons.contains(button)) {
+								continue;
+							}
+							
+							String buttonType = (String) button.get("type");
+							
+							// For URL buttons, match based on URL containing the variable
+							if ("URL".equals(buttonType) && button.get("url") != null) {
+								for (Map<String, Object> var : varList) {
+									String numVar = var.get("numVar").toString();
+									String variable = var.get("variable").toString();
+									// Create a unique key combining numVar and variable
+									String varKey = numVar + ":" + variable;
+									// Only map if this specific variable hasn't been used yet
+									if (!usedVariables.contains(varKey) && 
+										button.get("url").toString().contains(numVar)) {
+										buttonVarMap.put(button, varList);
+										usedVariables.add(varKey);
+										mappedButtons.add(button);
+										break;
+									}
+								}
+							}
+									
+							else if ("QUICK_REPLY".equals(buttonType)) {
+								for (Map<String, Object> var : varList) {
+									String path = (String) var.get("path");
+									String variable = var.get("variable").toString();
+//									String numVar = var.get("numVar").toString();
+									String varKey = path + ":" + variable;
+									// Only map if this specific variable hasn't been used yet
+									// For dynamic quick reply, we don't check button text
+									// Instead, we check if the path exists in body variables
+									if (!usedVariables.contains(varKey) &&
+										var.get("component").equals("button")) {
+										// Check if this path exists in body variables
+										boolean pathExistsInBody = false;
+										if (varMap.containsKey("body")) {
+											List<Map<String, Object>> bodyVars = varMap.entry("body").asListOfMap();
+											for (Map<String, Object> bodyVar : bodyVars) {
+												if (path.equals(bodyVar.get("path"))) {
+													pathExistsInBody = true;
+													break;
+												}
+											}
+										}
+										
+										if (pathExistsInBody) {
+											buttonVarMap.put(button, varList);
+											usedVariables.add(varKey);
+											mappedButtons.add(button);
+											break;
+										}
+									}
+								}
+							}
+							// For Flow buttons, if no match found for URL or QUICK_REPLY, assume it's for FLOW
+							else if ("FLOW".equals(buttonType) && !buttonVarMap.containsKey(button)) {
+								for (Map<String, Object> var : varList) {
+									String variable = var.get("variable").toString();
+									String numVar = var.get("numVar").toString();
+									String varKey = numVar + ":" + variable;
+									// Only map if this specific variable hasn't been used yet
+									if (!usedVariables.contains(varKey)) {
+										buttonVarMap.put(button, varList);
+										usedVariables.add(varKey);
+										mappedButtons.add(button);
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
 
 				for (int i = 0; i < extTemplateComponentButtons.size(); i++) {
 					Map<String, Object> extTemplateComponentButton = extTemplateComponentButtons.get(i);
-					List<Map<String, Object>> buttonParameterVar = CollectionUtil.getArray(buttonsParametersVars, i);
+					String buttonType = (String) extTemplateComponentButton.get("type");
+					List<Map<String, Object>> buttonParameterVar = buttonVarMap.get(extTemplateComponentButton);
+//					List<Map<String, Object>> buttonParameterVar = CollectionUtil.getArray(buttonsParametersVars, i);)
 					if (ArgUtil.is(buttonParameterVar)) {
-						String buttonType = (String) extTemplateComponentButton.get("type");
+//						String buttonType = (String) extTemplateComponentButton.get("type");
 						if ("URL".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
@@ -465,7 +556,6 @@ public class WacfbClient implements ChannelClient {
 						} else if ("FLOW".equals(buttonType)) {
 							for (Map<String, Object> buttonParameter : buttonParameterVar) {
 								if (buttonParameter.containsKey("path")) {
-
 									String path = (String) buttonParameter.get("path");
 									TmplComponent buttonComponent = TmplComponent.createInstance().button("flow", i);
 									buttonComponent.parameter("action", MapModel.createInstance());
@@ -474,7 +564,7 @@ public class WacfbClient implements ChannelClient {
 							}
 						}
 					} else {
-						String buttonType = (String) extTemplateComponentButton.get("type");
+//						String buttonType = (String) extTemplateComponentButton.get("type");
 						List<TmplElement> buttons = outboxMessage.optionActionButtons();
 						TmplElement button = CollectionUtil.getArray(buttons, i);
 						if (ArgUtil.is(button) && "QUICK_REPLY".equals(button.getType())
