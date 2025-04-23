@@ -240,23 +240,23 @@ public enum CONFIG_SETUP_KEY implements EntryMeta {
 			.group(ConfigConstants.GROUP_AGENT)),
 
 	// NLP
-	POSTMAN_NLP_LANGUAGE(new ConfigMeta("Enable Detect Language", "postman.nlp.detect.lang").optionsOnOff()
-			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
-	POSTMAN_NLP_SENTIMENT(new ConfigMeta("Enable Detect Sentiment", "postman.nlp.detect.sentiment").optionsOnOff()
-			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
-	POSTMAN_NLP_CATEGORIES(new ConfigMeta("Enable Detect Categories", "postman.nlp.detect.categories").optionsOnOff()
-			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
-	POSTMAN_NLP_PERSONS(new ConfigMeta("Enable Detect Persons", "postman.nlp.detect.persons").optionsOnOff()
-			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
-	POSTMAN_NLP_ORGANIZATIONS(new ConfigMeta("Enable Detect Organizations", "postman.nlp.detect.organizations")
-			.optionsOnOff().defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
-	POSTMAN_NLP_COUNTRIES(new ConfigMeta("Enable Detect Countries", "postman.nlp.detect.countries").optionsOnOff()
-			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
-	POSTMAN_NLP_CITIES(new ConfigMeta("Enable Detect Cities", "postman.nlp.detect.cities").optionsOnOff()
-			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
-	POSTMAN_NLP_LOCATIONS(new ConfigMeta("Enable Detect Locations", "postman.nlp.detect.locations").optionsOnOff()
-			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
-
+//	POSTMAN_NLP_LANGUAGE(new ConfigMeta("Enable Detect Language", "postman.nlp.detect.lang").optionsOnOff()
+//			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
+//	POSTMAN_NLP_SENTIMENT(new ConfigMeta("Enable Detect Sentiment", "postman.nlp.detect.sentiment").optionsOnOff()
+//			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
+//	POSTMAN_NLP_CATEGORIES(new ConfigMeta("Enable Detect Categories", "postman.nlp.detect.categories").optionsOnOff()
+//			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
+//	POSTMAN_NLP_PERSONS(new ConfigMeta("Enable Detect Persons", "postman.nlp.detect.persons").optionsOnOff()
+//			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
+//	POSTMAN_NLP_ORGANIZATIONS(new ConfigMeta("Enable Detect Organizations", "postman.nlp.detect.organizations")
+//			.optionsOnOff().defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
+//	POSTMAN_NLP_COUNTRIES(new ConfigMeta("Enable Detect Countries", "postman.nlp.detect.countries").optionsOnOff()
+//			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
+//	POSTMAN_NLP_CITIES(new ConfigMeta("Enable Detect Cities", "postman.nlp.detect.cities").optionsOnOff()
+//			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
+//	POSTMAN_NLP_LOCATIONS(new ConfigMeta("Enable Detect Locations", "postman.nlp.detect.locations").optionsOnOff()
+//			.defaultValue(ConfigOption.OFF).group(ConfigConstants.GROUP_NLP)),
+//
 	POSTMAN_DEBUG_CONTACT(new ConfigMeta("Debugging is enabled for Contact", "postman.debug.contact")
 			.group(ConfigConstants.GROUP_DEV).hidden()),
 

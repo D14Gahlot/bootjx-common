@@ -95,6 +95,10 @@ public class AgentSessionService
 		builder.set("lastOnlineStamp", agentSession.getLastOnlineStamp());
 		builder.set("domain", AppContextUtil.getTenant());
 		builder.set("profile", agentSession.getProfile());
+		// When user is logging in, set lastLogin to current timestamp
+//		if (agentSession.isLoggedIn()) {
+//			builder.set("lastLogin", System.currentTimeMillis());
+//		}
 
 		if (ArgUtil.is(agentSession.getProfile())) {
 			builder.set("isEnabled", agentSession.getProfile().isEnabled());
@@ -172,6 +176,12 @@ public class AgentSessionService
 		agentSessionBean.setLastOnlineStamp(System.currentTimeMillis());
 		agentSessionBean.getAgentCode();
 		agentSessionBean.addRole(PMConstants.USER_ROLE.AGENT);
+		
+		// Set lastLogin timestamp here since this is where the actual login happens
+	    MongoQueryBuilder<AgentSessionDoc> builder = MongoQueryBuilder.collection(AgentSessionDoc.class)
+	            .whereId(agent.getAgent_code());
+	    builder.set("lastLogin", System.currentTimeMillis());
+	    mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
 		this.updateSession(true, agentSessionBean);
 	}
 
