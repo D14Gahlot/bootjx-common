@@ -70,6 +70,7 @@ import com.boot.model.MapModel;
 import com.boot.model.MapModel.MapPathEntry;
 import com.boot.utils.ArgUtil;
 import com.boot.utils.CollectionUtil;
+import com.boot.utils.JsonUtil;
 
 @Component
 public class AgentChatHandlerImpl implements AgentChatHandler {
@@ -155,7 +156,7 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 				if (!ArgUtil.is(c)) {
 					LOGGER.debug("CHAT_RM_STICKY : Contact is Missing {}", params.contact().getCsid());
 				} else if (!ArgUtil.is(c.profile())) {
-					LOGGER.debug("CHAT_RM_STICKY : Profile Link Missing");
+					LOGGER.info("CHAT_RM_STICKY : Profile Link Missing");
 				} else if (!ArgUtil.is(c.profile().getId())) {
 					LOGGER.debug("CHAT_RM_STICKY : Profile Id Missing {} {} {}", c.profile().getId(),
 							c.profile().getProfileId(), c.profile().getCode());
@@ -170,16 +171,17 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 						LOGGER.debug("CHAT_SESSION_STICKY : because its strictly {}", agent);
 						return agent;
 					}
+				
 					if (PMConstants.CHAT_SESSION_STICKY.ONAVAILABLE.equals(rmStickyLogic)) {
 						if (ArgUtil.nullAsFalse(agent.getIsOnline()) && ArgUtil.nullAsFalse(agent.getIsLoggedIn())
 								&& (agent.getLastOnlineStamp() > timeThen)) {
-							LOGGER.debug("CHAT_RM_STICKY : because its availanle {}", agent);
+							LOGGER.info("CHAT_RM_STICKY : because its availanle {}", agent);
 							return agent;
 						}
 					}
 				}
 			} else {
-				LOGGER.debug("CHAT_RM_STICKY : rmCode Not Set");
+				LOGGER.info("CHAT_RM_STICKY : rmCode Not Set");
 			}
 
 		}
@@ -313,7 +315,6 @@ public class AgentChatHandlerImpl implements AgentChatHandler {
 
 	@Override
 	public PMArgs doAssign(ChatSessionDoc chatSessionDoc, PMArgs params) {
-
 		if (!ArgUtil.is(chatSessionDoc.getAssignedToQueue()) && !ArgUtil.is(params.getAssignToQueueCode())) {
 			chatSessionManager.assignToQueue(chatSessionDoc,
 					environment.config().prefsEntry(CONFIG_SETUP_KEY.POSTMAN_CHAT_AGENT_QUEUE)

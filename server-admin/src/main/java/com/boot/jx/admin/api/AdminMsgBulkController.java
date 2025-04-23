@@ -682,7 +682,11 @@ public class AdminMsgBulkController {
 
 					List<CustomerProfileDoc> docs = null;
 					if (ArgUtil.is(searCri)) {
-						docs = cusProfileService.getProfileSearch(profSerarch);
+						ApiResponse<CustomerProfileDoc, Object> resp=cusProfileService.getProfileSearch(profSerarch);
+						if(ArgUtil.is(resp)) {
+							docs =resp.getResults();
+						}
+						//docs = cusProfileService.getProfileSearch(profSerarch);
 					}
 					if (ArgUtil.is(docs)) {
 						if (concatFilterpNames.length() > 0) {

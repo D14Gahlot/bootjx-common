@@ -1,5 +1,7 @@
 package com.boot.jx.agent.api;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -296,5 +298,24 @@ public class AgChatSessionController {
 		return ApiResponse.buildResults(url);
 
 	}
+	
+	@RequestMapping(value = "/api/upload/profile/multiple", method = { RequestMethod.POST })
+	public ApiResponse<List<CommonFile>, Object> uploadMultileFiles(
+	        @RequestParam(name = "files", required = false) MultipartFile[] files) {
+
+	    List<CommonFile> uploadedFiles = new ArrayList<>();
+
+	    for (MultipartFile file : files) {
+	        if (file != null && !file.isEmpty()) {
+	            CommonFile url = fileStore.upload1(file,
+	                    String.format("%s/profileExcel/%s", AppContextUtil.getTenant(), UUID.randomUUID()),
+	                    file.getOriginalFilename());
+	            uploadedFiles.add(url);
+	        }
+	    }
+
+	    return  ApiResponse.buildResult(uploadedFiles);
+	}
+
 
 }

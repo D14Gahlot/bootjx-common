@@ -79,10 +79,15 @@ public class CommonServiceClient {
 	@Async
 	@Retryable(value = ApiHttpServerException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
 	public void publishSessionBoundEvent(SessionBoundEvent event) {
+
+		event.fixEvent();
+
 		if (ArgUtil.is(event.getTriggerType(), SessionBoundEvent.TRIGGER_TYPE.STATUS)) {
 			restService.ajax(cronoJobUrl).path("/session-event-timer/api/v1/message/status").post(event).asNone();
 		} else if (ArgUtil.is(event.getTriggerType(), SessionBoundEvent.TRIGGER_TYPE.MESSAGE)) {
 			restService.ajax(cronoJobUrl).path("/session-event-timer/api/v1/message/in-out").post(event).asNone();
+		} else if (ArgUtil.is(event.getTriggerType(), SessionBoundEvent.TRIGGER_TYPE.SESSION)) {
+			restService.ajax(cronoJobUrl).path("/session-event-timer/api/v1/session").post(event).asNone();
 		}
 	}
 
