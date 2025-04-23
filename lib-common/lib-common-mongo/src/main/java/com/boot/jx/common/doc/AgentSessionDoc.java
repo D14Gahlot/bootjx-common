@@ -26,6 +26,8 @@ public class AgentSessionDoc {
     private Long lastAssignStamp;
 
     private String domain;
+    
+    private long lastLogin;
 
     public String getAgentCode() {
 	return agentCode;
@@ -109,6 +111,14 @@ public class AgentSessionDoc {
 
     public void setDomain(String domain) {
 	this.domain = domain;
+    }
+    
+    public Long getLastLogin() {
+    	return lastLogin;
+    }
+    
+    public void setLastLogin(Long lastLogin) {
+    	this.lastLogin = lastLogin ;
     }
 
 }
