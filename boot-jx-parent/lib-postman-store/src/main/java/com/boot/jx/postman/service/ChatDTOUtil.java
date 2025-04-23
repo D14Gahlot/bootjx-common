@@ -116,6 +116,7 @@ public class ChatDTOUtil {
 		messageDto.setBulkSessionId(messageDoc.getBulkSessionId());
 		messageDto.setMeta(messageDoc.getMeta());
 		messageDto.setForm(messageDoc.getForm());
+		messageDto.setTimeout(messageDoc.getTimeout());
 
 		messageDto.setReferral(messageDoc.getReferral());
 		if (ArgUtil.is(messageDoc.getReplyTo())) {

@@ -10,6 +10,7 @@ import com.boot.jx.postman.model.Attachment;
 import com.boot.jx.postman.model.MessageDefinitions.IMessageId;
 import com.boot.jx.postman.model.MessageReferral;
 import com.boot.jx.postman.model.MessageRouter;
+import com.boot.jx.postman.model.MessageTimeout;
 import com.boot.jx.postman.model.TagDocument;
 import com.boot.jx.postman.pbook.PBVCard;
 import com.boot.jx.swagger.ApiMockModelProperty;
@@ -63,6 +64,7 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 	public List<Object> logs;
 
 	private MessageReferral referral;
+	private MessageTimeout timeout;
 
 	public MessageReferral getReferral() {
 		return referral;
@@ -326,6 +328,14 @@ public class ChatMessageDTO implements Serializable, IMessageId {
 
 	public void setMessageIdResend(String messageIdResend) {
 		this.messageIdResend = messageIdResend;
+	}
+
+	public MessageTimeout getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(MessageTimeout timeout) {
+		this.timeout = timeout;
 	}
 
 }

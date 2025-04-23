@@ -69,14 +69,14 @@ public class MessageEventsImpl implements MessageEvents {
 	}
 
 	/**
-	 * After Status of Outbound Message has been Recieved
+	 * After Status of Outbound Message has been Received
 	 * 
 	 */
 	@Override
 	public NodeEntry<InBoundEvent> postMessageStatus(MessageReport messageReport) {
 		ClientApp app = messageContext.clientApp();
 		MessageDoc m = messageContext.getMessageDoc();
-		if (ArgUtil.is(m) && ArgUtil.is(m.getTimeout())) {
+		if (ArgUtil.is(m) && (ArgUtil.is(m.getTimeout()) || ArgUtil.is(m.referral().getBulkId()))) {
 			SessionBoundEvent inboundEVent = new SessionBoundEvent();
 			inboundEVent.setTriggerType(SessionBoundEvent.TRIGGER_TYPE.STATUS);
 			inboundEVent.setType(StringUtils.toUpperCase(ArgUtil.parseAsString(messageReport.getStatus())));
