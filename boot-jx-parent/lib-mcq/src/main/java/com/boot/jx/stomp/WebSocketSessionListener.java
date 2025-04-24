@@ -1,13 +1,19 @@
 package com.boot.jx.stomp;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
@@ -36,6 +42,9 @@ public class WebSocketSessionListener {
 
 	@Autowired(required = false)
 	TenantResolver tenantResolver;
+	
+	@Autowired
+		private SimpMessagingTemplate messagingTemplate;
 
 	@EventListener
 	public void connectionEstablished(SessionConnectedEvent sce) {
@@ -78,6 +87,20 @@ public class WebSocketSessionListener {
 				}
 			}
 		}
+	}public void registerStompEndpoints(StompEndpointRegistry registry) {
+		registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
 	}
+
+	
+	public void publishForceLogoutEvent(String userId) {
+				Map<String, Object> payload = new HashMap<>();
+				payload.put("event", "FORCE_LOGOUT");
+				payload.put("userId", userId);
+		
+				messagingTemplate.convertAndSend("/topic/user-status", payload);
+				logger.info("FORCE_LOGOUT published for userId: {}", userId);
+			}
+
+	
 
 }
