@@ -22,7 +22,6 @@ import com.boot.jx.admin.dto.AgentResponseAdminDto;
 import com.boot.jx.admin.dto.DepartmentResponseAdminDto;
 import com.boot.jx.api.ApiResponseUtil;
 import com.boot.jx.common.doc.AgentDoc;
-import com.boot.jx.common.doc.AgentSessionDoc;
 import com.boot.jx.common.doc.DepartmentDoc;
 import com.boot.jx.common.store.AgentStore;
 import com.boot.jx.logger.AuditDetailProvider;
@@ -112,33 +111,14 @@ public class AdminManager {
 	    if (ArgUtil.is(agentId)) {
 	       	        AgentDoc agent = mongoTemplate.findOne(new Query(Criteria.where("_id").is(agentId)), AgentDoc.class);
 	       	     agentList.add(agent);
-	        if (agent != null) {
-	           	            AgentSessionDoc session = fetchAgentSession(agent.getAgent_code()); 
-	            agent.setAgentSession(session);
-	            agentList = Collections.singletonList(agent);
-	        } else {
-	            agentList = new ArrayList<>();
-	        }
+	      
 	    } else {
-	       
-	        agentList = agentStore.findAllAgents(includeInActive);
-	        for (AgentDoc agent : agentList) {
-	            AgentSessionDoc session = fetchAgentSession(agent.getAgent_code());
-	            agent.setAgentSession(session);
-	        }
-	    }
+	       	        agentList = agentStore.findAllAgents(includeInActive);
+	        	    }
 	    return agentList;
 	}
 
-	private AgentSessionDoc fetchAgentSession(String agentId) {
-		  AgentSessionDoc session = mongoTemplate.findOne(
-			        new Query(Criteria.where("_id").is(agentId)), 
-			        AgentSessionDoc.class
-			    );
-			    System.out.println("Fetched Session for " + agentId + ": " + session);
-			    return session;
-	}
-	private List<AgentDoc> fetchAgentList(String agentId) {
+		private List<AgentDoc> fetchAgentList(String agentId) {
 		return fetchAgentList(agentId, true);
 	}
 
