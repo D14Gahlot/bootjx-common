@@ -14,6 +14,7 @@ import com.boot.jx.mongo.CommonMongoQB.MQB;
 import com.boot.jx.mongo.CommonMongoQB.MongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoQueryBuilder;
 import com.boot.jx.mongo.CommonMongoTemplate;
+import com.boot.jx.stomp.WebSocketSessionListener;
 import com.boot.jx.utils.PostManUtil;
 import com.boot.utils.ArgUtil;
 
@@ -24,6 +25,9 @@ public class AgentStore {
 
 	@Autowired
 	CommonMongoTemplate mongoTemplate;
+	
+	@Autowired
+		private WebSocketSessionListener webSocketSessionListener;
 
 	public void logAgentUpdate(AgentDoc agent) {
 		mongoTemplate.log(agent, "updated");
@@ -108,6 +112,12 @@ public class AgentStore {
 				status);
 		updateFirst(cqb2, AgentDoc.class);
 		logAgentUpdate(agentId);
+		logAgentUpdate(agentId);
+						if (!isEnabled) {
+							webSocketSessionListener.publishForceLogoutEvent(agentId);
+						}
+		 	
+
 	}
 
 	public void updateAgentDefault(String agentId) {
