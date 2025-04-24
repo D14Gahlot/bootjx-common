@@ -58,17 +58,7 @@ public class AgentDoc implements IDocument, DocVersion {
 	private List<ResourceDocument> quickskills;
 
 	private List<String> channels;
-	 @Transient //to not store in db
-	    private AgentSessionDoc agentSession;
-
-	  
-	    public AgentSessionDoc getAgentSession() {
-	        return agentSession;
-	    }
-
-	    public void setAgentSession(AgentSessionDoc agentSession) {
-	        this.agentSession = agentSession;
-	    }
+	
 	private String dept_id;
 
 	private List<DocVersion> oldVersions;
