@@ -113,10 +113,7 @@ public class AgentStore {
 		updateFirst(cqb2, AgentDoc.class);
 		logAgentUpdate(agentId);
 		logAgentUpdate(agentId);
-						
-		 	
-
-	}
+		}
 
 	public void updateAgentDefault(String agentId) {
 		AgentDoc agent = findById(agentId);
