@@ -1,5 +1,8 @@
 package com.boot.jx.common.store;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -35,13 +38,21 @@ public class DocumentUpdateListner {
 	public void onAgentUpdate(String agentId) {
 		AgentDoc agentDoc = mongoTemplate.findById(agentId, AgentDoc.class);
 
-		if (ArgUtil.is(agentDoc)) {
+if  (ArgUtil.is(agentDoc)) {
 			MongoQueryBuilder<Object> builder = new CommonMongoQueryBuilder().whereId(agentDoc.getAgent_code());
 			builder.set("isEnabled", agentDoc.getIsEnabled());
+			Map<String, Object> payload = new HashMap<>();
+			payload.put("event", "FORCE_LOGOUT");
+			payload.put("userId", agentId);
+			if(!agentDoc.getIsEnabled())
+			{
+				stompTunnelService.sendToAll("agent/disable", payload);
+			}
 			mongoTemplate.upsert(builder.getQuery(), builder.getUpdate(), AgentSessionDoc.class);
 			onAgentSessionUpdate(agentDoc.getAgent_code());
 		}
 	}
+	
 
 	public void onChatSessionUpdate(ChatSessionDoc sessionDoc) {
 		if (ArgUtil.is(sessionDoc)) {

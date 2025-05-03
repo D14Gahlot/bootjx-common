@@ -113,9 +113,7 @@ public class AgentStore {
 		updateFirst(cqb2, AgentDoc.class);
 		logAgentUpdate(agentId);
 		logAgentUpdate(agentId);
-						if (!isEnabled) {
-							webSocketSessionListener.publishForceLogoutEvent(agentId);
-						}
+						
 		 	
 
 	}
