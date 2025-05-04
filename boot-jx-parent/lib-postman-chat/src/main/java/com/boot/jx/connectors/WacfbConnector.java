@@ -229,9 +229,9 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		commonMongoTemplate.save(channelConfigTemp);
 		return channels;
 	}
-
-	@Override
-	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
+     
+	@Deprecated//fix for double message on sales
+	/*public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 		String webhookUrl = null;
 		try {
 			webhookUrl = pmClientConfig.getWebhookUrl(channelConfig, null, null);
@@ -248,7 +248,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 			logManager.error("While Setting " + webhookUrl, e);
 		}
 
-	}
+	}*/
 
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChatContactQuery contactQuery = messageContext.contact();
