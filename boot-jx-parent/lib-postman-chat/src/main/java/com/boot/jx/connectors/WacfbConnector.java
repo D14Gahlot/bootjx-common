@@ -230,7 +230,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		return channels;
 	}
 
-	@Override
+/*	@Override
 	public void onChannelUpdate(ChannelConfig channelConfig, ChannelConfigLogger channelConfigLogger) {
 		String webhookUrl = null;
 		try {
@@ -249,7 +249,7 @@ public class WacfbConnector extends AbstractConnector<WACFBConfigDetails, WacfbP
 		}
 
 	}
-
+*/
 	public OutboxMessage initSession(ChatSessionDoc session, InboxMessage inboxMessage) {
 		ChatContactQuery contactQuery = messageContext.contact();
 		ChatContactDoc chatContactDoc = contactQuery.getDoc();
